@@ -39,6 +39,7 @@ Ask of every listing: "What sits under its prettiest feature?" Name the most att
 10. **All-in cost** — rent + bills model + council tax on one basis for every candidate.
 11. **Commute and redundancy** — TfL door-to-door minutes; two independent rail "families" within a 10-minute walk.
 12. **Low-maintenance living** — bundled bills, washing machine in the flat, parcel handling, blackout bedroom, shop within 3 minutes, a direct route.
+**Area sweep** (compare everything around an address): shell mode `python3 scripts/sweep.py --anchor "<postcode>" --radius 800 --dest "<postcode>" --profile profile.yaml --out sweep/`; then read `sweep/summary.md` and `sweep/candidates/*.json`, and send the user `sweep/ask-the-user.md` once. Method: `references/axes/00-area-sweep.md`.
 Legal facts (England): Renters' Rights Act 2025, in force 2026-05-01 — periodic tenancies only, no fixed terms, at most one month's rent in advance, deposit ≤ 5 weeks' rent, holding deposit ≤ 1 week. Cite from `references/sources.yaml`.
 
 ## 4. Evidence grades — mark every finding
