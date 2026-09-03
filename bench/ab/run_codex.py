@@ -78,7 +78,7 @@ def prepare_workdir(case, cases_path, config, workdir=None):
     if workdir:
         path = os.path.abspath(workdir)
         if not os.path.isdir(path):
-            os.makedirs(path)
+            os.makedirs(path, exist_ok=True)
     else:
         path = tempfile.mkdtemp(prefix="vetflat-codex-%s-" % case["id"])
     plan = []
@@ -91,7 +91,7 @@ def prepare_workdir(case, cases_path, config, workdir=None):
 
     home = os.path.join(path, ".agents", "skills")
     if not os.path.isdir(home):
-        os.makedirs(home)
+        os.makedirs(home, exist_ok=True)
     dst = os.path.join(home, "vet-flat")
     if os.path.lexists(dst):
         (shutil.rmtree if os.path.isdir(dst) and not os.path.islink(dst) else os.unlink)(dst)
@@ -194,7 +194,7 @@ def build_parser():
     ap.add_argument("--case", required=True, help="the case id")
     ap.add_argument("--run", type=int, default=1, help="which repeat this is")
     ap.add_argument("--model", help="override the config's main_model")
-    ap.add_argument("--timeout", type=int, default=1800)
+    ap.add_argument("--timeout", type=int, default=int(os.environ.get("VETFLAT_RUN_TIMEOUT", 1800)))
     ap.add_argument("--workdir", help="use this directory instead of a fresh temp one")
     ap.add_argument("--keep", action="store_true", help="do not delete the temp workdir")
     ap.add_argument("--results", help="results root; default bench/results")

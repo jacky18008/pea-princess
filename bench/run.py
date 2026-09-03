@@ -261,7 +261,7 @@ def prepare_workdir(case, agent, evals_path, workdir=None, link=True):
     if workdir:
         path = os.path.abspath(workdir)
         if not os.path.isdir(path):
-            os.makedirs(path)
+            os.makedirs(path, exist_ok=True)
     else:
         path = tempfile.mkdtemp(prefix="vetflat-%s-%s-" % (agent, case["id"]))
     plan = []
@@ -274,7 +274,7 @@ def prepare_workdir(case, agent, evals_path, workdir=None, link=True):
     if agent in SKILL_HOME:
         home = os.path.join(path, SKILL_HOME[agent])
         if not os.path.isdir(home):
-            os.makedirs(home)
+            os.makedirs(home, exist_ok=True)
         dst = os.path.join(home, "vet-flat")
         if os.path.lexists(dst):
             (shutil.rmtree if os.path.isdir(dst) and not os.path.islink(dst) else os.unlink)(dst)
@@ -626,7 +626,7 @@ def write_raw(stdout, config_name, case_label, run_index, when=None, results_roo
     day = (when or datetime.datetime.utcnow()).strftime("%Y-%m-%d")
     folder = os.path.join(results_root or RESULTS, day, "raw")
     if not os.path.isdir(folder):
-        os.makedirs(folder)
+        os.makedirs(folder, exist_ok=True)
     path = os.path.join(folder, raw_name(config_name, case_label, run_index))
     with io.open(path, "w", encoding="utf-8") as fh:
         fh.write(stdout or "")
@@ -656,7 +656,7 @@ def append_scorecard(row, when=None):
     day = (when or datetime.datetime.utcnow()).strftime("%Y-%m-%d")
     folder = os.path.join(RESULTS, day)
     if not os.path.isdir(folder):
-        os.makedirs(folder)
+        os.makedirs(folder, exist_ok=True)
     jpath = os.path.join(folder, "scorecard.json")
     rows = []
     if os.path.exists(jpath):
@@ -765,7 +765,7 @@ def build_parser():
     ap.add_argument("--model", help="the model name to pass to the agent")
     ap.add_argument("--variant", help="for a conversation case asked in more than one language, "
                                       "run only this variant (for example zh)")
-    ap.add_argument("--timeout", type=int, default=900, help="seconds, default 900")
+    ap.add_argument("--timeout", type=int, default=int(os.environ.get("VETFLAT_RUN_TIMEOUT", 900)), help="seconds, default 900")
     ap.add_argument("--dry-run", action="store_true",
                     help="print the working-directory plan and the command; run nothing")
     ap.add_argument("--config", help="an A/B config from bench/ab/configs (a path, or the "

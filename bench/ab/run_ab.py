@@ -249,7 +249,7 @@ def main(argv=None):
         for step in batch:
             print("run   r%d %s %s" % (step["run"], step["config"], step["case"]))
             try:
-                live.append((step, subprocess.Popen(step["command"])))
+                live.append((step, subprocess.Popen(step["command"], env=dict(os.environ, VETFLAT_RUN_TIMEOUT=str(args.timeout)))))
             except OSError as exc:
                 print("      could not start: %s" % exc, file=sys.stderr)
                 worst = 1
