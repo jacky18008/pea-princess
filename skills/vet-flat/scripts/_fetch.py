@@ -109,8 +109,10 @@ def fetch(url, ua=BROWSER_UA, headers=None, method="GET", data=None, timeout=20,
         res["note"] = f"http {status}"
     meta = {k: v for k, v in res.items() if k != "body"}
     meta["_ts"] = time.time()
-    if res["status"] and cache_ttl:
+    if 200 <= res["status"] < 300 and cache_ttl:  # never cache failures (a 504 replayed is a bug)
         json.dump(meta, open(cpath + ".json", "w", encoding="utf-8"))
+    elif os.path.exists(cpath + ".json"):
+        os.remove(cpath + ".json")
     return res
 
 

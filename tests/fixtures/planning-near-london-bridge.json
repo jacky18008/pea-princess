@@ -1,0 +1,1867 @@
+{
+ "took": 11,
+ "timed_out": false,
+ "_shards": {
+  "total": 1,
+  "successful": 1,
+  "skipped": 0,
+  "failed": 0
+ },
+ "hits": {
+  "total": {
+   "value": 268,
+   "relation": "eq"
+  },
+  "max_score": null,
+  "hits": [
+   {
+    "_index": "applications",
+    "_type": "_doc",
+    "_id": "Southwark-26_AP_0812",
+    "_score": null,
+    "_ignored": [
+     "polygon"
+    ],
+    "_source": {
+     "lpa_name": "Southwark",
+     "development_type": null,
+     "application_type": "All Other",
+     "description": "The View from the Shard",
+     "secondary_street_name": null,
+     "borough": "London Borough of Southwark",
+     "ward": "LBWB",
+     "application_type_full": "Non-Material Amendment",
+     "street_name": "32 London Bridge Street",
+     "decision_date": "29/04/2026",
+     "decision_target_date": "19/04/2026",
+     "valid_date": "23/03/2026",
+     "lpa_app_no": "26/AP/0812",
+     "appeal_decision": null,
+     "actual_commencement_date": null,
+     "id": "Southwark-26_AP_0812",
+     "lapsed_date": "29/04/2029",
+     "actual_completion_date": null,
+     "decision": "Approved",
+     "postcode": "SE1 9SG",
+     "locality": "London",
+     "centroid_northing": 180132,
+     "site_name": "The Shard",
+     "appeal_status": null,
+     "url_planning_app": null,
+     "centroid": {
+      "lon": -0.086416,
+      "lat": 51.504501
+     },
+     "site_number": null,
+     "centroid_easting": 532909,
+     "status": "Approved"
+    },
+    "sort": [
+     5.809035609126498
+    ]
+   },
+   {
+    "_index": "applications",
+    "_type": "_doc",
+    "_id": "Southwark-19_AP_1091",
+    "_score": null,
+    "_source": {
+     "lpa_name": "Southwark",
+     "development_type": null,
+     "application_type": "All Other",
+     "application_details": {
+      "scheme_name": null,
+      "building_details": [],
+      "residential_details": {
+       "total_no_proposed_residential_units": 0,
+       "total_no_existing_residential_units": 0
+      }
+     },
+     "description": "Discharge Planning Obligations contained within the Section 106 Agreement- Paragraph 9.2:  The Installation of Public Art.",
+     "borough": "London Borough of Southwark",
+     "secondary_street_name": null,
+     "ward": "LBWB",
+     "application_type_full": null,
+     "street_name": null,
+     "decision_date": "07/06/2019",
+     "decision_target_date": "07/06/2019",
+     "valid_date": "12/04/2019",
+     "lpa_app_no": "19/AP/1091",
+     "appeal_decision": null,
+     "id": "Southwark-19_AP_1091",
+     "actual_commencement_date": null,
+     "lapsed_date": "07/06/2022",
+     "actual_completion_date": null,
+     "decision": "Approved",
+     "locality": null,
+     "postcode": "SE1 9RY",
+     "centroid_northing": "180122",
+     "site_name": "The Shard/ Shard Plaza\n31 St Thomas Street\nLondon\nSE1 9RY",
+     "appeal_status": null,
+     "url_planning_app": null,
+     "centroid": {
+      "lon": -0.086607,
+      "lat": 51.504414
+     },
+     "site_number": null,
+     "centroid_easting": "532896",
+     "status": "Approved"
+    },
+    "sort": [
+     12.097463804668562
+    ]
+   },
+   {
+    "_index": "applications",
+    "_type": "_doc",
+    "_id": "Southwark-21_AP_1394",
+    "_score": null,
+    "_ignored": [
+     "polygon"
+    ],
+    "_source": {
+     "lpa_name": "Southwark",
+     "development_type": null,
+     "application_type": "All Other",
+     "application_details": {
+      "scheme_name": null,
+      "building_details": [],
+      "residential_details": {
+       "total_no_proposed_residential_units": 0,
+       "total_no_existing_residential_units": 0
+      }
+     },
+     "description": "Certificate of Lawful Development (Existing) for the building operations carried out in the formation of 10 apartments between levels 53-65",
+     "borough": "London Borough of Southwark",
+     "secondary_street_name": null,
+     "ward": "LBWB",
+     "application_type_full": null,
+     "street_name": "London Bridge Street",
+     "decision_date": "04/06/2021",
+     "decision_target_date": "20/06/2021",
+     "valid_date": "26/04/2021",
+     "lpa_app_no": "21/AP/1394",
+     "appeal_decision": null,
+     "actual_commencement_date": null,
+     "id": "Southwark-21_AP_1394",
+     "lapsed_date": "04/06/2026",
+     "actual_completion_date": null,
+     "decision": "Approved",
+     "postcode": null,
+     "locality": null,
+     "centroid_northing": "180118",
+     "site_name": "The Shard",
+     "appeal_status": null,
+     "url_planning_app": null,
+     "centroid": {
+      "lon": "-0.086439",
+      "lat": "51.5043774"
+     },
+     "site_number": "32",
+     "centroid_easting": "532906",
+     "status": "Approved"
+    },
+    "sort": [
+     14.270606830470287
+    ]
+   },
+   {
+    "_index": "applications",
+    "_type": "_doc",
+    "_id": "Southwark-25_AP_1910",
+    "_score": null,
+    "_source": {
+     "lpa_name": "Southwark",
+     "development_type": null,
+     "application_type": "All Other",
+     "description": "Listed Building Consent for 2 projecting signs to Units 56-57, London Bridge Station, St Thomas Street ",
+     "borough": "Southwark",
+     "secondary_street_name": null,
+     "ward": "LBWB",
+     "application_type_full": "Listed building consent",
+     "street_name": "St Thomas Street",
+     "decision_date": "17/09/2025",
+     "decision_target_date": "03/09/2025",
+     "valid_date": "10/07/2025",
+     "lpa_app_no": "25/AP/1910",
+     "appeal_decision": null,
+     "actual_commencement_date": null,
+     "id": "Southwark-25_AP_1910",
+     "lapsed_date": "17/09/2028",
+     "actual_completion_date": null,
+     "decision": "Approved",
+     "locality": "London",
+     "postcode": "SE1 3QX",
+     "centroid_northing": 180145,
+     "site_name": "London Bridge Station",
+     "appeal_status": null,
+     "url_planning_app": null,
+     "centroid": {
+      "lon": -0.085907,
+      "lat": 51.50461
+     },
+     "site_number": 61,
+     "centroid_easting": 532944,
+     "status": "Approved"
+    },
+    "sort": [
+     42.824147993976375
+    ]
+   },
+   {
+    "_index": "applications",
+    "_type": "_doc",
+    "_id": "Southwark-25_AP_1909",
+    "_score": null,
+    "_source": {
+     "lpa_name": "Southwark",
+     "development_type": null,
+     "application_type": "All Other",
+     "description": "Units 56-57, London Bridge Station, 61-63 St Thomas Street, London, SE1 3QX",
+     "borough": "Southwark",
+     "secondary_street_name": null,
+     "ward": "LBWB",
+     "application_type_full": "Consent to display an advertisement",
+     "street_name": "St Thomas Street",
+     "decision_date": "17/09/2025",
+     "decision_target_date": "31/08/2025",
+     "valid_date": "07/07/2025",
+     "lpa_app_no": "25/AP/1909",
+     "appeal_decision": null,
+     "actual_commencement_date": null,
+     "id": "Southwark-25_AP_1909",
+     "lapsed_date": "17/09/2028",
+     "actual_completion_date": null,
+     "decision": "Approved",
+     "postcode": "SE1 3QX",
+     "locality": "London",
+     "centroid_northing": 180145,
+     "site_name": "London Bridge Station",
+     "appeal_status": null,
+     "url_planning_app": null,
+     "centroid": {
+      "lon": -0.085907,
+      "lat": 51.50461
+     },
+     "site_number": 61,
+     "centroid_easting": 532944,
+     "status": "Approved"
+    },
+    "sort": [
+     42.824147993976375
+    ]
+   },
+   {
+    "_index": "applications",
+    "_type": "_doc",
+    "_id": "Southwark-CE_20_0261",
+    "_score": null,
+    "_source": {
+     "lpa_name": "Southwark",
+     "development_type": null,
+     "application_type": "All Other",
+     "description": "Application to vary premises licence to sell alcohol by retail for sales off the premises to allow us to sell our wine by the bottle alongside takeaway food sales and to sell wine as a retailer.",
+     "borough": "London Borough of Southwark",
+     "secondary_street_name": null,
+     "ward": "LBWB",
+     "application_type_full": null,
+     "street_name": "St Thomas Street",
+     "decision_date": null,
+     "decision_target_date": "06/08/2020",
+     "valid_date": "22/07/2020",
+     "lpa_app_no": "CE/20/0261",
+     "appeal_decision": null,
+     "id": "Southwark-CE_20_0261",
+     "actual_commencement_date": null,
+     "lapsed_date": null,
+     "actual_completion_date": null,
+     "decision": null,
+     "locality": null,
+     "postcode": "SE1 3QX",
+     "centroid_northing": "180146",
+     "site_name": "London Bridge Station",
+     "appeal_status": null,
+     "url_planning_app": null,
+     "centroid": {
+      "lon": -0.085893,
+      "lat": 51.504618
+     },
+     "site_number": "71",
+     "centroid_easting": "532945",
+     "status": "Application Under Consideration"
+    },
+    "sort": [
+     44.0106454823057
+    ]
+   },
+   {
+    "_index": "applications",
+    "_type": "_doc",
+    "_id": "Southwark-CE_21_0275",
+    "_score": null,
+    "_source": {
+     "lpa_name": "Southwark",
+     "development_type": null,
+     "application_type": "All Other",
+     "description": "Premises lic application New application for the sale of alcohol on and off site for Hotel Chocolate",
+     "secondary_street_name": null,
+     "borough": "London Borough of Southwark",
+     "ward": "LBWB",
+     "application_type_full": null,
+     "street_name": "London Bridge Street",
+     "decision_date": "01/10/2021",
+     "decision_target_date": "16/10/2021",
+     "valid_date": "01/10/2021",
+     "lpa_app_no": "CE/21/0275",
+     "appeal_decision": null,
+     "id": "Southwark-CE_21_0275",
+     "actual_commencement_date": null,
+     "lapsed_date": "01/10/2026",
+     "actual_completion_date": null,
+     "decision": "No Objection to Proposal (OBS only)",
+     "postcode": "SE1 9GP",
+     "locality": null,
+     "centroid_northing": "180146",
+     "site_name": "London Bridge Station, Unit 134",
+     "appeal_status": null,
+     "url_planning_app": null,
+     "centroid": {
+      "lon": -0.085893,
+      "lat": 51.504618
+     },
+     "site_number": "",
+     "centroid_easting": "532945",
+     "status": null
+    },
+    "sort": [
+     44.0106454823057
+    ]
+   },
+   {
+    "_index": "applications",
+    "_type": "_doc",
+    "_id": "Southwark-26_AP_1089",
+    "_score": null,
+    "_ignored": [
+     "polygon"
+    ],
+    "_source": {
+     "lpa_name": "Southwark",
+     "development_type": null,
+     "application_type": "All Other",
+     "description": "Provision of new retail unit (Class E), associated cycle store and improvements to existing pedestrian route to include relocation of cycle parking and new lighting.",
+     "borough": "London Borough of Southwark",
+     "secondary_street_name": null,
+     "ward": "LBWB",
+     "application_type_full": "Full planning permission",
+     "street_name": "London Bridge Street",
+     "decision_date": "05/08/2026",
+     "decision_target_date": "11/06/2026",
+     "valid_date": "17/04/2026",
+     "lpa_app_no": "26/AP/1089",
+     "appeal_decision": null,
+     "actual_commencement_date": null,
+     "id": "Southwark-26_AP_1089",
+     "lapsed_date": "05/08/2029",
+     "actual_completion_date": null,
+     "decision": "Approved",
+     "postcode": "SE1 9GP",
+     "locality": null,
+     "centroid_northing": "180146",
+     "site_name": "London Bridge Station",
+     "appeal_status": null,
+     "url_planning_app": null,
+     "centroid": {
+      "lon": -0.085893,
+      "lat": 51.504618
+     },
+     "site_number": "",
+     "centroid_easting": "532945",
+     "status": "Approved"
+    },
+    "sort": [
+     44.0106454823057
+    ]
+   },
+   {
+    "_index": "applications",
+    "_type": "_doc",
+    "_id": "Southwark-25_AP_2494",
+    "_score": null,
+    "_source": {
+     "lpa_name": "Southwark",
+     "development_type": null,
+     "application_type": "All Other",
+     "description": "ABO London Bridge",
+     "secondary_street_name": null,
+     "borough": "London Borough of Southwark",
+     "ward": "LBWB",
+     "application_type_full": "Approval of details reserved by a condition (discharge)",
+     "street_name": "London Bridge Street",
+     "decision_date": "05/02/2026",
+     "decision_target_date": "26/10/2025",
+     "valid_date": "01/09/2025",
+     "lpa_app_no": "25/AP/2494",
+     "appeal_decision": null,
+     "actual_commencement_date": null,
+     "id": "Southwark-25_AP_2494",
+     "lapsed_date": "05/02/2031",
+     "actual_completion_date": null,
+     "decision": "Approved",
+     "postcode": "SE1 9SG",
+     "locality": "London",
+     "centroid_northing": 180150,
+     "site_name": "28-42 Fielden House",
+     "appeal_status": null,
+     "url_planning_app": null,
+     "centroid": {
+      "lon": -0.087317,
+      "lat": 51.504678
+     },
+     "site_number": null,
+     "centroid_easting": 532846,
+     "status": "Approved"
+    },
+    "sort": [
+     59.91372612599505
+    ]
+   },
+   {
+    "_index": "applications",
+    "_type": "_doc",
+    "_id": "Southwark-19_AP_2089",
+    "_score": null,
+    "_source": {
+     "lpa_name": "Southwark",
+     "development_type": null,
+     "application_type": "All Other",
+     "application_details": {
+      "scheme_name": null,
+      "building_details": [],
+      "residential_details": {
+       "total_no_proposed_residential_units": 0,
+       "total_no_existing_residential_units": 0
+      }
+     },
+     "description": "Details of Condition 25 (Flue/Extraction - CHP) of planning permission 18/AP/3540 (Variation to Condition 1 (Approved Plans) of 17/AP/4008 which was an amendment to planning permission 14/AP/1302 for: Demolition of existing buildings and erection of part 26 and part 16 storeys to provide 148 apartments (118 Use Class C3 and 30 flexible use C1/C3), with 1,800sqm (gross) of flexible retail space (Classes A1, A2, A3 and A4) at St Thomas Street and London Bridge Street (Concourse) levels, service area, three levels of basement including car parking (28 spaces) and associated hard and soft landscaping, amenity spaces and alterations to existing highways adjoining) to allow for changes to the communal amenity and play spaces; increasing the core height by 520mm; minor internal reconfiguration works; minor elevational amendments; and relocation of the visitor cycle parking spaces at St Thomas' Street level.)",
+     "borough": "London Borough of Southwark",
+     "secondary_street_name": null,
+     "ward": "LBWB",
+     "application_type_full": null,
+     "street_name": null,
+     "decision_date": "07/01/2020",
+     "decision_target_date": "26/11/2019",
+     "valid_date": "01/10/2019",
+     "lpa_app_no": "19/AP/2089",
+     "appeal_decision": null,
+     "id": "Southwark-19_AP_2089",
+     "actual_commencement_date": null,
+     "lapsed_date": "07/01/2025",
+     "actual_completion_date": null,
+     "decision": "Withdrawn",
+     "locality": null,
+     "postcode": "SE1 9SG",
+     "centroid_northing": "180160",
+     "site_name": "Fielden House\n28-42 London Bridge Street\nLondon\nSE1 9SG",
+     "appeal_status": null,
+     "url_planning_app": null,
+     "centroid": {
+      "lon": -0.08727,
+      "lat": 51.504767
+     },
+     "site_number": null,
+     "centroid_easting": "532849",
+     "status": "Withdrawn"
+    },
+    "sort": [
+     61.007159344583606
+    ]
+   },
+   {
+    "_index": "applications",
+    "_type": "_doc",
+    "_id": "Southwark-19_AP_3814",
+    "_score": null,
+    "_source": {
+     "lpa_name": "Southwark",
+     "development_type": null,
+     "application_type": "All Other",
+     "description": "Details of Condition 15, Part (i) - Code for Sustainable Homes interim certification required by planning permission dated 31/01/2019 [LBS Ref 18/AP/3540] for Variation to Condition 1 (Approved Plans) of 17/AP/4008 which was an amendment to planning permission 14/AP/1302 for: Demolition of existing buildings and erection of part 26 and part 16 storeys to provide 148 apartments (118 Use Class C3 and 30 flexible use C1/C3), with 1,800sqm (gross) of flexible retail space (Classes A1, A2, A3 and A4) at St Thomas Street and London Bridge Street (Concourse) levels, service area, three levels of basement including car parking (28 spaces) and associated hard and soft landscaping, amenity spaces and alterations to existing highways adjoining) to allow for changes to the communal amenity and play\rspaces; increasing the core height by 520mm; minor internal reconfiguration works; minor elevational amendments; and relocation of the visitor cycle parking spaces at St Thomas' Street level.",
+     "borough": "London Borough of Southwark",
+     "secondary_street_name": null,
+     "ward": "LBWB",
+     "application_type_full": null,
+     "street_name": null,
+     "decision_date": "22/10/2019",
+     "decision_target_date": "23/10/2019",
+     "valid_date": "28/08/2019",
+     "lpa_app_no": "19/AP/3814",
+     "appeal_decision": null,
+     "id": "Southwark-19_AP_3814",
+     "actual_commencement_date": null,
+     "lapsed_date": "22/10/2024",
+     "actual_completion_date": null,
+     "decision": "Approved",
+     "locality": null,
+     "postcode": null,
+     "centroid_northing": "180147",
+     "site_name": "Fielden House\r28-42 London Bridge Street\rLondon\rSouthwark\r\r",
+     "appeal_status": null,
+     "url_planning_app": null,
+     "centroid": {
+      "lon": "-0.0873497",
+      "lat": "51.504653"
+     },
+     "site_number": null,
+     "centroid_easting": "532842",
+     "status": "Approved"
+    },
+    "sort": [
+     61.224664054027066
+    ]
+   },
+   {
+    "_index": "applications",
+    "_type": "_doc",
+    "_id": "Southwark-19_AP_5385",
+    "_score": null,
+    "_source": {
+     "lpa_name": "Southwark",
+     "development_type": null,
+     "application_type": "All Other",
+     "description": "Details of Condition 12 - play provision details as required by planning permission 18/AP/3540 (Variation to Condition 1 (Approved Plans) of 17/AP/4008 which was an amendment to planning permission 14/AP/1302 for: Demolition of existing buildings and erection of part 26 and part 16 storeys to provide 148 apartments (118 Use Class C3 and 30 flexible use C1/C3), with 1,800sqm (gross) of flexible retail space (Classes A1, A2, A3 and A4) at St Thomas Street and London Bridge Street (Concourse) levels, service area, three levels of basement including car parking (28 spaces) and associated hard and soft landscaping, amenity spaces and alterations to existing highways adjoining) to allow for changes to the communal amenity and play spaces; increasing the core height by 520mm; minor internal reconfiguration works; minor elevational amendments; and relocation of the visitor cycle parking spaces at St Thomas' Street level.)",
+     "borough": "London Borough of Southwark",
+     "secondary_street_name": null,
+     "ward": "LBWB",
+     "application_type_full": null,
+     "street_name": null,
+     "decision_date": "29/10/2019",
+     "decision_target_date": "01/11/2019",
+     "valid_date": "06/09/2019",
+     "lpa_app_no": "19/AP/5385",
+     "appeal_decision": null,
+     "id": "Southwark-19_AP_5385",
+     "actual_commencement_date": null,
+     "lapsed_date": "29/10/2024",
+     "actual_completion_date": null,
+     "decision": "Approved",
+     "locality": null,
+     "postcode": null,
+     "centroid_northing": "180147",
+     "site_name": "Fielden House\r28-42 London Bridge Street\rLondon\rSouthwark\r\r",
+     "appeal_status": null,
+     "url_planning_app": null,
+     "centroid": {
+      "lon": "-0.0873497",
+      "lat": "51.504653"
+     },
+     "site_number": null,
+     "centroid_easting": "532842",
+     "status": "Approved"
+    },
+    "sort": [
+     61.224664054027066
+    ]
+   },
+   {
+    "_index": "applications",
+    "_type": "_doc",
+    "_id": "Southwark-22_AP_0727",
+    "_score": null,
+    "_source": {
+     "lpa_name": "Southwark",
+     "development_type": null,
+     "application_type": "All Other",
+     "description": "Non-material amendment to Planning consent 20/AP/1473 (which was an amendment to 18/AP/3540, 17/AP/4008 and 14/AP/1302). Minor material amendment to Planning consent 18/AP/3540 (which was an amendment to 17/AP/4008 and 14/AP/1302). The proposed\ramendments include: - amendments internally and externally to the retail accommodation and location/number of the short stay cycle spaces at the lower levels; - increase in the size of the mezzanine within the ground floor retail unit by 56 sq metres; - split in the retail units to provide two separate units; - removal of lift between the Level 2 and associated mezzanine; - provision of a new dedicated lift to access the mezzanine cycle store; - relocation of vehicle mitigation bollards on St Thomas Street and London Bridge Street to bring them within property title\rboundary; - minor amendments to the flank window of Mary Sheridan House, located to the west of the site beneath the new public stairs; -minor changes to the position of partitions within the amenity area on level 4; and, - amendments to the canopies and increase in planters atroof level (level 27).\r\rThe proposed amendment relates to the installation of a permanent gas pedestal on Level 00.",
+     "secondary_street_name": null,
+     "borough": "London Borough of Southwark",
+     "ward": "LBWB",
+     "application_type_full": null,
+     "street_name": "London Bridge Street",
+     "decision_date": "14/07/2022",
+     "decision_target_date": "02/05/2022",
+     "valid_date": "04/04/2022",
+     "lpa_app_no": "22/AP/0727",
+     "appeal_decision": null,
+     "id": "Southwark-22_AP_0727",
+     "actual_commencement_date": null,
+     "lapsed_date": "14/07/2025",
+     "actual_completion_date": null,
+     "decision": "Withdrawn",
+     "postcode": "SE1 9SG",
+     "locality": null,
+     "centroid_northing": "180149",
+     "site_name": "Fielden House, Ground Floor",
+     "appeal_status": null,
+     "url_planning_app": null,
+     "centroid": {
+      "lon": "-0.0873489",
+      "lat": "51.504671"
+     },
+     "site_number": "28, 42",
+     "centroid_easting": "532842",
+     "status": "Withdrawn"
+    },
+    "sort": [
+     61.754757690881235
+    ]
+   },
+   {
+    "_index": "applications",
+    "_type": "_doc",
+    "_id": "Southwark-22_AP_0981",
+    "_score": null,
+    "_source": {
+     "lpa_name": "Southwark",
+     "development_type": null,
+     "application_type": "All Other",
+     "application_details": {
+      "scheme_name": null,
+      "building_details": [],
+      "residential_details": {
+       "total_no_proposed_residential_units": 0,
+       "total_no_existing_residential_units": 0
+      }
+     },
+     "description": "Variation of Condition 1 (Approved Plans) pursuant to planning permission 20/AP/1473 for 'Minor material amendment to Planning consent 18/AP/3540 (which was an amendment to 17/AP/4008 and 14/AP/1302) for redevelopment of the site. \rThe amendment seeks the following: minor reduction in provision of overall retail floor space (loss of 35 sq.m); instalation of an emergency generator; removal of vehicle stacker and re-provision of the four disabled spaces at the same level; minor amendment to frontage of Joiner Street to accommodate a metal louvre to serve the generator; insertion of metal grating on Level 02; installation of a gas pedestal; and existing generator room to be retained and used as plant space.",
+     "secondary_street_name": null,
+     "borough": "London Borough of Southwark",
+     "ward": "LBWB",
+     "application_type_full": null,
+     "street_name": null,
+     "decision_date": "13/06/2022",
+     "decision_target_date": "14/06/2022",
+     "valid_date": "15/03/2022",
+     "lpa_app_no": "22/AP/0981",
+     "appeal_decision": null,
+     "id": "Southwark-22_AP_0981",
+     "actual_commencement_date": null,
+     "lapsed_date": "13/06/2027",
+     "actual_completion_date": null,
+     "decision": "Approved",
+     "postcode": null,
+     "locality": null,
+     "centroid_northing": "180149",
+     "site_name": "Fielden House\r28-42 London Bridge Street\rLondon\rSouthwark\rSE1 9SG\r",
+     "appeal_status": null,
+     "url_planning_app": null,
+     "centroid": {
+      "lon": "-0.0873489",
+      "lat": "51.504671"
+     },
+     "site_number": null,
+     "centroid_easting": "532842",
+     "status": "Approved"
+    },
+    "sort": [
+     61.754757690881235
+    ]
+   },
+   {
+    "_index": "applications",
+    "_type": "_doc",
+    "_id": "Southwark-23_AP_2170",
+    "_score": null,
+    "_source": {
+     "lpa_name": "Southwark",
+     "development_type": null,
+     "application_type": "All Other",
+     "description": "Details of Condition 16 - Landscaping required by planning permission ref. 22/AP/0981 dated 13/06/2022 'Variation of Condition 1 (Approved Plans) pursuant to planning permission 20/AP/1473 for 'Minor material amendment to Planning consent 18/AP/3540 (which was an amendment to 17/AP/4008 and 14/AP/1302) for redevelopment of the site.\rThe amendment seeks the following: minor reduction in provision of overall retail floor space (loss of 35 sq.m); instalation of an emergency generator; removal of vehicle stacker and re-provision of the four disabled spaces at the same level; minor amendment to frontage of Joiner Street to accommodate a metal louvre to serve the generator; insertion of metal grating on Level 02; installation of a gas pedestal; and existing generator room to be retained and used as plant space'.",
+     "borough": "London Borough of Southwark",
+     "secondary_street_name": null,
+     "ward": "LBWB",
+     "application_type_full": "Approval of details reserved by a condition (discharge)",
+     "street_name": null,
+     "decision_date": "08/09/2023",
+     "decision_target_date": "26/09/2023",
+     "valid_date": "02/08/2023",
+     "lpa_app_no": "23/AP/2170",
+     "appeal_decision": null,
+     "actual_commencement_date": null,
+     "id": "Southwark-23_AP_2170",
+     "lapsed_date": "08/09/2028",
+     "actual_completion_date": null,
+     "decision": "Approved",
+     "postcode": null,
+     "locality": null,
+     "centroid_northing": "180149",
+     "site_name": "Fielden House\r28-42 London Bridge Street\rLondon\rSouthwark\rSE1 9SG\r",
+     "appeal_status": null,
+     "url_planning_app": null,
+     "centroid": {
+      "lon": "-0.0873489",
+      "lat": "51.504671"
+     },
+     "site_number": null,
+     "centroid_easting": "532842",
+     "status": "Approved"
+    },
+    "sort": [
+     61.754757690881235
+    ]
+   },
+   {
+    "_index": "applications",
+    "_type": "_doc",
+    "_id": "Southwark-19_AP_1192",
+    "_score": null,
+    "_source": {
+     "lpa_name": "Southwark",
+     "development_type": null,
+     "application_type": "All Other",
+     "application_details": {
+      "scheme_name": null,
+      "building_details": [],
+      "residential_details": {
+       "total_no_proposed_residential_units": 0,
+       "total_no_existing_residential_units": 0
+      }
+     },
+     "description": "Discharge of Planning Obligation relating to the car parking management strategy as required by para 12.1 of the Section 106 agreement dated 29.12.2014 relating to the planning permission for redevelopment of the site.",
+     "borough": "London Borough of Southwark",
+     "secondary_street_name": null,
+     "ward": "LBWB",
+     "application_type_full": null,
+     "street_name": null,
+     "decision_date": "13/06/2019",
+     "decision_target_date": "13/06/2019",
+     "valid_date": "18/04/2019",
+     "lpa_app_no": "19/AP/1192",
+     "appeal_decision": null,
+     "id": "Southwark-19_AP_1192",
+     "actual_commencement_date": null,
+     "lapsed_date": "13/06/2022",
+     "actual_completion_date": null,
+     "decision": "Approved",
+     "locality": null,
+     "postcode": "SE1 9SG",
+     "centroid_northing": "180147",
+     "site_name": "Fielden House\n28-42 London Bridge Street\nLondon SE1 9SG",
+     "appeal_status": null,
+     "url_planning_app": null,
+     "centroid": {
+      "lon": -0.087375,
+      "lat": 51.504652
+     },
+     "site_number": null,
+     "centroid_easting": "532842",
+     "status": "Approved"
+    },
+    "sort": [
+     62.87943056327856
+    ]
+   },
+   {
+    "_index": "applications",
+    "_type": "_doc",
+    "_id": "Southwark-19_AP_1191",
+    "_score": null,
+    "_source": {
+     "lpa_name": "Southwark",
+     "development_type": null,
+     "application_type": "All Other",
+     "application_details": {
+      "scheme_name": null,
+      "building_details": [],
+      "residential_details": {
+       "total_no_proposed_residential_units": 0,
+       "total_no_existing_residential_units": 0
+      }
+     },
+     "description": "Discharge of Planning Obligation relating to the travel plan, as required by para 7.1 of the Section 106 Agreement dated 29.12.2014 associated with the planning permission for the redevelopment of the site.",
+     "borough": "London Borough of Southwark",
+     "secondary_street_name": null,
+     "ward": "LBWB",
+     "application_type_full": null,
+     "street_name": null,
+     "decision_date": "13/06/2019",
+     "decision_target_date": "13/06/2019",
+     "valid_date": "18/04/2019",
+     "lpa_app_no": "19/AP/1191",
+     "appeal_decision": null,
+     "id": "Southwark-19_AP_1191",
+     "actual_commencement_date": null,
+     "lapsed_date": "13/06/2022",
+     "actual_completion_date": null,
+     "decision": "Approved",
+     "locality": null,
+     "postcode": "SE1 9SG",
+     "centroid_northing": "180147",
+     "site_name": "Fielden House\n28-42 London Bridge Street\nLonodn SE1 9SG",
+     "appeal_status": null,
+     "url_planning_app": null,
+     "centroid": {
+      "lon": -0.087375,
+      "lat": 51.504652
+     },
+     "site_number": null,
+     "centroid_easting": "532842",
+     "status": "Approved"
+    },
+    "sort": [
+     62.87943056327856
+    ]
+   },
+   {
+    "_index": "applications",
+    "_type": "_doc",
+    "_id": "Southwark-19_AP_1190",
+    "_score": null,
+    "_source": {
+     "lpa_name": "Southwark",
+     "development_type": null,
+     "application_type": "All Other",
+     "application_details": {
+      "scheme_name": null,
+      "building_details": [],
+      "residential_details": {
+       "total_no_proposed_residential_units": 0,
+       "total_no_existing_residential_units": 0
+      }
+     },
+     "description": "Discharge of Planning Obligation relating to the Car Club Scheme as set out in para 6.1 of the s106 agreement dated 29.12.2014 associated with the planning permission to redevelop the site.",
+     "borough": "London Borough of Southwark",
+     "secondary_street_name": null,
+     "ward": "LBWB",
+     "application_type_full": null,
+     "street_name": null,
+     "decision_date": "07/06/2019",
+     "decision_target_date": "13/06/2019",
+     "valid_date": "18/04/2019",
+     "lpa_app_no": "19/AP/1190",
+     "appeal_decision": null,
+     "id": "Southwark-19_AP_1190",
+     "actual_commencement_date": null,
+     "lapsed_date": "07/06/2022",
+     "actual_completion_date": null,
+     "decision": "Approved",
+     "locality": null,
+     "postcode": "SE1 9SG",
+     "centroid_northing": "180147",
+     "site_name": "Fielden House\n28-42 London Bridge Street\nLondon SE1 9SG",
+     "appeal_status": null,
+     "url_planning_app": null,
+     "centroid": {
+      "lon": -0.087375,
+      "lat": 51.504652
+     },
+     "site_number": null,
+     "centroid_easting": "532842",
+     "status": "Approved"
+    },
+    "sort": [
+     62.87943056327856
+    ]
+   },
+   {
+    "_index": "applications",
+    "_type": "_doc",
+    "_id": "Southwark-19_AP_0507",
+    "_score": null,
+    "_source": {
+     "lpa_name": "Southwark",
+     "development_type": null,
+     "application_type": "All Other",
+     "application_details": {
+      "scheme_name": null,
+      "building_details": [],
+      "residential_details": {
+       "total_no_proposed_residential_units": 0,
+       "total_no_existing_residential_units": 0
+      }
+     },
+     "description": "Full discharge of Condition 39 'post-excavation assessment report' pursuant to planning permission 18/AP/3540 (Approval date: 31/01/2019) for: 'Variation to Condition 1 (Approved Plans) of 17/AP/4008 which was an amendment to planning permission 14/AP/1302 for: Demolition of existing buildings and erection of part 26 and part 16 storeys to provide 148 apartments (118 Use Class C3 and 30 flexible use C1/C3), with 1,800sqm (gross) of flexible retail space (Classes A1, A2, A3 and A4) at St Thomas Street and London Bridge Street (Concourse) levels, service area, three levels of basement including car parking (28 spaces) and associated hard and soft landscaping, amenity spaces and alterations to existing highways adjoining) ",
+     "borough": "London Borough of Southwark",
+     "secondary_street_name": null,
+     "ward": "LBWB",
+     "application_type_full": null,
+     "street_name": null,
+     "decision_date": "28/03/2019",
+     "decision_target_date": "12/04/2019",
+     "valid_date": "15/02/2019",
+     "lpa_app_no": "19/AP/0507",
+     "appeal_decision": null,
+     "id": "Southwark-19_AP_0507",
+     "actual_commencement_date": null,
+     "lapsed_date": "28/03/2022",
+     "actual_completion_date": null,
+     "decision": "Approved",
+     "locality": null,
+     "postcode": "SE1 9SG",
+     "centroid_northing": "180147",
+     "site_name": "Fielden House\n28-42 London Bridge Street\nLondon\nSE1 9SG",
+     "appeal_status": null,
+     "url_planning_app": null,
+     "centroid": {
+      "lon": -0.087375,
+      "lat": 51.504652
+     },
+     "site_number": null,
+     "centroid_easting": "532842",
+     "status": "Approved"
+    },
+    "sort": [
+     62.87943056327856
+    ]
+   },
+   {
+    "_index": "applications",
+    "_type": "_doc",
+    "_id": "Southwark-19_AP_2085",
+    "_score": null,
+    "_source": {
+     "lpa_name": "Southwark",
+     "development_type": null,
+     "application_type": "All Other",
+     "application_details": {
+      "scheme_name": null,
+      "building_details": [],
+      "residential_details": {
+       "total_no_proposed_residential_units": 0,
+       "total_no_existing_residential_units": 0
+      }
+     },
+     "description": "Details of Condition 25 - details of CHP Flue as required by planning permission 18/AP/3540 (Variation to Condition 1 (approved plans) of 17/AP/4089 which was an amendment to planning permission 14/AP/1302 for: Demolition of existing buildings and erection of part 26 and part 16 storeys to provide 148 apartments (118 Use Class C3 and 30 flexible use C1/C3), with 1,800 sqm (gross) of flexible retail space (classes A1,A2,A4 and A4) at St Thomas Street and London Bridge Street (concourse) levels, service area, three levels of basement including car parking (28 spaces) and associated hard and soft landscaping, amenity spaces and alterations to existing highways adjoining to allow for changes to the communal amenity and play spaces; increasing the core height by 520mm; minor internal reconfiguration works; minor elevational amendments; and relocation of the visitor cycle parking spaces at St Thomas' Street level).",
+     "borough": "London Borough of Southwark",
+     "secondary_street_name": null,
+     "ward": "LBWB",
+     "application_type_full": null,
+     "street_name": null,
+     "decision_date": "11/12/2019",
+     "decision_target_date": "04/09/2019",
+     "valid_date": "10/07/2019",
+     "lpa_app_no": "19/AP/2085",
+     "appeal_decision": null,
+     "id": "Southwark-19_AP_2085",
+     "actual_commencement_date": null,
+     "lapsed_date": "11/12/2024",
+     "actual_completion_date": null,
+     "decision": "Approved",
+     "locality": null,
+     "postcode": "SE1 9SG",
+     "centroid_northing": "180147",
+     "site_name": "Fielden House\n28-42 London Bridge Street\nLondon\nSE1 9SG",
+     "appeal_status": null,
+     "url_planning_app": null,
+     "centroid": {
+      "lon": -0.087375,
+      "lat": 51.504652
+     },
+     "site_number": null,
+     "centroid_easting": "532842",
+     "status": "Approved"
+    },
+    "sort": [
+     62.87943056327856
+    ]
+   },
+   {
+    "_index": "applications",
+    "_type": "_doc",
+    "_id": "Southwark-21_AP_0238",
+    "_score": null,
+    "_source": {
+     "lpa_name": "Southwark",
+     "development_type": null,
+     "application_type": "All Other",
+     "application_details": {
+      "scheme_name": null,
+      "building_details": [],
+      "residential_details": {
+       "total_no_proposed_residential_units": 0,
+       "total_no_existing_residential_units": 0
+      }
+     },
+     "description": "Non-material amendment to planning permission 20/AP/1473 for the relocation of the short-stay cycle parking stands on Level 00.",
+     "borough": "London Borough of Southwark",
+     "secondary_street_name": null,
+     "ward": "LBWB",
+     "application_type_full": null,
+     "street_name": "London Bridge Street",
+     "decision_date": "23/02/2021",
+     "decision_target_date": "23/02/2021",
+     "valid_date": "26/01/2021",
+     "lpa_app_no": "21/AP/0238",
+     "appeal_decision": null,
+     "id": "Southwark-21_AP_0238",
+     "actual_commencement_date": null,
+     "lapsed_date": "23/02/2026",
+     "actual_completion_date": null,
+     "decision": "Approved",
+     "locality": null,
+     "postcode": "SE1 9SG",
+     "centroid_northing": "180168",
+     "site_name": "Fielden House, Ground Floor",
+     "appeal_status": null,
+     "url_planning_app": null,
+     "centroid": {
+      "lon": "-0.0873274",
+      "lat": "51.5048415"
+     },
+     "site_number": "28, 42",
+     "centroid_easting": "532843",
+     "status": "Approved"
+    },
+    "sort": [
+     68.71327979068327
+    ]
+   },
+   {
+    "_index": "applications",
+    "_type": "_doc",
+    "_id": "Southwark-21_AP_3185",
+    "_score": null,
+    "_source": {
+     "lpa_name": "Southwark",
+     "development_type": null,
+     "application_type": "All Other",
+     "description": "Details of Condition 24 (Secured by Design), as required by planning permission 20/AP/1473 (Minor material amendment to Planning consent 18/AP/3540 (which was an amendment to 17/AP/4008 and 14/AP/1302). The proposed amendments include:\r \r-\tamendments internally and externally to the retail accommodation and location/number of the short stay cycle spaces at the lower levels; \r-\tincrease in the size of the mezzanine within the ground floor retail unit by 56 sq metres; \r-\tsplit in the retail units to provide two separate units; \r-\tremoval of lift between the Level 2 and associated mezzanine; \r-\tprovision of a new dedicated lift to access the mezzanine cycle store; \r-\trelocation of vehicle mitigation bollards on St Thomas Street and London Bridge Street to bring them within property title boundary; \r-\tminor amendments to the flank window of Mary Sheridan House, located to the west of the site beneath the new public stairs; \r-\tminor changes to the position of partitions within the amenity area on level 4; and, \r-\tamendments to the canopies and increase in planters at roof level (level 27).)",
+     "secondary_street_name": null,
+     "borough": "London Borough of Southwark",
+     "ward": "LBWB",
+     "application_type_full": null,
+     "street_name": null,
+     "decision_date": "19/10/2021",
+     "decision_target_date": "02/11/2021",
+     "valid_date": "08/09/2021",
+     "lpa_app_no": "21/AP/3185",
+     "appeal_decision": null,
+     "id": "Southwark-21_AP_3185",
+     "actual_commencement_date": null,
+     "lapsed_date": "19/10/2026",
+     "actual_completion_date": null,
+     "decision": "Approved",
+     "postcode": null,
+     "locality": null,
+     "centroid_northing": "180168",
+     "site_name": "Fielden House\r28 - 42 London Bridge Street\rLondon\rSouthwark\rSE1 9SG\r",
+     "appeal_status": null,
+     "url_planning_app": null,
+     "centroid": {
+      "lon": "-0.0873274",
+      "lat": "51.5048415"
+     },
+     "site_number": null,
+     "centroid_easting": "532843",
+     "status": "Approved"
+    },
+    "sort": [
+     68.71327979068327
+    ]
+   },
+   {
+    "_index": "applications",
+    "_type": "_doc",
+    "_id": "Southwark-26_AP_0438",
+    "_score": null,
+    "_source": {
+     "lpa_name": "Southwark",
+     "development_type": null,
+     "application_type": "All Other",
+     "description": "6x London Plane (Two rows of London Plane trees) - Maintain pruning regime by pruning back to previous pollard points. To maintain the trees at the same extent at those dimensions every 2-3 years, for a period not exceeding 6 years (after which a new application will be made).",
+     "borough": "London Borough of Southwark",
+     "secondary_street_name": null,
+     "ward": "LBWB",
+     "application_type_full": "Tree works: Trees in conservation areas/subject to TPOs",
+     "street_name": "Great Maze Pond",
+     "decision_date": "23/03/2026",
+     "decision_target_date": "12/04/2026",
+     "valid_date": "16/02/2026",
+     "lpa_app_no": "26/AP/0438",
+     "appeal_decision": null,
+     "actual_commencement_date": null,
+     "id": "Southwark-26_AP_0438",
+     "lapsed_date": "23/03/2031",
+     "actual_completion_date": null,
+     "decision": "Approved",
+     "postcode": "SE1 9GU",
+     "locality": null,
+     "centroid_northing": "180097",
+     "site_name": "Guys Hospital Medical School, Science Gallery London",
+     "appeal_status": null,
+     "url_planning_app": null,
+     "centroid": {
+      "lon": -0.087553,
+      "lat": 51.504205
+     },
+     "site_number": "",
+     "centroid_easting": "532831",
+     "status": "Approved"
+    },
+    "sort": [
+     79.92494284291332
+    ]
+   },
+   {
+    "_index": "applications",
+    "_type": "_doc",
+    "_id": "Southwark-25_AP_2002",
+    "_score": null,
+    "_ignored": [
+     "polygon"
+    ],
+    "_source": {
+     "lpa_name": "Southwark",
+     "development_type": null,
+     "application_type": "All Other",
+     "description": "Science Gallery London - Windows",
+     "borough": "Southwark",
+     "secondary_street_name": null,
+     "ward": "LBWB",
+     "application_type_full": "Consent to display an advertisement",
+     "street_name": "Great Maze Pond",
+     "decision_date": "03/09/2025",
+     "decision_target_date": "15/09/2025",
+     "valid_date": "22/07/2025",
+     "lpa_app_no": "25/AP/2002",
+     "appeal_decision": null,
+     "actual_commencement_date": null,
+     "id": "Southwark-25_AP_2002",
+     "lapsed_date": "03/09/2028",
+     "actual_completion_date": null,
+     "decision": "Approved",
+     "postcode": "SE1 9GU",
+     "locality": "London",
+     "centroid_northing": 180096,
+     "site_name": "Guys Hospital Medical School, Science Gallery London",
+     "appeal_status": null,
+     "url_planning_app": null,
+     "centroid": {
+      "lon": -0.087553,
+      "lat": 51.504196
+     },
+     "site_number": "",
+     "centroid_easting": 532831,
+     "status": "Approved"
+    },
+    "sort": [
+     80.34137692395923
+    ]
+   },
+   {
+    "_index": "applications",
+    "_type": "_doc",
+    "_id": "Southwark-19_AP_2075",
+    "_score": null,
+    "_source": {
+     "lpa_name": "Southwark",
+     "development_type": null,
+     "application_type": "All Other",
+     "application_details": {
+      "scheme_name": null,
+      "building_details": [],
+      "residential_details": {
+       "total_no_proposed_residential_units": 0,
+       "total_no_existing_residential_units": 0
+      }
+     },
+     "description": "Display of advertisement on (i) external fascia signage, (ii) vinyl graphic to secondary unit and (iii)\nparasol skirt signage",
+     "borough": "London Borough of Southwark",
+     "secondary_street_name": null,
+     "ward": "LBWB",
+     "application_type_full": null,
+     "street_name": null,
+     "decision_date": "16/10/2019",
+     "decision_target_date": "13/09/2019",
+     "valid_date": "19/07/2019",
+     "lpa_app_no": "19/AP/2075",
+     "appeal_decision": null,
+     "id": "Southwark-19_AP_2075",
+     "actual_commencement_date": null,
+     "lapsed_date": "16/10/2022",
+     "actual_completion_date": null,
+     "decision": "Approved",
+     "locality": null,
+     "postcode": "SE1 3QX",
+     "centroid_northing": "180216",
+     "site_name": "Redwood\nLondon Bridge Station\nLondon\nSE1 3QX",
+     "appeal_status": null,
+     "url_planning_app": null,
+     "centroid": {
+      "lon": -0.085953,
+      "lat": 51.505249
+     },
+     "site_number": null,
+     "centroid_easting": "532939",
+     "status": "Approved"
+    },
+    "sort": [
+     91.48345890374041
+    ]
+   },
+   {
+    "_index": "applications",
+    "_type": "_doc",
+    "_id": "Southwark-20_AP_0671",
+    "_score": null,
+    "_source": {
+     "lpa_name": "Southwark",
+     "development_type": null,
+     "application_type": "All Other",
+     "description": "The display of 1 x internally illuminated projecting sign to the side elevation and 1 x internally illuminated lettering fixed to internal balustrade framework behind shopfront glazing.",
+     "borough": "London Borough of Southwark",
+     "secondary_street_name": null,
+     "ward": "LBWB",
+     "application_type_full": null,
+     "street_name": null,
+     "decision_date": "20/05/2020",
+     "decision_target_date": "30/04/2020",
+     "valid_date": "05/03/2020",
+     "lpa_app_no": "20/AP/0671",
+     "appeal_decision": null,
+     "id": "Southwark-20_AP_0671",
+     "actual_commencement_date": null,
+     "lapsed_date": "20/05/2023",
+     "actual_completion_date": null,
+     "decision": "Approved",
+     "locality": null,
+     "postcode": null,
+     "centroid_northing": "180212",
+     "site_name": "Unit SU72\rLondon Bridge Station\rLondon\rSE1 3QX\r\r\r",
+     "appeal_status": null,
+     "url_planning_app": null,
+     "centroid": {
+      "lon": "-0.0857844",
+      "lat": "51.505212"
+     },
+     "site_number": null,
+     "centroid_easting": "532949",
+     "status": "Approved"
+    },
+    "sort": [
+     93.38470788308726
+    ]
+   },
+   {
+    "_index": "applications",
+    "_type": "_doc",
+    "_id": "Southwark-25_AP_2107",
+    "_score": null,
+    "_source": {
+     "lpa_name": "Southwark",
+     "development_type": null,
+     "application_type": "All Other",
+     "description": "Replacement of external floor, wall and roof-mounted air conditioning/handling units; installation of a non-acoustic louvre screen and maintenance gates positioned above floor level to the rear of the site; and replacement of (and new) louvres to the rear of the site.",
+     "secondary_street_name": null,
+     "borough": "London Borough of Southwark",
+     "ward": "LBWB",
+     "application_type_full": null,
+     "street_name": "London Bridge Street",
+     "decision_date": "23/10/2025",
+     "decision_target_date": "23/09/2025",
+     "valid_date": "30/07/2025",
+     "lpa_app_no": "25/AP/2107",
+     "appeal_decision": null,
+     "id": "Southwark-25_AP_2107",
+     "actual_commencement_date": null,
+     "lapsed_date": "23/10/2028",
+     "actual_completion_date": null,
+     "decision": "Approved",
+     "postcode": "SE1 9SG",
+     "locality": null,
+     "centroid_northing": "180181",
+     "site_name": "",
+     "appeal_status": null,
+     "url_planning_app": null,
+     "centroid": {
+      "lon": -0.087651,
+      "lat": 51.504962
+     },
+     "site_number": "20, 26",
+     "centroid_easting": "532822",
+     "status": "Approved"
+    },
+    "sort": [
+     94.79574268278508
+    ]
+   },
+   {
+    "_index": "applications",
+    "_type": "_doc",
+    "_id": "Southwark-25_AP_2108",
+    "_score": null,
+    "_ignored": [
+     "polygon",
+     "wgs84_polygon"
+    ],
+    "_source": {
+     "lpa_name": "Southwark",
+     "development_type": null,
+     "application_type": "All Other",
+     "description": "Advertisement consent for display of 1no. internally illuminated fascia sign and 1no. internally illuminated projecting sign.",
+     "secondary_street_name": null,
+     "borough": "London Borough of Southwark",
+     "ward": "LBWB",
+     "application_type_full": null,
+     "street_name": "London Bridge Street",
+     "decision_date": "14/10/2025",
+     "decision_target_date": "23/09/2025",
+     "valid_date": "30/07/2025",
+     "lpa_app_no": "25/AP/2108",
+     "appeal_decision": null,
+     "id": "Southwark-25_AP_2108",
+     "actual_commencement_date": null,
+     "lapsed_date": "14/10/2028",
+     "actual_completion_date": null,
+     "decision": "Approved",
+     "postcode": "SE1 9SG",
+     "locality": null,
+     "centroid_northing": "180181",
+     "site_name": "",
+     "appeal_status": null,
+     "url_planning_app": null,
+     "centroid": {
+      "lon": -0.087651,
+      "lat": 51.504962
+     },
+     "site_number": "20, 26",
+     "centroid_easting": "532822",
+     "status": "Approved"
+    },
+    "sort": [
+     94.79574268278508
+    ]
+   },
+   {
+    "_index": "applications",
+    "_type": "_doc",
+    "_id": "Southwark-26_AP_0642",
+    "_score": null,
+    "_source": {
+     "lpa_name": "Southwark",
+     "development_type": null,
+     "application_type": "All Other",
+     "description": "Minor material amendment of Condition 1 (Approved Plans) to planning permission ref. no. 22/AP/4334. Minor material amendment sought: Detailed design.",
+     "secondary_street_name": null,
+     "borough": "London Borough of Southwark",
+     "ward": "LBWB",
+     "application_type_full": null,
+     "street_name": "St Thomas Street",
+     "decision_date": null,
+     "decision_target_date": "05/06/2026",
+     "valid_date": "06/03/2026",
+     "lpa_app_no": "26/AP/0642",
+     "appeal_decision": null,
+     "actual_commencement_date": null,
+     "id": "Southwark-26_AP_0642",
+     "lapsed_date": null,
+     "actual_completion_date": null,
+     "decision": null,
+     "locality": null,
+     "postcode": "SE1 9RT",
+     "centroid_northing": "180055",
+     "site_name": "Guys Hospital, Sainsbury Outpatient Pharmacy Solomon Centre",
+     "appeal_status": null,
+     "url_planning_app": null,
+     "centroid": {
+      "lon": -0.087352,
+      "lat": 51.503824
+     },
+     "site_number": "",
+     "centroid_easting": "532846",
+     "status": "Application Under Consideration"
+    },
+    "sort": [
+     95.5409537517708
+    ]
+   },
+   {
+    "_index": "applications",
+    "_type": "_doc",
+    "_id": "Southwark-23_AP_3558",
+    "_score": null,
+    "_source": {
+     "lpa_name": "Southwark",
+     "development_type": null,
+     "application_type": "All Other",
+     "application_details": {
+      "scheme_name": null,
+      "building_details": [],
+      "residential_details": {
+       "total_no_proposed_residential_units": 0,
+       "total_no_existing_residential_units": 0
+      }
+     },
+     "description": "Lawful Development Certificate (Existing) for continued use of site as a temporary mobile scanner.",
+     "borough": "London Borough of Southwark",
+     "secondary_street_name": null,
+     "ward": "LBWB",
+     "application_type_full": "Lawful development: Existing use",
+     "street_name": "St Thomas Street",
+     "decision_date": "12/02/2024",
+     "decision_target_date": "15/02/2024",
+     "valid_date": "22/12/2023",
+     "lpa_app_no": "23/AP/3558",
+     "appeal_decision": null,
+     "actual_commencement_date": null,
+     "id": "Southwark-23_AP_3558",
+     "lapsed_date": "12/02/2029",
+     "actual_completion_date": null,
+     "decision": "Approved",
+     "postcode": "SE1 9RT",
+     "locality": null,
+     "centroid_northing": "180050",
+     "site_name": "Guys Hospital, Sainsbury Outpatient Pharmacy Solomon Centre",
+     "appeal_status": null,
+     "url_planning_app": null,
+     "centroid": {
+      "lon": "-0.0873574",
+      "lat": "51.5037809"
+     },
+     "site_number": "",
+     "centroid_easting": "532844",
+     "status": "Approved"
+    },
+    "sort": [
+     99.57844564838872
+    ]
+   },
+   {
+    "_index": "applications",
+    "_type": "_doc",
+    "_id": "Southwark-24_AP_2219",
+    "_score": null,
+    "_source": {
+     "lpa_name": "Southwark",
+     "development_type": null,
+     "application_type": "All Other",
+     "description": "Details of Condition 2 'Fire Safety Strategy'  required by planning permission ref no. 22/AP/4334 'Minor material amendment of Condition 1 (Approved Plans) to planning permission ref. no. 20/AP/3101: Construction of a new 8 storey hospital building (C2) 41 metres AOD, alterations to existing access arrangements and public realm works.\rThe proposed amendments are:\r-\tReconfiguration of each floor \r-\tReduction of overall GEA\r-\tChange windows to angled bays\r-\tWhite wall to east elevation\r-\tGRC Natural Concrete Panels and Perforated Metal rainscreen cladding to south elevation\r-\tGRC Natural Concrete Panels, Perforated Metal rainscreen and curtain glazing to west elevation\r-\tGRC Natural Concrete Panels, Perforated Metal rainscreen and structural glazing to north elevation\r-\tChanges to design to meet to meet fire requirements and the clinical brief.'",
+     "borough": "London Borough of Southwark",
+     "secondary_street_name": null,
+     "ward": "LBWB",
+     "application_type_full": "Approval of details reserved by a condition (discharge)",
+     "street_name": "St Thomas Street",
+     "decision_date": "14/11/2024",
+     "decision_target_date": "23/09/2024",
+     "valid_date": "30/07/2024",
+     "lpa_app_no": "24/AP/2219",
+     "appeal_decision": null,
+     "id": "Southwark-24_AP_2219",
+     "actual_commencement_date": null,
+     "lapsed_date": "14/11/2029",
+     "actual_completion_date": null,
+     "decision": "Approved",
+     "locality": null,
+     "postcode": "SE1 9RT",
+     "centroid_northing": "180047",
+     "site_name": "Guys Hospital, Sainsbury Outpatient Pharmacy Solomon Centre",
+     "appeal_status": null,
+     "url_planning_app": null,
+     "centroid": {
+      "lon": "-0.08737289999999999",
+      "lat": "51.5037541"
+     },
+     "site_number": "",
+     "centroid_easting": "532843",
+     "status": "Approved"
+    },
+    "sort": [
+     102.61711516136837
+    ]
+   },
+   {
+    "_index": "applications",
+    "_type": "_doc",
+    "_id": "Southwark-24_AP_2060",
+    "_score": null,
+    "_source": {
+     "lpa_name": "Southwark",
+     "development_type": null,
+     "application_type": "All Other",
+     "description": "Details of Condition 3 'Construction Logistic Plans' required by planning permission ref no. 22/AP/4334: 'Minor material amendment of Condition 1 (Approved Plans) to planning permission ref. no. 20/AP/3101: Construction of a new 8 storey hospital building (C2) 41 metres AOD, alterations to existing access arrangements and public realm works.\rThe proposed amendments are:\r-\tReconfiguration of each floor \r-\tReduction of overall GEA\r-\tChange windows to angled bays\r-\tWhite wall to east elevation\r-\tGRC Natural Concrete Panels and Perforated Metal rainscreen cladding to south elevation\r-\tGRC Natural Concrete Panels, Perforated Metal rainscreen and curtain glazing to west elevation\r-\tGRC Natural Concrete Panels, Perforated Metal rainscreen and structural glazing to north elevation\r-\tChanges to design to meet to meet fire requirements and the clinical brief.'",
+     "borough": "London Borough of Southwark",
+     "secondary_street_name": null,
+     "ward": "LBWB",
+     "application_type_full": "Approval of details reserved by a condition (discharge)",
+     "street_name": "St Thomas Street",
+     "decision_date": "14/11/2024",
+     "decision_target_date": "08/09/2024",
+     "valid_date": "15/07/2024",
+     "lpa_app_no": "24/AP/2060",
+     "appeal_decision": null,
+     "id": "Southwark-24_AP_2060",
+     "actual_commencement_date": null,
+     "lapsed_date": "14/11/2029",
+     "actual_completion_date": null,
+     "decision": "Approved",
+     "locality": null,
+     "postcode": "SE1 9RT",
+     "centroid_northing": "180047",
+     "site_name": "Guys Hospital, Sainsbury Outpatient Pharmacy Solomon Centre",
+     "appeal_status": null,
+     "url_planning_app": null,
+     "centroid": {
+      "lon": "-0.08737289999999999",
+      "lat": "51.5037541"
+     },
+     "site_number": "",
+     "centroid_easting": "532843",
+     "status": "Approved"
+    },
+    "sort": [
+     102.61711516136837
+    ]
+   },
+   {
+    "_index": "applications",
+    "_type": "_doc",
+    "_id": "Southwark-24_AP_2604",
+    "_score": null,
+    "_source": {
+     "lpa_name": "Southwark",
+     "development_type": null,
+     "application_type": "All Other",
+     "description": "Details of Condition  4-Construction Management Plan as required by planning permission 24/AP/1196 dated 26/07/2024 for Refurbishment works to the existing offices at 11-19 St Thomas Street.  Removal of existing plant to the rear elevation, and installation of 7 AC Units at first floor on the flat roof to the rear extenison. Installation to a green wall to rear boundary wall.  Replacement of existing lighting to the entrance doors with new LED lights. Removal of the existing modern parking gate and bollards which and replacement with wrought iron gate. Installation of Sheffield bike stands to the front courtyard and secure bike storage to the rear (Revised Description).\r\r\r\r Protection of Existing Structures and Services\rWaste Management Plan\rExternal Planting",
+     "borough": "London Borough of Southwark",
+     "secondary_street_name": null,
+     "ward": "LBWB",
+     "application_type_full": "Approval of details reserved by a condition (discharge)",
+     "street_name": null,
+     "decision_date": "15/11/2024",
+     "decision_target_date": "31/10/2024",
+     "valid_date": "06/09/2024",
+     "lpa_app_no": "24/AP/2604",
+     "appeal_decision": null,
+     "id": "Southwark-24_AP_2604",
+     "actual_commencement_date": null,
+     "lapsed_date": "15/11/2029",
+     "actual_completion_date": null,
+     "decision": "Approved",
+     "locality": null,
+     "postcode": null,
+     "centroid_northing": "180170",
+     "site_name": "11 -19  St Thomas Street\rLondon\rSouthwark\rSE1 9RY\r",
+     "appeal_status": null,
+     "url_planning_app": null,
+     "centroid": {
+      "lon": "-0.0878882",
+      "lat": "51.5048686"
+     },
+     "site_number": null,
+     "centroid_easting": "532804",
+     "status": "Approved"
+    },
+    "sort": [
+     104.46284223622305
+    ]
+   },
+   {
+    "_index": "applications",
+    "_type": "_doc",
+    "_id": "Southwark-19_AP_0803",
+    "_score": null,
+    "_source": {
+     "lpa_name": "Southwark",
+     "development_type": null,
+     "application_type": "All Other",
+     "application_details": {
+      "scheme_name": null,
+      "building_details": [],
+      "residential_details": {
+       "total_no_proposed_residential_units": 0,
+       "total_no_existing_residential_units": 0
+      }
+     },
+     "description": "Display of fascia signage stating 'Left Luggage' above customer entrance doors in back internally illuminated individual letters.",
+     "borough": "London Borough of Southwark",
+     "secondary_street_name": null,
+     "ward": "LBWB",
+     "application_type_full": null,
+     "street_name": null,
+     "decision_date": "22/05/2019",
+     "decision_target_date": "10/05/2019",
+     "valid_date": "15/03/2019",
+     "lpa_app_no": "19/AP/0803",
+     "appeal_decision": null,
+     "id": "Southwark-19_AP_0803",
+     "actual_commencement_date": null,
+     "lapsed_date": "22/05/2022",
+     "actual_completion_date": null,
+     "decision": "Approved",
+     "locality": null,
+     "postcode": "SE1 9SP",
+     "centroid_northing": "180226",
+     "site_name": "Unit 264\nLondon Bridge Railway Station\nRailway Approach\nLondon\nSE1 9SP",
+     "appeal_status": null,
+     "url_planning_app": null,
+     "centroid": {
+      "lon": -0.085733,
+      "lat": 51.505335
+     },
+     "site_number": null,
+     "centroid_easting": "532954",
+     "status": "Approved"
+    },
+    "sort": [
+     106.95020505771822
+    ]
+   },
+   {
+    "_index": "applications",
+    "_type": "_doc",
+    "_id": "Southwark-24_AP_1196",
+    "_score": null,
+    "_source": {
+     "lpa_name": "Southwark",
+     "development_type": null,
+     "application_type": "All Other",
+     "description": "Refurbishment works to the existing offices at 11-19 St Thomas Street.  Removal of existing plant to the rear elevation,  snd installation of 7 AC Units at first floor on the flat roof to the rear extenison. Installation to a green wall to rear boundary wall.  Replacement of existing lighting to the entrance doors with new LED lights. Removal of the existing modern parking gate and bollards which and replacement with wrought iron gate. Installation of Sheffield bike stands to the front courtyard and secure bike storage to the rear (Revised Description).",
+     "secondary_street_name": null,
+     "borough": "London Borough of Southwark",
+     "ward": "LBWB",
+     "application_type_full": "Full planning & listed building consent",
+     "street_name": "St Thomas Street",
+     "decision_date": "26/07/2024",
+     "decision_target_date": "01/07/2024",
+     "valid_date": "07/05/2024",
+     "lpa_app_no": "24/AP/1196",
+     "appeal_decision": null,
+     "actual_commencement_date": null,
+     "id": "Southwark-24_AP_1196",
+     "lapsed_date": "26/07/2027",
+     "actual_completion_date": null,
+     "decision": "Approved",
+     "postcode": "SE1 9RY",
+     "locality": null,
+     "centroid_northing": "180176",
+     "site_name": "",
+     "appeal_status": null,
+     "url_planning_app": null,
+     "centroid": {
+      "lon": -0.08794,
+      "lat": 51.504922
+     },
+     "site_number": "11, 19",
+     "centroid_easting": "532802",
+     "status": "Approved"
+    },
+    "sort": [
+     110.16451454092417
+    ]
+   },
+   {
+    "_index": "applications",
+    "_type": "_doc",
+    "_id": "Southwark-25_AP_0260",
+    "_score": null,
+    "_source": {
+     "lpa_name": "Southwark",
+     "development_type": null,
+     "application_type": "All Other",
+     "description": "Retrospective consent to discharge Condition 4 (Scheme of Restoration plaster cornices) pursuant to planning permission ref. 24/AP/1197 dated 26/07/2024 for 'Listed Building Consent for alterations for refurbishment works to the offices at 11-15 St Thomas Street;SE1, to reconfigure the internal walls and install new wiring and services throughout. Existing historic fabric is to be retained and repaired with only modern C20 additions to be removed. Externally it is proposed to remove items installed to the rear of the site in the courtyard, to include a generator, metal chimney flue and associated plant.  Installation of 7no. AC units on the flat roof of the rear extension. Removal of the existing modern parking gate and bollards and replacement with a  wrought iron gate. Replacement of existing lights to the entrance doors with new LED lights.'",
+     "borough": "London Borough of Southwark",
+     "secondary_street_name": null,
+     "ward": "LBWB",
+     "application_type_full": "Approval of details reserved by a condition (discharge)",
+     "street_name": "St Thomas Street",
+     "decision_date": "07/02/2025",
+     "decision_target_date": "27/03/2025",
+     "valid_date": "31/01/2025",
+     "lpa_app_no": "25/AP/0260",
+     "appeal_decision": null,
+     "actual_commencement_date": null,
+     "id": "Southwark-25_AP_0260",
+     "lapsed_date": "07/02/2030",
+     "actual_completion_date": null,
+     "decision": "Approved",
+     "locality": null,
+     "postcode": "SE1 9RY",
+     "centroid_northing": "180176",
+     "site_name": "",
+     "appeal_status": null,
+     "url_planning_app": null,
+     "centroid": {
+      "lon": -0.08794,
+      "lat": 51.504922
+     },
+     "site_number": "11, 15",
+     "centroid_easting": "532802",
+     "status": "Approved"
+    },
+    "sort": [
+     110.16451454092417
+    ]
+   },
+   {
+    "_index": "applications",
+    "_type": "_doc",
+    "_id": "Southwark-25_AP_2810",
+    "_score": null,
+    "_source": {
+     "lpa_name": "Southwark",
+     "development_type": null,
+     "application_type": "All Other",
+     "description": "Resubmission of condition 3 'Hard and soft landscaping' pursuant to planning permission 24/AP/1196 'Refurbishment works to the existing offices at 11-19 St Thomas Street. Removal of existing plant to the rear elevation, snd installation of 7 AC Units at first floor on the flat roof to the rear extenison. Installation to a green wall to rear boundary wall. Replacement of existing lighting to the entrance doors with new LED lights. Removal of the existing modern parking gate and bollards which and replacement with wrought iron gate. Installation of Sheffield bike stands to the front courtyard and secure bike storage to the rear (Revised Description).'",
+     "borough": "London Borough of Southwark",
+     "secondary_street_name": null,
+     "ward": "LBWB",
+     "application_type_full": "Removal/Variation of a condition",
+     "street_name": "St Thomas Street",
+     "decision_date": "07/11/2025",
+     "decision_target_date": "25/11/2025",
+     "valid_date": "01/10/2025",
+     "lpa_app_no": "25/AP/2810",
+     "appeal_decision": null,
+     "actual_commencement_date": null,
+     "id": "Southwark-25_AP_2810",
+     "lapsed_date": "07/11/2030",
+     "actual_completion_date": null,
+     "decision": "Approved",
+     "locality": null,
+     "postcode": "SE1 9RY",
+     "centroid_northing": "180176",
+     "site_name": "",
+     "appeal_status": null,
+     "url_planning_app": null,
+     "centroid": {
+      "lon": -0.08794,
+      "lat": 51.504922
+     },
+     "site_number": "11, 19",
+     "centroid_easting": "532802",
+     "status": "Approved"
+    },
+    "sort": [
+     110.16451454092417
+    ]
+   },
+   {
+    "_index": "applications",
+    "_type": "_doc",
+    "_id": "Southwark-24_AP_2305",
+    "_score": null,
+    "_source": {
+     "lpa_name": "Southwark",
+     "development_type": null,
+     "application_type": "All Other",
+     "description": "Details of Condition 3 - Prior to commencement of the works to the staircase (No. 15) the following, shall be submitted to the Local Planning Authority for its approval in writing:\ri) Method Statement and marked up drawings for the dismantling of the staircase and retention of original joinery (drawings to include where the original sections are to be retained and reused).\rii) Protection measures for retained timber sections.\riii) Detailed drawings (scale 1:5/10) indicating where retained timber will be incorporated into the new staircase.  As required by planning permission 24/AP/1197 dated 26/07/2024 for Listed Building Consent for alterations for refurbishment works to the offices at 11-15 St Thomas Street;SE1, to reconfigure the internal walls and install new wiring and services throughout. Existing historic fabric is to be retained and repaired with only modern C20 additions to be removed.\rExternally it is proposed to remove items installed to the rear of the site in the courtyard, to include a generator, metal chimney flue and associated plant. Installation of 7no. AC units on the flat roof of the rear extension. Removal of the existing modern parking gate and bollards and replacement with a wrought iron gate. Replacement of existing lights to the entrance doors with new LED lights (Revised description)\r\r\r",
+     "borough": "London Borough of Southwark",
+     "secondary_street_name": null,
+     "ward": "LBWB",
+     "application_type_full": "Approval of details reserved by a condition (discharge)",
+     "street_name": null,
+     "decision_date": "20/08/2024",
+     "decision_target_date": "01/10/2024",
+     "valid_date": "07/08/2024",
+     "lpa_app_no": "24/AP/2305",
+     "appeal_decision": null,
+     "id": "Southwark-24_AP_2305",
+     "actual_commencement_date": null,
+     "lapsed_date": "20/08/2029",
+     "actual_completion_date": null,
+     "decision": "Approved",
+     "locality": null,
+     "postcode": null,
+     "centroid_northing": "180176",
+     "site_name": "11-15 St Thomas Street\rLondon\rSouthwark\rSE1 9RY\r",
+     "appeal_status": null,
+     "url_planning_app": null,
+     "centroid": {
+      "lon": "-0.0879436",
+      "lat": "51.5049235"
+     },
+     "site_number": null,
+     "centroid_easting": "532800",
+     "status": "Approved"
+    },
+    "sort": [
+     110.46168431485636
+    ]
+   },
+   {
+    "_index": "applications",
+    "_type": "_doc",
+    "_id": "Southwark-24_AP_2838",
+    "_score": null,
+    "_source": {
+     "lpa_name": "Southwark",
+     "development_type": null,
+     "application_type": "All Other",
+     "description": "Partial discharge of Condition 5 i) 'Schedule of Works - windows and doors' as required by Listed Building Consent (24/AP/1197) for alterations for refurbishment works to the offices at 11-15 St Thomas Street;SE1, to reconfigure the internal walls and install new wiring and services throughout. Existing historic fabric is to be retained and repaired with only modern C20 additions to be removed. Externally it is proposed to remove items installed to the rear of the site in the courtyard, to include a generator, metal chimney flue and associated plant.  Installation of 7no. AC units on the flat roof of the rear extension. Removal of the existing modern parking gate and bollards and replacement with a  wrought iron gate. Replacement of existing lights to the entrance doors with new LED lights (Revised description)",
+     "borough": "London Borough of Southwark",
+     "secondary_street_name": null,
+     "ward": "LBWB",
+     "application_type_full": "Approval of details reserved by a condition (discharge)",
+     "street_name": "St Thomas Street",
+     "decision_date": "11/10/2024",
+     "decision_target_date": "21/11/2024",
+     "valid_date": "27/09/2024",
+     "lpa_app_no": "24/AP/2838",
+     "appeal_decision": null,
+     "actual_commencement_date": null,
+     "id": "Southwark-24_AP_2838",
+     "lapsed_date": "11/10/2029",
+     "actual_completion_date": null,
+     "decision": "Approved",
+     "postcode": "SE1 9RY",
+     "locality": null,
+     "centroid_northing": "180176",
+     "site_name": "",
+     "appeal_status": null,
+     "url_planning_app": null,
+     "centroid": {
+      "lon": "-0.0879436",
+      "lat": "51.5049235"
+     },
+     "site_number": "11, 15",
+     "centroid_easting": "532800",
+     "status": "Approved"
+    },
+    "sort": [
+     110.46168431485636
+    ]
+   },
+   {
+    "_index": "applications",
+    "_type": "_doc",
+    "_id": "Southwark-19_AP_0845",
+    "_score": null,
+    "_source": {
+     "lpa_name": "Southwark",
+     "development_type": null,
+     "application_type": "All Other",
+     "application_details": {
+      "scheme_name": null,
+      "building_details": [],
+      "residential_details": {
+       "total_no_proposed_residential_units": 0,
+       "total_no_existing_residential_units": 0
+      }
+     },
+     "description": "Refurbishment of louvres to the West and East elevation to the 10th floor of Guy's Hospital Tower",
+     "borough": "London Borough of Southwark",
+     "secondary_street_name": null,
+     "ward": "LBWB",
+     "application_type_full": null,
+     "street_name": null,
+     "decision_date": "15/05/2019",
+     "decision_target_date": "15/05/2019",
+     "valid_date": "20/03/2019",
+     "lpa_app_no": "19/AP/0845",
+     "appeal_decision": null,
+     "id": "Southwark-19_AP_0845",
+     "actual_commencement_date": null,
+     "lapsed_date": "15/05/2022",
+     "actual_completion_date": null,
+     "decision": "Approved",
+     "locality": null,
+     "postcode": "SE1 9RT",
+     "centroid_northing": "180021",
+     "site_name": "Guys Hospital\nSt Thomas Street\nLondon\nSE1 9RT",
+     "appeal_status": null,
+     "url_planning_app": null,
+     "centroid": {
+      "lon": -0.08702,
+      "lat": 51.503513
+     },
+     "site_number": null,
+     "centroid_easting": "532870",
+     "status": "Approved"
+    },
+    "sort": [
+     115.50522592037605
+    ]
+   }
+  ]
+ }
+}

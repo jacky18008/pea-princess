@@ -351,3 +351,158 @@ $ landregistry.py price-paid --postcode "SE1 2BE" --paon "ST. SAVIOURS WHARF"
   "same_building_price_range": {"min": 101000, "max": 2000000,
                                 "first_date": "1995-02-17", "last_date": "2026-05-26"} }
 ```
+
+## `planning.py` — GLA Planning London Datahub (open guest Elasticsearch, no key)
+
+```
+planning.py near   --lat 51.5045 --lng -0.0865 [--radius 250] [--since 2018] [--limit 200] [--bbox]
+planning.py search --text "Emery Wharf" [--lpa "Tower Hamlets"] [--since 2015] [--limit 50]
+planning.py stages --reference "26/AP/0812" --lpa Southwark
+planning.py planit --postcode "SE1 9SG" [--km 0.3] [--limit 20]
+```
+
+One index covering all 33 London planning authorities plus the two Mayoral
+Development Corporations (LLDC, OPDC) — 1,280,679 applications. `near` is the
+construction-risk question ("what is going up next door?"), `search` finds a
+named site or street, `stages` turns one case's status into plain English for
+someone about to sign a tenancy, and `planit` is the fallback.
+
+**Geo fields.** `_mapping` is 403 for the guest role, so the shape was read off
+`_search`. `centroid` is a real **geo_point on 100 % of documents**, so `near`
+uses a `geo_distance` filter and a `_geo_distance` sort — no conversion needed.
+`centroid_easting`/`centroid_northing` (OSGB36 metres) exist on 94 % and never
+where `centroid` is missing, so they add no coverage; `--bbox` uses them anyway
+through `wgs84_to_osgb36()`, a pure-Python Helmert + Transverse Mercator that
+lands ~5 m from OSTN15 (the projection half is exact against the OS worked
+example; the datum shift is the lossy part). The two paths agree: at London
+Bridge, `geo_distance` returns 268 applications and the square bbox returns 348,
+which trims to the same 268 on the true distance.
+
+**Field types that bite.** `lpa_name`, `status`, `decision`, `application_type`,
+`postcode` and `borough` are `text` with **no `.keyword` sub-field** — aggregate
+on them and Elasticsearch throws; filter with `match_phrase`. `development_type`,
+`ward` and `id` are keywords. Date fields are `dd/MM/yyyy`, so a `range` query
+**must** pass `"format": "dd/MM/yyyy"` or an ISO bound raises `parse_exception`.
+`hits.total` caps at 10000 unless you send `"track_total_hits": true`.
+`application_details.building_details` is **nested**: a plain `exists` on
+`...building_details.no_storeys` returns 0; it needs a `nested` query.
+
+`tall_building_hint` is a screen, not a survey: it fires on stated storeys ≥ 8
+(including the London phrasing "part 26 and part 16 storeys" and word numbers
+like "eight storey"), on ≥ 100 proposed residential units, or on the words "tall
+building"/"tower" — with Tower Hamlets, Tower Bridge, Tower Hill and cooling
+towers subtracted. `tall_building_reasons` says which rule fired.
+
+`portal_url` comes from `references/boroughs.yaml`, so the model can send the
+user to the borough's own case file. 23 of the 33 portals disallow crawling,
+which is why the Datahub is the route in and the portal is a link, not a fetch.
+LLDC and OPDC are not boroughs and get `portal_url: null` plus a note.
+
+Caveats printed on every result: the Datahub carries applications **as boroughs
+report them**, small householder cases may be absent, and **zero hits is not
+proof of no activity**. `search` matches `site_name`, `street_name` and
+`description` only — a marketing name never filed with the application will miss
+(this is why "Emery Wharf" returns 0). `planit` is a third-party mirror whose
+`/api/applics/` path is **robots-disallowed**: single lookups only, and only
+after the Datahub comes back empty. Its `search=` parameter matches the
+description text alone, so this tool uses `pcode` + `krad`.
+
+```console
+$ planning.py near --lat 51.5045 --lng -0.0865 --radius 250 --limit 12
+{ "ok": true, "http_status": 200, "evidence_class": "G",
+  "geo_filter": "geo_distance on centroid (geo_point)",
+  "count": 12, "total_matching": 268,
+  "results": [
+    { "reference": "26/AP/0812", "lpa_name": "Southwark", "distance_m": 6,
+      "address": "The Shard, 32 London Bridge Street, London", "postcode": "SE1 9SG",
+      "description": "The View from the Shard", "status": "Approved", "decision": "Approved",
+      "decision_date": "29/04/2026", "tall_building_hint": false, "storeys": null,
+      "portal_url": "https://planning.southwark.gov.uk/online-applications/" },
+    { "reference": "19/AP/2089", "distance_m": 61, "tall_building_hint": true,
+      "tall_building_reasons": ["26 storeys"],
+      "description": "Details of Condition 25 (Flue/Extraction - CHP) of plann…" }, ... ],
+  "caveat": "the Datahub carries applications reported by boroughs; …" }
+
+$ planning.py stages --reference "26/AP/0812" --lpa Southwark
+{ "record": {...},
+  "what_this_means": [
+    "Status Approved = permission granted.",
+    "Granted 2026 with no commencement recorded = works could start at any time. The
+     permission expires 29/04/2029, so works must start before then." ],
+  "conditions": { "in_api": false, "portal_url": "https://planning.southwark.gov.uk/…",
+                  "how_to_read_the_rest": "… never the discharge status of each one …" } }
+```
+
+## `roads.py` — OpenStreetMap via Overpass (open, ODbL, no key)
+
+```
+roads.py near        --lat 51.5045 --lng -0.0865 [--radius 300]
+roads.py facade-note --lat 51.5045 --lng -0.0865 [--radius 300]
+```
+
+What is physically around the flat, in **one** Overpass query per call:
+`trunk_or_primary_road` and `secondary_road` (within `--radius`),
+`railway_surface`, `railway_tunnel_portal`, `tube_surface`,
+`helipad_or_aerodrome` (1000 m), `night_economy` (100 m),
+`food_smell_sources` (60 m), `waste_or_recycling` (150 m), `supermarket`
+(400 m, with a walking estimate), `park_or_green` (400 m) and
+`obstruction_candidates` (buildings within 60 m carrying `building:levels` or
+`height`). The fixed radii are the nuisance distance for that thing, so
+`--radius` widens only the linear features.
+
+**Overpass refuses browser User-Agents with 406** — the inverse of every other
+host in this repo — so this script sends `_fetch.TOOL_UA`. It also rate-limits by
+dropping the connection rather than returning 429, so `_retryable()` treats any
+transport failure as a backoff (2 / 4 / 8 s) and then falls to
+`overpass.kumi.systems`. `attempts` in the output records every try, and
+`overpass_instance` says which one answered. `overpass-api.de/robots.txt`
+disallows `/api/` for everyone; this is a single user-directed query per flat,
+so keep it that way — do not loop it over a list of addresses.
+
+Distances are **point-to-segment against the real `out geom` geometry**, so a
+road that runs past the flat is measured where it actually passes, and a point
+inside a polygon (a park, an industrial estate) scores 0 m. Every distance is an
+integer in metres; `null` means nothing of that kind is *mapped* inside that
+radius — OSM is crowd-sourced, so that is a gap in the map, not proof of quiet.
+`count` counts OSM elements (one road is split into many ways), so read `names`
+instead. A tunnel way's end node is only reported as a portal when it is shared
+with a surface railway way; otherwise it is listed under
+`unconfirmed_way_ends` as what it usually is, a mapper's way split.
+
+`obstruction_candidates` gives distance, bearing and levels/height per
+neighbouring building so the model can judge daylight:
+**angle ≈ atan(height / distance)**, and over 45° on a low floor means very
+little sky. Height comes from the `height` tag where OSM has one and otherwise
+`building:levels × 3.0 m`. The facade rule is generic and fires whenever a
+trunk or primary road is within 60 m.
+
+```console
+$ roads.py near --lat 51.5045 --lng -0.0865 --radius 300
+{ "ok": true, "evidence_class": "C", "overpass_instance": "https://overpass-api.de/api/interpreter",
+  "attribution": "© OpenStreetMap contributors, ODbL 1.0",
+  "trunk_or_primary_road": { "count": 64, "names": ["Tooley Street", "Borough High Street", …],
+      "nearest": {"distance_m": 142, "name": "Tooley Street", "ref": "A200",
+                  "highway": "primary", "maxspeed": "20 mph", "direction": "NNE"} },
+  "railway_surface":  {"nearest": {"distance_m": 62, "name": "South Eastern Main Line"}},
+  "tube_surface":     {"count": 0, "nearest": null},
+  "railway_tunnel_portal": {"count": 0, "count_unconfirmed_way_ends": 5},
+  "night_economy":    {"count": 2,  "nearest": {"distance_m": 11, "name": "Bar 31"}},
+  "food_smell_sources": {"count": 3, "nearest": {"distance_m": 19, "name": "Aqua Shard"}},
+  "supermarket":      {"nearest": {"distance_m": 32, "name": "M&S Food",
+                                   "walk_minutes_street_estimate": 1}},
+  "park_or_green":    {"count": 3, "names": ["Guy Street Park", "Leathermarket Gardens"]},
+  "waste_or_recycling": {"count": 0}, "helipad_or_aerodrome": {"count": 0},
+  "obstruction_candidates": { "count": 3, "worst_first": [
+      {"name": "The Shard", "distance_m": 0, "contains_point": true,
+       "building_levels": 95.0, "height_m": 310.0, "obstruction_angle_deg": 90},
+      {"name": "Shard Place", "distance_m": 41, "direction": "WNW",
+       "building_levels": 26.0, "height_m_estimate": 96.2, "obstruction_angle_deg": 66.9}] },
+  "facade_note": null, "facade_note_trigger_m": 60,
+  "not_found": {"what": ["secondary_road", "tube_surface", "helipad_or_aerodrome",
+                         "waste_or_recycling"], "meaning": "… a gap in the map …"} }
+
+$ roads.py facade-note --lat 51.505375 --lng -0.085706     # 30 m off the A200
+{ "trunk_or_primary_road": {"distance_m": 30, "name": "Tooley Street", "ref": "A200"},
+  "facade_note": "the building has a road-facing and a quiet side; ask which side the
+                  flat's windows face" }
+```

@@ -1,0 +1,206 @@
+{
+ "took": 2,
+ "timed_out": false,
+ "_shards": {
+  "total": 1,
+  "successful": 1,
+  "skipped": 0,
+  "failed": 0
+ },
+ "hits": {
+  "total": {
+   "value": 1,
+   "relation": "eq"
+  },
+  "max_score": 0.0,
+  "hits": [
+   {
+    "_index": "applications",
+    "_type": "_doc",
+    "_id": "Southwark-26_AP_0812",
+    "_score": 0.0,
+    "_ignored": [
+     "polygon"
+    ],
+    "_source": {
+     "site_name": "The Shard",
+     "site_number": null,
+     "decision_process": "Delegated",
+     "subdivision_of_building": null,
+     "decision_date": "29/04/2026",
+     "last_date_consultation_comments": "14/05/2026",
+     "street_name": "32 London Bridge Street",
+     "lpa_name": "Southwark",
+     "date_building_work_started_under_previous_permission": null,
+     "last_updated_by": "Planning Portal ingest",
+     "postcode": "SE1 9SG",
+     "appeal_decision_date": null,
+     "reference_no_of_permission_being_relied_on": null,
+     "bo_system": "Idox Uniform",
+     "decision_conditions": null,
+     "wgs84_polygon": {
+      "type": "Polygon",
+      "coordinates": [
+       [
+        [
+         -0.086394,
+         51.504514
+        ],
+        [
+         -0.086395,
+         51.504487
+        ],
+        [
+         -0.086438,
+         51.504488
+        ],
+        [
+         -0.086437,
+         51.504515
+        ],
+        [
+         -0.086394,
+         51.504514
+        ]
+       ]
+      ]
+     },
+     "centroid_easting": 532909,
+     "url_planning_app": null,
+     "appeal_decision": null,
+     "date_building_work_completed_under_previous_permission": null,
+     "actual_commencement_date": null,
+     "cil_liability": false,
+     "epc_number": null,
+     "locality": "London",
+     "ward": "LBWB",
+     "appeal_start_date": null,
+     "secondary_street_name": null,
+     "centroid": {
+      "lat": 51.504501,
+      "lon": -0.086416
+     },
+     "title_number": [],
+     "decision_target_date": "19/04/2026",
+     "decision": "Approved",
+     "uprn": "010090285781",
+     "application_type": "All Other",
+     "appeal_status": null,
+     "polygon": {
+      "type": "geometrycollection",
+      "geometries": [
+       {
+        "coordinates": [
+         [
+          [
+           532878,
+           180169
+          ],
+          [
+           532876,
+           180138
+          ],
+          [
+           532876,
+           180133
+          ],
+          [
+           532864,
+           180110
+          ],
+          [
+           532865,
+           180109
+          ],
+          [
+           532906,
+           180090
+          ],
+          [
+           532936,
+           180064
+          ],
+          [
+           532951,
+           180091
+          ],
+          [
+           532916,
+           180115
+          ],
+          [
+           532917,
+           180115
+          ],
+          [
+           532915,
+           180120
+          ],
+          [
+           532918,
+           180124
+          ],
+          [
+           532928,
+           180116
+          ],
+          [
+           532929,
+           180117
+          ],
+          [
+           532906,
+           180135
+          ],
+          [
+           532907,
+           180138
+          ],
+          [
+           532905,
+           180139
+          ],
+          [
+           532909,
+           180144
+          ],
+          [
+           532907,
+           180145
+          ],
+          [
+           532908,
+           180147
+          ],
+          [
+           532878,
+           180169
+          ]
+         ]
+        ],
+        "type": "Polygon"
+       }
+      ]
+     },
+     "decision_agency": null,
+     "actual_completion_date": null,
+     "pp_id": "PP-14795344",
+     "lpa_app_no": "26/AP/0812",
+     "last_synced": "2026-06-29T02:13:40.874Z",
+     "centroid_northing": 180132,
+     "application_details": {},
+     "status": "Approved",
+     "parking_details": null,
+     "description": "The View from the Shard",
+     "lapsed_date": "29/04/2029",
+     "application_type_full": "Non-Material Amendment",
+     "borough": "London Borough of Southwark",
+     "last_updated": "2026-06-28T16:20:30.668Z",
+     "development_type": null,
+     "id": "Southwark-26_AP_0812",
+     "valid_date": "23/03/2026"
+    }
+   }
+  ]
+ }
+}

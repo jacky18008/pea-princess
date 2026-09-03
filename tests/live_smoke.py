@@ -284,5 +284,106 @@ class LiveLandRegistry(unittest.TestCase):
         self.assertEqual(out["cost"]["title_register"], "GBP 7")
 
 
+# ----------------------------------------------------------- planning.py ----
+@unittest.skipUnless(LIVE, WHY)
+class LivePlanning(unittest.TestCase):
+    """GLA Planning London Datahub - 4 calls (3 Elasticsearch, 1 PlanIt fallback)."""
+
+    def test_near_returns_sorted_neighbours_with_a_portal_url(self):
+        import planning
+        out = planning.near(LAT, LNG, radius=250, since=2018, limit=50)
+        self.assertTrue(out["ok"], out["note"])
+        self.assertEqual(out["http_status"], 200)
+        self.assertEqual(out["evidence_class"], "G")
+        self.assertEqual(out["geo_filter"], "geo_distance on centroid (geo_point)")
+        self.assertGreater(out["count"], 0)
+        # track_total_hits must defeat the 10000 cap, so the count is exact
+        self.assertGreater(out["total_matching"], 0)
+        d = [r["distance_m"] for r in out["results"]]
+        self.assertEqual(d, sorted(d))
+        self.assertTrue(all(x <= 250 for x in d))
+        first = out["results"][0]
+        self.assertTrue(first["reference"])
+        self.assertEqual(first["lpa_name"], "Southwark")
+        self.assertTrue(first["portal_url"].startswith("https://"))
+        self.assertIn(first["tall_building_hint"], (True, False))
+        self.assertIn("zero hits is not proof", out["caveat"])
+
+    def test_stages_explains_the_status_and_points_at_the_portal(self):
+        import planning
+        out = planning.stages("26/AP/0812", "Southwark")
+        self.assertTrue(out["ok"], out["note"])
+        self.assertEqual(out["record"]["reference"], "26/AP/0812")
+        self.assertTrue(out["what_this_means"])
+        self.assertTrue(any("permission granted" in x for x in out["what_this_means"]))
+        self.assertIn("planning.southwark.gov.uk", out["conditions"]["portal_url"])
+        self.assertIn(out["conditions"]["in_api"], (True, False))
+
+    def test_a_site_name_the_developer_never_filed_returns_a_real_zero(self):
+        import planning
+        out = planning.search("Emery Wharf", limit=5)
+        self.assertTrue(out["ok"], out["note"])
+        self.assertEqual(out["count"], 0)
+        self.assertEqual(out["total_matching"], 0)
+        self.assertIn("not_found", out)
+        self.assertIn("Try the street name", out["not_found"]["meaning"])
+
+    def test_planit_fallback_still_answers_on_pcode_and_krad(self):
+        import planning
+        out = planning.planit("SE1 9SG", km=0.2, limit=5)
+        self.assertTrue(out["ok"], out["note"])
+        self.assertEqual(out["evidence_class"], "C")
+        self.assertIn("robots", out)
+        self.assertGreater(out["count"], 0)
+        self.assertTrue(out["results"][0]["reference"])
+
+
+# -------------------------------------------------------------- roads.py ----
+@unittest.skipUnless(LIVE, WHY)
+class LiveRoads(unittest.TestCase):
+    """Overpass - 1 call. The facade check reuses that same answer."""
+
+    @classmethod
+    def setUpClass(cls):
+        import roads
+        cls.roads = roads
+        cls.out = roads.near(LAT, LNG, radius=300)
+
+    def test_overpass_answers_a_tool_user_agent(self):
+        self.assertTrue(self.out["ok"], self.out["note"])
+        self.assertEqual(self.out["http_status"], 200)
+        self.assertIn(self.out["overpass_instance"], self.roads.INSTANCES)
+        self.assertNotEqual(self.out["http_status"], 406)   # 406 = browser UA sent
+        self.assertGreater(self.out["element_count"], 0)
+        self.assertIn("out geom;", self.out["query_used"])
+
+    def test_the_categories_look_like_central_london(self):
+        self.assertLessEqual(self.out["trunk_or_primary_road"]["nearest"]["distance_m"], 300)
+        self.assertGreater(self.out["railway_surface"]["count"], 0)
+        self.assertIsNotNone(self.out["supermarket"]["nearest"]["walk_minutes_street_estimate"])
+        self.assertEqual(self.out["helipad_or_aerodrome"]["count"], 0)
+        self.assertEqual(self.out["night_economy"]["search_radius_m"], 100)
+
+    def test_distances_are_ints_or_null_never_zero_as_a_stand_in(self):
+        for key, val in self.out.items():
+            if isinstance(val, dict) and "nearest" in val:
+                near_ = val["nearest"]
+                if near_ is None:
+                    self.assertEqual(val["count"], 0, key)
+                else:
+                    self.assertIsInstance(near_["distance_m"], int, key)
+
+    def test_obstruction_angles_are_derivable(self):
+        for r in self.out["obstruction_candidates"]["worst_first"]:
+            if r["height_m_estimate"]:
+                self.assertIsNotNone(r["obstruction_angle_deg"])
+                self.assertLessEqual(r["obstruction_angle_deg"], 90)
+
+    def test_facade_note_reuses_the_same_query(self):
+        out = self.roads.facade_note(LAT, LNG, 300, full=self.out)
+        self.assertEqual(out["query_used"], self.out["query_used"])
+        self.assertEqual(out["facade_note_trigger_m"], 60)
+
+
 if __name__ == "__main__":
     unittest.main()
