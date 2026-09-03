@@ -35,6 +35,9 @@ def main():
                     continue
                 full = os.path.join(dp, fn)
                 z.write(full, os.path.join("vet-flat", os.path.relpath(full, SKILL)))
+        viewer = os.path.join(ROOT, "viewer", "viewer.html")
+        if os.path.exists(viewer):
+            z.write(viewer, os.path.join("vet-flat", "viewer", "viewer.html"))
     # 2) prompt pack
     pack = os.path.join(DIST, "prompt-pack")
     os.makedirs(pack)
@@ -50,11 +53,15 @@ def main():
     prof = os.path.join(SKILL, "profile.template.yaml")
     if os.path.exists(prof):
         shutil.copy(prof, pack)
+    viewer = os.path.join(ROOT, "viewer", "viewer.html")
+    if os.path.exists(viewer):
+        shutil.copy(viewer, pack)
     open(os.path.join(pack, "README.txt"), "w", encoding="utf-8").write(
         "Pea Princess (vet-flat) prompt pack.\n"
         "1. Paste INSTRUCTIONS.md into your chat product's project/system instructions.\n"
         "2. Attach the files in references/ (and your filled profile.template.yaml).\n"
         "3. Ask: 'Vet this flat: <address>, flat <n>'. The skill will list, once, what to paste.\n"
+        "4. Paste the report JSON into viewer.html (open it in any browser) to get the standard report page.\n"
         "Source and licence: https://github.com/jacky18008/pea-princess (CC BY 4.0 docs, MIT code).\n")
     # 3) checksums
     lines = []
