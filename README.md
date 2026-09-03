@@ -4,7 +4,7 @@
 
 **繁中** — 這是一個不綁定任何廠商的 agent skill，用官方與公開的英國資料，像謹慎的驗屋師一樣審查一間倫敦出租公寓：身份、面積、屋齡、供暖、周邊工地、治安、管理評價、仲介合規、價格、採光、全部月成本、通勤，最後給出白話判決。任何支援 Agent Skills 格式的 agent 都能用；只能對話不能跑程式的產品也能用「精簡模式」。
 
-> Status: **draft** (2026-09-03). Seven fetchers, the report schema, both renderers and 15 axis references are in; planning/roads fetchers, the area-sweep orchestrator and the benchmark are in progress. Docs: `docs/INSTALL.md`, `docs/SCRIPTS.md`, `docs/CONVENTIONS.md`.
+> Status: **draft** (2026-09-03). Nine fetchers, the report schema, both renderers, 15 axis references, onboarding, the question bank, budget modes and the benchmark are in; the area-sweep orchestrator is in progress. Docs: `docs/INSTALL.md`, `docs/SCRIPTS.md`, `docs/CONVENTIONS.md`.
 
 ## Three modes
 | Mode | You have | What happens |
@@ -35,10 +35,17 @@ All in `skills/vet-flat/scripts/`; each prints one JSON object with `source_url`
 | `company.py` | Companies House (official, no key) | search with status, profile (SIC, charges, officers, accounts), filings, registered-address search for resident management companies |
 | `redress.py` | Client Money Protect, Heat Trust, GLA rogue landlord checker (open) | agent CMP membership, heat-network sites/suppliers, published enforcement actions; PRS/TPO are manual |
 | `landregistry.py` | HM Land Registry price-paid linked data (official, no key) | transactions by postcode, earliest new-build sale as completion-year evidence; title register is manual (£7) |
-| `planning.py`, `roads.py` | GLA Planning Datahub; OpenStreetMap | in progress |
+| `planning.py` | GLA Planning Datahub (open; all 33 boroughs) | applications within a radius by geo distance, tall-building hint, decision conditions text |
+| `roads.py` | OpenStreetMap via Overpass (open) | nearest main road, surface rail, tunnel portals, night economy, smell sources, supermarkets, obstruction candidates with bearing and angle |
 | `render.py` | — | `report.json` → HTML or Markdown, validated against `references/report-schema.json` |
 
 Report layout for people without a shell: open `viewer/viewer.html` in a browser and paste the JSON.
+
+## Start here, on any platform
+Ask **"What can this do?"** (or 這能幹嘛？). The answer comes from `skills/vet-flat/references/onboarding.md`: a short pitch, three starting points (a listing → vet it; an area or destination → sweep; no idea → a ten-fact primer and six questions with suggested defaults). Your rules live in `profile.yaml` (budget, size, flat type, deal-breakers, priorities, `budget_mode` lite/standard/deep for £20 plans and chat-only use). The hard follow-up questions the agent must ask are in `references/questions.md`.
+
+## Benchmark (facts must be right on every model; verdicts may differ)
+`evals/evals.json` has 8 real flats across 7 boroughs plus 2 conversation cases ("what can this do", "I have no idea"), with truth produced by the repo's own fetchers on 2026-09-03. `bench/grade.py` scores fact recall, fabrications, citations, unknown-honesty and hard-filter consistency; `bench/run.py --dry-run` prints the exact command for Claude Code, Codex, Gemini CLI or an OpenAI-compatible API. See `bench/README.md`.
 
 ## Tests
 ```bash
