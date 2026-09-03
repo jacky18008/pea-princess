@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this skill or its method, please cite it as below."
+title: "Pea Princess (vet-flat): a vendor-neutral due-diligence skill for renting a flat in London"
+authors:
+  - family-names: "Chen"
+    given-names: "Hsien Hao (Jacky)"
+version: "1.0.0-draft"
+date-released: "2026-09-03"
+url: "https://github.com/jacky18008/pea-princess"
+license: "CC-BY-4.0"

@@ -1,0 +1,1049 @@
+# London flat-vetting: verified public data sources
+# Every URL below was fetched exactly once on 2026-09-03 with:
+#   curl -sS -L -m 12 -A "<Chrome 128 on macOS UA>" -o <tmp> -w "%{http_code} %{content_type} %{url_effective}"
+# `http` is the status of that fetch; `ok` is whether the response was the real, usable page
+# (a 200 that is actually a bot-interruption body is recorded as ok: false).
+# `robots` records what https://<host>/robots.txt said for User-agent: * on the search path.
+version: "2026-09-03"
+tested_from: "London, UK network (macOS, curl 8.7.1 / LibreSSL 3.3.6)"
+
+london_wide:
+
+  # ---------- Planning (London-wide) ----------
+  - id: gla_planning_datahub_post
+    name: "GLA Planning Datahub - Elasticsearch _search (POST)"
+    url: "https://planningdata.london.gov.uk/api-guest/applications/_search"
+    access: open
+    method: POST
+    used_for: [planning, construction_risk, development_pipeline]
+    tested: {date: "2026-09-03", http: 200, ok: true, note: "Body {\"size\":1,\"query\":{\"match_all\":{}}} with Content-Type: application/json returned Elasticsearch JSON; hits.total.value 10000 (relation gte); first _id 'Islington-P2025_0271_FUL'. No key, no cookie."}
+  - id: gla_planning_datahub_get
+    name: "GLA Planning Datahub - Elasticsearch _search (GET form)"
+    url: "https://planningdata.london.gov.uk/api-guest/applications/_search?source=%7B%22size%22%3A1%2C%22query%22%3A%7B%22match_all%22%3A%7B%7D%7D%7D&source_content_type=application%2Fjson"
+    access: open
+    method: GET
+    used_for: [planning, construction_risk, development_pipeline]
+    tested: {date: "2026-09-03", http: 200, ok: true, note: "GET form works identically to POST: pass the query as ?source=<url-encoded JSON>&source_content_type=application/json. Same payload as the POST test."}
+    note: "Covers all 33 London LPAs in one index - the fastest way to find applications near an address without touching 33 borough portals. Fields include decision_conditions, so plant-noise and construction conditions are searchable."
+
+  - id: gla_rogue_landlord_checker
+    name: "GLA Rogue Landlord and Agent Checker"
+    url: "https://www.london.gov.uk/programmes-strategies/housing-and-land/renting-home/private-renting/check-landlord-or-agent/rogue-landlord-and-agent-checker"
+    access: open
+    method: GET
+    used_for: [landlord_identity, agent_identity, enforcement_history]
+    tested: {date: "2026-09-03", http: 200, ok: true, note: "SERVER-RENDERED. Drupal Views exposed form, method=GET, action=self, fields name= and address= (plus sort_by, sort_order). Base page carried 10 result accordion cards and 21 server-rendered facet-item links; ?name=smith returned a page 62 KB smaller with those cards gone. No ajaxViews / views_dom_id / use_ajax markers anywhere in the HTML, so results do NOT need JS."}
+    note: "Filter with ?name=<landlord or agent>&address=<text>. Only records enforcement action taken by London boroughs and reported to the GLA - absence is NOT proof of a clean landlord."
+
+  # ---------- Crime ----------
+  - id: police_uk_crimes_street
+    name: "data.police.uk street-level crime"
+    url: "https://data.police.uk/api/crimes-street/all-crime?lat=51.504963&lng=-0.087625&date=2026-06"
+    access: open
+    method: GET
+    used_for: [crime, safety]
+    tested: {date: "2026-09-03", http: 200, ok: true, note: "JSON array, 929 KB for a 1-mile circle around SE1 9SG for 2026-06. lat/lng in decimal degrees; date=YYYY-MM. Also accepts poly=lat,lng:lat,lng:... for a custom area."}
+  - id: police_uk_crime_last_updated
+    name: "data.police.uk crime-last-updated"
+    url: "https://data.police.uk/api/crime-last-updated"
+    access: open
+    method: GET
+    used_for: [crime, data_freshness]
+    tested: {date: "2026-09-03", http: 200, ok: true, note: "Returned {\"date\":\"2026-06-01\"} - i.e. the newest month available on 2026-09-03 is 2026-06, a ~3-month lag. Always call this before choosing a date= value."}
+  - id: police_uk_neighbourhoods
+    name: "data.police.uk neighbourhoods (Metropolitan Police)"
+    url: "https://data.police.uk/api/metropolitan/neighbourhoods"
+    access: open
+    method: GET
+    used_for: [crime, neighbourhood_policing]
+    tested: {date: "2026-09-03", http: 200, ok: true, note: "JSON array of {id, name}; ids are ONS ward codes (e.g. E05009317 Bethnal Green East). Use force id 'city-of-london' for the Square Mile - the Met does not cover it."}
+
+  # ---------- Transport ----------
+  - id: tfl_journey_planner
+    name: "TfL Unified API - Journey Planner"
+    url: "https://api.tfl.gov.uk/Journey/JourneyResults/SE19SG/to/WC2R2LS"
+    access: open
+    method: GET
+    used_for: [commute, transport]
+    tested: {date: "2026-09-03", http: 200, ok: true, note: "81 KB JSON, no app key needed. Accepts postcodes, place names, or lat,lng for from/to. Add &time=0900&timeIs=Arriving for a commute test. Unregistered use is rate-limited (register a free app key for volume)."}
+  - id: tfl_stoppoint_search
+    name: "TfL Unified API - StopPoint search"
+    url: "https://api.tfl.gov.uk/StopPoint/Search/Waterloo"
+    access: open
+    method: GET
+    used_for: [transport, walk_to_station]
+    tested: {date: "2026-09-03", http: 200, ok: true, note: "JSON SearchResponse, no key. See also /StopPoint?lat=&lon=&stopTypes=NaptanMetroStation,NaptanRailStation&radius= for nearest-station distance."}
+
+  # ---------- Geography ----------
+  - id: postcodes_io_lookup
+    name: "postcodes.io postcode lookup"
+    url: "https://api.postcodes.io/postcodes/SE19SG"
+    access: open
+    method: GET
+    used_for: [geocoding, borough_resolution, ward, lsoa]
+    tested: {date: "2026-09-03", http: 200, ok: true, note: "JSON with lat/lng, eastings/northings, admin_district + codes.admin_district (the E09 GSS code), admin_ward, lsoa/msoa, parliamentary_constituency. This is how you map a listing postcode to the right borough record below."}
+  - id: postcodes_io_nearest
+    name: "postcodes.io nearest postcodes (radius search)"
+    url: "https://api.postcodes.io/postcodes/SE19SG/nearest?radius=2000&limit=10"
+    access: open
+    method: GET
+    used_for: [geocoding, comparables, radius_search]
+    tested: {date: "2026-09-03", http: 200, ok: true, note: "MAX RADIUS 2000 m (default 100 m); limit max 100. Tested radius=2000 and radius=25000 on the same postcode: both return HTTP 200 with identical result sets, so an over-max radius is accepted without an error and does NOT widen the search - never assume a large radius took effect."}
+
+  # ---------- Energy performance ----------
+  - id: epc_find_by_postcode
+    name: "GOV.UK Find an energy certificate - postcode search (HTML)"
+    url: "https://find-energy-certificate.service.gov.uk/find-a-certificate/search-by-postcode?postcode=SE1+9SG"
+    access: open
+    method: GET
+    used_for: [epc, floor_area, heating_type, running_cost]
+    tested: {date: "2026-09-03", http: 200, ok: true, note: "Server-rendered HTML, title '16 EPCs for SE1 9SG'. Each result links to /energy-certificate/<RRN>. Flat-level addresses are shown in full (e.g. 'FLAT 16, 4 London Bridge Street')."}
+  - id: epc_find_by_street
+    name: "GOV.UK Find an energy certificate - street + town search (HTML)"
+    url: "https://find-energy-certificate.service.gov.uk/find-a-certificate/search-by-street-name-and-town?street_name=Belvedere+Road&town=London"
+    access: open
+    method: GET
+    used_for: [epc, floor_area]
+    tested: {date: "2026-09-03", http: 200, ok: true, note: "Correct path is search-by-street-name-and-town with params street_name= and town=. The obvious guess /find-a-certificate/search-by-street-and-town?street=&town= returns 404 (tested), as does the non-domestic equivalent. A broad street returns the 'Too many results for this address' page - narrow it or use the postcode search."}
+  - id: epc_certificate_page
+    name: "GOV.UK EPC certificate page"
+    url: "https://find-energy-certificate.service.gov.uk/energy-certificate/0095-0209-8505-6366-1710"
+    access: open
+    method: GET
+    used_for: [epc, floor_area, heating_type, running_cost]
+    tested: {date: "2026-09-03", http: 200, ok: true, note: "Server-rendered HTML certificate keyed by RRN (the 20-digit dashed report reference). Carries total floor area in m2 - the single best independent check on an agent's advertised square footage."}
+  - id: epc_no_json_api
+    name: "GOV.UK EPC register - no public JSON API (negative result)"
+    url: "https://find-energy-certificate.service.gov.uk/api/domestic/search?postcode=SE19SG"
+    access: open
+    method: GET
+    used_for: [epc]
+    tested: {date: "2026-09-03", http: 404, ok: false, note: "CONFIRMED NEGATIVE: /api/domestic/... returns the GOV.UK 'Page not found' page. There is no public JSON API on find-energy-certificate.service.gov.uk - parse the HTML above, or use the bulk open data below."}
+  - id: epc_open_data
+    name: "EPC open data (bulk download) - new domain"
+    url: "https://get-energy-performance-data.communities.gov.uk/"
+    access: login_free
+    method: manual
+    used_for: [epc, bulk_data]
+    tested: {date: "2026-09-03", http: 200, ok: true, note: "Homepage only was tested (17 KB, title 'Get energy performance of buildings data'). Bulk CSV download requires a free GOV.UK One Login account - do not attempt automated sign-in. This replaced the old epc.opendatacommunities.org service."}
+
+  # ---------- Corporate / ownership ----------
+  - id: companies_house_html
+    name: "Companies House - Find and update company information (HTML)"
+    url: "https://find-and-update.company-information.service.gov.uk/"
+    access: open
+    method: GET
+    used_for: [landlord_identity, agent_identity, corporate_landlord]
+    tested: {date: "2026-09-03", http: 200, ok: true, note: "Server-rendered. Search path /search?q=<name>; company page /company/<number>; officers /company/<number>/officers; filing history /company/<number>/filing-history."}
+  - id: companies_house_api
+    name: "Companies House REST API"
+    url: "https://api.company-information.service.gov.uk/company/00000006"
+    access: key_free
+    method: GET
+    used_for: [landlord_identity, agent_identity, corporate_landlord]
+    tested: {date: "2026-09-03", http: 401, ok: true, note: "Returned {\"error\":\"Empty Authorization header\",\"type\":\"ch:service\"} - the expected unauthenticated response, which confirms the endpoint is live. Needs a free API key sent as HTTP Basic username with an empty password. Registering for the key is a one-off human step."}
+
+  # ---------- Land / price ----------
+  - id: land_registry_title_register
+    name: "HM Land Registry - title register / title plan (who actually owns it)"
+    url: "https://www.gov.uk/search-property-information-land-registry"
+    access: paid
+    method: manual
+    used_for: [ownership, leasehold_term, restrictions, freeholder]
+    tested: {date: "2026-09-03", http: 200, ok: true, note: "Landing page tested (70 KB). Buying a title register costs GBP 7 per document and needs a card payment - HUMAN STEP, never automate. This is the only source that names the registered proprietor and shows the lease term and any restrictions."}
+  - id: land_registry_sparql
+    name: "HM Land Registry Open Data SPARQL endpoint (Price Paid + Transaction data)"
+    url: "https://landregistry.data.gov.uk/landregistry/query"
+    access: open
+    method: POST
+    used_for: [price_paid, comparables, valuation_sanity_check]
+    tested: {date: "2026-09-03", http: 200, ok: true, note: "WORKS WITHOUT A KEY. POST form field query=<SPARQL>, Accept: application/sparql-results+json. Tested a lrppi:propertyAddress / lrcommon:postcode \"SE1 9SG\" query: returned real rows, e.g. amount 3461527 on 2023-03-24 at paon 'THE SHARD', street 'LONDON BRIDGE STREET'. Postcodes must be spaced and upper-case exactly as in the register."}
+
+  # ---------- Council tax band ----------
+  - id: voa_council_tax_band
+    name: "VOA - Check your council tax band (England & Wales)"
+    url: "https://www.tax.service.gov.uk/check-council-tax-band/search"
+    access: open
+    method: GET
+    used_for: [council_tax, band, running_cost]
+    tested: {date: "2026-09-03", http: 200, ok: true, note: "Server-rendered GOV.UK page, title 'Search for a property - Check and challenge your Council Tax band'. This is the NATIONAL band lookup - the per-borough council_tax entries below are only the billing/rates pages, not the band lookup."}
+
+  # ---------- Flood ----------
+  - id: ea_long_term_flood_risk
+    name: "Environment Agency - check long term flood risk"
+    url: "https://check-long-term-flood-risk.service.gov.uk/"
+    access: open
+    method: GET
+    used_for: [flood_risk, insurance]
+    tested: {date: "2026-09-03", http: 200, ok: true, note: "FETCHABLE - no Cloudflare or JS challenge. Redirects to /postcode, title 'Where do you want to check?'. Flow is postcode -> address pick -> risk page, all server-rendered GOV.UK pages."}
+
+  # ---------- Air quality and noise ----------
+  - id: laqn_monitoring_sites
+    name: "London Air Quality Network (Imperial ERG) - monitoring sites"
+    url: "https://api.erg.ic.ac.uk/AirQuality/Information/MonitoringSites/GroupName=London/Json"
+    access: open
+    method: GET
+    used_for: [air_quality]
+    tested: {date: "2026-09-03", http: 200, ok: true, note: "136 KB JSON, no key. Each site has lat/lon, LocalAuthorityCode and site type - use it to find the nearest monitor to a flat."}
+  - id: laqn_hourly_index
+    name: "London Air Quality Network - hourly air quality index"
+    url: "https://api.erg.ic.ac.uk/AirQuality/Hourly/MonitoringIndex/GroupName=London/Json"
+    access: open
+    method: GET
+    used_for: [air_quality]
+    tested: {date: "2026-09-03", http: 200, ok: true, note: "54 KB JSON, no key. Current index band per site per species (NO2, PM10, PM2.5, O3)."}
+  - id: defra_noise_road_round4
+    name: "DEFRA strategic noise map - Road Noise, All Metrics, England Round 4 (2022)"
+    url: "https://environment.data.gov.uk/dataset/562c9d56-7c2d-4d42-83bb-578d6e97a517"
+    access: open
+    method: manual
+    used_for: [noise, road_noise]
+    tested: {date: "2026-09-03", http: 200, ok: true, note: "Defra Data Services Platform dataset page (78 KB). Bulk GIS download (10 m grid, Lden/Lnight bands) - a manual download plus a spatial join, not a per-address API. Rail and Airport Round 4 datasets are siblings on the same platform."}
+  - id: defra_noise_end_mapping
+    name: "DEFRA Environmental Noise Directive (END) noise mapping - agglomerations"
+    url: "https://environment.data.gov.uk/dataset/c4bc5ebd-eab8-4b8a-be54-83d2f7132059"
+    access: open
+    method: manual
+    used_for: [noise]
+    tested: {date: "2026-09-03", http: 200, ok: true, note: "Dataset page (74 KB) for the agglomeration (urban area) noise mapping, which is the layer that covers Greater London. Manual download."}
+
+  # ---------- Heat networks ----------
+  - id: heat_trust_members
+    name: "Heat Trust - registered sites / members"
+    url: "https://heattrust.org/our-members"
+    access: open
+    method: GET
+    used_for: [heat_network, communal_heating, running_cost]
+    tested: {date: "2026-09-03", http: 200, ok: true, note: "Server-rendered, title 'Heat Trust Registered Sites'. Check a communal/district-heating block here: registration signals a consumer-protection standard on a heat network that is otherwise unregulated on price."}
+  - id: ofgem_heat_networks
+    name: "Ofgem - heat networks regulation"
+    url: "https://www.ofgem.gov.uk/energy-policy-and-regulation/policy-and-regulatory-programmes/heat-networks"
+    access: open
+    method: GET
+    used_for: [heat_network, communal_heating, regulation]
+    tested: {date: "2026-09-03", http: 200, ok: true, note: "200 after redirect to https://www.ofgem.gov.uk/energy-regulation/... (216 KB). Ofgem became the heat networks regulator - relevant if a flat is on communal heating with no ability to switch supplier."}
+
+  # ---------- Legislation ----------
+  - id: legislation_renters_rights_act_2025
+    name: "Renters' Rights Act 2025 (c. 26)"
+    url: "https://www.legislation.gov.uk/ukpga/2025/26/contents"
+    access: open
+    method: GET
+    used_for: [tenancy_law, section21, rent_increase]
+    tested: {date: "2026-09-03", http: 200, ok: true, note: "VERIFIED EXACT TITLE: 'Renters' Rights Act 2025', UK Public General Act 2025 chapter 26 (ukpga/2025/26). 150 KB contents page."}
+  - id: legislation_rra_commencement_no2
+    name: "Renters' Rights Act 2025 (Commencement No. 2 and Transitional and Saving Provisions) Regulations 2026 (SI 2026/421)"
+    url: "https://www.legislation.gov.uk/uksi/2026/421/regulation/2/made"
+    access: open
+    method: GET
+    used_for: [tenancy_law, commencement_date]
+    tested: {date: "2026-09-03", http: 200, ok: true, note: "COMMENCEMENT VERIFIED ON THIS URL. Regulation 2 reads: '...come into force on 1st May 2026 for the purposes of assured tenancies that are not social housing assured tenancies only - (a) Chapter 1 of Part 1 (tenancy reform: assured tenancies), except section 25(3); (b) Schedule 1 (changes to grounds for possession); (c) Schedule 2...'. So for England the new assured-tenancy regime (end of s.21 / of fixed-term ASTs) bites from 2026-05-01, i.e. it is already in force today (2026-09-03)."}
+  - id: legislation_deregulation_2015_s44
+    name: "Deregulation Act 2015 s.44 - short-term use of London accommodation (the 90-night rule)"
+    url: "https://www.legislation.gov.uk/ukpga/2015/20/section/44"
+    access: open
+    method: GET
+    used_for: [short_let, airbnb, lease_breach, planning]
+    tested: {date: "2026-09-03", http: 200, ok: true, note: "VERIFIED CONTENT: s.44 'Short-term use of London accommodation: relaxation of restrictions' amends the Greater London Council (General Powers) Act 1973, inserting s.25A so that temporary sleeping accommodation in Greater London is not a material change of use if the statutory conditions are met - this is the source of the 90-nights-a-year limit. The '90 nights' figure itself sits in the inserted s.25A conditions, not in the s.44 heading."}
+
+  # ---------- Redress and client money protection ----------
+  - id: property_redress_agent_finder
+    name: "Property Redress (Property Redress Scheme) - agent finder"
+    url: "https://www.propertyredress.co.uk/agent-finder"
+    access: open
+    method: GET
+    used_for: [agent_compliance, redress_scheme]
+    tested: {date: "2026-09-03", http: 200, ok: true, note: "Title 'Agent finder'. Note the old path https://www.theprs.co.uk/Member/Search now 302s to the propertyredress.co.uk home page (tested) - use this URL instead."}
+  - id: property_ombudsman_find_a_member
+    name: "The Property Ombudsman - find a member"
+    url: "https://www.tpos.co.uk/find-a-member"
+    access: manual
+    method: manual
+    used_for: [agent_compliance, redress_scheme]
+    tested: {date: "2026-09-03", http: 200, ok: false, note: "HUMAN STEP. https://www.tpos.co.uk/robots.txt (tested, 200) contains an explicit 'User-agent: ClaudeBot / Disallow: /' block, so this agent must not crawl it. The URL also redirected to /consumers/make-a-complaint when fetched. Ask the user to open the member search and paste the result."}
+  - id: client_money_protect
+    name: "Client Money Protect - agent search"
+    url: "https://www.clientmoneyprotect.co.uk/agent-search/"
+    access: open
+    method: GET
+    used_for: [agent_compliance, client_money_protection, deposit_safety]
+    tested: {date: "2026-09-03", http: 200, ok: true, note: "Title 'Agent search - Client Money Protection'. A letting agent holding rent or deposits must be in a CMP scheme by law - absence here is a real red flag (check the other CMP providers too before concluding)."}
+  - id: propertymark_find_an_expert
+    name: "Propertymark (ARLA / NAEA) - find an agent"
+    url: "https://www.propertymark.co.uk/find-an-expert.html"
+    access: open
+    method: GET
+    used_for: [agent_compliance, professional_body]
+    tested: {date: "2026-09-03", http: 200, ok: true, note: "Page loads (87 KB) but the result list is JS-rendered - the initial HTML carries the search shell, not the members. Treat as a human/browser step for an actual lookup."}
+
+  # ---------- Commercial portals and review sites: MANUAL ONLY ----------
+  - id: commercial_portals_and_review_sites
+    name: "Rightmove; Zoopla; OnTheMarket; OpenRent; HomeViews; Trustpilot; Google Maps reviews; Airbnb; Booking.com"
+    url: null
+    access: manual
+    method: manual
+    used_for: [listing_text, asking_price, building_reviews, management_reputation, short_let_check]
+    tested: {date: "2026-09-03", http: null, ok: null, note: "NOT TESTED AND NOT TO BE AUTOMATED. Automated access is prohibited by these sites' terms of service. The agent must ask the user to open the page and paste the text, or use its own compliant means. No endpoint, parameter, selector or scraping technique for these sites is recorded here, deliberately."}
+
+boroughs:
+  - name: "City of London"
+    gss_code: "E09000001"
+    planning_search:
+      url: "https://www.planning2.cityoflondon.gov.uk/online-applications/"
+      system: idox
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Idox Public Access, title 'Simple Search'. Square Mile only - almost no residential stock, but the place to check what is being built next to a Barbican/Aldgate flat."}
+      robots: "* Disallow: / (robots.txt 200)"
+    committee:
+      url: "https://democracy.cityoflondon.gov.uk/mgListCommittees.aspx?bcr=1"
+      system: moderngov
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Title 'Committee structure - Modern Council'."}
+    licensing:
+      url: "https://www.cityoflondon.gov.uk/services/licensing/other-licence-and-business-permit-types/houses-in-multiple-occupation-hmo"
+      schemes_active: [mandatory]
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "MANDATORY ONLY: 'a house or flat shared by five or more people, consisting of two or more households... you need to apply for a mandatory HMO licence'. Corroborated on /services/environmental-health/housing-standards/private-rented-accommodation (tested 200). Neither page mentions additional or selective licensing. Page last updated 16/02/2023; the site is React-rendered but the content is present in the served HTML."}
+    licensed_register:
+      url: null
+      tested: null
+      note: "NO ONLINE REGISTER. /services/environmental-health/public-registers (tested 200) lists a 'Licensed houses in multiple occupation register' and states that registers not online are viewable BY APPOINTMENT, free of charge, at City of London Environment Department, PO Box 270, Guildhall, EC2P 2EJ, tel 020 7332 3630. Do not confuse the 'Search the public register' link on that page - it is the alcohol/entertainment register, not HMOs."
+    council_tax:
+      url: "https://www.cityoflondon.gov.uk/services/council-tax"
+      tested: {date: "2026-09-03", http: 200, ok: true}
+    notes: "Square Mile: Idox planning portal works and is the cleanest in London, but there is no online HMO register at all - a licence check is an appointment at the Guildhall. Mandatory HMO licensing only, so 'no licence' tells you nothing about a 3-4 person share here. Very little residential stock; the planning portal matters mainly for what is being built next door."
+
+  - name: "Barking and Dagenham"
+    gss_code: "E09000002"
+    planning_search:
+      url: "https://online-befirst.lbbd.gov.uk/planning/index.html?fa=search"
+      system: northgate
+      tested: {date: "2026-09-03", http: 202, ok: false, note: "NEC/Northgate 'Regulatory Services Hub'. Returned HTTP 202 with a ZERO-BYTE body to curl - the hub answers non-JS clients with an empty 202, so the search must be driven in a real browser. Planning service is delivered by Be First (the council's regeneration company), hence the online-befirst.lbbd.gov.uk host."}
+      robots: "* Disallow: / (robots.txt 200)"
+    committee:
+      url: "https://lbbd.moderngov.co.uk/mgListCommittees.aspx?bcr=1"
+      system: moderngov
+      tested: {date: "2026-09-03", http: 403, ok: false, note: "Cloudflare 'Just a moment...' interstitial on the moderngov.co.uk host. The council-hosted mirror https://modgov.lbbd.gov.uk/internet/mgListCommittees.aspx?bcr=1 resolves (51.105.24.193) but the connection failed on test."}
+    licensing:
+      url: "https://www.lbbd.gov.uk/private-sector-housing/property-licensing"
+      schemes_active: [mandatory, additional, selective]
+      tested: {date: "2026-09-03", http: 403, ok: false, note: "SCHEMES NOT VERIFIED FROM THE COUNCIL PAGE. The whole www.lbbd.gov.uk host returns a plain nginx 403 Forbidden (not a JS challenge) to every automated client on every path tested, and web.archive.org playback was rate-limited from this network. Scheme facts come from indexed extracts of the council's own pages plus Propertymark coverage: a selective licensing scheme took effect 6 April 2025 across three targeted designation areas for five years; an additional licensing scheme launched 9 January 2025 for five years covering properties occupied by three or four persons in two or more households; plus statutory mandatory HMO licensing."}
+    licensed_register:
+      url: "https://lbbd.metastreet.co.uk/public-register"
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Metastreet host that is NOT blocked - the only automatable LBBD source. Free postcode search, no login, but the search itself needs JavaScript plus reCAPTCHA. Only a RESTRICTED version of the register is online; the unrestricted register is in-person only, 10am-4pm Mon-Fri."}
+    council_tax:
+      url: "https://www.lbbd.gov.uk/council-tax"
+      tested: {date: "2026-09-03", http: 403, ok: false}
+    notes: "WORST-CASE BOROUGH FOR AUTOMATION: the council website (plain 403 on every path), the planning hub (202 with an empty body) and the committee site (Cloudflare 403) are ALL closed to scripted access. Only lbbd.metastreet.co.uk answers. Assume a human browser step for anything here. Planning is run by Be First, not the council directly."
+
+  - name: "Barnet"
+    gss_code: "E09000003"
+    planning_search:
+      url: "https://publicaccess.barnet.gov.uk/online-applications/"
+      system: idox
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Idox Public Access, title 'Simple Search'."}
+      robots: "* Disallow: / (robots.txt 200)"
+    committee:
+      url: "https://barnet.moderngov.co.uk/mgListCommittees.aspx?bcr=1"
+      system: moderngov
+      tested: {date: "2026-09-03", http: 403, ok: false, note: "Cloudflare 'Just a moment...' interstitial - all *.moderngov.co.uk hosts sit behind Cloudflare and challenge curl."}
+    licensing:
+      url: "https://www.barnet.gov.uk/housing/private-housing/houses-multiple-occupation"
+      schemes_active: [mandatory, additional]
+      tested: {date: "2026-09-03", http: 200, ok: false, note: "HTTP 200 BUT NOT A REAL PAGE - www.barnet.gov.uk sits behind Imperva and returns 200 with a 'Pardon Our Interruption' bot-interruption body for EVERY path, so a 200 from this host proves nothing (a full Chrome header set, a cookie jar and a Google referer all failed). Scheme facts from indexed extracts and Barnet ModernGov cabinet papers: a borough-wide additional licensing scheme started 27 October 2022 and ends 27 October 2027. SELECTIVE IS NOT ACTIVE - 'Barnet Council have approved two selective licensing schemes in principle but neither scheme has been implemented in practice'; a February 2026 Cabinet decision opened a fresh consultation on a 10-ward selective scheme (Burnt Oak, Colindale North/South, West Hendon, Golders Green, Hendon, Cricklewood, Childs Hill, Friern Barnet, Finchley Church End), so watch for it landing."}
+    licensed_register:
+      url: "https://open.barnet.gov.uk/dataset/hmo-register-29r12"
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Barnet's open-data portal is clean (not behind Imperva) and is the reliable route to the register: a monthly CSV, currently 'HMO Register - 12 August 2026' (380 kB), OGL v3."}
+    council_tax:
+      url: "https://www.barnet.gov.uk/council-tax"
+      tested: {date: "2026-09-03", http: 200, ok: false}
+    notes: "Idox planning portal is fine; the COUNCIL site is not - Imperva returns HTTP 200 with a 'Pardon Our Interruption' body for every barnet.gov.uk path, so never treat a 200 from that host as proof of anything. Use open.barnet.gov.uk for the HMO register. No selective licensing in force, but a 10-ward consultation is live - re-check before concluding a single-household let is legitimately unlicensed."
+
+  - name: "Bexley"
+    gss_code: "E09000004"
+    planning_search:
+      url: "https://pa.bexley.gov.uk/online-applications/"
+      system: idox
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Idox Public Access, title 'Simple Search'."}
+      robots: "* Disallow: / (robots.txt 200)"
+    committee:
+      url: "https://democracy.bexley.gov.uk/mgListCommittees.aspx?bcr=1"
+      system: moderngov
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Title 'Committee structure | Bexley'."}
+    licensing:
+      url: "https://www.bexley.gov.uk/services/housing/property-licensing/property-licensing-schemes"
+      schemes_active: [mandatory, selective]
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "NO ADDITIONAL LICENSING - the fee table lists only 'Mandatory HMO' and 'Selective Licensing' and the word 'additional' appears nowhere on the page; Bexley's earlier additional scheme expired and was not renewed. Selective covers BELVEDERE WARD ONLY, operative 13 January 2025 to 12 January 2030, with a postcode checker at /property-licensing-schemes/check-a-property. Outside Belvedere an unlicensed single-household let is normal."}
+    licensed_register:
+      url: "https://www.bexley.gov.uk/sites/default/files/2026-08/hmo-public-register-10-aug-2026.csv"
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "A DATE-STAMPED CSV DOWNLOAD, not a searchable page - columns include address, storeys, bedrooms, households/persons licensed for, and licence valid-from/expiry dates. The filename changes at each refresh, so scrape the licensing page for the current link rather than hard-coding this URL. Sibling CSVs for selective licences and TENs are listed on the same page (not tested)."}
+    council_tax:
+      url: "https://www.bexley.gov.uk/services/council-tax"
+      tested: {date: "2026-09-03", http: 200, ok: true}
+    notes: "Everything works: Idox planning, ModernGov committee, plain-HTML licensing page, CSV register. The only trap is that the register CSV filename is date-stamped and changes at each refresh. Selective licensing is Belvedere ward only, so an unlicensed let elsewhere in Bexley is normal."
+
+  - name: "Brent"
+    gss_code: "E09000005"
+    planning_search:
+      url: "https://pa.brent.gov.uk/online-applications/"
+      system: idox
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Idox Public Access, title 'Simple Search'."}
+      robots: "* Disallow: / (robots.txt 200)"
+    committee:
+      url: "https://democracy.brent.gov.uk/mgListCommittees.aspx?bcr=1"
+      system: moderngov
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Title 'Committee structure'."}
+    licensing:
+      url: "https://www.brent.gov.uk/housing/landlords/property-licensing"
+      schemes_active: [mandatory, additional, selective]
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "WIDEST NET IN LONDON AFTER NEWHAM - effectively every private rental in Brent needs a licence except in Wembley Park ward. Selective Designation 1 in force 1 August 2023 (Harlesden & Kensal Green, Dollis Hill, Willesden Green); Designation 2 confirmed by the Secretary of State 30 November 2023 covering all other 18 wards except Wembley Park. The additional HMO scheme was approved 13 October 2025 and came into force 2 February 2026, covering 3-4 person HMOs, s257 HMOs and HMOs in purpose-built blocks of 3+ flats. Mandatory unchanged for 5+ people in 2+ households. Fees rose on 2 Feb 2026 (mandatory/additional now GBP 1,040 base). An unlicensed Brent flat outside Wembley Park is a live compliance flag."}
+    licensed_register:
+      url: "https://www.brent.gov.uk/-/media/files/resident-documents/housing-documents/online-register-of-licenced-properties.pdf"
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "A 2.2 MB PDF DOWNLOAD, not a searchable register. Its first line carries the generation date ('This register was created on 31/08/2026 and shows all properties licensed as of that date')."}
+    council_tax:
+      url: "https://www.brent.gov.uk/council-tax"
+      tested: {date: "2026-09-03", http: 200, ok: true}
+    notes: "Highest licensing coverage after Newham - every private rental except Wembley Park ward needs a licence, so an unlicensed Brent flat is a live compliance flag. Idox planning and ModernGov both work. The register is a 2.2 MB PDF, so plan for a download-and-grep rather than a lookup."
+
+  - name: "Bromley"
+    gss_code: "E09000006"
+    planning_search:
+      url: "https://planningaccess.bromley.gov.uk/s/"
+      system: arcus
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Arcus/Salesforce Experience Cloud 'Public Register' (298 KB Lightning shell) - the result grid is JS-rendered, so curl gets the shell only. The old searchapplications.bromley.gov.uk Idox host still resolves but did not complete a TLS connection on test. Covers planning, building control, appeals, enforcement and TPOs in one register."}
+      robots: "* Allow: / (only */secur/forgotpassword.jsp?* disallowed) - the ONE London planning portal family that permits crawling"
+    committee:
+      url: "https://cds.bromley.gov.uk/mgListCommittees.aspx?bcr=1"
+      system: moderngov
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Title 'Committee structure'. Host is cds.bromley.gov.uk (Council Decision System)."}
+    licensing:
+      url: "https://www.bromley.gov.uk/housing-advice-options/houses-multiple-occupation-hmo-advice-landlords"
+      schemes_active: [mandatory]
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "MANDATORY ONLY - the page describes only the statutory 5-tenant threshold (4 with a live-in landlord); 'selective licensing' and 'additional licensing' do not appear anywhere on it. SEPARATE RISK TO CHECK: Bromley has an ARTICLE 4 DIRECTION removing permitted development rights for HMOs from 1 September 2022, so any new HMO conversion needs planning permission - worth a planning-portal check if a listing looks like a recently converted share. https://www.bromley.gov.uk/hmo (tested 200) is the tenant-facing sibling page."}
+    licensed_register:
+      url: null
+      tested: null
+      note: "NO ONLINE HMO REGISTER. The Housing Act 2004 s.232 register exists but must be requested from the council (historically supplied as an Excel file via FOI). A flat-vetter cannot self-serve a licence check in Bromley."
+    council_tax:
+      url: "https://www.bromley.gov.uk/council-tax"
+      tested: {date: "2026-09-03", http: 200, ok: true}
+    notes: "Planning moved off Idox to an Arcus/Salesforce register whose results are JS-rendered - and it is the ONLY London planning portal whose robots.txt permits crawling. Mandatory HMO licensing only and NO online register, so licence status is effectively unverifiable without contacting the council. Check the Article 4 Direction (from 1 Sep 2022) if the flat looks like a recent HMO conversion."
+
+  - name: "Camden"
+    gss_code: "E09000007"
+    planning_search:
+      url: "https://accountforms.camden.gov.uk/planning-search/"
+      system: other
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Camden's own front end to its NEC Planning Explorer, title 'Camden Council - Find a planning application' (11 KB, server-rendered). The underlying portal https://planningrecords.camden.gov.uk/NECSWS/PlanningExplorer/GeneralSearch.aspx was tested and returns 403 with a Cloudflare 'Just a moment...' interstitial, as does the bare host. Camden migrated from /Northgate/ to /NECSWS/ paths, so older bookmarks 404 or redirect."}
+      robots: "unknown - robots.txt on accountforms.camden.gov.uk returned 403 Cloudflare challenge; robots.txt on planningrecords.camden.gov.uk returned 404 (no file)"
+    committee:
+      url: "https://democracy.camden.gov.uk/mgListCommittees.aspx?bcr=1"
+      system: moderngov
+      tested: {date: "2026-09-03", http: 403, ok: false, note: "Cloudflare 'Just a moment...' interstitial."}
+    licensing:
+      url: "https://www.camden.gov.uk/houses-multiple-occupation"
+      schemes_active: [mandatory, additional]
+      tested: {date: "2026-09-03", http: 403, ok: false, note: "SCHEMES NOT VERIFIED FROM THAT PAGE BODY - www.camden.gov.uk is fully Cloudflare-challenged (403 'Just a moment...') on /houses-multiple-occupation, /property-licensing and /council-tax alike, as is contact.camden.gov.uk. Evidence instead from Camden's own newsroom host news.camden.gov.uk (tested 200): 'Camden Council has renewed its licensing scheme for Houses in Multiple Occupation (HMOs), extending it for a further five years until December 2030' - the renewed BOROUGH-WIDE additional scheme came into force 8 December 2025 and covers flat shares, student homes, bedsits and some converted buildings, so most Camden shares need a licence. No Camden source references any selective licensing scheme."}
+    licensed_register:
+      url: "https://opendata.camden.gov.uk/Housing/HMO-Licensing-Register/x43g-c2rf"
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Camden's open-data portal is reachable while the main site is not - a Socrata table (also mirrored on data.gov.uk), with a map version at /Housing/HMO-Licensing-Register-Map/up77-qhjq."}
+    council_tax:
+      url: "https://www.camden.gov.uk/council-tax"
+      tested: {date: "2026-09-03", http: 403, ok: false}
+    notes: "Cloudflare blocks www.camden.gov.uk AND the planningrecords portal. Two doors are open: accountforms.camden.gov.uk/planning-search/ for planning (server-rendered, works) and opendata.camden.gov.uk for the HMO register. Borough-wide additional HMO licensing renewed to Dec 2030 covers most flat shares, so an unlicensed Camden share is a real flag. Camden moved from /Northgate/ to /NECSWS/ paths - old links are dead."
+
+  - name: "Croydon"
+    gss_code: "E09000008"
+    planning_search:
+      url: "https://publicaccess3.croydon.gov.uk/online-applications/"
+      system: idox
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Idox Public Access, title 'Simple Search'. Note the '3' in the hostname - publicaccess.croydon.gov.uk is not the live host."}
+      robots: "* Disallow: / (robots.txt 200)"
+    committee:
+      url: "https://democracy.croydon.gov.uk/mgListCommittees.aspx?bcr=1"
+      system: moderngov
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Title 'Committee structure | Croydon Council'."}
+    licensing:
+      url: "https://www.croydon.gov.uk/housing/private-tenants/landlord-licensing"
+      schemes_active: [mandatory]
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "TIME-CRITICAL: as of this catalogue's date Croydon is MANDATORY-HMO-ONLY, but two new schemes go live on 25 SEPTEMBER 2026 - a Selective Licensing Scheme for single-family properties and an Additional HMO Licensing Scheme for smaller HMOs, with applications opening that day. Quote: 'We do not currently have a licensing scheme for privately rented properties, apart from mandatory houses in multiple occupation (HMO) licensing. However, on 25 September 2026, two new schemes will come into force in Croydon'. Any Croydon licensing verdict reached now is stale within weeks - re-check after 25 Sep 2026. Scheme detail pages: /housing/landlords/selective-and-additional-hmo-licensing-schemes-2026 and /housing/landlords/selective-licensing-scheme-2026."}
+    licensed_register:
+      url: "https://landlordlicensing.croydon.gov.uk/public-register"
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Metastreet portal, free postcode search, no login needed to search (the 'Log in' link is for landlords applying). Needs JavaScript plus reCAPTCHA. A full paper/PDF copy of the register costs GBP 59."}
+    council_tax:
+      url: "https://www.croydon.gov.uk/council-tax"
+      tested: {date: "2026-09-03", http: 200, ok: true}
+    notes: "TIME-CRITICAL: mandatory-HMO-only today, but selective plus additional licensing go live on 25 September 2026, so any licensing verdict reached now expires in weeks. Idox planning and ModernGov both work; the Metastreet register works but needs JS and reCAPTCHA. Note the planning host is publicaccess3, not publicaccess."
+
+  - name: "Ealing"
+    gss_code: "E09000009"
+    planning_search:
+      url: "https://pam.ealing.gov.uk/online-applications/"
+      system: idox
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Idox Public Access, title 'Simple Search'. https://pam.ealing.gov.uk/ redirects to /online-applications/."}
+      robots: "* Disallow: / (robots.txt 200)"
+    committee:
+      url: "https://ealing.moderngov.co.uk/mgListCommittees.aspx?bcr=1"
+      system: moderngov
+      tested: {date: "2026-09-03", http: 403, ok: false, note: "Cloudflare 'Just a moment...' interstitial."}
+    licensing:
+      url: "https://www.ealing.gov.uk/info/201086/housing/3306/private_rented_properties"
+      schemes_active: [mandatory, additional, selective]
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "All three schemes stated on one page: 5+ occupants sharing facilities = mandatory HMO; 3 or 4 occupants = additional HMO; a single person or single household in a self-contained property = selective licence IF the property is in a designated area. Current additional and selective designations run to 31 MARCH 2027, and a renewal consultation for the next additional scheme ran 15 July - 24 September 2026 (a renewal, not a lapse). WARNING: THE SELECTIVE AREAS ARE RENDERED ONLY IN A JS MAP AND POSTCODE CHECKER - the ward list is not in the served HTML, so coverage cannot be determined by scraping; use the checker. Ealing's URL scheme is brittle: /council-tax, /info/201134/private_landlords and several plausible licensing paths all 404 or land on unrelated content (one returns a page titled 'Nature conservation') - use the numeric /info/ paths recorded here."}
+    licensed_register:
+      url: "https://ealing.metastreet.co.uk/public-register"
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Metastreet postcode search, free. The council's own register info page is /info/201287/private_rented_property_licensing/3432/public_register_of_licensed_properties (tested 200); it warns that 'older licences may not show on the above register due to a change in software' and that a full copy costs GBP 25-100 by email or post."}
+    council_tax:
+      url: "https://www.ealing.gov.uk/info/201097/council_tax"
+      tested: {date: "2026-09-03", http: 200, ok: true}
+    notes: "All three licensing schemes run to 31 March 2027, but the selective AREAS exist only inside a JS map and postcode checker - you cannot determine coverage by reading the HTML, so route a selective question to the checker or the user. Ealing's URL scheme is brittle (numeric /info/ paths); several obvious guesses 404 or land on unrelated pages. Idox planning works; the ModernGov committee site is Cloudflare-challenged."
+
+  - name: "Enfield"
+    gss_code: "E09000010"
+    planning_search:
+      url: "https://planningandbuildingcontrol.enfield.gov.uk/online-applications/"
+      system: idox
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Idox Public Access, title 'Simple Search'."}
+      robots: "* Disallow: / (robots.txt 200)"
+    committee:
+      url: "https://governance.enfield.gov.uk/mgListCommittees.aspx?bcr=1"
+      system: moderngov
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Title 'Committee structure | Enfield Council'."}
+    licensing:
+      url: "https://www.enfield.gov.uk/services/housing/private-rented-property-licensing"
+      schemes_active: [mandatory, additional, selective]
+      tested: {date: "2026-09-03", http: 403, ok: false, note: "SCHEMES NOT VERIFIED FROM THE COUNCIL PAGE - the entire enfield.gov.uk domain (HTML and PDFs alike) sits behind a Cloudflare JS challenge and returns 403 'Just a moment...' to every automated client. The scheme list above comes from indexed page text plus londonpropertylicensing.co.uk/enfield/: additional started 1 Sep 2025 for five years; a NEW selective scheme took effect 1 September 2026 (Cabinet 22 Apr 2026), replacing the 1 Sep 2021 - 31 Aug 2026 scheme and expanding from 14 to 17 wards. Because that flipped over two days before this catalogue's date, treat ANY pre-September-2026 ward list as stale and confirm the current ward in a browser."}
+    licensed_register:
+      url: "https://enfield.metastreet.co.uk/public-register"
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Metastreet postcode search on a third-party host that is NOT behind the Cloudflare challenge - this is the only automatable Enfield source."}
+    council_tax:
+      url: "https://www.enfield.gov.uk/services/council-tax"
+      tested: {date: "2026-09-03", http: 403, ok: false}
+    notes: "Cloudflare blocks the entire enfield.gov.uk domain including PDFs, so licensing and council tax need a browser. Idox planning and the governance.enfield.gov.uk committee site both work. The selective scheme changed over on 1 September 2026 (14 -> 17 wards) - any ward list written before September 2026 is wrong."
+
+  - name: "Greenwich"
+    gss_code: "E09000011"
+    planning_search:
+      url: "https://planning.royalgreenwich.gov.uk/online-applications/"
+      system: idox
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Idox Public Access, title 'Simple Search'. Host is royalgreenwich.gov.uk, not greenwich.gov.uk."}
+      robots: "* Disallow: / (robots.txt 200)"
+    committee:
+      url: "https://committees.royalgreenwich.gov.uk/mgListCommittees.aspx?bcr=1"
+      system: moderngov
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Title 'Committee structure | Royal Borough of Greenwich'."}
+    licensing:
+      url: "https://www.royalgreenwich.gov.uk/info/200290/multiple_occupancy_homes"
+      schemes_active: [mandatory, additional, selective]
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "The 200 page is a thin navigation hub with no scheme statements; the canonical modern page https://www.royalgreenwich.gov.uk/housing/letting-out-your-property returns a CloudFront 403 'Request blocked'. SCHEME DETAIL IS THEREFORE NOT COUNCIL-PAGE-VERIFIED: additional licensing borough-wide from 1 January 2024 for five years (corroborated by the council's own 2024 news page), selective from 1 October 2022 for five years covering parts of Plumstead, Glyndon, Shooters Hill, Woolwich Common and Woolwich Riverside. Greenwich is CONSULTING (21 Jul - 12 Oct 2026) on a much larger selective scheme covering ~17 more wards - proposed, not in force. HOST SPLIT: legacy /info/ and /homepage/ paths return 200 but every new-style path (/council-tax, /housing/..., /media/.../download) returns CloudFront 403 to automated clients over both HTTP/1.1 and HTTP/2 - a bot-fingerprint block, not rate limiting. The on-site selective ward lookup at /homepage/484/selective_licencing_scheme_lookup returns 200 but says it is down for maintenance."}
+    licensed_register:
+      url: "https://greenwich.metastreet.co.uk/public-register"
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Metastreet postcode search, no login, not blocked."}
+    council_tax:
+      url: "https://www.royalgreenwich.gov.uk/council-tax"
+      tested: {date: "2026-09-03", http: 403, ok: false}
+    notes: "Split-host council site: legacy /info/ and /homepage/ paths work, but every modern path returns a CloudFront 403 to scripted clients, so the canonical licensing page and the council tax page are browser-only. Idox planning and the committee site work. A large selective-licensing expansion was out to consultation until 12 October 2026 - proposed, not in force."
+
+  - name: "Hackney"
+    gss_code: "E09000012"
+    planning_search:
+      url: "https://developmentandhousing.hackney.gov.uk/planning/index.html"
+      system: northgate
+      tested: {date: "2026-09-03", http: 202, ok: false, note: "NEC/Northgate 'Regulatory Services Hub'. HTTP 202 with a ZERO-BYTE body to curl - JS-only, drive it in a browser. The old planning.hackney.gov.uk Northgate Planning Explorer host no longer has an A record (NXDOMAIN-equivalent), so pre-2026 links are dead. LLDC (Olympic Park) records for Hackney sites transferred in Dec 2024 and are still being loaded, so some 2012-2024 applications are missing."}
+      robots: "* Disallow: / (robots.txt 200)"
+    committee:
+      url: "https://hackney.moderngov.co.uk/mgListCommittees.aspx?bcr=1"
+      system: moderngov
+      tested: {date: "2026-09-03", http: 403, ok: false, note: "Cloudflare 'Just a moment...' interstitial."}
+    licensing:
+      url: "https://hackney.gov.uk/property-licensing"
+      schemes_active: [mandatory, additional, selective]
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Cleanest licensing page in this group; redirects to /housing/private-tenants-and-landlords/private-landlords/check-which-property-licence-you-need. 'There are 3 types of licences for properties in Hackney: selective, additional HMO and mandatory HMO.' Additional covers 3-4 people from 2+ households; mandatory 5+. SELECTIVE IS WARD-LIMITED - the page lists the wards (Shacklewell, Springfield, Stamford Hill West, Stoke Newington, Victoria, Hoxton and others) and links a ward checker, so check the ward before treating an unlicensed single-household let as a red flag. A consultation on new additional/selective designations ran 12 Jun - 21 Sep 2025 with no outcome stated. Several key documents (licence conditions, FAQs) are Google Docs links rather than council-hosted PDFs."}
+    licensed_register:
+      url: "https://propertylicensing.hackney.gov.uk/public-register"
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Metastreet postcode search, no login."}
+    council_tax:
+      url: "https://www.hackney.gov.uk/council-tax-and-benefits/council-tax"
+      tested: {date: "2026-09-03", http: 200, ok: true}
+    notes: "Cleanest licensing page in London and a working Metastreet register, but the PLANNING portal is a NEC hub that answers curl with an empty 202 - planning needs a browser. The old planning.hackney.gov.uk host is gone. Selective licensing is ward-limited, so check the ward before treating an unlicensed single-household let as a flag. LLDC (Olympic Park) planning records transferred in Dec 2024 and are still incomplete."
+
+  - name: "Hammersmith and Fulham"
+    gss_code: "E09000013"
+    planning_search:
+      url: "https://public-access.lbhf.gov.uk/online-applications/"
+      system: idox
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Idox Public Access, title 'Simple Search'."}
+      robots: "* Disallow: / (robots.txt 200)"
+    committee:
+      url: "https://democracy.lbhf.gov.uk/mgListCommittees.aspx?bcr=1"
+      system: moderngov
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Title 'Committee structure | London Borough of Hammersmith & Fulham'."}
+    licensing:
+      url: "https://www.lbhf.gov.uk/housing/private-housing/property-licensing-landlords-and-letting-agents"
+      schemes_active: [mandatory, additional, selective]
+      tested: {date: "2026-09-03", http: 202, ok: false, note: "SCHEMES NOT VERIFIED FROM THE COUNCIL PAGE. Every path on www.lbhf.gov.uk - homepage, HTML and even /sites/default/files/*.pdf - returns HTTP 202 with a 2,408-byte AWS WAF challenge shell (window.awsWafCookieDomainList, challenge.js). 202 here is neither an error nor a success. Scheme list from londonpropertylicensing.co.uk/hammersmith-fulham/: additional and selective both started 5 June 2022 for five years (to 4 June 2027); additional is borough-wide, selective covers only about 24 DESIGNATED STREETS, so most H&F addresses need additional/mandatory only. Two hosts on this domain do respond: https://propertylicensing.lbhf.gov.uk/ (the application portal, 200) and https://democracy.lbhf.gov.uk (committee papers)."}
+    licensed_register:
+      url: null
+      tested: null
+      note: "NO PUBLIC ONLINE REGISTER. The council's register page (.../register-licences) is behind the same WAF, and LBHF offers register viewing only by Microsoft Teams appointment or a paid certified copy at GBP 54 under Housing Act 2004 s.232 (phs@lbhf.gov.uk). A flat-vetter cannot self-serve a licence check in this borough."
+    council_tax:
+      url: "https://www.lbhf.gov.uk/council-tax"
+      tested: {date: "2026-09-03", http: 202, ok: false}
+    notes: "AWS WAF returns HTTP 202 with an empty challenge body on EVERY www.lbhf.gov.uk path, and there is NO public online register - viewing is by Teams appointment or a GBP 54 certified copy. Licence status is therefore not self-servable here. Idox planning and democracy.lbhf.gov.uk both work. Selective licensing covers only ~24 named streets."
+
+  - name: "Haringey"
+    gss_code: "E09000014"
+    planning_search:
+      url: "https://publicregister.haringey.gov.uk/pr/s/register-view"
+      system: arcus
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Arcus/Salesforce 'Public Register' (299 KB Lightning shell) - JS-rendered results. Use Advanced search -> Category 'Planning applications'. The old publicaccess.haringey.gov.uk host has no A record any more."}
+      robots: "* Allow: / (only */secur/forgotpassword.jsp?* disallowed)"
+    committee:
+      url: "https://www.minutes.haringey.gov.uk/mgListCommittees.aspx?bcr=1"
+      system: moderngov
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Title 'Committee structure | Haringey Council'. Note the www.minutes. host."}
+    licensing:
+      url: "https://haringey.gov.uk/housing/private-sector-renting/property-licensing"
+      schemes_active: [mandatory, additional, selective]
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Use the BARE host - www.haringey.gov.uk redirects to haringey.gov.uk. The landing page is a hub; scheme text is on the child pages /do-i-need-an-hmo-licence and /selective-property-licensing (both tested 200). ADDITIONAL IS BOROUGH-WIDE AND COVERS SECTION 257 HMOs (converted blocks of flats) - unusually broad, so most converted-flat lets in Haringey need a licence: 'All property rented as an HMO in the borough now requires a licence to legally be let.' Selective is zone-limited, in force 17 November 2022 for five years (to Nov 2027), covering single people, couples and single households inside the zone."}
+    licensed_register:
+      url: "https://propertylicensing.haringey.gov.uk/public-register"
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Metastreet postcode search, no login. CAVEAT: the council states plainly that 'this is not the full register' - the online search omits some entries and the complete HMO register requires an in-person appointment, so absence is weak evidence. A council-hosted alternative entry point is haringey.gov.uk/housing/private-sector-renting/property-licensing/search-public-register-licensed-premises (200)."}
+    council_tax:
+      url: "https://haringey.gov.uk/council-tax"
+      tested: {date: "2026-09-03", http: 200, ok: true}
+    notes: "Planning moved to an Arcus/Salesforce register (JS-rendered, but crawlable per robots.txt); the old publicaccess host is gone. Use the BARE haringey.gov.uk host. Additional licensing is borough-wide and covers s257 converted blocks, so most converted-flat lets need a licence - but the council admits the online register 'is not the full register', so absence is weak evidence."
+
+  - name: "Harrow"
+    gss_code: "E09000015"
+    planning_search:
+      url: "https://myaccount.harrow.gov.uk/publicaccessliveHA/selfservice/citizenportal/myservices.htm"
+      system: idox
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Idox Public Access citizen portal, title 'My Services' - this is the landing page; the search itself is under the same /publicaccessliveHA/ path. The old msnpp.harrow.gov.uk host is NXDOMAIN."}
+      robots: "none published - https://myaccount.harrow.gov.uk/robots.txt returns HTTP 200 but the body is an HTML 'This page is currently unavailable' error page, not a robots file"
+    committee:
+      url: "https://moderngov.harrow.gov.uk/mgListCommittees.aspx?bcr=1"
+      system: moderngov
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Title 'Committee structure - London Borough of Harrow'."}
+    licensing:
+      url: "https://www.harrow.gov.uk/licences/licences-houses-multiple-occupation-hmos"
+      schemes_active: [mandatory, selective]
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "ADDITIONAL LICENSING APPEARS TO HAVE LAPSED - the single biggest live uncertainty in this catalogue. Harrow's additional HMO scheme ran 6 Aug 2021 - 5 Aug 2026; the council's own consultation page gives that expiry and warns re-designation is needed 'to avoid a regulatory gap', the consultation closed 27 Feb 2026, and no 2026 Cabinet re-designation was found in Harrow's decisions register (Jan-Sep 2026). The live fees page (/licences/licences-houses-multiple-occupation-hmos/2) and apply page (/3) now offer only 'HMO licence' and 'Self-contained units (Section 257)' with NO additional-licence option or fee, while the descriptive page still mentions an additional licence - that text looks stale. Confidence: medium-high that additional is NOT in force; confirm with private.sector.housing@harrow.gov.uk before relying on it. SELECTIVE IS PHASING IN DURING 2026: Edgware and Roxeth from 2 May 2026, Greenhill and Marlborough from 6 July 2026, Wealdstone North and Wealdstone South from 1 September 2026. Consequence: a 3-4 person share in Harrow may now need a SELECTIVE licence rather than an additional one. Harrow has no single licensing landing page - HMO and selective live on separate pages (https://www.harrow.gov.uk/licences/selective-licensing, 200)."}
+    licensed_register:
+      url: "https://www.harrow.gov.uk/licences/licensing-public-register"
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Council page describing the register (covers HMO, selective and other licences). The actual searchable NEC system at https://assurepp.harrow.gov.uk/NECSWS/ES/Presentation/Public/OnlineLicence TIMED OUT after 12 s and could not be verified."}
+    council_tax:
+      url: "https://www.harrow.gov.uk/council-tax"
+      tested: {date: "2026-09-03", http: 200, ok: true}
+    notes: "THE BIGGEST OPEN QUESTION IN THIS CATALOGUE: Harrow's additional HMO scheme expired 5 August 2026 and no re-designation was found, while the council's own pages contradict each other. Verify with private.sector.housing@harrow.gov.uk before ruling on a 3-4 person share. Selective licensing is phasing in ward by ward through 2026 (Edgware/Roxeth May, Greenhill/Marlborough July, Wealdstone North/South September). The searchable register system timed out on test."
+
+  - name: "Havering"
+    gss_code: "E09000016"
+    planning_search:
+      url: "https://development.havering.gov.uk/OcellaWeb/planningSearch"
+      system: other
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "OcellaWeb (Oracle-based), title 'OcellaWeb' - not Idox. Simple server-rendered form; results are server-rendered too."}
+      robots: "none - robots.txt returns 404"
+    committee:
+      url: "https://democracy.havering.gov.uk/mgListCommittees.aspx?bcr=1"
+      system: moderngov
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Title 'Committee structure | London Borough of Havering'."}
+    licensing:
+      url: "https://www.havering.gov.uk/information-landlords/private-rented-property-licensing"
+      schemes_active: [mandatory, additional, selective]
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Both discretionary schemes were REPLACED on 18 March 2026 and run to 17 March 2031, so anything written before 2026 is out of date. Additional (Scheme 3) is now BOROUGH-WIDE, covering all wards. Selective (Scheme 2) covers 7 wards: Beam Park, Harold Wood, Rainham and Wennington, Rush Green and Crowlands, Squirrels Heath, St Albans, St Edwards. Mandatory since 1 Oct 2018 for 5+ people in 2+ households. Fees on-page: selective GBP 950, additional GBP 1,400 (split Part A/Part B), with GBP 100 accredited-landlord and GBP 75 EPC-C-or-above discounts."}
+    licensed_register:
+      url: "https://housingpropertylicence.havering.gov.uk/public-register"
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Metastreet-style postcode search on a council-branded host, no login."}
+    council_tax:
+      url: "https://www.havering.gov.uk/counciltax"
+      tested: {date: "2026-09-03", http: 200, ok: true}
+    notes: "Both discretionary schemes were replaced on 18 March 2026 and run to 2031: additional is now borough-wide, selective covers 7 named wards. Anything written before 2026 is stale. Planning is OcellaWeb (server-rendered, no robots.txt) rather than Idox - a rare case where the planning search is genuinely scriptable. Council tax path has no hyphen: /counciltax."
+
+  - name: "Hillingdon"
+    gss_code: "E09000017"
+    planning_search:
+      url: "https://planning.hillingdon.gov.uk/OcellaWeb/planningSearch"
+      system: other
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "OcellaWeb, title 'London Borough of Hillingdon - Planning'. Server-rendered."}
+      robots: "none - robots.txt returns 404"
+    committee:
+      url: "https://modgov.hillingdon.gov.uk/mgListCommittees.aspx?bcr=1"
+      system: moderngov
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Title 'London Borough of Hillingdon - Committees'."}
+    licensing:
+      url: "https://www.hillingdon.gov.uk/hmo"
+      schemes_active: [mandatory, additional]
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Redirects to https://pre.hillingdon.gov.uk/hmo - Hillingdon serves its LIVE site from the 'pre.' subdomain despite the staging-looking name; store the www short URLs, which redirect correctly. NO SELECTIVE LICENSING - the word 'selective' appears zero times across the HMO hub and the additional-scheme page. The additional scheme is new and BOROUGH-WIDE, covering shared properties with fewer than five residents from 2+ households; applications opened 20 May 2026 with full compliance required by 23 August 2026, so unlicensed 3-4 person shares are now enforceable. Path traps: /council-tax (hyphenated) and /hmo-licensing both 404 - use /counciltax and /hmo."}
+    licensed_register:
+      url: "https://pre.hillingdon.gov.uk/downloads/file/2951/hmo-register"
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "A PDF DOWNLOAD (application/pdf, ~992 KB), not a searchable database - no postcode lookup, so checking an address means grepping a 1 MB file."}
+    council_tax:
+      url: "https://www.hillingdon.gov.uk/counciltax"
+      tested: {date: "2026-09-03", http: 200, ok: true}
+    notes: "The live site is served from the pre.hillingdon.gov.uk subdomain despite the staging-looking name. Planning is OcellaWeb (server-rendered, no robots.txt). No selective licensing; the new borough-wide additional scheme hit full compliance on 23 August 2026, so unlicensed 3-4 person shares are now enforceable. The register is a ~1 MB PDF, not a lookup."
+
+  - name: "Hounslow"
+    gss_code: "E09000018"
+    planning_search:
+      url: "https://planningandbuilding.hounslow.gov.uk/NECSWS/ES/Presentation/Planning/OnlinePlanning/OnlinePlanningSearch"
+      system: northgate
+      tested: {date: "2026-09-03", http: 0, ok: false, note: "COULD NOT BE VERIFIED FROM THIS NETWORK. The host resolves (152.114.60.90) but every connection on both port 443 and port 80 timed out after 12 s. URL taken from the council's own 'Search planning applications' page (https://www.hounslow.gov.uk/planning-building/search-planning-applications). Treat the URL as correct-but-untested and expect a NEC/Northgate JS-driven UI."}
+      robots: "unknown - host unreachable from this network"
+    committee:
+      url: "https://democraticservices.hounslow.gov.uk/mgListCommittees.aspx?bcr=1"
+      system: moderngov
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Title 'Committee structure | London Borough of Hounslow'. Reachable even though the Hounslow planning portal host is not."}
+    licensing:
+      url: "https://www.hounslow.gov.uk/houses-multiple-occupation/hmo-licensing"
+      schemes_active: [mandatory, additional]
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Additional HMO licensing is BOROUGH-WIDE from 11 Dec 2025 (designated 11 Sep 2025, runs to 2030) and covers s254 HMOs of 3+ persons in 2+ households plus s257 converted buildings - so effectively any 3-person houseshare in Hounslow needs a licence. The page contains zero occurrences of 'selective'. Older sources saying the additional scheme expired mid-2025 are stale; it was replaced."}
+    licensed_register:
+      url: "https://data.hounslow.gov.uk/@london-borough-of-hounslow/register-of-licensed-hmos"
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "On the council's OPEN DATA portal, not the main site: a downloadable CSV ('Register of licensed HMOs'), not a searchable address lookup."}
+    council_tax:
+      url: "https://www.hounslow.gov.uk/council-tax"
+      tested: {date: "2026-09-03", http: 200, ok: true}
+    notes: "PLANNING PORTAL UNREACHABLE from this network (host resolves, all connections time out) - the URL came from the council's own page and is recorded untested. Committee, licensing, register and council tax all work. Additional HMO licensing has been borough-wide since 11 December 2025 and covers s257 conversions, so almost any 3-person share needs a licence. The register is an open-data CSV, not an address lookup."
+
+  - name: "Islington"
+    gss_code: "E09000019"
+    planning_search:
+      url: "https://planning.agileapplications.co.uk/islington"
+      system: other
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Agile Applications / IEG4 'Citizen Portal Planning' - a 2.6 KB Angular SPA shell, so ALL content is JS-rendered and curl sees nothing useful. Islington switched to this system in April 2024; planning.islington.gov.uk is NXDOMAIN. CAUTION: this shared host returns the same 200 + identical 2576-byte shell for ANY tenant path (a deliberately bogus tenant name was tested and also returned 200), so a 200 here proves the platform is up, not that the tenant exists - the URL is confirmed by islington.gov.uk/planningsearch linking to it."}
+      robots: "* Disallow: / (robots.txt 200)"
+    committee:
+      url: "https://democracy.islington.gov.uk/mgListCommittees.aspx?bcr=1"
+      system: moderngov
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Title 'Committee structure | Democracy in Islington'."}
+    licensing:
+      url: "https://www.islington.gov.uk/housing/private-sector-housing/landlords/property-licensing"
+      schemes_active: [mandatory, additional, selective]
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Three schemes. Selective currently in force in Finsbury Park, Hillrise and Tollington wards only. Additional is borough-wide (3-4 unrelated people in 2+ households) and explicitly includes s257 converted flats. EXPANDING: a second selective designation covering Barnsbury, Caledonian, Highbury, Junction, Laycock, Mildmay and Tufnell Park starts 23 November 2026 (applications open 7 Sep 2026), so re-check after that date. The page contradicts itself on Mildmay (listed both as live and as part of the November designation) - treat Mildmay as ambiguous."}
+    licensed_register:
+      url: "https://propertylicensing.islington.gov.uk/public-register"
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Metastreet postcode-search page, public, no login (the 'Log in' link is for landlords' own applications)."}
+    council_tax:
+      url: "https://www.islington.gov.uk/council-tax"
+      tested: {date: "2026-09-03", http: 200, ok: true}
+    notes: "Planning switched to an Agile/IEG4 SPA in April 2024 - the page is a 2.6 KB shell, so planning needs a browser, and the shared host returns 200 for any path (a 200 does not prove the tenant exists). EXPANDING LICENSING: a second selective designation covering seven more wards starts 23 November 2026, and the council's own page is self-contradictory about Mildmay - treat Mildmay as ambiguous."
+
+  - name: "Kensington and Chelsea"
+    gss_code: "E09000020"
+    planning_search:
+      url: "https://www.rbkc.gov.uk/planning/searches/default.aspx?adv=1"
+      system: other
+      tested: {date: "2026-09-03", http: 403, ok: false, note: "Bespoke ASP.NET search, NOT Idox. Returned 403 with a Cloudflare 'Just a moment...' interstitial - the whole www.rbkc.gov.uk domain is Cloudflare-challenged to curl regardless of user-agent, so this borough needs a real browser (or the user) for planning, licensing and council tax alike."}
+      robots: "unknown - https://www.rbkc.gov.uk/robots.txt also returned 403 (Cloudflare challenge)"
+    committee:
+      url: "https://rbkc.moderngov.co.uk/committees/mgListCommittees.aspx?bcr=1"
+      system: moderngov
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Title 'Committee structure'. NOTE the /committees/ path prefix - https://rbkc.moderngov.co.uk/mgListCommittees.aspx returns 404. Planning Applications Committee is CId=153. This host is NOT Cloudflare-challenged, unlike www.rbkc.gov.uk."}
+    licensing:
+      url: "https://www.rbkc.gov.uk/housing/information-homeowners-private-rented-tenants-and-landlords/houses-multiple-occupation-hmo"
+      schemes_active: [mandatory, additional]
+      tested: {date: "2026-09-03", http: 403, ok: false, note: "Additional HMO licensing borough-wide (all 18 wards) since 1 June 2023, covering 3-4 unrelated sharers - RBKC is not a soft touch on shared flats. No selective scheme mentioned. THE PAGE ITSELF COULD NOT BE READ BY CURL: the whole www.rbkc.gov.uk domain returns 403 with a Cloudflare 'Just a moment...' interstitial to every user-agent; the content above was confirmed by a JS-capable fetch instead. Scheme end date is not stated on the council page."}
+    licensed_register:
+      url: "https://rbkc.metastreet.co.uk/public-register"
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Metastreet register on a separate host that is NOT Cloudflare-challenged - use this rather than the council-hosted register page."}
+    council_tax:
+      url: "https://www.rbkc.gov.uk/council-tax"
+      tested: {date: "2026-09-03", http: 403, ok: false}
+    notes: "Cloudflare blocks all of www.rbkc.gov.uk, so planning, licensing and council tax are ALL browser-only in this borough - it is the single hardest London borough to vet by script. Two doors are open: rbkc.moderngov.co.uk/committees/ for committee papers and rbkc.metastreet.co.uk for the licence register. Additional HMO licensing is borough-wide since 1 June 2023, so RBKC is not lenient on shared flats."
+
+  - name: "Kingston upon Thames"
+    gss_code: "E09000021"
+    planning_search:
+      url: "https://publicaccess.kingston.gov.uk/online-applications/"
+      system: idox
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Idox Public Access, title 'Simple Search'."}
+      robots: "* Disallow: / (robots.txt 200)"
+    committee:
+      url: "https://moderngov.kingston.gov.uk/mgListCommittees.aspx?bcr=1"
+      system: moderngov
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Title 'Committee structure - Modern Council'."}
+    licensing:
+      url: "https://www.kingston.gov.uk/housing/landlords-and-private-sector/houses-multiple-occupation-hmo"
+      schemes_active: [mandatory]
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "WEAKEST LICENSING REGIME IN LONDON - mandatory only (5+ people, 2+ households). Zero hits for 'additional licens' or 'selective' on the page. A 3- or 4-person houseshare in Kingston needs no licence at all, so 'unlicensed' is a much weaker red flag here than in Newham/Lambeth/Lewisham. An additional scheme has appeared in committee papers but is not live on the service page."}
+    licensed_register:
+      url: "https://www.kingston.gov.uk/housing/landlords-and-private-sector/houses-multiple-occupation-hmo/hmo-licensing-register"
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Register is a QUARTERLY PDF, not a live search ('HMO licensing register (PDF, 538KB). This is updated on a quarterly basis.'). Follow the link from this page - the file name carries the date and changes each quarter."}
+    council_tax:
+      url: "https://www.kingston.gov.uk/council-tax"
+      tested: {date: "2026-09-03", http: 200, ok: true}
+    notes: "Weakest licensing regime in London - mandatory HMO only, so a 3-4 person share legitimately needs no licence and 'unlicensed' is close to meaningless here. Idox planning and ModernGov both work. The register is a quarterly PDF."
+
+  - name: "Lambeth"
+    gss_code: "E09000022"
+    planning_search:
+      url: "https://planning.lambeth.gov.uk/online-applications/"
+      system: idox
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Idox Public Access, title 'Simple Search'."}
+      robots: "* Disallow: / (robots.txt 200)"
+    committee:
+      url: "https://moderngov.lambeth.gov.uk/mgListCommittees.aspx?bcr=1"
+      system: moderngov
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Title 'Committee meeting information | Lambeth Council'."}
+    licensing:
+      url: "https://www.lambeth.gov.uk/housing/landlords-licensing"
+      schemes_active: [mandatory, additional, selective]
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "ALMOST EVERY private rented property in Lambeth needs a licence: selective covers 23 of 25 wards (phase 1 from 2 Sep 2024, phase 2 from 1 Sep 2025; only Vauxhall and Waterloo & South Bank excluded), and additional covers all 3+ person HMOs plus s257 properties. No licence on a Lambeth flat outside those two wards is a strong red flag. NOTE the landing page is a link hub that does not itself name the schemes - the scheme statements are on /housing/landlords-licensing/houses-multiple-occupation-hmos/hmos-require-licence and /housing/landlords-licensing/selective-licensing-scheme (both tested 200)."}
+    licensed_register:
+      url: "https://hmolicensing.lambeth.gov.uk/public-register"
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Metastreet postcode search, no login - prefer this over the council's own HMO register page (https://www.lambeth.gov.uk/housing/landlords-licensing/houses-multiple-occupation-hmos/hmo-register, also tested 200). Lambeth migrated to Metastreet recently, so older register links may be stale."}
+    council_tax:
+      url: "https://www.lambeth.gov.uk/council-tax"
+      tested: {date: "2026-09-03", http: 200, ok: true}
+    notes: "Selective licensing covers 23 of 25 wards (all but Vauxhall and Waterloo & South Bank) and additional covers all 3+ person HMOs, so an unlicensed Lambeth flat is a strong red flag. Idox planning and ModernGov work; the Metastreet register works. The licensing landing page is only a hub - the scheme text lives on two child pages."
+
+  - name: "Lewisham"
+    gss_code: "E09000023"
+    planning_search:
+      url: "https://planning.lewisham.gov.uk/online-applications/"
+      system: idox
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Idox Public Access, title 'Simple Search'."}
+      robots: "* Disallow: / (robots.txt 200)"
+    committee:
+      url: "https://councilmeetings.lewisham.gov.uk/mgListCommittees.aspx?bcr=1"
+      system: moderngov
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Title 'Lewisham Council - Committee structure'."}
+    licensing:
+      url: "https://lewisham.gov.uk/myservices/housing/private-tenants-and-landlords/landlords"
+      schemes_active: [mandatory, additional, selective]
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Near-borough-wide. Selective in force 1 Jul 2024 - 30 Jun 2029, ~20,000 properties, excluding parts of Telegraph Hill and Blackheath. Additional in force 5 Apr 2022 - 4 Apr 2027, captures any HMO not caught by mandatory, including lodger arrangements with 3+ sharers. Landing page is a hub; scheme text is on .../landlords/hmo/which-houses-in-multiple-occupation--hmos--need-a-licence and .../landlords/selective-licensing (both tested 200)."}
+    licensed_register:
+      url: "https://lewisham.metastreet.co.uk/public-register"
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Metastreet search, no login. IMPORTANT: the council warns its own register data is incomplete - 'we are aware that some of the data in the HMO Register is not currently showing' - so absence from the register is NOT evidence a Lewisham property is unlicensed. An XLSX export also exists at /-/media/services/housing/hmo-register.xlsx (not separately tested)."}
+    council_tax:
+      url: "https://lewisham.gov.uk/myservices/counciltax"
+      tested: {date: "2026-09-03", http: 200, ok: true}
+    notes: "Near-borough-wide licensing (selective to 2029, additional to 2027), so an unlicensed flat is a strong flag - EXCEPT that the council itself warns its register data is incomplete, so absence from the register is not proof. Idox planning and the councilmeetings host both work."
+
+  - name: "Merton"
+    gss_code: "E09000024"
+    planning_search:
+      url: "https://rspandlp.merton.gov.uk/planning/index.html?fa=search"
+      system: northgate
+      tested: {date: "2026-09-03", http: 202, ok: false, note: "NEC/Northgate 'Regulatory Services Hub'. HTTP 202 with a ZERO-BYTE body to curl - JS-only. The old planning.merton.gov.uk Northgate Planning Explorer host is NXDOMAIN, so every /Northgate/PlanningExplorerAA/ link found in search engines is dead. Only applications validated after 1 July 2008 are online."}
+      robots: "* Disallow: / (robots.txt 200)"
+    committee:
+      url: "https://democracy.merton.gov.uk/mgListCommittees.aspx?bcr=1"
+      system: moderngov
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "200 and 21 KB of committee list, but the page carries no <title> text."}
+    licensing:
+      url: "https://merton.gov.uk/council-tax-benefits-and-housing/private-housing/licensing"
+      schemes_active: [mandatory, additional, selective]
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Best single licensing page in London - names all three schemes and the exact wards. GEOGRAPHY MATTERS: additional (3-4 people) applies only in Colliers Wood, Cricket Green, Figge's Marsh, Graveney, Lavender Fields, Longthornton, Pollards Hill; selective (single household) only in Figge's Marsh, Graveney, Longthornton, Pollards Hill. In Wimbledon, Raynes Park, Merton Park, Wimbledon Park, West Barnes etc. no licence is expected, so absence is normal rather than a red flag."}
+    licensed_register:
+      url: "https://rspandlp.merton.gov.uk/"
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Tascomi 'Regulatory Services Hub' - shared by Merton, Richmond and Wandsworth. No sign-in needed to view the licence register, but the direct path /registers/index.html?fa=licence_register returns HTTP 202 with a zero-byte body (JS-only), so a headless browser is required; the hub root is the usable entry point. A paper copy of the HMO register costs GBP 50 under Housing Act 2004 s.232."}
+    council_tax:
+      url: "https://www.merton.gov.uk/council-tax-benefits-and-housing/council-tax"
+      tested: {date: "2026-09-03", http: 200, ok: true}
+    notes: "Best single licensing page in London - all three schemes and their exact wards on one page - but the schemes cover only the eastern Mitcham/Colliers Wood wards, so in Wimbledon or Raynes Park an unlicensed let is normal. PLANNING NEEDS A BROWSER: the NEC hub answers curl with an empty 202, and the old Northgate host is gone so every search-engine link to it is dead. The register also 202s; use the hub root."
+
+  - name: "Newham"
+    gss_code: "E09000025"
+    planning_search:
+      url: "https://pa.newham.gov.uk/online-applications/"
+      system: idox
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Idox Public Access, title 'Simple Search'."}
+      robots: "* Disallow: / (robots.txt 200)"
+    committee:
+      url: "https://mgov.newham.gov.uk/mgListCommittees.aspx?bcr=1"
+      system: moderngov
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Title 'Committee structure - Newham Council'."}
+    licensing:
+      url: "https://www.newham.gov.uk/landlords-newham/rented-property-licensing"
+      schemes_active: [mandatory, additional, selective]
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "STRICTEST IN LONDON - borough-wide property licensing. Every privately rented dwelling needs a licence regardless of size or occupancy in 22 of 24 wards; the only exclusions are Royal Victoria and Stratford Olympic Park. Selective launched 1 Jun 2023, additional 1 Jan 2023. The content is a 17-part paginated guide: the scheme statements are on /rented-property-licensing/7 (selective) and /8 (additional + mandatory), both tested 200."}
+    licensed_register:
+      url: "https://www.newham.gov.uk/landlords-newham/rented-property-licensing/6"
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "REGISTER IS OFFLINE. The page states 'Our public register is currently offline due to development work... please contact us to arrange access at our office.' The only public data is two static PDFs dated 21 May 2026 (/downloads/file/10923/public-register-hmo-21may2026 and /10924/public-register-selective-21may2026, not separately tested). Treat 'not in the register' as INCONCLUSIVE for Newham."}
+    council_tax:
+      url: "https://www.newham.gov.uk/council-tax"
+      tested: {date: "2026-09-03", http: 200, ok: true}
+    notes: "Strictest licensing in London - borough-wide, every private rental in 22 of 24 wards (only Royal Victoria and Stratford Olympic Park are exempt), regardless of size. BUT the searchable register is OFFLINE, leaving only two static May-2026 PDFs, so 'not in the register' is INCONCLUSIVE here. Idox planning and ModernGov both work."
+
+  - name: "Redbridge"
+    gss_code: "E09000026"
+    planning_search:
+      url: "https://planning.redbridge.gov.uk/"
+      system: other
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Agile Applications / IEG4 'Citizen Portal Planning' - 2.6 KB Angular SPA shell, all content JS-rendered."}
+      robots: "* Disallow: / (robots.txt 200)"
+    committee:
+      url: "https://moderngov.redbridge.gov.uk/mgListCommittees.aspx?bcr=1"
+      system: moderngov
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Title 'Committee structure'. democracy.redbridge.gov.uk is NXDOMAIN."}
+    licensing:
+      url: "https://www.redbridge.gov.uk/housing/landlords/"
+      schemes_active: [mandatory, additional, selective]
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Additional applies to ALL privately rented properties in Redbridge occupied by 3 or 4 people in 2+ households. Selective runs as two designations: Scheme 3 (Valentines, Ilford Town) and Scheme 4 (Aldborough, Barkingside, Chadwell, Churchfields, Clementswood, Cranbrook, Fairlop, Goodmayes, Hainault, Loxford, Mayfield, Newbury, Seven Kings, South Woodford, Wanstead Village). No single page states all schemes - evidence is split across the HMO and selective sub-pages (both tested 200). SOFT-404 TRAP: /housing/private-housing/property-licensing/ returns HTTP 200 with a 'Page not found' body, so check the title, not just the status code."}
+    licensed_register:
+      url: "https://propertylicensing.redbridge.gov.uk/online-application/redbridge-public-register/"
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Searchable, no login - BUT currently broken: on-page banner reads 'We are currently experiencing technical issues with our Public Register... please contact us via email at Prslicensing@redbridge.gov.uk'."}
+    council_tax:
+      url: "https://www.redbridge.gov.uk/council-tax/"
+      tested: {date: "2026-09-03", http: 200, ok: true}
+    notes: "Planning is an Agile/IEG4 SPA - browser needed. Licensing is broad (borough-wide additional plus two selective designations covering most wards), but the public register is CURRENTLY BROKEN with an on-page outage banner. Soft-404 trap: some redbridge.gov.uk paths return HTTP 200 with a 'Page not found' body, so check the title, not the status."
+
+  - name: "Richmond upon Thames"
+    gss_code: "E09000027"
+    planning_search:
+      url: "https://planning.richmond.gov.uk/richmond/search-applications/"
+      system: other
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Agile Applications / IEG4 'Citizen Portal Planning' - 2.6 KB Angular SPA shell, JS-rendered. https://www2.richmond.gov.uk/PlanData2/Planning_CaseNo.aspx redirects here (tested). Richmond and Wandsworth share a planning service but run different portals."}
+      robots: "* Disallow: / (robots.txt 200)"
+    committee:
+      url: "https://cabnet.richmond.gov.uk/mgListCommittees.aspx?bcr=1"
+      system: moderngov
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Title 'Committee structure - London Borough of Richmond upon Thames'. Host is cabnet., not democracy."}
+    licensing:
+      url: "https://www.richmond.gov.uk/hmo"
+      schemes_active: [mandatory]
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Mandatory HMO licensing ONLY (5+ occupiers, 2+ households). Case-insensitive grep of the page returns 0 hits for both 'selective' and 'additional' - Richmond runs no discretionary scheme at all, so an unlicensed 3-4 person share here is normal and not a red flag."}
+    licensed_register:
+      url: "https://rspandlp.merton.gov.uk/registers/"
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Shared Merton/Richmond/Wandsworth Regulatory Services Partnership hub on the merton.gov.uk domain - expect Merton branding. Free view gives licence number, address and start/end dates only; licence-holder NAMES cost GBP 50 (Housing Act 2004 s.232 cost recovery) via privatehousing@merton.gov.uk. The direct register path ?fa=licence_register returns 202 with an empty body (JS-only)."}
+    council_tax:
+      url: "https://www.richmond.gov.uk/council_tax"
+      tested: {date: "2026-09-03", http: 200, ok: true}
+    notes: "Mandatory HMO licensing ONLY - zero mentions of selective or additional on the council's pages, so an unlicensed 3-4 person share here is normal, not a flag. Planning is an Agile/IEG4 SPA (browser needed). The register sits on the shared Merton-hosted Regulatory Services Hub and shows addresses and dates free, but licence-HOLDER NAMES cost GBP 50."
+
+  - name: "Southwark"
+    gss_code: "E09000028"
+    planning_search:
+      url: "https://planning.southwark.gov.uk/online-applications/"
+      system: idox
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Idox Public Access, title 'Simple Search'."}
+      robots: "* Disallow: / (robots.txt 200)"
+    committee:
+      url: "https://moderngov.southwark.gov.uk/mgListCommittees.aspx?bcr=1"
+      system: moderngov
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Title 'Committee structure - Southwark Council'."}
+    licensing:
+      url: "https://www.southwark.gov.uk/housing/private-tenants-and-landlords/private-rented-property-licensing/property-licensing"
+      schemes_active: [mandatory, additional, selective]
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "All three schemes stated on one page. Additional is BOROUGH-WIDE (designated 28 Oct 2021, in force 1 Mar 2022) but CEASES 1 MARCH 2027 - re-check before relying on it. Selective now spans about 19 wards across four designations: Champion Hill, Newington/Faraday, Goose Green, St Giles/North Walworth, Nunhead & Queens Road, Old Kent Road, Peckham/Camberwell Green, Chaucer, Dulwich Hill, Dulwich Wood, London Bridge & West Bermondsey, Peckham Rye, Rotherhithe, Rye Lane, South Bermondsey, Surrey Docks."}
+    licensed_register:
+      url: "https://licencesandservices.southwark.gov.uk/sf/control/publicregister"
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Searchable by address line / street / ward with a status filter ('Issued Licence'). A Login link exists but search works without it."}
+    council_tax:
+      url: "https://www.southwark.gov.uk/council-tax"
+      tested: {date: "2026-09-03", http: 200, ok: true}
+    notes: "All three schemes on one page and a searchable register that works - one of the easiest boroughs to vet. WATCH THE CLOCK: the borough-wide additional scheme ceases 1 March 2027. Selective covers about 19 wards. Idox planning and ModernGov both work."
+
+  - name: "Sutton"
+    gss_code: "E09000029"
+    planning_search:
+      url: "https://planningregister.sutton.gov.uk/online-applications/"
+      system: idox
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Idox Public Access, title 'Planning applications | Sutton Council'. The old publicaccess.sutton.gov.uk host is NXDOMAIN. Viewing needs no account; commenting does."}
+      robots: "* Disallow: / (robots.txt 200)"
+    committee:
+      url: "https://moderngov.sutton.gov.uk/mgListCommittees.aspx?bcr=1"
+      system: moderngov
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Title 'Committee structure - Sutton Council'."}
+    licensing:
+      url: "https://www.sutton.gov.uk/businesses-and-licensing/licensing/houses-multiple-occupation/houses-multiple-occupation-hmo"
+      schemes_active: [mandatory, additional]
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Additional licensing is NEW and borough-wide: designated 22 Dec 2025, in force 22 March 2026, ceases 21 Dec 2030 - 'the lead-in period has expired, and the Additional Licensing Scheme is now fully live and applies to the whole Borough'. Any HMO below the 5-person mandatory threshold now needs a licence. No selective licensing in Sutton (0 hits for 'selective')."}
+    licensed_register:
+      url: "https://www.sutton.gov.uk/businesses-and-licensing/licensing/houses-multiple-occupation/hmo-licensing-register-who-has-licence"
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Register is a QUARTERLY PDF (current file at the time of testing: /sites/default/files/2026-04/LBS%20Web%20Register%20Feb%202026.pdf, tested 200, application/pdf, 294 KB). The file URL changes each quarter, so always follow the link from this page. A GBP 25 fee applies for a PDF copy of the full register."}
+    council_tax:
+      url: "https://www.sutton.gov.uk/council-tax"
+      tested: {date: "2026-09-03", http: 200, ok: true}
+    notes: "Additional licensing is new and borough-wide (in force 22 March 2026 to 21 December 2030), so any sub-5-person HMO now needs a licence; there is no selective scheme. Idox planning works but note the host changed to planningregister.sutton.gov.uk - the old publicaccess host is gone. The register is a quarterly PDF and a full copy costs GBP 25."
+
+  - name: "Tower Hamlets"
+    gss_code: "E09000030"
+    planning_search:
+      url: "https://development.towerhamlets.gov.uk/online-applications/"
+      system: idox
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Idox Public Access, title 'Simple Search'. LLDC (Olympic Park) planning powers returned to the borough in Dec 2024; older Fish Island / Bromley-by-Bow records may sit in the LLDC archive rather than here."}
+      robots: "* Disallow: / (robots.txt 200)"
+    committee:
+      url: "https://democracy.towerhamlets.gov.uk/mgListCommittees.aspx?bcr=1"
+      system: moderngov
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Title 'Tower Hamlets Council - Committee structure'."}
+    licensing:
+      url: "https://www.towerhamlets.gov.uk/lgnl/housing/Private-tenants-landlords-and-homeowners/Property-licensing/Licences/Property-Licensing-Scheme.aspx"
+      schemes_active: [mandatory, additional, selective]
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Additional licensing is BOROUGH-WIDE (designated 25 Oct 2023, enforced 1 Apr 2024, runs to 31 Mar 2029) and covers 2+ households / 3+ tenants. TIME-CRITICAL: the selective scheme (Whitechapel, Spitalfields & Banglatown, Weavers) runs 1 Oct 2021 - 30 Sept 2026, i.e. it lapses within weeks of this catalogue's date and no renewal had been announced - re-verify. Since Apr 2024 additional licensing already swallows the 3-4 person HMOs that used to need a selective licence. The council warns licence applications are taking up to 12 months."}
+    licensed_register:
+      url: "https://www.towerhamlets.gov.uk/Documents/Housing/PublicRegister.xlsx"
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "NO SEARCHABLE ONLINE REGISTER - three separate spreadsheet downloads, one per scheme, with the month in the file name: mandatory = PublicRegister.xlsx (tested 200, 49 KB); additional = Additional-licence-public-register-August-2026.xls (tested 200, 696 KB); selective = Selective-licence-public-register-August-2026.xls (linked from the selective page, not tested). File names roll over monthly - verify before use."}
+    council_tax:
+      url: "https://www.towerhamlets.gov.uk/lgnl/council_and_democracy/council_tax/Your_Council_Tax.aspx"
+      tested: {date: "2026-09-03", http: 200, ok: true}
+    notes: "TIME-CRITICAL: the selective scheme (Whitechapel, Spitalfields & Banglatown, Weavers) ran to 30 September 2026 with no renewal announced at the time of testing - re-verify. Borough-wide additional licensing runs to 31 March 2029 and already covers 3-4 person shares. No searchable register: three separate spreadsheets whose filenames carry the month. Applications reportedly take up to 12 months, so 'pending' is common. LLDC records transferred in Dec 2024."
+
+  - name: "Waltham Forest"
+    gss_code: "E09000031"
+    planning_search:
+      url: "https://walthamforest.objective.co.uk/portal/pa/"
+      system: other
+      tested: {date: "2026-09-03", http: 0, ok: false, note: "COULD NOT BE VERIFIED FROM THIS MACHINE. Objective/Trapeze planning portal behind Cloudflare (162.159.137.54). Every HTTPS attempt failed the TLS handshake ('sslv3 alert handshake failure') from macOS system curl (LibreSSL 3.3.6) AND from python3 - the server rejects this client's TLS profile; plain HTTP returned 409. URL taken from the council's own 'Find an application' page. planning.walthamforest.gov.uk resolves (CNAME builtenvironment.walthamforest.gov.uk) but did not complete a connection either. A modern OpenSSL-linked client or a real browser is needed."}
+      robots: "unknown - TLS handshake fails from this machine"
+    committee:
+      url: "https://democracy.walthamforest.gov.uk/mgListCommittees.aspx?bcr=1"
+      system: moderngov
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Title '(*) Meetings, agendas and minutes'. Reachable even though the Waltham Forest planning portal is not."}
+    licensing:
+      url: "https://www.walthamforest.gov.uk/housing/private-sector-housing/private-rented-property-licensing-prpl/property-licensing-schemes"
+      schemes_active: [mandatory, additional, selective]
+      tested: {date: "2026-09-03", http: 202, ok: false, note: "PRACTICALLY THE WHOLE BOROUGH IS LICENSED: selective (single family or two sharers) in force 1 May 2025 - 30 Apr 2030 covering 20 of 22 wards (excluding Hatch Lane/Highams Park and Endlebury); additional (2-3 persons in 2+ households) borough-wide 1 Apr 2025 - 31 Mar 2030. THE WHOLE www.walthamforest.gov.uk HOST IS BEHIND AN AWS WAF CHALLENGE: every plain HTTP client gets HTTP 202 with an empty body and an awswaf challenge page ('we need to verify that you're not a robot'). Content above was confirmed with a JS-capable fetch. The council's PDF register also returns 202."}
+    licensed_register:
+      url: "https://propertylicensing.walthamforest.gov.uk/public-register"
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Metastreet postcode search on a SEPARATE subdomain that is NOT behind the WAF - use this instead of anything on www.walthamforest.gov.uk."}
+    council_tax:
+      url: "https://www.walthamforest.gov.uk/council-tax"
+      tested: {date: "2026-09-03", http: 202, ok: false}
+    notes: "Two separate blocks: the PLANNING portal fails the TLS handshake from macOS system curl entirely (unverified), and the whole www.walthamforest.gov.uk host is behind an AWS WAF returning empty 202s. The committee site and the propertylicensing subdomain are clean - use those. Licensing covers practically the whole borough (selective in 20 of 22 wards plus borough-wide additional), so an unlicensed flat here is a strong flag."
+
+  - name: "Wandsworth"
+    gss_code: "E09000032"
+    planning_search:
+      url: "https://planning.wandsworth.gov.uk/Northgate/PlanningExplorer/ApplicationSearch.aspx"
+      system: northgate
+      tested: {date: "2026-09-03", http: 0, ok: false, note: "COULD NOT BE VERIFIED FROM THIS NETWORK. Host resolves (152.114.60.98, same hosting range as Hounslow) but every connection on ports 443 and 80 timed out after 12 s. URL pattern confirmed from the council's own 'Search planning applications' page. Northgate Planning Explorer; covers applications from 2000 onward, with a separate pre-2000 'Planning Archive'."}
+      robots: "unknown - host unreachable from this network"
+    committee:
+      url: "https://democracy.wandsworth.gov.uk/mgListCommittees.aspx?bcr=1"
+      system: moderngov
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Title 'Committee structure - Wandsworth Borough Council'. Reachable even though the Wandsworth planning portal host is not."}
+    licensing:
+      url: "https://www.wandsworth.gov.uk/housing/private-housing/private-rented-property-licences/property-licence-check/"
+      schemes_active: [mandatory, additional, selective]
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Selective and additional both introduced 1 July 2025. Selective designation 1 (from Jul 2025): Furzedown, Tooting Bec, Tooting Broadway, South Balham. Selective designation 2 (from April 2026): East Putney, West Putney, Northcote. Additional applies to HMOs not covered by mandatory. Fees quoted: selective GBP 850, additional HMO GBP 1,450. The parent hub page is link-only - this 'property-licence-check' page is the one that states all three schemes."}
+    licensed_register:
+      url: "https://rspandlp.merton.gov.uk/registers/"
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Same shared Merton-hosted Regulatory Services Hub as Richmond: free view gives licence number, address and dates; licence-holder names cost GBP 50 via privatehousing@merton.gov.uk. Wandsworth's own HMO register page (.../houses-in-multiple-occupation-hmos/hmo-register/) also tested 200."}
+    council_tax:
+      url: "https://www.wandsworth.gov.uk/council-tax/"
+      tested: {date: "2026-09-03", http: 200, ok: true}
+    notes: "PLANNING PORTAL UNREACHABLE from this network (host resolves, all connections time out) - URL recorded untested from the council's own page. Everything else works. Selective now covers 7 wards across two designations (Tooting/Balham from Jul 2025, Putney/Northcote from Apr 2026). The register is the shared Merton hub; licence-holder names cost GBP 50."
+
+  - name: "Westminster"
+    gss_code: "E09000033"
+    planning_search:
+      url: "https://idoxpa.westminster.gov.uk/online-applications/"
+      system: idox
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Idox Public Access, title 'Simple Search'."}
+      robots: "* Disallow: / (robots.txt 200)"
+    committee:
+      url: "https://committees.westminster.gov.uk/mgListCommittees.aspx?bcr=1"
+      system: moderngov
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Title 'Committee structure | Westminster City Council'."}
+    licensing:
+      url: "https://www.westminster.gov.uk/housing/private-sector-housing"
+      schemes_active: [mandatory, additional, selective]
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Selective licensing covers 15 of the city's 18 wards from 24 November 2025 and applies to all privately rented properties except HMOs already covered by mandatory/additional. The renewed BOROUGH-WIDE additional HMO scheme was designated 21 Apr 2026 and took effect 31 August 2026 (running to 30 Aug 2031) - i.e. days before this catalogue's date; existing licences remain valid to their own expiry. No single landing page states everything: evidence comes from the hub plus the Selective Property Licensing page and the additional-licensing renewal page (all tested 200)."}
+    licensed_register:
+      url: "https://westminster.metastreet.co.uk/public-register"
+      tested: {date: "2026-09-03", http: 200, ok: true, note: "Metastreet, postcode search only, no login (the council-hosted register page .../public-hmo-register also tested 200). Caveat from the council: 'The register is updated as we issue licences and therefore applications that are currently being processed will not appear' - a pending licence looks like no licence. The Metastreet page renders a cosmetic 'Access denied. Not found.' string above the search box; the search itself works."}
+    council_tax:
+      url: "https://www.westminster.gov.uk/council-tax"
+      tested: {date: "2026-09-03", http: 200, ok: true}
+    notes: "Selective licensing covers 15 of 18 wards from 24 November 2025, and the renewed borough-wide additional HMO scheme took effect 31 August 2026 - days before this catalogue - so pre-September-2026 guidance is stale. Idox planning and the committee site both work. Register caveat: pending applications do not appear, so a licence in progress looks like no licence."
