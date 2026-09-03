@@ -9,11 +9,25 @@ Verified against vendor documentation on 2026-09-03; product features change, so
 |---|---|---|
 | Claude Code | `/plugin marketplace add jacky18008/pea-princess` then `/plugin install vet-flat@pea-princess` | Local shell; full mode |
 | Codex (CLI, IDE, app, cloud) | `npx skills add jacky18008/pea-princess -a codex` or in-session `$skill-installer install https://github.com/jacky18008/pea-princess` | **Sandbox network is off by default.** Enable with `codex -c 'sandbox_workspace_write.network_access=true'` or set it in `~/.codex/config.toml`; otherwise use manual mode |
-| Gemini CLI | `gemini skills install https://github.com/jacky18008/pea-princess` | Activation asks for consent once |
+| Gemini CLI | `gemini skills install https://github.com/jacky18008/pea-princess` | Needs a Gemini API key (or Code Assist Standard/Enterprise): consumer Google AI Pro/Ultra sign-in stopped on 2026-06-18; Antigravity CLI is Google's first-party route for those plans |
 | Grok CLI | `npx skills add jacky18008/pea-princess -a grok` (also reads Claude Code marketplaces) | |
 | Cursor · GitHub Copilot · OpenCode · Cline · Goose · OpenHands · Kimi Code · Qwen Code · pi · OpenClaw · Hermes Agent | `npx skills add jacky18008/pea-princess -a <agent>` (or omit `-a` to auto-detect) | All read the `.agents/skills/` convention or their own folder |
-| Hermes Agent (alt) | `hermes skills install jacky18008/pea-princess` | |
+| Hermes Agent (alt) | `hermes skills install jacky18008/pea-princess` | Use an API key or a local model; do not sign in with a Claude subscription (see A2) |
 | OpenClaw (alt) | `openclaw skills install git:jacky18008/pea-princess` | |
+
+## A2. Which harness for the plan you already pay for (verified 2026-09-03)
+
+The skill does not care which harness runs it. What decides your experience is whether your subscription is allowed inside that harness:
+
+| You pay for | Use, with no extra cost | Also allowed | Not permitted / avoid |
+|---|---|---|---|
+| Claude Pro / Max | Claude Code, Claude Cowork | Cline, Goose (ACP) and OpenClaw, because they launch your own unmodified `claude` | pi and Hermes Agent signing in with your Claude account (they reuse Claude Code's login identity; Anthropic's policy forbids it). Use an API key or a local model there |
+| ChatGPT (Free, Go, Plus, Pro, Business) | Codex (CLI, app, IDE), ChatGPT | OpenCode, Goose, Cline, OpenClaw via "Sign in with ChatGPT" (OpenAI documents this) | — |
+| Google AI Pro / Ultra | Antigravity CLI (Google's own) | Gemini CLI with an API key | Any third-party harness on a Google consumer login (Google names and bans this) |
+| SuperGrok / X Premium+ | Grok Build CLI | OpenCode (documented by xAI) | — |
+| Nothing (or maximum privacy) | Ollama / LM Studio / llama.cpp with pi, OpenClaw, Hermes, OpenCode, Goose, Cline | any API key on pay-as-you-go | — |
+
+On a £20-a-month plan set `budget_mode: lite` in `profile.yaml` (see `skills/vet-flat/references/budget-modes.md`): a single flat takes fewer than ten fetches and still gets the hard filters, the verdict and the two killer questions.
 
 ## B. Chat products with a Skills feature (upload the zip from Releases)
 
