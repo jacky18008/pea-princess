@@ -1,0 +1,138 @@
+{
+ "status": "sucess",
+ "results": [
+  {
+   "cname": "DW LONDON ESTATES LTD",
+   "address": "6 Leigh Street WC1H9EW",
+   "phone": "0000000000",
+   "email": "redacted@example.invalid",
+   "status": "Active",
+   "number": "CMP015515",
+   "branchStatus": 0,
+   "branch": null,
+   "fdDisplayAddress": 1
+  },
+  {
+   "cname": "Select.London Ltd",
+   "address": "288 High Street North E126SA",
+   "phone": "0000000000",
+   "email": "redacted@example.invalid",
+   "status": "Active",
+   "number": "CMP010644",
+   "branchStatus": 0,
+   "branch": null,
+   "fdDisplayAddress": 1
+  },
+  {
+   "cname": "Home London Ltd",
+   "address": "263 eversholt street ,  NW11NB",
+   "phone": "0000000000",
+   "email": "redacted@example.invalid",
+   "status": "Active",
+   "number": "CMP009074",
+   "branchStatus": 0,
+   "branch": null,
+   "fdDisplayAddress": 1
+  },
+  {
+   "cname": "P M S E London Ltd",
+   "address": "Unit 26Sarum Complex,  UB82RZ",
+   "phone": "0000000000",
+   "email": "redacted@example.invalid",
+   "status": "Active",
+   "number": "CMP015463",
+   "branchStatus": 0,
+   "branch": null,
+   "fdDisplayAddress": 1
+  },
+  {
+   "cname": "East London Developments Ltd",
+   "address": "Suite 2 223,Ilford Lane,  IG12RZ",
+   "phone": "0000000000",
+   "email": "redacted@example.invalid",
+   "status": "Active",
+   "number": "CMP010510",
+   "branchStatus": 0,
+   "branch": null,
+   "fdDisplayAddress": 1
+  },
+  {
+   "cname": "Propertywise London Ltd",
+   "address": "10-16 Tiller Road E148PX",
+   "phone": "0000000000",
+   "email": "redacted@example.invalid",
+   "status": "Active",
+   "number": "CMP010555",
+   "branchStatus": 0,
+   "branch": null,
+   "fdDisplayAddress": 1
+  },
+  {
+   "cname": "RentLondonFlat.com LTD",
+   "address": "RentLondonFlat.com, Unit 13, Freeland ParkWareham Road,  BH166FA",
+   "phone": "0000000000",
+   "email": "redacted@example.invalid",
+   "status": "Active",
+   "number": "CMP013533",
+   "branchStatus": 0,
+   "branch": null,
+   "fdDisplayAddress": 1
+  },
+  {
+   "cname": "Ihome London Limited",
+   "address": "Flat 1786 Cheshire Street,  E26FE",
+   "phone": "0000000000",
+   "email": "redacted@example.invalid",
+   "status": "Active",
+   "number": "CMP015435",
+   "branchStatus": 0,
+   "branch": null,
+   "fdDisplayAddress": 1
+  },
+  {
+   "cname": "London Relocation Consultancy LIMITED",
+   "address": "71-75 Shelton Street, Covent Garden WC2H9JQ",
+   "phone": "0000000000",
+   "email": "redacted@example.invalid",
+   "status": "Active",
+   "number": "CMP006348",
+   "branchStatus": 0,
+   "branch": null,
+   "fdDisplayAddress": 0
+  },
+  {
+   "cname": "PM London Group LTD. T/As. - Thinq Homes",
+   "address": "Office One130 Plashet Road,  E130QS",
+   "phone": "0000000000",
+   "email": "redacted@example.invalid",
+   "status": "Active",
+   "number": "CMP010247",
+   "branchStatus": 0,
+   "branch": null,
+   "fdDisplayAddress": 1
+  },
+  {
+   "cname": "Magic Rooms London LTD. T/As. - MYROOMS",
+   "address": "13 St. Swithin's Lane, 2nd Floor, London, United Kingdom EC4N8AL",
+   "phone": "0000000000",
+   "email": "redacted@example.invalid",
+   "status": "Active",
+   "number": "CMP014422",
+   "branchStatus": 0,
+   "branch": null,
+   "fdDisplayAddress": 1
+  },
+  {
+   "cname": "GLOBE HOMES SHARE LONDON LTD",
+   "address": "85 Great Portland Street, 1st Floor, W1W7LT",
+   "phone": "0000000000",
+   "email": "redacted@example.invalid",
+   "status": "Active",
+   "number": "CMP013453",
+   "branchStatus": 0,
+   "branch": null,
+   "fdDisplayAddress": 1
+  }
+ ],
+ "total": 11
+}

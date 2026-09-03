@@ -1,0 +1,31 @@
+{ "head": {
+    "vars": [ "date" , "amount" , "paon" , "saon" , "street" , "town" , "ptype" , "newbuild" , "estate" , "category" ]
+  } ,
+  "results": {
+    "bindings": [
+      { 
+        "date": { "type": "literal" , "datatype": "http://www.w3.org/2001/XMLSchema#date" , "value": "2018-05-08" } ,
+        "amount": { "type": "literal" , "datatype": "http://www.w3.org/2001/XMLSchema#integer" , "value": "1335000" } ,
+        "paon": { "type": "literal" , "value": "8" } ,
+        "street": { "type": "literal" , "value": "LONDON BRIDGE STREET" } ,
+        "town": { "type": "literal" , "value": "LONDON" } ,
+        "ptype": { "type": "uri" , "value": "http://landregistry.data.gov.uk/def/common/otherPropertyType" } ,
+        "newbuild": { "type": "literal" , "datatype": "http://www.w3.org/2001/XMLSchema#boolean" , "value": "false" } ,
+        "estate": { "type": "uri" , "value": "http://landregistry.data.gov.uk/def/common/leasehold" } ,
+        "category": { "type": "uri" , "value": "http://landregistry.data.gov.uk/def/ppi/additionalPricePaidTransaction" }
+      } ,
+      { 
+        "date": { "type": "literal" , "datatype": "http://www.w3.org/2001/XMLSchema#date" , "value": "2023-03-24" } ,
+        "amount": { "type": "literal" , "datatype": "http://www.w3.org/2001/XMLSchema#integer" , "value": "3461527" } ,
+        "paon": { "type": "literal" , "value": "THE SHARD" } ,
+        "saon": { "type": "literal" , "value": "LEVEL 11" } ,
+        "street": { "type": "literal" , "value": "LONDON BRIDGE STREET" } ,
+        "town": { "type": "literal" , "value": "LONDON" } ,
+        "ptype": { "type": "uri" , "value": "http://landregistry.data.gov.uk/def/common/otherPropertyType" } ,
+        "newbuild": { "type": "literal" , "datatype": "http://www.w3.org/2001/XMLSchema#boolean" , "value": "false" } ,
+        "estate": { "type": "uri" , "value": "http://landregistry.data.gov.uk/def/common/leasehold" } ,
+        "category": { "type": "uri" , "value": "http://landregistry.data.gov.uk/def/ppi/additionalPricePaidTransaction" }
+      }
+    ]
+  }
+}

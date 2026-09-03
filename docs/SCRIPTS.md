@@ -153,3 +153,201 @@ $ commute.py redundancy --lat 51.504963 --lng -0.087625
   "reason": "Both families are within an 800 m walk ... so a strike on one leaves the other standing.",
   "explanation": "Two lines of the same family do not count as redundancy; they tend to strike together ..." }
 ```
+
+## `company.py` — Companies House (official, free, no key, no robots.txt)
+
+```
+company.py search         --name "Get Living" [--limit 40]
+company.py profile        08854998 [--skip-filings] [--api]
+company.py filings        08854998 [--limit 40] [--page 1]
+company.py address-search --query "SE1 9SG" [--limit 100] [--pages 1]
+company.py heat-supplier  --name "Loka Energy"
+```
+
+Reads the public HTML site
+`find-and-update.company-information.service.gov.uk`. That host serves **no
+robots.txt at all** (404), so nothing is disallowed; the 1.2 s per-host spacing
+still applies. The REST API is optional: put `COMPANIES_HOUSE_KEY=<key>` in a
+plain `.env` next to the scripts (KEY=VALUE lines, parsed by hand — no package)
+or in the environment, then `profile --api` adds the JSON record. Without a key
+the API path returns `access: manual` instead of failing.
+
+`search` uses **`/advanced-search/get-results?companyNameIncludes=`**, not
+`/search/companies`, because the plain search page carries no company status —
+a dissolved shell looks exactly like a trading company there. Every row comes
+back with `status`, `dissolved`, `dissolved_on`, `company_type`, `sic_codes` and
+the registered office, plus `dissolved_count` and a `same_name_warning`: match
+on the company **number** printed on the tenancy agreement, never on the name.
+Overseas entities say `registration_event: "Registered"` rather than
+`"Incorporated"`; the date lands in the same field.
+
+`profile` makes four requests (overview, `/charges`, `/officers`,
+`/filing-history`; `--skip-filings` drops to three) and returns status,
+incorporation and dissolution dates, company type, SIC codes, registered office,
+previous names, accounts (last made up to / next due / `overdue`), confirmation
+statement dates, `charges_count` (total, outstanding, satisfied, part
+satisfied), `officers` (name, role, appointed, resigned, `active_officer_count`)
+and `insolvency_flag`. Officer records carry **names, roles and dates only** —
+dates of birth, nationality and country of residence are on the page and are
+deliberately not extracted.
+
+`landlord_type_hint` is an **inference (class I)** from the SIC code:
+`68209` → `owner_or_investor` (letting and operating of own or leased real
+estate — likely owns the property), `68310` → `agent_not_owner` (real estate
+agency), `68320` → `managing_agent` (management on a fee basis), `68100` →
+`buying_selling`, anything else → `other`. Owner beats agent when both are
+present. Every hint repeats the note: *brand != landlord; the legal entity named
+on the tenancy agreement is what matters.*
+
+`filings` flags the three filing types that show a change of hands:
+`registered_office_changes` (AD01), `name_changes` (CERTNM) and
+`accounts_filings` with their made-up-to dates. The site paginates at ~25 rows;
+`pages_available` tells you what else is there and `--page` fetches it.
+
+`address-search` probes `/advanced-search/get-results?registeredOfficeAddress=`.
+The site's own count is a loose token match — "SE1 9SG" reported 3,259 results —
+so the script re-filters rows on the normalised address and reports both
+`total_reported_by_site` and `count`. Its purpose is to find the building's
+Resident Management Company or Right to Manage company; names matching RMC/RTM
+markers land in `rmc_rtm_candidates`. **Zero RMC/RTM entries at an address means
+residents may have no route to replace the managing agent** — an inference
+(class I), not a register fact: an RMC can be registered at its accountant's
+address, and an RTM company can be formed later. Confirm from the lease.
+
+`heat-supplier` is `search` + `profile` + the latest accounts PDF link, for
+checking who runs a communal heat network.
+
+```console
+$ company.py search --name "Get Living" --limit 3
+{ "source_url": ".../advanced-search/get-results?companyNameIncludes=Get+Living",
+  "http_status": 200, "ok": true, "evidence_class": "G",
+  "total_reported_by_site": 66, "count": 3, "dissolved_count": 1,
+  "results": [ { "company_number": "07883003", "name": "GET LIVING IT LTD",
+                 "status": "Dissolved", "incorporated": "15 December 2011",
+                 "dissolved_on": "20 April 2021", "sic_codes": ["62090", "86900"],
+                 "address": "Rosedale Wellbrookside, Peterchurch, Hereford ... HR2 0SP" },
+               { "company_number": "15778219", "name": "GET LIVING (BIRMINGHAM) D LIMITED",
+                 "status": "Active", "incorporated": "14 June 2024",
+                 "sic_codes": ["68209"], "address": "1 East Park Walk, London, England E20 1JL" }, ... ],
+  "same_name_warning": "Several companies can share almost the same name, and a dissolved shell
+                        keeps its name on the register forever. Match on the company NUMBER ..." }
+```
+
+## `redress.py` — compliance registers (CMP, Heat Trust, GLA rogue checker)
+
+```
+redress.py cmp        --agent "Home-Made"
+redress.py heat-trust --site "Greenwich Peninsula"
+redress.py heat-trust --supplier "Loka"
+redress.py rogue      --name "Smith" [--address "Ilford"]
+redress.py prs
+redress.py tpo
+```
+
+**`cmp`** — Client Money Protect. The `/agent-search/` page is a shell, but the
+search is server-side: the form posts
+`action=member_search_third_party&keyword=<text>&auto=0` to
+`/wp-admin/admin-ajax.php` and gets JSON back, and that exact path is the one
+line `robots.txt` explicitly **allows** inside an otherwise disallowed
+`/wp-admin/`. Matches carry name, membership number (`CMP015515`), address and
+membership status. `valid_until` is always `null` — the API returns a status,
+not an expiry date; ask the agent for the certificate. The API also returns each
+member's email and phone; the script drops both. A miss returns
+`evidence_class: "U"` and lists the five other approved schemes (Propertymark,
+Money Shield, RICS, Safeagent, UKALA) — CMP is one of six, so absence here is
+not proof an agent is uninsured.
+
+**`heat-trust`** — plain HTML at `heattrust.org/our-members`, evidence class
+`C` (a voluntary industry scheme's own register, not a government one). Returns
+`total_members`, `total_sites`, `consumers_protected` and the page's `as_at`
+date, and matches against both the participant list and the site list. London
+sites are listed as `<li>` items under an underlined borough heading; everywhere
+else they are `<br>`-separated text under a local-authority heading — the parser
+handles both, and the parsed counts are asserted against the page's own
+headline numbers. Registration is voluntary and a supplier may register some
+networks and not others, so a miss says nothing about whether the building has a
+heat network.
+
+**`rogue`** — the GLA Rogue Landlord and Agent Checker, a server-rendered Drupal
+exposed form: `?name=` and `?address=` filter the result cards with no
+JavaScript. Each card yields name, enforcement action type, enforcement
+authority (borough), rental property address, offence, offence description,
+fine, enforcement date and record expiry. Hits are evidence class **G**; a miss
+is **U** and says so in words: *no entry found for query X in the checker (which
+lists only enforcement actions boroughs chose to publish)*.
+
+**`prs` / `tpo`** — `access: manual`, no fetch, with the URL and the questions
+to put to the agent. The Property Redress Scheme's public feed ignores every
+filter parameter and returns the same ten recent members whatever you ask, so it
+cannot answer a membership question; `tpos.co.uk/robots.txt` carries an explicit
+`User-agent: ClaudeBot / Disallow: /`.
+
+```console
+$ redress.py rogue --name "Reptons"
+{ "source_url": ".../rogue-landlord-and-agent-checker?name=Reptons",
+  "http_status": 200, "ok": true, "evidence_class": "G", "count": 1,
+  "results": [ { "name": "Reptons Global Property LTD (07523446)",
+                 "enforcement_action_type": "Civil Penalty (Housing and Planning Act 2016)",
+                 "enforcement_authority": "Redbridge",
+                 "address": "United Kingdom: IG1 3BW - FLAT 1, 80, WESTBURY ROAD null, ILFORD",
+                 "offence": "Duty of manager to maintain living accommodation ... SI_REGULATION 8 p.1",
+                 "fine": "5000", "enforcement_date": "Wednesday 11 April 2029",
+                 "record_expires": "Thursday 11 April 2030" } ],
+  "caveat": "The checker holds only what London boroughs sent the GLA ... Absence is not a clean record." }
+```
+
+## `landregistry.py` — HM Land Registry open data (official, keyless SPARQL)
+
+```
+landregistry.py price-paid --postcode "SE1 2BE" [--since 2015] [--paon "ST. SAVIOURS WHARF"]
+                           [--limit 500] [--method post|get]
+landregistry.py title --help-only
+```
+
+`price-paid` queries the public SPARQL endpoint
+`https://landregistry.data.gov.uk/landregistry/query` with
+`Accept: application/sparql-results+json`. No key, no login, no fee. Both forms
+work — POST with a `query=` form field (the default, because long queries
+overflow a URL) and GET with `?query=`; `--method get` switches. The exact
+SPARQL is in the script's docstring and is echoed back in the output's `sparql`
+field. Postcodes must be upper case and spaced as the register holds them; the
+script normalises `se12be` to `SE1 2BE` for you.
+
+Each transaction is `{date, price, paon, saon, street, town, property_type,
+new_build, estate_type, category}`, sorted by date. On top: `count`,
+`earliest_transaction`, `latest_transaction`, `new_build_count` and
+`earliest_new_build_transaction`. **A `new_build: true` row is the Land Registry
+recording the first sale of a newly built dwelling, so the earliest one in a
+postcode is a hard lower bound on the completion year** — independent of the
+brochure. The reverse does not hold: build-to-rent blocks that were never sold
+flat by flat, and flats sold under a different postcode, leave no new-build row
+at all. `--paon` adds `same_building_matches` and a price range for one building
+or one flat number.
+
+`title --help-only` fetches nothing. The title register is the only source that
+names the registered proprietor and the lease terms, and it stacks three
+barriers: a Cloudflare interactive challenge on
+`search-property-information.service.gov.uk` (its robots.txt is challenged too),
+a GOV.UK One Login sign-in, and **£7 per title register / £11 per filed
+document**. The command prints the route and the fields to paste back:
+proprietor name(s), title number, tenure, date of registration, lease term and
+start date, and any restrictions or charges.
+
+```console
+$ landregistry.py price-paid --postcode "SE1 2BE" --paon "ST. SAVIOURS WHARF"
+{ "query": {"postcode": "SE1 2BE", "paon": "ST. SAVIOURS WHARF"},
+  "source_url": "https://landregistry.data.gov.uk/landregistry/query",
+  "http_method": "POST", "http_status": 200, "ok": true, "evidence_class": "G",
+  "count": 101, "new_build_count": 3, "earliest_new_build_year": 1998,
+  "earliest_transaction": { "date": "1995-02-17", "price": 175000,
+                            "paon": "ST. SAVIOURS WHARF", "saon": "FLAT 38",
+                            "street": "MILL STREET", "town": "LONDON",
+                            "property_type": "flat-maisonette", "new_build": false,
+                            "estate_type": "leasehold",
+                            "category": "standardPricePaidTransaction" },
+  "earliest_new_build_transaction": { "date": "1998-02-26", "price": 325000,
+                                      "saon": "FLAT 46", "new_build": true, ... },
+  "same_building_matches": {"count": 101, ...},
+  "same_building_price_range": {"min": 101000, "max": 2000000,
+                                "first_date": "1995-02-17", "last_date": "2026-05-26"} }
+```
