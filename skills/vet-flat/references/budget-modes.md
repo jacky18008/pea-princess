@@ -25,3 +25,11 @@ The prompt pack (`INSTRUCTIONS.md` + references) plus `viewer.html` is the lite 
 
 ## Measuring it
 `bench/run.py` records wall time and tokens when the CLI reports them; run the same case in `lite` and `standard` and keep the numbers in `bench/results/`. Target for `lite` on a single flat: under ten tool calls and one report.
+
+## How much a £20 plan actually buys (checked 2026-09-03; these change often)
+- **ChatGPT Plus → Codex** is the only £20 plan that publishes numbers: 10–100 messages per 5-hour window on the largest model, 250–2,000 on the smallest, plus a credit rate card. A `lite` run is one message, so tens of flats per window on the large model and hundreds on the small one; an undisclosed weekly cap sits behind that.
+- **Claude Pro → Claude Code / Cowork** publishes no number ("at least 5× free"); one pool is shared with chat; the default model is the mid-size one and the largest is credits-only. Use `lite`, and split sweeps into ≤ 600 m runs.
+- **Google AI Pro → Antigravity** publishes no number ("generous, refreshed every five hours until the weekly limit"). Gemini CLI needs an API key.
+- **xAI** has no £20 tier; SuperGrok shows usage as a percentage of an unpublished allowance.
+- **Pay-as-you-go is cheap per flat**: at list API prices a `lite` run costs a few pence and a sweep well under £1 on any vendor's mid-size model. If a plan's windows get in the way, an API key on a cheap model is the predictable route for batch sweeps.
+
