@@ -321,7 +321,7 @@ def route_analysis(route_pts, months, corridor_m, box_total, verbose=False):
 
 
 def box(lat, lng, half_m=150.0, months=6, end=None, route=None, corridor_m=30.0,
-        verbose=False):
+        verbose=False, sensitivity=True):
     end_month = end
     latest_rec = None
     if not end_month:
@@ -345,6 +345,8 @@ def box(lat, lng, half_m=150.0, months=6, end=None, route=None, corridor_m=30.0,
                  ("east_20m", lat, lng + dlng),
                  ("west_20m", lat, lng - dlng)]
 
+    if not sensitivity:
+        positions = positions[:1]  # lite mode: centre box only (6 calls instead of 30)
     sets, sensitivity = {}, {}
     for name, plat, plng in positions:
         b = bbox(plat, plng, half_m)
@@ -376,6 +378,7 @@ def box(lat, lng, half_m=150.0, months=6, end=None, route=None, corridor_m=30.0,
     out.update(a)
     out["months_counted"] = len(centre["months_fetched"])
     out["sensitivity"] = {
+        "skipped": len(positions) == 1,
         "counts": sensitivity,
         "shift_m": SHIFT_M,
         "spread": (max(vals) - min(vals)) if len(vals) > 1 else None,
@@ -423,13 +426,15 @@ def main():
     p.add_argument("--route", help='"lat,lng;lat,lng;..." — the station-to-door walk')
     p.add_argument("--corridor-m", type=float, default=30.0, dest="corridor_m",
                    help="how far from the route line an incident still counts (default 30 m)")
+    p.add_argument("--no-sensitivity", action="store_true", dest="no_sensitivity",
+                   help="skip the four ±20 m shifted boxes (lite budget mode; 6 calls instead of 30)")
 
     a = ap.parse_args()
     try:
         if a.cmd == "latest":
             out = latest(verbose=a.verbose)
         else:
-            out = box(a.lat, a.lng, a.half_m, a.months, a.end, a.route, a.corridor_m,
+            out = box(a.lat, a.lng, a.half_m, a.months, a.end, a.route, a.corridor_m, sensitivity=not a.no_sensitivity,
                       verbose=a.verbose)
     except ValueError as exc:
         print("usage error: %s" % exc, file=sys.stderr)
