@@ -1,0 +1,1189 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/jacky18008/pea-princess/blob/main/skills/vet-flat/references/report-schema.json",
+  "title": "vet-flat report",
+  "description": "Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen - https://github.com/jacky18008/pea-princess - CC BY 4.0. THIS FILE IS THE STANDARD, NOT THE HTML. Emit one JSON object that matches this schema and stop. Two renderers (scripts/render.py and viewer/viewer.html) turn it into the fixed page layout; never write the HTML yourself. PLAIN-LANGUAGE RULES FOR EVERY TEXT FIELD: (1) short sentences, one idea each; (2) no jargon and no abbreviation without a gloss in the same sentence - write 'EPC (the government energy certificate)' the first time; (3) every number is followed by what it means and what it is compared with - that is what the 'meaning' and 'compared_to' fields are for, and they are required; (4) show evidence as the plain label (official record / self-reported / third-party / inferred / unknown), never as a bare letter; (5) never mention ethnicity, nationality, race, religion or immigration status anywhere in this file, in any field, for any reason; (6) never invent a number - if you did not find it, leave the field null and add a not_found entry with the exact search string you used.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "generated_by",
+    "generated_at",
+    "language",
+    "profile_snapshot",
+    "candidates",
+    "not_found",
+    "blocked_sources",
+    "sources"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "description": "Write the version of THIS schema that you followed. Today that is \"1.0\". Do not write your own tool version here; that goes in generated_by.version.",
+      "pattern": "^[0-9]+\\.[0-9]+$"
+    },
+    "generated_by": {
+      "$ref": "#/definitions/generated_by",
+      "description": "Say who made this report and under what conditions, so a reader can judge how much of it is machine-checked. Fill in every field honestly, including a reduced mode."
+    },
+    "generated_at": {
+      "type": "string",
+      "description": "Write the moment you finished the report, in UTC, as 2026-09-03T14:05:00Z. Use the real clock; do not copy the date from an example.",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}(:[0-9]{2})?(Z|[+-][0-9]{2}:[0-9]{2})$"
+    },
+    "language": {
+      "type": "string",
+      "description": "Write the language you wrote the text fields in, as a BCP-47 tag: en, zh-TW, zh-CN, ja, ko, fr. Use the language the user wrote to you in. The renderers translate labels and headings; they do NOT translate your sentences, so write them in this language.",
+      "pattern": "^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8})*$"
+    },
+    "profile_snapshot": {
+      "$ref": "#/definitions/profile_snapshot",
+      "description": "Copy the hard filters you actually judged against, from the user's profile.yaml or from what the user told you. This is what makes the report auditable later: the reader must be able to see the ruler you used. If a filter was assumed rather than given, say so in notes."
+    },
+    "candidates": {
+      "type": "array",
+      "minItems": 1,
+      "description": "One entry per flat you vetted. Keep the order you want the reader to see; the ranking in comparison.ranking is separate.",
+      "items": {
+        "$ref": "#/definitions/candidate"
+      }
+    },
+    "comparison": {
+      "$ref": "#/definitions/comparison",
+      "description": "Fill this in ONLY when candidates has more than one entry. With a single candidate, leave the whole key out."
+    },
+    "not_found": {
+      "type": "array",
+      "description": "List everything you looked for and did not find, with the exact search strings you used. An empty list means you found everything, which is rare - if you searched for nothing, that is itself worth saying. A gap recorded here is honest; a gap hidden is a defect.",
+      "items": {
+        "$ref": "#/definitions/not_found_entry"
+      }
+    },
+    "blocked_sources": {
+      "type": "array",
+      "description": "List every source that refused you: robots.txt, a login wall, a paywall, a bot block, a sandbox with no network, a 403 or 429. This tells the reader which parts of the report a different runtime could improve.",
+      "items": {
+        "$ref": "#/definitions/blocked_source"
+      }
+    },
+    "sources": {
+      "type": "array",
+      "description": "List every source you actually used, once each, with the time you read it. Every id here can be referenced from an axis, a metric, a review or a finding. Do not list a source you did not open.",
+      "items": {
+        "$ref": "#/definitions/source"
+      }
+    },
+    "footer": {
+      "type": "string",
+      "description": "Leave this out. The renderers write the attribution line themselves from generated_by.version and generated_by.source_url. If you do write it, write exactly: Generated with vet-flat <version> — https://github.com/jacky18008/pea-princess (the dash is an em dash).",
+      "maxLength": 200
+    }
+  },
+  "definitions": {
+    "evidence_class": {
+      "type": "string",
+      "enum": [
+        "G",
+        "S",
+        "C",
+        "I",
+        "U"
+      ],
+      "description": "Grade the evidence behind this item with one letter. G = an official record (a government register, a company register, a police open data feed, a council decision notice). S = self-reported (the landlord, the agent, the listing, a marketing brochure). C = a third party (a resident review, a news report, a forum). I = your own inference from other evidence - say what from. U = unknown, you could not check it. The renderers show these to the reader as plain labels, never as letters. Two sources disagreeing is itself a finding: record the disagreement rather than picking the nicer number."
+    },
+    "source_ids": {
+      "type": "array",
+      "description": "List the ids of the sources that back this item, copied from the top-level sources list. Every number you state should be traceable to at least one id. Leave the array empty only when the item is your own inference, and then say so in the text.",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 64
+      }
+    },
+    "measure": {
+      "type": "object",
+      "description": "One number, plus the two things a reader needs to use it: what it means and what it is compared with. Never publish a bare number.",
+      "additionalProperties": false,
+      "required": [
+        "value",
+        "meaning",
+        "compared_to"
+      ],
+      "properties": {
+        "value": {
+          "type": [
+            "number",
+            "string",
+            "null"
+          ],
+          "description": "Write the value. Use a number where it is a number. Use null when you could not find it - never write 0, 'n/a' or a guess to fill the hole."
+        },
+        "unit": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Write the unit in words a reader knows: 'GBP per month', 'GBP per square foot', 'minutes', 'metres', 'crimes in 6 months', 'out of 5', 'percent'. Leave null for a label-like value such as a landlord type.",
+          "maxLength": 40
+        },
+        "meaning": {
+          "type": "string",
+          "description": "Say in one short sentence whether this number is good, bad or ordinary, and why it matters to someone living there. Example: 'This is the rent per square foot of real indoor space, so it shows what you pay for room rather than for the address.'",
+          "minLength": 1,
+          "maxLength": 240
+        },
+        "compared_to": {
+          "type": "string",
+          "description": "Say what you compared it with, with the comparison number in it. Example: 'The local band for similar flats is 3.80 to 4.40 per square foot.' If you have no benchmark, write 'No local benchmark found' - do not leave it vague.",
+          "minLength": 1,
+          "maxLength": 240
+        },
+        "evidence_class": {
+          "$ref": "#/definitions/evidence_class"
+        },
+        "sources": {
+          "$ref": "#/definitions/source_ids"
+        }
+      }
+    },
+    "generated_by": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tool",
+        "version",
+        "source_url",
+        "runtime",
+        "mode"
+      ],
+      "properties": {
+        "tool": {
+          "type": "string",
+          "description": "Write the skill name that produced this report. Write \"vet-flat\" unless you forked it, and then write your fork's name.",
+          "minLength": 1,
+          "maxLength": 60
+        },
+        "version": {
+          "type": "string",
+          "description": "Write the version from the skill's frontmatter, for example \"1.0.0-draft\". The renderers print it in the footer of every page.",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "source_url": {
+          "type": "string",
+          "description": "Write where the skill came from. For the original, write https://github.com/jacky18008/pea-princess. Keep the attribution even in a fork; add your own line if you want.",
+          "maxLength": 300
+        },
+        "runtime": {
+          "type": "string",
+          "description": "Write what you were running inside, in plain words: 'Claude Code on macOS', 'Codex CLI, sandbox with network off', 'a chat window with no tools'. This tells the reader why some axes are thin.",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "shell",
+            "fetch",
+            "manual"
+          ],
+          "description": "Write which of the three modes you were in. shell = you ran the scripts. fetch = you could open URLs but not run scripts. manual = you had neither and worked from what the user pasted."
+        },
+        "model_name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Write your own model name as free text, for example 'claude-opus-4', 'gpt-5-codex', 'gemini-2.5-pro', 'grok-4', 'qwen3-coder-30b (local)'. Any model may fill this in; it is not a Claude-only field. Write null if you do not know it.",
+          "maxLength": 80
+        }
+      }
+    },
+    "profile_snapshot": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "The hard filters used for this run. Extra keys are allowed and will be shown as rows.",
+      "properties": {
+        "min_floor_area_sqft": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "Write the smallest indoor floor area the user will accept, in square feet, measured the way the energy certificate measures it (balconies excluded)."
+        },
+        "max_building_age_years": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "Write the oldest building the user will accept, in years."
+        },
+        "all_in_pcm_ceiling": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "Write the highest total monthly cost the user will accept, in pounds: rent plus bills plus council tax."
+        },
+        "rent_pcm_target": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "Write the rent the user is aiming at, in pounds per month, before bills."
+        },
+        "move_in_earliest": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Write the earliest move-in date as 2026-09-15.",
+          "maxLength": 20
+        },
+        "move_in_latest": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Write the latest move-in date as 2026-10-15.",
+          "maxLength": 20
+        },
+        "commute_destination": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Write where the user has to get to most days, as an address or a station name. Never hard-code a campus or an office; take it from the profile.",
+          "maxLength": 160
+        },
+        "commute_max_min": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "Write the longest door-to-door journey the user will accept, in minutes."
+        },
+        "reject_ground_floor": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Write true if a ground-floor flat is an automatic no."
+        },
+        "must_haves": {
+          "type": "array",
+          "description": "List the things that are not negotiable, in plain words, for example 'washing machine inside the flat'.",
+          "items": {
+            "type": "string",
+            "maxLength": 120
+          }
+        },
+        "guarantor_route": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Write how the user plans to satisfy the landlord's income test, in plain words: a UK guarantor, rent guarantee insurance, paying more months up front, or none needed.",
+          "maxLength": 160
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Say here which of these filters the user gave you and which you assumed. An assumed filter that is never flagged is how a report quietly lies.",
+          "maxLength": 600
+        }
+      }
+    },
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "identity",
+        "verdict",
+        "hard_filters",
+        "axes",
+        "costs",
+        "landmines"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Write a short id you will reuse everywhere else in this file, for example \"c1\". Keep it stable; the comparison table joins on it.",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "identity": {
+          "$ref": "#/definitions/identity"
+        },
+        "verdict": {
+          "$ref": "#/definitions/verdict"
+        },
+        "metrics": {
+          "$ref": "#/definitions/metrics",
+          "description": "Fill this in whenever there is more than one candidate: it is what the side-by-side table is built from. With one candidate it is optional but still useful."
+        },
+        "hard_filters": {
+          "type": "array",
+          "description": "One row per hard filter from the profile: the user's requirement, what you actually observed, and whether it passes. Show a failed filter even when the flat is otherwise good, and show an unknown as unknown - an unknown is never a pass.",
+          "items": {
+            "$ref": "#/definitions/hard_filter"
+          }
+        },
+        "axes": {
+          "type": "array",
+          "minItems": 12,
+          "maxItems": 12,
+          "description": "Exactly 12 entries, ids 1 to 12, one per axis, in order, even when you found nothing. An axis you could not check is an entry with evidence_class U and a finding that says what you tried. Never drop an axis to make the report tidy.",
+          "items": {
+            "$ref": "#/definitions/axis"
+          }
+        },
+        "costs": {
+          "$ref": "#/definitions/costs"
+        },
+        "worst_reviews": {
+          "type": "array",
+          "description": "The lowest resident reviews you found, quoted, not summarised. Read the worst ones in full and put the sharpest sentence here. Move-out reviews carry the most weight. Leave the array empty if the building has no usable reviews, and say why in axis 6.",
+          "items": {
+            "$ref": "#/definitions/worst_review"
+          }
+        },
+        "landmines": {
+          "type": "array",
+          "description": "Every problem you found, filed under one of the twelve codes. One entry per real problem, not one per code. If you found none, use an empty array - but check again first.",
+          "items": {
+            "$ref": "#/definitions/landmine"
+          }
+        },
+        "killer_questions": {
+          "type": "array",
+          "maxItems": 2,
+          "description": "At most TWO questions for the agent or landlord. Pick the two whose answers would change your verdict; everything else is noise and will get you ignored. Ask for a written answer.",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 240
+          }
+        },
+        "viewing_day_checks": {
+          "type": "array",
+          "description": "Things only standing in the flat can settle: noise with the window open, the smell in the corridor, the lift log, phone signal, water pressure, where the sun actually falls, how the street reads after dark. Keep each one to an action the user can do in a minute.",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 240
+          }
+        },
+        "photos_vs_reality_notes": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Say what the listing photos are hiding or flattering: a wide lens, a shot taken from the one corner with sky, furniture at doll scale, a floor plan with no compass, a balcony counted as room. Write it as plain observation, not accusation.",
+          "maxLength": 600
+        },
+        "provenance_notes": {
+          "type": "array",
+          "description": "Note anything a reader needs to know about where the material came from, for example 'The energy certificate page was supplied by the user on 2026-09-03' or 'The agent quoted the service charge by phone; nothing in writing yet'. An official document supplied by the user keeps its official grade; what a person told you is self-reported.",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 240
+          }
+        }
+      }
+    },
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "display_name",
+        "postcode"
+      ],
+      "properties": {
+        "display_name": {
+          "type": "string",
+          "description": "Write the short name you will use for this flat all through the report, for example 'Flat 12, Harrowfield Court'. Keep it under about 60 characters so it fits a table column.",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "address": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Write the full postal address as the official register spells it, not as the listing spells it.",
+          "maxLength": 200
+        },
+        "postcode": {
+          "type": "string",
+          "description": "Write the UK postcode in upper case with the space, for example 'SE8 3GS'. A large building can span several postcodes, so use the one on the certificate for this flat.",
+          "minLength": 3,
+          "maxLength": 10
+        },
+        "flat": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Write the flat number exactly as the official register writes it. If the listing and the register disagree, that disagreement belongs in axis 1 and probably in landmine L10.",
+          "maxLength": 80
+        },
+        "floor": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Write the floor in plain words: 'ground', '2nd of 9', 'top'. If the flat number implies a floor the register does not confirm, say both.",
+          "maxLength": 80
+        },
+        "building": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Write the building or development name.",
+          "maxLength": 120
+        },
+        "listing_url": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Write the listing page address if the user gave you one. Do not go and fetch a portal page yourself; several portals forbid it.",
+          "maxLength": 500
+        }
+      }
+    },
+    "verdict": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "headline",
+        "reason_codes"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "PASS",
+            "EDGE",
+            "CONDITIONAL",
+            "KILL"
+          ],
+          "description": "Choose one. PASS = go and see it. EDGE = only worth it at a lower rent; then break_even_rent_pcm is required. CONDITIONAL = worth it only if named conditions are met in writing; then conditions is required. KILL = do not view; then fatal_axis is required. When in doubt between two, pick the harsher one and explain in the headline."
+        },
+        "headline": {
+          "type": "string",
+          "description": "One sentence, at most 140 characters, that a tired person can read on a phone and act on. Say the decision and the single reason for it. No jargon, no hedging, no lists.",
+          "minLength": 1,
+          "maxLength": 140
+        },
+        "reason_codes": {
+          "type": "array",
+          "description": "The landmine codes that drove this verdict, most important first. Use only codes you have actually evidenced in the landmines array. An empty array is correct for a clean PASS.",
+          "items": {
+            "$ref": "#/definitions/landmine_code"
+          }
+        },
+        "conditions": {
+          "type": "array",
+          "description": "Required when status is CONDITIONAL. Each condition must be checkable and in writing before signing, for example 'The agent confirms in writing that the heat network standing charge is under 200 pounds a year'. If you cannot make it checkable, it is not a condition, it is a hope.",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 240
+          }
+        },
+        "break_even_rent_pcm": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "Required when status is EDGE. Write the monthly rent, in pounds, at which this flat becomes worth taking given everything you found. Show your reasoning in axis 8."
+        },
+        "fatal_axis": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Required when status is KILL. Write the number, 1 to 12, of the axis that killed it. One axis, the decisive one.",
+          "minimum": 1,
+          "maximum": 12
+        }
+      }
+    },
+    "landmine_code": {
+      "type": "string",
+      "enum": [
+        "L1",
+        "L2",
+        "L3",
+        "L4",
+        "L5",
+        "L6",
+        "L7",
+        "L8",
+        "L9",
+        "L10",
+        "L11",
+        "L12"
+      ],
+      "description": "Pick the code that names the problem. L1 area illusion: the advertised size is bigger than the real indoor area, or a balcony or a gallery is counted as room. L2 obstruction and no sky: another building, a wall or a deep recess takes the sky away from the main windows. L3 crime nodes on the walk home: the trouble sits on the route between the station and the front door, so it cannot be walked around. L4 road or rail facade: the flat faces a main road, a railway or a tunnel mouth, and the noise comes with the address. L5 works in the tenancy window: an active building site next door, or a tall scheme still undecided whose decision lands while the user lives there. L6 heat network tariff and billing agent: heat bought from a building-wide system at a rate the tenant cannot switch away from, plus whoever bills it. L7 management outsourced with no way to replace it: the managing agent is failing and the residents have no legal route to sack them. L8 unusable reviews: reviews that were paid for or prompted, or arrived in a one-day burst, or are too old to mean anything - and a building with no reviews at all is unknown, not clean. L9 short-let or student churn neighbours: the flats around this one turn over weekly, so the corridor is a hotel corridor. L10 ground floor or misleading floor numbering: the flat number suggests a floor the official record does not confirm, or it is at street level. L11 no cooling or shared ventilation odours: it overheats in summer, or the mechanical ventilation carries cooking and smoke between flats. L12 landlord type and money gate: who actually owns it, and what they will demand - rent in advance beyond the legal limit, an oversized deposit, a guarantor requirement, or a newly formed company with no history."
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "The eight numbers the side-by-side table is built from. Use the same basis for every candidate or the table lies. Each one is a measure: value, unit, what it means, what it is compared with.",
+      "properties": {
+        "price_per_sqft_epc": {
+          "$ref": "#/definitions/measure",
+          "description": "Monthly rent divided by the indoor floor area on the energy certificate, in pounds per square foot. Never use the area from the listing or the floor plan; those are claims. Compare with the local band for similar flats."
+        },
+        "crime_6mo_count": {
+          "$ref": "#/definitions/measure",
+          "description": "The number of recorded crimes in a fixed six-month window inside a small box around the address, from the police open data. Use the same window and the same box size for every candidate. Never scale a short window up to six months. Say in meaning what kind of crime dominates."
+        },
+        "commute_min": {
+          "$ref": "#/definitions/measure",
+          "description": "Door-to-door minutes to the destination in the profile, at the arrival time in the profile, including the walk at both ends. Compare with the user's ceiling."
+        },
+        "commute_redundancy_grade": {
+          "$ref": "#/definitions/measure",
+          "description": "How well the journey survives one line failing, as a letter: A = two independent rail families within a ten-minute walk, B = one plus a usable bus, C = one line only, U = not checked. Put the letter in value and explain it in meaning."
+        },
+        "management_organic_score": {
+          "$ref": "#/definitions/measure",
+          "description": "The resident rating for management after you remove the reviews that were prompted or incentivised and any one-day bursts, out of 5. If there is nothing left to score, write null and say so - a zero denominator is not a clean building."
+        },
+        "management_incentivised_share": {
+          "$ref": "#/definitions/measure",
+          "description": "The share of reviews that were prompted or incentivised, as a percentage. A high share means the public average is not usable, which is landmine L8."
+        },
+        "nearest_works_m": {
+          "$ref": "#/definitions/measure",
+          "description": "Distance in metres to the nearest active building site or approved scheme, with what it is and when it runs in meaning. A site that finishes before the tenancy starts is a different animal from one that starts in month three; say which."
+        },
+        "landlord_type": {
+          "$ref": "#/definitions/measure",
+          "description": "Who you would actually be renting from, as a short label in value: 'build-to-rent operator', 'professional portfolio landlord', 'individual owner via agent', 'unknown'. Put what it means for repairs and deposits in meaning. Judge the entity and its record only - never the person, and never their background."
+        }
+      }
+    },
+    "hard_filter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "requirement",
+        "observed",
+        "pass"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name the filter in the user's words, for example 'Indoor floor area' or 'Total monthly cost'.",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "requirement": {
+          "type": "string",
+          "description": "Write what the user asked for, with the number in it: 'At least 490 square feet indoors'.",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "observed": {
+          "type": "string",
+          "description": "Write what you actually found, with the number and where it came from: '571 square feet on the energy certificate'. If you did not find it, write what you tried, not a dash.",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "pass": {
+          "enum": [
+            true,
+            false,
+            "unknown"
+          ],
+          "description": "Write true if the requirement is met, false if it is not, and the string \"unknown\" if you could not tell. Never write true for something you did not check."
+        },
+        "evidence_class": {
+          "$ref": "#/definitions/evidence_class"
+        },
+        "sources": {
+          "$ref": "#/definitions/source_ids"
+        }
+      }
+    },
+    "axis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "finding",
+        "evidence_class"
+      ],
+      "properties": {
+        "id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12,
+          "description": "The axis number, 1 to 12, used exactly once per candidate. 1 identity, 2 floor area, 3 age and fabric, 4 construction nearby, 5 crime, 6 management and neighbours, 7 agent and landlord compliance, 8 price, 9 aspect and light, 10 all-in cost, 11 commute and redundancy, 12 low-maintenance living."
+        },
+        "name": {
+          "type": "string",
+          "description": "Write the axis name in the report language. The renderers will replace it with the glossary name for the reader's language, so an English name here is fine.",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "finding": {
+          "type": "string",
+          "description": "What you found on this axis, at most 600 characters, in short sentences a twelve-year-old could follow. Lead with the thing that matters. Say where the fact came from in the sentence itself. If you found nothing, say exactly what you tried and why it failed - that is a finding too.",
+          "minLength": 1,
+          "maxLength": 600
+        },
+        "evidence_class": {
+          "$ref": "#/definitions/evidence_class"
+        },
+        "numbers": {
+          "type": "array",
+          "description": "The numbers behind this axis, each with a label, what it means and what it is compared with. Put every number you quote in the finding here as well, so the reader can check it.",
+          "items": {
+            "$ref": "#/definitions/labelled_number"
+          }
+        },
+        "unknowns": {
+          "type": "array",
+          "description": "What is still missing on this axis, in the user's words, one item per line. Be specific enough that someone could go and get it.",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 240
+          }
+        },
+        "sources": {
+          "$ref": "#/definitions/source_ids"
+        }
+      }
+    },
+    "labelled_number": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "label",
+        "value",
+        "meaning",
+        "compared_to"
+      ],
+      "properties": {
+        "label": {
+          "type": "string",
+          "description": "Name the number in plain words, for example 'Indoor floor area' or 'Recorded crimes, six months'.",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "value": {
+          "type": [
+            "number",
+            "string",
+            "null"
+          ],
+          "description": "The value. Use null when you could not find it; never fill a hole with a zero or a guess."
+        },
+        "unit": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The unit in words: 'square feet', 'pounds per month', 'minutes', 'metres', 'out of 5'.",
+          "maxLength": 40
+        },
+        "meaning": {
+          "type": "string",
+          "description": "One short sentence: is this good, bad or ordinary, and why does it matter to someone living there.",
+          "minLength": 1,
+          "maxLength": 240
+        },
+        "compared_to": {
+          "type": "string",
+          "description": "What you compared it with, including the comparison number. Write 'No local benchmark found' if you have none.",
+          "minLength": 1,
+          "maxLength": 240
+        },
+        "evidence_class": {
+          "$ref": "#/definitions/evidence_class"
+        },
+        "sources": {
+          "$ref": "#/definitions/source_ids"
+        }
+      }
+    },
+    "costs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rent_pcm",
+        "all_in_planning",
+        "basis_note"
+      ],
+      "description": "Every cost in pounds per month, on ONE basis for every candidate. If two candidates were costed differently, the comparison is worthless - fix the basis first, then write it in basis_note.",
+      "properties": {
+        "rent_pcm": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "The advertised rent, in pounds per month, before bills."
+        },
+        "bills_low": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "Monthly energy, water, broadband and any building charge you would pay in a mild month with careful use. This is the best case, not the expected case."
+        },
+        "bills_planning": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "Monthly bills to budget for across a whole year. This is the number that goes in the total. Say what heating type it assumes in basis_note."
+        },
+        "bills_stress": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "Monthly bills in a cold month on the least favourable tariff. Use it to test whether the user survives a bad winter, not to compare candidates."
+        },
+        "council_tax": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "Council tax for the band, spread over twelve months. If the user qualifies for a full student exemption, write 0 and say why in basis_note - do not silently drop it."
+        },
+        "all_in_planning": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "Rent plus bills_planning plus council tax, in pounds per month. This is the number compared against the user's ceiling and shown in the table."
+        },
+        "basis_note": {
+          "type": "string",
+          "description": "State the basis in one or two sentences: which heating type, which tariff date, whether council tax is included or exempt, what is bundled in the rent, and anything paid yearly that you spread. Without this the totals cannot be compared.",
+          "minLength": 1,
+          "maxLength": 400
+        },
+        "sources": {
+          "$ref": "#/definitions/source_ids"
+        }
+      }
+    },
+    "worst_review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_name",
+        "organic",
+        "excerpt",
+        "why_it_matters"
+      ],
+      "properties": {
+        "building": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Which building the review is about. Say so plainly when it is a neighbouring building under the same manager rather than this one.",
+          "maxLength": 120
+        },
+        "source_name": {
+          "type": "string",
+          "description": "Name the site or place the review came from, as a name only. Do not describe how to harvest it; several review sites forbid automated access, so this comes from what the user pasted or from your own compliant means.",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "date": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The review date as 2025-11-04, or the month if that is all you have. Age matters: a complaint from four years ago under a different manager is weaker evidence.",
+          "maxLength": 20
+        },
+        "score": {
+          "type": [
+            "number",
+            "string",
+            "null"
+          ],
+          "description": "The score the reviewer gave, with the scale in the unit sense, for example 2 where the scale is out of 5."
+        },
+        "organic": {
+          "type": "boolean",
+          "description": "Write true if this review looks freely given. Write false if it was prompted, incentivised, part of a same-day burst, or otherwise organised. A false here does not mean the complaint is untrue; it means the score cannot be averaged."
+        },
+        "excerpt": {
+          "type": "string",
+          "description": "Quote the reviewer's own words, at most 300 characters, cut at a sentence boundary. Do not paraphrase and do not soften it. Remove anything that identifies a private individual.",
+          "minLength": 1,
+          "maxLength": 300
+        },
+        "why_it_matters": {
+          "type": "string",
+          "description": "One sentence on what this would mean for the user in daily life, and whether it is fixable.",
+          "minLength": 1,
+          "maxLength": 240
+        },
+        "sources": {
+          "$ref": "#/definitions/source_ids"
+        }
+      }
+    },
+    "landmine": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "label",
+        "detail",
+        "reversible"
+      ],
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/landmine_code"
+        },
+        "label": {
+          "type": "string",
+          "description": "A short plain label for this specific problem, in the report language, for example 'Advertised 885 square feet, certificate says 570'. Not the generic code name - the renderers already show that.",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "detail": {
+          "type": "string",
+          "description": "What you found, how you know, and what it would cost the user in money, sleep or time. Two or three short sentences.",
+          "minLength": 1,
+          "maxLength": 600
+        },
+        "reversible": {
+          "type": "boolean",
+          "description": "Write true if the tenant can undo or dodge it - a fan, a different bedroom, a negotiated clause. Write false if it comes with the building and the lease. Reversible problems change the price; irreversible ones change the answer."
+        },
+        "evidence_class": {
+          "$ref": "#/definitions/evidence_class"
+        },
+        "sources": {
+          "$ref": "#/definitions/source_ids"
+        }
+      }
+    },
+    "comparison": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ranking"
+      ],
+      "properties": {
+        "ranking": {
+          "type": "array",
+          "minItems": 2,
+          "description": "Rank every candidate, best first. The order is your recommendation; the numbers must justify it.",
+          "items": {
+            "$ref": "#/definitions/ranking_entry"
+          }
+        },
+        "structural_findings": {
+          "type": "array",
+          "description": "Problems you saw in at least TWO different buildings AND in at least TWO different years. Only these may be generalised - 'this is how this operator runs buildings'. Anything narrower belongs below.",
+          "items": {
+            "$ref": "#/definitions/structural_finding"
+          }
+        },
+        "single_building_findings": {
+          "type": "array",
+          "description": "Problems seen in one building only, or in one year only. These must NOT be generalised to an operator, an area or a building type. Say the limit out loud in the detail.",
+          "items": {
+            "$ref": "#/definitions/single_building_finding"
+          }
+        }
+      }
+    },
+    "ranking_entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "candidate_id",
+        "quality_score",
+        "closing_probability",
+        "reason"
+      ],
+      "properties": {
+        "candidate_id": {
+          "type": "string",
+          "description": "The id of the candidate, copied from candidates[].id.",
+          "minLength": 1,
+          "maxLength": 40
+        },
+        "quality_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "How good this flat is if you got it, 0 to 100, from the twelve axes. Do not include how likely you are to get it; that is the next field."
+        },
+        "closing_probability": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "The chance the user actually ends up living here, 0 to 1: is it still available, will the landlord accept this tenant profile, does the timing work, is there a queue. Belief is for changing this number, not the quality score."
+        },
+        "expected_value": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "quality_score multiplied by closing_probability. This is the sort key: a 90 you cannot get beats nothing, and a 70 you can get beats it."
+        },
+        "reason": {
+          "type": "string",
+          "description": "One line, at most 160 characters, saying why this one sits here. Name the deciding factor, not a summary.",
+          "minLength": 1,
+          "maxLength": 160
+        }
+      }
+    },
+    "structural_finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "theme",
+        "detail",
+        "buildings_count",
+        "years",
+        "generalisable"
+      ],
+      "properties": {
+        "theme": {
+          "type": "string",
+          "description": "Name the pattern in a few words, for example 'Lifts out of service for weeks'.",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "detail": {
+          "type": "string",
+          "description": "What the pattern is, in which buildings and which years you saw it, and what it predicts for a new tenant.",
+          "minLength": 1,
+          "maxLength": 600
+        },
+        "buildings_count": {
+          "type": "integer",
+          "minimum": 2,
+          "description": "How many different buildings showed this. Must be at least 2, or it is not structural and belongs in single_building_findings."
+        },
+        "years": {
+          "type": "array",
+          "minItems": 2,
+          "description": "The distinct years you saw it in, for example [2023, 2025]. Must be at least two different years, or it is a bad month rather than a pattern.",
+          "items": {
+            "type": [
+              "integer",
+              "string"
+            ]
+          }
+        },
+        "generalisable": {
+          "const": true,
+          "description": "Always true here. This is the promise that the two thresholds above were actually met."
+        },
+        "sources": {
+          "$ref": "#/definitions/source_ids"
+        }
+      }
+    },
+    "single_building_finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "building",
+        "theme",
+        "detail",
+        "generalisable"
+      ],
+      "properties": {
+        "building": {
+          "type": "string",
+          "description": "The one building this is about.",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "theme": {
+          "type": "string",
+          "description": "Name it in a few words.",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "detail": {
+          "type": "string",
+          "description": "What happened, when, and why it cannot yet be treated as a pattern.",
+          "minLength": 1,
+          "maxLength": 600
+        },
+        "generalisable": {
+          "const": false,
+          "description": "Always false here. Do not extend this finding to other buildings, to the operator, or to the area."
+        },
+        "sources": {
+          "$ref": "#/definitions/source_ids"
+        }
+      }
+    },
+    "not_found_entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "what",
+        "queries_used"
+      ],
+      "properties": {
+        "what": {
+          "type": "string",
+          "description": "What you were trying to find, in plain words: 'The service charge for this flat'.",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "queries_used": {
+          "type": "array",
+          "minItems": 1,
+          "description": "The exact search strings, URLs or commands you tried, copied literally. This lets the next person start where you stopped instead of repeating you.",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          }
+        },
+        "where_looked": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Which sites or registers you tried, by name.",
+          "maxLength": 200
+        },
+        "next_step": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "What would get it: a question to the agent, a page the user can open, a paid record. One sentence.",
+          "maxLength": 240
+        }
+      }
+    },
+    "blocked_source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source",
+        "reason"
+      ],
+      "properties": {
+        "source": {
+          "type": "string",
+          "description": "Name the site or register that refused you.",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "http_status": {
+          "type": [
+            "integer",
+            "string",
+            "null"
+          ],
+          "description": "The status code you got, or 'no network' or 'robots.txt' if there was no request. Remember that a 200 carrying the wrong page is a failure, not a success."
+        },
+        "reason": {
+          "type": "string",
+          "description": "Why it was blocked, in plain words: 'The site tells automated tools not to read any page', 'Needs a paid account', 'The sandbox has no internet'. Do not describe a way around it.",
+          "minLength": 1,
+          "maxLength": 300
+        },
+        "workaround": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "What the user can do themselves, if anything: open the page and paste the text, or run the skill somewhere with a shell.",
+          "maxLength": 240
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "url",
+        "retrieved_at",
+        "evidence_class"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "A short id referenced from the axes, metrics, reviews and findings, for example 's1' or 'epc-cert'. Keep it unique in this file.",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "A plain name for the source that a reader would recognise, for example 'Government energy certificate register'.",
+          "maxLength": 160
+        },
+        "url": {
+          "type": "string",
+          "description": "The exact page address you read. If it came from the user rather than the web, write the place it came from and record that in provenance.",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "retrieved_at": {
+          "type": "string",
+          "description": "When you read it, in UTC, as 2026-09-03T11:20:00Z. Crime counts, commute times and review scores move; a reader needs to know how stale this is.",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}(:[0-9]{2})?(Z|[+-][0-9]{2}:[0-9]{2})$"
+        },
+        "evidence_class": {
+          "$ref": "#/definitions/evidence_class"
+        },
+        "http_status": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "The status code, when there was a request."
+        },
+        "provenance": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Say if this did not come straight from the web: 'supplied by the user on 2026-09-03', 'read from a page the user saved'. An official document supplied by the user is still official; what a person told you is self-reported.",
+          "maxLength": 200
+        },
+        "note": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Anything a reader should know about this source: a content check that failed, a page that had moved, a figure that contradicts another source.",
+          "maxLength": 300
+        }
+      }
+    }
+  }
+}

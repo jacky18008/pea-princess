@@ -1,0 +1,138 @@
+# Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen — https://github.com/jacky18008/pea-princess — CC BY 4.0
+#
+# Copy this file to `profile.yaml` next to it and fill it in. The skill reads `profile.yaml`
+# and judges every flat against it; whatever you leave blank, the skill will ask about once
+# and then state as an assumption in the report.
+#
+# Rules for this file:
+#   * Personal values are deliberately left BLANK here. Do not commit your own profile.yaml.
+#   * Money is pounds sterling. Areas are square feet indoors, measured the way the government
+#     energy certificate measures them (balconies and terraces do not count).
+#   * Anything you write here is copied into the report as `profile_snapshot`, so a reader can
+#     see the ruler that was used. Do not put anything here you would not want in the report.
+#   * Never put ethnicity, nationality, religion or immigration status in this file. The skill
+#     will refuse to use them and they are not lawful grounds for filtering anything.
+
+# ---------------------------------------------------------------- hard filters
+# These are pass/fail. A flat that misses one is not "a bit worse"; it is out, or it is an
+# exception you make on purpose and write down.
+
+# Smallest indoor area you will live in, in square feet, from the energy certificate.
+# Leave blank if you have no floor. Typical one-bed floors people set: 450-550.
+min_floor_area_sqft:
+
+# Oldest building you will accept, in years. Leave blank for no limit.
+# Note this is about the building fabric, not charm: older usually means worse sound
+# insulation, no mechanical ventilation, and single-supplier heating is less likely.
+max_building_age_years:
+
+budget:
+  # What you want the rent itself to be, per month, before bills.
+  rent_pcm_target:
+  # The hard ceiling on rent PLUS bills PLUS council tax, per month. This is the number the
+  # report compares against. If you only set one budget number, set this one.
+  all_in_pcm_ceiling:
+  # If you would go above the ceiling for something specific, say what and by how much, in one
+  # sentence. Example: "Up to 150 more per month only for a second rail line within 8 minutes."
+  # An unnamed stretch budget becomes your real budget within a week.
+  stretch_ceiling_and_conditions:
+
+move_in_window:
+  # Earliest date you can take the keys, as YYYY-MM-DD.
+  earliest:
+  # Latest date you can take the keys, as YYYY-MM-DD.
+  latest:
+  # How many days either side you can absorb (hotel, storage, a friend's sofa).
+  # Set 0 if a date miss kills the deal.
+  tolerance_days: 0
+
+commute:
+  # Where you must get to most days: a full address or a station name. Required.
+  # The skill has no default destination and will not guess one.
+  destination:
+  # The time you have to arrive, as HH:MM, 24-hour. Journey times are measured for this time,
+  # because a 20-minute trip at 11:00 can be a 40-minute trip at 08:45.
+  arrive_by: "09:00"
+  # The longest door-to-door journey you will accept, in minutes, including both walks.
+  max_door_to_door_min:
+  # Minimum backup grade you will accept when one line stops:
+  #   A = two independent rail lines within a 10-minute walk
+  #   B = one rail line plus a bus route that actually works for this journey
+  #   C = one line only, no plan B
+  redundancy_min_grade: "B"
+
+floors:
+  # true = a ground-floor flat is an automatic no (noise, security, privacy, damp).
+  reject_ground_floor: true
+  # The floors you actually want, as a range like "2-8". High floors trade lift dependence
+  # and summer heat for light and quiet. Leave blank if you have no preference.
+  prefer_floor_band:
+
+light:
+  # true = a flat whose main windows cannot see sky is an automatic no, whatever else it has.
+  reject_no_sky: true
+  # Score each compass direction 0-5 for how much you want it. These are preferences, not
+  # filters: they break ties, they do not kill candidates.
+  # In London: south is bright and hot, north is even and dim, east is morning light,
+  # west is evening light and evening heat.
+  aspect_scores:
+    N: 2
+    NE: 2
+    E: 4
+    SE: 5
+    S: 4
+    SW: 4
+    W: 3
+    NW: 2
+
+# true = when light and quiet conflict, quiet wins. Set false only if you know that a dim
+# flat makes you miserable faster than a noisy one does.
+quiet_over_light: true
+
+# ------------------------------------------------------- must-haves and extras
+# Plain words, one per line. A must_have that fails is a hard fail, so keep this list short
+# and honest. Anything you would trade away belongs in nice_to_haves.
+must_haves:
+  - washing_machine_in_flat
+  # - separate_bedroom_door
+  # - openable_windows
+  # - parcel_room_or_concierge
+
+nice_to_haves:
+  # - dishwasher
+  # - blackout_blinds_in_bedroom
+  # - bike_storage
+  # - supermarket_within_3_min_walk
+  # - lift
+  # - balcony
+
+# ------------------------------------------------------------- money gate
+# How you will satisfy the landlord's income test. Landlords in England usually want annual
+# income of about 30 times the monthly rent, or a guarantor, or rent paid up front.
+# One of: "UK guarantor" | "rent guarantee insurance" | "overseas guarantor" |
+#         "proof of funds only" | "none needed"
+guarantor_route:
+
+tenancy:
+  # The most months of rent you are willing to pay before you move in.
+  # In England since 2026-05-01 the legal maximum is 1. Leave this at 1: a landlord who asks
+  # for six months up front is telling you something, and it is not about your credit file.
+  max_months_upfront: 1
+  # The most weeks of rent you will hand over as a deposit. The legal cap is 5.
+  max_deposit_weeks: 5
+  # true = the deposit must be held by a government-approved scheme, confirmed in writing.
+  require_deposit_protection: true
+
+# --------------------------------------------------------- how you introduce yourself
+# One neutral sentence the skill can adapt into an enquiry. Fill the placeholders in and keep
+# it to facts a landlord may lawfully ask about: what you do, how many people, smoking, pets,
+# whether you can prove funds, how you cover the income test.
+# Never add nationality, ethnicity, religion or visa status: it is not lawful ground for a
+# landlord to select on, and volunteering it invites exactly that.
+self_intro_template: >-
+  I am a {occupation} looking for a home for {occupants}, non-smoking, {pets},
+  able to provide {proof_of_funds}, with {guarantor_route} for the income check.
+
+# Language for the report: a BCP-47 tag such as en, zh-TW, zh-CN, ja, ko, fr.
+# The findings are written in this language; the layout labels are translated by the renderer.
+language: "en"
