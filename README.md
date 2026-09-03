@@ -4,7 +4,7 @@
 
 **繁中** — 這是一個不綁定任何廠商的 agent skill，用官方與公開的英國資料，像謹慎的驗屋師一樣審查一間倫敦出租公寓：身份、面積、屋齡、供暖、周邊工地、治安、管理評價、仲介合規、價格、採光、全部月成本、通勤，最後給出白話判決。任何支援 Agent Skills 格式的 agent 都能用；只能對話不能跑程式的產品也能用「精簡模式」。
 
-> Status: **draft** (2026-09-03). The EPC route is implemented and tested; other scripts, the report schema and the viewer are in progress. See `docs/` (coming) and the plan.
+> Status: **draft** (2026-09-03). Seven fetchers, the report schema, both renderers and 15 axis references are in; planning/roads fetchers, the area-sweep orchestrator and the benchmark are in progress. Docs: `docs/INSTALL.md`, `docs/SCRIPTS.md`, `docs/CONVENTIONS.md`.
 
 ## Three modes
 | Mode | You have | What happens |
@@ -24,8 +24,21 @@ npx skills add jacky18008/pea-princess
 Codex: enable sandbox network (`sandbox_workspace_write.network_access = true`) or use manual mode.
 
 ## Scripts (Python 3.9 standard library only; network via curl)
-- `skills/vet-flat/scripts/epc.py` — GOV.UK EPC register: `search --postcode`, `search --street --town`, `cert <id>`, `building --postcode` (whole-building area, age, heating profile). Tested against 10 known flats: 10/10 floor areas match.
-- more to come: crime, commute, company, planning, roads, render.
+All in `skills/vet-flat/scripts/`; each prints one JSON object with `source_url`, `retrieved_at`, `http_status`, `ok` and an evidence class. Usage details: `docs/SCRIPTS.md`.
+
+| Script | Source (official? key?) | What it gives |
+|---|---|---|
+| `epc.py` | GOV.UK EPC register (official, no key; HTML only) | search by postcode/street, one certificate, whole-building profile (area distribution, first assessment year, heating, air permeability). Validated 10/10 floor areas |
+| `geo.py` | postcodes.io (open) | postcode ↔ coordinates, nearby postcodes, hex-tile cover for a radius, bounding boxes |
+| `crime.py` | data.police.uk (official, no key) | fixed 6-month window in a ~300 m box, categories, predatory subset, anchors, ±20 m sensitivity, walk-home corridor |
+| `commute.py` | TfL Unified API (official, no key) | door-to-door journeys (all / rail / bus), nearby stations, strike-family redundancy grade |
+| `company.py` | Companies House (official, no key) | search with status, profile (SIC, charges, officers, accounts), filings, registered-address search for resident management companies |
+| `redress.py` | Client Money Protect, Heat Trust, GLA rogue landlord checker (open) | agent CMP membership, heat-network sites/suppliers, published enforcement actions; PRS/TPO are manual |
+| `landregistry.py` | HM Land Registry price-paid linked data (official, no key) | transactions by postcode, earliest new-build sale as completion-year evidence; title register is manual (£7) |
+| `planning.py`, `roads.py` | GLA Planning Datahub; OpenStreetMap | in progress |
+| `render.py` | — | `report.json` → HTML or Markdown, validated against `references/report-schema.json` |
+
+Report layout for people without a shell: open `viewer/viewer.html` in a browser and paste the JSON.
 
 ## Tests
 ```bash
