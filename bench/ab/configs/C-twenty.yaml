@@ -18,7 +18,7 @@ allowed_tools:
   - Write
 append_system_prompt: |
   You are running on a limited plan. Follow references/budget-modes.md `lite` exactly: at most
-  8 tool calls, run scripts only (`epc.py cert`, `crime.py box --months 3 --no-sensitivity`,
+  8 tool calls, run scripts only, in this order: `epc.py search --postcode` then `epc.py cert <id>` for the matching flat (never pass an address to `cert`), `geo.py lookup` then `crime.py box --months 3 --no-sensitivity`,
   `commute.py journey`, `company.py profile` when an entity is named), never spawn subagents,
   never read a file over 40 KB, ask the user once for anything else, and still deliver the
   verdict card, the hard-filter table and two killer questions from references/questions.md.

@@ -8,9 +8,9 @@ People on a £20-a-month plan share usage caps and smaller sandboxes; people wit
 |---|---|---|---|
 | Who | £20 plans, chat-only users, a first quick screen | most users | £100+ plans, final shortlists, area sweeps |
 | Fetches per flat (shell mode, approx.) | ≤ 8 | ≈ 15–25 | 40+ |
-| Identity and area | one certificate (`epc.py cert`) | + `epc.py search` for the building's flats | + whole-building profile (`epc.py building`) and certificate history |
-| Crime | `crime.py box --months 3 --no-sensitivity` (3 calls) | 6 months, no sensitivity (6 calls) | 6 months + ±20 m sensitivity (30 calls) + route corridor |
-| Commute | `commute.py journey` all-modes only | + rail and bus plans, `redundancy` | + `stations` detail and alternative arrival times |
+| Identity and area | `epc.py search --postcode "<postcode>"` to list the flats, then `epc.py cert <certificate id>` for the matching flat (never pass an address to `cert`) | + `epc.py search` for the building's flats | + whole-building profile (`epc.py building`) and certificate history |
+| Crime | `geo.py lookup "<postcode>"` for coordinates, then `crime.py box --lat <lat> --lng <lng> --months 3 --no-sensitivity` (4 calls) | 6 months, no sensitivity (6 calls) | 6 months + ±20 m sensitivity (30 calls) + route corridor |
+| Commute | `commute.py journey --from "<postcode>" --to "<destination postcode>"` (postcodes work directly) | + rail and bus plans, `redundancy` | + `stations` detail and alternative arrival times |
 | Company and compliance | `company.py profile` of the named entity | + `search` for same-name shells, `redress.py cmp`, `heat-trust` | + `filings`, `address-search` (RMC/RTM), `rogue`, `landregistry.py price-paid` |
 | Planning | skip (state it) | `planning.py near --radius 250 --limit 20` | + `stages` on tall schemes, `roads.py near` |
 | Reviews | ask the user for the lowest reviews only | full paste, incentivised and burst filters | + Trustpilot/press, cross-building matrix |
