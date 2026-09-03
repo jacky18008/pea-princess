@@ -31,6 +31,17 @@ The skill does not care which harness runs it. What decides your experience is w
 
 On a £20-a-month plan set `budget_mode: lite` in `profile.yaml` (see `skills/vet-flat/references/budget-modes.md`): a single flat takes fewer than ten fetches and still gets the hard filters, the verdict and the two killer questions.
 
+## A3. Subscription or API key?
+
+Subscription by default. This workload is cheap in absolute terms at pay-as-you-go prices (a `lite` check of one flat costs a few pence, an area sweep well under £1, a whole search of 20–30 flats and a few sweeps roughly £2–£20 on a mid-size model), so what a subscription buys is not savings but zero setup: no account, card, key, config file or bill to understand. Heavy users on £100+ plans get far more than the equivalent API spend; for this workload that only matters if you already pay for one.
+
+| You are | Do this |
+|---|---|
+| Already paying ~£20 for a chat product | Use that vendor's own harness in `lite` or `standard` mode: Claude Pro → Claude Cowork; ChatGPT Plus → the Codex app, or paste the prompt pack into a Project; Google AI Pro → Antigravity. No API key |
+| Paying nothing | A free ChatGPT account can sign in to Codex (limits unpublished); or any free chat box plus the prompt pack in manual mode |
+| Running batch sweeps, or your plan's windows keep stopping you | Get an API key and use a cheap model (Gemini Flash, Grok build, Sonnet) in Codex, OpenCode or Gemini CLI: predictable, under £1 per sweep |
+| On a £100+ plan already | `deep` mode everywhere; nothing to decide |
+
 ## B. Chat products with a Skills feature (upload the zip from Releases)
 
 | Product | Steps | Network for scripts |
