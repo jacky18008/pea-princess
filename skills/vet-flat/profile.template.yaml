@@ -32,6 +32,11 @@ flat_type: one_bed
 separate_bedroom_required: true
 # How many people will live there.
 occupants: 1
+# How deep the checks go: lite | standard | deep. lite = few fetches, fits £20 plans and chat-only
+# use; standard = default; deep = everything, for final shortlists and area sweeps.
+# See references/budget-modes.md for exactly what each level runs.
+budget_mode: standard
+
 # How much you already know about renting in London: none | some | expert.
 # "none" = the skill explains each term the first time and suggests defaults instead of asking open questions.
 experience: none

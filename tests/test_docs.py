@@ -45,6 +45,23 @@ class TestOnboarding(unittest.TestCase):
             self.assertIn(code, s)
 
 
+class TestQuestionBank(unittest.TestCase):
+    def test_every_landmine_has_a_question(self):
+        s = read("references", "questions.md")
+        for code in ["G1", "G2", "G3", "G4"] + [f"L{i}" for i in range(1, 13)]:
+            self.assertIn(f"| {code} |", s, code)
+        self.assertIn("two questions at most", s)
+
+
+class TestBudgetModes(unittest.TestCase):
+    def test_modes_documented_and_wired(self):
+        s = read("references", "budget-modes.md")
+        for m in ["`lite`", "`standard`", "`deep`"]:
+            self.assertIn(m, s)
+        self.assertIn("budget_mode: standard", read("profile.template.yaml"))
+        self.assertIn("budget-modes.md", read("SKILL.md"))
+
+
 class TestProfileTemplate(unittest.TestCase):
     def test_new_fields(self):
         s = read("profile.template.yaml")

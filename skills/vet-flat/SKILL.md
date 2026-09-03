@@ -16,13 +16,13 @@ metadata:
 - **Shell mode**: you can run `python3` and `curl` with internet access. Run `scripts/*.py`; read only their JSON output, never raw pages.
 - **Fetch mode**: you can fetch URLs but not run scripts. Use the open GET sources in `references/sources.yaml`; ask the user for the rest.
 - **Manual mode**: neither. Ask the user to open pages and paste text, following `references/inputs.md`.
-Codex users: the sandbox blocks network by default; ask them to enable it or work in manual mode. Fetchers that honour robots.txt cannot read the EPC register or council planning portals; that is expected — ask the user.
+Codex: sandbox network is off by default; enable it or use manual mode. Fetchers that honour robots.txt cannot read the EPC register or council planning portals; that is expected — ask the user.
 
 ## 0b. If asked "what can this do", "how do I start", or "I have no idea"
 Answer from `references/onboarding.md`: the short pitch in the user's language, then the three starting points (a listing → vet it; an area or destination → sweep; no idea → the ten-fact primer, then six intake questions in one message with a suggested default each). Write the answers into `profile.yaml`, show it back plainly, then start.
 
 ## 1. Load the profile
-Read `profile.yaml` (the user's hard filters: minimum floor area, maximum building age, budget bands, move-in window, commute destination and minutes, guarantor route, floor and light rules, must-haves). If it is missing, ask for the six essentials once (budget, area, age, move-in, destination, must-haves), then proceed and state your assumptions.
+Read `profile.yaml` (hard filters: minimum floor area, maximum building age, budget bands, move-in window, commute destination and minutes, guarantor route, floor and light rules, must-haves, and `budget_mode` lite/standard/deep — depths in `references/budget-modes.md`). If it is missing, ask for the six essentials once (budget, area, age, move-in, destination, must-haves), then proceed and state your assumptions.
 
 ## 2. Two presumptions that run through every axis
 1. **Cheap has a reason.** A price below the local band means the landlord or agent has a reason to sell you. Find it and name it (location, age, construction, timing, management, commute, aspect). An unexplained discount is a reason to walk.
@@ -46,7 +46,7 @@ Ask of every listing: "What sits under its prettiest feature?" and check what th
 Legal facts (England): Renters' Rights Act 2025, in force 2026-05-01 — periodic tenancies only, no fixed terms, at most one month's rent in advance, deposit ≤ 5 weeks' rent, holding deposit ≤ 1 week. Cite from `references/sources.yaml`.
 
 ## 4. Evidence grades — mark every finding
-**G** official register · **S** self-reported (landlord, agent, listing) · **C** third-party (reviews, press) · **I** inference · **U** unknown. Two sources disagreeing is itself a finding ("document quality"). An HTTP 200 with the wrong page is not evidence: check the content.
+**G** official register · **S** self-reported (landlord, agent, listing) · **C** third-party (reviews, press) · **I** inference · **U** unknown. Two sources disagreeing is itself a finding. An HTTP 200 with the wrong page is not evidence: check the content.
 
 ## 5. Sources you may automate, and sources you may only name
 Automatable (official or open): EPC register (HTML only; single addresses, built-in spacing), data.police.uk, Companies House, GLA Planning Datahub, TfL, postcodes.io, Land Registry price-paid, Heat Trust, Client Money Protect, GLA rogue landlord checker.
