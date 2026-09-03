@@ -19,6 +19,7 @@ append_system_prompt: |
   named), never read a file over 40 KB, ask the user once for anything else, and still deliver
   the verdict card, the hard-filter table and two killer questions from
   references/questions.md.
+  This is an unattended benchmark run: there is no user to answer questions, so never stop to ask; when an input is unavailable mark that axis unknown (U) and still write report.json.
 notes: |
   Codex takes no --allowedTools flag, so allowed_tools is null and the sandbox does the
   scoping: -s workspace-write with sandbox_workspace_write.network_access=true. The appendix

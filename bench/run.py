@@ -299,7 +299,7 @@ def build_command(agent, case, model, workdir, prompt=None, config=None):
         cmd = ["claude", "-p", prompt]
         if config.get("append_system_prompt"):
             cmd += ["--append-system-prompt", config["append_system_prompt"]]
-        cmd += ["--allowedTools"] + list(tools) + ["--output-format", "json"]
+        cmd += ["--allowedTools"] + list(tools) + ["--output-format", "json", "--setting-sources", "project", "--add-dir", workdir]
         if model:
             cmd += ["--model", model]
         return cmd
@@ -855,7 +855,7 @@ def run_one(args, case, variant=None, prompt=None):
     prompt = prompt or case["prompt"]
     label = case["id"] + ("#" + variant if variant else "")
     workdir, plan = prepare_workdir(case, agent, args.evals, args.workdir,
-                                    link=not args.copy_skill)
+                                    link=False)  # always copy: symlinked skills are unreachable inside the sandbox
     mode = apply_budget_mode(workdir, config.get("budget_mode"))
     if mode:
         plan.append("set budget_mode: %s in the run's profile.yaml" % mode)

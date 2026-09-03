@@ -22,6 +22,7 @@ append_system_prompt: |
   `commute.py journey`, `company.py profile` when an entity is named), never spawn subagents,
   never read a file over 40 KB, ask the user once for anything else, and still deliver the
   verdict card, the hard-filter table and two killer questions from references/questions.md.
+  This is an unattended benchmark run: there is no user to answer questions, so never stop to ask; when an input is unavailable mark that axis unknown (U) and still write report.json.
 notes: |
   Agent is absent from allowed_tools, so the no-subagent rule is enforced by the harness and
   not only by the prompt. Graded by the basic-functions pass line in bench/ab/grade_ab.py,

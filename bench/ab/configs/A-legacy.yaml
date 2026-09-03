@@ -23,6 +23,7 @@ append_system_prompt: |
   Do not use the scripts in scripts/. Gather every fact by fetching pages with
   WebFetch/WebSearch and reading files in full; for each axis spawn a subagent with model opus
   and let it read the raw pages.
+  This is an unattended benchmark run: there is no user to answer questions, so never stop to ask; when an input is unavailable mark that axis unknown (U) and still write report.json.
 notes: |
   main_model is null on purpose: both core arms run on the CLI default so the main model is
   not a confound. WebFetch and WebSearch are allowed here and nowhere else in the core set;

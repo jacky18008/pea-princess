@@ -21,5 +21,6 @@ append_system_prompt: |
   file larger than 40 KB in full; use ranges. Spawn subagents only for reading pasted review
   or report text, with model sonnet; do judgment yourself. Keep the report JSON as the only
   large output.
+  This is an unattended benchmark run: there is no user to answer questions, so never stop to ask; when an input is unavailable mark that axis unknown (U) and still write report.json.
 notes: |
   opus is the alias Claude Code accepts for the latest Opus; see claude --help.

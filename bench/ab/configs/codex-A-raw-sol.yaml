@@ -17,6 +17,7 @@ append_system_prompt: |
   Do not use the scripts in .agents/skills/vet-flat/scripts/. Gather every fact by fetching
   pages with the shell (curl) and reading them in full, and read the reference files in full
   as well.
+  This is an unattended benchmark run: there is no user to answer questions, so never stop to ask; when an input is unavailable mark that axis unknown (U) and still write report.json.
 notes: |
   Codex takes no --allowedTools flag, so allowed_tools is null and the sandbox does the
   scoping: -s workspace-write with sandbox_workspace_write.network_access=true. The appendix
