@@ -506,3 +506,225 @@ $ roads.py facade-note --lat 51.505375 --lng -0.085706     # 30 m off the A200
   "facade_note": "the building has a road-facing and a quiet side; ask which side the
                   flat's windows face" }
 ```
+
+## `sweep.py` — area sweep orchestrator (calls the other nine)
+
+```
+sweep.py --anchor "SE1 9SG" --dest "WC2R 2LS" --out sweep/
+sweep.py --anchor "51.5045,-0.0865" --radius 400 --dest "SW1A 2AA" \
+         --profile profile.yaml --candidates candidates.txt \
+         --max-buildings 4 --out sweep/
+sweep.py --anchor "SE1 9SG" --dest "WC2R 2LS" --out sweep/ --dry-run
+```
+
+One address in, one compact JSON file per candidate building out. This is
+`references/axes/00-area-sweep.md` turned into a program, and the whole point is
+the cost gate: **the model reads JSON, never a page.** It imports the other
+scripts as modules (no subprocesses), so every fetch still goes through
+`_fetch.fetch` with its 1.2 s per-host spacing and its on-disk cache.
+
+**Options.** `--anchor` takes a postcode or `lat,lng`. `--radius` is metres,
+default 800, refused above 3300 (about two miles) and warned about above 1200.
+`--dest` is the commute destination and is required unless `--profile` sets
+`commute.destination`; `--arrive` overrides the profile's arrival time.
+`--profile profile.yaml` supplies the hard filters — with no profile the run says
+so and filters nothing. `--candidates file.txt` takes addresses or postcodes, one
+per line, and those buildings are **always** kept: an exclusion or a failed filter
+is recorded against them but never drops them. Caps, all with sensible defaults:
+`--max-streets` (0 = no cap), `--max-postcode-lookups` 120, `--postcode-fallback` 40,
+`--max-filter-buildings` 25, `--certs-per-building` 8, `--max-buildings` 8,
+`--crime-months` 6, `--crime-half-m` 150, `--planning-radius` 250,
+`--roads-radius` 300. `--resume` reuses the stage files already in `--out`.
+`--dry-run` locates the anchor, counts the streets and prints the plan.
+
+**The register refuses busy streets.** A street search that would return too many
+rows gets the register's own page instead — *"Too many results for this address.
+Search by postcode instead."* — and it hits exactly the streets with the most homes
+on them (6 of 64 streets in a 400 m circle at London Bridge, including Tooley
+Street, Borough High Street and Union Street). `epc.search` now recognises that
+page, keeps `ok: true` and sets `too_many_results`, and the sweep does what the page
+says: it re-searches by postcode, nearest first, using the postcodes already primed
+from one `geo.nearby` call, capped by `--postcode-fallback` (default 40, 0 = off).
+What the cap left out is listed in `not_found` with the exact commands. Without this
+the sweep silently loses its best streets.
+
+Two more of the register's answers used to read as fetch failures, which is the one
+thing the `not_found` table exists to prevent: a postcode with nothing on it serves
+*"No results for SE1 9BS"*, and a street with nothing on it serves *"A certificate
+was not found at this address"*. Neither carries the results table the old content
+assertion looked for. `epc.search` now accepts both, keeps `ok: true`, sets
+`no_results` and fills `not_found` — so a nil result and a broken request no longer
+look the same. In the demo run that moved 55 rows out of the failure column.
+
+**Enumeration is Overpass then the energy register, not postcodes.io.**
+postcodes.io returns at most 100 rows per call, so around London Bridge a 2000 m
+request stops at about 330 m: it can locate a point but it can never census a
+circle. So stage 1 asks OpenStreetMap for the **named** ways in the circle with
+`highway` in residential, living_street, tertiary, unclassified, pedestrian or
+service (the `["name"]` filter is what keeps unnamed service roads out), then runs
+one `epc.search --street --town` per street name — a street search returns 190+
+certificates in one page. postcodes.io is then used only to turn each
+certificate's postcode into coordinates, primed with a single `geo.nearby` call
+and topped up one lookup at a time up to the cap.
+
+**Grouping.** Certificates become buildings on `building name or number + street +
+outcode`, which is also the candidate's file name (`4--london-bridge-street--se1`).
+The flat number is never in the key, so two flats in one building are one
+candidate. A number range collapses to its first number ("4-6" and "4" are one
+building) and street abbreviations expand ("Weston Rd" and "Weston Road" are one
+street) — but only on the **last** word, because "St. Thomas Street" is Saint
+Thomas, not Street Thomas. A letter suffix stays: 4A and 4 are different
+addresses. The street on the certificate beats the street that was searched, so a
+building found twice — once by the census, once by a user-supplied postcode — lands
+on one key.
+
+The register also spells the same street two ways: "4 London Bridge Street" and
+"4 London Bridge" are one block and arrive as two candidates. A merge pass runs
+after grouping — same building token, same outcode, one street name a word-prefix
+of the other — and folds the shorter spelling into the longer, keeping every
+certificate and the nearer distance reading. What was folded is listed in the
+building's `merged_from` and in `buildings.json` under
+`merged_abbreviated_streets`, so a reader can undo the judgement.
+
+**Stage 1b exclusions** are name patterns, and they mark rather than delete:
+`student_accommodation` (student, hall of residence, dormitory),
+`serviced_apartments` (serviced apartments/suites, aparthotel, short stay or
+short let, holiday lets), `hotel_or_hostel` (hotel, hostel, motel, guest house)
+and `care_or_retirement` (care/nursing/residential/rest home, hospice, retirement
+home or village, sheltered housing, extra care, almshouse). Every excluded
+building keeps an `excluded_reason` naming the words that matched, and appears in
+`summary.md`, because a pattern list is a guess about a name and the reader may
+disagree with it.
+
+**Stage 2** samples up to `--certs-per-building` certificates *spread across* the
+building's list — never the first eight, because a big block's first certificates
+are all one floor and one layout — and computes median area, earliest assessment
+year, heating classes, ground-floor share, assessment types and air permeability.
+The filters follow the profile: building age against `max_building_age_years`,
+`min_floor_area_sqft` where **any** flat that clears it keeps the building, and
+the ground-floor rule (`floors.reject_ground_floor`, or the words "ground floor"
+in the profile's `avoid:` list) recorded per building but applied per flat (it fails a
+building only when every sampled flat is ground or basement). Rows use the
+report-schema `hard_filter` shape, so an unknown is the string `"unknown"` and
+never a pass — and an unknown keeps the building rather than dropping it silently.
+
+**Stage 3** runs, for survivors only and capped by `--max-buildings`:
+`crime.box`, `commute.journey` (plans `all` and `rail`) plus `commute.redundancy`,
+`planning.near`, `roads.near`, `landregistry.price_paid`,
+`company.address_search`, and `redress.heat_trust` **only** when a sampled
+certificate says the heating is a community network. Each call is wrapped, so one
+dead source does not stop the run; what failed lands in the record's `failures`
+and in the manifest.
+
+The crime window is fixed once for the whole sweep: stage 3 reads the latest
+published month with one `crime.latest` call and passes it to every `crime.box` as
+`end`, so the buildings cannot end up on different six-month windows if the police
+publish mid-run. The method's rule is one geometry and one window for every
+candidate, or the table compares methods rather than flats.
+
+`roads.py` says in its own docstring: *do not loop this query over a list of
+addresses.* So the sweep does not. It sends **one** Overpass query for the whole
+circle — `roads.build_query` with every `around:` radius widened by the sweep
+radius, taken from roads.py by regex so the tag list cannot drift — and then hands
+those elements to `roads.near(..., elements=, meta=)` per building, which
+re-filters at each category's proper distance from that building's coordinates.
+Above `SHARED_OVERPASS_MAX_M` (1200 m) the widened query would pull megabytes, so
+the sweep falls back to one query per building and says so on stderr. This matters:
+in testing, four back-to-back per-building Overpass calls tripped the public
+instance's rate limit, and each refusal costs up to 90 s x 8 attempts before
+roads.py gives up.
+
+**The 4 KB rule.** Every `candidates/<key>.json` is at most 4096 bytes
+pretty-printed. Provenance sits at the block level: each of `epc`, `crime`,
+`commute`, `planning`, `roads`, `land_registry` and `companies` carries its own
+`source_url`, `retrieved_at` (minute precision) and `evidence_class`, and those
+three are never trimmed — a number with no provenance is worse than no number.
+A block that failed keeps `ok: false`, its status and its note; a block that
+succeeded drops those three, because a plain 200, an empty note and `ok: true` cost
+bytes and say nothing. When the record is still too big, `fit_to_budget()` walks a
+documented list of trim steps:
+metadata that summary.json repeats goes first, then detail the summary table does
+not use, and the three lists the method actually asks for — the top crime anchors,
+the nearest planning cases and the nearest of each road category — are cut down
+last. `trimmed` says how many fields went and names the first few; the full list
+is in `summary.json` under each candidate.
+
+**`metrics`** uses the exact `report-schema.json` keys and holds only what a sweep
+can measure: `crime_6mo_count`, `commute_min`, `commute_redundancy_grade` and
+`nearest_works_m`. `compared_to` is filled mechanically with the sweep median (it
+is only knowable after every candidate is in, so stage 5 rewrites the files);
+`meaning` is left as the literal string `TO BE WRITTEN BY THE MODEL`. The four
+metrics a sweep cannot reach — `price_per_sqft_epc`, `management_organic_score`,
+`management_incentivised_share`, `landlord_type` — are named in
+`metrics_not_measured` with the reason, rather than emitted as empty measures that
+would cost 700 bytes and teach nothing.
+
+**Stage 4** writes `ask-the-user.md`, which follows `references/inputs.md`: one
+message, one numbered list, the review sites and listing portals **by name only**
+with no URLs at all, and per building the specific thing to ask about (the heat
+tariff when the block is on a network, the stage of the nearest tall scheme, who
+appoints the managing agent). The repo never fetches a review site or a portal.
+
+**Stage 5** writes `summary.json`, `summary.md` and `report-skeleton.json`. The
+table is one row per building — distance, certificates, median square feet,
+earliest year, heating, ground-floor share, crimes and predatory share, commute
+all/rail, redundancy grade, nearest tall scheme, nearest trunk road, RMC/RTM count
+and earliest new-build sale — with a MEDIAN row under it. `coverage` counts
+streets found, searched and refused as "too many results", postcode-fallback
+searches, certificates seen, buildings, streets merged, excluded, assessed, passed,
+failed, **not assessed** (past `--max-filter-buildings`, which is neither a pass nor
+a fail), fetched, failures and wall seconds; `not_found` carries the exact query for
+every empty search, and a fetch that a retry or the mirror later fixed is not listed
+as a gap. `report-skeleton.json` is a partly-filled report — identity,
+metrics, hard filters, sources, not_found, blocked_sources — that the model
+completes; it is deliberately **not** yet schema-valid, because every candidate
+still needs its verdict, twelve axes, costs and landmines, and its
+`_skeleton_notes` say so.
+
+**`manifest.json`** records every fetch the run made — stage, url, method, status,
+ok, note, retrieved_at, from_cache — by wrapping `_fetch.fetch` and rebinding it
+inside each imported module. Failures are recorded, never hidden, and the wrapper
+is removed in a `finally`, so the manifest is written even when the run dies.
+
+**Cost.** Stage 3 costs about `crime_months x 5 + 7` fetches per building (the
+police box re-fetches the same window at four shifted centres for its sensitivity
+check, which is 5x on its own), so 37 at the defaults, plus one shared
+OpenStreetMap query for the whole run. Enumeration is 1 Overpass call + 1
+energy-register search per street + up to `--max-postcode-lookups` geocodes, and
+stage 2 is `certs_per_building x` the buildings assessed. `--dry-run` prints all of
+that before you spend it. Past police months and certificate pages are cached, so a
+re-run inside the cache window is nearly free. On a cold cache the energy register
+is the slow part — the pages take about 3.5 s each, well over the 1.2 s spacing — so
+stage 2 dominates the clock; `--certs-per-building 4 --max-filter-buildings 12` cuts
+it about fourfold when you only want a shortlist.
+
+```console
+$ sweep.py --anchor "51.5045,-0.0865" --radius 400 --dest "SW1A 2AA" \
+           --max-buildings 4 --out sweep/ --dry-run
+{ "dry_run": true, "streets_found": 64, "streets_that_would_be_searched": 64,
+  "estimated_fetches": { "street_query": 1, "shared_openstreetmap_query": 1,
+                         "epc_street_searches": 64, "epc_certificates": 200,
+                         "per_building_facts": 37, "facts_total": 148,
+                         "grand_total_excluding_postcodes": 414 } }
+
+$ sweep.py --anchor "51.5045,-0.0865" --radius 400 --dest "SW1A 2AA" \
+           --max-buildings 4 --out sweep/
+stage 1: 64 streets searched, 1202 certificates, 207 buildings (1 excluded)
+stage 2: 25 assessed, 25 passed, 0 failed, 181 not assessed (over the cap)
+stage 3 plan: 4 building(s) x about 37 fetches = about 148 fetches
+{ "ok": true, "out": "/…/sweep", "candidates": 4,
+  "coverage": {...}, "sweep_medians": {...},
+  "files": ["anchor.json", "buildings.json", "filtered.json", "candidates/*.json",
+            "ask-the-user.md", "summary.json", "summary.md",
+            "report-skeleton.json", "manifest.json"] }
+```
+
+Measured on a cold cache, that run took **6 min 15 s** for **373 fetches** (296 over
+the network, 77 served from the cache inside the same run because three of the four
+buildings share one postcode centroid and therefore one crime box). The same run
+against a warm cache takes about 54 s. Each of the four candidate files came out at
+4011-4079 bytes.
+
+Volume note: the energy register's robots.txt disallows crawling. This tool keeps
+the built-in spacing, caps the census, and is meant for an area someone is
+actually house-hunting in — not for harvesting a borough.

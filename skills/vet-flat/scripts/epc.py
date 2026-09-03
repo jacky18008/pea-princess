@@ -15,6 +15,13 @@ Usage:
   epc.py building --postcode "SE8 3GS" [--match "Collier Point"] [--limit 80]
 All commands print JSON. Every record carries source_url, retrieved_at,
 http_status and evidence_class "G" (official register).
+
+Three of the register's answers carry no result table and are NOT failures:
+`too_many_results` (a street too busy to list - it tells you to search by postcode
+instead, and it fires on exactly the streets with the most homes on them) and
+`no_results` (a postcode or a street the register holds nothing for). Both keep
+ok=true and fill `not_found` with the query, so an area sweep can tell a nil result
+from a broken request.
 """
 import argparse
 import collections
@@ -185,7 +192,9 @@ def parse_certificate(body):
 def cert(id_or_url, follow_history=False):
     m = CERT_RE.search(id_or_url) or re.search(r"([0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{4})", id_or_url)
     if not m:
-        raise SystemExit("not a certificate id/url: " + id_or_url)
+        return {"certificate_id": None, "source_url": None, "http_status": 0, "ok": False,
+                "note": "not a certificate id/url: " + id_or_url, "retrieved_at": now_iso(),
+                "evidence_class": "U"}
     cid = m.group(1)
     url = f"{BASE}/energy-certificate/{cid}"
     res = fetch(url, cache_ttl=7 * 86400, expect=lambda b: "Total floor area" in b)

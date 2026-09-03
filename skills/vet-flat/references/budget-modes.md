@@ -15,7 +15,7 @@ People on a £20-a-month plan share usage caps and smaller sandboxes; people wit
 | Planning | skip (state it) | `planning.py near --radius 250 --limit 20` | + `stages` on tall schemes, `roads.py near` |
 | Reviews | ask the user for the lowest reviews only | full paste, incentivised and burst filters | + Trustpilot/press, cross-building matrix |
 | Report | verdict card, hard filters, 2 questions, 12 axes with U where skipped | full | full + comparison |
-| Area sweep | not offered; suggest `standard` | `sweep.py --radius 600 --max-buildings 6` | `--radius 3200 --max-buildings 20` |
+| Area sweep | not offered; suggest `standard` | `sweep.py --radius 600 --max-buildings 6` | run several `--radius 1000` sweeps on different anchors (one per neighbourhood) with `--max-buildings 8` each; a single 3,200 m sweep trips the map service's rate limit and needs the filter caps raised |
 
 ## What never gets cut
 Hard filters from the profile · evidence grades · the "not found" table · the attribution footer · "never sign on the viewing day" · asking the user once, in one list, for what cannot be fetched.
