@@ -1,0 +1,346 @@
+{
+ "query": {
+  "postcode": "NW1 0NE",
+  "street": null,
+  "town": null
+ },
+ "source_url": "https://find-energy-certificate.service.gov.uk/find-a-certificate/search-by-postcode?postcode=NW1%200NE",
+ "http_status": 200,
+ "ok": true,
+ "note": "",
+ "retrieved_at": "2026-09-03T11:41:38+00:00",
+ "evidence_class": "G",
+ "count": 47,
+ "results": [
+  {
+   "certificate_id": "4650-9529-8009-0128-0292",
+   "address": "Third and Fourth Floor 160 Camden High Road, London, NW1 0NE",
+   "rating": "D",
+   "valid_until": "14 December 2030",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/4650-9529-8009-0128-0292"
+  },
+  {
+   "certificate_id": "1136-4029-8100-0456-1226",
+   "address": "Studio 2, 162 Camden High Street, London, NW1 0NE",
+   "rating": "D",
+   "valid_until": "27 January 2036",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/1136-4029-8100-0456-1226"
+  },
+  {
+   "certificate_id": "0370-2056-0190-2026-7161",
+   "address": "Studio 3, 162 Camden High Street, London, NW1 0NE",
+   "rating": "C",
+   "valid_until": "27 January 2036",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0370-2056-0190-2026-7161"
+  },
+  {
+   "certificate_id": "0380-2946-4190-2026-8135",
+   "address": "Studio 5, 162 Camden High Street, London, NW1 0NE",
+   "rating": "D",
+   "valid_until": "27 January 2036",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0380-2946-4190-2026-8135"
+  },
+  {
+   "certificate_id": "4836-5122-9100-0180-1296",
+   "address": "Studio 6, 162 Camden High Street, London, NW1 0NE",
+   "rating": "D",
+   "valid_until": "9 February 2036",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/4836-5122-9100-0180-1296"
+  },
+  {
+   "certificate_id": "9546-3011-6304-3226-3204",
+   "address": "Flat 1, 140A Camden High Street, London, NW1 0NE",
+   "rating": "C",
+   "valid_until": "13 April 2036",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/9546-3011-6304-3226-3204"
+  },
+  {
+   "certificate_id": "1336-3634-8600-0834-0296",
+   "address": "Flat 2, 140a Camden High Street, LONDON, NW1 0NE",
+   "rating": "C",
+   "valid_until": "13 April 2036",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/1336-3634-8600-0834-0296"
+  },
+  {
+   "certificate_id": "9149-3060-7304-8186-6200",
+   "address": "Flat 3, 140a Camden High Street, LONDON, NW1 0NE",
+   "rating": "C",
+   "valid_until": "13 April 2036",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/9149-3060-7304-8186-6200"
+  },
+  {
+   "certificate_id": "9646-3060-9304-8486-6200",
+   "address": "Flat 4, 140a Camden High Street, LONDON, NW1 0NE",
+   "rating": "C",
+   "valid_until": "13 April 2036",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/9646-3060-9304-8486-6200"
+  },
+  {
+   "certificate_id": "9641-3011-1304-5476-3204",
+   "address": "Flat 5, 140a Camden High Street, LONDON, NW1 0NE",
+   "rating": "C",
+   "valid_until": "13 April 2036",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/9641-3011-1304-5476-3204"
+  },
+  {
+   "certificate_id": "1436-1334-5100-0784-1296",
+   "address": "Flat 5, 140a Camden High Street, LONDON, NW1 0NE",
+   "rating": "C",
+   "valid_until": "13 April 2036",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/1436-1334-5100-0784-1296"
+  },
+  {
+   "certificate_id": "0350-3374-1140-2396-3121",
+   "address": "Flat 6, 140a Camden High Street, LONDON, NW1 0NE",
+   "rating": "C",
+   "valid_until": "13 April 2036",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0350-3374-1140-2396-3121"
+  },
+  {
+   "certificate_id": "3100-7345-0732-7191-3463",
+   "address": "Flat 6, 140a Camden High Street, LONDON, NW1 0NE",
+   "rating": "B",
+   "valid_until": "13 April 2036",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/3100-7345-0732-7191-3463"
+  },
+  {
+   "certificate_id": "4100-6345-0732-7191-3463",
+   "address": "Flat 7, 140a Camden High Street, LONDON, NW1 0NE",
+   "rating": "C",
+   "valid_until": "13 April 2036",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/4100-6345-0732-7191-3463"
+  },
+  {
+   "certificate_id": "4536-1334-5100-0774-1292",
+   "address": "Flat 7, 140a Camden High Street, LONDON, NW1 0NE",
+   "rating": "C",
+   "valid_until": "13 April 2036",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/4536-1334-5100-0774-1292"
+  },
+  {
+   "certificate_id": "0409-2525-4000-0153-0222",
+   "address": "FLAT 1, 144 CAMDEN HIGH STREET, LONDON, NW1 0NE",
+   "rating": "D",
+   "valid_until": "27 May 2031",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0409-2525-4000-0153-0222"
+  },
+  {
+   "certificate_id": "8239-6326-8680-8743-8902",
+   "address": "Flat 2, 144 Camden High Street, LONDON, NW1 0NE",
+   "rating": "C",
+   "valid_until": "7 June 2021 Expired",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/8239-6326-8680-8743-8902"
+  },
+  {
+   "certificate_id": "0653-3023-8209-5237-0204",
+   "address": "Flat 3, 144 Camden High Street, LONDON, NW1 0NE",
+   "rating": "C",
+   "valid_until": "5 January 2033",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0653-3023-8209-5237-0204"
+  },
+  {
+   "certificate_id": "0865-3016-7205-7712-1200",
+   "address": "Flat 4, 144 Camden High Street, LONDON, NW1 0NE",
+   "rating": "D",
+   "valid_until": "8 May 2032",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0865-3016-7205-7712-1200"
+  },
+  {
+   "certificate_id": "8784-6329-8689-4764-8996",
+   "address": "Flat 5, 144 Camden High Street, LONDON, NW1 0NE",
+   "rating": "E",
+   "valid_until": "14 November 2024 Expired",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/8784-6329-8689-4764-8996"
+  },
+  {
+   "certificate_id": "2648-9916-7210-0922-7970",
+   "address": "Flat 1, 146 Camden High Street, LONDON, NW1 0NE",
+   "rating": "D",
+   "valid_until": "26 October 2022 Expired",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/2648-9916-7210-0922-7970"
+  },
+  {
+   "certificate_id": "1737-5122-6000-0973-5296",
+   "address": "Flat 1, 146 Camden High Street, London, NW1 0NE",
+   "rating": "C",
+   "valid_until": "16 February 2033",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/1737-5122-6000-0973-5296"
+  },
+  {
+   "certificate_id": "4400-1134-0522-8299-3273",
+   "address": "Flat 2, 146 Camden High Street, LONDON, NW1 0NE",
+   "rating": "C",
+   "valid_until": "16 February 2033",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/4400-1134-0522-8299-3273"
+  },
+  {
+   "certificate_id": "8001-6521-6750-5573-0922",
+   "address": "Flat 3, 146 Camden High Street, LONDON, NW1 0NE",
+   "rating": "C",
+   "valid_until": "28 September 2029",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/8001-6521-6750-5573-0922"
+  },
+  {
+   "certificate_id": "9552-3061-6204-7356-1204",
+   "address": "Flat 4, 146 Camden High Street, LONDON, NW1 0NE",
+   "rating": "C",
+   "valid_until": "14 April 2036",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/9552-3061-6204-7356-1204"
+  },
+  {
+   "certificate_id": "0320-2176-9330-2994-2901",
+   "address": "Flat 1, 154-156 Camden High Street, LONDON, NW1 0NE",
+   "rating": "C",
+   "valid_until": "24 July 2034",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0320-2176-9330-2994-2901"
+  },
+  {
+   "certificate_id": "0320-2376-9330-2994-7971",
+   "address": "Flat 2, 154-156 Camden High Street, LONDON, NW1 0NE",
+   "rating": "C",
+   "valid_until": "24 July 2034",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0320-2376-9330-2994-7971"
+  },
+  {
+   "certificate_id": "0320-2475-9330-2994-4931",
+   "address": "Flat 3, 154-156 Camden High Street, LONDON, NW1 0NE",
+   "rating": "C",
+   "valid_until": "24 July 2034",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0320-2475-9330-2994-4931"
+  },
+  {
+   "certificate_id": "9465-3039-9203-2474-9204",
+   "address": "Flat 4, 154-156 Camden High Street, LONDON, NW1 0NE",
+   "rating": "C",
+   "valid_until": "24 July 2034",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/9465-3039-9203-2474-9204"
+  },
+  {
+   "certificate_id": "0320-2776-9330-2994-4935",
+   "address": "Flat 5, 154-156 Camden High Street, LONDON, NW1 0NE",
+   "rating": "C",
+   "valid_until": "24 July 2034",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0320-2776-9330-2994-4935"
+  },
+  {
+   "certificate_id": "8900-5962-0722-6399-3343",
+   "address": "Flat 6, 154-156 Camden High Street, LONDON, NW1 0NE",
+   "rating": "C",
+   "valid_until": "24 July 2034",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/8900-5962-0722-6399-3343"
+  },
+  {
+   "certificate_id": "8942-6632-9100-4530-6922",
+   "address": "Flat 4, 158 Camden High Street, LONDON, NW1 0NE",
+   "rating": "C",
+   "valid_until": "19 February 2022 Expired",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/8942-6632-9100-4530-6922"
+  },
+  {
+   "certificate_id": "0068-4997-7240-5643-3994",
+   "address": "158a, Camden High Street, LONDON, NW1 0NE",
+   "rating": "C",
+   "valid_until": "6 October 2027",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0068-4997-7240-5643-3994"
+  },
+  {
+   "certificate_id": "9952-2846-7905-9303-3711",
+   "address": "158b, Camden High Street, LONDON, NW1 0NE",
+   "rating": "C",
+   "valid_until": "6 October 2027",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/9952-2846-7905-9303-3711"
+  },
+  {
+   "certificate_id": "8796-5365-5429-2907-4033",
+   "address": "158c, Camden High Street, LONDON, NW1 0NE",
+   "rating": "D",
+   "valid_until": "6 October 2027",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/8796-5365-5429-2907-4033"
+  },
+  {
+   "certificate_id": "8333-7320-5969-1486-7902",
+   "address": "158d, Camden High Street, LONDON, NW1 0NE",
+   "rating": "C",
+   "valid_until": "6 October 2027",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/8333-7320-5969-1486-7902"
+  },
+  {
+   "certificate_id": "8460-6426-7560-1781-4922",
+   "address": "Second Floor Flat, 160 Camden High Street, LONDON, NW1 0NE",
+   "rating": "E",
+   "valid_until": "28 June 2020 Expired",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/8460-6426-7560-1781-4922"
+  },
+  {
+   "certificate_id": "9020-0549-0054-7005-0733",
+   "address": "Flat 2nd Floor, 160 Camden High Street, LONDON, NW1 0NE",
+   "rating": "D",
+   "valid_until": "5 April 2033",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/9020-0549-0054-7005-0733"
+  },
+  {
+   "certificate_id": "9848-7963-7239-4286-4940",
+   "address": "Flat 1, 162 Camden High Street, LONDON, NW1 0NE",
+   "rating": "D",
+   "valid_until": "13 November 2026",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/9848-7963-7239-4286-4940"
+  },
+  {
+   "certificate_id": "9748-4963-7239-4286-4954",
+   "address": "Flat 2, 162 Camden High Street, LONDON, NW1 0NE",
+   "rating": "C",
+   "valid_until": "13 November 2026",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/9748-4963-7239-4286-4954"
+  },
+  {
+   "certificate_id": "8226-7429-4639-8884-3996",
+   "address": "Flat 3, 162 Camden High Street, LONDON, NW1 0NE",
+   "rating": "D",
+   "valid_until": "13 November 2026",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/8226-7429-4639-8884-3996"
+  },
+  {
+   "certificate_id": "8906-7429-4649-1854-3992",
+   "address": "Flat 4, 162 Camden High Street, LONDON, NW1 0NE",
+   "rating": "D",
+   "valid_until": "13 November 2026",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/8906-7429-4649-1854-3992"
+  },
+  {
+   "certificate_id": "8816-7429-4649-3834-3992",
+   "address": "Flat 5, 162 Camden High Street, LONDON, NW1 0NE",
+   "rating": "C",
+   "valid_until": "13 November 2026",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/8816-7429-4649-3834-3992"
+  },
+  {
+   "certificate_id": "9148-8963-7249-4186-4930",
+   "address": "Flat 6, 162 Camden High Street, LONDON, NW1 0NE",
+   "rating": "D",
+   "valid_until": "13 November 2026",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/9148-8963-7249-4186-4930"
+  },
+  {
+   "certificate_id": "8726-7429-4649-5884-3992",
+   "address": "Flat 7, 162 Camden High Street, LONDON, NW1 0NE",
+   "rating": "D",
+   "valid_until": "13 November 2026",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/8726-7429-4649-5884-3992"
+  },
+  {
+   "certificate_id": "9248-9963-7259-4686-4920",
+   "address": "Flat 8, 162 Camden High Street, LONDON, NW1 0NE",
+   "rating": "D",
+   "valid_until": "13 November 2026",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/9248-9963-7259-4686-4920"
+  },
+  {
+   "certificate_id": "9446-2884-7695-9496-1321",
+   "address": "Flat 9, 162 Camden High Street, LONDON, NW1 0NE",
+   "rating": "D",
+   "valid_until": "13 November 2026",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/9446-2884-7695-9496-1321"
+  }
+ ],
+ "caveat": "Large buildings are often split across several postcodes; if a flat is missing, search by street name and town."
+}

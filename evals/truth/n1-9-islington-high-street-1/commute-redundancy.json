@@ -1,0 +1,288 @@
+{
+ "query": {
+  "lat": 51.532445,
+  "lng": -0.106486,
+  "search_radius_m": 2000
+ },
+ "source_url": "https://api.tfl.gov.uk/StopPoint?lat=51.532445&lon=-0.106486&stopTypes=NaptanMetroStation,NaptanRailStation,NaptanFerryPort&radius=2000&returnLines=true",
+ "http_status": 200,
+ "ok": true,
+ "note": "",
+ "retrieved_at": "2026-09-03T11:56:23+00:00",
+ "evidence_class": "G",
+ "grade": "B",
+ "reason": "The nearer family is within an 800 m walk (family_A about 91 m) and the second is a longer but usable walk (family_B about 1532 m).",
+ "explanation": "Two lines of the same family do not count as redundancy; they tend to strike together, and they share the same tunnels, the same control room and the same flood.",
+ "families": {
+  "family_A": {
+   "members": [
+    "tube",
+    "dlr"
+   ],
+   "nearest": "Angel Underground Station",
+   "modes": [
+    "tube"
+   ],
+   "lines": [
+    "Northern"
+   ],
+   "straight_line_m": 70,
+   "walk_m_estimate": 91,
+   "walk_min_estimate": 1.1
+  },
+  "family_B": {
+   "members": [
+    "national-rail",
+    "overground",
+    "elizabeth-line"
+   ],
+   "nearest": "London King's Cross Rail Station",
+   "modes": [
+    "national-rail"
+   ],
+   "lines": [
+    "Grand Central",
+    "Great Northern",
+    "Hull Trains",
+    "London North Eastern Railway",
+    "Lumo",
+    "Thameslink"
+   ],
+   "straight_line_m": 1178,
+   "walk_m_estimate": 1532,
+   "walk_min_estimate": 19.1
+  },
+  "family_C": {
+   "members": [
+    "river-bus"
+   ],
+   "nearest": null,
+   "walk_m_estimate": null
+  }
+ },
+ "nearest_family": "family_A",
+ "nearest_family_walk_m": 91,
+ "second_family_walk_m": 1532,
+ "bus_fallback": null,
+ "stations_considered": [
+  {
+   "name": "Angel Underground Station",
+   "modes": [
+    "tube"
+   ],
+   "family": "family_A",
+   "walk_m_estimate": 91,
+   "walk_min_estimate": 1.1
+  },
+  {
+   "name": "London King's Cross Rail Station",
+   "modes": [
+    "national-rail"
+   ],
+   "family": "family_B",
+   "walk_m_estimate": 1532,
+   "walk_min_estimate": 19.1
+  },
+  {
+   "name": "Essex Road Rail Station",
+   "modes": [
+    "national-rail"
+   ],
+   "family": "family_B",
+   "walk_m_estimate": 1534,
+   "walk_min_estimate": 19.2
+  },
+  {
+   "name": "King's Cross St. Pancras Underground Station",
+   "modes": [
+    "tube"
+   ],
+   "family": "family_A",
+   "walk_m_estimate": 1560,
+   "walk_min_estimate": 19.5
+  },
+  {
+   "name": "Farringdon Underground Station",
+   "modes": [
+    "tube"
+   ],
+   "family": "family_A",
+   "walk_m_estimate": 1702,
+   "walk_min_estimate": 21.3
+  },
+  {
+   "name": "Farringdon",
+   "modes": [
+    "elizabeth-line"
+   ],
+   "family": "family_B",
+   "walk_m_estimate": 1712,
+   "walk_min_estimate": 21.4
+  },
+  {
+   "name": "Farringdon Rail Station",
+   "modes": [
+    "national-rail"
+   ],
+   "family": "family_B",
+   "walk_m_estimate": 1713,
+   "walk_min_estimate": 21.4
+  },
+  {
+   "name": "Old Street Rail Station",
+   "modes": [
+    "national-rail"
+   ],
+   "family": "family_B",
+   "walk_m_estimate": 1808,
+   "walk_min_estimate": 22.6
+  },
+  {
+   "name": "Barbican Underground Station",
+   "modes": [
+    "tube"
+   ],
+   "family": "family_A",
+   "walk_m_estimate": 1843,
+   "walk_min_estimate": 23.0
+  },
+  {
+   "name": "London St Pancras International Rail Station",
+   "modes": [
+    "national-rail"
+   ],
+   "family": "family_B",
+   "walk_m_estimate": 1843,
+   "walk_min_estimate": 23.0
+  },
+  {
+   "name": "Old Street Underground Station",
+   "modes": [
+    "tube"
+   ],
+   "family": "family_A",
+   "walk_m_estimate": 1866,
+   "walk_min_estimate": 23.3
+  },
+  {
+   "name": "Caledonian Road & Barnsbury Rail Station",
+   "modes": [
+    "overground"
+   ],
+   "family": "family_B",
+   "walk_m_estimate": 1867,
+   "walk_min_estimate": 23.3
+  },
+  {
+   "name": "London St Pancras International Rail Station",
+   "modes": [
+    "national-rail"
+   ],
+   "family": "family_B",
+   "walk_m_estimate": 1908,
+   "walk_min_estimate": 23.8
+  },
+  {
+   "name": "London St Pancras International LL Rail Station",
+   "modes": [
+    "national-rail"
+   ],
+   "family": "family_B",
+   "walk_m_estimate": 1921,
+   "walk_min_estimate": 24.0
+  },
+  {
+   "name": "Chancery Lane Underground Station",
+   "modes": [
+    "tube"
+   ],
+   "family": "family_A",
+   "walk_m_estimate": 2052,
+   "walk_min_estimate": 25.7
+  },
+  {
+   "name": "Highbury & Islington Rail Station",
+   "modes": [
+    "national-rail",
+    "overground"
+   ],
+   "family": "family_B",
+   "walk_m_estimate": 2061,
+   "walk_min_estimate": 25.8
+  },
+  {
+   "name": "Highbury & Islington Underground Station",
+   "modes": [
+    "tube"
+   ],
+   "family": "family_A",
+   "walk_m_estimate": 2090,
+   "walk_min_estimate": 26.1
+  },
+  {
+   "name": "Russell Square Underground Station",
+   "modes": [
+    "tube"
+   ],
+   "family": "family_A",
+   "walk_m_estimate": 2092,
+   "walk_min_estimate": 26.2
+  },
+  {
+   "name": "Euston Underground Station",
+   "modes": [
+    "tube"
+   ],
+   "family": "family_A",
+   "walk_m_estimate": 2425,
+   "walk_min_estimate": 30.3
+  },
+  {
+   "name": "Holborn Underground Station",
+   "modes": [
+    "tube"
+   ],
+   "family": "family_A",
+   "walk_m_estimate": 2460,
+   "walk_min_estimate": 30.7
+  },
+  {
+   "name": "Moorgate Rail Station",
+   "modes": [
+    "national-rail"
+   ],
+   "family": "family_B",
+   "walk_m_estimate": 2485,
+   "walk_min_estimate": 31.1
+  },
+  {
+   "name": "Moorgate Underground Station",
+   "modes": [
+    "tube"
+   ],
+   "family": "family_A",
+   "walk_m_estimate": 2556,
+   "walk_min_estimate": 31.9
+  },
+  {
+   "name": "London Euston Rail Station",
+   "modes": [
+    "national-rail",
+    "overground"
+   ],
+   "family": "family_B",
+   "walk_m_estimate": 2575,
+   "walk_min_estimate": 32.2
+  },
+  {
+   "name": "St. Paul's Underground Station",
+   "modes": [
+    "tube"
+   ],
+   "family": "family_A",
+   "walk_m_estimate": 2583,
+   "walk_min_estimate": 32.3
+  }
+ ],
+ "method": "Stations within 2000 m straight line, each put in a strike family: family_A is tube and DLR, family_B is national rail, Overground and the Elizabeth line, family_C is the river bus (a pleasant backup, not a commute). Grades: A = both A and B within an 800 m walk; B = both, second one 800-1600 m; B- = one within 800 m and the other beyond 1600 m or bus only; C = one family only. Distances are the straight line times 1.3, an estimate, so treat a number near a threshold as a tie."
+}

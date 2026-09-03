@@ -1,0 +1,132 @@
+{
+ "query": {
+  "postcode": "E14 9TP",
+  "postcode_as_given": "E14 9TP",
+  "since": null,
+  "paon": null
+ },
+ "source_url": "https://landregistry.data.gov.uk/landregistry/query",
+ "http_method": "POST",
+ "http_status": 200,
+ "ok": true,
+ "note": "",
+ "retrieved_at": "2026-09-03T11:52:15+00:00",
+ "evidence_class": "G",
+ "sparql": "PREFIX lrppi: <http://landregistry.data.gov.uk/def/ppi/>\nPREFIX lrcommon: <http://landregistry.data.gov.uk/def/common/>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nSELECT ?date ?amount ?paon ?saon ?street ?town ?ptype ?newbuild ?estate ?category\nWHERE {\n  ?tx lrppi:propertyAddress ?addr ;\n      lrppi:pricePaid ?amount ;\n      lrppi:transactionDate ?date ;\n      lrppi:transactionCategory ?category .\n  ?addr lrcommon:postcode \"E14 9TP\" .\n  OPTIONAL { ?addr lrcommon:paon ?paon }\n  OPTIONAL { ?addr lrcommon:saon ?saon }\n  OPTIONAL { ?addr lrcommon:street ?street }\n  OPTIONAL { ?addr lrcommon:town ?town }\n  OPTIONAL { ?tx lrppi:propertyType ?ptype }\n  OPTIONAL { ?tx lrppi:newBuild ?newbuild }\n  OPTIONAL { ?tx lrppi:estateType ?estate }\n}\nORDER BY ?date\nLIMIT 500",
+ "transactions": [
+  {
+   "date": "2014-08-27",
+   "price": 42000,
+   "paon": "40",
+   "saon": "GROUND FLOOR",
+   "street": "MARSH WALL",
+   "town": "LONDON",
+   "property_type": "otherPropertyType",
+   "new_build": false,
+   "estate_type": "freehold",
+   "category": "additionalPricePaidTransaction"
+  },
+  {
+   "date": "2019-12-20",
+   "price": 26650000,
+   "paon": "30",
+   "saon": null,
+   "street": "MARSH WALL",
+   "town": "LONDON",
+   "property_type": "otherPropertyType",
+   "new_build": false,
+   "estate_type": "freehold",
+   "category": "additionalPricePaidTransaction"
+  },
+  {
+   "date": "2022-02-14",
+   "price": 11250000,
+   "paon": "58",
+   "saon": null,
+   "street": "MARSH WALL",
+   "town": "LONDON",
+   "property_type": "otherPropertyType",
+   "new_build": false,
+   "estate_type": "freehold",
+   "category": "additionalPricePaidTransaction"
+  },
+  {
+   "date": "2022-02-14",
+   "price": 11250000,
+   "paon": "56",
+   "saon": null,
+   "street": "MARSH WALL",
+   "town": "LONDON",
+   "property_type": "otherPropertyType",
+   "new_build": false,
+   "estate_type": "freehold",
+   "category": "additionalPricePaidTransaction"
+  },
+  {
+   "date": "2023-09-28",
+   "price": 1260000,
+   "paon": "56",
+   "saon": null,
+   "street": "MARSH WALL",
+   "town": "LONDON",
+   "property_type": "otherPropertyType",
+   "new_build": false,
+   "estate_type": "leasehold",
+   "category": "additionalPricePaidTransaction"
+  },
+  {
+   "date": "2024-12-20",
+   "price": 60000000,
+   "paon": "30",
+   "saon": null,
+   "street": "MARSH WALL",
+   "town": "LONDON",
+   "property_type": "otherPropertyType",
+   "new_build": false,
+   "estate_type": "freehold",
+   "category": "additionalPricePaidTransaction"
+  },
+  {
+   "date": "2025-08-28",
+   "price": 2298337,
+   "paon": "52",
+   "saon": "UNIT A",
+   "street": "MARSH WALL",
+   "town": "LONDON",
+   "property_type": "otherPropertyType",
+   "new_build": false,
+   "estate_type": "leasehold",
+   "category": "additionalPricePaidTransaction"
+  }
+ ],
+ "count": 7,
+ "earliest_transaction": {
+  "date": "2014-08-27",
+  "price": 42000,
+  "paon": "40",
+  "saon": "GROUND FLOOR",
+  "street": "MARSH WALL",
+  "town": "LONDON",
+  "property_type": "otherPropertyType",
+  "new_build": false,
+  "estate_type": "freehold",
+  "category": "additionalPricePaidTransaction"
+ },
+ "latest_transaction": {
+  "date": "2025-08-28",
+  "price": 2298337,
+  "paon": "52",
+  "saon": "UNIT A",
+  "street": "MARSH WALL",
+  "town": "LONDON",
+  "property_type": "otherPropertyType",
+  "new_build": false,
+  "estate_type": "leasehold",
+  "category": "additionalPricePaidTransaction"
+ },
+ "new_build_count": 0,
+ "earliest_new_build_transaction": null,
+ "earliest_new_build_year": null,
+ "completion_year_note": "earliest_new_build_transaction is the first recorded sale of a newly built dwelling in this postcode: strong evidence the building was finished by that year. Absence of a new-build row is not evidence the building is old - flats sold by the developer under a different postcode, or never sold at all (build to rent), leave no trace here.",
+ "coverage_note": "Price Paid Data is sales lodged for registration in England and Wales. It excludes lettings, transfers that were not sales, and most commercial transactions. It does not name the owner."
+}

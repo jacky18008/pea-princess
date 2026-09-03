@@ -1,0 +1,28 @@
+{
+ "query": {
+  "postcode": "SW8 1SP",
+  "normalised": "SW81SP"
+ },
+ "source_url": "https://api.postcodes.io/postcodes/SW81SP",
+ "http_status": 200,
+ "ok": true,
+ "note": "",
+ "retrieved_at": "2026-09-03T11:56:38+00:00",
+ "evidence_class": "G",
+ "postcode": "SW8 1SP",
+ "admin_district": "Lambeth",
+ "admin_ward": "Vauxhall",
+ "lsoa": "Lambeth 004A",
+ "msoa": "Lambeth 004",
+ "outcode": "SW8",
+ "incode": "1SP",
+ "region": "London",
+ "country": "England",
+ "parliamentary_constituency": "Vauxhall and Camberwell Green",
+ "eastings": 530382,
+ "northings": 177965,
+ "quality": 1,
+ "lat": 51.485616,
+ "lng": -0.12358,
+ "method": "ONS Postcode Directory via postcodes.io. `quality` 1 means the coordinate is within the building; higher numbers are coarser. A postcode centroid is not a door: expect tens of metres of error."
+}

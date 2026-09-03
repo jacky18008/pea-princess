@@ -1,0 +1,240 @@
+{
+ "query": {
+  "from": "NW1 0NE",
+  "from_kind": "postcode",
+  "to": "SW1A 2AA",
+  "to_kind": "postcode",
+  "arrive_by": "09:00",
+  "date": "20260904",
+  "date_source": "next-weekday",
+  "door_buffer_min": 0,
+  "plans": [
+   "all",
+   "rail",
+   "bus"
+  ]
+ },
+ "source_url": "https://api.tfl.gov.uk/Journey/JourneyResults/NW1%200NE/to/SW1A%202AA?date=20260904&time=0900&timeIs=Arriving",
+ "http_status": 200,
+ "ok": true,
+ "note": "",
+ "retrieved_at": "2026-09-03T11:55:05+00:00",
+ "evidence_class": "G",
+ "app_key_used": false,
+ "plans": {
+  "all": {
+   "source_url": "https://api.tfl.gov.uk/Journey/JourneyResults/NW1%200NE/to/SW1A%202AA?date=20260904&time=0900&timeIs=Arriving",
+   "http_status": 200,
+   "ok": true,
+   "note": "",
+   "retrieved_at": "2026-09-03T11:55:03+00:00",
+   "evidence_class": "G",
+   "mode_filter": "(TfL default: every mode)",
+   "duration_min": 34,
+   "duration_min_before_buffer": 34,
+   "door_buffer_min": 0,
+   "start": "2026-09-04T08:25:00",
+   "arrival": "2026-09-04T08:59:00",
+   "legs": [
+    {
+     "mode": "walking",
+     "line": null,
+     "from": "NW1 0NE",
+     "to": "Camden Town Station",
+     "duration_min": 4,
+     "departure": "2026-09-04T08:25:00",
+     "arrival": "2026-09-04T08:29:00",
+     "summary": "Walk to Camden Town Station"
+    },
+    {
+     "mode": "bus",
+     "line": "24",
+     "from": "Camden Town Station",
+     "to": "Westminster Stn  / Parliament Square",
+     "duration_min": 27,
+     "departure": "2026-09-04T08:29:00",
+     "arrival": "2026-09-04T08:56:00",
+     "summary": "24 bus to Westminster Station / Parliament Square"
+    },
+    {
+     "mode": "walking",
+     "line": null,
+     "from": "Westminster Stn  / Parliament Square",
+     "to": "SW1A 2AA",
+     "duration_min": 3,
+     "departure": "2026-09-04T08:56:00",
+     "arrival": "2026-09-04T08:59:00",
+     "summary": "Walk to SW1A 2AA"
+    }
+   ],
+   "changes": 0,
+   "transit_legs": 1,
+   "walking_min": 7,
+   "first_leg_walk_min": 4,
+   "last_leg_walk_min": 3,
+   "waiting_min_in_plan": 0,
+   "zero_wait_joins": 2,
+   "modes": [
+    "bus"
+   ],
+   "lines": [
+    "24"
+   ],
+   "wait_sample_note": "2 of the 2 connections in this plan depart at the exact minute the previous leg arrives. That is a zero-wait sample: the plan has budgeted nothing for waiting, so the real trip is this number plus however long the next service takes to turn up.",
+   "alternatives_min": [
+    34,
+    41,
+    41
+   ],
+   "journeys_returned": 3
+  },
+  "rail": {
+   "source_url": "https://api.tfl.gov.uk/Journey/JourneyResults/NW1%200NE/to/SW1A%202AA?date=20260904&time=0900&timeIs=Arriving&mode=tube,dlr,overground,elizabeth-line,national-rail,walking",
+   "http_status": 200,
+   "ok": true,
+   "note": "",
+   "retrieved_at": "2026-09-03T11:55:04+00:00",
+   "evidence_class": "G",
+   "mode_filter": "tube,dlr,overground,elizabeth-line,national-rail,walking",
+   "duration_min": 41,
+   "duration_min_before_buffer": 41,
+   "door_buffer_min": 0,
+   "start": "2026-09-04T08:13:00",
+   "arrival": "2026-09-04T08:54:00",
+   "legs": [
+    {
+     "mode": "walking",
+     "line": null,
+     "from": "NW1 0NE",
+     "to": "Camden Town Underground Station",
+     "duration_min": 12,
+     "departure": "2026-09-04T08:13:00",
+     "arrival": "2026-09-04T08:25:00",
+     "summary": "Walk to Camden Town Station"
+    },
+    {
+     "mode": "tube",
+     "line": "Northern",
+     "from": "Camden Town Underground Station",
+     "to": "Embankment Underground Station",
+     "duration_min": 11,
+     "departure": "2026-09-04T08:25:00",
+     "arrival": "2026-09-04T08:36:00",
+     "summary": "Northern line to Embankment"
+    },
+    {
+     "mode": "tube",
+     "line": "District",
+     "from": "Embankment Underground Station",
+     "to": "Westminster Underground Station",
+     "duration_min": 2,
+     "departure": "2026-09-04T08:41:00",
+     "arrival": "2026-09-04T08:43:00",
+     "summary": "District line to Westminster"
+    },
+    {
+     "mode": "walking",
+     "line": null,
+     "from": "Westminster Underground Station",
+     "to": "SW1A 2AA",
+     "duration_min": 11,
+     "departure": "2026-09-04T08:43:00",
+     "arrival": "2026-09-04T08:54:00",
+     "summary": "Walk to SW1A 2AA"
+    }
+   ],
+   "changes": 1,
+   "transit_legs": 2,
+   "walking_min": 23,
+   "first_leg_walk_min": 12,
+   "last_leg_walk_min": 11,
+   "waiting_min_in_plan": 5,
+   "zero_wait_joins": 2,
+   "modes": [
+    "tube"
+   ],
+   "lines": [
+    "Northern",
+    "District"
+   ],
+   "wait_sample_note": "2 of the 3 connections in this plan depart at the exact minute the previous leg arrives. That is a zero-wait sample: the plan has budgeted nothing for waiting, so the real trip is this number plus however long the next service takes to turn up.",
+   "alternatives_min": [
+    41,
+    41,
+    41
+   ],
+   "journeys_returned": 3
+  },
+  "bus": {
+   "source_url": "https://api.tfl.gov.uk/Journey/JourneyResults/NW1%200NE/to/SW1A%202AA?date=20260904&time=0900&timeIs=Arriving&mode=bus,walking",
+   "http_status": 200,
+   "ok": true,
+   "note": "",
+   "retrieved_at": "2026-09-03T11:55:05+00:00",
+   "evidence_class": "G",
+   "mode_filter": "bus,walking",
+   "duration_min": 33,
+   "duration_min_before_buffer": 33,
+   "door_buffer_min": 0,
+   "start": "2026-09-04T08:14:00",
+   "arrival": "2026-09-04T08:47:00",
+   "legs": [
+    {
+     "mode": "walking",
+     "line": null,
+     "from": "NW1 0NE",
+     "to": "Camden Town Station",
+     "duration_min": 4,
+     "departure": "2026-09-04T08:14:00",
+     "arrival": "2026-09-04T08:18:00",
+     "summary": "Walk to Camden Town Station"
+    },
+    {
+     "mode": "bus",
+     "line": "24",
+     "from": "Camden Town Station",
+     "to": "Westminster Stn  / Parliament Square",
+     "duration_min": 26,
+     "departure": "2026-09-04T08:18:00",
+     "arrival": "2026-09-04T08:44:00",
+     "summary": "24 bus to Westminster Station / Parliament Square"
+    },
+    {
+     "mode": "walking",
+     "line": null,
+     "from": "Westminster Stn  / Parliament Square",
+     "to": "SW1A 2AA",
+     "duration_min": 3,
+     "departure": "2026-09-04T08:44:00",
+     "arrival": "2026-09-04T08:47:00",
+     "summary": "Walk to SW1A 2AA"
+    }
+   ],
+   "changes": 0,
+   "transit_legs": 1,
+   "walking_min": 7,
+   "first_leg_walk_min": 4,
+   "last_leg_walk_min": 3,
+   "waiting_min_in_plan": 0,
+   "zero_wait_joins": 2,
+   "modes": [
+    "bus"
+   ],
+   "lines": [
+    "24"
+   ],
+   "wait_sample_note": "2 of the 2 connections in this plan depart at the exact minute the previous leg arrives. That is a zero-wait sample: the plan has budgeted nothing for waiting, so the real trip is this number plus however long the next service takes to turn up.",
+   "alternatives_min": [
+    33,
+    34,
+    41
+   ],
+   "journeys_returned": 3
+  }
+ },
+ "fastest_plan": "bus",
+ "fastest_min": 33,
+ "rail_only_min": 41,
+ "bus_only_min": 33,
+ "method": "TfL Journey Planner, arriving by 09:00 on 20260904 (next-weekday). Three plans: 'all' lets TfL choose any mode, 'rail' restricts to tube, DLR, Overground, Elizabeth line, national rail and walking, 'bus' to bus and walking. The bus number is the answer to 'what happens when the trains stop', so read it as the fallback, not as the commute. `door_buffer_min` is 0 and is added only because you asked; TfL plans to the street, not through the front door of a building."
+}

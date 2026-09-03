@@ -19,7 +19,7 @@ metadata:
 Codex users: the sandbox blocks network by default; ask them to enable it or work in manual mode. Fetchers that honour robots.txt cannot read the EPC register or council planning portals; that is expected — ask the user.
 
 ## 0b. If asked "what can this do", "how do I start", or "I have no idea"
-Answer from `references/onboarding.md`: the short pitch in the user's language, then the three starting points (a listing → vet it; an area or destination → sweep; no idea → the ten-fact primer, then six intake questions in one message with a suggested default each). Write the answers into `profile.yaml`, show it back in plain words, then start.
+Answer from `references/onboarding.md`: the short pitch in the user's language, then the three starting points (a listing → vet it; an area or destination → sweep; no idea → the ten-fact primer, then six intake questions in one message with a suggested default each). Write the answers into `profile.yaml`, show it back plainly, then start.
 
 ## 1. Load the profile
 Read `profile.yaml` (the user's hard filters: minimum floor area, maximum building age, budget bands, move-in window, commute destination and minutes, guarantor route, floor and light rules, must-haves). If it is missing, ask for the six essentials once (budget, area, age, move-in, destination, must-haves), then proceed and state your assumptions.
@@ -27,7 +27,7 @@ Read `profile.yaml` (the user's hard filters: minimum floor area, maximum buildi
 ## 2. Two presumptions that run through every axis
 1. **Cheap has a reason.** A price below the local band means the landlord or agent has a reason to sell you. Find it and name it (location, age, construction, timing, management, commute, aspect). An unexplained discount is a reason to walk.
 2. **Pay more only for a nameable benefit** (aspect, floor, quiet side, management). If you cannot say what the premium buys, do not pay it.
-Ask of every listing: "What sits under its prettiest feature?" Name the most attractive thing, then check what it costs on every other axis.
+Ask of every listing: "What sits under its prettiest feature?" and check what that feature costs on the other axes.
 
 ## 3. The 12 axes (method per axis in `references/axes/`)
 1. **Identity** — exact flat number, building, postcode. The EPC register is the arbiter (`scripts/epc.py search`, `cert`). Large buildings span several postcodes; search by street if a flat is missing.
@@ -58,8 +58,8 @@ Follow `references/inputs.md`: try first; collect every gap; ask **once**, in on
 
 ## 7. Output contract
 Write `report.json` conforming to `references/report-schema.json`. Shell mode: `python3 scripts/render.py report.json > report.html`. Otherwise hand over the JSON and tell the user to paste it into `viewer/viewer.html`. Always also print the one-page verdict in the user's language.
-Plain-language rules for every text field: short sentences; no jargon or abbreviations without a gloss; every number is followed by what it means and what it is compared with; evidence grades as plain labels (official / self-reported / third-party / inferred / unknown).
-Verdict: **PASS** · **EDGE** (with the break-even rent) · **CONDITIONAL** (conditions listed) · **KILL** (fatal axis named). Include: at most two killer questions for the agent; viewing-day checks that only the site can answer; a "not found" table listing the search strings you used; sources with retrieval times; and the footer "Generated with vet-flat <version> — <source URL>".
+Plain language in every text field: short sentences; no jargon without a gloss; every number says what it means and what it is compared with; evidence grades as plain labels.
+Verdict: **PASS** · **EDGE** (with the break-even rent) · **CONDITIONAL** (conditions listed) · **KILL** (fatal axis named). Include: at most two killer questions for the agent, drawn from `references/questions.md`; viewing-day checks that only the site can answer; a "not found" table listing the search strings you used; sources with retrieval times; and the footer "Generated with vet-flat <version> — <source URL>".
 
 ## 8. Never
 Sign on the viewing day. Treat listing area as fact. Scale crime figures for missing months. Turn a missing item into a pass. Drop a red flag to make the report tidy. Use ethnicity or nationality as a risk factor.

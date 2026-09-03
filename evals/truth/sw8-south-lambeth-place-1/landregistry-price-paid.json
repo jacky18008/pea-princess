@@ -1,0 +1,30 @@
+{
+ "query": {
+  "postcode": "SW8 1SP",
+  "postcode_as_given": "SW8 1SP",
+  "since": null,
+  "paon": null
+ },
+ "source_url": "https://landregistry.data.gov.uk/landregistry/query",
+ "http_method": "POST",
+ "http_status": 200,
+ "ok": true,
+ "note": "",
+ "retrieved_at": "2026-09-03T11:57:35+00:00",
+ "evidence_class": "G",
+ "sparql": "PREFIX lrppi: <http://landregistry.data.gov.uk/def/ppi/>\nPREFIX lrcommon: <http://landregistry.data.gov.uk/def/common/>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nSELECT ?date ?amount ?paon ?saon ?street ?town ?ptype ?newbuild ?estate ?category\nWHERE {\n  ?tx lrppi:propertyAddress ?addr ;\n      lrppi:pricePaid ?amount ;\n      lrppi:transactionDate ?date ;\n      lrppi:transactionCategory ?category .\n  ?addr lrcommon:postcode \"SW8 1SP\" .\n  OPTIONAL { ?addr lrcommon:paon ?paon }\n  OPTIONAL { ?addr lrcommon:saon ?saon }\n  OPTIONAL { ?addr lrcommon:street ?street }\n  OPTIONAL { ?addr lrcommon:town ?town }\n  OPTIONAL { ?tx lrppi:propertyType ?ptype }\n  OPTIONAL { ?tx lrppi:newBuild ?newbuild }\n  OPTIONAL { ?tx lrppi:estateType ?estate }\n}\nORDER BY ?date\nLIMIT 500",
+ "transactions": [],
+ "count": 0,
+ "earliest_transaction": null,
+ "latest_transaction": null,
+ "new_build_count": 0,
+ "earliest_new_build_transaction": null,
+ "earliest_new_build_year": null,
+ "completion_year_note": "earliest_new_build_transaction is the first recorded sale of a newly built dwelling in this postcode: strong evidence the building was finished by that year. Absence of a new-build row is not evidence the building is old - flats sold by the developer under a different postcode, or never sold at all (build to rent), leave no trace here.",
+ "not_found": {
+  "query": "SW8 1SP",
+  "endpoint": "https://landregistry.data.gov.uk/landregistry/query",
+  "meaning": "no Price Paid rows for this postcode. Common causes: the block is build-to-rent and has never been sold flat by flat; the postcode was issued after the sales; or the postcode is spaced differently in the register."
+ },
+ "coverage_note": "Price Paid Data is sales lodged for registration in England and Wales. It excludes lettings, transfers that were not sales, and most commercial transactions. It does not name the owner."
+}

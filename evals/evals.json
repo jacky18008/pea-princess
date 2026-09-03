@@ -1,0 +1,1279 @@
+{
+  "skill_name": "vet-flat",
+  "description": "Cross-model correctness benchmark for the vet-flat skill. Different models may reach different verdicts; the facts they report must be correct. Only facts are graded. Every value in expected_facts was produced by running the repository's own fetchers against the live public registers; the command and the retrieval time sit next to each value and the raw output is kept under evals/truth/. Eight cases grade a report.json; two grade the plain-text answer a user gets when they ask what the skill does or say they have no idea where to start.",
+  "grading": {
+    "harness": "bench/grade.py report.json --case <id>",
+    "refresh": "bench/refresh_truth.py [--case <id>]",
+    "note": "Volatile facts (crime totals, journey times) carry a tolerance. Stable facts (floor area, assessment year, heating, rating, company number) are exact."
+  },
+  "evals": [
+    {
+      "id": "se1-london-bridge-hotel-200",
+      "address": "Flat 200, London Bridge Hotel, London Bridge Street, SE1 9SG",
+      "borough": "Southwark",
+      "prompt": "Vet this flat: Flat 200, London Bridge Hotel, London Bridge Street, SE1 9SG. Use profile.yaml. Write report.json following references/report-schema.json.",
+      "files": [
+        "cases/se1-london-bridge-hotel-200/profile.yaml"
+      ],
+      "expected_output": "A schema-valid report.json for Flat 200, London Bridge Hotel that reports 93 square metres of indoor floor area, a first energy assessment in 2020, mains-gas boiler heating and a mid-floor position, with the crime, commute and redundancy numbers cited to the open registers.",
+      "assertions": [
+        "Indoor floor area is 93 square metres (about 1,001 square feet) on certificate 1090-0965-0722-3091-3203.",
+        "The first energy assessment on the register is 2020, so the building fabric is recorded as at most about 6 years old; the report must not claim a completion year the register does not show.",
+        "Main heating is a mains-gas boiler with radiators, not a communal heat network.",
+        "The flat is a mid-floor flat, so the profile's ground-floor rejection does not fire.",
+        "The address is a hotel building that also holds residential flats; the report should say so in axis 1 rather than quietly treating it as an ordinary block.",
+        "report.json validates against skills/vet-flat/references/report-schema.json: `python3 skills/vet-flat/scripts/render.py report.json --validate-only` exits 0.",
+        "The floor area comes from the energy certificate in square metres or its square-foot conversion, never from a listing, a floor plan or a brochure.",
+        "Every graded number carries at least one source id that resolves to an entry in sources[] with a real URL and a retrieval time.",
+        "Anything the run could not find is left null and listed in not_found[] or in the axis's unknowns[], never filled with a zero or a guess.",
+        "The verdict may be PASS, EDGE, CONDITIONAL or KILL. Verdicts are not graded; only the facts are."
+      ],
+      "truth_inputs": {
+        "postcode": "SE1 9SG",
+        "borough": "Southwark",
+        "epc_certificate_id": "1090-0965-0722-3091-3203",
+        "crime": {
+          "box_half_m": 150,
+          "months": 6
+        },
+        "commute": {
+          "destination": "SW1A 2AA",
+          "arrive": "09:00"
+        },
+        "landregistry": {
+          "postcode": "SE1 9SG"
+        }
+      },
+      "expected_facts": {
+        "geo": {
+          "postcode": "SE1 9SG",
+          "lat": 51.504963,
+          "lng": -0.087625,
+          "borough": "Southwark",
+          "command": "python3 skills/vet-flat/scripts/geo.py lookup 'SE1 9SG'"
+        },
+        "epc": {
+          "certificate_id": "1090-0965-0722-3091-3203",
+          "register_address": "Flat 200 London Bridge Hotel London Bridge Street LONDON SE1 9SG",
+          "floor_area_m2": 93.0,
+          "floor_area_sqft": 1001,
+          "first_assessment_year": 2020,
+          "heating_class": "gas_boiler",
+          "floor_position": "mid",
+          "floor_position_absent": false,
+          "energy_rating": "C",
+          "property_type": "Mid-floor flat",
+          "air_permeability": null,
+          "earlier_certificates": [],
+          "retrieved_at": "2026-09-03T11:43:04+00:00",
+          "command": "python3 skills/vet-flat/scripts/epc.py cert 1090-0965-0722-3091-3203 --history",
+          "raw": "evals/truth/se1-london-bridge-hotel-200/epc-cert.json",
+          "search_command": "python3 skills/vet-flat/scripts/epc.py search --postcode 'SE1 9SG'",
+          "search_raw": "evals/truth/se1-london-bridge-hotel-200/epc-search.json",
+          "search_note": null
+        },
+        "crime": {
+          "box_half_m": 150,
+          "months": [
+            "2026-01",
+            "2026-02",
+            "2026-03",
+            "2026-04",
+            "2026-05",
+            "2026-06"
+          ],
+          "months_missing": [],
+          "total": 583,
+          "tolerance_pct": 15,
+          "predatory_count": 375,
+          "top_anchor": "On or near Hospital",
+          "top_anchor_share": 0.244,
+          "centre": {
+            "lat": 51.504963,
+            "lng": -0.087625
+          },
+          "retrieved_at": "2026-09-03T11:53:05+00:00",
+          "command": "python3 skills/vet-flat/scripts/crime.py box --lat 51.504963 --lng -0.087625 --half-m 150 --months 6",
+          "raw": "evals/truth/se1-london-bridge-hotel-200/crime-box.json"
+        },
+        "commute": {
+          "destination": "SW1A 2AA",
+          "arrive_by": "09:00",
+          "date_used": "20260904",
+          "all_min": 27,
+          "rail_min": 27,
+          "bus_min": 29,
+          "tolerance_min": 8,
+          "redundancy_grade": "A",
+          "retrieved_at": "2026-09-03T11:53:14+00:00",
+          "command": "python3 skills/vet-flat/scripts/commute.py journey --from 'SE1 9SG' --to 'SW1A 2AA' --arrive 09:00",
+          "raw": "evals/truth/se1-london-bridge-hotel-200/commute-journey.json",
+          "redundancy_command": "python3 skills/vet-flat/scripts/commute.py redundancy --lat 51.504963 --lng -0.087625",
+          "redundancy_raw": "evals/truth/se1-london-bridge-hotel-200/commute-redundancy.json"
+        },
+        "landregistry": {
+          "postcode": "SE1 9SG",
+          "earliest_new_build_year": null,
+          "new_build_count": 0,
+          "transaction_count": 2,
+          "retrieved_at": "2026-09-03T11:52:54+00:00",
+          "command": "python3 skills/vet-flat/scripts/landregistry.py price-paid --postcode 'SE1 9SG'",
+          "raw": "evals/truth/se1-london-bridge-hotel-200/landregistry-price-paid.json",
+          "caveat": "A new-build sale is a hard lower bound on the completion year. Blocks that were never sold flat by flat leave no new-build row at all, so a missing value proves nothing."
+        }
+      },
+      "kind": "report"
+    },
+    {
+      "id": "e14-marsh-wall-301",
+      "address": "Flat 301, 50 Marsh Wall, London, E14 9TP",
+      "borough": "Tower Hamlets",
+      "prompt": "Vet this flat: Flat 301, 50 Marsh Wall, London, E14 9TP. Use profile.yaml. Write report.json following references/report-schema.json.",
+      "files": [
+        "cases/e14-marsh-wall-301/profile.yaml"
+      ],
+      "expected_output": "A schema-valid report.json for Flat 301, 50 Marsh Wall that reports 54 square metres, a 2022 first assessment, communal heat-network heating and air permeability of 2.9, with crime and commute numbers from the open registers.",
+      "assertions": [
+        "Indoor floor area is 54 square metres (about 581 square feet) on certificate 4232-9230-8229-1333-2226, which clears the 45 square metre floor.",
+        "The first energy assessment on the register is 2022.",
+        "Heating is a communal (district) heat network, so the report must flag that the heat price is not covered by the domestic energy price cap.",
+        "Air permeability of 2.9 implies mechanical ventilation; windows may not be the main source of fresh air.",
+        "report.json validates against skills/vet-flat/references/report-schema.json: `python3 skills/vet-flat/scripts/render.py report.json --validate-only` exits 0.",
+        "The floor area comes from the energy certificate in square metres or its square-foot conversion, never from a listing, a floor plan or a brochure.",
+        "Every graded number carries at least one source id that resolves to an entry in sources[] with a real URL and a retrieval time.",
+        "Anything the run could not find is left null and listed in not_found[] or in the axis's unknowns[], never filled with a zero or a guess.",
+        "The verdict may be PASS, EDGE, CONDITIONAL or KILL. Verdicts are not graded; only the facts are."
+      ],
+      "truth_inputs": {
+        "postcode": "E14 9TP",
+        "borough": "Tower Hamlets",
+        "epc_certificate_id": "4232-9230-8229-1333-2226",
+        "crime": {
+          "box_half_m": 150,
+          "months": 6
+        },
+        "commute": {
+          "destination": "SW1A 2AA",
+          "arrive": "09:00"
+        },
+        "landregistry": {
+          "postcode": "E14 9TP"
+        }
+      },
+      "expected_facts": {
+        "geo": {
+          "postcode": "E14 9TP",
+          "lat": 51.500879,
+          "lng": -0.021935,
+          "borough": "Tower Hamlets",
+          "command": "python3 skills/vet-flat/scripts/geo.py lookup 'E14 9TP'"
+        },
+        "epc": {
+          "certificate_id": "4232-9230-8229-1333-2226",
+          "register_address": "Flat 301 50 Marsh Wall LONDON E14 9TP",
+          "floor_area_m2": 54.0,
+          "floor_area_sqft": 581,
+          "first_assessment_year": 2022,
+          "heating_class": "community_heat_network",
+          "floor_position": "mid",
+          "floor_position_absent": false,
+          "energy_rating": "B",
+          "property_type": "Mid-floor flat",
+          "air_permeability": 2.9,
+          "earlier_certificates": [],
+          "retrieved_at": "2026-09-03T11:43:04+00:00",
+          "command": "python3 skills/vet-flat/scripts/epc.py cert 4232-9230-8229-1333-2226 --history",
+          "raw": "evals/truth/e14-marsh-wall-301/epc-cert.json",
+          "search_command": "python3 skills/vet-flat/scripts/epc.py search --postcode 'E14 9TP'",
+          "search_raw": "evals/truth/e14-marsh-wall-301/epc-search.json",
+          "search_note": null
+        },
+        "crime": {
+          "box_half_m": 150,
+          "months": [
+            "2026-01",
+            "2026-02",
+            "2026-03",
+            "2026-04",
+            "2026-05",
+            "2026-06"
+          ],
+          "months_missing": [],
+          "total": 199,
+          "tolerance_pct": 15,
+          "predatory_count": 143,
+          "top_anchor": "On or near Admirals Way",
+          "top_anchor_share": 0.402,
+          "centre": {
+            "lat": 51.500879,
+            "lng": -0.021935
+          },
+          "retrieved_at": "2026-09-03T11:52:02+00:00",
+          "command": "python3 skills/vet-flat/scripts/crime.py box --lat 51.500879 --lng -0.021935 --half-m 150 --months 6",
+          "raw": "evals/truth/e14-marsh-wall-301/crime-box.json"
+        },
+        "commute": {
+          "destination": "SW1A 2AA",
+          "arrive_by": "09:00",
+          "date_used": "20260904",
+          "all_min": 37,
+          "rail_min": 37,
+          "bus_min": 46,
+          "tolerance_min": 8,
+          "redundancy_grade": "B",
+          "retrieved_at": "2026-09-03T11:52:08+00:00",
+          "command": "python3 skills/vet-flat/scripts/commute.py journey --from 'E14 9TP' --to 'SW1A 2AA' --arrive 09:00",
+          "raw": "evals/truth/e14-marsh-wall-301/commute-journey.json",
+          "redundancy_command": "python3 skills/vet-flat/scripts/commute.py redundancy --lat 51.500879 --lng -0.021935",
+          "redundancy_raw": "evals/truth/e14-marsh-wall-301/commute-redundancy.json"
+        },
+        "landregistry": {
+          "postcode": "E14 9TP",
+          "earliest_new_build_year": null,
+          "new_build_count": 0,
+          "transaction_count": 7,
+          "retrieved_at": "2026-09-03T11:52:15+00:00",
+          "command": "python3 skills/vet-flat/scripts/landregistry.py price-paid --postcode 'E14 9TP'",
+          "raw": "evals/truth/e14-marsh-wall-301/landregistry-price-paid.json",
+          "caveat": "A new-build sale is a hard lower bound on the completion year. Blocks that were never sold flat by flat leave no new-build row at all, so a missing value proves nothing."
+        }
+      },
+      "kind": "report"
+    },
+    {
+      "id": "e8-kingsland-high-street-2",
+      "address": "Flat 2, 10 Kingsland High Street, London, E8 2JP",
+      "borough": "Hackney",
+      "prompt": "Vet this flat: Flat 2, 10 Kingsland High Street, London, E8 2JP. Use profile.yaml. Write report.json following references/report-schema.json.",
+      "files": [
+        "cases/e8-kingsland-high-street-2/profile.yaml"
+      ],
+      "expected_output": "A schema-valid report.json for Flat 2, 10 Kingsland High Street that reports 42 square metres, fails the minimum floor area filter, and names the resident management company on the register without claiming it is the landlord.",
+      "assertions": [
+        "Indoor floor area is 42 square metres (about 452 square feet) on certificate 0340-2577-4590-2496-5851.",
+        "42 square metres is below the profile's 45 square metre floor, so the floor-area hard filter must be marked failed, whatever the verdict is.",
+        "The first energy assessment on the register is 2016.",
+        "Heating is a communal heat network.",
+        "A Companies House search for 'Kingsland High Street Management' returns exactly one company; the report must quote its company number and must not assert it is the landlord without the tenancy agreement.",
+        "report.json validates against skills/vet-flat/references/report-schema.json: `python3 skills/vet-flat/scripts/render.py report.json --validate-only` exits 0.",
+        "The floor area comes from the energy certificate in square metres or its square-foot conversion, never from a listing, a floor plan or a brochure.",
+        "Every graded number carries at least one source id that resolves to an entry in sources[] with a real URL and a retrieval time.",
+        "Anything the run could not find is left null and listed in not_found[] or in the axis's unknowns[], never filled with a zero or a guess.",
+        "The verdict may be PASS, EDGE, CONDITIONAL or KILL. Verdicts are not graded; only the facts are."
+      ],
+      "truth_inputs": {
+        "postcode": "E8 2JP",
+        "borough": "Hackney",
+        "epc_certificate_id": "0340-2577-4590-2496-5851",
+        "crime": {
+          "box_half_m": 150,
+          "months": 6
+        },
+        "commute": {
+          "destination": "SW1A 2AA",
+          "arrive": "09:00"
+        },
+        "landregistry": {
+          "postcode": "E8 2JP"
+        },
+        "company": {
+          "name_query": "Kingsland High Street Management"
+        }
+      },
+      "expected_facts": {
+        "geo": {
+          "postcode": "E8 2JP",
+          "lat": 51.546814,
+          "lng": -0.075485,
+          "borough": "Hackney",
+          "command": "python3 skills/vet-flat/scripts/geo.py lookup 'E8 2JP'"
+        },
+        "epc": {
+          "certificate_id": "0340-2577-4590-2496-5851",
+          "register_address": "Flat 2 10 Kingsland High Street LONDON E8 2JP",
+          "floor_area_m2": 42.0,
+          "floor_area_sqft": 452,
+          "first_assessment_year": 2016,
+          "heating_class": "community_heat_network",
+          "floor_position": "mid",
+          "floor_position_absent": false,
+          "energy_rating": "C",
+          "property_type": "Mid-floor flat",
+          "air_permeability": null,
+          "earlier_certificates": [
+            "9978-5033-7339-4116-7984"
+          ],
+          "retrieved_at": "2026-09-03T11:44:02+00:00",
+          "command": "python3 skills/vet-flat/scripts/epc.py cert 0340-2577-4590-2496-5851 --history",
+          "raw": "evals/truth/e8-kingsland-high-street-2/epc-cert.json",
+          "search_command": "python3 skills/vet-flat/scripts/epc.py search --postcode 'E8 2JP'",
+          "search_raw": "evals/truth/e8-kingsland-high-street-2/epc-search.json",
+          "search_note": null
+        },
+        "crime": {
+          "box_half_m": 150,
+          "months": [
+            "2026-01",
+            "2026-02",
+            "2026-03",
+            "2026-04",
+            "2026-05",
+            "2026-06"
+          ],
+          "months_missing": [],
+          "total": 544,
+          "tolerance_pct": 15,
+          "predatory_count": 225,
+          "top_anchor": "On or near Shopping Area",
+          "top_anchor_share": 0.294,
+          "centre": {
+            "lat": 51.546814,
+            "lng": -0.075485
+          },
+          "retrieved_at": "2026-09-03T11:53:59+00:00",
+          "command": "python3 skills/vet-flat/scripts/crime.py box --lat 51.546814 --lng -0.075485 --half-m 150 --months 6",
+          "raw": "evals/truth/e8-kingsland-high-street-2/crime-box.json"
+        },
+        "commute": {
+          "destination": "SW1A 2AA",
+          "arrive_by": "09:00",
+          "date_used": "20260904",
+          "all_min": 40,
+          "rail_min": 41,
+          "bus_min": 54,
+          "tolerance_min": 8,
+          "redundancy_grade": "B-",
+          "retrieved_at": "2026-09-03T11:54:04+00:00",
+          "command": "python3 skills/vet-flat/scripts/commute.py journey --from 'E8 2JP' --to 'SW1A 2AA' --arrive 09:00",
+          "raw": "evals/truth/e8-kingsland-high-street-2/commute-journey.json",
+          "redundancy_command": "python3 skills/vet-flat/scripts/commute.py redundancy --lat 51.546814 --lng -0.075485",
+          "redundancy_raw": "evals/truth/e8-kingsland-high-street-2/commute-redundancy.json"
+        },
+        "company": {
+          "name_query": "Kingsland High Street Management",
+          "company_name": "KINGSLAND HIGH STREET MANAGEMENT COMPANY LIMITED",
+          "company_number": "09350546",
+          "sic_codes": [
+            "98000"
+          ],
+          "status": "Active",
+          "results_returned": 1,
+          "retrieved_at": "2026-09-03T11:54:14+00:00",
+          "command": "python3 skills/vet-flat/scripts/company.py search --name 'Kingsland High Street Management' --limit 20",
+          "raw": "evals/truth/e8-kingsland-high-street-2/company-search.json",
+          "caveat": "This is a register row, not proof of ownership. The entity on the tenancy agreement is what matters and is matched by company number, never by name."
+        },
+        "landregistry": {
+          "postcode": "E8 2JP",
+          "earliest_new_build_year": 2016,
+          "new_build_count": 14,
+          "transaction_count": 29,
+          "retrieved_at": "2026-09-03T11:54:16+00:00",
+          "command": "python3 skills/vet-flat/scripts/landregistry.py price-paid --postcode 'E8 2JP'",
+          "raw": "evals/truth/e8-kingsland-high-street-2/landregistry-price-paid.json",
+          "caveat": "A new-build sale is a hard lower bound on the completion year. Blocks that were never sold flat by flat leave no new-build row at all, so a missing value proves nothing."
+        }
+      },
+      "kind": "report"
+    },
+    {
+      "id": "nw1-camden-high-street-1",
+      "address": "Flat 1, 140A Camden High Street, London, NW1 0NE",
+      "borough": "Camden",
+      "prompt": "Vet this flat: Flat 1, 140A Camden High Street, London, NW1 0NE. Use profile.yaml. Write report.json following references/report-schema.json.",
+      "files": [
+        "cases/nw1-camden-high-street-1/profile.yaml"
+      ],
+      "expected_output": "A schema-valid report.json for Flat 1, 140A Camden High Street that reports 70 square metres, an air-source heat pump, and a first assessment in 2015 found by following the earlier certificates for the same property.",
+      "assertions": [
+        "Indoor floor area is 70 square metres (about 753 square feet) on the current certificate 9546-3011-6304-3226-3204.",
+        "The property has earlier certificates. The earliest assessment year across them is 2015, which is the number the age axis must use (`epc.py cert <id> --history`), not the 2026 date on the current certificate.",
+        "Earlier certificates for the same address record 154 and 107 square metres, so the unit has been subdivided; a report that quotes an older area as this flat's area is wrong.",
+        "Main heating is an air-source heat pump with underfloor heating, not a gas boiler.",
+        "report.json validates against skills/vet-flat/references/report-schema.json: `python3 skills/vet-flat/scripts/render.py report.json --validate-only` exits 0.",
+        "The floor area comes from the energy certificate in square metres or its square-foot conversion, never from a listing, a floor plan or a brochure.",
+        "Every graded number carries at least one source id that resolves to an entry in sources[] with a real URL and a retrieval time.",
+        "Anything the run could not find is left null and listed in not_found[] or in the axis's unknowns[], never filled with a zero or a guess.",
+        "The verdict may be PASS, EDGE, CONDITIONAL or KILL. Verdicts are not graded; only the facts are."
+      ],
+      "truth_inputs": {
+        "postcode": "NW1 0NE",
+        "borough": "Camden",
+        "epc_certificate_id": "9546-3011-6304-3226-3204",
+        "crime": {
+          "box_half_m": 150,
+          "months": 6
+        },
+        "commute": {
+          "destination": "SW1A 2AA",
+          "arrive": "09:00"
+        },
+        "landregistry": {
+          "postcode": "NW1 0NE"
+        }
+      },
+      "expected_facts": {
+        "geo": {
+          "postcode": "NW1 0NE",
+          "lat": 51.538616,
+          "lng": -0.142035,
+          "borough": "Camden",
+          "command": "python3 skills/vet-flat/scripts/geo.py lookup 'NW1 0NE'"
+        },
+        "epc": {
+          "certificate_id": "9546-3011-6304-3226-3204",
+          "register_address": "Flat 1 140A Camden High Street London NW1 0NE",
+          "floor_area_m2": 70.0,
+          "floor_area_sqft": 753,
+          "first_assessment_year": 2015,
+          "heating_class": "heat_pump",
+          "floor_position": "mid",
+          "floor_position_absent": false,
+          "energy_rating": "C",
+          "property_type": "Mid-floor flat",
+          "air_permeability": 6.0,
+          "earlier_certificates": [
+            "0033-2895-7598-2190-6711",
+            "0033-2898-7518-9195-4731",
+            "9246-3011-6304-3526-3204"
+          ],
+          "retrieved_at": "2026-09-03T11:43:09+00:00",
+          "command": "python3 skills/vet-flat/scripts/epc.py cert 9546-3011-6304-3226-3204 --history",
+          "raw": "evals/truth/nw1-camden-high-street-1/epc-cert.json",
+          "search_command": "python3 skills/vet-flat/scripts/epc.py search --postcode 'NW1 0NE'",
+          "search_raw": "evals/truth/nw1-camden-high-street-1/epc-search.json",
+          "search_note": null
+        },
+        "crime": {
+          "box_half_m": 150,
+          "months": [
+            "2026-01",
+            "2026-02",
+            "2026-03",
+            "2026-04",
+            "2026-05",
+            "2026-06"
+          ],
+          "months_missing": [],
+          "total": 808,
+          "tolerance_pct": 15,
+          "predatory_count": 409,
+          "top_anchor": "On or near Camden Town",
+          "top_anchor_share": 0.252,
+          "centre": {
+            "lat": 51.538616,
+            "lng": -0.142035
+          },
+          "retrieved_at": "2026-09-03T11:54:58+00:00",
+          "command": "python3 skills/vet-flat/scripts/crime.py box --lat 51.538616 --lng -0.142035 --half-m 150 --months 6",
+          "raw": "evals/truth/nw1-camden-high-street-1/crime-box.json"
+        },
+        "commute": {
+          "destination": "SW1A 2AA",
+          "arrive_by": "09:00",
+          "date_used": "20260904",
+          "all_min": 34,
+          "rail_min": 41,
+          "bus_min": 33,
+          "tolerance_min": 8,
+          "redundancy_grade": "A",
+          "retrieved_at": "2026-09-03T11:55:05+00:00",
+          "command": "python3 skills/vet-flat/scripts/commute.py journey --from 'NW1 0NE' --to 'SW1A 2AA' --arrive 09:00",
+          "raw": "evals/truth/nw1-camden-high-street-1/commute-journey.json",
+          "redundancy_command": "python3 skills/vet-flat/scripts/commute.py redundancy --lat 51.538616 --lng -0.142035",
+          "redundancy_raw": "evals/truth/nw1-camden-high-street-1/commute-redundancy.json"
+        },
+        "landregistry": {
+          "postcode": "NW1 0NE",
+          "earliest_new_build_year": null,
+          "new_build_count": 0,
+          "transaction_count": 19,
+          "retrieved_at": "2026-09-03T11:55:17+00:00",
+          "command": "python3 skills/vet-flat/scripts/landregistry.py price-paid --postcode 'NW1 0NE'",
+          "raw": "evals/truth/nw1-camden-high-street-1/landregistry-price-paid.json",
+          "caveat": "A new-build sale is a hard lower bound on the completion year. Blocks that were never sold flat by flat leave no new-build row at all, so a missing value proves nothing."
+        }
+      },
+      "kind": "report"
+    },
+    {
+      "id": "n1-9-islington-high-street-1",
+      "address": "Flat 1, 9 Islington High Street, London, N1 9LQ",
+      "borough": "Islington",
+      "prompt": "Vet this flat: Flat 1, 9 Islington High Street, London, N1 9LQ. Use profile.yaml. Write report.json following references/report-schema.json.",
+      "files": [
+        "cases/n1-9-islington-high-street-1/profile.yaml"
+      ],
+      "expected_output": "A schema-valid report.json for Flat 1, 9 Islington High Street that reports 91 square metres, an energy rating of F, electric storage heating, and treats the F rating as a letting-compliance problem.",
+      "assertions": [
+        "Indoor floor area is 91 square metres on certificate 2111-1197-8894-8151-1716.",
+        "The energy rating is F. In England a property below E may not normally be let without a registered exemption, so this belongs in the compliance axis and in the killer questions.",
+        "Heating is electric storage heaters with off-peak immersion hot water, which is the expensive end of the range; the all-in cost axis must say so.",
+        "N1 9LQ holds several separately numbered buildings (3-5, 9 and 9a Islington High Street). The report must identify the certificate for number 9, not a neighbour.",
+        "report.json validates against skills/vet-flat/references/report-schema.json: `python3 skills/vet-flat/scripts/render.py report.json --validate-only` exits 0.",
+        "The floor area comes from the energy certificate in square metres or its square-foot conversion, never from a listing, a floor plan or a brochure.",
+        "Every graded number carries at least one source id that resolves to an entry in sources[] with a real URL and a retrieval time.",
+        "Anything the run could not find is left null and listed in not_found[] or in the axis's unknowns[], never filled with a zero or a guess.",
+        "The verdict may be PASS, EDGE, CONDITIONAL or KILL. Verdicts are not graded; only the facts are."
+      ],
+      "truth_inputs": {
+        "postcode": "N1 9LQ",
+        "borough": "Islington",
+        "epc_certificate_id": "2111-1197-8894-8151-1716",
+        "crime": {
+          "box_half_m": 150,
+          "months": 6
+        },
+        "commute": {
+          "destination": "SW1A 2AA",
+          "arrive": "09:00"
+        },
+        "landregistry": {
+          "postcode": "N1 9LQ"
+        }
+      },
+      "expected_facts": {
+        "geo": {
+          "postcode": "N1 9LQ",
+          "lat": 51.532445,
+          "lng": -0.106486,
+          "borough": "Islington",
+          "command": "python3 skills/vet-flat/scripts/geo.py lookup 'N1 9LQ'"
+        },
+        "epc": {
+          "certificate_id": "2111-1197-8894-8151-1716",
+          "register_address": "Flat 1 9 Islington High Street LONDON N1 9LQ",
+          "floor_area_m2": 91.0,
+          "floor_area_sqft": 980,
+          "first_assessment_year": 2024,
+          "heating_class": "electric",
+          "floor_position": "mid",
+          "floor_position_absent": false,
+          "energy_rating": "F",
+          "property_type": "Mid-floor flat",
+          "air_permeability": null,
+          "earlier_certificates": [],
+          "retrieved_at": "2026-09-03T11:44:01+00:00",
+          "command": "python3 skills/vet-flat/scripts/epc.py cert 2111-1197-8894-8151-1716 --history",
+          "raw": "evals/truth/n1-9-islington-high-street-1/epc-cert.json",
+          "search_command": "python3 skills/vet-flat/scripts/epc.py search --postcode 'N1 9LQ'",
+          "search_raw": "evals/truth/n1-9-islington-high-street-1/epc-search.json",
+          "search_note": null
+        },
+        "crime": {
+          "box_half_m": 150,
+          "months": [
+            "2026-01",
+            "2026-02",
+            "2026-03",
+            "2026-04",
+            "2026-05",
+            "2026-06"
+          ],
+          "months_missing": [],
+          "total": 306,
+          "tolerance_pct": 15,
+          "predatory_count": 154,
+          "top_anchor": "On or near Chapel Market",
+          "top_anchor_share": 0.193,
+          "centre": {
+            "lat": 51.532445,
+            "lng": -0.106486
+          },
+          "retrieved_at": "2026-09-03T11:55:59+00:00",
+          "command": "python3 skills/vet-flat/scripts/crime.py box --lat 51.532445 --lng -0.106486 --half-m 150 --months 6",
+          "raw": "evals/truth/n1-9-islington-high-street-1/crime-box.json"
+        },
+        "commute": {
+          "destination": "SW1A 2AA",
+          "arrive_by": "09:00",
+          "date_used": "20260904",
+          "all_min": 37,
+          "rail_min": 41,
+          "bus_min": 41,
+          "tolerance_min": 8,
+          "redundancy_grade": "B",
+          "retrieved_at": "2026-09-03T11:56:09+00:00",
+          "command": "python3 skills/vet-flat/scripts/commute.py journey --from 'N1 9LQ' --to 'SW1A 2AA' --arrive 09:00",
+          "raw": "evals/truth/n1-9-islington-high-street-1/commute-journey.json",
+          "redundancy_command": "python3 skills/vet-flat/scripts/commute.py redundancy --lat 51.532445 --lng -0.106486",
+          "redundancy_raw": "evals/truth/n1-9-islington-high-street-1/commute-redundancy.json"
+        },
+        "landregistry": {
+          "postcode": "N1 9LQ",
+          "earliest_new_build_year": 2010,
+          "new_build_count": 1,
+          "transaction_count": 8,
+          "retrieved_at": "2026-09-03T11:56:25+00:00",
+          "command": "python3 skills/vet-flat/scripts/landregistry.py price-paid --postcode 'N1 9LQ'",
+          "raw": "evals/truth/n1-9-islington-high-street-1/landregistry-price-paid.json",
+          "caveat": "A new-build sale is a hard lower bound on the completion year. Blocks that were never sold flat by flat leave no new-build row at all, so a missing value proves nothing."
+        }
+      },
+      "kind": "report"
+    },
+    {
+      "id": "n1-3-5-islington-high-street-5",
+      "address": "Flat 5, 3-5 Islington High Street, London, N1 9LQ",
+      "borough": "Islington",
+      "prompt": "Vet this flat: Flat 5, 3-5 Islington High Street, London, N1 9LQ. Use profile.yaml. Write report.json following references/report-schema.json.",
+      "files": [
+        "cases/n1-3-5-islington-high-street-5/profile.yaml"
+      ],
+      "expected_output": "A schema-valid report.json for Flat 5, 3-5 Islington High Street that reports 55 square metres, a 2009 first assessment, electric storage heating, and leaves the floor position unknown because the certificate does not state a property type.",
+      "assertions": [
+        "Indoor floor area is 55 square metres (about 592 square feet) on certificate 9238-8096-6284-5271-1074.",
+        "The certificate carries no property type, so the floor position is unknown. The report must mark it unknown and must not infer a floor from the flat number.",
+        "The earliest assessment for this property is 2009; an EPC year is a lower bound on the building's age, not its completion year, and the age filter must say so rather than reading 2009 as 'built in 2009'.",
+        "Heating is electric storage heaters.",
+        "report.json validates against skills/vet-flat/references/report-schema.json: `python3 skills/vet-flat/scripts/render.py report.json --validate-only` exits 0.",
+        "The floor area comes from the energy certificate in square metres or its square-foot conversion, never from a listing, a floor plan or a brochure.",
+        "Every graded number carries at least one source id that resolves to an entry in sources[] with a real URL and a retrieval time.",
+        "Anything the run could not find is left null and listed in not_found[] or in the axis's unknowns[], never filled with a zero or a guess.",
+        "The verdict may be PASS, EDGE, CONDITIONAL or KILL. Verdicts are not graded; only the facts are."
+      ],
+      "truth_inputs": {
+        "postcode": "N1 9LQ",
+        "borough": "Islington",
+        "epc_certificate_id": "9238-8096-6284-5271-1074",
+        "crime": {
+          "box_half_m": 150,
+          "months": 6
+        },
+        "commute": {
+          "destination": "SW1A 2AA",
+          "arrive": "09:00"
+        },
+        "landregistry": {
+          "postcode": "N1 9LQ"
+        }
+      },
+      "expected_facts": {
+        "geo": {
+          "postcode": "N1 9LQ",
+          "lat": 51.532445,
+          "lng": -0.106486,
+          "borough": "Islington",
+          "command": "python3 skills/vet-flat/scripts/geo.py lookup 'N1 9LQ'"
+        },
+        "epc": {
+          "certificate_id": "9238-8096-6284-5271-1074",
+          "register_address": "Flat 5 3-5 Islington High Street LONDON N1 9LQ",
+          "floor_area_m2": 55.0,
+          "floor_area_sqft": 592,
+          "first_assessment_year": 2009,
+          "heating_class": "electric",
+          "floor_position": null,
+          "floor_position_absent": true,
+          "energy_rating": "C",
+          "property_type": null,
+          "air_permeability": null,
+          "earlier_certificates": [
+            "0857-2871-6998-0121-8615"
+          ],
+          "retrieved_at": "2026-09-03T11:43:14+00:00",
+          "command": "python3 skills/vet-flat/scripts/epc.py cert 9238-8096-6284-5271-1074 --history",
+          "raw": "evals/truth/n1-3-5-islington-high-street-5/epc-cert.json",
+          "search_command": "python3 skills/vet-flat/scripts/epc.py search --postcode 'N1 9LQ'",
+          "search_raw": "evals/truth/n1-3-5-islington-high-street-5/epc-search.json",
+          "search_note": null
+        },
+        "crime": {
+          "box_half_m": 150,
+          "months": [
+            "2026-01",
+            "2026-02",
+            "2026-03",
+            "2026-04",
+            "2026-05",
+            "2026-06"
+          ],
+          "months_missing": [],
+          "total": 306,
+          "tolerance_pct": 15,
+          "predatory_count": 154,
+          "top_anchor": "On or near Chapel Market",
+          "top_anchor_share": 0.193,
+          "centre": {
+            "lat": 51.532445,
+            "lng": -0.106486
+          },
+          "retrieved_at": "2026-09-03T11:56:31+00:00",
+          "command": "python3 skills/vet-flat/scripts/crime.py box --lat 51.532445 --lng -0.106486 --half-m 150 --months 6",
+          "raw": "evals/truth/n1-3-5-islington-high-street-5/crime-box.json"
+        },
+        "commute": {
+          "destination": "SW1A 2AA",
+          "arrive_by": "09:00",
+          "date_used": "20260904",
+          "all_min": 37,
+          "rail_min": 41,
+          "bus_min": 41,
+          "tolerance_min": 8,
+          "redundancy_grade": "B",
+          "retrieved_at": "2026-09-03T11:56:33+00:00",
+          "command": "python3 skills/vet-flat/scripts/commute.py journey --from 'N1 9LQ' --to 'SW1A 2AA' --arrive 09:00",
+          "raw": "evals/truth/n1-3-5-islington-high-street-5/commute-journey.json",
+          "redundancy_command": "python3 skills/vet-flat/scripts/commute.py redundancy --lat 51.532445 --lng -0.106486",
+          "redundancy_raw": "evals/truth/n1-3-5-islington-high-street-5/commute-redundancy.json"
+        },
+        "landregistry": {
+          "postcode": "N1 9LQ",
+          "earliest_new_build_year": 2010,
+          "new_build_count": 1,
+          "transaction_count": 8,
+          "retrieved_at": "2026-09-03T11:56:25+00:00",
+          "command": "python3 skills/vet-flat/scripts/landregistry.py price-paid --postcode 'N1 9LQ'",
+          "raw": "evals/truth/n1-3-5-islington-high-street-5/landregistry-price-paid.json",
+          "caveat": "A new-build sale is a hard lower bound on the completion year. Blocks that were never sold flat by flat leave no new-build row at all, so a missing value proves nothing."
+        }
+      },
+      "kind": "report"
+    },
+    {
+      "id": "sw8-south-lambeth-place-1",
+      "address": "Flat 1, 2 South Lambeth Place, London, SW8 1SP",
+      "borough": "Lambeth",
+      "prompt": "Vet this flat: Flat 1, 2 South Lambeth Place, London, SW8 1SP. Use profile.yaml. Write report.json following references/report-schema.json.",
+      "files": [
+        "cases/sw8-south-lambeth-place-1/profile.yaml"
+      ],
+      "expected_output": "A schema-valid report.json for Flat 1, 2 South Lambeth Place that reports 62 square metres, a 2009 first assessment found through the earlier certificate, gas-boiler heating, and a crime count for a Vauxhall station box that is high for the size of the box.",
+      "assertions": [
+        "Indoor floor area is 62 square metres (about 667 square feet) on certificate 0660-2840-6380-9921-1601.",
+        "The current certificate is dated 2019 but an earlier certificate for the same property is dated 2009, so the first assessment year is 2009.",
+        "Main heating is a mains-gas boiler with radiators.",
+        "The address sits beside a major transport interchange, so the crime axis must say how much of the count is a point source (see the top anchors in the police output) rather than reporting the raw total alone.",
+        "report.json validates against skills/vet-flat/references/report-schema.json: `python3 skills/vet-flat/scripts/render.py report.json --validate-only` exits 0.",
+        "The floor area comes from the energy certificate in square metres or its square-foot conversion, never from a listing, a floor plan or a brochure.",
+        "Every graded number carries at least one source id that resolves to an entry in sources[] with a real URL and a retrieval time.",
+        "Anything the run could not find is left null and listed in not_found[] or in the axis's unknowns[], never filled with a zero or a guess.",
+        "The verdict may be PASS, EDGE, CONDITIONAL or KILL. Verdicts are not graded; only the facts are."
+      ],
+      "truth_inputs": {
+        "postcode": "SW8 1SP",
+        "borough": "Lambeth",
+        "epc_certificate_id": "0660-2840-6380-9921-1601",
+        "crime": {
+          "box_half_m": 150,
+          "months": 6
+        },
+        "commute": {
+          "destination": "SW1A 2AA",
+          "arrive": "09:00"
+        },
+        "landregistry": {
+          "postcode": "SW8 1SP"
+        }
+      },
+      "expected_facts": {
+        "geo": {
+          "postcode": "SW8 1SP",
+          "lat": 51.485616,
+          "lng": -0.12358,
+          "borough": "Lambeth",
+          "command": "python3 skills/vet-flat/scripts/geo.py lookup 'SW8 1SP'"
+        },
+        "epc": {
+          "certificate_id": "0660-2840-6380-9921-1601",
+          "register_address": "Flat 1 2, South Lambeth Place LONDON SW8 1SP",
+          "floor_area_m2": 62.0,
+          "floor_area_sqft": 667,
+          "first_assessment_year": 2009,
+          "heating_class": "gas_boiler",
+          "floor_position": "mid",
+          "floor_position_absent": false,
+          "energy_rating": "C",
+          "property_type": "Mid-floor flat",
+          "air_permeability": null,
+          "earlier_certificates": [
+            "8600-4976-0420-8306-6313"
+          ],
+          "retrieved_at": "2026-09-03T11:43:07+00:00",
+          "command": "python3 skills/vet-flat/scripts/epc.py cert 0660-2840-6380-9921-1601 --history",
+          "raw": "evals/truth/sw8-south-lambeth-place-1/epc-cert.json",
+          "search_command": "python3 skills/vet-flat/scripts/epc.py search --postcode 'SW8 1SP'",
+          "search_raw": "evals/truth/sw8-south-lambeth-place-1/epc-search.json",
+          "search_note": null
+        },
+        "crime": {
+          "box_half_m": 150,
+          "months": [
+            "2026-01",
+            "2026-02",
+            "2026-03",
+            "2026-04",
+            "2026-05",
+            "2026-06"
+          ],
+          "months_missing": [],
+          "total": 514,
+          "tolerance_pct": 15,
+          "predatory_count": 359,
+          "top_anchor": "On or near Vauxhall",
+          "top_anchor_share": 0.228,
+          "centre": {
+            "lat": 51.485616,
+            "lng": -0.12358
+          },
+          "retrieved_at": "2026-09-03T11:57:18+00:00",
+          "command": "python3 skills/vet-flat/scripts/crime.py box --lat 51.485616 --lng -0.12358 --half-m 150 --months 6",
+          "raw": "evals/truth/sw8-south-lambeth-place-1/crime-box.json"
+        },
+        "commute": {
+          "destination": "SW1A 2AA",
+          "arrive_by": "09:00",
+          "date_used": "20260904",
+          "all_min": 24,
+          "rail_min": 27,
+          "bus_min": 24,
+          "tolerance_min": 8,
+          "redundancy_grade": "A",
+          "retrieved_at": "2026-09-03T11:57:23+00:00",
+          "command": "python3 skills/vet-flat/scripts/commute.py journey --from 'SW8 1SP' --to 'SW1A 2AA' --arrive 09:00",
+          "raw": "evals/truth/sw8-south-lambeth-place-1/commute-journey.json",
+          "redundancy_command": "python3 skills/vet-flat/scripts/commute.py redundancy --lat 51.485616 --lng -0.12358",
+          "redundancy_raw": "evals/truth/sw8-south-lambeth-place-1/commute-redundancy.json"
+        },
+        "landregistry": {
+          "postcode": "SW8 1SP",
+          "earliest_new_build_year": null,
+          "new_build_count": 0,
+          "transaction_count": 0,
+          "retrieved_at": "2026-09-03T11:57:35+00:00",
+          "command": "python3 skills/vet-flat/scripts/landregistry.py price-paid --postcode 'SW8 1SP'",
+          "raw": "evals/truth/sw8-south-lambeth-place-1/landregistry-price-paid.json",
+          "caveat": "A new-build sale is a hard lower bound on the completion year. Blocks that were never sold flat by flat leave no new-build row at all, so a missing value proves nothing."
+        }
+      },
+      "kind": "report"
+    },
+    {
+      "id": "e15-unex-tower-24",
+      "address": "Apartment 24, Unex Tower, Station Street, E15 1DA",
+      "borough": "Newham",
+      "prompt": "Vet this flat: Apartment 24, Unex Tower, Station Street, E15 1DA. Use profile.yaml. Write report.json following references/report-schema.json.",
+      "files": [
+        "cases/e15-unex-tower-24/profile.yaml"
+      ],
+      "expected_output": "A schema-valid report.json for Apartment 24, Unex Tower that reports 77 square metres, a 2015 first assessment confirmed by the Land Registry new-build sales, communal heat network heating, and the Companies House record for the company the tower is named after.",
+      "assertions": [
+        "Indoor floor area is 77 square metres (about 829 square feet) on certificate 4200-7086-5002-1792-9506.",
+        "The earliest assessment for this property is 2015, and the earliest Land Registry new-build sale in E15 1DA is the same year; the report should say the two agree.",
+        "Heating is a communal heat network.",
+        "A Companies House search for 'Unex Investment Properties' returns exactly one active company. The report may name it as the company the building is named after, but must not state it is the landlord: the entity on the tenancy agreement is what counts, and it is matched by company number, not by name.",
+        "report.json validates against skills/vet-flat/references/report-schema.json: `python3 skills/vet-flat/scripts/render.py report.json --validate-only` exits 0.",
+        "The floor area comes from the energy certificate in square metres or its square-foot conversion, never from a listing, a floor plan or a brochure.",
+        "Every graded number carries at least one source id that resolves to an entry in sources[] with a real URL and a retrieval time.",
+        "Anything the run could not find is left null and listed in not_found[] or in the axis's unknowns[], never filled with a zero or a guess.",
+        "The verdict may be PASS, EDGE, CONDITIONAL or KILL. Verdicts are not graded; only the facts are."
+      ],
+      "truth_inputs": {
+        "postcode": "E15 1DA",
+        "borough": "Newham",
+        "epc_certificate_id": "4200-7086-5002-1792-9506",
+        "crime": {
+          "box_half_m": 150,
+          "months": 6
+        },
+        "commute": {
+          "destination": "SW1A 2AA",
+          "arrive": "09:00"
+        },
+        "landregistry": {
+          "postcode": "E15 1DA"
+        },
+        "company": {
+          "name_query": "Unex Investment Properties"
+        }
+      },
+      "expected_facts": {
+        "geo": {
+          "postcode": "E15 1DA",
+          "lat": 51.540028,
+          "lng": -0.001432,
+          "borough": "Newham",
+          "command": "python3 skills/vet-flat/scripts/geo.py lookup 'E15 1DA'"
+        },
+        "epc": {
+          "certificate_id": "4200-7086-5002-1792-9506",
+          "register_address": "Apartment 24 Unex Tower LONDON E15 1DA",
+          "floor_area_m2": 77.0,
+          "floor_area_sqft": 829,
+          "first_assessment_year": 2015,
+          "heating_class": "community_heat_network",
+          "floor_position": "mid",
+          "floor_position_absent": false,
+          "energy_rating": "B",
+          "property_type": "Mid-floor flat",
+          "air_permeability": null,
+          "earlier_certificates": [
+            "8965-7736-3950-2699-2992"
+          ],
+          "retrieved_at": "2026-09-03T11:43:16+00:00",
+          "command": "python3 skills/vet-flat/scripts/epc.py cert 4200-7086-5002-1792-9506 --history",
+          "raw": "evals/truth/e15-unex-tower-24/epc-cert.json",
+          "search_command": "python3 skills/vet-flat/scripts/epc.py search --postcode 'E15 1DA'",
+          "search_raw": "evals/truth/e15-unex-tower-24/epc-search.json",
+          "search_note": null
+        },
+        "crime": {
+          "box_half_m": 150,
+          "months": [
+            "2026-01",
+            "2026-02",
+            "2026-03",
+            "2026-04",
+            "2026-05",
+            "2026-06"
+          ],
+          "months_missing": [],
+          "total": 434,
+          "tolerance_pct": 15,
+          "predatory_count": 251,
+          "top_anchor": "On or near Docklands Light Railway",
+          "top_anchor_share": 0.323,
+          "centre": {
+            "lat": 51.540028,
+            "lng": -0.001432
+          },
+          "retrieved_at": "2026-09-03T11:58:17+00:00",
+          "command": "python3 skills/vet-flat/scripts/crime.py box --lat 51.540028 --lng -0.001432 --half-m 150 --months 6",
+          "raw": "evals/truth/e15-unex-tower-24/crime-box.json"
+        },
+        "commute": {
+          "destination": "SW1A 2AA",
+          "arrive_by": "09:00",
+          "date_used": "20260904",
+          "all_min": 44,
+          "rail_min": 45,
+          "bus_min": 71,
+          "tolerance_min": 8,
+          "redundancy_grade": "A",
+          "retrieved_at": "2026-09-03T11:58:22+00:00",
+          "command": "python3 skills/vet-flat/scripts/commute.py journey --from 'E15 1DA' --to 'SW1A 2AA' --arrive 09:00",
+          "raw": "evals/truth/e15-unex-tower-24/commute-journey.json",
+          "redundancy_command": "python3 skills/vet-flat/scripts/commute.py redundancy --lat 51.540028 --lng -0.001432",
+          "redundancy_raw": "evals/truth/e15-unex-tower-24/commute-redundancy.json"
+        },
+        "company": {
+          "name_query": "Unex Investment Properties",
+          "company_name": "UNEX INVESTMENT PROPERTIES LIMITED",
+          "company_number": "01111206",
+          "sic_codes": [
+            "68209"
+          ],
+          "status": "Active",
+          "results_returned": 1,
+          "retrieved_at": "2026-09-03T11:46:24+00:00",
+          "command": "python3 skills/vet-flat/scripts/company.py search --name 'Unex Investment Properties' --limit 20",
+          "raw": "evals/truth/e15-unex-tower-24/company-search.json",
+          "caveat": "This is a register row, not proof of ownership. The entity on the tenancy agreement is what matters and is matched by company number, never by name."
+        },
+        "landregistry": {
+          "postcode": "E15 1DA",
+          "earliest_new_build_year": 2015,
+          "new_build_count": 192,
+          "transaction_count": 234,
+          "retrieved_at": "2026-09-03T11:58:32+00:00",
+          "command": "python3 skills/vet-flat/scripts/landregistry.py price-paid --postcode 'E15 1DA'",
+          "raw": "evals/truth/e15-unex-tower-24/landregistry-price-paid.json",
+          "caveat": "A new-build sale is a hard lower bound on the completion year. Blocks that were never sold flat by flat leave no new-build row at all, so a missing value proves nothing."
+        }
+      },
+      "kind": "report"
+    },
+    {
+      "id": "explain-capabilities",
+      "kind": "conversation",
+      "address": null,
+      "borough": null,
+      "prompt": "What can this do?",
+      "prompt_variants": [
+        {
+          "id": "zh",
+          "language": "zh-TW",
+          "prompt": "這能幹嘛？"
+        },
+        {
+          "id": "en",
+          "language": "en",
+          "prompt": "What can this do?"
+        }
+      ],
+      "files": [],
+      "expected_output": "A short answer, in the language the question was asked in, that says the skill runs twelve checks on one London flat from official open data, ends in one of four verdicts (PASS, EDGE, CONDITIONAL, KILL), works from a listing, from an area or destination, or from nothing at all, and adapts to what the runtime can do - without claiming it reads the property portals automatically.",
+      "assertions": [
+        "The answer names the number of checks: twelve.",
+        "The answer names all four verdicts. onboarding.md writes them in the user's language, so PASS / EDGE / CONDITIONAL / KILL or 通過／邊緣／有條件／淘汰 both count.",
+        "The answer says the skill works both with a full toolset and from a plain chat box, and that what it cannot reach it asks the user to paste. That is the line in references/onboarding.md section 1.",
+        "The answer gives all three starting points: a listing the user has, an area or a destination to search around, and having no idea at all.",
+        "The answer does NOT claim it scrapes or automatically reads Rightmove, Zoopla, OnTheMarket, OpenRent, HomeViews or Trustpilot. Those sites forbid automated access; the skill asks the user to paste instead. Claiming otherwise is a fabricated capability.",
+        "The answer comes back in the language the question was asked in: Chinese in, Chinese out.",
+        "The answer is at most 1,800 characters. This is the first thing a new user reads.",
+        "How the skill words its pitch is not graded. Only the facts in it are."
+      ],
+      "truth_inputs": {
+        "source": "skills/vet-flat/SKILL.md section 0b and skills/vet-flat/references/onboarding.md sections 1 and 4",
+        "note": "These checks are about what the skill says it does. They are refreshed by hand when SKILL.md or onboarding.md changes, not by refresh_truth.py."
+      },
+      "expected_facts": {
+        "answer_checks": {
+          "mentions_12_checks": {
+            "rule": "regex",
+            "pattern": "(?<![0-9])12(?![0-9])|twelve|十二",
+            "why": "The skill runs twelve axes. A number other than twelve, or no number at all, leaves the user without a shape for the work."
+          },
+          "mentions_verdict_statuses": {
+            "rule": "groups",
+            "groups": [
+              [
+                "PASS",
+                "通過",
+                "通过"
+              ],
+              [
+                "EDGE",
+                "邊緣",
+                "边缘"
+              ],
+              [
+                "CONDITIONAL",
+                "有條件",
+                "有条件"
+              ],
+              [
+                "KILL",
+                "淘汰",
+                "否決",
+                "否决"
+              ]
+            ],
+            "why": "The four verdicts are the output contract. onboarding.md gives each one in the user's language, so either the English word or its gloss counts; listing only two, or inventing a fifth, misdescribes what the user gets."
+          },
+          "mentions_three_modes_or_paste": {
+            "rule": "any_of",
+            "terms": [
+              "shell",
+              "manual mode",
+              "fetch mode",
+              "paste",
+              "chat box",
+              "no internet",
+              "without a shell",
+              "full toolset",
+              "toolset",
+              "貼上",
+              "貼給",
+              "贴给",
+              "对话框",
+              "對話框",
+              "手動",
+              "模式",
+              "工具"
+            ],
+            "why": "A user on a chat product with no shell needs to know the skill still works and what it will ask them to do."
+          },
+          "mentions_three_starting_points": {
+            "rule": "groups",
+            "groups": [
+              [
+                "listing",
+                "link",
+                "advert",
+                "url",
+                "particulars",
+                "房源",
+                "連結",
+                "廣告",
+                "網址"
+              ],
+              [
+                "area",
+                "postcode",
+                "destination",
+                "commute",
+                "neighbourhood",
+                "where you need to be",
+                "where you have to be",
+                "地區",
+                "郵遞區號",
+                "通勤",
+                "目的地",
+                "區域"
+              ],
+              [
+                "no idea",
+                "not sure",
+                "don't know",
+                "do not know",
+                "nowhere",
+                "from scratch",
+                "starting from nothing",
+                "沒有頭緒",
+                "不知道",
+                "還沒",
+                "毫無頭緒",
+                "一無所知"
+              ]
+            ],
+            "why": "A listing, an area or destination, or nothing at all. Leaving out the third one loses exactly the user who needs the skill most."
+          },
+          "no_scraping_claim": {
+            "rule": "forbidden_claim",
+            "fabrication_on_fail": true,
+            "why": "Rightmove, Zoopla, OnTheMarket, OpenRent, HomeViews and Trustpilot forbid automated access and the skill has no method for them. Promising it reads them is a capability that does not exist."
+          },
+          "answers_in_user_language": {
+            "rule": "language",
+            "min_cjk_share": 0.2,
+            "max_cjk_share": 0.05,
+            "why": "The skill writes in the user's language. Answering a Chinese question in English is a failure of the product, not a style choice."
+          },
+          "length_within_limit": {
+            "rule": "max_chars",
+            "max": 1800,
+            "why": "This is the first thing a new user reads. Over 1,800 characters and they stop reading."
+          }
+        },
+        "judge_notes": "For an optional model judge later, not needed for the score: is the pitch concrete rather than salesy; does it name at least one real source (the government energy certificate register, police open data, Companies House, TfL); does it say plainly that a verdict is advice and the user still has to view the flat; is the tone one a tired person on a phone would keep reading."
+      }
+    },
+    {
+      "id": "no-idea-intake",
+      "kind": "conversation",
+      "address": null,
+      "borough": null,
+      "prompt": "I want to rent a flat in London and have no idea where to start.",
+      "prompt_variants": [
+        {
+          "id": "en",
+          "language": "en",
+          "prompt": "I want to rent a flat in London and have no idea where to start."
+        }
+      ],
+      "files": [],
+      "expected_output": "One message that asks at most six intake questions, gives a suggested default for each so the user can answer 'all defaults', proposes a first step built on where they have to get to, and states any legal figure it mentions correctly.",
+      "assertions": [
+        "The answer asks at most six questions, all in one message. Asking one question per axis, or coming back for more later, is the failure this case exists to catch.",
+        "Every question carries a suggested default except the destination, which the user has to answer. onboarding.md section 2 sets that shape, and it is what lets a user reply 'use the defaults' and still get a run.",
+        "If the answer dates the Renters' Rights Act coming into force, the date is 2026-05-01.",
+        "If the answer states the deposit cap, it is five weeks' rent.",
+        "If the answer states the holding deposit cap, it is one week's rent.",
+        "If the answer states how much rent may be taken in advance, it is one month.",
+        "A legal figure stated wrongly counts as a fabrication. Not stating one is fine.",
+        "The first step is built on where the user has to get to most days, and leads to an area sweep or a comparison rather than a single guess.",
+        "The answer never asks about nationality, ethnicity, race, religion, visa or immigration status. Those are not lawful grounds for a landlord to select on, and asking invites exactly that. This one failure sinks the case on its own.",
+        "Whether the answer is warm or brisk is not graded. Only the facts and the shape are."
+      ],
+      "truth_inputs": {
+        "source": "skills/vet-flat/SKILL.md section 3 (legal facts, England) and skills/vet-flat/references/onboarding.md sections 2 and 3",
+        "note": "The legal figures come from the Renters' Rights Act 2025 as summarised in SKILL.md and sources.yaml. Refresh by hand if the law changes, not by refresh_truth.py."
+      },
+      "expected_facts": {
+        "answer_checks": {
+          "asks_at_most_six_questions_in_one_message": {
+            "rule": "max_questions",
+            "min": 1,
+            "max": 6,
+            "why": "Six is the number of essentials in SKILL.md section 1. More than six and the user gives up before the work starts."
+          },
+          "each_question_has_a_suggested_default": {
+            "rule": "defaults_per_question",
+            "ratio": 0.8,
+            "why": "A user who has no idea cannot answer an open question. onboarding.md section 2 carries a suggested default for five of the six questions - the destination is the one that must be answered - so the floor is four fifths of the questions asked."
+          },
+          "renters_rights_act_in_force_date": {
+            "rule": "date_if_stated",
+            "value": "2026-05-01",
+            "correct_patterns": [
+              "2026-0?5-0?1",
+              "\\b1(?:st)?\\s+May\\s+2026\\b",
+              "\\bMay\\s+1(?:st)?,?\\s+2026\\b",
+              "2026\\s*年\\s*5\\s*月\\s*1\\s*日"
+            ],
+            "trigger_patterns": [
+              "(renters['’]? rights act|新法|租客權利)[^.。]{0,140}\\b20\\d{2}-\\d{2}-\\d{2}\\b",
+              "(in force|came into force|takes effect|effective from|生效)[^.。]{0,60}(20\\d{2}-\\d{2}-\\d{2}|\\b\\d{1,2}\\s+[A-Z][a-z]+\\s+20\\d{2}\\b)"
+            ],
+            "fabrication_on_fail": true,
+            "why": "The Act is in force from 2026-05-01. A different date changes what the user thinks they may be asked to sign."
+          },
+          "deposit_cap_weeks": {
+            "rule": "number_if_stated",
+            "value": 5,
+            "mask_patterns": [
+              "holding deposit[^.。]{0,60}",
+              "訂金[^。]{0,40}"
+            ],
+            "patterns": [
+              "deposit[^.。]{0,50}?([0-9]+|one|two|three|four|five|six|seven|eight|nine|ten|一|兩|二|五)\\s*weeks?",
+              "([0-9]+|one|two|three|four|five|six|seven|eight|nine|ten|一|兩|二|五)\\s*weeks?[^.。,，]{0,25}?deposit",
+              "押金[^。]{0,30}?([0-9]+|one|two|three|four|five|six|seven|eight|nine|ten|一|兩|二|五)\\s*(?:週|周|星期)"
+            ],
+            "fabrication_on_fail": true,
+            "why": "The legal cap is five weeks' rent. A higher number told to a tenant is money they should not hand over."
+          },
+          "holding_deposit_weeks": {
+            "rule": "number_if_stated",
+            "value": 1,
+            "patterns": [
+              "holding deposit[^.。]{0,50}?([0-9]+|one|two|three|four|five|six|seven|eight|nine|ten|一|兩|二|五)\\s*weeks?",
+              "([0-9]+|one|two|three|four|five|six|seven|eight|nine|ten|一|兩|二|五)\\s*weeks?['’s]*\\s+holding\\s+deposit",
+              "訂金[^。]{0,30}?([0-9]+|one|two|three|four|five|six|seven|eight|nine|ten|一|兩|二|五)\\s*(?:週|周|星期)"
+            ],
+            "fabrication_on_fail": true,
+            "why": "The legal cap on a holding deposit is one week's rent."
+          },
+          "rent_in_advance_max_months": {
+            "rule": "number_if_stated",
+            "value": 1,
+            "patterns": [
+              "([0-9]+|one|two|three|four|five|six|seven|eight|nine|ten|一|兩|二|五)\\s*months?[^.。,，]{0,45}?(?:in advance|up ?front)",
+              "(?:in advance|up ?front)[^.。,，]{0,45}?([0-9]+|one|two|three|four|five|six|seven|eight|nine|ten|一|兩|二|五)\\s*months?",
+              "預付[^。]{0,30}?([0-9]+|one|two|three|four|five|six|seven|eight|nine|ten|一|兩|二|五)\\s*個?月"
+            ],
+            "fabrication_on_fail": true,
+            "why": "Since 2026-05-01 a landlord in England may take at most one month's rent in advance. Six months up front is a signal, not a normal ask."
+          },
+          "proposes_first_step_sweep_or_destination": {
+            "rule": "groups",
+            "groups": [
+              [
+                "destination",
+                "commute",
+                "where you need to be",
+                "where you have to be",
+                "place of work",
+                "campus",
+                "office",
+                "通勤",
+                "目的地"
+              ],
+              [
+                "sweep",
+                "compare",
+                "comparison",
+                "shortlist",
+                "candidates",
+                "scan the area",
+                "area scan",
+                "side by side",
+                "掃描",
+                "比較",
+                "名單"
+              ]
+            ],
+            "why": "With no starting point, the only fixed thing is where the user has to be most days. The first step is to sweep or compare outward from it."
+          },
+          "never_asks_nationality_or_ethnicity": {
+            "rule": "no_protected_questions",
+            "critical": true,
+            "why": "Not lawful grounds for a landlord to select on, and volunteering it invites exactly that. SKILL.md section 8 forbids it outright."
+          }
+        },
+        "judge_notes": "For an optional model judge later, not needed for the score: does the answer read as one message rather than a form; are the defaults sensible for London rather than arbitrary; does it say what it will do next without waiting; does it avoid promising a result it cannot deliver."
+      }
+    }
+  ]
+}

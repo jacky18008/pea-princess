@@ -1,0 +1,153 @@
+{
+ "query": {
+  "lat": 51.538616,
+  "lng": -0.142035,
+  "half_m": 150.0,
+  "months": 6,
+  "end_month": "2026-06",
+  "corridor_m": null
+ },
+ "source_url": "https://data.police.uk/api/crimes-street/all-crime?poly=51.537269%2C-0.144201:51.539963%2C-0.144201:51.539963%2C-0.139869:51.537269%2C-0.139869&date=2026-01",
+ "source_urls_count": 30,
+ "http_status": 200,
+ "ok": true,
+ "note": "",
+ "retrieved_at": "2026-09-03T11:54:58+00:00",
+ "evidence_class": "G",
+ "latest_available_month": "2026-06",
+ "box": {
+  "corners": [
+   {
+    "lat": 51.537269,
+    "lng": -0.144201
+   },
+   {
+    "lat": 51.539963,
+    "lng": -0.144201
+   },
+   {
+    "lat": 51.539963,
+    "lng": -0.139869
+   },
+   {
+    "lat": 51.537269,
+    "lng": -0.139869
+   }
+  ],
+  "poly": "51.537269,-0.144201:51.539963,-0.144201:51.539963,-0.139869:51.537269,-0.139869",
+  "height_m_actual": 299.7,
+  "width_m_actual": 299.7,
+  "half_m_requested": 150.0
+ },
+ "months_requested": [
+  "2026-01",
+  "2026-02",
+  "2026-03",
+  "2026-04",
+  "2026-05",
+  "2026-06"
+ ],
+ "months_fetched": [
+  "2026-01",
+  "2026-02",
+  "2026-03",
+  "2026-04",
+  "2026-05",
+  "2026-06"
+ ],
+ "months_missing": [],
+ "total": 808,
+ "per_month": {
+  "2026-01": 123,
+  "2026-02": 119,
+  "2026-03": 151,
+  "2026-04": 108,
+  "2026-05": 138,
+  "2026-06": 169
+ },
+ "by_category": {
+  "theft-from-the-person": 166,
+  "violent-crime": 163,
+  "other-theft": 104,
+  "drugs": 92,
+  "shoplifting": 88,
+  "public-order": 70,
+  "robbery": 43,
+  "anti-social-behaviour": 37,
+  "criminal-damage-arson": 14,
+  "burglary": 12,
+  "bicycle-theft": 9,
+  "possession-of-weapons": 4,
+  "vehicle-crime": 4,
+  "other-crime": 2
+ },
+ "predatory_subset": {
+  "categories": [
+   "anti-social-behaviour",
+   "violent-crime",
+   "theft-from-the-person",
+   "robbery"
+  ],
+  "count": 409,
+  "share_of_total": 0.506,
+  "per_category": {
+   "anti-social-behaviour": 37,
+   "violent-crime": 163,
+   "theft-from-the-person": 166,
+   "robbery": 43
+  },
+  "explanation": "These four are the ones a resident meets in person: being harassed, hit, pickpocketed or mugged. Separating them from the rest tells 'busy' apart from 'dangerous' — a place full of shoplifting and vehicle crime is commercial, not threatening to someone walking home."
+ },
+ "top_anchors": [
+  {
+   "anchor": "On or near Camden Town",
+   "count": 204,
+   "share_of_total": 0.252
+  },
+  {
+   "anchor": "On or near Nightclub",
+   "count": 129,
+   "share_of_total": 0.16
+  },
+  {
+   "anchor": "On or near Camden High Street",
+   "count": 106,
+   "share_of_total": 0.131
+  },
+  {
+   "anchor": "On or near Sports/recreation Area",
+   "count": 95,
+   "share_of_total": 0.118
+  },
+  {
+   "anchor": "On or near Supermarket",
+   "count": 83,
+   "share_of_total": 0.103
+  }
+ ],
+ "top_anchor_share": 0.252,
+ "anchor_dispersion": {
+  "distinct_anchors": 13,
+  "top5_total": 617,
+  "top5_mean": 123.4,
+  "top5_share_of_total": 0.764,
+  "top1_share_of_total": 0.252,
+  "reading": "The top five anchors hold 76% of everything. Crime here clusters at a few nodes rather than spreading along the streets."
+ },
+ "anchor_caveat": "'On or near X' is an anonymised snap point, not an address. Two incidents on the same anchor may be a hundred metres apart.",
+ "months_counted": 6,
+ "sensitivity": {
+  "counts": {
+   "centre": 808,
+   "north_20m": 707,
+   "south_20m": 808,
+   "east_20m": 796,
+   "west_20m": 807
+  },
+  "shift_m": 20.0,
+  "spread": 101,
+  "spread_share_of_centre": 0.125,
+  "explanation": "The same box re-fetched with the centre moved 20 m north, south, east and west. A big spread means the number is an artefact of where you put the pin, usually because one anonymised anchor sits just inside or just outside the edge. A small spread means the count is robust."
+ },
+ "method": "data.police.uk street-level all-crime over a 300 m x 300 m box (half-width 150 m, cosine-corrected), months 2026-01 to 2026-06, 6 of 6 months actually returned. Totals cover the months fetched only — nothing is scaled up to fill a gap. Caveats: locations are anonymised snap points ('On or near X'), there is no night/day split, there is no population or footfall denominator so busy places out-count dangerous ones, and publication runs 2-3 months behind, so this describes a window that has already closed."
+}

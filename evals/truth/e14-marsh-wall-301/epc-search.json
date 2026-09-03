@@ -1,0 +1,73 @@
+{
+ "query": {
+  "postcode": "E14 9TP",
+  "street": null,
+  "town": null
+ },
+ "source_url": "https://find-energy-certificate.service.gov.uk/find-a-certificate/search-by-postcode?postcode=E14%209TP",
+ "http_status": 200,
+ "ok": true,
+ "note": "",
+ "retrieved_at": "2026-09-03T11:40:06+00:00",
+ "evidence_class": "G",
+ "count": 8,
+ "results": [
+  {
+   "certificate_id": "9691-3333-1103-2222-7251",
+   "address": "Flat, 50 Marsh Wall, LONDON, E14 9TP",
+   "rating": "B",
+   "valid_until": "27 October 2032",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/9691-3333-1103-2222-7251"
+  },
+  {
+   "certificate_id": "4232-9230-8229-1333-2226",
+   "address": "Flat 301, 50 Marsh Wall, LONDON, E14 9TP",
+   "rating": "B",
+   "valid_until": "27 October 2032",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/4232-9230-8229-1333-2226"
+  },
+  {
+   "certificate_id": "7291-9238-6332-4829-0023",
+   "address": "Flat 302, 50 Marsh Wall, LONDON, E14 9TP",
+   "rating": "B",
+   "valid_until": "27 October 2032",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/7291-9238-6332-4829-0023"
+  },
+  {
+   "certificate_id": "8472-9230-8539-1363-2222",
+   "address": "Flat 303, 50 Marsh Wall, LONDON, E14 9TP",
+   "rating": "B",
+   "valid_until": "27 October 2032",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/8472-9230-8539-1363-2222"
+  },
+  {
+   "certificate_id": "9402-9230-8089-1323-2226",
+   "address": "Flat 304, 50 Marsh Wall, LONDON, E14 9TP",
+   "rating": "B",
+   "valid_until": "27 October 2032",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/9402-9230-8089-1323-2226"
+  },
+  {
+   "certificate_id": "4882-4230-9429-1383-2226",
+   "address": "Flat 305, 50 Marsh Wall, LONDON, E14 9TP",
+   "rating": "B",
+   "valid_until": "27 October 2032",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/4882-4230-9429-1383-2226"
+  },
+  {
+   "certificate_id": "1772-3230-9529-1393-2222",
+   "address": "Flat 306, 50 Marsh Wall, LONDON, E14 9TP",
+   "rating": "B",
+   "valid_until": "27 October 2032",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/1772-3230-9529-1393-2222"
+  },
+  {
+   "certificate_id": "4662-3230-9129-1353-2222",
+   "address": "Flat 308, 50 Marsh Wall, LONDON, E14 9TP",
+   "rating": "B",
+   "valid_until": "27 October 2032",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/4662-3230-9129-1353-2222"
+  }
+ ],
+ "caveat": "Large buildings are often split across several postcodes; if a flat is missing, search by street name and town."
+}

@@ -1,0 +1,301 @@
+{
+ "query": {
+  "lat": 51.500879,
+  "lng": -0.021935,
+  "search_radius_m": 2000
+ },
+ "source_url": "https://api.tfl.gov.uk/StopPoint?lat=51.500879&lon=-0.021935&stopTypes=NaptanMetroStation,NaptanRailStation,NaptanFerryPort&radius=2000&returnLines=true",
+ "http_status": 200,
+ "ok": true,
+ "note": "",
+ "retrieved_at": "2026-09-03T11:52:13+00:00",
+ "evidence_class": "G",
+ "grade": "B",
+ "reason": "The nearer family is within an 800 m walk (family_A about 453 m) and the second is a longer but usable walk (family_B about 918 m).",
+ "explanation": "Two lines of the same family do not count as redundancy; they tend to strike together, and they share the same tunnels, the same control room and the same flood.",
+ "families": {
+  "family_A": {
+   "members": [
+    "tube",
+    "dlr"
+   ],
+   "nearest": "South Quay DLR Station",
+   "modes": [
+    "dlr"
+   ],
+   "lines": [
+    "DLR"
+   ],
+   "straight_line_m": 348,
+   "walk_m_estimate": 453,
+   "walk_min_estimate": 5.7
+  },
+  "family_B": {
+   "members": [
+    "national-rail",
+    "overground",
+    "elizabeth-line"
+   ],
+   "nearest": "Canary Wharf",
+   "modes": [
+    "elizabeth-line"
+   ],
+   "lines": [
+    "Elizabeth line"
+   ],
+   "straight_line_m": 706,
+   "walk_m_estimate": 918,
+   "walk_min_estimate": 11.5
+  },
+  "family_C": {
+   "members": [
+    "river-bus"
+   ],
+   "nearest": "Canary Wharf Pier",
+   "modes": [
+    "river-bus"
+   ],
+   "lines": [
+    "RB1",
+    "RB4",
+    "RB6"
+   ],
+   "straight_line_m": 818,
+   "walk_m_estimate": 1064,
+   "walk_min_estimate": 13.3
+  }
+ },
+ "nearest_family": "family_A",
+ "nearest_family_walk_m": 453,
+ "second_family_walk_m": 918,
+ "bus_fallback": null,
+ "stations_considered": [
+  {
+   "name": "South Quay DLR Station",
+   "modes": [
+    "dlr"
+   ],
+   "family": "family_A",
+   "walk_m_estimate": 453,
+   "walk_min_estimate": 5.7
+  },
+  {
+   "name": "Heron Quays DLR Station",
+   "modes": [
+    "dlr"
+   ],
+   "family": "family_A",
+   "walk_m_estimate": 490,
+   "walk_min_estimate": 6.1
+  },
+  {
+   "name": "Canary Wharf Underground Station",
+   "modes": [
+    "tube"
+   ],
+   "family": "family_A",
+   "walk_m_estimate": 562,
+   "walk_min_estimate": 7.0
+  },
+  {
+   "name": "Canary Wharf DLR Station",
+   "modes": [
+    "dlr"
+   ],
+   "family": "family_A",
+   "walk_m_estimate": 700,
+   "walk_min_estimate": 8.7
+  },
+  {
+   "name": "Crossharbour DLR Station",
+   "modes": [
+    "dlr"
+   ],
+   "family": "family_A",
+   "walk_m_estimate": 845,
+   "walk_min_estimate": 10.6
+  },
+  {
+   "name": "Canary Wharf",
+   "modes": [
+    "elizabeth-line"
+   ],
+   "family": "family_B",
+   "walk_m_estimate": 918,
+   "walk_min_estimate": 11.5
+  },
+  {
+   "name": "West India Quay DLR Station",
+   "modes": [
+    "dlr"
+   ],
+   "family": "family_A",
+   "walk_m_estimate": 1019,
+   "walk_min_estimate": 12.7
+  },
+  {
+   "name": "Canary Wharf Pier",
+   "modes": [
+    "river-bus"
+   ],
+   "family": "family_C",
+   "walk_m_estimate": 1064,
+   "walk_min_estimate": 13.3
+  },
+  {
+   "name": "Rotherhithe Pier",
+   "modes": [
+    "river-bus"
+   ],
+   "family": "family_C",
+   "walk_m_estimate": 1149,
+   "walk_min_estimate": 14.4
+  },
+  {
+   "name": "Poplar DLR Station",
+   "modes": [
+    "dlr"
+   ],
+   "family": "family_A",
+   "walk_m_estimate": 1167,
+   "walk_min_estimate": 14.6
+  },
+  {
+   "name": "Greenland Surrey Quays Pier",
+   "modes": [
+    "river-bus"
+   ],
+   "family": "family_C",
+   "walk_m_estimate": 1309,
+   "walk_min_estimate": 16.4
+  },
+  {
+   "name": "Mudchute DLR Station",
+   "modes": [
+    "dlr"
+   ],
+   "family": "family_A",
+   "walk_m_estimate": 1458,
+   "walk_min_estimate": 18.2
+  },
+  {
+   "name": "Westferry DLR Station",
+   "modes": [
+    "dlr"
+   ],
+   "family": "family_A",
+   "walk_m_estimate": 1459,
+   "walk_min_estimate": 18.2
+  },
+  {
+   "name": "Blackwall DLR Station",
+   "modes": [
+    "dlr"
+   ],
+   "family": "family_A",
+   "walk_m_estimate": 1713,
+   "walk_min_estimate": 21.4
+  },
+  {
+   "name": "All Saints DLR Station",
+   "modes": [
+    "dlr"
+   ],
+   "family": "family_A",
+   "walk_m_estimate": 1742,
+   "walk_min_estimate": 21.8
+  },
+  {
+   "name": "Masthouse Terrace Pier",
+   "modes": [
+    "river-bus"
+   ],
+   "family": "family_C",
+   "walk_m_estimate": 1811,
+   "walk_min_estimate": 22.6
+  },
+  {
+   "name": "Island Gardens DLR Station",
+   "modes": [
+    "dlr"
+   ],
+   "family": "family_A",
+   "walk_m_estimate": 2017,
+   "walk_min_estimate": 25.2
+  },
+  {
+   "name": "East India DLR Station",
+   "modes": [
+    "bus",
+    "dlr"
+   ],
+   "family": "family_A",
+   "walk_m_estimate": 2159,
+   "walk_min_estimate": 27.0
+  },
+  {
+   "name": "North Greenwich Underground Station",
+   "modes": [
+    "tube"
+   ],
+   "family": "family_A",
+   "walk_m_estimate": 2278,
+   "walk_min_estimate": 28.5
+  },
+  {
+   "name": "Langdon Park DLR Station",
+   "modes": [
+    "dlr"
+   ],
+   "family": "family_A",
+   "walk_m_estimate": 2280,
+   "walk_min_estimate": 28.5
+  },
+  {
+   "name": "Limehouse DLR Station",
+   "modes": [
+    "dlr"
+   ],
+   "family": "family_A",
+   "walk_m_estimate": 2467,
+   "walk_min_estimate": 30.8
+  },
+  {
+   "name": "Limehouse Rail Station",
+   "modes": [
+    "national-rail"
+   ],
+   "family": "family_B",
+   "walk_m_estimate": 2481,
+   "walk_min_estimate": 31.0
+  },
+  {
+   "name": "Canada Water Underground Station",
+   "modes": [
+    "tube"
+   ],
+   "family": "family_A",
+   "walk_m_estimate": 2576,
+   "walk_min_estimate": 32.2
+  },
+  {
+   "name": "Greenwich Pier",
+   "modes": [
+    "river-bus"
+   ],
+   "family": "family_C",
+   "walk_m_estimate": 2581,
+   "walk_min_estimate": 32.3
+  },
+  {
+   "name": "Surrey Quays Rail Station",
+   "modes": [
+    "overground"
+   ],
+   "family": "family_B",
+   "walk_m_estimate": 2583,
+   "walk_min_estimate": 32.3
+  }
+ ],
+ "method": "Stations within 2000 m straight line, each put in a strike family: family_A is tube and DLR, family_B is national rail, Overground and the Elizabeth line, family_C is the river bus (a pleasant backup, not a commute). Grades: A = both A and B within an 800 m walk; B = both, second one 800-1600 m; B- = one within 800 m and the other beyond 1600 m or bus only; C = one family only. Distances are the straight line times 1.3, an estimate, so treat a number near a threshold as a tie."
+}

@@ -1,0 +1,129 @@
+{
+ "query": {
+  "postcode": "SE1 9SG",
+  "street": null,
+  "town": null
+ },
+ "source_url": "https://find-energy-certificate.service.gov.uk/find-a-certificate/search-by-postcode?postcode=SE1%209SG",
+ "http_status": 200,
+ "ok": true,
+ "note": "",
+ "retrieved_at": "2026-09-03T11:38:39+00:00",
+ "evidence_class": "G",
+ "count": 16,
+ "results": [
+  {
+   "certificate_id": "1090-0965-0722-3091-3203",
+   "address": "Flat 200, London Bridge Hotel, LONDON, SE1 9SG",
+   "rating": "C",
+   "valid_until": "15 December 2030",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/1090-0965-0722-3091-3203"
+  },
+  {
+   "certificate_id": "9350-2876-3020-2990-5081",
+   "address": "Flat 300, London Bridge Hotel, LONDON, SE1 9SG",
+   "rating": "D",
+   "valid_until": "15 December 2030",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/9350-2876-3020-2990-5081"
+  },
+  {
+   "certificate_id": "2658-1044-7289-4026-0970",
+   "address": "Flat 5, 4 London Bridge Street, LONDON, SE1 9SG",
+   "rating": "C",
+   "valid_until": "25 January 2026 Expired",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/2658-1044-7289-4026-0970"
+  },
+  {
+   "certificate_id": "8726-7722-4040-5247-8922",
+   "address": "Flat 12, 4 London Bridge, LONDON, SE1 9SG",
+   "rating": "C",
+   "valid_until": "23 February 2026 Expired",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/8726-7722-4040-5247-8922"
+  },
+  {
+   "certificate_id": "0095-0209-8505-6366-1710",
+   "address": "FLAT 16, 4 London Bridge Street, LONDON, SE1 9SG",
+   "rating": "C",
+   "valid_until": "10 January 2035",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0095-0209-8505-6366-1710"
+  },
+  {
+   "certificate_id": "8296-7020-4039-9874-4922",
+   "address": "Flat 16, 4-6 London Bridge Street, LONDON, SE1 9SG",
+   "rating": "C",
+   "valid_until": "24 October 2026",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/8296-7020-4039-9874-4922"
+  },
+  {
+   "certificate_id": "2742-8016-1345-2759-8210",
+   "address": "Apartment 1, The Shard, LONDON, SE1 9SG",
+   "rating": "B",
+   "valid_until": "3 July 2032",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/2742-8016-1345-2759-8210"
+  },
+  {
+   "certificate_id": "3801-9842-5532-8521-0593",
+   "address": "Apartment 2, The Shard, LONDON, SE1 9SG",
+   "rating": "B",
+   "valid_until": "3 July 2032",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/3801-9842-5532-8521-0593"
+  },
+  {
+   "certificate_id": "4969-1835-2700-1574-1226",
+   "address": "Apartment 3, The Shard, LONDON, SE1 9SG",
+   "rating": "B",
+   "valid_until": "3 July 2032",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/4969-1835-2700-1574-1226"
+  },
+  {
+   "certificate_id": "0431-3674-6260-2892-9125",
+   "address": "Apartment 4, The Shard, LONDON, SE1 9SG",
+   "rating": "B",
+   "valid_until": "14 June 2032",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0431-3674-6260-2892-9125"
+  },
+  {
+   "certificate_id": "0521-3554-1256-2829-3441",
+   "address": "Apartment 5, The Shard, LONDON, SE1 9SG",
+   "rating": "B",
+   "valid_until": "3 July 2032",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0521-3554-1256-2829-3441"
+  },
+  {
+   "certificate_id": "6389-1835-2600-1564-8222",
+   "address": "Apartment 6, The Shard, LONDON, SE1 9SG",
+   "rating": "B",
+   "valid_until": "3 July 2032",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/6389-1835-2600-1564-8222"
+  },
+  {
+   "certificate_id": "2947-5010-1355-2559-8214",
+   "address": "Apartment 7, The Shard, LONDON, SE1 9SG",
+   "rating": "B",
+   "valid_until": "3 July 2032",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/2947-5010-1355-2559-8214"
+  },
+  {
+   "certificate_id": "7101-9843-7732-4096-8623",
+   "address": "Apartment 8, The Shard, LONDON, SE1 9SG",
+   "rating": "B",
+   "valid_until": "14 June 2032",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/7101-9843-7732-4096-8623"
+  },
+  {
+   "certificate_id": "2448-4080-1385-2759-8214",
+   "address": "Apartment 9, The Shard, LONDON, SE1 9SG",
+   "rating": "B",
+   "valid_until": "3 July 2032",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/2448-4080-1385-2759-8214"
+  },
+  {
+   "certificate_id": "9829-1835-2220-1544-3222",
+   "address": "Apartment 10, The Shard, LONDON, SE1 9SG",
+   "rating": "B",
+   "valid_until": "3 July 2032",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/9829-1835-2220-1544-3222"
+  }
+ ],
+ "caveat": "Large buildings are often split across several postcodes; if a flat is missing, search by street name and town."
+}

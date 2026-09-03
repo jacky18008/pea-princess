@@ -1,0 +1,243 @@
+{
+ "query": {
+  "from": "SW8 1SP",
+  "from_kind": "postcode",
+  "to": "SW1A 2AA",
+  "to_kind": "postcode",
+  "arrive_by": "09:00",
+  "date": "20260904",
+  "date_source": "next-weekday",
+  "door_buffer_min": 0,
+  "plans": [
+   "all",
+   "rail",
+   "bus"
+  ]
+ },
+ "source_url": "https://api.tfl.gov.uk/Journey/JourneyResults/SW8%201SP/to/SW1A%202AA?date=20260904&time=0900&timeIs=Arriving",
+ "http_status": 200,
+ "ok": true,
+ "note": "",
+ "retrieved_at": "2026-09-03T11:57:23+00:00",
+ "evidence_class": "G",
+ "app_key_used": false,
+ "plans": {
+  "all": {
+   "source_url": "https://api.tfl.gov.uk/Journey/JourneyResults/SW8%201SP/to/SW1A%202AA?date=20260904&time=0900&timeIs=Arriving",
+   "http_status": 200,
+   "ok": true,
+   "note": "",
+   "retrieved_at": "2026-09-03T11:57:20+00:00",
+   "evidence_class": "G",
+   "mode_filter": "(TfL default: every mode)",
+   "duration_min": 24,
+   "duration_min_before_buffer": 24,
+   "door_buffer_min": 0,
+   "start": "2026-09-04T08:29:00",
+   "arrival": "2026-09-04T08:53:00",
+   "legs": [
+    {
+     "mode": "walking",
+     "line": null,
+     "from": "SW8 1SP",
+     "to": "Vauxhall Bus Station",
+     "duration_min": 1,
+     "departure": "2026-09-04T08:29:00",
+     "arrival": "2026-09-04T08:30:00",
+     "summary": "Walk to Vauxhall Bus Station"
+    },
+    {
+     "mode": "bus",
+     "line": "87",
+     "from": "Vauxhall Bus Station",
+     "to": "Horse Guards Parade",
+     "duration_min": 20,
+     "departure": "2026-09-04T08:30:00",
+     "arrival": "2026-09-04T08:50:00",
+     "summary": "87 bus to Horse Guards Parade"
+    },
+    {
+     "mode": "walking",
+     "line": null,
+     "from": "Horse Guards Parade",
+     "to": "SW1A 2AA",
+     "duration_min": 3,
+     "departure": "2026-09-04T08:50:00",
+     "arrival": "2026-09-04T08:53:00",
+     "summary": "Walk to SW1A 2AA"
+    }
+   ],
+   "changes": 0,
+   "transit_legs": 1,
+   "walking_min": 4,
+   "first_leg_walk_min": 1,
+   "last_leg_walk_min": 3,
+   "waiting_min_in_plan": 0,
+   "zero_wait_joins": 2,
+   "modes": [
+    "bus"
+   ],
+   "lines": [
+    "87"
+   ],
+   "wait_sample_note": "2 of the 2 connections in this plan depart at the exact minute the previous leg arrives. That is a zero-wait sample: the plan has budgeted nothing for waiting, so the real trip is this number plus however long the next service takes to turn up.",
+   "alternatives_min": [
+    24,
+    25,
+    27,
+    38
+   ],
+   "journeys_returned": 4
+  },
+  "rail": {
+   "source_url": "https://api.tfl.gov.uk/Journey/JourneyResults/SW8%201SP/to/SW1A%202AA?date=20260904&time=0900&timeIs=Arriving&mode=tube,dlr,overground,elizabeth-line,national-rail,walking",
+   "http_status": 200,
+   "ok": true,
+   "note": "",
+   "retrieved_at": "2026-09-03T11:57:22+00:00",
+   "evidence_class": "G",
+   "mode_filter": "tube,dlr,overground,elizabeth-line,national-rail,walking",
+   "duration_min": 27,
+   "duration_min_before_buffer": 27,
+   "door_buffer_min": 0,
+   "start": "2026-09-04T08:29:00",
+   "arrival": "2026-09-04T08:56:00",
+   "legs": [
+    {
+     "mode": "walking",
+     "line": null,
+     "from": "SW8 1SP",
+     "to": "Vauxhall Underground Station",
+     "duration_min": 6,
+     "departure": "2026-09-04T08:29:00",
+     "arrival": "2026-09-04T08:35:00",
+     "summary": "Walk to Vauxhall"
+    },
+    {
+     "mode": "tube",
+     "line": "Victoria",
+     "from": "Vauxhall Underground Station",
+     "to": "Victoria Underground Station",
+     "duration_min": 3,
+     "departure": "2026-09-04T08:35:00",
+     "arrival": "2026-09-04T08:38:00",
+     "summary": "Victoria line to Victoria"
+    },
+    {
+     "mode": "tube",
+     "line": "Circle",
+     "from": "Victoria Underground Station",
+     "to": "Westminster Underground Station",
+     "duration_min": 4,
+     "departure": "2026-09-04T08:41:00",
+     "arrival": "2026-09-04T08:45:00",
+     "summary": "Circle line to Westminster"
+    },
+    {
+     "mode": "walking",
+     "line": null,
+     "from": "Westminster Underground Station",
+     "to": "SW1A 2AA",
+     "duration_min": 11,
+     "departure": "2026-09-04T08:45:00",
+     "arrival": "2026-09-04T08:56:00",
+     "summary": "Walk to SW1A 2AA"
+    }
+   ],
+   "changes": 1,
+   "transit_legs": 2,
+   "walking_min": 17,
+   "first_leg_walk_min": 6,
+   "last_leg_walk_min": 11,
+   "waiting_min_in_plan": 3,
+   "zero_wait_joins": 2,
+   "modes": [
+    "tube"
+   ],
+   "lines": [
+    "Victoria",
+    "Circle"
+   ],
+   "wait_sample_note": "2 of the 3 connections in this plan depart at the exact minute the previous leg arrives. That is a zero-wait sample: the plan has budgeted nothing for waiting, so the real trip is this number plus however long the next service takes to turn up.",
+   "alternatives_min": [
+    27,
+    28,
+    28,
+    38
+   ],
+   "journeys_returned": 4
+  },
+  "bus": {
+   "source_url": "https://api.tfl.gov.uk/Journey/JourneyResults/SW8%201SP/to/SW1A%202AA?date=20260904&time=0900&timeIs=Arriving&mode=bus,walking",
+   "http_status": 200,
+   "ok": true,
+   "note": "",
+   "retrieved_at": "2026-09-03T11:57:23+00:00",
+   "evidence_class": "G",
+   "mode_filter": "bus,walking",
+   "duration_min": 24,
+   "duration_min_before_buffer": 24,
+   "door_buffer_min": 0,
+   "start": "2026-09-04T08:29:00",
+   "arrival": "2026-09-04T08:53:00",
+   "legs": [
+    {
+     "mode": "walking",
+     "line": null,
+     "from": "SW8 1SP",
+     "to": "Vauxhall Bus Station",
+     "duration_min": 1,
+     "departure": "2026-09-04T08:29:00",
+     "arrival": "2026-09-04T08:30:00",
+     "summary": "Walk to Vauxhall Bus Station"
+    },
+    {
+     "mode": "bus",
+     "line": "87",
+     "from": "Vauxhall Bus Station",
+     "to": "Horse Guards Parade",
+     "duration_min": 20,
+     "departure": "2026-09-04T08:30:00",
+     "arrival": "2026-09-04T08:50:00",
+     "summary": "87 bus to Horse Guards Parade"
+    },
+    {
+     "mode": "walking",
+     "line": null,
+     "from": "Horse Guards Parade",
+     "to": "SW1A 2AA",
+     "duration_min": 3,
+     "departure": "2026-09-04T08:50:00",
+     "arrival": "2026-09-04T08:53:00",
+     "summary": "Walk to SW1A 2AA"
+    }
+   ],
+   "changes": 0,
+   "transit_legs": 1,
+   "walking_min": 4,
+   "first_leg_walk_min": 1,
+   "last_leg_walk_min": 3,
+   "waiting_min_in_plan": 0,
+   "zero_wait_joins": 2,
+   "modes": [
+    "bus"
+   ],
+   "lines": [
+    "87"
+   ],
+   "wait_sample_note": "2 of the 2 connections in this plan depart at the exact minute the previous leg arrives. That is a zero-wait sample: the plan has budgeted nothing for waiting, so the real trip is this number plus however long the next service takes to turn up.",
+   "alternatives_min": [
+    24,
+    25,
+    27,
+    38
+   ],
+   "journeys_returned": 4
+  }
+ },
+ "fastest_plan": "all",
+ "fastest_min": 24,
+ "rail_only_min": 27,
+ "bus_only_min": 24,
+ "method": "TfL Journey Planner, arriving by 09:00 on 20260904 (next-weekday). Three plans: 'all' lets TfL choose any mode, 'rail' restricts to tube, DLR, Overground, Elizabeth line, national rail and walking, 'bus' to bus and walking. The bus number is the answer to 'what happens when the trains stop', so read it as the fallback, not as the commute. `door_buffer_min` is 0 and is added only because you asked; TfL plans to the street, not through the front door of a building."
+}

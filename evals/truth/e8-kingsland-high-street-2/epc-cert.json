@@ -1,0 +1,84 @@
+{
+ "certificate_id": "0340-2577-4590-2496-5851",
+ "source_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0340-2577-4590-2496-5851",
+ "http_status": 200,
+ "ok": true,
+ "note": "",
+ "retrieved_at": "2026-09-03T11:44:02+00:00",
+ "evidence_class": "G",
+ "property_type": "Mid-floor flat",
+ "total_floor_area_m2": 42.0,
+ "total_floor_area_sqft": 452,
+ "date_of_assessment": "13 January 2026",
+ "date_of_certificate": "28 January 2026",
+ "assessment_type": "RdSAP",
+ "valid_until": "27 January 2036",
+ "certificate_number": "0340-2577-4590-2496-5851",
+ "energy_rating": "C",
+ "energy_score": 78,
+ "potential_rating": "C",
+ "address": "Flat 2 10 Kingsland High Street LONDON E8 2JP",
+ "features": {
+  "Wall": {
+   "description": "Cavity wall, as built, insulated (assumed)",
+   "rating": "Good"
+  },
+  "Window": {
+   "description": "Fully double glazed",
+   "rating": "Average"
+  },
+  "Main heating": {
+   "description": "Community scheme",
+   "rating": "Average"
+  },
+  "Main heating control": {
+   "description": "Charging system linked to use of community heating, programmer and TRVs",
+   "rating": "Good"
+  },
+  "Hot water": {
+   "description": "Community scheme",
+   "rating": "Average"
+  },
+  "Lighting": {
+   "description": "Good lighting efficiency",
+   "rating": "Good"
+  },
+  "Roof": {
+   "description": "(another dwelling above)",
+   "rating": "N/A"
+  },
+  "Floor": {
+   "description": "(another dwelling below)",
+   "rating": "N/A"
+  },
+  "Air tightness": {
+   "description": "(not tested)",
+   "rating": "N/A"
+  },
+  "Secondary heating": {
+   "description": "None",
+   "rating": "N/A"
+  }
+ },
+ "heating_class": "community_heat_network",
+ "main_heating": "Community scheme",
+ "hot_water": "Community scheme",
+ "air_permeability": null,
+ "mechanical_ventilation_inferred": false,
+ "kwh_per_year_heating": 498,
+ "kwh_per_year_hot_water": 2032,
+ "floor_position": "mid",
+ "other_certificates": [
+  "9978-5033-7339-4116-7984"
+ ],
+ "first_assessment_year": 2016,
+ "history": [
+  {
+   "certificate_id": "9978-5033-7339-4116-7984",
+   "date_of_assessment": "13 January 2016",
+   "energy_rating": "B",
+   "energy_score": 85,
+   "total_floor_area_m2": 43.0
+  }
+ ]
+}

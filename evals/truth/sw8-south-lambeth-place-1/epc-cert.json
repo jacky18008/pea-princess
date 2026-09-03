@@ -1,0 +1,80 @@
+{
+ "certificate_id": "0660-2840-6380-9921-1601",
+ "source_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0660-2840-6380-9921-1601",
+ "http_status": 200,
+ "ok": true,
+ "note": "",
+ "retrieved_at": "2026-09-03T11:43:07+00:00",
+ "evidence_class": "G",
+ "property_type": "Mid-floor flat",
+ "total_floor_area_m2": 62.0,
+ "total_floor_area_sqft": 667,
+ "date_of_assessment": "20 August 2019",
+ "date_of_certificate": "20 August 2019",
+ "assessment_type": "RdSAP",
+ "valid_until": "19 August 2029",
+ "certificate_number": "0660-2840-6380-9921-1601",
+ "energy_rating": "C",
+ "energy_score": 69,
+ "potential_rating": "C",
+ "address": "Flat 1 2, South Lambeth Place LONDON SW8 1SP",
+ "features": {
+  "Wall": {
+   "description": "Timber frame, as built, no insulation (assumed)",
+   "rating": "Poor"
+  },
+  "Window": {
+   "description": "Fully double glazed",
+   "rating": "Average"
+  },
+  "Main heating": {
+   "description": "Boiler and radiators, mains gas",
+   "rating": "Good"
+  },
+  "Main heating control": {
+   "description": "Programmer, TRVs and bypass",
+   "rating": "Average"
+  },
+  "Hot water": {
+   "description": "From main system",
+   "rating": "Good"
+  },
+  "Lighting": {
+   "description": "No low energy lighting",
+   "rating": "Very poor"
+  },
+  "Roof": {
+   "description": "(another dwelling above)",
+   "rating": "N/A"
+  },
+  "Floor": {
+   "description": "(other premises below)",
+   "rating": "N/A"
+  },
+  "Secondary heating": {
+   "description": "None",
+   "rating": "N/A"
+  }
+ },
+ "heating_class": "gas_boiler",
+ "main_heating": "Boiler and radiators, mains gas",
+ "hot_water": "From main system",
+ "air_permeability": null,
+ "mechanical_ventilation_inferred": false,
+ "kwh_per_year_heating": 5559,
+ "kwh_per_year_hot_water": 1704,
+ "floor_position": "mid",
+ "other_certificates": [
+  "8600-4976-0420-8306-6313"
+ ],
+ "first_assessment_year": 2009,
+ "history": [
+  {
+   "certificate_id": "8600-4976-0420-8306-6313",
+   "date_of_assessment": "3 July 2009",
+   "energy_rating": "D",
+   "energy_score": 68,
+   "total_floor_area_m2": null
+  }
+ ]
+}

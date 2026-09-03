@@ -1,0 +1,28 @@
+{
+ "query": {
+  "postcode": "N1 9LQ",
+  "normalised": "N19LQ"
+ },
+ "source_url": "https://api.postcodes.io/postcodes/N19LQ",
+ "http_status": 200,
+ "ok": true,
+ "note": "",
+ "retrieved_at": "2026-09-03T11:55:19+00:00",
+ "evidence_class": "G",
+ "postcode": "N1 9LQ",
+ "admin_district": "Islington",
+ "admin_ward": "Barnsbury",
+ "lsoa": "Islington 020A",
+ "msoa": "Islington 020",
+ "outcode": "N1",
+ "incode": "9LQ",
+ "region": "London",
+ "country": "England",
+ "parliamentary_constituency": "Islington South and Finsbury",
+ "eastings": 531434,
+ "northings": 183203,
+ "quality": 1,
+ "lat": 51.532445,
+ "lng": -0.106486,
+ "method": "ONS Postcode Directory via postcodes.io. `quality` 1 means the coordinate is within the building; higher numbers are coarser. A postcode centroid is not a door: expect tens of metres of error."
+}

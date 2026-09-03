@@ -1,0 +1,311 @@
+{
+ "query": {
+  "postcode": "N1 9LQ",
+  "street": null,
+  "town": null
+ },
+ "source_url": "https://find-energy-certificate.service.gov.uk/find-a-certificate/search-by-postcode?postcode=N1%209LQ",
+ "http_status": 200,
+ "ok": true,
+ "note": "",
+ "retrieved_at": "2026-09-03T11:42:03+00:00",
+ "evidence_class": "G",
+ "count": 42,
+ "results": [
+  {
+   "certificate_id": "0310-2997-6010-2522-3481",
+   "address": "Flat 3, 9a Islington High Street, London, N1 9LQ",
+   "rating": "D",
+   "valid_until": "24 September 2032",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0310-2997-6010-2522-3481"
+  },
+  {
+   "certificate_id": "8291-6728-6290-5001-2922",
+   "address": "Flat 4, 3 - 5 Islington High Street, LONDON, N1 9LQ",
+   "rating": "D",
+   "valid_until": "28 August 2029",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/8291-6728-6290-5001-2922"
+  },
+  {
+   "certificate_id": "0962-2808-6380-9721-7225",
+   "address": "Flat 6, 3 - 5 Islington High Street, LONDON, N1 9LQ",
+   "rating": "D",
+   "valid_until": "28 August 2029",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0962-2808-6380-9721-7225"
+  },
+  {
+   "certificate_id": "0064-2800-6114-9771-3205",
+   "address": "Flat 1, 3-5 Islington High Street, LONDON, N1 9LQ",
+   "rating": "D",
+   "valid_until": "1 October 2029",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0064-2800-6114-9771-3205"
+  },
+  {
+   "certificate_id": "8251-6728-6160-1028-2926",
+   "address": "Flat 2, 3-5 Islington High Street, LONDON, N1 9LQ",
+   "rating": "D",
+   "valid_until": "28 August 2029",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/8251-6728-6160-1028-2926"
+  },
+  {
+   "certificate_id": "0065-2808-6186-9721-9295",
+   "address": "Flat 3, 3-5 Islington High Street, LONDON, N1 9LQ",
+   "rating": "D",
+   "valid_until": "28 August 2029",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0065-2808-6186-9721-9295"
+  },
+  {
+   "certificate_id": "9238-8096-6284-5271-1074",
+   "address": "Flat 5, 3-5 Islington High Street, LONDON, N1 9LQ",
+   "rating": "C",
+   "valid_until": "19 April 2019 Expired",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/9238-8096-6284-5271-1074"
+  },
+  {
+   "certificate_id": "2111-1197-8894-8151-1716",
+   "address": "Flat 1, 9 Islington High Street, LONDON, N1 9LQ",
+   "rating": "F",
+   "valid_until": "21 February 2034",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/2111-1197-8894-8151-1716"
+  },
+  {
+   "certificate_id": "7808-9077-6224-9372-9934",
+   "address": "9a Islington High Street, LONDON, N1 9LQ",
+   "rating": "E",
+   "valid_until": "30 April 2022 Expired",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/7808-9077-6224-9372-9934"
+  },
+  {
+   "certificate_id": "2863-1122-5061-1110-3721",
+   "address": "FLAT 2, 9A ISLINGTON HIGH STREET, LONDON, N1 9LQ",
+   "rating": "D",
+   "valid_until": "15 April 2031",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/2863-1122-5061-1110-3721"
+  },
+  {
+   "certificate_id": "0898-2870-6742-9972-9721",
+   "address": "9b Islington High Street, LONDON, N1 9LQ",
+   "rating": "D",
+   "valid_until": "30 April 2022 Expired",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0898-2870-6742-9972-9721"
+  },
+  {
+   "certificate_id": "0990-2870-6743-9972-9755",
+   "address": "9c Islington High Street, LONDON, N1 9LQ",
+   "rating": "D",
+   "valid_until": "30 April 2022 Expired",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0990-2870-6743-9972-9755"
+  },
+  {
+   "certificate_id": "8702-9909-3729-7776-3423",
+   "address": "9d Islington High Street, LONDON, N1 9LQ",
+   "rating": "F",
+   "valid_until": "30 April 2022 Expired",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/8702-9909-3729-7776-3423"
+  },
+  {
+   "certificate_id": "8101-5771-8829-8707-9243",
+   "address": "Flat 1, 11b Islington High Street, LONDON, N1 9LQ",
+   "rating": "D",
+   "valid_until": "2 February 2024 Expired",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/8101-5771-8829-8707-9243"
+  },
+  {
+   "certificate_id": "8323-7222-5910-8082-5906",
+   "address": "Flat 1, Room 1, 11b Islington High Street, LONDON, N1 9LQ",
+   "rating": "C",
+   "valid_until": "26 February 2027",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/8323-7222-5910-8082-5906"
+  },
+  {
+   "certificate_id": "8553-7222-5920-4022-5902",
+   "address": "Flat 1, Room 2, 11b Islington High Street, LONDON, N1 9LQ",
+   "rating": "C",
+   "valid_until": "26 February 2027",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/8553-7222-5920-4022-5902"
+  },
+  {
+   "certificate_id": "0328-1095-7232-5603-2904",
+   "address": "Flat 1, Room 3, 11b Islington High Street, LONDON, N1 9LQ",
+   "rating": "D",
+   "valid_until": "26 February 2027",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0328-1095-7232-5603-2904"
+  },
+  {
+   "certificate_id": "8224-7722-1790-5897-1906",
+   "address": "Flat 2, 11b Islington High Street, LONDON, N1 9LQ",
+   "rating": "E",
+   "valid_until": "2 February 2024 Expired",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/8224-7722-1790-5897-1906"
+  },
+  {
+   "certificate_id": "0328-9095-7212-5603-2984",
+   "address": "Flat 2, Room 1, 11b Islington High Street, LONDON, N1 9LQ",
+   "rating": "C",
+   "valid_until": "26 February 2027",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0328-9095-7212-5603-2984"
+  },
+  {
+   "certificate_id": "8323-7222-5920-5062-5902",
+   "address": "Flat 2, Room 2, 11b Islington High Street, LONDON, N1 9LQ",
+   "rating": "C",
+   "valid_until": "26 February 2027",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/8323-7222-5920-5062-5902"
+  },
+  {
+   "certificate_id": "0231-3034-6202-5734-6204",
+   "address": "Flat 3, 11b Islington High Street, LONDON, N1 9LQ",
+   "rating": "D",
+   "valid_until": "6 February 2034",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0231-3034-6202-5734-6204"
+  },
+  {
+   "certificate_id": "8464-7722-1800-3897-1902",
+   "address": "Flat 4, 11b Islington High Street, LONDON, N1 9LQ",
+   "rating": "E",
+   "valid_until": "2 February 2024 Expired",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/8464-7722-1800-3897-1902"
+  },
+  {
+   "certificate_id": "0350-2802-7922-9203-7595",
+   "address": "Flat 4, Room 1, 11b Islington High Street, LONDON, N1 9LQ",
+   "rating": "C",
+   "valid_until": "26 February 2027",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0350-2802-7922-9203-7595"
+  },
+  {
+   "certificate_id": "0955-2802-7922-9203-2561",
+   "address": "Flat 4, Room 2, 11b Islington High Street, LONDON, N1 9LQ",
+   "rating": "C",
+   "valid_until": "26 February 2027",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0955-2802-7922-9203-2561"
+  },
+  {
+   "certificate_id": "0628-2095-7232-5703-2924",
+   "address": "Flat 4, Room 3, 11b Islington High Street, LONDON, N1 9LQ",
+   "rating": "C",
+   "valid_until": "26 February 2027",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0628-2095-7232-5703-2924"
+  },
+  {
+   "certificate_id": "0578-0071-7272-1984-7970",
+   "address": "Flat 5, 11b Islington High Street, LONDON, N1 9LQ",
+   "rating": "F",
+   "valid_until": "2 February 2024 Expired",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0578-0071-7272-1984-7970"
+  },
+  {
+   "certificate_id": "8501-8225-2029-8907-0233",
+   "address": "Flat 5, Room 1, 11b Islington High Street, LONDON, N1 9LQ",
+   "rating": "C",
+   "valid_until": "26 February 2027",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/8501-8225-2029-8907-0233"
+  },
+  {
+   "certificate_id": "0228-6095-7222-5403-2964",
+   "address": "Flat 5, Room 2, 11b Islington High Street, LONDON, N1 9LQ",
+   "rating": "C",
+   "valid_until": "26 February 2027",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0228-6095-7222-5403-2964"
+  },
+  {
+   "certificate_id": "8474-7722-1770-0897-1906",
+   "address": "Flat 6, 11b Islington High Street, LONDON, N1 9LQ",
+   "rating": "F",
+   "valid_until": "2 February 2024 Expired",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/8474-7722-1770-0897-1906"
+  },
+  {
+   "certificate_id": "8443-7222-5920-2062-5902",
+   "address": "Flat 6, Room 1, 11b Islington High Street, LONDON, N1 9LQ",
+   "rating": "C",
+   "valid_until": "26 February 2027",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/8443-7222-5920-2062-5902"
+  },
+  {
+   "certificate_id": "8433-7222-5920-7022-5902",
+   "address": "Flat 6, Room 2, 11b Islington High Street, LONDON, N1 9LQ",
+   "rating": "C",
+   "valid_until": "26 February 2027",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/8433-7222-5920-7022-5902"
+  },
+  {
+   "certificate_id": "8293-7222-5930-2062-5906",
+   "address": "Flat 6, Room 3, 11b Islington High Street, LONDON, N1 9LQ",
+   "rating": "C",
+   "valid_until": "26 February 2027",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/8293-7222-5930-2062-5906"
+  },
+  {
+   "certificate_id": "8101-2771-9829-5707-0243",
+   "address": "Flat 7, 11b Islington High Street, LONDON, N1 9LQ",
+   "rating": "F",
+   "valid_until": "2 February 2024 Expired",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/8101-2771-9829-5707-0243"
+  },
+  {
+   "certificate_id": "0428-8095-7222-5303-2934",
+   "address": "Flat 7, Room 1, 11b Islington High Street, LONDON, N1 9LQ",
+   "rating": "D",
+   "valid_until": "26 February 2027",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0428-8095-7222-5303-2934"
+  },
+  {
+   "certificate_id": "8508-8225-2029-1907-0233",
+   "address": "Flat 7, Room 2, 11b Islington High Street, LONDON, N1 9LQ",
+   "rating": "D",
+   "valid_until": "26 February 2027",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/8508-8225-2029-1907-0233"
+  },
+  {
+   "certificate_id": "1836-0332-9500-0504-9226",
+   "address": "Flat 1, Lion House, LONDON, N1 9LQ",
+   "rating": "C",
+   "valid_until": "23 February 2036",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/1836-0332-9500-0504-9226"
+  },
+  {
+   "certificate_id": "4900-7349-0532-2520-3263",
+   "address": "Flat 2, Lion House, LONDON, N1 9LQ",
+   "rating": "C",
+   "valid_until": "23 February 2036",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/4900-7349-0532-2520-3263"
+  },
+  {
+   "certificate_id": "0390-3854-0520-2326-4935",
+   "address": "Flat 3, Lion House, LONDON, N1 9LQ",
+   "rating": "B",
+   "valid_until": "23 February 2036",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0390-3854-0520-2326-4935"
+  },
+  {
+   "certificate_id": "0390-3454-1520-2326-8925",
+   "address": "Flat 4, Lion House, LONDON, N1 9LQ",
+   "rating": "C",
+   "valid_until": "23 February 2036",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0390-3454-1520-2326-8925"
+  },
+  {
+   "certificate_id": "9636-1332-9500-0504-9226",
+   "address": "Flat 5, Lion House, LONDON, N1 9LQ",
+   "rating": "B",
+   "valid_until": "23 February 2036",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/9636-1332-9500-0504-9226"
+  },
+  {
+   "certificate_id": "0390-3554-2520-2326-7941",
+   "address": "Flat 6, Lion House, LONDON, N1 9LQ",
+   "rating": "C",
+   "valid_until": "23 February 2036",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0390-3554-2520-2326-7941"
+  },
+  {
+   "certificate_id": "0390-3359-2550-2306-1961",
+   "address": "Flat 7, Lion House, LONDON, N1 9LQ",
+   "rating": "C",
+   "valid_until": "30 April 2036",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0390-3359-2550-2306-1961"
+  }
+ ],
+ "caveat": "Large buildings are often split across several postcodes; if a flat is missing, search by street name and town."
+}

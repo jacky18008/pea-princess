@@ -1,0 +1,73 @@
+{
+ "certificate_id": "4232-9230-8229-1333-2226",
+ "source_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/4232-9230-8229-1333-2226",
+ "http_status": 200,
+ "ok": true,
+ "note": "",
+ "retrieved_at": "2026-09-03T11:43:04+00:00",
+ "evidence_class": "G",
+ "property_type": "Mid-floor flat",
+ "total_floor_area_m2": 54.0,
+ "total_floor_area_sqft": 581,
+ "date_of_assessment": "27 October 2022",
+ "date_of_certificate": "28 October 2022",
+ "assessment_type": "SAP",
+ "valid_until": "27 October 2032",
+ "certificate_number": "4232-9230-8229-1333-2226",
+ "energy_rating": "B",
+ "energy_score": 83,
+ "potential_rating": "B",
+ "address": "Flat 301 50 Marsh Wall LONDON E14 9TP",
+ "features": {
+  "Walls": {
+   "description": "Average thermal transmittance 0.00 W/m²K",
+   "rating": "Very good"
+  },
+  "Windows": {
+   "description": "High performance glazing",
+   "rating": "Very good"
+  },
+  "Main heating": {
+   "description": "Community scheme",
+   "rating": "Good"
+  },
+  "Main heating control": {
+   "description": "Charging system linked to use of community heating, programmer and TRVs",
+   "rating": "Good"
+  },
+  "Hot water": {
+   "description": "Community scheme",
+   "rating": "Good"
+  },
+  "Lighting": {
+   "description": "Low energy lighting in all fixed outlets",
+   "rating": "Very good"
+  },
+  "Air tightness": {
+   "description": "Air permeability 2.9 m³/h.m² (as tested)",
+   "rating": "Very good"
+  },
+  "Roof": {
+   "description": "(other premises above)",
+   "rating": "N/A"
+  },
+  "Floor": {
+   "description": "(other premises below)",
+   "rating": "N/A"
+  },
+  "Secondary heating": {
+   "description": "None",
+   "rating": "N/A"
+  }
+ },
+ "heating_class": "community_heat_network",
+ "main_heating": "Community scheme",
+ "hot_water": "Community scheme",
+ "air_permeability": 2.9,
+ "mechanical_ventilation_inferred": true,
+ "kwh_per_year_heating": 507,
+ "kwh_per_year_hot_water": 1869,
+ "floor_position": "mid",
+ "other_certificates": [],
+ "first_assessment_year": 2022
+}

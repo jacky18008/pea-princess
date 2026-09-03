@@ -1,0 +1,34 @@
+{
+ "query": {
+  "name": "Unex Investment Properties"
+ },
+ "source_url": "https://find-and-update.company-information.service.gov.uk/advanced-search/get-results?companyNameIncludes=Unex+Investment+Properties",
+ "http_status": 200,
+ "ok": true,
+ "note": "",
+ "retrieved_at": "2026-09-03T11:46:24+00:00",
+ "evidence_class": "G",
+ "endpoint_used": "advanced-search/get-results?companyNameIncludes= (the plain /search/companies page omits company status)",
+ "total_reported_by_site": 1,
+ "count": 1,
+ "results": [
+  {
+   "company_number": "01111206",
+   "name": "UNEX INVESTMENT PROPERTIES LIMITED",
+   "status": "Active",
+   "incorporated": "1 May 1973",
+   "registration_event": "Incorporated",
+   "dissolved_on": null,
+   "company_type": "Private limited company",
+   "address": "Unex House, Church Lane, Stetchworth, Cambridgeshire CB8 9TN",
+   "sic_codes": [
+    "68209"
+   ],
+   "company_url": "https://find-and-update.company-information.service.gov.uk/company/01111206",
+   "dissolved": false
+  }
+ ],
+ "dissolved_count": 0,
+ "dissolved_company_numbers": [],
+ "same_name_warning": "Several companies can share almost the same name, and a dissolved shell keeps its name on the register forever. Match on the company NUMBER printed on the tenancy agreement, not on the name. brand != landlord; the legal entity named on the tenancy agreement is what matters"
+}

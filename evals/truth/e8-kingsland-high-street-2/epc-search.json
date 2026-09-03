@@ -1,0 +1,227 @@
+{
+ "query": {
+  "postcode": "E8 2JP",
+  "street": null,
+  "town": null
+ },
+ "source_url": "https://find-energy-certificate.service.gov.uk/find-a-certificate/search-by-postcode?postcode=E8%202JP",
+ "http_status": 200,
+ "ok": true,
+ "note": "",
+ "retrieved_at": "2026-09-03T11:40:07+00:00",
+ "evidence_class": "G",
+ "count": 30,
+ "results": [
+  {
+   "certificate_id": "0026-3064-0203-7136-1204",
+   "address": "6a Kingsland High Street, LONDON, E8 2JP",
+   "rating": "C",
+   "valid_until": "1 July 2036",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0026-3064-0203-7136-1204"
+  },
+  {
+   "certificate_id": "4334-2426-1300-0226-9226",
+   "address": "6b Kingsland High Street, LONDON, E8 2JP",
+   "rating": "C",
+   "valid_until": "25 June 2034",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/4334-2426-1300-0226-9226"
+  },
+  {
+   "certificate_id": "8836-4022-3500-0954-9292",
+   "address": "6c Kingsland High Street, LONDON, E8 2JP",
+   "rating": "C",
+   "valid_until": "13 February 2036",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/8836-4022-3500-0954-9292"
+  },
+  {
+   "certificate_id": "4735-8621-4500-0745-4296",
+   "address": "8a Kingsland High Street, LONDON, E8 2JP",
+   "rating": "D",
+   "valid_until": "17 September 2035",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/4735-8621-4500-0745-4296"
+  },
+  {
+   "certificate_id": "0360-2932-7630-2106-8465",
+   "address": "8b Kingsland High Street, LONDON, E8 2JP",
+   "rating": "C",
+   "valid_until": "1 July 2036",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0360-2932-7630-2106-8465"
+  },
+  {
+   "certificate_id": "9843-3059-5202-3496-0204",
+   "address": "8c Kingsland High Street, LONDON, E8 2JP",
+   "rating": "C",
+   "valid_until": "13 February 2036",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/9843-3059-5202-3496-0204"
+  },
+  {
+   "certificate_id": "8776-7739-4340-2187-3996",
+   "address": "Flat 1, 10 Kingsland High Street, LONDON, E8 2JP",
+   "rating": "B",
+   "valid_until": "12 January 2026 Expired",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/8776-7739-4340-2187-3996"
+  },
+  {
+   "certificate_id": "0340-2577-4590-2496-5851",
+   "address": "Flat 2, 10 Kingsland High Street, LONDON, E8 2JP",
+   "rating": "C",
+   "valid_until": "27 January 2036",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0340-2577-4590-2496-5851"
+  },
+  {
+   "certificate_id": "4709-2896-4002-1398-0302",
+   "address": "Flat 3, 10 Kingsland High Street, LONDON, E8 2JP",
+   "rating": "B",
+   "valid_until": "17 August 2036",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/4709-2896-4002-1398-0302"
+  },
+  {
+   "certificate_id": "0780-3957-3202-7575-2204",
+   "address": "Flat 4, 10 Kingsland High Street, LONDON, E8 2JP",
+   "rating": "C",
+   "valid_until": "11 December 2035",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0780-3957-3202-7575-2204"
+  },
+  {
+   "certificate_id": "0934-0200-2309-4531-8414",
+   "address": "FLAT 5, 10 KINGSLAND HIGH STREET, LONDON, E8 2JP",
+   "rating": "B",
+   "valid_until": "19 July 2031",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0934-0200-2309-4531-8414"
+  },
+  {
+   "certificate_id": "8276-7739-4330-5147-3996",
+   "address": "Flat 6, 10 Kingsland High Street, LONDON, E8 2JP",
+   "rating": "B",
+   "valid_until": "12 January 2026 Expired",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/8276-7739-4330-5147-3996"
+  },
+  {
+   "certificate_id": "8266-7739-4330-3177-3996",
+   "address": "Flat 7, 10 Kingsland High Street, LONDON, E8 2JP",
+   "rating": "B",
+   "valid_until": "12 January 2026 Expired",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/8266-7739-4330-3177-3996"
+  },
+  {
+   "certificate_id": "9978-1033-7339-4916-7970",
+   "address": "Flat 8, 10 Kingsland High Street, LONDON, E8 2JP",
+   "rating": "B",
+   "valid_until": "12 January 2026 Expired",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/9978-1033-7339-4916-7970"
+  },
+  {
+   "certificate_id": "0140-3817-7393-9796-5301",
+   "address": "Flat 9, 10 Kingsland High Street, LONDON, E8 2JP",
+   "rating": "B",
+   "valid_until": "12 January 2026 Expired",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0140-3817-7393-9796-5301"
+  },
+  {
+   "certificate_id": "2084-3062-4205-1206-9200",
+   "address": "Flat 10, 10 Kingsland High Street, LONDON, E8 2JP",
+   "rating": "C",
+   "valid_until": "28 May 2036",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/2084-3062-4205-1206-9200"
+  },
+  {
+   "certificate_id": "4400-4939-0022-2620-3363",
+   "address": "Flat 11, 10 Kingsland High Street, LONDON, E8 2JP",
+   "rating": "B",
+   "valid_until": "26 July 2036",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/4400-4939-0022-2620-3363"
+  },
+  {
+   "certificate_id": "0330-2640-8570-2896-2915",
+   "address": "Flat 12, 10 Kingsland High Street, LONDON, E8 2JP",
+   "rating": "C",
+   "valid_until": "9 March 2036",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0330-2640-8570-2896-2915"
+  },
+  {
+   "certificate_id": "8426-7739-4330-2137-3996",
+   "address": "Flat 13, 10 Kingsland High Street, LONDON, E8 2JP",
+   "rating": "B",
+   "valid_until": "12 January 2026 Expired",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/8426-7739-4330-2137-3996"
+  },
+  {
+   "certificate_id": "9978-5033-7329-4216-7940",
+   "address": "Flat 14, 10 Kingsland High Street, LONDON, E8 2JP",
+   "rating": "B",
+   "valid_until": "12 January 2026 Expired",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/9978-5033-7329-4216-7940"
+  },
+  {
+   "certificate_id": "9343-2802-7493-9595-5571",
+   "address": "46a, Kingsland High Street, LONDON, E8 2JP",
+   "rating": "E",
+   "valid_until": "11 November 2025 Expired",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/9343-2802-7493-9595-5571"
+  },
+  {
+   "certificate_id": "8200-7022-3980-6164-2206",
+   "address": "Flat A, 48 Kingsland High Street, LONDON, E8 2JP",
+   "rating": "C",
+   "valid_until": "4 February 2030",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/8200-7022-3980-6164-2206"
+  },
+  {
+   "certificate_id": "0233-2814-7928-2000-9265",
+   "address": "Flat B, 48 Kingsland High Street, LONDON, E8 2JP",
+   "rating": "C",
+   "valid_until": "4 February 2030",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0233-2814-7928-2000-9265"
+  },
+  {
+   "certificate_id": "0934-2814-7923-2000-4215",
+   "address": "Flat C, 48 Kingsland High Street, LONDON, E8 2JP",
+   "rating": "D",
+   "valid_until": "4 February 2030",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0934-2814-7923-2000-4215"
+  },
+  {
+   "certificate_id": "0568-3018-1203-8112-2204",
+   "address": "Flat 1, 50 Kingsland High Street, LONDON, E8 2JP",
+   "rating": "C",
+   "valid_until": "29 August 2032",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0568-3018-1203-8112-2204"
+  },
+  {
+   "certificate_id": "0380-2216-4130-2202-5811",
+   "address": "Flat 2, 50 Kingsland High Street, LONDON, E8 2JP",
+   "rating": "C",
+   "valid_until": "29 August 2032",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0380-2216-4130-2202-5811"
+  },
+  {
+   "certificate_id": "9320-2935-5290-2322-3281",
+   "address": "Flat 3, 50 Kingsland High Street, LONDON, E8 2JP",
+   "rating": "D",
+   "valid_until": "7 December 2032",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/9320-2935-5290-2322-3281"
+  },
+  {
+   "certificate_id": "2075-3001-9207-0099-7200",
+   "address": "Flat A, 52 Kingsland High Street, London, E8 2JP",
+   "rating": "E",
+   "valid_until": "22 March 2031",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/2075-3001-9207-0099-7200"
+  },
+  {
+   "certificate_id": "2439-0727-1000-0927-1222",
+   "address": "Flat B, 52 Kingsland High Street, London, E8 2JP",
+   "rating": "E",
+   "valid_until": "22 March 2031",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/2439-0727-1000-0927-1222"
+  },
+  {
+   "certificate_id": "0310-2377-6040-2809-3181",
+   "address": "Flat C, 52 Kingsland High Street, London, E8 2JP",
+   "rating": "G",
+   "valid_until": "4 April 2031",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0310-2377-6040-2809-3181"
+  }
+ ],
+ "caveat": "Large buildings are often split across several postcodes; if a flat is missing, search by street name and town."
+}

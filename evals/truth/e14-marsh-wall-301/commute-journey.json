@@ -1,0 +1,251 @@
+{
+ "query": {
+  "from": "E14 9TP",
+  "from_kind": "postcode",
+  "to": "SW1A 2AA",
+  "to_kind": "postcode",
+  "arrive_by": "09:00",
+  "date": "20260904",
+  "date_source": "next-weekday",
+  "door_buffer_min": 0,
+  "plans": [
+   "all",
+   "rail",
+   "bus"
+  ]
+ },
+ "source_url": "https://api.tfl.gov.uk/Journey/JourneyResults/E14%209TP/to/SW1A%202AA?date=20260904&time=0900&timeIs=Arriving",
+ "http_status": 200,
+ "ok": true,
+ "note": "",
+ "retrieved_at": "2026-09-03T11:52:08+00:00",
+ "evidence_class": "G",
+ "app_key_used": false,
+ "plans": {
+  "all": {
+   "source_url": "https://api.tfl.gov.uk/Journey/JourneyResults/E14%209TP/to/SW1A%202AA?date=20260904&time=0900&timeIs=Arriving",
+   "http_status": 200,
+   "ok": true,
+   "note": "",
+   "retrieved_at": "2026-09-03T11:52:05+00:00",
+   "evidence_class": "G",
+   "mode_filter": "(TfL default: every mode)",
+   "duration_min": 37,
+   "duration_min_before_buffer": 37,
+   "door_buffer_min": 0,
+   "start": "2026-09-04T08:19:00",
+   "arrival": "2026-09-04T08:56:00",
+   "legs": [
+    {
+     "mode": "walking",
+     "line": null,
+     "from": "E14 9TP",
+     "to": "Admirals Way",
+     "duration_min": 2,
+     "departure": "2026-09-04T08:19:00",
+     "arrival": "2026-09-04T08:21:00",
+     "summary": "Walk to Admirals Way"
+    },
+    {
+     "mode": "bus",
+     "line": "D8",
+     "from": "Admirals Way",
+     "to": "Heron Quays",
+     "duration_min": 1,
+     "departure": "2026-09-04T08:21:00",
+     "arrival": "2026-09-04T08:22:00",
+     "summary": "D8 bus to Heron Quays"
+    },
+    {
+     "mode": "walking",
+     "line": null,
+     "from": "Heron Quays",
+     "to": "Canary Wharf Underground Station",
+     "duration_min": 6,
+     "departure": "2026-09-04T08:22:00",
+     "arrival": "2026-09-04T08:28:00",
+     "summary": "Walk to Canary Wharf Underground Station"
+    },
+    {
+     "mode": "tube",
+     "line": "Jubilee",
+     "from": "Canary Wharf Underground Station",
+     "to": "Westminster Underground Station",
+     "duration_min": 13,
+     "departure": "2026-09-04T08:28:00",
+     "arrival": "2026-09-04T08:41:00",
+     "summary": "Jubilee line to Westminster"
+    },
+    {
+     "mode": "walking",
+     "line": null,
+     "from": "Westminster Underground Station",
+     "to": "SW1A 2AA",
+     "duration_min": 15,
+     "departure": "2026-09-04T08:41:00",
+     "arrival": "2026-09-04T08:56:00",
+     "summary": "Walk to SW1A 2AA"
+    }
+   ],
+   "changes": 1,
+   "transit_legs": 2,
+   "walking_min": 23,
+   "first_leg_walk_min": 2,
+   "last_leg_walk_min": 15,
+   "waiting_min_in_plan": 0,
+   "zero_wait_joins": 4,
+   "modes": [
+    "bus",
+    "tube"
+   ],
+   "lines": [
+    "D8",
+    "Jubilee"
+   ],
+   "wait_sample_note": "4 of the 4 connections in this plan depart at the exact minute the previous leg arrives. That is a zero-wait sample: the plan has budgeted nothing for waiting, so the real trip is this number plus however long the next service takes to turn up.",
+   "alternatives_min": [
+    37,
+    37,
+    37
+   ],
+   "journeys_returned": 3
+  },
+  "rail": {
+   "source_url": "https://api.tfl.gov.uk/Journey/JourneyResults/E14%209TP/to/SW1A%202AA?date=20260904&time=0900&timeIs=Arriving&mode=tube,dlr,overground,elizabeth-line,national-rail,walking",
+   "http_status": 200,
+   "ok": true,
+   "note": "",
+   "retrieved_at": "2026-09-03T11:52:06+00:00",
+   "evidence_class": "G",
+   "mode_filter": "tube,dlr,overground,elizabeth-line,national-rail,walking",
+   "duration_min": 37,
+   "duration_min_before_buffer": 37,
+   "door_buffer_min": 0,
+   "start": "2026-09-04T08:21:00",
+   "arrival": "2026-09-04T08:58:00",
+   "legs": [
+    {
+     "mode": "walking",
+     "line": null,
+     "from": "E14 9TP",
+     "to": "Canary Wharf Underground Station",
+     "duration_min": 10,
+     "departure": "2026-09-04T08:21:00",
+     "arrival": "2026-09-04T08:31:00",
+     "summary": "Walk to Canary Wharf Underground Station"
+    },
+    {
+     "mode": "tube",
+     "line": "Jubilee",
+     "from": "Canary Wharf Underground Station",
+     "to": "Westminster Underground Station",
+     "duration_min": 12,
+     "departure": "2026-09-04T08:31:00",
+     "arrival": "2026-09-04T08:43:00",
+     "summary": "Jubilee line to Westminster"
+    },
+    {
+     "mode": "walking",
+     "line": null,
+     "from": "Westminster Underground Station",
+     "to": "SW1A 2AA",
+     "duration_min": 15,
+     "departure": "2026-09-04T08:43:00",
+     "arrival": "2026-09-04T08:58:00",
+     "summary": "Walk to SW1A 2AA"
+    }
+   ],
+   "changes": 0,
+   "transit_legs": 1,
+   "walking_min": 25,
+   "first_leg_walk_min": 10,
+   "last_leg_walk_min": 15,
+   "waiting_min_in_plan": 0,
+   "zero_wait_joins": 2,
+   "modes": [
+    "tube"
+   ],
+   "lines": [
+    "Jubilee"
+   ],
+   "wait_sample_note": "2 of the 2 connections in this plan depart at the exact minute the previous leg arrives. That is a zero-wait sample: the plan has budgeted nothing for waiting, so the real trip is this number plus however long the next service takes to turn up.",
+   "alternatives_min": [
+    37,
+    37,
+    38
+   ],
+   "journeys_returned": 3
+  },
+  "bus": {
+   "source_url": "https://api.tfl.gov.uk/Journey/JourneyResults/E14%209TP/to/SW1A%202AA?date=20260904&time=0900&timeIs=Arriving&mode=bus,walking",
+   "http_status": 200,
+   "ok": true,
+   "note": "",
+   "retrieved_at": "2026-09-03T11:52:08+00:00",
+   "evidence_class": "G",
+   "mode_filter": "bus,walking",
+   "duration_min": 46,
+   "duration_min_before_buffer": 46,
+   "door_buffer_min": 0,
+   "start": "2026-09-04T07:32:00",
+   "arrival": "2026-09-04T08:18:00",
+   "legs": [
+    {
+     "mode": "walking",
+     "line": null,
+     "from": "E14 9TP",
+     "to": "Canada Square South / Canary Wharf Stn",
+     "duration_min": 9,
+     "departure": "2026-09-04T07:32:00",
+     "arrival": "2026-09-04T07:41:00",
+     "summary": "Walk to Canada Square South / Canary Wharf Station"
+    },
+    {
+     "mode": "bus",
+     "line": "789",
+     "from": "Canada Square South / Canary Wharf Stn",
+     "to": "Banqueting House",
+     "duration_min": 32,
+     "departure": "2026-09-04T07:41:00",
+     "arrival": "2026-09-04T08:13:00",
+     "summary": "789 bus to Banqueting House"
+    },
+    {
+     "mode": "walking",
+     "line": null,
+     "from": "Banqueting House",
+     "to": "SW1A 2AA",
+     "duration_min": 5,
+     "departure": "2026-09-04T08:13:00",
+     "arrival": "2026-09-04T08:18:00",
+     "summary": "Walk to SW1A 2AA"
+    }
+   ],
+   "changes": 0,
+   "transit_legs": 1,
+   "walking_min": 14,
+   "first_leg_walk_min": 9,
+   "last_leg_walk_min": 5,
+   "waiting_min_in_plan": 0,
+   "zero_wait_joins": 2,
+   "modes": [
+    "bus"
+   ],
+   "lines": [
+    "789"
+   ],
+   "wait_sample_note": "2 of the 2 connections in this plan depart at the exact minute the previous leg arrives. That is a zero-wait sample: the plan has budgeted nothing for waiting, so the real trip is this number plus however long the next service takes to turn up.",
+   "alternatives_min": [
+    46,
+    46,
+    48
+   ],
+   "journeys_returned": 3
+  }
+ },
+ "fastest_plan": "all",
+ "fastest_min": 37,
+ "rail_only_min": 37,
+ "bus_only_min": 46,
+ "method": "TfL Journey Planner, arriving by 09:00 on 20260904 (next-weekday). Three plans: 'all' lets TfL choose any mode, 'rail' restricts to tube, DLR, Overground, Elizabeth line, national rail and walking, 'bus' to bus and walking. The bus number is the answer to 'what happens when the trains stop', so read it as the fallback, not as the commute. `door_buffer_min` is 0 and is added only because you asked; TfL plans to the street, not through the front door of a building."
+}

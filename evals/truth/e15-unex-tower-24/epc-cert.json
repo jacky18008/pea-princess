@@ -1,0 +1,84 @@
+{
+ "certificate_id": "4200-7086-5002-1792-9506",
+ "source_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/4200-7086-5002-1792-9506",
+ "http_status": 200,
+ "ok": true,
+ "note": "",
+ "retrieved_at": "2026-09-03T11:43:16+00:00",
+ "evidence_class": "G",
+ "property_type": "Mid-floor flat",
+ "total_floor_area_m2": 77.0,
+ "total_floor_area_sqft": 829,
+ "date_of_assessment": "9 February 2026",
+ "date_of_certificate": "13 February 2026",
+ "assessment_type": "RdSAP",
+ "valid_until": "12 February 2036",
+ "certificate_number": "4200-7086-5002-1792-9506",
+ "energy_rating": "B",
+ "energy_score": 82,
+ "potential_rating": "B",
+ "address": "Apartment 24 Unex Tower LONDON E15 1DA",
+ "features": {
+  "Wall": {
+   "description": "System built, as built, insulated (assumed)",
+   "rating": "Good"
+  },
+  "Window": {
+   "description": "Fully double glazed",
+   "rating": "Average"
+  },
+  "Main heating": {
+   "description": "Community scheme",
+   "rating": "Average"
+  },
+  "Main heating control": {
+   "description": "Flat rate charging, programmer and room thermostat",
+   "rating": "Poor"
+  },
+  "Hot water": {
+   "description": "Community scheme",
+   "rating": "Average"
+  },
+  "Lighting": {
+   "description": "Excellent lighting efficiency",
+   "rating": "Very good"
+  },
+  "Roof": {
+   "description": "(another dwelling above)",
+   "rating": "N/A"
+  },
+  "Floor": {
+   "description": "(another dwelling below)",
+   "rating": "N/A"
+  },
+  "Air tightness": {
+   "description": "(not tested)",
+   "rating": "N/A"
+  },
+  "Secondary heating": {
+   "description": "None",
+   "rating": "N/A"
+  }
+ },
+ "heating_class": "community_heat_network",
+ "main_heating": "Community scheme",
+ "hot_water": "Community scheme",
+ "air_permeability": null,
+ "mechanical_ventilation_inferred": false,
+ "kwh_per_year_heating": 833,
+ "kwh_per_year_hot_water": 2548,
+ "floor_position": "mid",
+ "other_certificates": [
+  "8965-7736-3950-2699-2992"
+ ],
+ "first_assessment_year": 2015,
+ "history": [
+  {
+   "certificate_id": "8965-7736-3950-2699-2992",
+   "date_of_assessment": "11 June 2015",
+   "energy_rating": "B",
+   "energy_score": 83,
+   "total_floor_area_m2": 78.0
+  }
+ ]
+}

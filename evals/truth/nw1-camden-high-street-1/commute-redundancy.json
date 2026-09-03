@@ -1,0 +1,246 @@
+{
+ "query": {
+  "lat": 51.538616,
+  "lng": -0.142035,
+  "search_radius_m": 2000
+ },
+ "source_url": "https://api.tfl.gov.uk/StopPoint?lat=51.538616&lon=-0.142035&stopTypes=NaptanMetroStation,NaptanRailStation,NaptanFerryPort&radius=2000&returnLines=true",
+ "http_status": 200,
+ "ok": true,
+ "note": "",
+ "retrieved_at": "2026-09-03T11:55:15+00:00",
+ "evidence_class": "G",
+ "grade": "A",
+ "reason": "Both families are within an 800 m walk (family_A about 198 m, family_B about 624 m), so a strike on one leaves the other standing.",
+ "explanation": "Two lines of the same family do not count as redundancy; they tend to strike together, and they share the same tunnels, the same control room and the same flood.",
+ "families": {
+  "family_A": {
+   "members": [
+    "tube",
+    "dlr"
+   ],
+   "nearest": "Camden Town Underground Station",
+   "modes": [
+    "tube"
+   ],
+   "lines": [
+    "Northern"
+   ],
+   "straight_line_m": 153,
+   "walk_m_estimate": 198,
+   "walk_min_estimate": 2.5
+  },
+  "family_B": {
+   "members": [
+    "national-rail",
+    "overground",
+    "elizabeth-line"
+   ],
+   "nearest": "Camden Road Rail Station",
+   "modes": [
+    "overground"
+   ],
+   "lines": [
+    "Mildmay"
+   ],
+   "straight_line_m": 480,
+   "walk_m_estimate": 624,
+   "walk_min_estimate": 7.8
+  },
+  "family_C": {
+   "members": [
+    "river-bus"
+   ],
+   "nearest": null,
+   "walk_m_estimate": null
+  }
+ },
+ "nearest_family": "family_A",
+ "nearest_family_walk_m": 198,
+ "second_family_walk_m": 624,
+ "bus_fallback": null,
+ "stations_considered": [
+  {
+   "name": "Camden Town Underground Station",
+   "modes": [
+    "tube"
+   ],
+   "family": "family_A",
+   "walk_m_estimate": 198,
+   "walk_min_estimate": 2.5
+  },
+  {
+   "name": "Mornington Crescent Underground Station",
+   "modes": [
+    "tube"
+   ],
+   "family": "family_A",
+   "walk_m_estimate": 561,
+   "walk_min_estimate": 7.0
+  },
+  {
+   "name": "Camden Road Rail Station",
+   "modes": [
+    "overground"
+   ],
+   "family": "family_B",
+   "walk_m_estimate": 624,
+   "walk_min_estimate": 7.8
+  },
+  {
+   "name": "Kentish Town West Rail Station",
+   "modes": [
+    "overground"
+   ],
+   "family": "family_B",
+   "walk_m_estimate": 1306,
+   "walk_min_estimate": 16.3
+  },
+  {
+   "name": "Chalk Farm Underground Station",
+   "modes": [
+    "tube"
+   ],
+   "family": "family_A",
+   "walk_m_estimate": 1354,
+   "walk_min_estimate": 16.9
+  },
+  {
+   "name": "London St Pancras International Rail Station",
+   "modes": [
+    "national-rail"
+   ],
+   "family": "family_B",
+   "walk_m_estimate": 1561,
+   "walk_min_estimate": 19.5
+  },
+  {
+   "name": "London St Pancras International LL Rail Station",
+   "modes": [
+    "national-rail"
+   ],
+   "family": "family_B",
+   "walk_m_estimate": 1566,
+   "walk_min_estimate": 19.6
+  },
+  {
+   "name": "London Euston Rail Station",
+   "modes": [
+    "national-rail",
+    "overground"
+   ],
+   "family": "family_B",
+   "walk_m_estimate": 1602,
+   "walk_min_estimate": 20.0
+  },
+  {
+   "name": "London St Pancras International Rail Station",
+   "modes": [
+    "national-rail"
+   ],
+   "family": "family_B",
+   "walk_m_estimate": 1608,
+   "walk_min_estimate": 20.1
+  },
+  {
+   "name": "Euston Underground Station",
+   "modes": [
+    "tube"
+   ],
+   "family": "family_A",
+   "walk_m_estimate": 1688,
+   "walk_min_estimate": 21.1
+  },
+  {
+   "name": "Kentish Town Underground Station",
+   "modes": [
+    "tube"
+   ],
+   "family": "family_A",
+   "walk_m_estimate": 1785,
+   "walk_min_estimate": 22.3
+  },
+  {
+   "name": "Kentish Town Rail Station",
+   "modes": [
+    "national-rail"
+   ],
+   "family": "family_B",
+   "walk_m_estimate": 1814,
+   "walk_min_estimate": 22.7
+  },
+  {
+   "name": "Euston Square Underground Station",
+   "modes": [
+    "tube"
+   ],
+   "family": "family_A",
+   "walk_m_estimate": 1877,
+   "walk_min_estimate": 23.5
+  },
+  {
+   "name": "Warren Street Underground Station",
+   "modes": [
+    "tube"
+   ],
+   "family": "family_A",
+   "walk_m_estimate": 1917,
+   "walk_min_estimate": 24.0
+  },
+  {
+   "name": "King's Cross St. Pancras Underground Station",
+   "modes": [
+    "tube"
+   ],
+   "family": "family_A",
+   "walk_m_estimate": 1998,
+   "walk_min_estimate": 25.0
+  },
+  {
+   "name": "London King's Cross Rail Station",
+   "modes": [
+    "national-rail"
+   ],
+   "family": "family_B",
+   "walk_m_estimate": 2002,
+   "walk_min_estimate": 25.0
+  },
+  {
+   "name": "Great Portland Street Underground Station",
+   "modes": [
+    "tube"
+   ],
+   "family": "family_A",
+   "walk_m_estimate": 2059,
+   "walk_min_estimate": 25.7
+  },
+  {
+   "name": "Regent's Park Underground Station",
+   "modes": [
+    "tube"
+   ],
+   "family": "family_A",
+   "walk_m_estimate": 2158,
+   "walk_min_estimate": 27.0
+  },
+  {
+   "name": "Caledonian Road & Barnsbury Rail Station",
+   "modes": [
+    "overground"
+   ],
+   "family": "family_B",
+   "walk_m_estimate": 2388,
+   "walk_min_estimate": 29.9
+  },
+  {
+   "name": "Baker Street Underground Station",
+   "modes": [
+    "tube"
+   ],
+   "family": "family_A",
+   "walk_m_estimate": 2576,
+   "walk_min_estimate": 32.2
+  }
+ ],
+ "method": "Stations within 2000 m straight line, each put in a strike family: family_A is tube and DLR, family_B is national rail, Overground and the Elizabeth line, family_C is the river bus (a pleasant backup, not a commute). Grades: A = both A and B within an 800 m walk; B = both, second one 800-1600 m; B- = one within 800 m and the other beyond 1600 m or bus only; C = one family only. Distances are the straight line times 1.3, an estimate, so treat a number near a threshold as a tie."
+}

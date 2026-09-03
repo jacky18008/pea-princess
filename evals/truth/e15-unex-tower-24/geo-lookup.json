@@ -1,0 +1,28 @@
+{
+ "query": {
+  "postcode": "E15 1DA",
+  "normalised": "E151DA"
+ },
+ "source_url": "https://api.postcodes.io/postcodes/E151DA",
+ "http_status": 200,
+ "ok": true,
+ "note": "",
+ "retrieved_at": "2026-09-03T11:57:37+00:00",
+ "evidence_class": "G",
+ "postcode": "E15 1DA",
+ "admin_district": "Newham",
+ "admin_ward": "Stratford",
+ "lsoa": "Newham 039D",
+ "msoa": "Newham 039",
+ "outcode": "E15",
+ "incode": "1DA",
+ "region": "London",
+ "country": "England",
+ "parliamentary_constituency": "Stratford and Bow",
+ "eastings": 538697,
+ "northings": 184240,
+ "quality": 1,
+ "lat": 51.540028,
+ "lng": -0.001432,
+ "method": "ONS Postcode Directory via postcodes.io. `quality` 1 means the coordinate is within the building; higher numbers are coarser. A postcode centroid is not a door: expect tens of metres of error."
+}

@@ -1,0 +1,80 @@
+{
+ "certificate_id": "9238-8096-6284-5271-1074",
+ "source_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/9238-8096-6284-5271-1074",
+ "http_status": 200,
+ "ok": true,
+ "note": "",
+ "retrieved_at": "2026-09-03T11:43:14+00:00",
+ "evidence_class": "G",
+ "property_type": null,
+ "total_floor_area_m2": 55.0,
+ "total_floor_area_sqft": 592,
+ "date_of_assessment": "17 April 2009",
+ "date_of_certificate": "20 April 2009",
+ "assessment_type": "RdSAP",
+ "valid_until": null,
+ "certificate_number": "9238-8096-6284-5271-1074",
+ "energy_rating": "C",
+ "energy_score": 76,
+ "potential_rating": "C",
+ "address": "Flat 5 3-5 Islington High Street LONDON N1 9LQ",
+ "features": {
+  "Wall": {
+   "description": "System built, as built, no insulation (assumed)",
+   "rating": "Very poor"
+  },
+  "Window": {
+   "description": "Fully double glazed",
+   "rating": "Average"
+  },
+  "Main heating": {
+   "description": "Electric storage heaters",
+   "rating": "Poor"
+  },
+  "Main heating control": {
+   "description": "Automatic charge control",
+   "rating": "Average"
+  },
+  "Hot water": {
+   "description": "Electric immersion, off-peak",
+   "rating": "Poor"
+  },
+  "Lighting": {
+   "description": "No low energy lighting",
+   "rating": "Very poor"
+  },
+  "Roof": {
+   "description": "(another dwelling above)",
+   "rating": "N/A"
+  },
+  "Floor": {
+   "description": "(other premises below)",
+   "rating": "N/A"
+  },
+  "Secondary heating": {
+   "description": "Room heaters, electric",
+   "rating": "N/A"
+  }
+ },
+ "heating_class": "electric",
+ "main_heating": "Electric storage heaters",
+ "hot_water": "Electric immersion, off-peak",
+ "air_permeability": null,
+ "mechanical_ventilation_inferred": false,
+ "kwh_per_year_heating": null,
+ "kwh_per_year_hot_water": null,
+ "floor_position": null,
+ "other_certificates": [
+  "0857-2871-6998-0121-8615"
+ ],
+ "first_assessment_year": 2009,
+ "history": [
+  {
+   "certificate_id": "0857-2871-6998-0121-8615",
+   "date_of_assessment": "29 January 2009",
+   "energy_rating": "E",
+   "energy_score": 46,
+   "total_floor_area_m2": 43.0
+  }
+ ]
+}

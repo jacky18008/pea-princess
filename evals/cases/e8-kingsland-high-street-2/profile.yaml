@@ -1,0 +1,58 @@
+# Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen - https://github.com/jacky18008/pea-princess - CC BY 4.0
+#
+# Benchmark profile for the vet-flat eval suite. Every case uses the same generic
+# values so that a difference between two runs is a difference in the model, not
+# in the ruler. Nothing here is anybody's real requirement.
+
+# 45 square metres on the energy certificate. The certificate reports metric;
+# this file is in square feet because that is the key the skill reads.
+min_floor_area_sqft: 484
+max_building_age_years: 25
+
+budget:
+  rent_pcm_target: 2200
+  all_in_pcm_ceiling: 2600
+  stretch_ceiling_and_conditions:
+
+move_in_window:
+  earliest:
+  latest:
+  tolerance_days: 0
+
+commute:
+  destination: "SW1A 2AA"
+  arrive_by: "09:00"
+  max_door_to_door_min: 45
+  redundancy_min_grade: "B"
+
+floors:
+  reject_ground_floor: true
+  prefer_floor_band:
+
+light:
+  reject_no_sky: true
+  aspect_scores:
+    N: 2
+    NE: 2
+    E: 4
+    SE: 5
+    S: 4
+    SW: 4
+    W: 3
+    NW: 2
+
+quiet_over_light: true
+
+must_haves:
+  - washing_machine_in_flat
+
+nice_to_haves:
+
+guarantor_route:
+
+tenancy:
+  max_months_upfront: 1
+  max_deposit_weeks: 5
+  require_deposit_protection: true
+
+language: "en"

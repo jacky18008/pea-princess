@@ -29,6 +29,13 @@ from _fetch import fetch, now_iso  # noqa: E402
 
 BASE = "https://find-energy-certificate.service.gov.uk"
 CERT_RE = re.compile(r"/energy-certificate/([0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{4})")
+# Three pages that are real answers, not failures, and none of which carries a result
+# table. A search that comes back on one of these has been answered; the answer is
+# "nothing here" or "too many to list", and recording it as a fetch failure hides a
+# fact behind an error.
+TOO_MANY_MARKER = "Too many results for this address"    # busy street: search by postcode
+NIL_POSTCODE_MARKER = "No results for"                   # postcode with no certificates
+NIL_STREET_MARKER = "was not found at this address"      # street with no certificates
 
 
 def _clean(s):
@@ -46,7 +53,10 @@ def search(postcode=None, street=None, town=None):
     else:
         raise SystemExit("search needs --postcode or --street and --town")
     res = fetch(url, expect=lambda b: "epb-search-results" in b or "no certificates" in b.lower()
-                or "could not find" in b.lower())
+                or "could not find" in b.lower() or TOO_MANY_MARKER in b
+                or NIL_STREET_MARKER in b or NIL_POSTCODE_MARKER in b)
+    too_many = bool(res["ok"] and TOO_MANY_MARKER in res["body"]
+                    and "epb-search-results" not in res["body"])
     rows = []
     if res["ok"]:
         for tr in re.findall(r"<tr[^>]*>(.*?)</tr>", res["body"], re.S):
@@ -62,14 +72,37 @@ def search(postcode=None, street=None, town=None):
                 "valid_until": cells[1] if len(cells) > 1 else None,
                 "certificate_url": f"{BASE}/energy-certificate/{m.group(1)}",
             })
-    return {
+    out = {
         "query": {"postcode": postcode, "street": street, "town": town},
         "source_url": url, "http_status": res["status"], "ok": res["ok"], "note": res["note"],
         "retrieved_at": res["retrieved_at"], "evidence_class": "G",
         "count": len(rows), "results": rows,
+        "too_many_results": too_many,
+        "no_results": bool(res["ok"] and not rows and not too_many),
         "caveat": ("Large buildings are often split across several postcodes; if a flat is missing, "
                    "search by street name and town."),
     }
+    if out["no_results"]:
+        out["not_found"] = {
+            "query": url,
+            "meaning": ("the register answered and listed nothing: it holds no certificate "
+                        "for this search. It only lists properties that have one."),
+            "next_step": "try the other search (street instead of postcode, or the reverse)",
+        }
+    if too_many:
+        # The register refuses a street search that would return too many rows and says
+        # so on a page of its own: "There are too many results. Search by postcode
+        # instead." That is a real answer, not a fetch failure, and it hits exactly the
+        # busiest streets - so a caller enumerating an area must fall back to postcodes
+        # or it will silently lose the streets with the most homes on them.
+        out["not_found"] = {
+            "query": url,
+            "meaning": ("the register returned its 'Too many results for this address' page: "
+                        "this street has more certificates than the street search will list. "
+                        "Search by postcode instead."),
+            "next_step": "epc.py search --postcode <pc> for each postcode on the street",
+        }
+    return out
 
 
 # ------------------------------------------------------------------ cert ----

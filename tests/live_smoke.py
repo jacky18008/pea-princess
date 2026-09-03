@@ -12,6 +12,7 @@ Each class keeps its call budget small and leans on the on-disk cache in
 added later should append their own class here rather than editing an existing
 one.
 """
+import json
 import os
 import sys
 import unittest
@@ -383,6 +384,106 @@ class LiveRoads(unittest.TestCase):
         out = self.roads.facade_note(LAT, LNG, 300, full=self.out)
         self.assertEqual(out["query_used"], self.out["query_used"])
         self.assertEqual(out["facade_note_trigger_m"], 60)
+
+
+# -------------------------------------------------------------- sweep.py ----
+@unittest.skipUnless(LIVE, WHY)
+class LiveSweep(unittest.TestCase):
+    """The whole orchestrator, end to end, on a 300 m circle - about 90 calls.
+
+    The caps are deliberate: a bare 300 m sweep in central London is 40 street
+    searches and 200 certificate pages. This asserts the pipeline, not the area, so
+    it searches four streets, samples three certificates per building and takes two
+    buildings through the fact run. Everything is cached, so a re-run is nearly free.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        import subprocess
+        import tempfile
+        cls.out = tempfile.mkdtemp(prefix="vetflat-sweep-")
+        cmd = [sys.executable, os.path.join(HERE, "..", "skills", "vet-flat", "scripts",
+                                            "sweep.py"),
+               "--anchor", POSTCODE, "--radius", "300", "--dest", "WC2R 2LS",
+               "--out", cls.out, "--max-buildings", "2",
+               "--max-streets", "4", "--max-filter-buildings", "3",
+               "--certs-per-building", "3", "--crime-months", "2",
+               "--max-postcode-lookups", "20"]
+        cls.proc = subprocess.run(cmd, capture_output=True, text=True, timeout=1800)
+        cls.result = json.loads(cls.proc.stdout) if cls.proc.stdout.strip().startswith("{") \
+            else None
+
+    def _read(self, name):
+        with open(os.path.join(self.out, name), encoding="utf-8") as fh:
+            return json.load(fh) if name.endswith(".json") else fh.read()
+
+    def test_the_run_finishes_and_reports_its_own_coverage(self):
+        self.assertEqual(self.proc.returncode, 0, self.proc.stderr[-2000:])
+        self.assertIsNotNone(self.result, self.proc.stdout[:400])
+        self.assertTrue(self.result["ok"])
+        cov = self.result["coverage"]
+        self.assertGreater(cov["streets_found"], 0)
+        self.assertEqual(cov["streets_searched"], 4)
+        self.assertGreater(cov["certificates_seen"], 0)
+        self.assertGreater(cov["buildings"], 0)
+        self.assertGreater(cov["fetches"], 0)
+
+    def test_every_stage_wrote_its_file(self):
+        for name in ("anchor.json", "buildings.json", "filtered.json", "summary.json",
+                     "summary.md", "report-skeleton.json", "manifest.json",
+                     "ask-the-user.md"):
+            self.assertTrue(os.path.exists(os.path.join(self.out, name)), name)
+
+    def test_the_manifest_records_every_fetch_including_the_failures(self):
+        man = self._read("manifest.json")
+        self.assertEqual(len(man["fetches"]), man["summary"]["fetches"])
+        for row in man["fetches"]:
+            for field in ("url", "status", "ok", "note", "retrieved_at", "stage"):
+                self.assertIn(field, row)
+        self.assertEqual(len([r for r in man["fetches"] if not r["ok"]]),
+                         man["summary"]["failures"])
+
+    def test_each_candidate_is_under_the_four_kilobyte_cap(self):
+        import glob
+        files = sorted(glob.glob(os.path.join(self.out, "candidates", "*.json")))
+        self.assertTrue(files, "no candidate was written")
+        self.assertLessEqual(len(files), 2)
+        for path in files:
+            self.assertLessEqual(os.path.getsize(path), 4096, os.path.basename(path))
+            with open(path, encoding="utf-8") as fh:
+                rec = json.load(fh)
+            self.assertTrue(rec["display_address"])
+            self.assertIn("metrics", rec)
+            for block in ("epc", "crime", "commute"):
+                if block in rec:
+                    self.assertIn("source_url", rec[block], block)
+                    self.assertIn("retrieved_at", rec[block], block)
+                    self.assertIn("evidence_class", rec[block], block)
+
+    def test_the_ask_file_names_sites_and_carries_no_search_urls(self):
+        text = self._read("ask-the-user.md")
+        self.assertIn("HomeViews", text)
+        self.assertIn("Rightmove", text)
+        # site names only: a review or portal URL with a search in it must never
+        # appear, because the user has to open the site under their own terms
+        self.assertNotIn("http", text)
+
+    def test_the_dry_run_stops_before_the_expensive_stages(self):
+        import subprocess
+        import tempfile
+        out = tempfile.mkdtemp(prefix="vetflat-dry-")
+        cmd = [sys.executable, os.path.join(HERE, "..", "skills", "vet-flat", "scripts",
+                                            "sweep.py"),
+               "--anchor", POSTCODE, "--radius", "300", "--dest", "WC2R 2LS",
+               "--out", out, "--dry-run"]
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+        self.assertEqual(proc.returncode, 0, proc.stderr[-2000:])
+        plan = json.loads(proc.stdout)
+        self.assertTrue(plan["dry_run"])
+        self.assertGreater(plan["streets_found"], 0)
+        self.assertIn("grand_total_excluding_postcodes", plan["estimated_fetches"])
+        self.assertFalse(os.path.exists(os.path.join(out, "buildings.json")))
+
 
 
 if __name__ == "__main__":

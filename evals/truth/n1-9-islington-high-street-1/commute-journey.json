@@ -1,0 +1,295 @@
+{
+ "query": {
+  "from": "N1 9LQ",
+  "from_kind": "postcode",
+  "to": "SW1A 2AA",
+  "to_kind": "postcode",
+  "arrive_by": "09:00",
+  "date": "20260904",
+  "date_source": "next-weekday",
+  "door_buffer_min": 0,
+  "plans": [
+   "all",
+   "rail",
+   "bus"
+  ]
+ },
+ "source_url": "https://api.tfl.gov.uk/Journey/JourneyResults/N1%209LQ/to/SW1A%202AA?date=20260904&time=0900&timeIs=Arriving",
+ "http_status": 200,
+ "ok": true,
+ "note": "",
+ "retrieved_at": "2026-09-03T11:56:09+00:00",
+ "evidence_class": "G",
+ "app_key_used": false,
+ "plans": {
+  "all": {
+   "source_url": "https://api.tfl.gov.uk/Journey/JourneyResults/N1%209LQ/to/SW1A%202AA?date=20260904&time=0900&timeIs=Arriving",
+   "http_status": 200,
+   "ok": true,
+   "note": "",
+   "retrieved_at": "2026-09-03T11:56:06+00:00",
+   "evidence_class": "G",
+   "mode_filter": "(TfL default: every mode)",
+   "duration_min": 37,
+   "duration_min_before_buffer": 37,
+   "door_buffer_min": 0,
+   "start": "2026-09-04T08:15:00",
+   "arrival": "2026-09-04T08:52:00",
+   "legs": [
+    {
+     "mode": "walking",
+     "line": null,
+     "from": "N1 9LQ",
+     "to": "Angel Underground Station",
+     "duration_min": 7,
+     "departure": "2026-09-04T08:15:00",
+     "arrival": "2026-09-04T08:22:00",
+     "summary": "Walk to Angel Station"
+    },
+    {
+     "mode": "tube",
+     "line": "Northern",
+     "from": "Angel Underground Station",
+     "to": "Bank Underground Station",
+     "duration_min": 7,
+     "departure": "2026-09-04T08:22:00",
+     "arrival": "2026-09-04T08:29:00",
+     "summary": "Northern line to Bank"
+    },
+    {
+     "mode": "walking",
+     "line": null,
+     "from": "Bank Underground Station",
+     "to": "Monument Underground Station",
+     "duration_min": 5,
+     "departure": "2026-09-04T08:29:00",
+     "arrival": "2026-09-04T08:34:00",
+     "summary": "Walk to Monument"
+    },
+    {
+     "mode": "tube",
+     "line": "District",
+     "from": "Monument Underground Station",
+     "to": "Temple Underground Station",
+     "duration_min": 6,
+     "departure": "2026-09-04T08:34:00",
+     "arrival": "2026-09-04T08:40:00",
+     "summary": "District line to Temple"
+    },
+    {
+     "mode": "bus",
+     "line": "786",
+     "from": "Temple Station",
+     "to": "Banqueting House",
+     "duration_min": 2,
+     "departure": "2026-09-04T08:45:00",
+     "arrival": "2026-09-04T08:47:00",
+     "summary": "786 bus to Banqueting House"
+    },
+    {
+     "mode": "walking",
+     "line": null,
+     "from": "Banqueting House",
+     "to": "SW1A 2AA",
+     "duration_min": 5,
+     "departure": "2026-09-04T08:47:00",
+     "arrival": "2026-09-04T08:52:00",
+     "summary": "Walk to SW1A 2AA"
+    }
+   ],
+   "changes": 2,
+   "transit_legs": 3,
+   "walking_min": 17,
+   "first_leg_walk_min": 7,
+   "last_leg_walk_min": 5,
+   "waiting_min_in_plan": 5,
+   "zero_wait_joins": 4,
+   "modes": [
+    "bus",
+    "tube"
+   ],
+   "lines": [
+    "Northern",
+    "District",
+    "786"
+   ],
+   "wait_sample_note": "4 of the 5 connections in this plan depart at the exact minute the previous leg arrives. That is a zero-wait sample: the plan has budgeted nothing for waiting, so the real trip is this number plus however long the next service takes to turn up.",
+   "alternatives_min": [
+    37,
+    38,
+    41
+   ],
+   "journeys_returned": 3
+  },
+  "rail": {
+   "source_url": "https://api.tfl.gov.uk/Journey/JourneyResults/N1%209LQ/to/SW1A%202AA?date=20260904&time=0900&timeIs=Arriving&mode=tube,dlr,overground,elizabeth-line,national-rail,walking",
+   "http_status": 200,
+   "ok": true,
+   "note": "",
+   "retrieved_at": "2026-09-03T11:56:07+00:00",
+   "evidence_class": "G",
+   "mode_filter": "tube,dlr,overground,elizabeth-line,national-rail,walking",
+   "duration_min": 41,
+   "duration_min_before_buffer": 41,
+   "door_buffer_min": 0,
+   "start": "2026-09-04T08:17:00",
+   "arrival": "2026-09-04T08:58:00",
+   "legs": [
+    {
+     "mode": "walking",
+     "line": null,
+     "from": "N1 9LQ",
+     "to": "Angel Underground Station",
+     "duration_min": 7,
+     "departure": "2026-09-04T08:17:00",
+     "arrival": "2026-09-04T08:24:00",
+     "summary": "Walk to Angel Station"
+    },
+    {
+     "mode": "tube",
+     "line": "Northern",
+     "from": "Angel Underground Station",
+     "to": "Euston Underground Station",
+     "duration_min": 4,
+     "departure": "2026-09-04T08:24:00",
+     "arrival": "2026-09-04T08:28:00",
+     "summary": "Northern line to Euston"
+    },
+    {
+     "mode": "tube",
+     "line": "Victoria",
+     "from": "Euston Underground Station",
+     "to": "Victoria Underground Station",
+     "duration_min": 7,
+     "departure": "2026-09-04T08:33:00",
+     "arrival": "2026-09-04T08:40:00",
+     "summary": "Victoria line to Victoria"
+    },
+    {
+     "mode": "tube",
+     "line": "District",
+     "from": "Victoria Underground Station",
+     "to": "Westminster Underground Station",
+     "duration_min": 4,
+     "departure": "2026-09-04T08:43:00",
+     "arrival": "2026-09-04T08:47:00",
+     "summary": "District line to Westminster"
+    },
+    {
+     "mode": "walking",
+     "line": null,
+     "from": "Westminster Underground Station",
+     "to": "SW1A 2AA",
+     "duration_min": 11,
+     "departure": "2026-09-04T08:47:00",
+     "arrival": "2026-09-04T08:58:00",
+     "summary": "Walk to SW1A 2AA"
+    }
+   ],
+   "changes": 2,
+   "transit_legs": 3,
+   "walking_min": 18,
+   "first_leg_walk_min": 7,
+   "last_leg_walk_min": 11,
+   "waiting_min_in_plan": 8,
+   "zero_wait_joins": 2,
+   "modes": [
+    "tube"
+   ],
+   "lines": [
+    "Northern",
+    "Victoria",
+    "District"
+   ],
+   "wait_sample_note": "2 of the 4 connections in this plan depart at the exact minute the previous leg arrives. That is a zero-wait sample: the plan has budgeted nothing for waiting, so the real trip is this number plus however long the next service takes to turn up.",
+   "alternatives_min": [
+    41,
+    41,
+    41
+   ],
+   "journeys_returned": 3
+  },
+  "bus": {
+   "source_url": "https://api.tfl.gov.uk/Journey/JourneyResults/N1%209LQ/to/SW1A%202AA?date=20260904&time=0900&timeIs=Arriving&mode=bus,walking",
+   "http_status": 200,
+   "ok": true,
+   "note": "",
+   "retrieved_at": "2026-09-03T11:56:09+00:00",
+   "evidence_class": "G",
+   "mode_filter": "bus,walking",
+   "duration_min": 41,
+   "duration_min_before_buffer": 41,
+   "door_buffer_min": 0,
+   "start": "2026-09-04T07:55:00",
+   "arrival": "2026-09-04T08:36:00",
+   "legs": [
+    {
+     "mode": "walking",
+     "line": null,
+     "from": "N1 9LQ",
+     "to": "St John Street / Goswell Road",
+     "duration_min": 6,
+     "departure": "2026-09-04T07:55:00",
+     "arrival": "2026-09-04T08:01:00",
+     "summary": "Walk to St John Street / Goswell Road"
+    },
+    {
+     "mode": "bus",
+     "line": "19",
+     "from": "St John Street / Goswell Road",
+     "to": "Tottenham Court Road Station",
+     "duration_min": 17,
+     "departure": "2026-09-04T08:01:00",
+     "arrival": "2026-09-04T08:18:00",
+     "summary": "19 bus to Tottenham Court Road Station"
+    },
+    {
+     "mode": "bus",
+     "line": "24",
+     "from": "Tottenham Court Road Station",
+     "to": "Westminster Stn  / Parliament Square",
+     "duration_min": 10,
+     "departure": "2026-09-04T08:23:00",
+     "arrival": "2026-09-04T08:33:00",
+     "summary": "24 bus to Westminster Station / Parliament Square"
+    },
+    {
+     "mode": "walking",
+     "line": null,
+     "from": "Westminster Stn  / Parliament Square",
+     "to": "SW1A 2AA",
+     "duration_min": 3,
+     "departure": "2026-09-04T08:33:00",
+     "arrival": "2026-09-04T08:36:00",
+     "summary": "Walk to SW1A 2AA"
+    }
+   ],
+   "changes": 1,
+   "transit_legs": 2,
+   "walking_min": 9,
+   "first_leg_walk_min": 6,
+   "last_leg_walk_min": 3,
+   "waiting_min_in_plan": 5,
+   "zero_wait_joins": 2,
+   "modes": [
+    "bus"
+   ],
+   "lines": [
+    "19",
+    "24"
+   ],
+   "wait_sample_note": "2 of the 3 connections in this plan depart at the exact minute the previous leg arrives. That is a zero-wait sample: the plan has budgeted nothing for waiting, so the real trip is this number plus however long the next service takes to turn up.",
+   "alternatives_min": [
+    41,
+    42,
+    43
+   ],
+   "journeys_returned": 3
+  }
+ },
+ "fastest_plan": "all",
+ "fastest_min": 37,
+ "rail_only_min": 41,
+ "bus_only_min": 41,
+ "method": "TfL Journey Planner, arriving by 09:00 on 20260904 (next-weekday). Three plans: 'all' lets TfL choose any mode, 'rail' restricts to tube, DLR, Overground, Elizabeth line, national rail and walking, 'bus' to bus and walking. The bus number is the answer to 'what happens when the trains stop', so read it as the fallback, not as the commute. `door_buffer_min` is 0 and is added only because you asked; TfL plans to the street, not through the front door of a building."
+}

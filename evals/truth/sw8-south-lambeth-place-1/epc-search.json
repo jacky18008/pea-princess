@@ -1,0 +1,59 @@
+{
+ "query": {
+  "postcode": "SW8 1SP",
+  "street": null,
+  "town": null
+ },
+ "source_url": "https://find-energy-certificate.service.gov.uk/find-a-certificate/search-by-postcode?postcode=SW8%201SP",
+ "http_status": 200,
+ "ok": true,
+ "note": "",
+ "retrieved_at": "2026-09-03T11:40:26+00:00",
+ "evidence_class": "G",
+ "count": 6,
+ "results": [
+  {
+   "certificate_id": "0660-2840-6380-9921-1601",
+   "address": "Flat 1, 2, South Lambeth Place, LONDON, SW8 1SP",
+   "rating": "C",
+   "valid_until": "19 August 2029",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0660-2840-6380-9921-1601"
+  },
+  {
+   "certificate_id": "2408-9006-6238-6841-9934",
+   "address": "Flat 2, 2, South Lambeth Place, LONDON, SW8 1SP",
+   "rating": "C",
+   "valid_until": "19 August 2029",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/2408-9006-6238-6841-9934"
+  },
+  {
+   "certificate_id": "8851-6928-6070-4480-6922",
+   "address": "Flat 3, 2, South Lambeth Place, LONDON, SW8 1SP",
+   "rating": "D",
+   "valid_until": "19 August 2029",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/8851-6928-6070-4480-6922"
+  },
+  {
+   "certificate_id": "0668-2840-6286-9121-2521",
+   "address": "Flat 4, 2, South Lambeth Place, LONDON, SW8 1SP",
+   "rating": "D",
+   "valid_until": "19 August 2029",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/0668-2840-6286-9121-2521"
+  },
+  {
+   "certificate_id": "8211-6928-6160-4480-6926",
+   "address": "Flat 5, 2, South Lambeth Place, LONDON, SW8 1SP",
+   "rating": "D",
+   "valid_until": "19 August 2029",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/8211-6928-6160-4480-6926"
+  },
+  {
+   "certificate_id": "8305-9956-1429-3496-2813",
+   "address": "Flat 6, 2, South Lambeth Place, LONDON, SW8 1SP",
+   "rating": "C",
+   "valid_until": "18 August 2029",
+   "certificate_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/8305-9956-1429-3496-2813"
+  }
+ ],
+ "caveat": "Large buildings are often split across several postcodes; if a flat is missing, search by street name and town."
+}

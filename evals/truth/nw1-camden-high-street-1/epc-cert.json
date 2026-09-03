@@ -1,0 +1,100 @@
+{
+ "certificate_id": "9546-3011-6304-3226-3204",
+ "source_url": "https://find-energy-certificate.service.gov.uk/energy-certificate/9546-3011-6304-3226-3204",
+ "http_status": 200,
+ "ok": true,
+ "note": "",
+ "retrieved_at": "2026-09-03T11:43:09+00:00",
+ "evidence_class": "G",
+ "property_type": "Mid-floor flat",
+ "total_floor_area_m2": 70.0,
+ "total_floor_area_sqft": 753,
+ "date_of_assessment": "14 April 2026",
+ "date_of_certificate": "14 April 2026",
+ "assessment_type": "SAP",
+ "valid_until": "13 April 2036",
+ "certificate_number": "9546-3011-6304-3226-3204",
+ "energy_rating": "C",
+ "energy_score": 75,
+ "potential_rating": "C",
+ "address": "Flat 1 140A Camden High Street London NW1 0NE",
+ "features": {
+  "Walls": {
+   "description": "Average thermal transmittance 0.14 W/m²K",
+   "rating": "Very good"
+  },
+  "Roof": {
+   "description": "Average thermal transmittance 0.10 W/m²K",
+   "rating": "Very good"
+  },
+  "Floor": {
+   "description": "Average thermal transmittance 0.13 W/m²K",
+   "rating": "Very good"
+  },
+  "Windows": {
+   "description": "High performance glazing",
+   "rating": "Very good"
+  },
+  "Main heating": {
+   "description": "Air source heat pump, underfloor, electric",
+   "rating": "Poor"
+  },
+  "Main heating control": {
+   "description": "Programmer and at least two room thermostats",
+   "rating": "Good"
+  },
+  "Hot water": {
+   "description": "From main system, no cylinder thermostat",
+   "rating": "Poor"
+  },
+  "Lighting": {
+   "description": "Low energy lighting in all fixed outlets",
+   "rating": "Very good"
+  },
+  "Air tightness": {
+   "description": "Air permeability 6.0 m³/h.m² (as tested)",
+   "rating": "Good"
+  },
+  "Secondary heating": {
+   "description": "None",
+   "rating": "N/A"
+  }
+ },
+ "heating_class": "heat_pump",
+ "main_heating": "Air source heat pump, underfloor, electric",
+ "hot_water": "From main system, no cylinder thermostat",
+ "air_permeability": 6.0,
+ "mechanical_ventilation_inferred": false,
+ "kwh_per_year_heating": 1917,
+ "kwh_per_year_hot_water": 2808,
+ "floor_position": "mid",
+ "other_certificates": [
+  "0033-2895-7598-2190-6711",
+  "0033-2898-7518-9195-4731",
+  "9246-3011-6304-3526-3204"
+ ],
+ "first_assessment_year": 2015,
+ "history": [
+  {
+   "certificate_id": "0033-2895-7598-2190-6711",
+   "date_of_assessment": "15 January 2020",
+   "energy_rating": "C",
+   "energy_score": 69,
+   "total_floor_area_m2": 107.0
+  },
+  {
+   "certificate_id": "0033-2898-7518-9195-4731",
+   "date_of_assessment": "18 September 2015",
+   "energy_rating": "D",
+   "energy_score": 65,
+   "total_floor_area_m2": 154.0
+  },
+  {
+   "certificate_id": "9246-3011-6304-3526-3204",
+   "date_of_assessment": "14 April 2026",
+   "energy_rating": "C",
+   "energy_score": 74,
+   "total_floor_area_m2": 70.0
+  }
+ ]
+}
