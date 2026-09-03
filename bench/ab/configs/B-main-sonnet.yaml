@@ -1,0 +1,25 @@
+# Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen - https://github.com/jacky18008/pea-princess - CC BY 4.0
+# A/B harness config. Read by bench/run.py --config and bench/ab/run_ab.py.
+
+name: B-main-sonnet
+agent: claude
+phase: ablation
+factor: "main model: sonnet, everything else as B-lean"
+description: |
+  B-lean pinned to sonnet as the main model, standard budget. With B-lite and C-twenty this
+  triangulates which half of the cheap setup costs quality: the model, or the budget.
+main_model: sonnet
+worker_model: sonnet
+budget_mode: standard
+allowed_tools:
+  - "Bash(python3:*)"
+  - Read
+  - Write
+  - Agent
+append_system_prompt: |
+  Use the scripts in scripts/ for every fetchable fact and read only their JSON. Never read a
+  file larger than 40 KB in full; use ranges. Spawn subagents only for reading pasted review
+  or report text, with model sonnet; do judgment yourself. Keep the report JSON as the only
+  large output.
+notes: |
+  sonnet is the alias Claude Code accepts for the latest Sonnet; see claude --help.

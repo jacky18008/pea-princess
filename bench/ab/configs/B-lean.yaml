@@ -1,0 +1,28 @@
+# Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen - https://github.com/jacky18008/pea-princess - CC BY 4.0
+# A/B harness config. Read by bench/run.py --config and bench/ab/run_ab.py.
+
+name: B-lean
+agent: claude
+phase: core
+factor: "baseline: the lean way of working"
+description: |
+  The lean harness: the repository's own scripts instead of raw pages, Sonnet subagents for
+  reading pasted text, Opus (the CLI default) doing the judgment, no whole-file reads, compact
+  JSON in and one report JSON out.
+main_model: null
+worker_model: sonnet
+budget_mode: standard
+allowed_tools:
+  - "Bash(python3:*)"
+  - Read
+  - Write
+  - Agent
+append_system_prompt: |
+  Use the scripts in scripts/ for every fetchable fact and read only their JSON. Never read a
+  file larger than 40 KB in full; use ranges. Spawn subagents only for reading pasted review
+  or report text, with model sonnet; do judgment yourself. Keep the report JSON as the only
+  large output.
+notes: |
+  No WebFetch and no WebSearch: every fetchable fact has to come through a script, which is
+  what makes the token bill collapse. If a fact is not fetchable by a script the run must say
+  so in not_found rather than guess.

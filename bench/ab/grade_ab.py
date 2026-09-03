@@ -1,0 +1,727 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""Score an A/B sweep: per run, per config, paired per case, and print the decision.
+
+Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen -
+https://github.com/jacky18008/pea-princess - CC BY 4.0
+
+WHAT IT READS
+=============
+``bench/results/<date>/scorecard.json`` - one row per run, written by bench/run.py or
+bench/ab/run_codex.py. Each row names its config, its case, its run index, its wall
+time, its token counts and the path to the report it graded.
+``bench/private/gold.json`` - the private gold set: verdict, landmine codes with a
+confidence, and the killer questions the owner actually asked.
+
+WHAT IT ADDS TO THE PUBLIC FACT SCORES
+======================================
+landmine_recall      of the gold's HIGH-confidence codes, the share the report raised.
+                     Low-confidence gold codes are reported separately and never
+                     counted, because they were derived from survey text rather than
+                     from the reviewer's stated objection.
+landmine_precision   of the codes the report raised, the share that are in the gold
+                     (high or low: a low-confidence gold code is still not a
+                     hallucination).
+verdict_agreement    exact match on PASS/EDGE/CONDITIONAL/KILL, and the 2-level match
+                     KILL vs not-KILL.
+killer_question_overlap
+                     a report question counts if it shares at least half of its
+                     content words with a gold question, using bench/grade.py's own
+                     content_words() so the two graders agree on what a word is. The
+                     public bank check (killer_questions_from_bank) is carried through
+                     next to it.
+unknown_share        the share of the twelve axes graded U (unknown).
+tokens, cost, wall time from the run row.
+
+THE DECISION RULE
+=================
+Printed at the end, for B against A:
+
+  ADOPT B  if fact recall B >= A - 0.02
+           and fabrications B <= A
+           and the mean landmine recall drop is at most one code per case
+              (that is, at most 1 / mean gold codes per case)
+           and tokens B <= 0.5 x tokens A
+  UNDECIDED if the B - A differences are smaller than the within-config
+           run-to-run spread (nothing was measured, only noise)
+  KEEP A   otherwise
+
+C is never in that rule. C answers a separate question - do the basic functions
+survive on the cheapest realistic setup - and gets its own pass line:
+stable fact recall >= 0.90, zero fabrications, hard filter consistency 1.0, at least
+one killer question from the bank, a verdict present, and a schema-valid report.
+
+Ablation configs get a factor table: each one paired against B-lean, one line per
+factor saying "effect within noise", "helps" or "hurts".
+
+Usage:
+  bench/ab/grade_ab.py --results bench/results/2026-09-04 --gold bench/private/gold.json
+  bench/ab/grade_ab.py --results bench/results/2026-09-04 --baseline A-legacy \\
+      --candidate B-lean --out bench/results/2026-09-04
+
+Writes summary.md and summary.json next to the scorecard. Exit code 0 always unless
+the inputs are missing (2).
+"""
+from __future__ import unicode_literals
+
+import argparse
+import collections
+import io
+import json
+import os
+import sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+BENCH = os.path.abspath(os.path.join(HERE, ".."))
+ROOT = os.path.abspath(os.path.join(BENCH, ".."))
+
+sys.path.insert(0, BENCH)
+import grade as grader  # noqa: E402
+
+PRIVATE_GOLD = os.path.join(BENCH, "private", "gold.json")
+
+VERDICTS = ("PASS", "EDGE", "CONDITIONAL", "KILL")
+OVERLAP_FLOOR = 0.5          # same floor as the public bank check
+MIN_CONTENT_WORDS = 4        # same as bench/grade.py
+
+# The ADOPT rule, in one place so the tests and the README quote the same numbers.
+DECISION = {
+    "fact_recall_slack": 0.02,
+    "landmine_codes_allowed_to_drop": 1.0,
+    "token_ratio": 0.5,
+}
+
+# C's basic-functions pass line.
+BASIC_FUNCTIONS = {
+    "stable_fact_recall": 0.90,
+    "fabrications": 0,
+    "hard_filter_consistency": 1.0,
+    "killer_questions_from_bank_min": 1,
+}
+
+
+# ------------------------------------------------------------------- inputs --
+def load_json(path):
+    with io.open(path, encoding="utf-8") as fh:
+        return json.load(fh, object_pairs_hook=collections.OrderedDict)
+
+
+def load_gold(path):
+    """{case_id_lowercased: gold row}. Cases are named from the gold id."""
+    doc = load_json(path)
+    out = collections.OrderedDict()
+    for row in doc.get("candidates") or []:
+        out[row["id"]] = row
+        out[row["id"].lower().replace("_", "-")] = row
+    return out, doc
+
+
+def gold_for(row, gold):
+    for key in (row.get("gold_id"), row.get("case"), (row.get("case") or "").split("#")[0]):
+        if key and key in gold:
+            return gold[key]
+    return None
+
+
+def load_report(row):
+    path = row.get("report_path") or (row.get("workdir") and
+                                      os.path.join(row["workdir"], "report.json"))
+    if path and os.path.exists(path):
+        try:
+            return load_json(path)
+        except ValueError:
+            return None
+    return None
+
+
+# ------------------------------------------------------------------ metrics --
+def first_candidate(report):
+    cands = (report or {}).get("candidates") or []
+    return cands[0] if cands and isinstance(cands[0], dict) else {}
+
+
+def reported_codes(cand):
+    """Every landmine code the report stood behind, as bench/grade.py counts them."""
+    return grader.raised_codes(cand)
+
+
+def landmine_scores(cand, gold_row):
+    high = set(m["code"] for m in gold_row["gold_landmines"] if m["confidence"] == "high")
+    low = set(m["code"] for m in gold_row["gold_landmines"] if m["confidence"] == "low")
+    got = set(c for c in reported_codes(cand) if c.startswith("L"))
+
+    recall = len(got & high) / float(len(high)) if high else None
+    low_recall = len(got & low) / float(len(low)) if low else None
+    precision = len(got & (high | low)) / float(len(got)) if got else None
+    return collections.OrderedDict([
+        ("gold_high", sorted(high, key=code_order)),
+        ("gold_low", sorted(low, key=code_order)),
+        ("reported", sorted(got, key=code_order)),
+        ("hit_high", sorted(got & high, key=code_order)),
+        ("missed_high", sorted(high - got, key=code_order)),
+        ("extra", sorted(got - high - low, key=code_order)),
+        ("landmine_recall", round(recall, 4) if recall is not None else None),
+        ("landmine_recall_low_confidence",
+         round(low_recall, 4) if low_recall is not None else None),
+        ("landmine_precision", round(precision, 4) if precision is not None else None),
+        ("codes_dropped", len(high - got)),
+    ])
+
+
+def code_order(code):
+    try:
+        return int(str(code)[1:])
+    except ValueError:
+        return 99
+
+
+def verdict_scores(cand, gold_row):
+    got = ((cand.get("verdict") or {}).get("status") or "").upper() or None
+    want = gold_row.get("gold_verdict")
+    exact = (got == want) if (got and want) else None
+    two = None
+    if got and want:
+        two = ((got == "KILL") == (want == "KILL"))
+    return collections.OrderedDict([
+        ("verdict_reported", got), ("verdict_gold", want),
+        ("verdict_agreement", exact), ("verdict_agreement_kill_split", two),
+        ("verdict_present", bool(got)),
+    ])
+
+
+CJK_RE = None
+
+
+def content_words(text):
+    """bench/grade.py's content words, plus CJK bigrams so Chinese questions match.
+
+    The gold questions come from a bilingual campaign: the reviewer's own questions
+    are in Chinese, the letters that were actually sent are in English. The reports
+    are written in the profile's language. A Chinese gold question and an English
+    report question will never match on words, and neither should they: the English
+    letter pool is what covers the English reports, and it is in the gold for every
+    candidate. What the bigrams buy is Chinese-to-Chinese matching, for the day
+    somebody runs the suite with `language: zh-TW`.
+    """
+    global CJK_RE
+    if CJK_RE is None:
+        CJK_RE = grader.re.compile(r"[㐀-䶿一-鿿]+")
+    words = set(grader.content_words(text or ""))
+    for run in CJK_RE.findall(text or ""):
+        if len(run) == 1:
+            words.add(run)
+        for i in range(len(run) - 1):
+            words.add(run[i:i + 2])
+    return words
+
+
+def question_scores(cand, gold_row, bank):
+    questions = [q for q in (cand.get("killer_questions") or []) if isinstance(q, str)
+                 and q.strip()]
+    gold_words = []
+    for entry in gold_row.get("gold_killer_questions") or []:
+        text = entry.get("text") if isinstance(entry, dict) else entry
+        words = content_words(text or "")
+        if words:
+            gold_words.append((text, words))
+
+    rows, matched = [], 0
+    for question in questions:
+        words = content_words(question)
+        best, ratio = None, 0.0
+        if len(words) >= MIN_CONTENT_WORDS:
+            for text, gwords in gold_words:
+                share = len(words & gwords) / float(len(words))
+                if share > ratio:
+                    best, ratio = text, share
+        ok = ratio >= OVERLAP_FLOOR
+        matched += 1 if ok else 0
+        rows.append(collections.OrderedDict([
+            ("question", question), ("best_gold", (best or "")[:110]),
+            ("overlap", round(ratio, 3)), ("matches_gold", ok)]))
+    return collections.OrderedDict([
+        ("killer_questions", len(questions)),
+        ("killer_question_overlap",
+         round(matched / float(len(questions)), 4) if questions else None),
+        ("killer_questions_matched", matched),
+        ("gold_questions", len(gold_words)),
+        ("detail", rows),
+    ])
+
+
+def unknown_share(cand):
+    axes = cand.get("axes") or []
+    graded = [a for a in axes if isinstance(a, dict)]
+    if not graded:
+        return None
+    unknown = 0
+    for axis in graded:
+        letter = str(axis.get("evidence_class") or axis.get("grade") or "").strip().upper()
+        if letter == "U":
+            unknown += 1
+        elif not letter and grader.looks_unknown(str(axis.get("finding") or "")):
+            unknown += 1
+    return round(unknown / float(len(graded)), 4)
+
+
+def grade_row(row, gold, bank):
+    """One scorecard row -> the A/B metrics for that run."""
+    out = collections.OrderedDict([
+        ("config", row.get("config")), ("phase", row.get("config_phase")),
+        ("factor", row.get("config_factor")), ("agent", row.get("agent")),
+        ("model", row.get("model")), ("budget_mode", row.get("budget_mode")),
+        ("case", row.get("case")), ("run", row.get("run_index")),
+        ("fact_recall", row.get("fact_recall")),
+        ("stable_fact_recall", row.get("stable_fact_recall")),
+        ("fabrications", row.get("fabrications")),
+        ("hard_filter_consistency", row.get("hard_filter_consistency")),
+        ("killer_questions_from_bank", row.get("killer_questions_from_bank")),
+        ("schema_valid", row.get("schema_valid")),
+        ("total_tokens", row.get("total_tokens")),
+        ("total_cost_usd", row.get("total_cost_usd")),
+        ("wall_time_s", row.get("wall_time_s")),
+        ("note", row.get("note")),
+    ])
+    gold_row = gold_for(row, gold)
+    report = load_report(row)
+    cand = first_candidate(report)
+    if gold_row is None:
+        out["gold"] = None
+        return out
+    out["gold"] = gold_row["id"]
+    if report is None:
+        out["report_missing"] = True
+        return out
+    out.update(landmine_scores(cand, gold_row))
+    out.update(verdict_scores(cand, gold_row))
+    out.update(question_scores(cand, gold_row, bank))
+    out["unknown_share"] = unknown_share(cand)
+    return out
+
+
+# ---------------------------------------------------------------- aggregate --
+NUMERIC = ("fact_recall", "stable_fact_recall", "fabrications", "hard_filter_consistency",
+           "killer_questions_from_bank", "landmine_recall", "landmine_precision",
+           "landmine_recall_low_confidence", "killer_question_overlap", "unknown_share",
+           "codes_dropped", "total_tokens", "total_cost_usd", "wall_time_s")
+BOOLEAN = ("verdict_agreement", "verdict_agreement_kill_split", "schema_valid",
+           "verdict_present")
+
+
+def stats(values):
+    values = [v for v in values if isinstance(v, (int, float)) and not isinstance(v, bool)]
+    if not values:
+        return None
+    return collections.OrderedDict([
+        ("n", len(values)),
+        ("mean", round(sum(values) / float(len(values)), 4)),
+        ("min", round(min(values), 4)), ("max", round(max(values), 4)),
+        ("spread", round(max(values) - min(values), 4)),
+    ])
+
+
+def rate(values):
+    values = [v for v in values if isinstance(v, bool)]
+    if not values:
+        return None
+    return round(sum(1 for v in values if v) / float(len(values)), 4)
+
+
+def aggregate(rows):
+    """config -> {metric: stats}, plus the boolean rates."""
+    out = collections.OrderedDict()
+    by_config = collections.OrderedDict()
+    for row in rows:
+        by_config.setdefault(row.get("config"), []).append(row)
+    for name, group in by_config.items():
+        summary = collections.OrderedDict([("runs", len(group)),
+                                           ("cases", len(set(r["case"] for r in group))),
+                                           ("phase", group[0].get("phase")),
+                                           ("factor", group[0].get("factor")),
+                                           ("agent", group[0].get("agent"))])
+        for metric in NUMERIC:
+            summary[metric] = stats([r.get(metric) for r in group])
+        for metric in BOOLEAN:
+            summary[metric] = rate([r.get(metric) for r in group])
+        out[name] = summary
+    return out
+
+
+def per_case_mean(rows, config, metric):
+    """{case: mean of that metric over that config's runs}."""
+    buckets = collections.OrderedDict()
+    for row in rows:
+        if row.get("config") != config:
+            continue
+        value = row.get(metric)
+        if isinstance(value, bool):
+            value = 1.0 if value else 0.0
+        if isinstance(value, (int, float)):
+            buckets.setdefault(row["case"], []).append(value)
+    return collections.OrderedDict(
+        (case, sum(vals) / float(len(vals))) for case, vals in buckets.items())
+
+
+def paired(rows, base, cand, metric):
+    """B - A per case, plus how often B >= A."""
+    a = per_case_mean(rows, base, metric)
+    b = per_case_mean(rows, cand, metric)
+    shared = [c for c in b if c in a]
+    diffs = collections.OrderedDict((c, round(b[c] - a[c], 4)) for c in shared)
+    better = sum(1 for c in shared if b[c] >= a[c])
+    return collections.OrderedDict([
+        ("metric", metric), ("cases", len(shared)),
+        ("per_case", diffs),
+        ("mean_diff", round(sum(diffs.values()) / float(len(diffs)), 4) if diffs else None),
+        ("candidate_at_least_baseline", better),
+        ("candidate_worse", len(shared) - better),
+    ])
+
+
+def within_spread(rows, config, metric):
+    """The largest run-to-run spread this config showed on one case: the noise floor."""
+    buckets = collections.OrderedDict()
+    for row in rows:
+        if row.get("config") != config:
+            continue
+        value = row.get(metric)
+        if isinstance(value, bool):
+            value = 1.0 if value else 0.0
+        if isinstance(value, (int, float)):
+            buckets.setdefault(row["case"], []).append(value)
+    spreads = [max(v) - min(v) for v in buckets.values() if len(v) > 1]
+    return round(max(spreads), 4) if spreads else None
+
+
+# ----------------------------------------------------------------- decision --
+def decide(rows, agg, base, cand, gold_doc):
+    """The ADOPT / UNDECIDED / KEEP rule, with every input it used."""
+    reasons = []
+    a, b = agg.get(base), agg.get(cand)
+    if not a or not b:
+        return collections.OrderedDict([
+            ("decision", "NO DATA"),
+            ("why", "no runs for %s" % (base if not a else cand)),
+            ("inputs", collections.OrderedDict())])
+
+    def mean(config, metric):
+        block = agg[config].get(metric)
+        return block["mean"] if block else None
+
+    # Only the cases this sweep actually ran, so "one code per case" means one code of
+    # the cases in front of us, not one code of the whole twenty.
+    ran = set(r.get("gold") for r in rows if r.get("gold"))
+    gold_codes = [len([m for m in row["gold_landmines"] if m["confidence"] == "high"])
+                  for row in gold_doc.get("candidates") or []
+                  if not ran or row["id"] in ran]
+    mean_gold_codes = (sum(gold_codes) / float(len(gold_codes))) if gold_codes else None
+
+    fr_a, fr_b = mean(base, "fact_recall"), mean(cand, "fact_recall")
+    fab_a, fab_b = mean(base, "fabrications"), mean(cand, "fabrications")
+    lm_a, lm_b = mean(base, "landmine_recall"), mean(cand, "landmine_recall")
+    tok_a, tok_b = mean(base, "total_tokens"), mean(cand, "total_tokens")
+
+    facts_ok = (fr_a is None or fr_b is None or
+                fr_b >= fr_a - DECISION["fact_recall_slack"])
+    fabs_ok = (fab_a is None or fab_b is None or fab_b <= fab_a)
+    if mean_gold_codes and lm_a is not None and lm_b is not None:
+        allowed = DECISION["landmine_codes_allowed_to_drop"] / mean_gold_codes
+        mines_ok = (lm_a - lm_b) <= allowed
+    else:
+        allowed, mines_ok = None, True
+    tokens_ok = (tok_a is None or tok_b is None or
+                 tok_b <= DECISION["token_ratio"] * tok_a)
+
+    noise = collections.OrderedDict()
+    signal_beats_noise = False
+    for metric in ("fact_recall", "landmine_recall", "verdict_agreement"):
+        floor = max([x for x in (within_spread(rows, base, metric),
+                                 within_spread(rows, cand, metric)) if x is not None] or [0])
+        diff = paired(rows, base, cand, metric)["mean_diff"]
+        noise[metric] = collections.OrderedDict([("run_to_run_spread", floor),
+                                                 ("mean_diff", diff)])
+        if diff is not None and abs(diff) > floor:
+            signal_beats_noise = True
+
+    if facts_ok and fabs_ok and mines_ok and tokens_ok:
+        decision = "ADOPT B"
+        reasons.append("every clause of the rule held")
+    elif not signal_beats_noise:
+        decision = "UNDECIDED"
+        reasons.append("the B - A differences are inside the run-to-run spread of the arms "
+                       "themselves: nothing was measured yet, only noise. Add runs.")
+    else:
+        decision = "KEEP A"
+        for ok, why in ((facts_ok, "fact recall fell by more than %.2f"
+                         % DECISION["fact_recall_slack"]),
+                        (fabs_ok, "fabrications went up"),
+                        (mines_ok, "landmine recall fell by more than one code per case"),
+                        (tokens_ok, "tokens did not fall to half of A")):
+            if not ok:
+                reasons.append(why)
+
+    return collections.OrderedDict([
+        ("decision", decision),
+        ("baseline", base), ("candidate", cand),
+        ("why", "; ".join(reasons)),
+        ("inputs", collections.OrderedDict([
+            ("fact_recall", [fr_a, fr_b, facts_ok]),
+            ("fabrications", [fab_a, fab_b, fabs_ok]),
+            ("landmine_recall", [lm_a, lm_b, mines_ok]),
+            ("landmine_recall_drop_allowed", round(allowed, 4) if allowed else None),
+            ("mean_gold_high_codes_per_case",
+             round(mean_gold_codes, 2) if mean_gold_codes else None),
+            ("total_tokens", [tok_a, tok_b, tokens_ok]),
+        ])),
+        ("noise", noise),
+    ])
+
+
+def basic_functions(agg, config):
+    """C's own pass line. Never part of the ADOPT rule."""
+    block = agg.get(config)
+    if not block:
+        return None
+    checks = collections.OrderedDict()
+    stable = block.get("stable_fact_recall")
+    checks["stable_fact_recall >= %.2f" % BASIC_FUNCTIONS["stable_fact_recall"]] = (
+        stable is not None and stable["mean"] >= BASIC_FUNCTIONS["stable_fact_recall"])
+    fabs = block.get("fabrications")
+    checks["fabrications == 0"] = (fabs is not None and fabs["max"] == 0)
+    hard = block.get("hard_filter_consistency")
+    checks["hard_filter_consistency == 1.0"] = (
+        hard is not None and hard["min"] >= BASIC_FUNCTIONS["hard_filter_consistency"])
+    bank = block.get("killer_questions_from_bank")
+    checks["at least one killer question from the bank"] = (
+        bank is not None and bank["min"] > 0)
+    checks["a verdict is present"] = bool(block.get("verdict_present"))
+    checks["schema valid"] = (block.get("schema_valid") == 1.0)
+    return collections.OrderedDict([
+        ("config", config),
+        ("result", "PASS" if all(checks.values()) else "FAIL"),
+        ("checks", checks),
+    ])
+
+
+def factor_table(rows, agg, base):
+    """One line per ablation config: within noise / helps / hurts."""
+    out = []
+    metrics = ("fact_recall", "fabrications", "landmine_recall", "verdict_agreement",
+               "total_tokens", "wall_time_s")
+    for name, block in agg.items():
+        if name == base or block.get("phase") != "ablation":
+            continue
+        row = collections.OrderedDict([("config", name), ("factor", block.get("factor"))])
+        verdicts = []
+        for metric in metrics:
+            diff = paired(rows, base, name, metric)
+            floor = max([x for x in (within_spread(rows, base, metric),
+                                     within_spread(rows, name, metric))
+                         if x is not None] or [0])
+            row[metric] = collections.OrderedDict([
+                ("mean_diff", diff["mean_diff"]),
+                ("cases", diff["cases"]),
+                ("candidate_at_least_baseline", diff["candidate_at_least_baseline"]),
+                ("run_to_run_spread", floor),
+            ])
+            if metric in ("fact_recall", "landmine_recall", "verdict_agreement") \
+                    and diff["mean_diff"] is not None:
+                if abs(diff["mean_diff"]) <= floor:
+                    verdicts.append(0)
+                else:
+                    verdicts.append(1 if diff["mean_diff"] > 0 else -1)
+        if not verdicts or all(v == 0 for v in verdicts):
+            row["effect"] = "effect within noise"
+        elif sum(verdicts) > 0:
+            row["effect"] = "helps"
+        elif sum(verdicts) < 0:
+            row["effect"] = "hurts"
+        else:
+            row["effect"] = "mixed, effect within noise on balance"
+        out.append(row)
+    return out
+
+
+# ------------------------------------------------------------------ reports --
+def fmt(value, spec="%.3f"):
+    if value is None:
+        return "-"
+    if isinstance(value, bool):
+        return "yes" if value else "no"
+    if isinstance(value, float):
+        return spec % value
+    return str(value)
+
+
+def mstat(block, key="mean", spec="%.3f"):
+    if not block:
+        return "-"
+    return fmt(block.get(key), spec)
+
+
+def markdown(summary):
+    agg = summary["per_config"]
+    lines = ["# vet-flat A/B, %s" % summary["results_dir"], "",
+             "%d runs, %d configs, %d cases, gold %s."
+             % (summary["runs"], len(agg), summary["cases"], summary["gold"]), "",
+             "## Per config (mean over runs, min-max in brackets)", "",
+             "| config | phase | runs | facts | stable | fab | landmine recall | landmine prec "
+             "| verdict exact | KILL split | questions vs gold | from bank | unknown | tokens "
+             "| cost $ | wall s |",
+             "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|"]
+    for name, block in agg.items():
+        lines.append("| %s | %s | %d | %s | %s | %s | %s [%s-%s] | %s | %s | %s | %s | %s | %s "
+                     "| %s [%s-%s] | %s | %s |"
+                     % (name, block.get("phase") or "-", block["runs"],
+                        mstat(block["fact_recall"]), mstat(block["stable_fact_recall"]),
+                        mstat(block["fabrications"], spec="%.2f"),
+                        mstat(block["landmine_recall"]),
+                        mstat(block["landmine_recall"], "min"),
+                        mstat(block["landmine_recall"], "max"),
+                        mstat(block["landmine_precision"]),
+                        fmt(block["verdict_agreement"]),
+                        fmt(block["verdict_agreement_kill_split"]),
+                        mstat(block["killer_question_overlap"]),
+                        mstat(block["killer_questions_from_bank"]),
+                        mstat(block["unknown_share"]),
+                        mstat(block["total_tokens"], spec="%.0f"),
+                        mstat(block["total_tokens"], "min", "%.0f"),
+                        mstat(block["total_tokens"], "max", "%.0f"),
+                        mstat(block["total_cost_usd"], spec="%.4f"),
+                        mstat(block["wall_time_s"], spec="%.0f")))
+
+    if summary.get("paired"):
+        lines += ["", "## Paired differences, %s minus %s, per case"
+                  % (summary["candidate"], summary["baseline"]), "",
+                  "| metric | mean diff | cases | candidate >= baseline | run-to-run spread |",
+                  "|---|---:|---:|---:|---:|"]
+        for metric, block in summary["paired"].items():
+            lines.append("| %s | %s | %d | %d/%d | %s |"
+                         % (metric, fmt(block["mean_diff"]), block["cases"],
+                            block["candidate_at_least_baseline"], block["cases"],
+                            fmt(summary["noise_floor"].get(metric))))
+        lines += ["", "Per case, %s minus %s:" % (summary["candidate"], summary["baseline"]),
+                  "", "| case | " + " | ".join(summary["paired"]) + " |",
+                  "|---" * (len(summary["paired"]) + 1) + "|"]
+        cases = sorted(set(c for b in summary["paired"].values() for c in b["per_case"]))
+        for case in cases:
+            lines.append("| %s | %s |"
+                         % (case, " | ".join(fmt(summary["paired"][m]["per_case"].get(case))
+                                             for m in summary["paired"])))
+
+    if summary.get("factors"):
+        lines += ["", "## Ablation: one factor at a time against %s" % summary["baseline_lean"],
+                  "",
+                  "| config | factor | effect | facts | landmine recall | verdict | tokens | "
+                  "wall s |",
+                  "|---|---|---|---:|---:|---:|---:|---:|"]
+        for row in summary["factors"]:
+            lines.append("| %s | %s | **%s** | %s | %s | %s | %s | %s |"
+                         % (row["config"], row["factor"], row["effect"],
+                            fmt(row["fact_recall"]["mean_diff"]),
+                            fmt(row["landmine_recall"]["mean_diff"]),
+                            fmt(row["verdict_agreement"]["mean_diff"]),
+                            fmt(row["total_tokens"]["mean_diff"], "%.0f"),
+                            fmt(row["wall_time_s"]["mean_diff"], "%.0f")))
+
+    if summary.get("basic_functions"):
+        lines += ["", "## Basic functions on the cheapest setup", ""]
+        for block in summary["basic_functions"]:
+            lines += ["**%s: %s**" % (block["config"], block["result"]), ""]
+            for check, ok in block["checks"].items():
+                lines.append("* %s %s" % ("PASS" if ok else "FAIL", check))
+            lines.append("")
+
+    dec = summary.get("decision") or {}
+    lines += ["", "## Decision", "", "**%s**" % dec.get("decision", "NO DATA"), ""]
+    if dec.get("why"):
+        lines += [dec["why"], ""]
+    for key, value in (dec.get("inputs") or {}).items():
+        lines.append("* %s: %s" % (key, json.dumps(value)))
+    lines += ["", "The rule: ADOPT B if fact recall B >= A - %.2f and fabrications B <= A, and "
+                  "the mean landmine recall drop is at most one code per case, and tokens "
+                  "B <= %.1f x A. UNDECIDED if the differences are smaller than the "
+                  "within-config run-to-run spread. Otherwise KEEP A."
+              % (DECISION["fact_recall_slack"], DECISION["token_ratio"])]
+    return "\n".join(lines) + "\n"
+
+
+# --------------------------------------------------------------------- main --
+def build_parser():
+    ap = argparse.ArgumentParser(description=__doc__,
+                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--results", required=True, help="bench/results/<date>")
+    ap.add_argument("--gold", default=PRIVATE_GOLD)
+    ap.add_argument("--baseline", default="A-legacy")
+    ap.add_argument("--candidate", default="B-lean")
+    ap.add_argument("--basic", default="C-twenty,codex-C-terra-lite,codex-C-luna-lite",
+                    help="comma-separated configs judged by the basic-functions line "
+                         "instead of the adoption rule")
+    ap.add_argument("--out", help="where to write summary.md and summary.json; default is "
+                                  "--results")
+    ap.add_argument("--quiet", action="store_true")
+    return ap
+
+
+def main(argv=None):
+    args = build_parser().parse_args(argv)
+    scorecard = os.path.join(args.results, "scorecard.json")
+    if not os.path.exists(scorecard):
+        print("no scorecard at %s" % scorecard, file=sys.stderr)
+        return 2
+    if not os.path.exists(args.gold):
+        print("no gold at %s  (run bench/private/build_gold.py)" % args.gold, file=sys.stderr)
+        return 2
+
+    gold, gold_doc = load_gold(args.gold)
+    bank = grader.parse_question_bank()
+    raw_rows = load_json(scorecard)
+    rows = [grade_row(row, gold, bank) for row in raw_rows]
+    agg = aggregate(rows)
+
+    metrics = ("fact_recall", "stable_fact_recall", "fabrications", "landmine_recall",
+               "landmine_precision", "verdict_agreement", "killer_question_overlap",
+               "unknown_share", "total_tokens", "total_cost_usd", "wall_time_s")
+    paired_blocks = collections.OrderedDict()
+    noise_floor = collections.OrderedDict()
+    if args.baseline in agg and args.candidate in agg:
+        for metric in metrics:
+            paired_blocks[metric] = paired(rows, args.baseline, args.candidate, metric)
+            noise_floor[metric] = max(
+                [x for x in (within_spread(rows, args.baseline, metric),
+                             within_spread(rows, args.candidate, metric))
+                 if x is not None] or [0])
+
+    summary = collections.OrderedDict([
+        ("results_dir", args.results),
+        ("gold", args.gold),
+        ("runs", len(rows)),
+        ("cases", len(set(r["case"] for r in rows))),
+        ("baseline", args.baseline), ("candidate", args.candidate),
+        ("baseline_lean", args.candidate),
+        ("per_config", agg),
+        ("paired", paired_blocks),
+        ("noise_floor", noise_floor),
+        ("factors", factor_table(rows, agg, args.candidate)),
+        ("basic_functions", [b for b in (basic_functions(agg, n.strip())
+                                         for n in args.basic.split(",") if n.strip())
+                             if b]),
+        ("decision", decide(rows, agg, args.baseline, args.candidate, gold_doc)),
+        ("per_run", rows),
+    ])
+
+    out_dir = args.out or args.results
+    if not os.path.isdir(out_dir):
+        os.makedirs(out_dir)
+    text = markdown(summary)
+    with io.open(os.path.join(out_dir, "summary.md"), "w", encoding="utf-8") as fh:
+        fh.write(text)
+    with io.open(os.path.join(out_dir, "summary.json"), "w", encoding="utf-8") as fh:
+        fh.write(json.dumps(summary, ensure_ascii=False, indent=1) + "\n")
+    if not args.quiet:
+        sys.stdout.write(text)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

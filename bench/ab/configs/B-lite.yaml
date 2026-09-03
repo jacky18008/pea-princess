@@ -1,0 +1,31 @@
+# Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen - https://github.com/jacky18008/pea-princess - CC BY 4.0
+# A/B harness config. Read by bench/run.py --config and bench/ab/run_ab.py.
+
+name: B-lite
+agent: claude
+phase: ablation
+factor: "budget mode: standard vs lite, main model held at the default"
+description: |
+  B-lean with one factor flipped: lite budget mode. Separates 'a small model' from 'a small
+  budget', which C-twenty confounds.
+main_model: null
+worker_model: sonnet
+budget_mode: lite
+allowed_tools:
+  - "Bash(python3:*)"
+  - Read
+  - Write
+  - Agent
+append_system_prompt: |
+  Use the scripts in scripts/ for every fetchable fact and read only their JSON. Never read a
+  file larger than 40 KB in full; use ranges. Spawn subagents only for reading pasted review
+  or report text, with model sonnet; do judgment yourself. Keep the report JSON as the only
+  large output. You are running on a limited plan. Follow references/budget-modes.md `lite`
+  exactly: at most 8 tool calls, run scripts only (`epc.py cert`, `crime.py box --months 3
+  --no-sensitivity`, `commute.py journey`, `company.py profile` when an entity is named),
+  never spawn subagents, never read a file over 40 KB, ask the user once for anything else,
+  and still deliver the verdict card, the hard-filter table and two killer questions from
+  references/questions.md.
+notes: |
+  profile.yaml is written with budget_mode: lite for this arm, so the skill's own budget logic
+  and the prompt appendix agree.

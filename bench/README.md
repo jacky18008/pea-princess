@@ -474,3 +474,29 @@ and a deliberately bad answer must fail.
 - **Aspect, light and the flat itself.** No open register knows which way the windows face.
 - **Planning and roads.** `planning.py` and `roads.py` are still being finished; when they land, `nearest_works_m` becomes gradeable and a `planning` block belongs in `expected_facts`.
 - **Taste.** A dull correct report and a vivid correct report score the same, and the same goes for the two conversation answers: only the facts and the shape are scored.
+
+## The A/B harness (`bench/ab/`)
+
+The first bullet above — verdict quality is not graded — is exactly what the A/B
+harness grades, and it is why it lives in a separate folder with a separate,
+**private** gold set.
+
+`bench/ab/` asks a different question from this benchmark: not "did the model get the
+facts right" but "if the harness changes — the repository's scripts instead of raw web
+pages, a small model for the reading and a big one only for the judgment, no whole-file
+reads — does the *answer* get worse?" It grades the landmine codes, the verdict, the
+killer questions, and the token bill, against a gold set built from one person's real,
+human-reviewed shortlist.
+
+That gold cannot be public: it is real addresses, real landlords and real money. So
+`bench/private/` is gitignored, and every A/B script degrades honestly without it —
+`bench/ab/grade_ab.py` says which file is missing, and the gold-rule tests in
+`tests/test_ab.py` skip. The protocol, the arms, the decision rule and the cost
+estimate are in `bench/ab/README.md`; `bench/ab/CODEX_BRIEF.md` is the same experiment
+written out for the OpenAI side.
+
+`bench/run.py` grew two flags for it, and they work on this suite too:
+`--config bench/ab/configs/<arm>.yaml` applies a system-prompt appendix, an
+`--allowedTools` list, a main model and a `budget_mode`, and `--cases <file>` swaps the
+case file. Every run's stdout is kept verbatim at
+`bench/results/<date>/raw/<config>-<case>-<run>.json`.

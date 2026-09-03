@@ -1,0 +1,28 @@
+# Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen - https://github.com/jacky18008/pea-princess - CC BY 4.0
+# A/B harness config. Read by bench/run.py --config and bench/ab/run_ab.py.
+
+name: C-twenty
+agent: claude
+phase: core
+factor: "cheapest realistic setup: does the skill still function at all"
+description: |
+  The twenty-pound-plan user: Sonnet as the main model, lite budget mode, no subagents, no web
+  tools. This arm does not vote on adoption. It answers one question: do the basic functions
+  survive on the cheapest setup a real user might have?
+main_model: sonnet
+worker_model: null
+budget_mode: lite
+allowed_tools:
+  - "Bash(python3:*)"
+  - Read
+  - Write
+append_system_prompt: |
+  You are running on a limited plan. Follow references/budget-modes.md `lite` exactly: at most
+  8 tool calls, run scripts only (`epc.py cert`, `crime.py box --months 3 --no-sensitivity`,
+  `commute.py journey`, `company.py profile` when an entity is named), never spawn subagents,
+  never read a file over 40 KB, ask the user once for anything else, and still deliver the
+  verdict card, the hard-filter table and two killer questions from references/questions.md.
+notes: |
+  Agent is absent from allowed_tools, so the no-subagent rule is enforced by the harness and
+  not only by the prompt. Graded by the basic-functions pass line in bench/ab/grade_ab.py,
+  never by the ADOPT/KEEP rule.

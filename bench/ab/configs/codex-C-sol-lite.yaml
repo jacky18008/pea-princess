@@ -1,0 +1,26 @@
+# Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen - https://github.com/jacky18008/pea-princess - CC BY 4.0
+# A/B harness config. Read by bench/run.py --config and bench/ab/run_ab.py.
+
+name: codex-C-sol-lite
+agent: codex
+phase: ablation
+factor: "budget mode on the default Codex model: lite vs standard"
+description: |
+  The twenty-pound arm on the default Codex model. Paired with codex-B-lean-sol it isolates
+  the budget mode with the model held fixed.
+main_model: gpt-5.6-sol
+worker_model: null
+budget_mode: lite
+allowed_tools: null
+append_system_prompt: |
+  You are running on a limited plan. Follow .agents/skills/vet-flat/references/budget-modes.md
+  `lite` exactly: at most 8 tool calls, run scripts only (`epc.py cert`, `crime.py box
+  --months 3 --no-sensitivity`, `commute.py journey`, `company.py profile` when an entity is
+  named), never read a file over 40 KB, ask the user once for anything else, and still deliver
+  the verdict card, the hard-filter table and two killer questions from
+  references/questions.md.
+notes: |
+  Codex takes no --allowedTools flag, so allowed_tools is null and the sandbox does the
+  scoping: -s workspace-write with sandbox_workspace_write.network_access=true. The appendix
+  is delivered as AGENTS.md in the working directory, which Codex reads on start. Model ids
+  verified against the installed CLI (codex 0.151): gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna.

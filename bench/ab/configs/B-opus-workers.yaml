@@ -1,0 +1,26 @@
+# Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen - https://github.com/jacky18008/pea-princess - CC BY 4.0
+# A/B harness config. Read by bench/run.py --config and bench/ab/run_ab.py.
+
+name: B-opus-workers
+agent: claude
+phase: ablation
+factor: "worker model: sonnet vs opus on the extraction subagents"
+description: |
+  B-lean with one factor flipped: the subagents that read pasted review and report text run on
+  opus instead of sonnet.
+main_model: null
+worker_model: opus
+budget_mode: standard
+allowed_tools:
+  - "Bash(python3:*)"
+  - Read
+  - Write
+  - Agent
+append_system_prompt: |
+  Use the scripts in scripts/ for every fetchable fact and read only their JSON. Never read a
+  file larger than 40 KB in full; use ranges. Spawn subagents only for reading pasted review
+  or report text, with model opus; do judgment yourself. Keep the report JSON as the only
+  large output.
+notes: |
+  Pair this with bench/ab/worker_eval.py, which measures the same question directly on fixed
+  extraction tasks with known answers.

@@ -20,6 +20,22 @@ WHAT THIS DOES
    JSON object in stdout is used.
 4. Grades the report with ``bench/grade.py`` and appends one row to
    ``bench/results/<date>/scorecard.json`` and ``scorecard.md``.
+5. Writes the run's stdout verbatim to
+   ``bench/results/<date>/raw/<config>-<case>-<run>.json`` so a later grader, or a
+   later argument, can go back to what the agent actually said.
+
+THE A/B CONFIGS
+===============
+``--config <yaml>`` reads one file from ``bench/ab/configs`` and applies it:
+``append_system_prompt`` is appended to the agent's system prompt, ``allowed_tools``
+becomes ``--allowedTools``, ``main_model`` becomes ``--model`` when ``--model`` is not
+given, and ``budget_mode`` is written into the run's own copy of ``profile.yaml`` so
+the skill's budget logic and the prompt appendix agree. The config's name, phase and
+factor go into the scorecard row, next to the wall time, ``total_cost_usd`` and the
+token counts (``usage`` and ``modelUsage`` when Claude Code reports them).
+
+``--cases <file>`` swaps the case file. The default is ``evals/evals.json``; the A/B
+suite uses ``bench/private/cases_private.json``.
 
 Two cases in the suite are conversations, not flats: the user asks what the skill
 does, or says they have no idea where to start. For those there is no profile and
@@ -64,6 +80,8 @@ Usage:
   bench/run.py --agent claude --case explain-capabilities --dry-run
   bench/run.py --agent api --case no-idea-intake --model <name>
   bench/run.py --agent claude --all-cases --dry-run
+  bench/run.py --agent claude --config B-lean --cases bench/private/cases_private.json \
+               --case v2-buck --run-index 1 --dry-run
 
 Exit codes: 0 the case ran and was graded, 1 it did not produce a gradeable
 report, 2 usage error.
@@ -76,6 +94,7 @@ import datetime
 import io
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -103,6 +122,123 @@ SKILL_HOME = {"claude": os.path.join(".claude", "skills"),
               "gemini": os.path.join(".agents", "skills"),
               "opencode": os.path.join(".agents", "skills")}
 UNTESTED = ("gemini", "opencode")
+CONFIG_DIR = os.path.join(HERE, "ab", "configs")
+
+
+# -------------------------------------------------------------- A/B configs --
+CONFIG_KEYS = ("name", "agent", "phase", "factor", "description", "main_model", "worker_model",
+               "budget_mode", "allowed_tools", "append_system_prompt", "notes")
+
+
+def load_config(path):
+    """A deliberately small YAML reader for bench/ab/configs/*.yaml.
+
+    It understands exactly what those files use: `key: scalar`, `key: null`,
+    `key: |` literal blocks, and `key:` followed by `  - item` lists. Anything
+    else raises, so a config that needs real YAML fails loudly instead of being
+    silently half-read. Standard library only, per docs/CONVENTIONS.md.
+    """
+    if not os.path.isabs(path) and not os.path.exists(path):
+        for guess in (os.path.join(CONFIG_DIR, path),
+                      os.path.join(CONFIG_DIR, path + ".yaml")):
+            if os.path.exists(guess):
+                path = guess
+                break
+    with io.open(path, encoding="utf-8") as fh:
+        lines = fh.read().splitlines()
+
+    cfg = collections.OrderedDict()
+    key, block, block_indent, listing = None, None, None, None
+    for raw in lines + [""]:
+        line = raw.rstrip("\n")
+        stripped = line.strip()
+        indented = line[:1] in (" ", "\t")
+
+        if block is not None:
+            if not stripped or indented:
+                block.append(line[block_indent:] if len(line) > block_indent else "")
+                continue
+            cfg[key] = " ".join(" ".join(block).split())
+            block, key = None, None
+
+        if listing is not None:
+            if stripped.startswith("- "):
+                listing.append(scalar(stripped[2:].strip()))
+                continue
+            cfg[key] = listing
+            listing, key = None, None
+
+        if not stripped or stripped.startswith("#"):
+            continue
+        if ":" not in line:
+            raise ValueError("bench config line is not key: value: %r" % line)
+        key, _, value = line.partition(":")
+        key, value = key.strip(), value.strip()
+        if value in ("|", ">", ">-", "|-"):
+            block, block_indent = [], 2
+        elif value == "":
+            listing = []
+        else:
+            cfg[key] = scalar(value)
+            key = None
+    if block is not None:
+        cfg[key] = " ".join(" ".join(block).split())
+    if listing is not None:
+        cfg[key] = listing
+
+    cfg.setdefault("name", os.path.splitext(os.path.basename(path))[0])
+    cfg.setdefault("agent", "claude")
+    cfg.setdefault("phase", "core")
+    cfg.setdefault("budget_mode", "standard")
+    cfg.setdefault("main_model", None)
+    cfg.setdefault("allowed_tools", None)
+    cfg.setdefault("append_system_prompt", None)
+    cfg["path"] = path
+    return cfg
+
+
+def scalar(text):
+    text = text.strip()
+    if len(text) >= 2 and text[0] == text[-1] and text[0] in "\"'":
+        return text[1:-1]
+    if text in ("null", "~", ""):
+        return None
+    if text == "true":
+        return True
+    if text == "false":
+        return False
+    if re.match(r"^-?\d+$", text):
+        return int(text)
+    return text
+
+
+def list_configs(directory=None):
+    directory = directory or CONFIG_DIR
+    if not os.path.isdir(directory):
+        return []
+    return [load_config(os.path.join(directory, n))
+            for n in sorted(os.listdir(directory)) if n.endswith(".yaml")]
+
+
+BUDGET_RE = re.compile(r"^(\s*budget_mode\s*:\s*)(\S+)", re.M)
+
+
+def apply_budget_mode(workdir, mode):
+    """Write the config's budget_mode into the run's own profile.yaml copy."""
+    if not mode:
+        return None
+    path = os.path.join(workdir, "profile.yaml")
+    if not os.path.exists(path):
+        return None
+    with io.open(path, encoding="utf-8") as fh:
+        text = fh.read()
+    if BUDGET_RE.search(text):
+        text = BUDGET_RE.sub(lambda m: m.group(1) + str(mode), text, count=1)
+    else:
+        text = text.rstrip("\n") + "\n\nbudget_mode: %s\n" % mode
+    with io.open(path, "w", encoding="utf-8") as fh:
+        fh.write(text)
+    return mode
 
 
 def quote(part):
@@ -152,12 +288,17 @@ def prepare_workdir(case, agent, evals_path, workdir=None, link=True):
 
 
 # ------------------------------------------------------------------ commands --
-def build_command(agent, case, model, workdir, prompt=None):
+def build_command(agent, case, model, workdir, prompt=None, config=None):
     prompt = prompt or case["prompt"]
+    config = config or {}
+    if config.get("main_model") and not model:
+        model = config["main_model"]
     if agent == "claude":
-        cmd = ["claude", "-p", prompt,
-               "--allowedTools", "Bash(python3:*)", "Read", "Write",
-               "--output-format", "json"]
+        tools = config.get("allowed_tools") or ["Bash(python3:*)", "Read", "Write"]
+        cmd = ["claude", "-p", prompt]
+        if config.get("append_system_prompt"):
+            cmd += ["--append-system-prompt", config["append_system_prompt"]]
+        cmd += ["--allowedTools"] + list(tools) + ["--output-format", "json"]
         if model:
             cmd += ["--model", model]
         return cmd
@@ -430,21 +571,78 @@ def answer_text(agent, stdout):
     return stdout or ""
 
 
+USAGE_KEYS = ("input_tokens", "output_tokens", "cache_read_input_tokens",
+              "cache_creation_input_tokens")
+
+
+def total_tokens(usage):
+    """One comparable number per run: everything the run had to pay attention to."""
+    if not usage:
+        return None
+    total = 0
+    seen = False
+    for key in USAGE_KEYS:
+        value = usage.get(key)
+        if isinstance(value, (int, float)):
+            total += value
+            seen = True
+    return total if seen else None
+
+
 def usage_from_stdout(agent, stdout):
     """Tokens and cost when the agent reports them; None when it does not."""
     obj = first_json_object(stdout) if agent == "claude" else None
     if isinstance(obj, dict):
         usage = obj.get("usage") or {}
         out = collections.OrderedDict()
-        for key in ("input_tokens", "output_tokens", "cache_read_input_tokens",
-                    "cache_creation_input_tokens"):
+        for key in USAGE_KEYS:
             if key in usage:
                 out[key] = usage[key]
         for key in ("total_cost_usd", "duration_ms", "num_turns"):
             if key in obj:
                 out[key] = obj[key]
+        # modelUsage is per-model and is what tells A from B when subagents ran on a
+        # different model from the main loop. Kept whole; it is small.
+        for key in ("modelUsage", "model_usage"):
+            if isinstance(obj.get(key), dict):
+                out["modelUsage"] = obj[key]
+                for per_model in obj[key].values():
+                    if isinstance(per_model, dict):
+                        for k in USAGE_KEYS:
+                            if k in per_model:
+                                out.setdefault(k, 0)
+                                if k not in usage:
+                                    out[k] += per_model[k]
+                break
+        total = total_tokens(out)
+        if total is not None:
+            out["total_tokens"] = total
         return out or None
     return None
+
+
+def write_raw(stdout, config_name, case_label, run_index, when=None, results_root=None):
+    """bench/results/<date>/raw/<config>-<case>-<run>.json, verbatim."""
+    day = (when or datetime.datetime.utcnow()).strftime("%Y-%m-%d")
+    folder = os.path.join(results_root or RESULTS, day, "raw")
+    if not os.path.isdir(folder):
+        os.makedirs(folder)
+    path = os.path.join(folder, raw_name(config_name, case_label, run_index))
+    with io.open(path, "w", encoding="utf-8") as fh:
+        fh.write(stdout or "")
+    return path
+
+
+def raw_name(config_name, case_label, run_index):
+    def safe(text):
+        return re.sub(r"[^A-Za-z0-9._#-]+", "-", str(text or "none"))
+    return "%s-%s-%s.json" % (safe(config_name), safe(case_label), int(run_index))
+
+
+def raw_exists(config_name, case_label, run_index, day=None, results_root=None):
+    day = day or datetime.datetime.utcnow().strftime("%Y-%m-%d")
+    return os.path.exists(os.path.join(results_root or RESULTS, day, "raw",
+                                       raw_name(config_name, case_label, run_index)))
 
 
 # ------------------------------------------------------------- scorecard IO --
@@ -492,7 +690,8 @@ def append_scorecard(row, when=None):
     return jpath, mpath
 
 
-def make_row(agent, model, case, card, wall, usage, workdir, command, note=None, variant=None):
+def make_row(agent, model, case, card, wall, usage, workdir, command, note=None, variant=None,
+             config=None, run_index=None, raw_path=None):
     scores = (card or {}).get("scores") or {}
     counts = (card or {}).get("counts") or {}
     cost = None
@@ -509,9 +708,17 @@ def make_row(agent, model, case, card, wall, usage, workdir, command, note=None,
         if usage.get("total_cost_usd") is not None:
             bits.append("$%.4f" % usage["total_cost_usd"])
         cost = ", ".join(bits) or None
+    config = config or {}
     return collections.OrderedDict([
         ("run_at", now()), ("agent", agent), ("model", model),
+        ("config", config.get("name")),
+        ("config_phase", config.get("phase")),
+        ("config_factor", config.get("factor")),
+        ("budget_mode", config.get("budget_mode")),
+        ("worker_model", config.get("worker_model")),
+        ("run_index", run_index),
         ("case", case["id"] + ("#" + variant if variant else "")),
+        ("gold_id", case.get("gold_id")),
         ("kind", case.get("kind", "report")),
         ("address", case.get("address")), ("borough", case.get("borough")),
         ("facts", "%s/%s" % (counts.get("correct"), counts.get("gradeable")) if counts else None),
@@ -537,9 +744,14 @@ def make_row(agent, model, case, card, wall, usage, workdir, command, note=None,
         ("schema_valid", (card or {}).get("schema", {}).get("valid")),
         ("meets_pass_line", (card or {}).get("meets_pass_line")),
         ("wall_time_s", round(wall, 1) if wall is not None else None),
-        ("tokens", usage), ("cost_note", cost),
+        ("tokens", usage),
+        ("total_tokens", total_tokens(usage)),
+        ("total_cost_usd", (usage or {}).get("total_cost_usd")),
+        ("cost_note", cost),
+        ("raw", raw_path),
         ("workdir", workdir), ("command", command), ("note", note),
         ("summary", (card or {}).get("summary")),
+        ("report_path", (card or {}).get("report")),
     ])
 
 
@@ -556,6 +768,16 @@ def build_parser():
     ap.add_argument("--timeout", type=int, default=900, help="seconds, default 900")
     ap.add_argument("--dry-run", action="store_true",
                     help="print the working-directory plan and the command; run nothing")
+    ap.add_argument("--config", help="an A/B config from bench/ab/configs (a path, or the "
+                                     "bare name). Applies append_system_prompt, allowed_tools, "
+                                     "main_model and budget_mode, and labels the scorecard row")
+    ap.add_argument("--cases", help="a cases file in the evals/evals.json shape; defaults to "
+                                    "evals/evals.json. Use bench/private/cases_private.json "
+                                    "for the A/B suite")
+    ap.add_argument("--run-index", type=int, default=1,
+                    help="which repeat of this config x case this is; names the raw file")
+    ap.add_argument("--results", help="results root; default bench/results. The date folder "
+                                      "is created inside it")
     ap.add_argument("--evals", default=EVALS_JSON)
     ap.add_argument("--workdir", help="use this directory instead of a fresh temp one")
     ap.add_argument("--copy-skill", action="store_true",
@@ -586,12 +808,16 @@ def variants_of(case):
 
 def run_one(args, case, variant=None, prompt=None):
     agent = args.agent
+    config = getattr(args, "config_data", None) or {}
     conversation = case.get("kind") == "conversation"
     prompt = prompt or case["prompt"]
     label = case["id"] + ("#" + variant if variant else "")
     workdir, plan = prepare_workdir(case, agent, args.evals, args.workdir,
                                     link=not args.copy_skill)
-    command = build_command(agent, case, args.model, workdir, prompt)
+    mode = apply_budget_mode(workdir, config.get("budget_mode"))
+    if mode:
+        plan.append("set budget_mode: %s in the run's profile.yaml" % mode)
+    command = build_command(agent, case, args.model, workdir, prompt, config)
 
     if args.dry_run:
         print("case:     %s  (%s)" % (label, case.get("address")
@@ -599,7 +825,14 @@ def run_one(args, case, variant=None, prompt=None):
                                           else "no address")))
         print("agent:    %s%s" % (agent, "   [UNTESTED - flags not verified against the vendor "
                                           "documentation]" if agent in UNTESTED else ""))
-        print("model:    %s" % (args.model or "(the agent's default)"))
+        if config:
+            print("config:   %s   [%s]  factor: %s"
+                  % (config.get("name"), config.get("phase"), config.get("factor")))
+            print("raw file: %s" % os.path.join(
+                "bench", "results", datetime.datetime.utcnow().strftime("%Y-%m-%d"), "raw",
+                raw_name(config.get("name"), label, args.run_index)))
+        print("model:    %s" % (args.model or config.get("main_model")
+                                or "(the agent's default)"))
         print("workdir:  %s" % workdir)
         for line in plan or ["(no case files: this case is a question, not a flat)"]:
             print("          %s" % line)
@@ -631,7 +864,7 @@ def run_one(args, case, variant=None, prompt=None):
         if stdout is None:
             print("api run did not happen: %s" % note, file=sys.stderr)
             return 1, make_row(agent, args.model, case, None, time.time() - started, None,
-                               workdir, "api", note, variant)
+                               workdir, "api", note, variant, config, args.run_index)
     else:
         try:
             proc = subprocess.Popen(command, cwd=workdir, stdout=subprocess.PIPE,
@@ -648,10 +881,11 @@ def run_one(args, case, variant=None, prompt=None):
             note = "could not start %r: %s" % (command[0], exc)
             print(note, file=sys.stderr)
             return 1, make_row(agent, args.model, case, None, time.time() - started, None,
-                               workdir, shell(command), note, variant)
+                               workdir, shell(command), note, variant, config, args.run_index)
         usage = usage_from_stdout(agent, stdout)
     wall = time.time() - started
     command_text = "api" if agent == "api" else shell(command)
+    raw_path = write_raw(stdout, config.get("name") or agent, label, args.run_index)
 
     if conversation:
         text = stdout if agent == "api" else answer_text(agent, stdout)
@@ -661,7 +895,7 @@ def run_one(args, case, variant=None, prompt=None):
         if not (text or "").strip():
             note = (note + "; " if note else "") + "the agent produced no answer"
             row = make_row(agent, args.model, case, None, wall, usage, workdir,
-                           command_text, note, variant)
+                           command_text, note, variant, config, args.run_index, raw_path)
             append_scorecard(row)
             print(note, file=sys.stderr)
             return 1, row
@@ -673,7 +907,7 @@ def run_one(args, case, variant=None, prompt=None):
             note = (note + "; " if note else "") + ("no report.json and no JSON object in the "
                                                     "output")
             row = make_row(agent, args.model, case, None, wall, usage, workdir,
-                           command_text, note, variant)
+                           command_text, note, variant, config, args.run_index, raw_path)
             append_scorecard(row)
             print(note, file=sys.stderr)
             return 1, row
@@ -684,7 +918,7 @@ def run_one(args, case, variant=None, prompt=None):
     with io.open(os.path.join(workdir, "scorecard.json"), "w", encoding="utf-8") as fh:
         fh.write(json.dumps(card, ensure_ascii=False, indent=1) + "\n")
     row = make_row(agent, args.model, case, card, wall, usage, workdir, command_text, note,
-                   variant)
+                   variant, config, args.run_index, raw_path)
     append_scorecard(row)
     print(card["summary"])
     return 0, row
@@ -692,6 +926,19 @@ def run_one(args, case, variant=None, prompt=None):
 
 def main(argv=None):
     args = build_parser().parse_args(argv)
+    if getattr(args, "results", None):
+        global RESULTS
+        RESULTS = os.path.abspath(args.results)
+    if getattr(args, "cases", None):
+        args.evals = args.cases
+    args.config_data = load_config(args.config) if getattr(args, "config", None) else None
+    if args.config_data and args.agent != "claude":
+        if args.config_data.get("append_system_prompt"):
+            print("usage error: only the claude agent takes --append-system-prompt, so this "
+                  "config's appendix would be silently dropped. For a codex config use "
+                  "bench/ab/run_codex.py, which delivers the appendix as AGENTS.md.",
+                  file=sys.stderr)
+            return 2
     if not args.case and not args.all_cases:
         print("usage error: give --case <id> or --all-cases", file=sys.stderr)
         return 2

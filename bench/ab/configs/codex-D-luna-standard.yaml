@@ -1,0 +1,23 @@
+# Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen - https://github.com/jacky18008/pea-princess - CC BY 4.0
+# A/B harness config. Read by bench/run.py --config and bench/ab/run_ab.py.
+
+name: codex-D-luna-standard
+agent: codex
+phase: ablation
+factor: "budget mode on the smallest Codex model: standard vs lite"
+description: |
+  Luna on the lean appendix and the standard budget. Paired with codex-C-luna-lite it says
+  whether the lite ceiling, rather than the model, is what costs the small model its quality.
+main_model: gpt-5.6-luna
+worker_model: null
+budget_mode: standard
+allowed_tools: null
+append_system_prompt: |
+  Use the scripts in .agents/skills/vet-flat/scripts/ for every fetchable fact and read only
+  their JSON. Never read a file larger than 40 KB in full; use ranges. Do the judgment
+  yourself. Keep the report JSON as the only large output.
+notes: |
+  Codex takes no --allowedTools flag, so allowed_tools is null and the sandbox does the
+  scoping: -s workspace-write with sandbox_workspace_write.network_access=true. The appendix
+  is delivered as AGENTS.md in the working directory, which Codex reads on start. Model ids
+  verified against the installed CLI (codex 0.151): gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna.

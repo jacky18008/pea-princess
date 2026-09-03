@@ -1,0 +1,29 @@
+# Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen - https://github.com/jacky18008/pea-princess - CC BY 4.0
+# A/B harness config. Read by bench/run.py --config and bench/ab/run_ab.py.
+
+name: A-legacy
+agent: claude
+phase: core
+factor: "baseline: the legacy way of working"
+description: |
+  The legacy harness: Opus subagents on every axis, raw web pages instead of the repository's
+  fetchers, whole files read into context. This is the arm the lean settings have to beat, or
+  at least tie, on quality.
+main_model: null
+worker_model: opus
+budget_mode: standard
+allowed_tools:
+  - "Bash(python3:*)"
+  - Read
+  - Write
+  - WebFetch
+  - WebSearch
+  - Agent
+append_system_prompt: |
+  Do not use the scripts in scripts/. Gather every fact by fetching pages with
+  WebFetch/WebSearch and reading files in full; for each axis spawn a subagent with model opus
+  and let it read the raw pages.
+notes: |
+  main_model is null on purpose: both core arms run on the CLI default so the main model is
+  not a confound. WebFetch and WebSearch are allowed here and nowhere else in the core set;
+  that is the whole point of the arm.

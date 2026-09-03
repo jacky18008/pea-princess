@@ -1,0 +1,24 @@
+# Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen - https://github.com/jacky18008/pea-princess - CC BY 4.0
+# A/B harness config. Read by bench/run.py --config and bench/ab/run_ab.py.
+
+name: codex-A-raw-sol
+agent: codex
+phase: ablation
+factor: "data path on the OpenAI side: raw pages vs scripts"
+description: |
+  The legacy arm on Codex: Sol, raw pages fetched with the shell, reference files read in
+  full. Codex has no subagent model to vary, so the worker-model factor does not exist on this
+  side.
+main_model: gpt-5.6-sol
+worker_model: null
+budget_mode: standard
+allowed_tools: null
+append_system_prompt: |
+  Do not use the scripts in .agents/skills/vet-flat/scripts/. Gather every fact by fetching
+  pages with the shell (curl) and reading them in full, and read the reference files in full
+  as well.
+notes: |
+  Codex takes no --allowedTools flag, so allowed_tools is null and the sandbox does the
+  scoping: -s workspace-write with sandbox_workspace_write.network_access=true. The appendix
+  is delivered as AGENTS.md in the working directory, which Codex reads on start. Model ids
+  verified against the installed CLI (codex 0.151): gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna.

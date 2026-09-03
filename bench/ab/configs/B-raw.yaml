@@ -1,0 +1,29 @@
+# Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen - https://github.com/jacky18008/pea-princess - CC BY 4.0
+# A/B harness config. Read by bench/run.py --config and bench/ab/run_ab.py.
+
+name: B-raw
+agent: claude
+phase: ablation
+factor: "data path: scripts and their JSON vs raw web pages"
+description: |
+  B-lean with one factor flipped: the facts come from raw web pages instead of the scripts.
+  Everything else - Sonnet workers, no whole-file reads, standard budget - is unchanged, so
+  the difference against B-lean is the data path and nothing else.
+main_model: fable
+worker_model: sonnet
+budget_mode: standard
+allowed_tools:
+  - "Bash(python3:*)"
+  - Read
+  - Write
+  - WebFetch
+  - WebSearch
+  - Agent
+append_system_prompt: |
+  Do not use the scripts in scripts/. Gather every fetchable fact by fetching pages with
+  WebFetch/WebSearch and reading the pages themselves. Never read a file larger than 40 KB in
+  full; use ranges. Spawn subagents only for reading pasted review or report text, with model
+  sonnet; do judgment yourself. Keep the report JSON as the only large output.
+notes: |
+  Expect this arm to cost several times B-lean: a rendered page is one to two orders of
+  magnitude larger than the JSON a fetcher returns.
