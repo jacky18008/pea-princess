@@ -1,0 +1,195 @@
+{
+ "$type": "Tfl.Api.Presentation.Entities.StopPointsResponse, Tfl.Api.Presentation.Entities",
+ "pageSize": 0,
+ "total": 0,
+ "stopPoints": [
+  {
+   "naptanId": "940GZZDLCAN",
+   "id": "940GZZDLCAN",
+   "commonName": "Canary Wharf DLR Station",
+   "stopType": "NaptanMetroStation",
+   "modes": [
+    "dlr"
+   ],
+   "lat": 51.504838,
+   "lon": -0.020997,
+   "distance": 139.91973443748068,
+   "lines": [
+    {
+     "name": "DLR",
+     "id": "dlr"
+    }
+   ]
+  },
+  {
+   "naptanId": "940GZZDLHEQ",
+   "id": "940GZZDLHEQ",
+   "commonName": "Heron Quays DLR Station",
+   "stopType": "NaptanMetroStation",
+   "modes": [
+    "dlr"
+   ],
+   "lat": 51.503379,
+   "lon": -0.021421,
+   "distance": 210.97351504737398,
+   "lines": [
+    {
+     "name": "DLR",
+     "id": "dlr"
+    }
+   ]
+  },
+  {
+   "naptanId": "940GZZDLWIQ",
+   "id": "940GZZDLWIQ",
+   "commonName": "West India Quay DLR Station",
+   "stopType": "NaptanMetroStation",
+   "modes": [
+    "dlr"
+   ],
+   "lat": 51.50703,
+   "lon": -0.020311,
+   "distance": 292.8081171471825,
+   "lines": [
+    {
+     "name": "DLR",
+     "id": "dlr"
+    }
+   ]
+  },
+  {
+   "naptanId": "910GCANWHRF",
+   "id": "910GCANWHRF",
+   "commonName": "Canary Wharf",
+   "stopType": "NaptanRailStation",
+   "modes": [
+    "elizabeth-line"
+   ],
+   "lat": 51.506203,
+   "lon": -0.018834,
+   "distance": 318.1296921499708,
+   "lines": [
+    {
+     "name": "Elizabeth line",
+     "id": "elizabeth"
+    }
+   ]
+  },
+  {
+   "naptanId": "940GZZLUCYF",
+   "id": "940GZZLUCYF",
+   "commonName": "Canary Wharf Underground Station",
+   "stopType": "NaptanMetroStation",
+   "modes": [
+    "tube"
+   ],
+   "lat": 51.503488,
+   "lon": -0.018246,
+   "distance": 369.8270426702621,
+   "lines": [
+    {
+     "name": "Jubilee",
+     "id": "jubilee"
+    }
+   ]
+  },
+  {
+   "naptanId": "930GCAW",
+   "id": "930GCAW",
+   "commonName": "Canary Wharf Pier",
+   "stopType": "NaptanFerryPort",
+   "modes": [
+    "river-bus"
+   ],
+   "lat": 51.505692,
+   "lon": -0.028482,
+   "distance": 387.4801250013571,
+   "lines": [
+    {
+     "name": "RB1",
+     "id": "rb1"
+    },
+    {
+     "name": "RB4",
+     "id": "rb4"
+    },
+    {
+     "name": "RB6",
+     "id": "rb6"
+    }
+   ]
+  },
+  {
+   "naptanId": "940GZZDLPOP",
+   "id": "940GZZDLPOP",
+   "commonName": "Poplar DLR Station",
+   "stopType": "NaptanMetroStation",
+   "modes": [
+    "dlr"
+   ],
+   "lat": 51.507744,
+   "lon": -0.017384,
+   "distance": 494.56800024179086,
+   "lines": [
+    {
+     "name": "DLR",
+     "id": "dlr"
+    }
+   ]
+  },
+  {
+   "naptanId": "940GZZDLWFE",
+   "id": "940GZZDLWFE",
+   "commonName": "Westferry DLR Station",
+   "stopType": "NaptanMetroStation",
+   "modes": [
+    "dlr"
+   ],
+   "lat": 51.509431,
+   "lon": -0.02675,
+   "distance": 557.3619747499383,
+   "lines": [
+    {
+     "name": "DLR",
+     "id": "dlr"
+    }
+   ]
+  },
+  {
+   "naptanId": "930GNEL",
+   "id": "930GNEL",
+   "commonName": "Rotherhithe Pier",
+   "stopType": "NaptanFerryPort",
+   "modes": [
+    "river-bus"
+   ],
+   "lat": 51.504641,
+   "lon": -0.031351,
+   "distance": 579.8760072810377,
+   "lines": [
+    {
+     "name": "RB4",
+     "id": "rb4"
+    }
+   ]
+  },
+  {
+   "naptanId": "940GZZDLSOQ",
+   "id": "940GZZDLSOQ",
+   "commonName": "South Quay DLR Station",
+   "stopType": "NaptanMetroStation",
+   "modes": [
+    "dlr"
+   ],
+   "lat": 51.50005,
+   "lon": -0.015975,
+   "distance": 735.067516808946,
+   "lines": [
+    {
+     "name": "DLR",
+     "id": "dlr"
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,363 @@
+{
+ "$type": "Tfl.Api.Presentation.Entities.JourneyPlanner.ItineraryResult, Tfl.Api.Presentation.Entities",
+ "journeys": [
+  {
+   "duration": 34,
+   "startDateTime": "2026-09-07T08:16:00",
+   "arrivalDateTime": "2026-09-07T08:50:00",
+   "legs": [
+    {
+     "duration": 6,
+     "mode": {
+      "id": "walking"
+     },
+     "departureTime": "2026-09-07T08:16:00",
+     "arrivalTime": "2026-09-07T08:22:00",
+     "departurePoint": {
+      "commonName": "SE1 9SG"
+     },
+     "arrivalPoint": {
+      "commonName": "Southwark Street"
+     },
+     "instruction": {
+      "summary": "Walk to Southwark Street, The Borough"
+     },
+     "routeOptions": [
+      {
+       "name": "",
+       "lineIdentifier": null
+      }
+     ]
+    },
+    {
+     "duration": 6,
+     "mode": {
+      "id": "bus"
+     },
+     "departureTime": "2026-09-07T08:22:00",
+     "arrivalTime": "2026-09-07T08:28:00",
+     "departurePoint": {
+      "commonName": "Southwark Street"
+     },
+     "arrivalPoint": {
+      "commonName": "Elephant & Castle / Newington Causeway"
+     },
+     "instruction": {
+      "summary": "133 bus to Elephant & Castle / Newington Causeway"
+     },
+     "routeOptions": [
+      {
+       "name": "133",
+       "lineIdentifier": {
+        "name": "133",
+        "id": "133"
+       }
+      }
+     ]
+    },
+    {
+     "duration": 3,
+     "mode": {
+      "id": "walking"
+     },
+     "departureTime": "2026-09-07T08:28:00",
+     "arrivalTime": "2026-09-07T08:31:00",
+     "departurePoint": {
+      "commonName": "Elephant & Castle / Newington Causeway"
+     },
+     "arrivalPoint": {
+      "commonName": "Elephant & Castle  / London Road"
+     },
+     "instruction": {
+      "summary": "Walk to Elephant & Castle / London Road"
+     },
+     "routeOptions": [
+      {
+       "name": "",
+       "lineIdentifier": null
+      }
+     ]
+    },
+    {
+     "duration": 12,
+     "mode": {
+      "id": "bus"
+     },
+     "departureTime": "2026-09-07T08:32:00",
+     "arrivalTime": "2026-09-07T08:44:00",
+     "departurePoint": {
+      "commonName": "Elephant & Castle  / London Road"
+     },
+     "arrivalPoint": {
+      "commonName": "Lancaster Place"
+     },
+     "instruction": {
+      "summary": "176 bus to Lancaster Place"
+     },
+     "routeOptions": [
+      {
+       "name": "176",
+       "lineIdentifier": {
+        "name": "176",
+        "id": "176"
+       }
+      }
+     ]
+    },
+    {
+     "duration": 6,
+     "mode": {
+      "id": "walking"
+     },
+     "departureTime": "2026-09-07T08:44:00",
+     "arrivalTime": "2026-09-07T08:50:00",
+     "departurePoint": {
+      "commonName": "Lancaster Place"
+     },
+     "arrivalPoint": {
+      "commonName": "WC2R 2LS"
+     },
+     "instruction": {
+      "summary": "Walk to WC2R 2LS"
+     },
+     "routeOptions": [
+      {
+       "name": "",
+       "lineIdentifier": null
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "duration": 35,
+   "startDateTime": "2026-09-07T08:18:00",
+   "arrivalDateTime": "2026-09-07T08:53:00",
+   "legs": [
+    {
+     "duration": 6,
+     "mode": {
+      "id": "walking"
+     },
+     "departureTime": "2026-09-07T08:18:00",
+     "arrivalTime": "2026-09-07T08:24:00",
+     "departurePoint": {
+      "commonName": "SE1 9SG"
+     },
+     "arrivalPoint": {
+      "commonName": "Southwark Street"
+     },
+     "instruction": {
+      "summary": "Walk to Southwark Street, The Borough"
+     },
+     "routeOptions": [
+      {
+       "name": "",
+       "lineIdentifier": null
+      }
+     ]
+    },
+    {
+     "duration": 6,
+     "mode": {
+      "id": "bus"
+     },
+     "departureTime": "2026-09-07T08:24:00",
+     "arrivalTime": "2026-09-07T08:30:00",
+     "departurePoint": {
+      "commonName": "Southwark Street"
+     },
+     "arrivalPoint": {
+      "commonName": "Elephant & Castle / Newington Causeway"
+     },
+     "instruction": {
+      "summary": "35 bus to Elephant & Castle / Newington Causeway"
+     },
+     "routeOptions": [
+      {
+       "name": "35",
+       "lineIdentifier": {
+        "name": "35",
+        "id": "35"
+       }
+      }
+     ]
+    },
+    {
+     "duration": 3,
+     "mode": {
+      "id": "walking"
+     },
+     "departureTime": "2026-09-07T08:30:00",
+     "arrivalTime": "2026-09-07T08:33:00",
+     "departurePoint": {
+      "commonName": "Elephant & Castle / Newington Causeway"
+     },
+     "arrivalPoint": {
+      "commonName": "Elephant & Castle  / London Road"
+     },
+     "instruction": {
+      "summary": "Walk to Elephant & Castle / London Road"
+     },
+     "routeOptions": [
+      {
+       "name": "",
+       "lineIdentifier": null
+      }
+     ]
+    },
+    {
+     "duration": 12,
+     "mode": {
+      "id": "bus"
+     },
+     "departureTime": "2026-09-07T08:35:00",
+     "arrivalTime": "2026-09-07T08:47:00",
+     "departurePoint": {
+      "commonName": "Elephant & Castle  / London Road"
+     },
+     "arrivalPoint": {
+      "commonName": "Lancaster Place"
+     },
+     "instruction": {
+      "summary": "1 bus to Lancaster Place"
+     },
+     "routeOptions": [
+      {
+       "name": "1",
+       "lineIdentifier": {
+        "name": "1",
+        "id": "1"
+       }
+      }
+     ]
+    },
+    {
+     "duration": 6,
+     "mode": {
+      "id": "walking"
+     },
+     "departureTime": "2026-09-07T08:47:00",
+     "arrivalTime": "2026-09-07T08:53:00",
+     "departurePoint": {
+      "commonName": "Lancaster Place"
+     },
+     "arrivalPoint": {
+      "commonName": "WC2R 2LS"
+     },
+     "instruction": {
+      "summary": "Walk to WC2R 2LS"
+     },
+     "routeOptions": [
+      {
+       "name": "",
+       "lineIdentifier": null
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "duration": 24,
+   "startDateTime": "2026-09-07T08:30:00",
+   "arrivalDateTime": "2026-09-07T08:54:00",
+   "legs": [
+    {
+     "duration": 0,
+     "mode": {
+      "id": "walking"
+     },
+     "departureTime": "2026-09-07T08:30:00",
+     "arrivalTime": "2026-09-07T08:30:00",
+     "departurePoint": {
+      "commonName": "SE1 9SG"
+     },
+     "arrivalPoint": {
+      "commonName": "London Bridge Station"
+     },
+     "instruction": {
+      "summary": "Walk to London Bridge Bus Station"
+     },
+     "routeOptions": [
+      {
+       "name": "",
+       "lineIdentifier": null
+      }
+     ]
+    },
+    {
+     "duration": 6,
+     "mode": {
+      "id": "bus"
+     },
+     "departureTime": "2026-09-07T08:30:00",
+     "arrivalTime": "2026-09-07T08:36:00",
+     "departurePoint": {
+      "commonName": "London Bridge Station"
+     },
+     "arrivalPoint": {
+      "commonName": "Cannon St Stn   / Bank Station"
+     },
+     "instruction": {
+      "summary": "17 bus to Cannon Street Station / Bank Station"
+     },
+     "routeOptions": [
+      {
+       "name": "17",
+       "lineIdentifier": {
+        "name": "17",
+        "id": "17"
+       }
+      }
+     ]
+    },
+    {
+     "duration": 4,
+     "mode": {
+      "id": "bus"
+     },
+     "departureTime": "2026-09-07T08:40:00",
+     "arrivalTime": "2026-09-07T08:44:00",
+     "departurePoint": {
+      "commonName": "Cannon St Stn   / Bank Station"
+     },
+     "arrivalPoint": {
+      "commonName": "Temple Station"
+     },
+     "instruction": {
+      "summary": "736 bus to Temple Station"
+     },
+     "routeOptions": [
+      {
+       "name": "736",
+       "lineIdentifier": null
+      }
+     ]
+    },
+    {
+     "duration": 10,
+     "mode": {
+      "id": "walking"
+     },
+     "departureTime": "2026-09-07T08:44:00",
+     "arrivalTime": "2026-09-07T08:54:00",
+     "departurePoint": {
+      "commonName": "Temple Station"
+     },
+     "arrivalPoint": {
+      "commonName": "WC2R 2LS"
+     },
+     "instruction": {
+      "summary": "Walk to WC2R 2LS"
+     },
+     "routeOptions": [
+      {
+       "name": "",
+       "lineIdentifier": null
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,242 @@
+{
+ "$type": "Tfl.Api.Presentation.Entities.JourneyPlanner.ItineraryResult, Tfl.Api.Presentation.Entities",
+ "journeys": [
+  {
+   "duration": 32,
+   "startDateTime": "2026-09-07T08:25:00",
+   "arrivalDateTime": "2026-09-07T08:57:00",
+   "legs": [
+    {
+     "duration": 17,
+     "mode": {
+      "id": "walking"
+     },
+     "departureTime": "2026-09-07T08:25:00",
+     "arrivalTime": "2026-09-07T08:42:00",
+     "departurePoint": {
+      "commonName": "SE1 9SG"
+     },
+     "arrivalPoint": {
+      "commonName": "Cannon Street Underground Station"
+     },
+     "instruction": {
+      "summary": "Walk to Cannon Street Station"
+     },
+     "routeOptions": [
+      {
+       "name": "",
+       "lineIdentifier": null
+      }
+     ]
+    },
+    {
+     "duration": 4,
+     "mode": {
+      "id": "tube"
+     },
+     "departureTime": "2026-09-07T08:42:00",
+     "arrivalTime": "2026-09-07T08:46:00",
+     "departurePoint": {
+      "commonName": "Cannon Street Underground Station"
+     },
+     "arrivalPoint": {
+      "commonName": "Temple Underground Station"
+     },
+     "instruction": {
+      "summary": "District line to Temple"
+     },
+     "routeOptions": [
+      {
+       "name": "District",
+       "lineIdentifier": {
+        "name": "District",
+        "id": "district"
+       }
+      }
+     ]
+    },
+    {
+     "duration": 11,
+     "mode": {
+      "id": "walking"
+     },
+     "departureTime": "2026-09-07T08:46:00",
+     "arrivalTime": "2026-09-07T08:57:00",
+     "departurePoint": {
+      "commonName": "Temple Underground Station"
+     },
+     "arrivalPoint": {
+      "commonName": "WC2R 2LS"
+     },
+     "instruction": {
+      "summary": "Walk to WC2R 2LS"
+     },
+     "routeOptions": [
+      {
+       "name": "",
+       "lineIdentifier": null
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "duration": 32,
+   "startDateTime": "2026-09-07T08:26:00",
+   "arrivalDateTime": "2026-09-07T08:58:00",
+   "legs": [
+    {
+     "duration": 7,
+     "mode": {
+      "id": "walking"
+     },
+     "departureTime": "2026-09-07T08:26:00",
+     "arrivalTime": "2026-09-07T08:33:00",
+     "departurePoint": {
+      "commonName": "SE1 9SG"
+     },
+     "arrivalPoint": {
+      "commonName": "London Bridge Underground Station"
+     },
+     "instruction": {
+      "summary": "Walk to London Bridge Station"
+     },
+     "routeOptions": [
+      {
+       "name": "",
+       "lineIdentifier": null
+      }
+     ]
+    },
+    {
+     "duration": 2,
+     "mode": {
+      "id": "tube"
+     },
+     "departureTime": "2026-09-07T08:33:00",
+     "arrivalTime": "2026-09-07T08:35:00",
+     "departurePoint": {
+      "commonName": "London Bridge Underground Station"
+     },
+     "arrivalPoint": {
+      "commonName": "Southwark Underground Station"
+     },
+     "instruction": {
+      "summary": "Jubilee line to Southwark"
+     },
+     "routeOptions": [
+      {
+       "name": "Jubilee",
+       "lineIdentifier": {
+        "name": "Jubilee",
+        "id": "jubilee"
+       }
+      }
+     ]
+    },
+    {
+     "duration": 23,
+     "mode": {
+      "id": "walking"
+     },
+     "departureTime": "2026-09-07T08:35:00",
+     "arrivalTime": "2026-09-07T08:58:00",
+     "departurePoint": {
+      "commonName": "Southwark Underground Station"
+     },
+     "arrivalPoint": {
+      "commonName": "WC2R 2LS"
+     },
+     "instruction": {
+      "summary": "Walk to WC2R 2LS"
+     },
+     "routeOptions": [
+      {
+       "name": "",
+       "lineIdentifier": null
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "duration": 32,
+   "startDateTime": "2026-09-07T08:28:00",
+   "arrivalDateTime": "2026-09-07T09:00:00",
+   "legs": [
+    {
+     "duration": 7,
+     "mode": {
+      "id": "walking"
+     },
+     "departureTime": "2026-09-07T08:28:00",
+     "arrivalTime": "2026-09-07T08:35:00",
+     "departurePoint": {
+      "commonName": "SE1 9SG"
+     },
+     "arrivalPoint": {
+      "commonName": "London Bridge Underground Station"
+     },
+     "instruction": {
+      "summary": "Walk to London Bridge Station"
+     },
+     "routeOptions": [
+      {
+       "name": "",
+       "lineIdentifier": null
+      }
+     ]
+    },
+    {
+     "duration": 2,
+     "mode": {
+      "id": "tube"
+     },
+     "departureTime": "2026-09-07T08:35:00",
+     "arrivalTime": "2026-09-07T08:37:00",
+     "departurePoint": {
+      "commonName": "London Bridge Underground Station"
+     },
+     "arrivalPoint": {
+      "commonName": "Southwark Underground Station"
+     },
+     "instruction": {
+      "summary": "Jubilee line to Southwark"
+     },
+     "routeOptions": [
+      {
+       "name": "Jubilee",
+       "lineIdentifier": {
+        "name": "Jubilee",
+        "id": "jubilee"
+       }
+      }
+     ]
+    },
+    {
+     "duration": 23,
+     "mode": {
+      "id": "walking"
+     },
+     "departureTime": "2026-09-07T08:37:00",
+     "arrivalTime": "2026-09-07T09:00:00",
+     "departurePoint": {
+      "commonName": "Southwark Underground Station"
+     },
+     "arrivalPoint": {
+      "commonName": "WC2R 2LS"
+     },
+     "instruction": {
+      "summary": "Walk to WC2R 2LS"
+     },
+     "routeOptions": [
+      {
+       "name": "",
+       "lineIdentifier": null
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

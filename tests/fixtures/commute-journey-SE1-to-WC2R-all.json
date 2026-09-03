@@ -1,0 +1,363 @@
+{
+ "$type": "Tfl.Api.Presentation.Entities.JourneyPlanner.ItineraryResult, Tfl.Api.Presentation.Entities",
+ "journeys": [
+  {
+   "duration": 27,
+   "startDateTime": "2026-09-07T08:24:00",
+   "arrivalDateTime": "2026-09-07T08:51:00",
+   "legs": [
+    {
+     "duration": 7,
+     "mode": {
+      "id": "walking"
+     },
+     "departureTime": "2026-09-07T08:24:00",
+     "arrivalTime": "2026-09-07T08:31:00",
+     "departurePoint": {
+      "commonName": "SE1 9SG"
+     },
+     "arrivalPoint": {
+      "commonName": "London Bridge Underground Station"
+     },
+     "instruction": {
+      "summary": "Walk to London Bridge Station"
+     },
+     "routeOptions": [
+      {
+       "name": "",
+       "lineIdentifier": null
+      }
+     ]
+    },
+    {
+     "duration": 3,
+     "mode": {
+      "id": "tube"
+     },
+     "departureTime": "2026-09-07T08:31:00",
+     "arrivalTime": "2026-09-07T08:34:00",
+     "departurePoint": {
+      "commonName": "London Bridge Underground Station"
+     },
+     "arrivalPoint": {
+      "commonName": "Waterloo Underground Station"
+     },
+     "instruction": {
+      "summary": "Jubilee line to Waterloo"
+     },
+     "routeOptions": [
+      {
+       "name": "Jubilee",
+       "lineIdentifier": {
+        "name": "Jubilee",
+        "id": "jubilee"
+       }
+      }
+     ]
+    },
+    {
+     "duration": 7,
+     "mode": {
+      "id": "walking"
+     },
+     "departureTime": "2026-09-07T08:34:00",
+     "arrivalTime": "2026-09-07T08:41:00",
+     "departurePoint": {
+      "commonName": "Waterloo Underground Station"
+     },
+     "arrivalPoint": {
+      "commonName": "Waterloo Station / Tenison Way"
+     },
+     "instruction": {
+      "summary": "Walk to Waterloo Station / Tenison Way"
+     },
+     "routeOptions": [
+      {
+       "name": "",
+       "lineIdentifier": null
+      }
+     ]
+    },
+    {
+     "duration": 4,
+     "mode": {
+      "id": "bus"
+     },
+     "departureTime": "2026-09-07T08:41:00",
+     "arrivalTime": "2026-09-07T08:45:00",
+     "departurePoint": {
+      "commonName": "Waterloo Station / Tenison Way"
+     },
+     "arrivalPoint": {
+      "commonName": "Lancaster Place"
+     },
+     "instruction": {
+      "summary": "SL6 Superloop bus to Lancaster Place"
+     },
+     "routeOptions": [
+      {
+       "name": "SL6",
+       "lineIdentifier": {
+        "name": "SL6",
+        "id": "sl6"
+       }
+      }
+     ]
+    },
+    {
+     "duration": 6,
+     "mode": {
+      "id": "walking"
+     },
+     "departureTime": "2026-09-07T08:45:00",
+     "arrivalTime": "2026-09-07T08:51:00",
+     "departurePoint": {
+      "commonName": "Lancaster Place"
+     },
+     "arrivalPoint": {
+      "commonName": "WC2R 2LS"
+     },
+     "instruction": {
+      "summary": "Walk to WC2R 2LS"
+     },
+     "routeOptions": [
+      {
+       "name": "",
+       "lineIdentifier": null
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "duration": 24,
+   "startDateTime": "2026-09-07T08:30:00",
+   "arrivalDateTime": "2026-09-07T08:54:00",
+   "legs": [
+    {
+     "duration": 0,
+     "mode": {
+      "id": "walking"
+     },
+     "departureTime": "2026-09-07T08:30:00",
+     "arrivalTime": "2026-09-07T08:30:00",
+     "departurePoint": {
+      "commonName": "SE1 9SG"
+     },
+     "arrivalPoint": {
+      "commonName": "London Bridge Station"
+     },
+     "instruction": {
+      "summary": "Walk to London Bridge Bus Station"
+     },
+     "routeOptions": [
+      {
+       "name": "",
+       "lineIdentifier": null
+      }
+     ]
+    },
+    {
+     "duration": 6,
+     "mode": {
+      "id": "bus"
+     },
+     "departureTime": "2026-09-07T08:30:00",
+     "arrivalTime": "2026-09-07T08:36:00",
+     "departurePoint": {
+      "commonName": "London Bridge Station"
+     },
+     "arrivalPoint": {
+      "commonName": "Cannon St Stn   / Bank Station"
+     },
+     "instruction": {
+      "summary": "17 bus to Cannon Street Station / Bank Station"
+     },
+     "routeOptions": [
+      {
+       "name": "17",
+       "lineIdentifier": {
+        "name": "17",
+        "id": "17"
+       }
+      }
+     ]
+    },
+    {
+     "duration": 4,
+     "mode": {
+      "id": "bus"
+     },
+     "departureTime": "2026-09-07T08:40:00",
+     "arrivalTime": "2026-09-07T08:44:00",
+     "departurePoint": {
+      "commonName": "Cannon St Stn   / Bank Station"
+     },
+     "arrivalPoint": {
+      "commonName": "Temple Station"
+     },
+     "instruction": {
+      "summary": "736 bus to Temple Station"
+     },
+     "routeOptions": [
+      {
+       "name": "736",
+       "lineIdentifier": null
+      }
+     ]
+    },
+    {
+     "duration": 10,
+     "mode": {
+      "id": "walking"
+     },
+     "departureTime": "2026-09-07T08:44:00",
+     "arrivalTime": "2026-09-07T08:54:00",
+     "departurePoint": {
+      "commonName": "Temple Station"
+     },
+     "arrivalPoint": {
+      "commonName": "WC2R 2LS"
+     },
+     "instruction": {
+      "summary": "Walk to WC2R 2LS"
+     },
+     "routeOptions": [
+      {
+       "name": "",
+       "lineIdentifier": null
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "duration": 28,
+   "startDateTime": "2026-09-07T08:31:00",
+   "arrivalDateTime": "2026-09-07T08:59:00",
+   "legs": [
+    {
+     "duration": 7,
+     "mode": {
+      "id": "walking"
+     },
+     "departureTime": "2026-09-07T08:31:00",
+     "arrivalTime": "2026-09-07T08:38:00",
+     "departurePoint": {
+      "commonName": "SE1 9SG"
+     },
+     "arrivalPoint": {
+      "commonName": "London Bridge Underground Station"
+     },
+     "instruction": {
+      "summary": "Walk to London Bridge Station"
+     },
+     "routeOptions": [
+      {
+       "name": "",
+       "lineIdentifier": null
+      }
+     ]
+    },
+    {
+     "duration": 3,
+     "mode": {
+      "id": "tube"
+     },
+     "departureTime": "2026-09-07T08:38:00",
+     "arrivalTime": "2026-09-07T08:41:00",
+     "departurePoint": {
+      "commonName": "London Bridge Underground Station"
+     },
+     "arrivalPoint": {
+      "commonName": "Waterloo Underground Station"
+     },
+     "instruction": {
+      "summary": "Jubilee line to Waterloo"
+     },
+     "routeOptions": [
+      {
+       "name": "Jubilee",
+       "lineIdentifier": {
+        "name": "Jubilee",
+        "id": "jubilee"
+       }
+      }
+     ]
+    },
+    {
+     "duration": 7,
+     "mode": {
+      "id": "walking"
+     },
+     "departureTime": "2026-09-07T08:41:00",
+     "arrivalTime": "2026-09-07T08:48:00",
+     "departurePoint": {
+      "commonName": "Waterloo Underground Station"
+     },
+     "arrivalPoint": {
+      "commonName": "Waterloo Station / Tenison Way"
+     },
+     "instruction": {
+      "summary": "Walk to Waterloo Station / Tenison Way"
+     },
+     "routeOptions": [
+      {
+       "name": "",
+       "lineIdentifier": null
+      }
+     ]
+    },
+    {
+     "duration": 4,
+     "mode": {
+      "id": "bus"
+     },
+     "departureTime": "2026-09-07T08:49:00",
+     "arrivalTime": "2026-09-07T08:53:00",
+     "departurePoint": {
+      "commonName": "Waterloo Station / Tenison Way"
+     },
+     "arrivalPoint": {
+      "commonName": "Lancaster Place"
+     },
+     "instruction": {
+      "summary": "176 bus to Lancaster Place"
+     },
+     "routeOptions": [
+      {
+       "name": "176",
+       "lineIdentifier": {
+        "name": "176",
+        "id": "176"
+       }
+      }
+     ]
+    },
+    {
+     "duration": 6,
+     "mode": {
+      "id": "walking"
+     },
+     "departureTime": "2026-09-07T08:53:00",
+     "arrivalTime": "2026-09-07T08:59:00",
+     "departurePoint": {
+      "commonName": "Lancaster Place"
+     },
+     "arrivalPoint": {
+      "commonName": "WC2R 2LS"
+     },
+     "instruction": {
+      "summary": "Walk to WC2R 2LS"
+     },
+     "routeOptions": [
+      {
+       "name": "",
+       "lineIdentifier": null
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

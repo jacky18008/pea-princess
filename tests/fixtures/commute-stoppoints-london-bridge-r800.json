@@ -1,0 +1,157 @@
+{
+ "$type": "Tfl.Api.Presentation.Entities.StopPointsResponse, Tfl.Api.Presentation.Entities",
+ "pageSize": 0,
+ "total": 0,
+ "stopPoints": [
+  {
+   "naptanId": "910GLNDNBDC",
+   "id": "910GLNDNBDC",
+   "commonName": "London Bridge Rail Station",
+   "stopType": "NaptanRailStation",
+   "modes": [
+    "national-rail"
+   ],
+   "lat": 51.505019,
+   "lon": -0.086092,
+   "distance": 129.68127571399677,
+   "lines": [
+    {
+     "name": "Southeastern",
+     "id": "southeastern"
+    },
+    {
+     "name": "Southern",
+     "id": "southern"
+    },
+    {
+     "name": "Thameslink",
+     "id": "thameslink"
+    }
+   ]
+  },
+  {
+   "naptanId": "940GZZLULNB",
+   "id": "940GZZLULNB",
+   "commonName": "London Bridge Underground Station",
+   "stopType": "NaptanMetroStation",
+   "modes": [
+    "tube"
+   ],
+   "lat": 51.505721,
+   "lon": -0.088873,
+   "distance": 231.3415908753361,
+   "lines": [
+    {
+     "name": "Jubilee",
+     "id": "jubilee"
+    },
+    {
+     "name": "Northern",
+     "id": "northern"
+    }
+   ]
+  },
+  {
+   "naptanId": "930GLBR",
+   "id": "930GLBR",
+   "commonName": "London Bridge City Pier",
+   "stopType": "NaptanFerryPort",
+   "modes": [
+    "river-bus"
+   ],
+   "lat": 51.506598,
+   "lon": -0.084758,
+   "distance": 328.205726727174,
+   "lines": [
+    {
+     "name": "RB1",
+     "id": "rb1"
+    },
+    {
+     "name": "RB6",
+     "id": "rb6"
+    }
+   ]
+  },
+  {
+   "naptanId": "940GZZLUBOR",
+   "id": "940GZZLUBOR",
+   "commonName": "Borough Underground Station",
+   "stopType": "NaptanMetroStation",
+   "modes": [
+    "tube"
+   ],
+   "lat": 51.501199,
+   "lon": -0.09337,
+   "distance": 540.2867435003337,
+   "lines": [
+    {
+     "name": "Northern",
+     "id": "northern"
+    }
+   ]
+  },
+  {
+   "naptanId": "490G000753",
+   "id": "490G000753",
+   "commonName": "Southwark Bridge / Bankside Pier",
+   "stopType": "NaptanFerryPort",
+   "modes": [
+    "bus"
+   ],
+   "lat": 51.50712,
+   "lon": -0.09494,
+   "distance": 650.4511742505805,
+   "lines": [
+    {
+     "name": "344",
+     "id": "344"
+    }
+   ]
+  },
+  {
+   "naptanId": "930GTMP",
+   "id": "930GTMP",
+   "commonName": "Tower Pier",
+   "stopType": "NaptanFerryPort",
+   "modes": [
+    "river-bus"
+   ],
+   "lat": 51.507809,
+   "lon": -0.079087,
+   "distance": 692.9346522700538,
+   "lines": [
+    {
+     "name": "RB1",
+     "id": "rb1"
+    },
+    {
+     "name": "RB6",
+     "id": "rb6"
+    }
+   ]
+  },
+  {
+   "naptanId": "940GZZLUMMT",
+   "id": "940GZZLUMMT",
+   "commonName": "Monument Underground Station",
+   "stopType": "NaptanMetroStation",
+   "modes": [
+    "tube"
+   ],
+   "lat": 51.5107,
+   "lon": -0.085969,
+   "distance": 749.0613957130287,
+   "lines": [
+    {
+     "name": "Circle",
+     "id": "circle"
+    },
+    {
+     "name": "District",
+     "id": "district"
+    }
+   ]
+  }
+ ]
+}

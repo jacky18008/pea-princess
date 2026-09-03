@@ -1,0 +1,1784 @@
+[
+ {
+  "category": "anti-social-behaviour",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.506252",
+   "street": {
+    "id": 1684574,
+    "name": "On or near Montague Close"
+   },
+   "longitude": "-0.088994"
+  },
+  "context": "",
+  "outcome_status": null,
+  "persistent_id": "",
+  "id": 135670022,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "anti-social-behaviour",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.505578",
+   "street": {
+    "id": 1684868,
+    "name": "On or near Railway Approach"
+   },
+   "longitude": "-0.087409"
+  },
+  "context": "",
+  "outcome_status": null,
+  "persistent_id": "",
+  "id": 135674495,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "anti-social-behaviour",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.504168",
+   "street": {
+    "id": 1684545,
+    "name": "On or near Further/higher Educational Building"
+   },
+   "longitude": "-0.089168"
+  },
+  "context": "",
+  "outcome_status": null,
+  "persistent_id": "",
+  "id": 135690715,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "anti-social-behaviour",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.504168",
+   "street": {
+    "id": 1684545,
+    "name": "On or near Further/higher Educational Building"
+   },
+   "longitude": "-0.089168"
+  },
+  "context": "",
+  "outcome_status": null,
+  "persistent_id": "",
+  "id": 135678768,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "anti-social-behaviour",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.504452",
+   "street": {
+    "id": 1684986,
+    "name": "On or near Hospital"
+   },
+   "longitude": "-0.086692"
+  },
+  "context": "",
+  "outcome_status": null,
+  "persistent_id": "",
+  "id": 135673725,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "anti-social-behaviour",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.506252",
+   "street": {
+    "id": 1684574,
+    "name": "On or near Montague Close"
+   },
+   "longitude": "-0.088994"
+  },
+  "context": "",
+  "outcome_status": null,
+  "persistent_id": "",
+  "id": 135671820,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "anti-social-behaviour",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.505414",
+   "street": {
+    "id": 1684743,
+    "name": "On or near London Bridge Street"
+   },
+   "longitude": "-0.088338"
+  },
+  "context": "",
+  "outcome_status": null,
+  "persistent_id": "",
+  "id": 135670821,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "anti-social-behaviour",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.504452",
+   "street": {
+    "id": 1684986,
+    "name": "On or near Hospital"
+   },
+   "longitude": "-0.086692"
+  },
+  "context": "",
+  "outcome_status": null,
+  "persistent_id": "",
+  "id": 135678510,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "bicycle-theft",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.504452",
+   "street": {
+    "id": 1684986,
+    "name": "On or near Hospital"
+   },
+   "longitude": "-0.086692"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Under investigation",
+   "date": "2026-05"
+  },
+  "persistent_id": "af81bf370f81bebc6c7aaded3fb756d96eafd20e43e3a00379a363f120444370",
+  "id": 135623808,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "bicycle-theft",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.504452",
+   "street": {
+    "id": 1684986,
+    "name": "On or near Hospital"
+   },
+   "longitude": "-0.086692"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-05"
+  },
+  "persistent_id": "e292b2f10de4ecb1bbcd32c770f23399681d5b65e7b672ba4f4e7402a082c43e",
+  "id": 135619561,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "bicycle-theft",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.504168",
+   "street": {
+    "id": 1684545,
+    "name": "On or near Further/higher Educational Building"
+   },
+   "longitude": "-0.089168"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-05"
+  },
+  "persistent_id": "8fe2eddba1d0f0d91e75f524a5443b61b9963dadc2ec5ade1ce48f085dd5c272",
+  "id": 135591429,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "bicycle-theft",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.505578",
+   "street": {
+    "id": 1684868,
+    "name": "On or near Railway Approach"
+   },
+   "longitude": "-0.087409"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Under investigation",
+   "date": "2026-05"
+  },
+  "persistent_id": "eaa1086010ddd1668f1f9bd3ab803ba176a4c39c54a0dd1a98eceffc821cb763",
+  "id": 135624155,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "burglary",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.504452",
+   "street": {
+    "id": 1684986,
+    "name": "On or near Hospital"
+   },
+   "longitude": "-0.086692"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-05"
+  },
+  "persistent_id": "7a6a993112d2246844d9b71bfd240d2c1f39c0ddf7fbb4573325671334ece621",
+  "id": 135591509,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "drugs",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.505208",
+   "street": {
+    "id": 1684629,
+    "name": "On or near Borough High Street"
+   },
+   "longitude": "-0.089485"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Under investigation",
+   "date": "2026-05"
+  },
+  "persistent_id": "ea0c94c49b59caa22f74e9b2811ef503b3b2ed3e12995af2d451a63e89d343fc",
+  "id": 135202125,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "other-theft",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.504452",
+   "street": {
+    "id": 1684986,
+    "name": "On or near Hospital"
+   },
+   "longitude": "-0.086692"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-05"
+  },
+  "persistent_id": "1dffd35d3f0c356ed0c9e0959d6ce9188ee7e7b54610e71a0b9e1b426f4c5768",
+  "id": 135593347,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "other-theft",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.505208",
+   "street": {
+    "id": 1684629,
+    "name": "On or near Borough High Street"
+   },
+   "longitude": "-0.089485"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Under investigation",
+   "date": "2026-05"
+  },
+  "persistent_id": "d347e536f5e894e63f872d77e1218f0e16bb5274933cbd3b2bdfacac3f647960",
+  "id": 135596084,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "other-theft",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.504168",
+   "street": {
+    "id": 1684545,
+    "name": "On or near Further/higher Educational Building"
+   },
+   "longitude": "-0.089168"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-06"
+  },
+  "persistent_id": "71421258a1d7d3c2b13b21b1999adae2de0a7366848519e462797b3a5797a964",
+  "id": 135626785,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "other-theft",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.504452",
+   "street": {
+    "id": 1684986,
+    "name": "On or near Hospital"
+   },
+   "longitude": "-0.086692"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-06"
+  },
+  "persistent_id": "80f16e7622f7cbaac6de9427f4de33c7c199e281a5f9870a778c3fdfb4a4703b",
+  "id": 135619365,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "other-theft",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.505414",
+   "street": {
+    "id": 1684743,
+    "name": "On or near London Bridge Street"
+   },
+   "longitude": "-0.088338"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Under investigation",
+   "date": "2026-05"
+  },
+  "persistent_id": "57d76df668272bb63ada309db89d3a465414d1cd63c28b7cb2144575486a61d0",
+  "id": 135621116,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "other-theft",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.504452",
+   "street": {
+    "id": 1684986,
+    "name": "On or near Hospital"
+   },
+   "longitude": "-0.086692"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Under investigation",
+   "date": "2026-05"
+  },
+  "persistent_id": "949f04ca7dd9ef1e797c6bdfa665ba30f3ca214444fe572c2aef447285122e7d",
+  "id": 135622419,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "other-theft",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.505578",
+   "street": {
+    "id": 1684868,
+    "name": "On or near Railway Approach"
+   },
+   "longitude": "-0.087409"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-05"
+  },
+  "persistent_id": "6207047087c9ae5b0eb437d08486aa86de1f9980cfa0fc273fd0041519cb2f56",
+  "id": 135628133,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "other-theft",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.505414",
+   "street": {
+    "id": 1684743,
+    "name": "On or near London Bridge Street"
+   },
+   "longitude": "-0.088338"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-05"
+  },
+  "persistent_id": "f0b54b53f8692d36151e7f2e7560e4464761112c08793668a0b8f4e7d403fd79",
+  "id": 135592892,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "other-theft",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.505208",
+   "street": {
+    "id": 1684629,
+    "name": "On or near Borough High Street"
+   },
+   "longitude": "-0.089485"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-05"
+  },
+  "persistent_id": "3e3362d826390841766268171421955216e06674c90021d2ecc98fb8380ea2ee",
+  "id": 135625380,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "other-theft",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.505208",
+   "street": {
+    "id": 1684629,
+    "name": "On or near Borough High Street"
+   },
+   "longitude": "-0.089485"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-05"
+  },
+  "persistent_id": "9ff7e9f5ebad2cf9bc9eaa9c11710361adcda69a8ba8795e5b4860f07e0a4b55",
+  "id": 135594483,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "other-theft",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.504452",
+   "street": {
+    "id": 1684986,
+    "name": "On or near Hospital"
+   },
+   "longitude": "-0.086692"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-05"
+  },
+  "persistent_id": "8f4ac2b3499431d117f8d8e733827d31e3e6870f16919bac040c567c11194f34",
+  "id": 135597347,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "other-theft",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.504452",
+   "street": {
+    "id": 1684986,
+    "name": "On or near Hospital"
+   },
+   "longitude": "-0.086692"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-05"
+  },
+  "persistent_id": "47649047a4588af8cd9e7c9c17db23cefdb481791a63af5319e0474ea3294d38",
+  "id": 135597587,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "possession-of-weapons",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.504452",
+   "street": {
+    "id": 1684986,
+    "name": "On or near Hospital"
+   },
+   "longitude": "-0.086692"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Awaiting court outcome",
+   "date": "2026-05"
+  },
+  "persistent_id": "328d04277f955e5ab7ff3614c79e70551c9f98392bad030b61ad0d2b0f66ff5b",
+  "id": 135594107,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "possession-of-weapons",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.504452",
+   "street": {
+    "id": 1684986,
+    "name": "On or near Hospital"
+   },
+   "longitude": "-0.086692"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-05"
+  },
+  "persistent_id": "d25b73f48dbc28b557addc4b5415b754899242b06f096a5934cdf7d10d6e7a18",
+  "id": 135591688,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "public-order",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.504452",
+   "street": {
+    "id": 1684986,
+    "name": "On or near Hospital"
+   },
+   "longitude": "-0.086692"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Unable to prosecute suspect",
+   "date": "2026-06"
+  },
+  "persistent_id": "d78da5273918b8cf8f204a4affe29eb29290fc6f5d3883da03f4094e0cfc3dd3",
+  "id": 135594944,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "public-order",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.504452",
+   "street": {
+    "id": 1684986,
+    "name": "On or near Hospital"
+   },
+   "longitude": "-0.086692"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-05"
+  },
+  "persistent_id": "10ef508e7577622941cbcdb66626004de3b36198b166eab2f2091ca1a64034b4",
+  "id": 135625357,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "robbery",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.505208",
+   "street": {
+    "id": 1684629,
+    "name": "On or near Borough High Street"
+   },
+   "longitude": "-0.089485"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-05"
+  },
+  "persistent_id": "1087a5c09e6ac5f6a7cfce5ffe8d046c7da1b5b0e5d5775ea8e941787e818515",
+  "id": 135630326,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "robbery",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.505208",
+   "street": {
+    "id": 1684629,
+    "name": "On or near Borough High Street"
+   },
+   "longitude": "-0.089485"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Under investigation",
+   "date": "2026-05"
+  },
+  "persistent_id": "53ae7a86209d95d7d80f1ae10ab313baf3c31892693481b213d0d1fd07d16e07",
+  "id": 135591647,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "shoplifting",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.505208",
+   "street": {
+    "id": 1684629,
+    "name": "On or near Borough High Street"
+   },
+   "longitude": "-0.089485"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-05"
+  },
+  "persistent_id": "c012d1d7478eb3c3680678a3e0a38a464548c1fe9a11ccc93ca7b74bec8b84dd",
+  "id": 135592107,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "shoplifting",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.504168",
+   "street": {
+    "id": 1684545,
+    "name": "On or near Further/higher Educational Building"
+   },
+   "longitude": "-0.089168"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-06"
+  },
+  "persistent_id": "b61548e0217206dfccec07850238c72e08dfd39b93afd49e91b719af259bdf6b",
+  "id": 135593291,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "shoplifting",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.505208",
+   "street": {
+    "id": 1684629,
+    "name": "On or near Borough High Street"
+   },
+   "longitude": "-0.089485"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-05"
+  },
+  "persistent_id": "a5c6d5875298927542a465ada65ac3ab68c610fb2a651b723b65fc7554417e06",
+  "id": 135596162,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "theft-from-the-person",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.504168",
+   "street": {
+    "id": 1684545,
+    "name": "On or near Further/higher Educational Building"
+   },
+   "longitude": "-0.089168"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Under investigation",
+   "date": "2026-05"
+  },
+  "persistent_id": "66f4d7bde8d754d3e4eda0795e5e3ea8003e9575fcdc7920fc313488392a2fc0",
+  "id": 135592757,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "theft-from-the-person",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.504452",
+   "street": {
+    "id": 1684986,
+    "name": "On or near Hospital"
+   },
+   "longitude": "-0.086692"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-05"
+  },
+  "persistent_id": "fd7c43212f8d9faa7f8bce2e64bc6af9e9b66443aaf6a59d21ee0846c6f221cf",
+  "id": 135592911,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "theft-from-the-person",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.505414",
+   "street": {
+    "id": 1684743,
+    "name": "On or near London Bridge Street"
+   },
+   "longitude": "-0.088338"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Unable to prosecute suspect",
+   "date": "2026-06"
+  },
+  "persistent_id": "917b503614c0c921b9245c2e32cfbc9ce916158bb1619e7f6f00fd00178fba04",
+  "id": 135629706,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "theft-from-the-person",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.505414",
+   "street": {
+    "id": 1684743,
+    "name": "On or near London Bridge Street"
+   },
+   "longitude": "-0.088338"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-05"
+  },
+  "persistent_id": "e107e065614c15b366dd5a0c8b39dba1fb0877eb27740e1f90920eca2f35902c",
+  "id": 135630644,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "theft-from-the-person",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.505208",
+   "street": {
+    "id": 1684629,
+    "name": "On or near Borough High Street"
+   },
+   "longitude": "-0.089485"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-06"
+  },
+  "persistent_id": "2173f12b90bd140d8eca7c0d782fce5a27ad7c875c862da814e670db532d7734",
+  "id": 135620216,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "theft-from-the-person",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.505578",
+   "street": {
+    "id": 1684868,
+    "name": "On or near Railway Approach"
+   },
+   "longitude": "-0.087409"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-06"
+  },
+  "persistent_id": "f893b2d6444738bc405b20baee4c59d144ddf3c07cdb74018966a730dc6726b0",
+  "id": 135631357,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "theft-from-the-person",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.505208",
+   "street": {
+    "id": 1684629,
+    "name": "On or near Borough High Street"
+   },
+   "longitude": "-0.089485"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-05"
+  },
+  "persistent_id": "500ef5fa22b8c0a03c89003a517006c7a6f7db1dc89f43b60e3b51b205d649b6",
+  "id": 135630952,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "theft-from-the-person",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.505578",
+   "street": {
+    "id": 1684868,
+    "name": "On or near Railway Approach"
+   },
+   "longitude": "-0.087409"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-05"
+  },
+  "persistent_id": "4ddacf54c11c2869c4be97f050d233a5310eae989d66073ff9a79358c9a65f86",
+  "id": 135631202,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "theft-from-the-person",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.505578",
+   "street": {
+    "id": 1684868,
+    "name": "On or near Railway Approach"
+   },
+   "longitude": "-0.087409"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-05"
+  },
+  "persistent_id": "5b3d64c8821a20fea055df3bd060eeccf214006cc9b924b541deb78957842c0e",
+  "id": 135628807,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "theft-from-the-person",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.505208",
+   "street": {
+    "id": 1684629,
+    "name": "On or near Borough High Street"
+   },
+   "longitude": "-0.089485"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-06"
+  },
+  "persistent_id": "ea71a84db4b07060e1f3d0e962473ee21e0e83ca89ebe57e62e036bb9e0d34de",
+  "id": 135621328,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "theft-from-the-person",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.505208",
+   "street": {
+    "id": 1684629,
+    "name": "On or near Borough High Street"
+   },
+   "longitude": "-0.089485"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-05"
+  },
+  "persistent_id": "7b94841d73db84058c502e05c1044695c1173cda04f794bf267367a0e7e598ec",
+  "id": 135591083,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "theft-from-the-person",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.504168",
+   "street": {
+    "id": 1684545,
+    "name": "On or near Further/higher Educational Building"
+   },
+   "longitude": "-0.089168"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-05"
+  },
+  "persistent_id": "1cdc840b6ddc521ad1ffe1a718b68e472f5fa6a804e86dff8b94dec7b590e95c",
+  "id": 135591035,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "theft-from-the-person",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.506171",
+   "street": {
+    "id": 1684785,
+    "name": "On or near Duke Street Hill"
+   },
+   "longitude": "-0.088479"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-05"
+  },
+  "persistent_id": "c2de01fff8d3f6abd3daded5288c55e03594a64055f7e0122f9520824d6e5a00",
+  "id": 135624845,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "theft-from-the-person",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.504452",
+   "street": {
+    "id": 1684986,
+    "name": "On or near Hospital"
+   },
+   "longitude": "-0.086692"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-05"
+  },
+  "persistent_id": "fce89bba7d2ae3da4cdb829a801d59cb5c1c8c8cf5b08ea4da9f31a51c85e2b9",
+  "id": 135623099,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "theft-from-the-person",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.505578",
+   "street": {
+    "id": 1684868,
+    "name": "On or near Railway Approach"
+   },
+   "longitude": "-0.087409"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-05"
+  },
+  "persistent_id": "a854a3aea1ce359d7866e1c9a5aeefa14d2866d567d65ab1c22f7bfeee9618d0",
+  "id": 135624338,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "theft-from-the-person",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.505578",
+   "street": {
+    "id": 1684868,
+    "name": "On or near Railway Approach"
+   },
+   "longitude": "-0.087409"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-05"
+  },
+  "persistent_id": "f97887a0d9e6c4a6e8c1d7763e5a7430669939065e28cd93dfefc9ed9e87aca0",
+  "id": 135624891,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "theft-from-the-person",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.504452",
+   "street": {
+    "id": 1684986,
+    "name": "On or near Hospital"
+   },
+   "longitude": "-0.086692"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-05"
+  },
+  "persistent_id": "c494695e4065eee77b403de397e2d119a7ae946ae8cc7fb913ac2aace9e5b705",
+  "id": 135593487,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "theft-from-the-person",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.505578",
+   "street": {
+    "id": 1684868,
+    "name": "On or near Railway Approach"
+   },
+   "longitude": "-0.087409"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-05"
+  },
+  "persistent_id": "01dea1a1070810e38c9403f23f759246319c4ba4d3ca4fb11fe165a076c43906",
+  "id": 135620047,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "theft-from-the-person",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.504168",
+   "street": {
+    "id": 1684545,
+    "name": "On or near Further/higher Educational Building"
+   },
+   "longitude": "-0.089168"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-06"
+  },
+  "persistent_id": "caf58d6289bcaba625921908e6040c061ade058794ed91d4a284e1900836f29b",
+  "id": 135595196,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "theft-from-the-person",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.505578",
+   "street": {
+    "id": 1684868,
+    "name": "On or near Railway Approach"
+   },
+   "longitude": "-0.087409"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-05"
+  },
+  "persistent_id": "b452a1544d0d8fd8924c64d20b79e23139450e11d2660f86c6dbd40cb909a5ee",
+  "id": 135626541,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "theft-from-the-person",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.505208",
+   "street": {
+    "id": 1684629,
+    "name": "On or near Borough High Street"
+   },
+   "longitude": "-0.089485"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-05"
+  },
+  "persistent_id": "557d521d2d6714571d63f1e084ca5e949fe31e20f18055aaec50fb90ab905515",
+  "id": 135594817,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "theft-from-the-person",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.505578",
+   "street": {
+    "id": 1684868,
+    "name": "On or near Railway Approach"
+   },
+   "longitude": "-0.087409"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-05"
+  },
+  "persistent_id": "8eb4bc3a089440b49c5a1e7e0e5f7eb7a50505f1b4ee01e17f2a0eb8e23c626d",
+  "id": 135595652,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "theft-from-the-person",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.505208",
+   "street": {
+    "id": 1684629,
+    "name": "On or near Borough High Street"
+   },
+   "longitude": "-0.089485"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-05"
+  },
+  "persistent_id": "b075f9c89b878bb4254d1b4f2b48bf907135237484a7f1420f1066ef9b009459",
+  "id": 135596183,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "theft-from-the-person",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.504168",
+   "street": {
+    "id": 1684545,
+    "name": "On or near Further/higher Educational Building"
+   },
+   "longitude": "-0.089168"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-05"
+  },
+  "persistent_id": "ca3481d2a95b419b79bcf8b08a729f7542b272cbc66a9184f2efe5dd7cfc6511",
+  "id": 135621974,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "theft-from-the-person",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.504168",
+   "street": {
+    "id": 1684545,
+    "name": "On or near Further/higher Educational Building"
+   },
+   "longitude": "-0.089168"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-05"
+  },
+  "persistent_id": "5accf8468680c0f429c3e1d96ffe2c8abed3aecd069b6c8bea45e29641ffd441",
+  "id": 135623993,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "theft-from-the-person",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.504168",
+   "street": {
+    "id": 1684545,
+    "name": "On or near Further/higher Educational Building"
+   },
+   "longitude": "-0.089168"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-05"
+  },
+  "persistent_id": "e82990f77f2e4b7dbf7a50964b273f4546a4572af642813900fa9daf6b36f3d3",
+  "id": 135629655,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "theft-from-the-person",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.505578",
+   "street": {
+    "id": 1684868,
+    "name": "On or near Railway Approach"
+   },
+   "longitude": "-0.087409"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-05"
+  },
+  "persistent_id": "3325f197912f6ae79209c507894bb9a1c1bb517b97a7eb304d9cd7381469852b",
+  "id": 135629676,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "theft-from-the-person",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.504168",
+   "street": {
+    "id": 1684545,
+    "name": "On or near Further/higher Educational Building"
+   },
+   "longitude": "-0.089168"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-05"
+  },
+  "persistent_id": "07cbb9734949de54bf72edf5be339e2ec63d85a28b165edfaa4d2759ad771015",
+  "id": 135592623,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "theft-from-the-person",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.505208",
+   "street": {
+    "id": 1684629,
+    "name": "On or near Borough High Street"
+   },
+   "longitude": "-0.089485"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-05"
+  },
+  "persistent_id": "6f02973eabd6fc38479434df22b2a10808a108d8d5ef852debd9ef1cf98a6063",
+  "id": 135592617,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "violent-crime",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.505578",
+   "street": {
+    "id": 1684868,
+    "name": "On or near Railway Approach"
+   },
+   "longitude": "-0.087409"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Under investigation",
+   "date": "2026-05"
+  },
+  "persistent_id": "2d9d37810b1744356be291d974f08b1056444d247a930a95270e169ae55d411e",
+  "id": 135619169,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "violent-crime",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.505578",
+   "street": {
+    "id": 1684868,
+    "name": "On or near Railway Approach"
+   },
+   "longitude": "-0.087409"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Under investigation",
+   "date": "2026-05"
+  },
+  "persistent_id": "e65bb7c0f5e394ed8cc44960445fb05143afbf1b97e7b91ce51fc2d07177eb2b",
+  "id": 135621545,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "violent-crime",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.504168",
+   "street": {
+    "id": 1684545,
+    "name": "On or near Further/higher Educational Building"
+   },
+   "longitude": "-0.089168"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-06"
+  },
+  "persistent_id": "d3d3b1b19b2604243b1d11494626c66950478b9abf68cd6c6eae7b977efbec4a",
+  "id": 135622587,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "violent-crime",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.505208",
+   "street": {
+    "id": 1684629,
+    "name": "On or near Borough High Street"
+   },
+   "longitude": "-0.089485"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Unable to prosecute suspect",
+   "date": "2026-05"
+  },
+  "persistent_id": "e303986786c9824fe98bf68f6675e95b7ba7919e0a3f3d63d4dceb84443445f0",
+  "id": 135592182,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "violent-crime",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.506171",
+   "street": {
+    "id": 1684785,
+    "name": "On or near Duke Street Hill"
+   },
+   "longitude": "-0.088479"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Unable to prosecute suspect",
+   "date": "2026-05"
+  },
+  "persistent_id": "62a96becd3863b9d2ddf95f017458812f7305ca9521cac189b6c5fb207db54e3",
+  "id": 135624789,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "violent-crime",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.504452",
+   "street": {
+    "id": 1684986,
+    "name": "On or near Hospital"
+   },
+   "longitude": "-0.086692"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Unable to prosecute suspect",
+   "date": "2026-06"
+  },
+  "persistent_id": "a961d3b93a216e79b244d97eb5c73f84abdb56838cfb563d29097b1ce88770fd",
+  "id": 135625937,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "violent-crime",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.504168",
+   "street": {
+    "id": 1684545,
+    "name": "On or near Further/higher Educational Building"
+   },
+   "longitude": "-0.089168"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Under investigation",
+   "date": "2026-05"
+  },
+  "persistent_id": "6cf3009eae21835ef97d711537e44921b06551587e1a1965c830f28b5b689146",
+  "id": 135627043,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "violent-crime",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.505578",
+   "street": {
+    "id": 1684868,
+    "name": "On or near Railway Approach"
+   },
+   "longitude": "-0.087409"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Under investigation",
+   "date": "2026-05"
+  },
+  "persistent_id": "57ef3bc570052bfc4b61d2a79bccc5f85f40ea57465ff95efc3898793b500833",
+  "id": 135593783,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "violent-crime",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.503785",
+   "street": {
+    "id": 1685065,
+    "name": "On or near St Thomas Street"
+   },
+   "longitude": "-0.086043"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Under investigation",
+   "date": "2026-05"
+  },
+  "persistent_id": "42730596306b45db2ceb3e7ff80f9769a060552cd3b0f66ffc6d5c5d2bbb09b3",
+  "id": 135630971,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "violent-crime",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.505414",
+   "street": {
+    "id": 1684743,
+    "name": "On or near London Bridge Street"
+   },
+   "longitude": "-0.088338"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Under investigation",
+   "date": "2026-05"
+  },
+  "persistent_id": "c5c2eb191d5e104872ef4bff08393f81b36b0b800a16a4fbc2048235068be91e",
+  "id": 135591623,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "violent-crime",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.505414",
+   "street": {
+    "id": 1684743,
+    "name": "On or near London Bridge Street"
+   },
+   "longitude": "-0.088338"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Unable to prosecute suspect",
+   "date": "2026-05"
+  },
+  "persistent_id": "5bd499985080204cba141b22018c9f30e47eb865f5802e300302cd4abe1930d5",
+  "id": 135591396,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "violent-crime",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.505208",
+   "street": {
+    "id": 1684629,
+    "name": "On or near Borough High Street"
+   },
+   "longitude": "-0.089485"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Awaiting court outcome",
+   "date": "2026-05"
+  },
+  "persistent_id": "a87d3c272ecdb6dee0c207e5dba5ed23582dbba21817c9539e9358b742a00816",
+  "id": 135628999,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "violent-crime",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.505578",
+   "street": {
+    "id": 1684868,
+    "name": "On or near Railway Approach"
+   },
+   "longitude": "-0.087409"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-05"
+  },
+  "persistent_id": "0370ffea9a43919c3190fe717b2882c498ff01edd2009c13a23e0b5043d5359c",
+  "id": 135594118,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "violent-crime",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.505578",
+   "street": {
+    "id": 1684868,
+    "name": "On or near Railway Approach"
+   },
+   "longitude": "-0.087409"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-06"
+  },
+  "persistent_id": "82e474d5c4d0e923ad42e0ddb2af378e0007ccdd6b24f22368d3bdaf403fcc66",
+  "id": 135595454,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "violent-crime",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.504316",
+   "street": {
+    "id": 1684865,
+    "name": "On or near Great Maze Pond"
+   },
+   "longitude": "-0.087202"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Unable to prosecute suspect",
+   "date": "2026-06"
+  },
+  "persistent_id": "021855db3a9890b43ec674006d168dea6e5f011e779f7b9a5de59b01d054a129",
+  "id": 135596206,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "violent-crime",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.503785",
+   "street": {
+    "id": 1685065,
+    "name": "On or near St Thomas Street"
+   },
+   "longitude": "-0.086043"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Unable to prosecute suspect",
+   "date": "2026-05"
+  },
+  "persistent_id": "4597c4a26d6f2488df3cc4079a17a99c1774344f3be4cef8c664c2f56ae7c068",
+  "id": 135621353,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "violent-crime",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.504452",
+   "street": {
+    "id": 1684986,
+    "name": "On or near Hospital"
+   },
+   "longitude": "-0.086692"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Unable to prosecute suspect",
+   "date": "2026-05"
+  },
+  "persistent_id": "a177cc11ca041c3e550e49b0255191770ab8c85d2dbf45a0b3a29014a5a63c11",
+  "id": 135594838,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "violent-crime",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.504452",
+   "street": {
+    "id": 1684986,
+    "name": "On or near Hospital"
+   },
+   "longitude": "-0.086692"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Under investigation",
+   "date": "2026-05"
+  },
+  "persistent_id": "40689821ab91fdfcf123867bfa024579b0499faca386329b7946be1e62b36145",
+  "id": 135596995,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "violent-crime",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.504168",
+   "street": {
+    "id": 1684545,
+    "name": "On or near Further/higher Educational Building"
+   },
+   "longitude": "-0.089168"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Unable to prosecute suspect",
+   "date": "2026-06"
+  },
+  "persistent_id": "e3dd18a2acfeaff3ba30398a33861a0d76bd9b0fa60f69896b3e1bbb16f91497",
+  "id": 135592506,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "violent-crime",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.505578",
+   "street": {
+    "id": 1684868,
+    "name": "On or near Railway Approach"
+   },
+   "longitude": "-0.087409"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Investigation complete; no suspect identified",
+   "date": "2026-06"
+  },
+  "persistent_id": "24e42a6fda64fbcd2fa3b322a7418d76eca41d7c4320b9542f3c05a06250aa73",
+  "id": 135595548,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "violent-crime",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.504452",
+   "street": {
+    "id": 1684986,
+    "name": "On or near Hospital"
+   },
+   "longitude": "-0.086692"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Under investigation",
+   "date": "2026-05"
+  },
+  "persistent_id": "4fb9303a9a4ffdc98aa3b86c9c2897302ee73b1b824b3c8ce152316f582b58c1",
+  "id": 135597129,
+  "location_subtype": "",
+  "month": "2026-05"
+ },
+ {
+  "category": "violent-crime",
+  "location_type": "Force",
+  "location": {
+   "latitude": "51.505578",
+   "street": {
+    "id": 1684868,
+    "name": "On or near Railway Approach"
+   },
+   "longitude": "-0.087409"
+  },
+  "context": "",
+  "outcome_status": {
+   "category": "Under investigation",
+   "date": "2026-05"
+  },
+  "persistent_id": "2da0e8612b4ac50bf98e2b0bd18242624fbc2181c479e07fe26279d63b6b6aca",
+  "id": 135591819,
+  "location_subtype": "",
+  "month": "2026-05"
+ }
+]

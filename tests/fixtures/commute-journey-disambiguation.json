@@ -1,0 +1,48 @@
+{
+ "$type": "Tfl.Api.Presentation.Entities.JourneyPlanner.DisambiguationResult, Tfl.Api.Presentation.Entities",
+ "fromLocationDisambiguation": {
+  "matchStatus": "list",
+  "disambiguationOptions": [
+   {
+    "parameterValue": "51.579798983149,-0.0871807029",
+    "place": {
+     "commonName": "London Borough of Haringey, Victoria"
+    }
+   },
+   {
+    "parameterValue": "51.583871244103,-0.019340503866",
+    "place": {
+     "commonName": "London Borough of Waltham Forest, Victoria 2"
+    }
+   },
+   {
+    "parameterValue": "1000248",
+    "place": {
+     "commonName": "Victoria (London), London Victoria"
+    }
+   },
+   {
+    "parameterValue": "1015226",
+    "place": {
+     "commonName": "Charlton (London), Victoria Way"
+    }
+   },
+   {
+    "parameterValue": "51.464416015432,-0.327781347702",
+    "place": {
+     "commonName": "London Borough of Hounslow, The Victoria"
+    }
+   },
+   {
+    "parameterValue": "51.494569201657,-0.080666411606",
+    "place": {
+     "commonName": "London Borough of Southwark, The Victoria"
+    }
+   }
+  ]
+ },
+ "toLocationDisambiguation": {
+  "matchStatus": "identified",
+  "disambiguationOptions": []
+ }
+}
