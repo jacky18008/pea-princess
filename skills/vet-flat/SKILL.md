@@ -18,6 +18,9 @@ metadata:
 - **Manual mode**: neither. Ask the user to open pages and paste text, following `references/inputs.md`.
 Codex users: the sandbox blocks network by default; ask them to enable it or work in manual mode. Fetchers that honour robots.txt cannot read the EPC register or council planning portals; that is expected — ask the user.
 
+## 0b. If asked "what can this do", "how do I start", or "I have no idea"
+Answer from `references/onboarding.md`: the short pitch in the user's language, then the three starting points (a listing → vet it; an area or destination → sweep; no idea → the ten-fact primer, then six intake questions in one message with a suggested default each). Write the answers into `profile.yaml`, show it back in plain words, then start.
+
 ## 1. Load the profile
 Read `profile.yaml` (the user's hard filters: minimum floor area, maximum building age, budget bands, move-in window, commute destination and minutes, guarantor route, floor and light rules, must-haves). If it is missing, ask for the six essentials once (budget, area, age, move-in, destination, must-haves), then proceed and state your assumptions.
 
@@ -46,9 +49,9 @@ Legal facts (England): Renters' Rights Act 2025, in force 2026-05-01 — periodi
 **G** official register · **S** self-reported (landlord, agent, listing) · **C** third-party (reviews, press) · **I** inference · **U** unknown. Two sources disagreeing is itself a finding ("document quality"). An HTTP 200 with the wrong page is not evidence: check the content.
 
 ## 5. Sources you may automate, and sources you may only name
-Open and automatable: EPC register (HTML pages only, no API; robots-restricted, so single addresses with the built-in spacing), data.police.uk, Companies House, GLA Planning Datahub, TfL, postcodes.io, Heat Trust, Ofgem, council committee sites, Client Money Protect.
-Named only — their terms forbid automated access, so this skill gives no method for them: Rightmove, Zoopla, OnTheMarket, OpenRent, HomeViews, Trustpilot, Google reviews, Airbnb, Booking.com. Ask the user to paste the page, or use your own compliant means.
-Full catalogue with tested status: `references/sources.yaml`; per-borough planning, committee and licensing pages: `references/boroughs.yaml`.
+Automatable (official or open): EPC register (HTML only; single addresses, built-in spacing), data.police.uk, Companies House, GLA Planning Datahub, TfL, postcodes.io, Land Registry price-paid, Heat Trust, Client Money Protect, GLA rogue landlord checker.
+Named only, no method given (their terms forbid automated access): Rightmove, Zoopla, OnTheMarket, OpenRent, HomeViews, Trustpilot, Google reviews, Airbnb, Booking.com. Ask the user to paste the page.
+Catalogue with tested status: `references/sources.yaml`; per-borough portals: `references/boroughs.yaml`.
 
 ## 6. When you cannot get something
 Follow `references/inputs.md`: try first; collect every gap; ask **once**, in one numbered list, with the URL, the format and one sentence on why; keep working on everything else meanwhile; record `provenance: user_supplied`; mark the axis **U** if it stays unavailable. Never invent a number.

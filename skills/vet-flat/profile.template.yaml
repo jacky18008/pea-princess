@@ -26,6 +26,36 @@ min_floor_area_sqft:
 # insulation, no mechanical ventilation, and single-supplier heating is less likely.
 max_building_age_years:
 
+# What kind of home. One of: studio | one_bed | two_bed | three_bed_plus | any
+flat_type: one_bed
+# true = the bedroom must have a door and a window. A "studio suite" with a bed alcove does not count.
+separate_bedroom_required: true
+# How many people will live there.
+occupants: 1
+# How much you already know about renting in London: none | some | expert.
+# "none" = the skill explains each term the first time and suggests defaults instead of asking open questions.
+experience: none
+
+# Your deal-breakers in plain words, one per line. The skill maps them to its checks
+# (menu in references/onboarding.md). Examples:
+#   - ground floor
+#   - windows that cannot see sky
+#   - heat network without a written tariff
+#   - main windows facing a main road or railway
+#   - building works next door during my tenancy
+#   - short-let or hotel-style neighbours
+#   - no washing machine in the flat
+#   - management with no resident route to replace it
+avoid:
+  - ground floor
+
+# Your top three priorities, in order. Words such as: quiet, light, price, space, commute,
+# new building, bills included, on-site management, outdoor space.
+priorities:
+  - quiet
+  - commute
+  - price
+
 budget:
   # What you want the rent itself to be, per month, before bills.
   rent_pcm_target:
