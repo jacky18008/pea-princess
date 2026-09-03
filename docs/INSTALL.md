@@ -27,6 +27,8 @@ The skill does not care which harness runs it. What decides your experience is w
 | SuperGrok / X Premium+ | Grok Build CLI | OpenCode (documented by xAI) | — |
 | Nothing (or maximum privacy) | Ollama / LM Studio / llama.cpp with pi, OpenClaw, Hermes, OpenCode, Goose, Cline | any API key on pay-as-you-go | — |
 
+**Which plan, from the author (personal experience, 2026-09; not a measured result).** At about £20 a month, ChatGPT Plus with Codex gives the most published headroom and the only numbers you can plan with (messages per five-hour window plus a credit rate card); Claude Pro works well in `lite` mode but publishes no usage figures and shares one pool with chat. At the top tier the author's daily experience is that Claude's largest model (Fable 5.1) is markedly stronger than GPT-5.6 Sol on the judgment parts of this work: reading the lowest reviews, naming what sits under a discount, deciding what to ask. That is an opinion from use, not a benchmark: the suite in `bench/` grades facts, not judgment, and the facts come from the scripts, so any model that runs them gets the same numbers. Run the benchmark on the plan you have and decide for yourself.
+
 On a £20-a-month plan set `budget_mode: lite` in `profile.yaml` (see `skills/vet-flat/references/budget-modes.md`): a single flat takes fewer than ten fetches and still gets the hard filters, the verdict and the two killer questions.
 
 ## B. Chat products with a Skills feature (upload the zip from Releases)
