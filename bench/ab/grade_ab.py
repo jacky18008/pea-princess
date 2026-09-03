@@ -54,8 +54,21 @@ one killer question from the bank, a verdict present, and a schema-valid report.
 Ablation configs get a factor table: each one paired against B-lean, one line per
 factor saying "effect within noise", "helps" or "hurts".
 
+REGRADING
+=========
+``--regrade`` re-scores every stored run against the CURRENT cases file before it
+summarises. Use it after ``bench/refresh_truth.py`` fills a case's ``expected_facts``:
+a run graded before that shows ``0/0`` facts forever, because the fact table it was
+graded against was empty. The report comes from the run's own ``report_path``, then its
+workdir, then the stored raw stdout (Claude's ``.result``, Codex's event stream). Only
+the scores change - tokens, cost, wall time, the command and the raw file are kept - and
+the scorecard is written through a temp file and renamed, so a sweep appending rows at
+the same time is never truncated.
+
 Usage:
   bench/ab/grade_ab.py --results bench/results/2026-09-04 --gold bench/private/gold.json
+  bench/ab/grade_ab.py --results bench/results/2026-09-04 --regrade \
+      --cases bench/private/cases_private.json
   bench/ab/grade_ab.py --results bench/results/2026-09-04 --baseline A-legacy \\
       --candidate B-lean --out bench/results/2026-09-04
 
@@ -66,9 +79,11 @@ from __future__ import unicode_literals
 
 import argparse
 import collections
+import datetime
 import io
 import json
 import os
+import re
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -77,8 +92,31 @@ ROOT = os.path.abspath(os.path.join(BENCH, ".."))
 
 sys.path.insert(0, BENCH)
 import grade as grader  # noqa: E402
+import run as runner  # noqa: E402
 
 PRIVATE_GOLD = os.path.join(BENCH, "private", "gold.json")
+PRIVATE_CASES = os.path.join(BENCH, "private", "cases_private.json")
+
+# The twelve axes, from report-schema.json's own description of axis.id.
+AXIS_NAMES = collections.OrderedDict([
+    (1, "identity"), (2, "floor area"), (3, "age and fabric"), (4, "construction nearby"),
+    (5, "crime"), (6, "management and neighbours"), (7, "agent and landlord compliance"),
+    (8, "price"), (9, "aspect and light"), (10, "all-in cost"), (11, "commute and redundancy"),
+    (12, "low-maintenance living")])
+
+# Axes with no open-register input. A benchmark run has nobody to paste a listing, a
+# tariff page or a review, and no register holds an aspect, so these come back U in
+# every arm. That is a ceiling on the suite, not a model failure, and the summary says
+# so rather than letting a reader score it as one. This mirrors "What the benchmark
+# does not measure" in bench/README.md.
+NO_INPUT_AXES = collections.OrderedDict([
+    (6, "resident reviews sit on portals this repo will not fetch"),
+    (7, "the landlord and agent on the tenancy come from a listing, not a register"),
+    (8, "the advertised rent is on a portal, so price per square foot has no input"),
+    (9, "no open register records which way the windows face"),
+    (10, "the heat tariff and the bills come from a welcome pack somebody pastes"),
+    (12, "washing machine, parcels and furniture are listing detail, not register data"),
+])
 
 VERDICTS = ("PASS", "EDGE", "CONDITIONAL", "KILL")
 OVERLAP_FLOOR = 0.5          # same floor as the public bank check
@@ -249,19 +287,25 @@ def question_scores(cand, gold_row, bank):
     ])
 
 
-def unknown_share(cand):
-    axes = cand.get("axes") or []
-    graded = [a for a in axes if isinstance(a, dict)]
-    if not graded:
-        return None
-    unknown = 0
-    for axis in graded:
+def unknown_axes(cand):
+    """([axis ids graded U], how many axes were graded at all)."""
+    graded = [a for a in (cand.get("axes") or []) if isinstance(a, dict)]
+    out = []
+    for i, axis in enumerate(graded):
         letter = str(axis.get("evidence_class") or axis.get("grade") or "").strip().upper()
-        if letter == "U":
-            unknown += 1
-        elif not letter and grader.looks_unknown(str(axis.get("finding") or "")):
-            unknown += 1
-    return round(unknown / float(len(graded)), 4)
+        unknown = (letter == "U") or (
+            not letter and grader.looks_unknown(str(axis.get("finding") or "")))
+        if unknown:
+            try:
+                out.append(int(axis.get("id") or (i + 1)))
+            except (TypeError, ValueError):
+                out.append(i + 1)
+    return out, len(graded)
+
+
+def unknown_share(cand):
+    ids, total = unknown_axes(cand)
+    return round(len(ids) / float(total), 4) if total else None
 
 
 def grade_row(row, gold, bank):
@@ -295,7 +339,10 @@ def grade_row(row, gold, bank):
     out.update(landmine_scores(cand, gold_row))
     out.update(verdict_scores(cand, gold_row))
     out.update(question_scores(cand, gold_row, bank))
-    out["unknown_share"] = unknown_share(cand)
+    ids, graded = unknown_axes(cand)
+    out["unknown_share"] = round(len(ids) / float(graded), 4) if graded else None
+    out["unknown_axis_ids"] = sorted(set(ids))
+    out["axes_graded"] = graded
     return out
 
 
@@ -343,6 +390,16 @@ def aggregate(rows):
             summary[metric] = stats([r.get(metric) for r in group])
         for metric in BOOLEAN:
             summary[metric] = rate([r.get(metric) for r in group])
+        counts = collections.Counter()
+        with_axes = 0
+        for row in group:
+            if row.get("axes_graded"):
+                with_axes += 1
+                for axis in row.get("unknown_axis_ids") or []:
+                    counts[axis] += 1
+        summary["runs_with_axes"] = with_axes
+        summary["unknown_axis_counts"] = collections.OrderedDict(
+            (str(a), counts[a]) for a in sorted(counts))
         out[name] = summary
     return out
 
@@ -542,6 +599,249 @@ def factor_table(rows, agg, base):
     return out
 
 
+# --------------------------------------------------------------- regrading --
+def looks_like_report(obj):
+    """A report, not the schema the agent read on its way to writing one.
+
+    ``report-schema.json`` also has a top-level ``candidates`` key, so a naive search
+    of an event stream finds the schema fragment and scores it. A report has
+    ``candidates`` as a LIST whose first entry is a candidate with a verdict; the
+    schema has it as an object with ``type``/``items``.
+    """
+    if not isinstance(obj, dict):
+        return False
+    if any(k in obj for k in ("$schema", "definitions", "properties")):
+        return False
+    cands = obj.get("candidates")
+    if not isinstance(cands, list) or not cands or not isinstance(cands[0], dict):
+        return False
+    first = cands[0]
+    return bool(first.get("verdict") or first.get("axes") or first.get("identity"))
+
+
+def report_in(node):
+    """The last report hiding in an already-parsed wrapper, or None.
+
+    Claude Code's ``--output-format json`` puts the answer in ``.result``, often inside
+    a ```json fence; Codex's ``--json`` prints one event object per line with the text
+    in a nested string. Both are "a JSON object hiding in a string field", so both are
+    handled the same way. The LAST one wins: an agent that revises its report prints
+    the good one last.
+    """
+    if looks_like_report(node):
+        return node
+    found = None
+    for value in strings_in(node):
+        if "candidates" not in value:
+            continue
+        inner = runner.first_json_object(value)
+        if looks_like_report(inner):
+            found = inner
+    return found
+
+
+def scan_for_report(text):
+    """(report, where) - the report object inside an agent's stored stdout."""
+    if not text:
+        return None, None
+
+    try:                                        # the whole file is one JSON document
+        whole = json.loads(text)
+    except ValueError:
+        whole = None
+    if whole is not None:
+        found = report_in(whole)
+        if found is not None:
+            return found, "raw stdout, wrapper document"
+
+    last = None                                 # ... or is a JSONL event stream
+    for line in text.splitlines():
+        line = line.strip()
+        if not line.startswith("{") or "candidates" not in line:
+            continue
+        try:
+            event = json.loads(line)
+        except ValueError:
+            continue
+        found = report_in(event)
+        if found is not None:
+            last = found                        # the last one wins: agents revise
+    if last is not None:
+        return last, "raw stdout, event stream"
+
+    obj = runner.first_json_object(text)        # ... or starts with one
+    if isinstance(obj, dict):
+        found = report_in(obj)
+        if found is not None:
+            return found, "raw stdout, first object"
+
+    for m in list(re.finditer(r'"candidates"', text))[:8]:      # last resort
+        base = max(0, m.start() - 20000)
+        window = text[base:m.start()]
+        for i in [pos for pos, ch in enumerate(window) if ch == "{"][-60:]:
+            inner = runner.first_json_object(text[base + i:])
+            if looks_like_report(inner):
+                return inner, "raw stdout, scanned"
+    return None, None
+
+
+def strings_in(node, depth=0):
+    if depth > 6:
+        return []
+    if isinstance(node, str):
+        return [node]
+    out = []
+    if isinstance(node, dict):
+        for value in node.values():
+            out.extend(strings_in(value, depth + 1))
+    elif isinstance(node, list):
+        for value in node:
+            out.extend(strings_in(value, depth + 1))
+    return out
+
+
+def locate_report(row, results_dir):
+    """(report, where) for one scorecard row, most reliable source first."""
+    for path, label in ((row.get("report_path"), "report_path"),
+                        (os.path.join(row.get("workdir") or "", "report.json"), "workdir")):
+        if path and os.path.exists(path):
+            try:
+                return load_json(path), "%s %s" % (label, path)
+            except ValueError:
+                pass
+    workdir = row.get("workdir")
+    if workdir and os.path.isdir(workdir):
+        for base, _dirs, files in os.walk(workdir):
+            if ".claude" in base or ".agents" in base:
+                continue
+            if "report.json" in files:
+                try:
+                    return load_json(os.path.join(base, "report.json")), "workdir walk"
+                except ValueError:
+                    pass
+    raw = row.get("raw")
+    if not (raw and os.path.exists(raw)):
+        guess = os.path.join(results_dir, "raw",
+                             runner.raw_name(row.get("config"), row.get("case"),
+                                             row.get("run_index") or 1))
+        raw = guess if os.path.exists(guess) else None
+    if raw:
+        with io.open(raw, encoding="utf-8", errors="replace") as fh:
+            report, where = scan_for_report(fh.read())
+        if report is not None:
+            return report, "%s (%s)" % (where, os.path.basename(raw))
+    return None, None
+
+
+def row_key(row):
+    return (row.get("run_at"), row.get("config"), row.get("case"), row.get("run_index"))
+
+
+def config_of(row):
+    return collections.OrderedDict([
+        ("name", row.get("config")), ("phase", row.get("config_phase")),
+        ("factor", row.get("config_factor")), ("budget_mode", row.get("budget_mode")),
+        ("worker_model", row.get("worker_model"))])
+
+
+def regrade(results_dir, cases_path):
+    """Re-score every stored run against the CURRENT cases file, in place.
+
+    Runs graded before ``bench/refresh_truth.py`` filled a case's ``expected_facts``
+    show ``0/0`` facts forever, because the fact table they were graded against was
+    empty. This rebuilds those rows from the report the run actually produced, keeps
+    what only the run knows (tokens, cost, wall time, the command, the raw file), and
+    writes the scorecard back atomically so a live sweep appending rows alongside is
+    never truncated.
+    """
+    scorecard = os.path.join(results_dir, "scorecard.json")
+    if not os.path.exists(scorecard):
+        return None
+    cases = collections.OrderedDict(
+        (case["id"], case) for case in load_json(cases_path).get("evals") or [])
+
+    updates, notes = {}, []
+    for row in load_json(scorecard):
+        label = "%s / %s / run %s" % (row.get("config"), row.get("case"),
+                                      row.get("run_index"))
+        case = cases.get((row.get("case") or "").split("#")[0])
+        if case is None:
+            notes.append("%s: no case of that id in %s" % (label, os.path.basename(cases_path)))
+            continue
+        report, where = locate_report(row, results_dir)
+        if report is None:
+            notes.append("%s: no stored report to re-score (%s)"
+                         % (label, row.get("note") or "no note"))
+            continue
+        card = grader.grade(report, case, grader.case_profile_path(cases_path, case))
+        fresh = runner.make_row(row.get("agent") or "claude", row.get("model"), case, card,
+                                row.get("wall_time_s"), row.get("tokens"), row.get("workdir"),
+                                row.get("command"), row.get("note"), None, config_of(row),
+                                row.get("run_index"), row.get("raw"))
+        fresh["run_at"] = row.get("run_at")          # the row keeps its identity
+        fresh["report_path"] = row.get("report_path") or fresh.get("report_path")
+        # Only the scores are recomputed. What only the run itself knew is carried over
+        # whenever re-deriving it would give less than the row already has.
+        for field in ("total_tokens", "total_cost_usd", "cost_note", "tokens",
+                      "wall_time_s", "raw", "workdir", "command"):
+            if fresh.get(field) in (None, "") and row.get(field) not in (None, ""):
+                fresh[field] = row[field]
+        fresh["regraded_at"] = (datetime.datetime.utcnow().replace(microsecond=0).isoformat()
+                                + "Z")
+        fresh["regraded_from"] = where
+        updates[row_key(row)] = fresh
+        notes.append("%s: %s facts, from %s" % (label, fresh.get("facts"), where))
+
+    # Re-read as late as possible: a live sweep may have appended rows since.
+    rows = load_json(scorecard)
+    merged = [updates.get(row_key(row), row) for row in rows]
+    runner.write_scorecard(merged, results_dir, os.path.basename(results_dir.rstrip(os.sep)))
+    return collections.OrderedDict([("rows", len(rows)), ("regraded", len(updates)),
+                                    ("cases", cases_path), ("notes", notes)])
+
+
+# ------------------------------------------------------------ why unknown --
+def unknown_breakdown(agg):
+    """Which axes come back U, per config, and which are U in every arm.
+
+    An axis that is unknown in every arm is a ceiling on the suite, not a difference
+    between the arms: nobody pastes resident reviews or a planning officer's report
+    into a benchmark run, so the axes that need pasted text have no input to work
+    from. Saying that out loud stops a reader scoring it as a model failure.
+    """
+    configs = [name for name, block in agg.items() if block.get("runs_with_axes")]
+    rows = []
+    for axis, label in AXIS_NAMES.items():
+        per_config = collections.OrderedDict()
+        for name in configs:
+            block = agg[name]
+            runs = block.get("runs_with_axes") or 0
+            hits = (block.get("unknown_axis_counts") or {}).get(str(axis), 0)
+            per_config[name] = collections.OrderedDict([
+                ("runs", runs), ("unknown", hits),
+                ("share", round(hits / float(runs), 4) if runs else None)])
+        shares = [v["share"] for v in per_config.values() if v["share"] is not None]
+        rows.append(collections.OrderedDict([
+            ("axis", axis), ("name", label),
+            ("no_input", axis in NO_INPUT_AXES),
+            ("no_input_reason", NO_INPUT_AXES.get(axis)),
+            ("per_config", per_config),
+            ("every_arm", bool(shares) and min(shares) == 1.0),
+            ("no_arm", bool(shares) and max(shares) == 0.0),
+            ("spread", round(max(shares) - min(shares), 4) if shares else None)]))
+    shared = [r["axis"] for r in rows if r["every_arm"]]
+    differs = sorted((r for r in rows if r["spread"]), key=lambda r: -r["spread"])
+    return collections.OrderedDict([
+        ("configs", configs), ("axes", rows),
+        ("unknown_in_every_arm", shared),
+        ("shared_ceiling_has_no_input",
+         bool(shared) and all(a in NO_INPUT_AXES for a in shared)),
+        ("shared_ceiling_reasons", collections.OrderedDict(
+            (str(a), NO_INPUT_AXES[a]) for a in shared if a in NO_INPUT_AXES)),
+        ("differs_between_arms", [r["axis"] for r in differs[:4]]),
+    ])
+
+
 # ------------------------------------------------------------------ reports --
 def fmt(value, spec="%.3f"):
     if value is None:
@@ -589,6 +889,44 @@ def markdown(summary):
                         mstat(block["total_tokens"], "max", "%.0f"),
                         mstat(block["total_cost_usd"], spec="%.4f"),
                         mstat(block["wall_time_s"], spec="%.0f")))
+
+    unk = summary.get("unknown") or {}
+    if unk.get("configs"):
+        lines += ["", "## Why an axis is unknown", "",
+                  "Share of runs in which each axis came back `U`. **no input** marks the "
+                  "axes with nothing for a benchmark run to work from: the material is on a "
+                  "portal this repo will not fetch, or it is a document somebody has to paste, "
+                  "or no register records it at all. Those come back unknown in every arm. "
+                  "That is a ceiling on the suite, not a model that failed - read the "
+                  "**spread** column, which is where the arms actually differ.", "",
+                  "| axis | what it is | no input | " + " | ".join(unk["configs"])
+                  + " | spread |",
+                  "|---:|---|---|" + "---:|" * (len(unk["configs"]) + 1)]
+        for row in unk["axes"]:
+            lines.append("| %d | %s | %s | %s | %s |"
+                         % (row["axis"], row["name"], "yes" if row["no_input"] else "",
+                            " | ".join(fmt(row["per_config"][c]["share"], "%.2f")
+                                       for c in unk["configs"]),
+                            fmt(row["spread"], "%.2f")))
+        shared = unk.get("unknown_in_every_arm") or []
+        if shared:
+            lines += ["", "Unknown in **every** arm: %s."
+                      % ", ".join("axis %d (%s)" % (a, AXIS_NAMES[a]) for a in shared)]
+            if unk.get("shared_ceiling_has_no_input"):
+                lines += ["", "Every one of them is an axis with no input, so this is the "
+                              "suite's ceiling and not a difference between the arms:"]
+            else:
+                lines += ["", "Not all of them are axes with no input, so at least one is a "
+                              "real gap worth chasing. The ones that are expected:"]
+            lines.append("")
+            for axis in shared:
+                lines.append("* axis %d (%s) - %s" % (axis, AXIS_NAMES[axis],
+                                                      NO_INPUT_AXES.get(axis)
+                                                      or "**no reason on file: investigate**"))
+        differ = unk.get("differs_between_arms") or []
+        if differ:
+            lines += ["", "Where the arms actually differ: %s. Those are the axes to read."
+                      % ", ".join("axis %d (%s)" % (a, AXIS_NAMES[a]) for a in differ)]
 
     if summary.get("paired"):
         lines += ["", "## Paired differences, %s minus %s, per case"
@@ -652,6 +990,14 @@ def build_parser():
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--results", required=True, help="bench/results/<date>")
     ap.add_argument("--gold", default=PRIVATE_GOLD)
+    ap.add_argument("--regrade", action="store_true",
+                    help="before summarising, re-score every stored run against the CURRENT "
+                         "cases file and rewrite its scorecard row in place. Use this after "
+                         "bench/refresh_truth.py fills a case's expected_facts: runs graded "
+                         "before that show 0/0 facts forever otherwise")
+    ap.add_argument("--cases", default=PRIVATE_CASES,
+                    help="the cases file --regrade scores against; default "
+                         "bench/private/cases_private.json")
     ap.add_argument("--baseline", default="A-legacy")
     ap.add_argument("--candidate", default="B-lean")
     ap.add_argument("--basic", default="C-twenty,codex-C-terra-lite,codex-C-luna-lite",
@@ -672,6 +1018,18 @@ def main(argv=None):
     if not os.path.exists(args.gold):
         print("no gold at %s  (run bench/private/build_gold.py)" % args.gold, file=sys.stderr)
         return 2
+
+    if args.regrade:
+        if not os.path.exists(args.cases):
+            print("no cases file at %s" % args.cases, file=sys.stderr)
+            return 2
+        done = regrade(args.results, args.cases)
+        if done:
+            print("regraded %d of %d rows against %s"
+                  % (done["regraded"], done["rows"], os.path.basename(done["cases"])))
+            for note in done["notes"]:
+                print("  %s" % note)
+            print("")
 
     gold, gold_doc = load_gold(args.gold)
     bank = grader.parse_question_bank()
@@ -702,6 +1060,7 @@ def main(argv=None):
         ("per_config", agg),
         ("paired", paired_blocks),
         ("noise_floor", noise_floor),
+        ("unknown", unknown_breakdown(agg)),
         ("factors", factor_table(rows, agg, args.candidate)),
         ("basic_functions", [b for b in (basic_functions(agg, n.strip())
                                          for n in args.basic.split(",") if n.strip())

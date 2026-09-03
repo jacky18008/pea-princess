@@ -519,6 +519,186 @@ class Aggregation(unittest.TestCase):
 
 
 # ----------------------------------------------------------------- dry runs --
+class Regrade(unittest.TestCase):
+    """--regrade re-scores stored runs against the CURRENT cases file."""
+
+    def setUp(self):
+        self.ws = Workspace()
+        self.cases = os.path.join(self.ws.dir, "cases.json")
+
+    def tearDown(self):
+        self.ws.close()
+
+    def write_cases(self, facts):
+        with io.open(self.cases, "w", encoding="utf-8") as fh:
+            fh.write(json.dumps({"evals": [
+                {"id": "c1", "address": "a", "prompt": "p", "files": [], "kind": "report",
+                 "truth_inputs": {}, "expected_facts": facts}]}))
+
+    def test_a_row_graded_against_an_empty_fact_table_is_rescored(self):
+        path = self.ws.report(["L1"], questions=["q"])
+        row = scorecard_row("B-lean", "c1", 1, path, facts="0/0", fact_recall=None,
+                            total_tokens=1234, wall_time_s=99.0, total_cost_usd=0.5)
+        self.ws.write([row], gold_doc([("c1", "CONDITIONAL", ["L1"], [], ["q"])]))
+        self.write_cases({"epc": {"floor_area_m2": 52.0, "floor_area_sqft": 560}})
+        done = grade_ab.regrade(self.ws.results, self.cases)
+        self.assertEqual(done["regraded"], 1)
+        with io.open(os.path.join(self.ws.results, "scorecard.json"), encoding="utf-8") as fh:
+            after = json.load(fh)
+        self.assertEqual(len(after), 1)
+        self.assertNotEqual(after[0]["facts"], "0/0")     # a real fact table was applied
+        self.assertEqual(after[0]["total_tokens"], 1234)  # the run's own numbers survive
+        self.assertEqual(after[0]["wall_time_s"], 99.0)
+        self.assertEqual(after[0]["run_at"], row["run_at"])
+        self.assertTrue(after[0]["regraded_at"])
+
+    def test_a_row_with_no_stored_report_is_left_alone(self):
+        row = scorecard_row("A-legacy", "c1", 1, os.path.join(self.ws.dir, "gone.json"),
+                            note="timed out")
+        row["workdir"] = os.path.join(self.ws.dir, "nowhere")
+        self.ws.write([row], gold_doc([("c1", "CONDITIONAL", ["L1"], [], ["q"])]))
+        self.write_cases({})
+        done = grade_ab.regrade(self.ws.results, self.cases)
+        self.assertEqual(done["regraded"], 0)
+        self.assertIn("no stored report", done["notes"][0])
+        with io.open(os.path.join(self.ws.results, "scorecard.json"), encoding="utf-8") as fh:
+            self.assertEqual(json.load(fh)[0]["note"], "timed out")
+
+    def test_rows_appended_during_the_regrade_are_not_lost(self):
+        path = self.ws.report(["L1"], questions=["q"])
+        first = scorecard_row("B-lean", "c1", 1, path)
+        self.ws.write([first], gold_doc([("c1", "CONDITIONAL", ["L1"], [], ["q"])]))
+        self.write_cases({})
+        scorecard = os.path.join(self.ws.results, "scorecard.json")
+        real_grade = grade_ab.grader.grade
+
+        def racing(*args, **kw):
+            rows = json.load(io.open(scorecard, encoding="utf-8"))
+            rows.append(scorecard_row("B-lean", "c1", 2, path))   # a live sweep appends
+            with io.open(scorecard, "w", encoding="utf-8") as fh:
+                fh.write(json.dumps(rows))
+            grade_ab.grader.grade = real_grade
+            return real_grade(*args, **kw)
+
+        grade_ab.grader.grade = racing
+        try:
+            grade_ab.regrade(self.ws.results, self.cases)
+        finally:
+            grade_ab.grader.grade = real_grade
+        rows = json.load(io.open(scorecard, encoding="utf-8"))
+        self.assertEqual(sorted(r["run_index"] for r in rows), [1, 2])
+
+    def test_the_markdown_is_rebuilt_with_one_line_per_row(self):
+        path = self.ws.report(["L1"], questions=["q"])
+        self.ws.write([scorecard_row("B-lean", "c1", 1, path),
+                       scorecard_row("A-legacy", "c1", 1, path)],
+                      gold_doc([("c1", "CONDITIONAL", ["L1"], [], ["q"])]))
+        self.write_cases({})
+        grade_ab.regrade(self.ws.results, self.cases)
+        with io.open(os.path.join(self.ws.results, "scorecard.md"), encoding="utf-8") as fh:
+            text = fh.read()
+        self.assertEqual(text.count("| c1 |"), 2)
+        self.assertEqual(text.count("# vet-flat benchmark"), 1)
+
+
+class ReportExtraction(unittest.TestCase):
+    def report_blob(self):
+        return {"schema_version": "1",
+                "candidates": [{"id": "x", "verdict": {"status": "EDGE", "headline": "h",
+                                                       "reason_codes": []}}]}
+
+    def test_claude_output_format_json_wrapper(self):
+        blob = json.dumps({"type": "result", "usage": {},
+                           "result": "here:\n```json\n%s\n```" % json.dumps(
+                               self.report_blob())})
+        got, where = grade_ab.scan_for_report(blob)
+        self.assertEqual(got["candidates"][0]["id"], "x")
+        self.assertIn("wrapper", where)
+
+    def test_codex_jsonl_event_stream(self):
+        lines = [json.dumps({"type": "start", "msg": {"text": "go"}}),
+                 json.dumps({"type": "agent_message",
+                             "msg": {"text": "wrote " + json.dumps(self.report_blob())}})]
+        got, where = grade_ab.scan_for_report("\n".join(lines))
+        self.assertEqual(got["candidates"][0]["id"], "x")
+        self.assertIn("event stream", where)
+
+    def test_the_schema_is_not_mistaken_for_a_report(self):
+        schema = {"$schema": "http://json-schema.org/draft-07/schema#",
+                  "properties": {"candidates": {"type": "array", "minItems": 1}}}
+        self.assertFalse(grade_ab.looks_like_report(schema))
+        self.assertEqual(grade_ab.scan_for_report(json.dumps(schema))[0], None)
+        # the same fragment inside an event stream must also be rejected
+        line = json.dumps({"msg": {"text": json.dumps(
+            {"candidates": {"type": "array", "items": {"$ref": "#/definitions/candidate"}}})}})
+        self.assertEqual(grade_ab.scan_for_report(line)[0], None)
+
+    def test_the_last_report_in_a_stream_wins(self):
+        first, second = self.report_blob(), self.report_blob()
+        second["candidates"][0]["id"] = "final"
+        lines = [json.dumps({"msg": {"text": json.dumps(first)}}),
+                 json.dumps({"msg": {"text": json.dumps(second)}})]
+        got, _ = grade_ab.scan_for_report("\n".join(lines))
+        self.assertEqual(got["candidates"][0]["id"], "final")
+
+    def test_nothing_to_find_is_none_not_a_crash(self):
+        self.assertEqual(grade_ab.scan_for_report("")[0], None)
+        self.assertEqual(grade_ab.scan_for_report("no json here at all")[0], None)
+
+
+class WhyUnknown(unittest.TestCase):
+    def setUp(self):
+        self.ws = Workspace()
+
+    def tearDown(self):
+        self.ws.close()
+
+    def summary(self, spec):
+        rows = []
+        for config, unknown in spec:
+            rows.append(scorecard_row(config, "c1", 1,
+                                      self.ws.report(["L1"], unknown_axes=0)))
+            path = os.path.join(self.ws.dir, "r-%s.json" % config)
+            blob = report(["L1"], questions=["q"])
+            for axis in blob["candidates"][0]["axes"]:
+                axis["evidence_class"] = "U" if axis["id"] in unknown else "G"
+            with io.open(path, "w", encoding="utf-8") as fh:
+                fh.write(json.dumps(blob))
+            rows[-1]["report_path"] = path
+        self.ws.write(rows, gold_doc([("c1", "CONDITIONAL", ["L1"], [], ["q"])]))
+        return self.ws.grade()
+
+    def test_an_axis_unknown_everywhere_is_flagged_as_the_suite_ceiling(self):
+        s = self.summary([("A-legacy", (8, 9)), ("B-lean", (8, 9))])
+        unk = s["unknown"]
+        self.assertEqual(unk["unknown_in_every_arm"], [8, 9])
+        self.assertTrue(unk["shared_ceiling_has_no_input"])
+        self.assertIn("8", unk["shared_ceiling_reasons"])
+
+    def test_an_axis_that_differs_between_arms_is_surfaced(self):
+        s = self.summary([("A-legacy", (2,)), ("B-lean", ())])
+        unk = s["unknown"]
+        by_axis = dict((r["axis"], r) for r in unk["axes"])
+        self.assertEqual(by_axis[2]["spread"], 1.0)
+        self.assertEqual(by_axis[2]["per_config"]["A-legacy"]["share"], 1.0)
+        self.assertEqual(by_axis[2]["per_config"]["B-lean"]["share"], 0.0)
+        self.assertIn(2, unk["differs_between_arms"])
+        self.assertEqual(unk["unknown_in_every_arm"], [])
+
+    def test_a_real_gap_is_not_excused_as_a_ceiling(self):
+        s = self.summary([("A-legacy", (5,)), ("B-lean", (5,))])
+        self.assertEqual(s["unknown"]["unknown_in_every_arm"], [5])
+        self.assertFalse(s["unknown"]["shared_ceiling_has_no_input"])
+
+    def test_the_table_reaches_the_markdown(self):
+        self.summary([("A-legacy", (8,)), ("B-lean", (8,))])
+        with io.open(os.path.join(self.ws.results, "summary.md"), encoding="utf-8") as fh:
+            text = fh.read()
+        self.assertIn("Why an axis is unknown", text)
+        self.assertIn("no open register records which way the windows face"
+                      if "axis 9" in text else "price", text)
+
+
 class RunAbDryRun(unittest.TestCase):
     def setUp(self):
         self.dir = tempfile.mkdtemp(prefix="vetflat-ab-plan-")

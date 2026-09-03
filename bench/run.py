@@ -96,6 +96,7 @@ import json
 import os
 import re
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
@@ -652,11 +653,73 @@ MD_HEADER = ("| run (UTC) | agent | model | case | facts | stable | fabrications
              "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n")
 
 
+def md_row(row):
+    return ("| %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s |\n"
+            % (row.get("run_at"), row.get("agent"), row.get("model") or "-", row.get("case"),
+               row.get("facts") or "-", row.get("stable_facts") or "-",
+               row.get("fabrications", "-"), row.get("citations") or "-",
+               row.get("unknown_honesty") or "-", row.get("hard_filters") or "-",
+               row.get("questions") or "-", row.get("gates") or "-",
+               "ok" if row.get("schema_valid") else "FAIL",
+               row.get("wall_time_s", "-"), row.get("cost_note") or "-"))
+
+
+def md_preamble(day):
+    return ("# vet-flat benchmark, %s\n\n"
+            "Facts are graded, verdicts are not. The pass line is stable facts at or "
+            "above 95 percent, zero fabrications, citations at 100 percent.\n\n%s"
+            % (day, MD_HEADER))
+
+
+def write_scorecard(rows, folder, day=None):
+    """Rewrite both scorecard files from `rows`. One formatter, two callers.
+
+    bench/ab/grade_ab.py --regrade uses this to rewrite rows in place after the case
+    file gains real expected_facts, so the markdown never drifts from the JSON.
+    """
+    if not os.path.isdir(folder):
+        os.makedirs(folder)
+    day = day or os.path.basename(folder.rstrip(os.sep))
+    jpath = os.path.join(folder, "scorecard.json")
+    atomic_write(jpath, json.dumps(rows, ensure_ascii=False, indent=1) + "\n")
+    mpath = os.path.join(folder, "scorecard.md")
+    atomic_write(mpath, md_preamble(day) + "".join(md_row(row) for row in rows))
+    return jpath, mpath
+
+
+def atomic_write(path, text):
+    """Write via a temp file in the same directory, then rename over the target.
+
+    A sweep appends rows while a grader rewrites them. Rename is atomic on POSIX, so
+    a reader sees either the old file or the new one and never a truncated one.
+    """
+    folder = os.path.dirname(os.path.abspath(path)) or "."
+    handle, tmp = tempfile.mkstemp(prefix=".%s." % os.path.basename(path), dir=folder)
+    try:
+        with io.open(handle, "w", encoding="utf-8") as fh:
+            fh.write(text)
+        # mkstemp makes the file 0600; keep whatever the target already had, or the
+        # umask default, so a rewritten scorecard is no less readable than an
+        # appended one.
+        try:
+            os.chmod(tmp, stat.S_IMODE(os.stat(path).st_mode))
+        except OSError:
+            mask = os.umask(0)
+            os.umask(mask)
+            os.chmod(tmp, 0o666 & ~mask)
+        os.replace(tmp, path)
+    except Exception:
+        if os.path.exists(tmp):
+            os.unlink(tmp)
+        raise
+    return path
+
+
 def append_scorecard(row, when=None):
     day = (when or datetime.datetime.utcnow()).strftime("%Y-%m-%d")
     folder = os.path.join(RESULTS, day)
     if not os.path.isdir(folder):
-        os.makedirs(folder, exist_ok=True)
+        os.makedirs(folder)
     jpath = os.path.join(folder, "scorecard.json")
     rows = []
     if os.path.exists(jpath):
@@ -666,28 +729,7 @@ def append_scorecard(row, when=None):
         except ValueError:
             rows = []
     rows.append(row)
-    with io.open(jpath, "w", encoding="utf-8") as fh:
-        fh.write(json.dumps(rows, ensure_ascii=False, indent=1) + "\n")
-
-    mpath = os.path.join(folder, "scorecard.md")
-    new = not os.path.exists(mpath)
-    with io.open(mpath, "a", encoding="utf-8") as fh:
-        if new:
-            fh.write("# vet-flat benchmark, %s\n\n"
-                     "Facts are graded, verdicts are not. The pass line is stable facts at or "
-                     "above 95 percent, zero fabrications, citations at 100 percent.\n\n"
-                     % day)
-            fh.write(MD_HEADER)
-        fh.write("| %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s |"
-                 "\n" % (
-                     row["run_at"], row["agent"], row.get("model") or "-", row["case"],
-                     row.get("facts") or "-", row.get("stable_facts") or "-",
-                     row.get("fabrications", "-"), row.get("citations") or "-",
-                     row.get("unknown_honesty") or "-", row.get("hard_filters") or "-",
-                     row.get("questions") or "-", row.get("gates") or "-",
-                     "ok" if row.get("schema_valid") else "FAIL",
-                     row.get("wall_time_s", "-"), row.get("cost_note") or "-"))
-    return jpath, mpath
+    return write_scorecard(rows, folder, day)
 
 
 def make_row(agent, model, case, card, wall, usage, workdir, command, note=None, variant=None,

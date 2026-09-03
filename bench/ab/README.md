@@ -119,6 +119,27 @@ Nothing anywhere passes a permission-bypass flag. The Claude side is scoped by
    `run_ab.py` calls it after every batch, so you can watch the tables fill in. It
    writes `summary.md` and `summary.json` next to the scorecard.
 
+   **After `bench/refresh_truth.py` fills a case's `expected_facts`, re-score the runs
+   you already have:**
+
+   ```
+   bench/ab/grade_ab.py --results bench/results/<date> --regrade \
+       --cases bench/private/cases_private.json
+   ```
+
+   A run graded before that shows `0/0` facts forever, because the fact table it was
+   graded against was empty. `--regrade` finds each run's report — its `report_path`,
+   then its workdir, then the stored raw stdout (Claude's `.result`, Codex's event
+   stream) — re-scores it against the current cases file, and rewrites that row in
+   place. Only the scores change: tokens, cost, wall time, the command and the raw file
+   are kept. The scorecard is written through a temp file and renamed, and re-read just
+   before the write, so a sweep appending rows at the same time is never truncated or
+   lost. A run that produced no report is left exactly as it was and said so in the log.
+
+   Note the report finder refuses `report-schema.json` itself: the schema also has a
+   top-level `candidates` key, so a naive search of an event stream would score the
+   schema the agent read on its way to writing a report.
+
 4. **Worker eval**, separately, when the A/B says the worker model matters:
 
    ```
@@ -154,6 +175,21 @@ Per run, on top of the public fact scores from `bench/grade.py`:
 | `killer_questions_from_bank` | the public check, carried through | high |
 | `unknown_share` | share of the twelve axes graded `U` | low, but honest beats confident |
 | `total_tokens`, `total_cost_usd`, `wall_time_s` | the bill | low |
+
+### Why an axis is unknown
+
+`summary.md` carries a per-config table of how often each of the twelve axes came back
+`U`, with a **no input** column. Six axes have nothing for a benchmark run to work from:
+the material is on a portal this repo will not fetch (price, listing detail, resident
+reviews), or it is a document somebody has to paste (a welcome-pack tariff, the landlord
+on the tenancy), or no register records it at all (which way the windows face). Those
+come back unknown in **every** arm, and the summary says so in as many words, with the
+reason per axis, so nobody reads a shared ceiling as a model that failed.
+
+The column to read is **spread**: an axis where the arms differ is a real difference, and
+an axis that is unknown everywhere is the suite talking about itself. If an axis is
+unknown in every arm and is *not* on the no-input list, the summary says that too — that
+one is a genuine gap worth chasing.
 
 `total_tokens` is input + output + cache-read + cache-creation, summed across the main
 loop and every subagent (Claude Code reports the split in `usage` and `modelUsage`, and
