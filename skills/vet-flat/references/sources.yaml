@@ -1,0 +1,713 @@
+# Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen — https://github.com/jacky18008/pea-princess — CC BY 4.0
+#
+# Every source the axis files use. Per-borough planning, committee and licensing pages live in boroughs.yaml.
+#
+# Field guide
+#   official            true if a public body, a statutory register or legislation publishes it
+#   access              open | open_robots_disallow | key_free | login_free | paid | manual
+#   method              GET | POST | manual
+#   needs_key           true if a key, login or payment is required before a request will work
+#   robots_note         what robots.txt said for a general crawler on the tested path
+#   tos_note            what the site's terms say about automated access
+#   content_assertion   a string that must appear in a good response; a 200 without it is a failure
+#   used_by_scripts     the scripts in skills/vet-flat/scripts that call it
+#   used_for            the axes and questions it answers
+#   last_tested         the date the URL was actually fetched
+#   verify_before_release  true where this repo has not itself opened the page and confirmed the content
+version: "2026-09-03"
+tested_from: "London, UK network, curl with a browser user agent, 1-2 s between requests to one host"
+
+sources:
+
+  # ------------------------------------------------------------ geography --
+  - id: postcodes_io_lookup
+    name: "postcodes.io postcode lookup"
+    url: "https://api.postcodes.io/postcodes/SE19SG"
+    official: false
+    access: open
+    method: GET
+    needs_key: false
+    robots_note: "No robots.txt is served (404), so nothing is disallowed."
+    tos_note: "Open data service over Ordnance Survey and ONS open data."
+    content_assertion: '"result"'
+    used_by_scripts: [geo.py]
+    used_for: [identity, geocoding, borough_resolution, ward, crime_box_centre]
+    last_tested: 2026-09-03
+    note: "The most reliable source in the set. Always take coordinates from here, never from a map pin, and never guess the sign of the longitude."
+
+  - id: postcodes_io_nearest
+    name: "postcodes.io nearest postcodes (radius search)"
+    url: "https://api.postcodes.io/postcodes/SE19SG/nearest"
+    official: false
+    access: open
+    method: GET
+    needs_key: false
+    robots_note: "No robots.txt is served (404)."
+    tos_note: "Open data service."
+    content_assertion: '"result"'
+    used_by_scripts: [geo.py]
+    used_for: [area_sweep, postcode_coverage, comparables]
+    last_tested: 2026-09-03
+    note: "Radius caps at nearest_postcode_max_radius_m. A larger radius returns HTTP 200 with the same result set and no error, so never assume a wide radius took effect."
+
+  # ---------------------------------------------------- energy performance --
+  - id: epc_find_by_postcode
+    name: "GOV.UK Find an energy certificate, postcode search"
+    url: "https://find-energy-certificate.service.gov.uk/find-a-certificate/search-by-postcode"
+    official: true
+    access: open_robots_disallow
+    method: GET
+    needs_key: false
+    robots_note: "Disallow: / for a general crawler, with two /type-of-property paths allowed. No group names any AI user agent, so they all fall under the general rule. The page also carries a noindex, nofollow meta tag."
+    tos_note: "Crown copyright, Open Government Licence. No automation ban in the terms; the robots file is the constraint."
+    content_assertion: "EPCs for"
+    used_by_scripts: [epc.py]
+    used_for: [identity, floor_area, age, heating, building_profile]
+    last_tested: 2026-09-03
+    note: "Server-rendered. Flat-level addresses appear in full. A robots-honouring fetcher cannot read this; ask the user to paste the page."
+
+  - id: epc_find_by_street
+    name: "GOV.UK Find an energy certificate, street and town search"
+    url: "https://find-energy-certificate.service.gov.uk/find-a-certificate/search-by-street-name-and-town"
+    official: true
+    access: open_robots_disallow
+    method: GET
+    needs_key: false
+    robots_note: "As epc_find_by_postcode."
+    tos_note: "Open Government Licence."
+    content_assertion: "energy certificate"
+    used_by_scripts: [epc.py]
+    used_for: [identity, floor_area]
+    last_tested: 2026-09-03
+    note: "Parameters are street_name and town. Use it when a building is split across postcodes and a high floor is missing from the postcode search. A broad street returns a too-many-results page."
+
+  - id: epc_certificate_page
+    name: "GOV.UK energy certificate page"
+    url: "https://find-energy-certificate.service.gov.uk/energy-certificate/"
+    official: true
+    access: open_robots_disallow
+    method: GET
+    needs_key: false
+    robots_note: "As epc_find_by_postcode; two major search engines are additionally barred from this path."
+    tos_note: "Open Government Licence."
+    content_assertion: "Total floor area"
+    used_by_scripts: [epc.py]
+    used_for: [floor_area, property_type, air_permeability, heating, rating_history]
+    last_tested: 2026-09-03
+    note: "Keyed by the 20-digit certificate reference. The only working route to a certified floor area."
+
+  - id: epc_json_api_absent
+    name: "GOV.UK energy certificate register, JSON API (confirmed absent)"
+    url: "https://find-energy-certificate.service.gov.uk/api/domestic/"
+    official: true
+    access: open
+    method: GET
+    needs_key: false
+    robots_note: "As epc_find_by_postcode."
+    tos_note: "n/a"
+    content_assertion: "Page not found"
+    used_by_scripts: []
+    used_for: [negative_result]
+    last_tested: 2026-09-03
+    note: "Recorded so nobody rebuilds a client for it: both the search and the certificate JSON paths return the GOV.UK page-not-found page. Parse the HTML instead."
+
+  - id: epc_open_data_bulk
+    name: "Get energy performance of buildings data (bulk download)"
+    url: "https://get-energy-performance-data.communities.gov.uk/"
+    official: true
+    access: login_free
+    method: manual
+    needs_key: true
+    robots_note: "Allow the homepage and an opt-out path, Disallow: / for everything else."
+    tos_note: "Open Government Licence, behind a free national sign-in account."
+    content_assertion: "Get energy performance of buildings data"
+    used_by_scripts: []
+    used_for: [bulk_epc, area_sweep]
+    last_tested: 2026-09-03
+    note: "This replaced the old open-data domain, whose API paths now 404. Bulk download needs a free account; a human step, never an automated sign-in."
+
+  # ----------------------------------------------------------------- crime --
+  - id: police_uk_crimes_street
+    name: "Police open data, street-level crime"
+    url: "https://data.police.uk/api/crimes-street/all-crime"
+    official: true
+    access: open
+    method: GET
+    needs_key: false
+    robots_note: "robots.txt is served empty, so nothing is disallowed for anyone."
+    tos_note: "Open Government Licence."
+    content_assertion: '"category"'
+    used_by_scripts: [crime.py]
+    used_for: [crime, safety, night_route]
+    last_tested: 2026-09-03
+    note: "Use the poly form for a fixed box; the lat/lng form searches a one-mile circle, which is a different question. Locations are snapped to anonymised street anchors."
+
+  - id: police_uk_crime_last_updated
+    name: "Police open data, last updated"
+    url: "https://data.police.uk/api/crime-last-updated"
+    official: true
+    access: open
+    method: GET
+    needs_key: false
+    robots_note: "Empty robots.txt."
+    tos_note: "Open Government Licence."
+    content_assertion: '"date"'
+    used_by_scripts: [crime.py]
+    used_for: [crime, data_freshness]
+    last_tested: 2026-09-03
+    note: "Call this before choosing months. It returns the newest data month, which ran two to three months behind the calendar when tested."
+
+  - id: police_uk_crimes_street_dates
+    name: "Police open data, available data months"
+    url: "https://data.police.uk/api/crimes-street-dates"
+    official: true
+    access: open
+    method: GET
+    needs_key: false
+    robots_note: "Empty robots.txt."
+    tos_note: "Open Government Licence."
+    content_assertion: '"date"'
+    used_by_scripts: [crime.py]
+    used_for: [crime, data_freshness]
+    last_tested: null
+    verify_before_release: true
+    note: "Not opened by this repo's audit. Intended use is to list the months actually available before building a fixed window, so missing months are marked rather than filled."
+
+  - id: police_uk_neighbourhoods
+    name: "Police open data, neighbourhood teams"
+    url: "https://data.police.uk/api/metropolitan/neighbourhoods"
+    official: true
+    access: open
+    method: GET
+    needs_key: false
+    robots_note: "Empty robots.txt."
+    tos_note: "Open Government Licence."
+    content_assertion: '"id"'
+    used_by_scripts: [crime.py]
+    used_for: [crime, neighbourhood_policing]
+    last_tested: 2026-09-03
+    note: "Identifiers are statistical ward codes. The City of London has its own force identifier and is not covered by the metropolitan force."
+
+  # ------------------------------------------------------------- transport --
+  - id: tfl_journey_planner
+    name: "Transport for London Unified API, journey planner"
+    url: "https://api.tfl.gov.uk/Journey/JourneyResults/"
+    official: true
+    access: open
+    method: GET
+    needs_key: false
+    robots_note: "No robots.txt is served."
+    tos_note: "Open data under the transport authority's own terms; a free application key raises the quota."
+    content_assertion: '"journeys"'
+    used_by_scripts: [commute.py]
+    used_for: [commute, door_to_door, walk_to_station]
+    last_tested: 2026-09-03
+    note: "Accepts postcodes, place names or coordinates for both ends. Add an arrival time for a commute test. The destination is always an argument, never built into a script."
+
+  - id: tfl_stoppoint_search
+    name: "Transport for London Unified API, stop point search and radius"
+    url: "https://api.tfl.gov.uk/StopPoint/Search/"
+    official: true
+    access: open
+    method: GET
+    needs_key: false
+    robots_note: "No robots.txt is served."
+    tos_note: "Open data; free key optional."
+    content_assertion: '"matches"'
+    used_by_scripts: [commute.py]
+    used_for: [commute, redundancy, walk_to_station]
+    last_tested: 2026-09-03
+    note: "The radius form with stop types returns the nearest stations and their modes, which is what the redundancy grade is built from."
+
+  # -------------------------------------------------------------- planning --
+  - id: gla_planning_datahub_post
+    name: "London-wide planning application index (search, POST)"
+    url: "https://planningdata.london.gov.uk/api-guest/applications/_search"
+    official: true
+    access: open
+    method: POST
+    needs_key: false
+    robots_note: "No robots.txt is served."
+    tos_note: "Open guest search over a public planning dataset."
+    content_assertion: '"hits"'
+    used_by_scripts: [planning.py]
+    used_for: [construction, development_pipeline, decision_conditions]
+    last_tested: 2026-09-03
+    note: "Covers every London planning authority in one index. Zero hits is a coverage gap, not an absence: it carries referable and major schemes, and small named sites can simply be missing. Its status field can mark an implemented permission as lapsed, so take decision dates and form data from here and the real state from recent condition activity."
+
+  - id: gla_planning_datahub_get
+    name: "London-wide planning application index (search, GET form)"
+    url: "https://planningdata.london.gov.uk/api-guest/applications/_search"
+    official: true
+    access: open
+    method: GET
+    needs_key: false
+    robots_note: "No robots.txt is served."
+    tos_note: "As above."
+    content_assertion: '"hits"'
+    used_by_scripts: [planning.py]
+    used_for: [construction, development_pipeline]
+    last_tested: 2026-09-03
+    note: "Same index, query passed as an encoded source parameter. This is the form a fetch-only runtime can use."
+
+  - id: planit_applications_api
+    name: "PlanIt UK planning application aggregator"
+    url: "https://www.planit.org.uk/api/applics/json"
+    official: false
+    access: open_robots_disallow
+    method: GET
+    needs_key: false
+    robots_note: "Disallow on the API path for a general crawler; no group names any AI user agent, so all fall under it."
+    tos_note: "Non-commercial use of aggregated public planning data."
+    content_assertion: '"records"'
+    used_by_scripts: [planning.py]
+    used_for: [construction, second_opinion]
+    last_tested: 2026-09-03
+    note: "Query by postcode plus radius, or by authority plus a date range. A free-text search matches only the description field, so searching a site name returns an empty set that is easy to misread as no activity. Records can be years stale."
+
+  - id: borough_planning_portals
+    name: "Borough planning registers (per-borough URLs in boroughs.yaml)"
+    url: null
+    official: true
+    access: open_robots_disallow
+    method: manual
+    needs_key: false
+    robots_note: "The common portal software serves a blanket Disallow: / on every borough instance tested."
+    tos_note: "Public registers; the robots file is the constraint, not the terms."
+    content_assertion: "Simple Search"
+    used_by_scripts: [planning.py]
+    used_for: [construction, condition_discharge, officer_reports]
+    last_tested: 2026-09-03
+    note: "Reachable but robots-disallowed, so treat as a user step. This is where condition discharge lives: pre-commencement conditions mean works are starting, pre-occupation conditions mean they are finishing. Some instances hide withdrawn applications behind a details-not-available page."
+
+  - id: council_committee_reports
+    name: "Council committee and democracy sites (per-borough URLs in boroughs.yaml)"
+    url: null
+    official: true
+    access: open
+    method: GET
+    needs_key: false
+    robots_note: "Typically only a script path is disallowed; the agenda pages are allowed."
+    tos_note: "Public meeting papers."
+    content_assertion: "Agenda for"
+    used_by_scripts: [planning.py]
+    used_for: [construction, daylight_assessment, officer_reports]
+    last_tested: 2026-09-03
+    note: "The highest-risk trap in the set: a stale meeting identifier returns HTTP 200 with a plausible generic page. Always assert on the title containing 'Agenda for', and discover identifiers by walking the committee list, then the meeting list, then the documents page. Officer and committee reports name affected buildings and give window-by-window daylight findings."
+
+  # ----------------------------------------------------- roads and geometry --
+  - id: osm_overpass
+    name: "OpenStreetMap Overpass API"
+    url: "https://overpass-api.de/api/interpreter"
+    official: false
+    access: open_robots_disallow
+    method: POST
+    needs_key: false
+    robots_note: "Disallow on the API path for a general crawler; no group names any AI user agent."
+    tos_note: "Open Database Licence data; the public instance rate-limits aggressively."
+    content_assertion: '"elements"'
+    used_by_scripts: [roads.py]
+    used_for: [road_noise, railway_distance, nearby_uses, facade_split]
+    last_tested: 2026-09-03
+    note: "This host refuses browser user agents with 406; send a descriptive tool user agent instead, which is the inverse of every other source here. Any road query must include the trunk class or major A-roads are missed."
+
+  - id: defra_noise_road_mapping
+    name: "Strategic road noise mapping, England"
+    url: "https://environment.data.gov.uk/dataset/562c9d56-7c2d-4d42-83bb-578d6e97a517"
+    official: true
+    access: open
+    method: manual
+    needs_key: false
+    robots_note: "No restriction observed on the dataset page."
+    tos_note: "Open Government Licence."
+    content_assertion: "Road Noise"
+    used_by_scripts: []
+    used_for: [noise]
+    last_tested: 2026-09-03
+    note: "A bulk geographic download on a 10 m grid with day and night bands, not a per-address lookup. Rail and airport rounds are sibling datasets."
+
+  - id: defra_noise_agglomerations
+    name: "Environmental noise mapping, urban agglomerations"
+    url: "https://environment.data.gov.uk/dataset/c4bc5ebd-eab8-4b8a-be54-83d2f7132059"
+    official: true
+    access: open
+    method: manual
+    needs_key: false
+    robots_note: "No restriction observed."
+    tos_note: "Open Government Licence."
+    content_assertion: "noise"
+    used_by_scripts: []
+    used_for: [noise]
+    last_tested: 2026-09-03
+    note: "The layer that covers Greater London. Manual download."
+
+  - id: laqn_monitoring_sites
+    name: "London air quality network, monitoring sites"
+    url: "https://api.erg.ic.ac.uk/AirQuality/Information/MonitoringSites/GroupName=London/Json"
+    official: false
+    access: open
+    method: GET
+    needs_key: false
+    robots_note: "No restriction observed."
+    tos_note: "Academic network publishing open air quality data."
+    content_assertion: "MonitoringSite"
+    used_by_scripts: []
+    used_for: [air_quality]
+    last_tested: 2026-09-03
+    note: "Each site carries coordinates and a site type; use it to find the monitor nearest the flat."
+
+  - id: laqn_hourly_index
+    name: "London air quality network, hourly index"
+    url: "https://api.erg.ic.ac.uk/AirQuality/Hourly/MonitoringIndex/GroupName=London/Json"
+    official: false
+    access: open
+    method: GET
+    needs_key: false
+    robots_note: "No restriction observed."
+    tos_note: "As above."
+    content_assertion: "HourlyAirQualityIndex"
+    used_by_scripts: []
+    used_for: [air_quality]
+    last_tested: 2026-09-03
+
+  - id: ea_long_term_flood_risk
+    name: "Check long term flood risk"
+    url: "https://check-long-term-flood-risk.service.gov.uk/"
+    official: true
+    access: open
+    method: GET
+    needs_key: false
+    robots_note: "No blocking observed."
+    tos_note: "Open Government Licence."
+    content_assertion: "Where do you want to check"
+    used_by_scripts: []
+    used_for: [flood_risk, insurance]
+    last_tested: 2026-09-03
+    note: "Server-rendered flow: postcode, then address, then the risk page. No challenge."
+
+  # ------------------------------------------------ companies and ownership --
+  - id: companies_house_html
+    name: "Companies House, find and update company information"
+    url: "https://find-and-update.company-information.service.gov.uk/"
+    official: true
+    access: open
+    method: GET
+    needs_key: false
+    robots_note: "No robots.txt is served, so nothing is disallowed."
+    tos_note: "Crown copyright; public register."
+    content_assertion: "Companies House"
+    used_by_scripts: [company.py]
+    used_for: [landlord_identity, agent_identity, sic_codes, charges, filings, resident_management_company]
+    last_tested: 2026-09-03
+    note: "Search, company page, officers and filing history are all server-rendered. Match on the company number, never the name: dissolved same-name shells are common. Searching by registered address finds every company at a building, which is how you learn whether a resident-owned management company exists."
+
+  - id: companies_house_api
+    name: "Companies House REST API"
+    url: "https://api.company-information.service.gov.uk/"
+    official: true
+    access: key_free
+    method: GET
+    needs_key: true
+    robots_note: "n/a, API host."
+    tos_note: "Free key after a one-off registration; public register data."
+    content_assertion: '"company_name"'
+    used_by_scripts: [company.py]
+    used_for: [landlord_identity, agent_identity]
+    last_tested: 2026-09-03
+    note: "Without a key it returns an empty-authorisation error, which confirms the endpoint is live. The free HTML service above covers most vetting without a key."
+
+  - id: land_registry_price_paid_sparql
+    name: "HM Land Registry open data, price paid and transactions"
+    url: "https://landregistry.data.gov.uk/landregistry/query"
+    official: true
+    access: open
+    method: POST
+    needs_key: false
+    robots_note: "No blocking observed on the query endpoint."
+    tos_note: "Open Government Licence."
+    content_assertion: '"results"'
+    used_by_scripts: [landregistry.py]
+    used_for: [price_comparables, building_age, new_build_flag]
+    last_tested: 2026-09-03
+    note: "Works without a key. Postcodes must be spaced and upper case exactly as registered. The earliest sale with a new-build flag is the hardest available counter-evidence to a claimed building age."
+
+  - id: land_registry_title_register
+    name: "HM Land Registry title register and title plan"
+    url: "https://www.gov.uk/search-property-information-land-registry"
+    official: true
+    access: paid
+    method: manual
+    needs_key: true
+    robots_note: "The search service itself sits behind an interactive challenge whose robots file cannot be read."
+    tos_note: "Paid, signed-in service."
+    content_assertion: "title register"
+    used_by_scripts: [landregistry.py]
+    used_for: [ownership, proprietor, lease_term, restrictions]
+    last_tested: 2026-09-03
+    note: "land_registry_title_fee_gbp per title register or plan, land_registry_document_fee_gbp per filed document. Card payment and a signed-in journey: a human step, never automated. The only source that names the registered proprietor."
+
+  # ------------------------------------ redress, client money, enforcement ---
+  - id: client_money_protect
+    name: "Client Money Protect, agent search"
+    url: "https://www.clientmoneyprotect.co.uk/agent-search/"
+    official: false
+    access: open
+    method: GET
+    needs_key: false
+    robots_note: "Only administrative paths disallowed."
+    tos_note: "No automation ban observed."
+    content_assertion: "Agent search"
+    used_by_scripts: [redress.py]
+    used_for: [agent_compliance, client_money_protection, deposit_safety]
+    last_tested: 2026-09-03
+    note: "An agent holding rent or deposits must belong to a client-money scheme by law, but this is one provider of several: absence here is a prompt to check the others, not yet a finding. Open the certificate itself to read the current expiry."
+
+  - id: property_redress_agent_finder
+    name: "Property Redress, agent finder"
+    url: "https://www.propertyredress.co.uk/agent-finder"
+    official: false
+    access: open
+    method: GET
+    needs_key: false
+    robots_note: "No blocking observed on the finder page."
+    tos_note: "No automation ban observed."
+    content_assertion: "Agent finder"
+    used_by_scripts: [redress.py]
+    used_for: [agent_compliance, redress_scheme]
+    last_tested: 2026-09-03
+    note: "An older member-search path now redirects to the home page. A member-lookup endpoint on the same service silently ignores its name filter and returns the same recent-members list for every query, so never report its default output as a search result."
+
+  - id: property_ombudsman_find_a_member
+    name: "The Property Ombudsman, find a member"
+    url: "https://www.tpos.co.uk/find-a-member"
+    official: false
+    access: manual
+    method: manual
+    needs_key: false
+    robots_note: "robots.txt blocks several named AI crawler user agents site-wide, including the kind this skill's fetcher uses. Do not crawl it."
+    tos_note: "The site asserts a reservation of rights against text and data mining."
+    content_assertion: "member"
+    used_by_scripts: [redress.py]
+    used_for: [agent_compliance, redress_scheme]
+    last_tested: 2026-09-03
+    note: "The member search also redirects away from this path. Ask the user to open the member search and paste the result."
+
+  - id: propertymark_find_an_expert
+    name: "Propertymark, find an agent"
+    url: "https://www.propertymark.co.uk/find-an-expert.html"
+    official: false
+    access: manual
+    method: manual
+    needs_key: false
+    robots_note: "The search query-string form is specifically disallowed."
+    tos_note: "No general automation ban observed."
+    content_assertion: "find an expert"
+    used_by_scripts: [redress.py]
+    used_for: [agent_compliance, professional_body]
+    last_tested: 2026-09-03
+    note: "The page loads but the results are rendered in the browser, so there is nothing to parse. A human step."
+
+  - id: gla_rogue_landlord_checker
+    name: "London rogue landlord and agent checker"
+    url: "https://www.london.gov.uk/programmes-strategies/housing-and-land/renting-home/private-renting/check-landlord-or-agent/rogue-landlord-and-agent-checker"
+    official: true
+    access: open
+    method: GET
+    needs_key: false
+    robots_note: "No blocking observed."
+    tos_note: "Public enforcement record."
+    content_assertion: "rogue landlord"
+    used_by_scripts: [redress.py]
+    used_for: [landlord_identity, agent_identity, enforcement_history]
+    last_tested: 2026-09-03
+    note: "Server-rendered with name and address filters. It records only enforcement action taken by London boroughs and reported centrally, so absence is not proof of a clean landlord."
+
+  - id: ftt_property_chamber_decisions
+    name: "First-tier Tribunal (Property Chamber) decisions"
+    url: "https://www.gov.uk/residential-property-tribunal-decisions"
+    official: true
+    access: open
+    method: manual
+    needs_key: false
+    robots_note: "Not checked."
+    tos_note: "Open Government Licence."
+    content_assertion: "residential property tribunal"
+    used_by_scripts: []
+    used_for: [management_disputes, service_charges, landlord_conduct]
+    last_tested: null
+    verify_before_release: true
+    note: "Not opened by this repo's audit. Used to check whether a building or a managing agent has a decided dispute history."
+
+  - id: find_case_law
+    name: "Find Case Law (National Archives)"
+    url: "https://caselaw.nationalarchives.gov.uk/"
+    official: true
+    access: open
+    method: manual
+    needs_key: false
+    robots_note: "Not checked."
+    tos_note: "Open Justice Licence."
+    content_assertion: "Find Case Law"
+    used_by_scripts: []
+    used_for: [landlord_conduct, judgments]
+    last_tested: null
+    verify_before_release: true
+    note: "Not opened by this repo's audit. Used in the conduct forensics on a landlord or agent entity."
+
+  # ------------------------------------------------------- heat and energy --
+  - id: heat_trust_members
+    name: "Heat Trust registered sites and participants"
+    url: "https://heattrust.org/our-members"
+    official: false
+    access: open
+    method: GET
+    needs_key: false
+    robots_note: "Only default administrative paths disallowed."
+    tos_note: "No automation ban observed."
+    content_assertion: "Heat Trust Registered Sites"
+    used_by_scripts: [redress.py]
+    used_for: [heat_network, communal_heating, consumer_protection, running_cost]
+    last_tested: 2026-09-03
+    note: "Supplier and site names appear in plain HTML, so they cross-reference straight against the company register. A registered site has a consumer-protection standard on a heat network that is otherwise uncapped on price. An older path for this page returns 404."
+
+  - id: ofgem_heat_networks
+    name: "Ofgem, heat networks regulation"
+    url: "https://www.ofgem.gov.uk/energy-policy-and-regulation/policy-and-regulatory-programmes/heat-networks"
+    official: true
+    access: open
+    method: GET
+    needs_key: false
+    robots_note: "Standard content-management paths disallowed only."
+    tos_note: "Public regulator information."
+    content_assertion: "Heat networks"
+    used_by_scripts: []
+    used_for: [heat_network, regulation, complaints_route]
+    last_tested: 2026-09-03
+    note: "Follow the redirect; the short path is not canonical. The regulator took on heat networks, with pricing benchmarks and standards of performance following later, so there is a period with a statutory complaints route but no price cap. Check the current position before quoting a date."
+
+  # ------------------------------------------------------------ council tax --
+  - id: voa_council_tax_band
+    name: "Check your council tax band (England and Wales)"
+    url: "https://www.tax.service.gov.uk/check-council-tax-band/search"
+    official: true
+    access: open
+    method: GET
+    needs_key: false
+    robots_note: "No blocking observed."
+    tos_note: "Open Government Licence."
+    content_assertion: "Council Tax band"
+    used_by_scripts: []
+    used_for: [council_tax, all_in_cost]
+    last_tested: 2026-09-03
+    note: "The national band lookup. The per-borough entries in boroughs.yaml are billing and rate pages, not band lookups."
+
+  # ----------------------------------------------------------- legislation --
+  - id: legislation_renters_rights_act_2025
+    name: "Renters' Rights Act 2025 (c. 26)"
+    url: "https://www.legislation.gov.uk/ukpga/2025/26/contents"
+    official: true
+    access: open
+    method: GET
+    needs_key: false
+    robots_note: "No blocking observed."
+    tos_note: "Open Government Licence."
+    content_assertion: "Renters' Rights Act 2025"
+    used_by_scripts: []
+    used_for: [tenancy_law, periodic_tenancy, rent_in_advance]
+    last_tested: 2026-09-03
+    note: "Exact title verified: a UK Public General Act of 2025, chapter 26. Earlier drafts of this skill named it as a 2026 Act; that was wrong."
+
+  - id: legislation_rra_commencement_no2
+    name: "Renters' Rights Act 2025 (Commencement No. 2 and Transitional and Saving Provisions) Regulations 2026 (SI 2026/421)"
+    url: "https://www.legislation.gov.uk/uksi/2026/421/regulation/2/made"
+    official: true
+    access: open
+    method: GET
+    needs_key: false
+    robots_note: "No blocking observed."
+    tos_note: "Open Government Licence."
+    content_assertion: "come into force on 1st May 2026"
+    used_by_scripts: []
+    used_for: [tenancy_law, commencement_date]
+    last_tested: 2026-09-03
+    note: "Commencement verified on this URL: the tenancy-reform chapter, the possession-grounds schedule and the related schedule come into force on 2026-05-01 for assured tenancies that are not social housing assured tenancies."
+
+  - id: legislation_deregulation_2015_s44
+    name: "Deregulation Act 2015 s.44, short-term use of London accommodation"
+    url: "https://www.legislation.gov.uk/ukpga/2015/20/section/44"
+    official: true
+    access: open
+    method: GET
+    needs_key: false
+    robots_note: "No blocking observed."
+    tos_note: "Open Government Licence."
+    content_assertion: "Short-term use of London accommodation"
+    used_by_scripts: []
+    used_for: [short_let, lease_breach, planning]
+    last_tested: 2026-09-03
+    note: "Content verified. It amends the 1973 London general powers Act by inserting the provision that carries the nightly limit and its conditions; the number of nights sits in the inserted section, not in the s.44 heading."
+
+  - id: legislation_tenant_fees_act_2019
+    name: "Tenant Fees Act 2019 (c. 4), permitted payments and deposit caps"
+    url: "https://www.legislation.gov.uk/ukpga/2019/4/schedule/1"
+    official: true
+    access: open
+    method: GET
+    needs_key: false
+    robots_note: "As other legislation pages."
+    tos_note: "Open Government Licence."
+    content_assertion: "Permitted payments"
+    used_by_scripts: []
+    used_for: [deposit_cap, holding_deposit, prohibited_fees]
+    last_tested: null
+    verify_before_release: true
+    note: "Not opened by this repo's audit. Source for deposit_cap_weeks, deposit_cap_weeks_high_rent, deposit_annual_rent_threshold_gbp and holding_deposit_weeks. Confirm the paragraph numbers and that the caps are current before quoting them in a report."
+
+  - id: legislation_housing_act_2004_s213
+    name: "Housing Act 2004 s.213, tenancy deposit schemes"
+    url: "https://www.legislation.gov.uk/ukpga/2004/34/section/213"
+    official: true
+    access: open
+    method: GET
+    needs_key: false
+    robots_note: "As other legislation pages."
+    tos_note: "Open Government Licence."
+    content_assertion: "tenancy deposit scheme"
+    used_by_scripts: []
+    used_for: [deposit_protection]
+    last_tested: null
+    verify_before_release: true
+    note: "Not opened by this repo's audit. Source for deposit_protection_days. Confirm the current period before quoting it."
+
+  # ------------------------------------------------------------- archives ---
+  - id: wayback_availability
+    name: "Internet Archive availability API and snapshots"
+    url: "https://archive.org/wayback/available"
+    official: false
+    access: open
+    method: GET
+    needs_key: false
+    robots_note: "Not checked."
+    tos_note: "Public archive."
+    content_assertion: '"archived_snapshots"'
+    used_by_scripts: []
+    used_for: [company_history, listing_history, claim_dating]
+    last_tested: null
+    verify_before_release: true
+    note: "Not opened by this repo's audit. Ask the availability endpoint for an exact timestamp first, then request that timestamped snapshot; a vague year-level snapshot path can hang."
+
+  # ------------------------------ commercial portals and review sites -------
+  - id: commercial_portals_and_review_sites
+    name: "Rightmove; Zoopla; OnTheMarket; OpenRent; HomeViews; Trustpilot; Google reviews; Airbnb; Booking.com"
+    url: null
+    official: false
+    access: manual
+    method: manual
+    needs_key: false
+    robots_note: "Not recorded. Their robots files are more permissive than their terms, and robots compliance is not terms compliance."
+    tos_note: "Automated access prohibited. Every one of these sites whose terms could be read bans bots, crawlers, scrapers and automated data collection."
+    content_assertion: null
+    used_by_scripts: []
+    used_for: [listing_text, asking_price, price_reduction_history, resident_reviews, management_reputation, short_let_check]
+    last_tested: null
+    note: "Deliberately no URL, endpoint, parameter, selector or technique is recorded for any of these. Ask the user to open the page and paste the text, or use your own compliant means; see inputs.md. The review-reading method in axes/06-management-neighbours.md applies to whatever text the user supplies."

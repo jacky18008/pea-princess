@@ -1,0 +1,445 @@
+# Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen — https://github.com/jacky18008/pea-princess — CC BY 4.0
+#
+# Every number the axis files reference, by id.
+# Shape: id: {value, unit, meaning, default_source, note}
+#   default_source: generic  -> a method constant or a legal fact; safe to use as shipped
+#   default_source: profile  -> a personal preference; value is null until profile.yaml sets it
+# A null value with default_source: profile is NOT a failure. If the profile is silent,
+# report the measurement and do not fail the flat on that threshold.
+version: "2026-09-03"
+
+# ---------------------------------------------------------------- fetching --
+fetch_host_spacing_seconds:
+  value: 1.2
+  unit: seconds
+  meaning: "Minimum gap between two requests to the same host."
+  default_source: generic
+  note: "Enforced by scripts/_fetch.py. Do not bulk-harvest a register for addresses you are not vetting."
+
+nearest_postcode_max_radius_m:
+  value: 2000
+  unit: metres
+  meaning: "Maximum radius the postcode radius-search accepts."
+  default_source: generic
+  note: "A larger value is accepted with HTTP 200 and silently ignored: the result set does not widen. Page the circle instead."
+
+# ------------------------------------------------------------ area sweep ----
+sweep_radius_m:
+  value: 2000
+  unit: metres
+  meaning: "Enumeration radius around the anchor address."
+  default_source: generic
+  note: "Anchor on a real address, never an area name."
+sweep_deep_read_radius_m:
+  value: 1600
+  unit: metres
+  meaning: "Radius inside which full review reading is done."
+  default_source: generic
+  note: "The cost gate: enumerate to the full radius, read deeply only inside this one."
+sweep_max_deep_lines:
+  value: 8
+  unit: buildings
+  meaning: "Maximum buildings taken through the full per-building script run."
+  default_source: generic
+  note: "If the budget runs short, cut this number, never the review-hygiene steps."
+sweep_max_decision_questions:
+  value: 2
+  unit: questions
+  meaning: "Maximum questions put back to the user at the end of a sweep."
+  default_source: generic
+  note: "Separate from the at-most-two questions per candidate aimed at the agent."
+structural_finding_min_developments:
+  value: 2
+  unit: buildings
+  meaning: "A theme must appear in at least this many buildings before it can be called structural."
+  default_source: generic
+  note: "Below this it is a single-building defect and may not be generalised to the area."
+structural_finding_min_years:
+  value: 2
+  unit: years
+  meaning: "A theme must span at least this many years before it can be called structural."
+  default_source: generic
+  note: "Applied together with structural_finding_min_developments."
+
+# -------------------------------------------------------------- floor area --
+min_floor_area_sqft:
+  value: null
+  unit: square_feet
+  meaning: "Smallest certified internal area the user will accept."
+  default_source: profile
+  profile_key: "min_floor_area_sqft"
+  note: "Set in profile.yaml. Measured on the energy certificate, which excludes balconies."
+floor_area_exception_band_sqft:
+  value: null
+  unit: square_feet
+  meaning: "A narrower band the user allows only in a stated area or with stated compensations."
+  default_source: profile
+  note: "State the exception's scope in the report. Never apply an area-specific exception city-wide."
+area_variance_investigate_pct:
+  value: 5
+  unit: percent
+  meaning: "Gap between advertised and certified area above which the listing needs an explanation before anything on it is trusted."
+  default_source: generic
+  note: "The usual cause is a balcony counted in the advertised figure."
+studio_living_area_share:
+  value: 0.75
+  unit: fraction
+  meaning: "Living area at or above this share of total floor area means the flat is a studio, however it is advertised."
+  default_source: generic
+
+# -------------------------------------------------------- age and fabric ----
+max_building_age_years:
+  value: null
+  unit: years
+  meaning: "Oldest building the user will accept, from the first assessment year."
+  default_source: profile
+  profile_key: "max_building_age_years"
+  note: "Set in profile.yaml. The first assessment year approximates completion; the earliest registered sale is stronger."
+epc_validity_years:
+  value: 10
+  unit: years
+  meaning: "How long an energy certificate stays valid."
+  default_source: generic
+  note: "A whole building re-assessed on one day is usually this clock expiring, not a refurbishment."
+air_permeability_mech_vent_threshold:
+  value: 5
+  unit: "m3/h.m2 at 50 Pa"
+  meaning: "Air permeability at or below this implies the dwelling needs mechanical ventilation to meet the ventilation building regulation."
+  default_source: generic
+  note: "Implies mechanical ventilation; does not identify which kind, and does not prove heat recovery."
+heat_network_supplier_margin_flag:
+  value: 1.0
+  unit: "ratio of cost of sales to revenue"
+  meaning: "A heat supplier whose cost of sales meets or exceeds revenue is selling below cost, which predicts a tariff rise."
+  default_source: generic
+  note: "Read from filed accounts on the company register, typically about a year before residents notice."
+
+# ------------------------------------------------------------ construction --
+planning_radius_m:
+  value: 250
+  unit: metres
+  meaning: "Standard search radius for planning applications around the flat."
+  default_source: generic
+road_facade_distance_m:
+  value: 60
+  unit: metres
+  meaning: "Within this distance of a major road, the building must be split by facade before any noise judgement."
+  default_source: generic
+  note: "Road-facing and courtyard-facing are two different products at the same rent. Include trunk-classified roads in the query."
+hospital_helipad_distance_m:
+  value: 300
+  unit: metres
+  meaning: "Distance within which an emergency entrance, ambulance route or helipad counts as a deduction."
+  default_source: generic
+  note: "Proximity to a hospital is never scored as a benefit on this axis."
+construction_decision_within_tenancy:
+  value: true
+  unit: boolean
+  meaning: "An undecided application whose decision falls inside the intended tenancy is a live risk."
+  default_source: generic
+
+# ------------------------------------------------------------------ crime ---
+crime_box_half_width_m:
+  value: 150
+  unit: metres
+  meaning: "Half-width of the standard crime polygon; the box is about 300 m by 305 m."
+  default_source: generic
+  note: "One fixed spec for every candidate. Resizing it per candidate changes the answer."
+crime_box_lat_delta_deg:
+  value: 0.00135
+  unit: degrees
+  meaning: "Latitude offset used to build the standard box."
+  default_source: generic
+crime_box_lng_delta_deg:
+  value: 0.0022
+  unit: degrees
+  meaning: "Longitude offset used to build the standard box at London latitude."
+  default_source: generic
+  note: "Take the sign of the longitude from the geocoder. A flipped sign returns a fake quiet reading a kilometre away."
+crime_window_months:
+  value: 6
+  unit: months
+  meaning: "Fixed observation window for every candidate."
+  default_source: generic
+  note: "Missing months are marked missing. Never scale a short window up to a six-month equivalent, and never fill with zeros."
+police_data_lag_months:
+  value: "2-3"
+  unit: months
+  meaning: "How far behind the present the published street-level crime data runs."
+  default_source: generic
+  note: "Query the last-updated endpoint before choosing months; the newest month available is not last month."
+crime_sensitivity_shift_m:
+  value: 20
+  unit: metres
+  meaning: "Distance the box is shifted in each of four directions to produce a sensitivity range."
+  default_source: generic
+  note: "A 20 m shift has moved a count by 37 percent. Report the range, not a single figure."
+crime_point_source_share_flag:
+  value: 0.40
+  unit: fraction
+  meaning: "A single street anchor carrying this share or more of the counts is a point source and must be labelled."
+  default_source: generic
+crime_top_anchor_count:
+  value: 5
+  unit: anchors
+  meaning: "How many street anchors to list. Spread across all five is neighbourhood-wide; one dominating is a point source."
+  default_source: generic
+night_route_node_share_flag:
+  value: 0.50
+  unit: fraction
+  meaning: "Share of counts sitting on the station-to-door route above which the walk home is a red flag in its own right."
+  default_source: generic
+  note: "Nodes on the route home are never discounted, whatever the area grade says."
+
+# ------------------------------------------------- management and reviews ---
+review_burst_same_day_min:
+  value: 4
+  unit: reviews
+  meaning: "This many reviews on one date is a review-drive day; all of them come out of the organic sample."
+  default_source: generic
+  note: "Applies even when the site does not mark them as incentivised."
+review_staleness_years:
+  value: 3
+  unit: years
+  meaning: "No natural (non-incentivised, non-burst) review within this period means the score is expired."
+  default_source: generic
+  note: "Say the building is unmeasured on reviews and stop quoting the number. Zero denominator is not clean."
+review_min_organic_sample:
+  value: 5
+  unit: reviews
+  meaning: "Fewest organic reviews that can support a management score."
+  default_source: generic
+  note: "One organic review is not a score. Always print the sample size next to the average."
+management_organic_score_min:
+  value: null
+  unit: "score out of 5"
+  meaning: "The user's bar for the organic management score."
+  default_source: profile
+  note: "No universal pass mark. Set in profile.yaml; state in the report which bar was used."
+
+# ----------------------------------------------------------- legal facts ----
+deposit_cap_weeks:
+  value: 5
+  unit: weeks_of_rent
+  meaning: "Maximum tenancy deposit where the annual rent is below deposit_annual_rent_threshold_gbp."
+  default_source: generic
+  note: "Tenant Fees Act 2019. The cap runs on the current rent; an advertised deposit is often five weeks of an older, higher rent."
+deposit_cap_weeks_high_rent:
+  value: 6
+  unit: weeks_of_rent
+  meaning: "Maximum tenancy deposit where the annual rent is at or above deposit_annual_rent_threshold_gbp."
+  default_source: generic
+  note: "Tenant Fees Act 2019."
+deposit_annual_rent_threshold_gbp:
+  value: 50000
+  unit: GBP_per_year
+  meaning: "Annual rent at which the deposit cap changes from five to six weeks."
+  default_source: generic
+holding_deposit_weeks:
+  value: 1
+  unit: weeks_of_rent
+  meaning: "Maximum holding deposit."
+  default_source: generic
+  note: "Tenant Fees Act 2019."
+rent_in_advance_max_months:
+  value: 1
+  unit: months
+  meaning: "Maximum rent that may be required in advance after the first payment."
+  default_source: generic
+  note: "Renters' Rights Act 2025, in force 2026-05-01 in England. It removes paying six or twelve months up front as a substitute for a guarantor."
+deposit_protection_days:
+  value: 30
+  unit: days
+  meaning: "Deadline for placing a deposit in a protection scheme."
+  default_source: generic
+  note: "Housing Act 2004."
+tenant_notice_months:
+  value: 2
+  unit: months
+  meaning: "Tenant's notice period on an assured periodic tenancy, in writing."
+  default_source: generic
+  note: "A shorter period can be agreed in writing. Agree it before signing if a short stay is possible. There is no minimum contract length."
+short_let_nights_per_calendar_year:
+  value: 90
+  unit: nights
+  meaning: "Nights of temporary sleeping accommodation in Greater London above which planning permission is needed."
+  default_source: generic
+  note: "Deregulation Act 2015 s.44. Counted per property per calendar year, not per person, and conditional on someone providing it being liable for council tax. Planning compliance is not lease, freeholder, mortgage or insurance permission."
+land_registry_title_fee_gbp:
+  value: 7
+  unit: GBP
+  meaning: "Cost of a title register or title plan."
+  default_source: generic
+  note: "A signed-in card payment; a human step, never automated."
+land_registry_document_fee_gbp:
+  value: 11
+  unit: GBP
+  meaning: "Cost of a copy of a filed document, such as a lease."
+  default_source: generic
+
+# ------------------------------------------------------------------ price ---
+rent_ceiling_pcm:
+  value: null
+  unit: GBP_per_month
+  meaning: "The user's rent ceiling before bills."
+  default_source: profile
+  profile_key: "budget.rent_pcm_target"
+price_below_band_flag_pct:
+  value: 15
+  unit: percent
+  meaning: "Below the local band by more than this: name the discount or leave."
+  default_source: generic
+  note: "Run the test on both the monthly rent and the pounds per square foot."
+price_above_comparable_flag_pct:
+  value: 15
+  unit: percent
+  meaning: "Above a same-building, same-floor comparable by more than this, with no nameable benefit: leave."
+  default_source: generic
+
+# ----------------------------------------------------------- aspect, light --
+obstruction_angle_kill_deg:
+  value: 45
+  unit: degrees
+  meaning: "Obstruction subtending more than this angle from the window, on a low floor, is the almost-no-light case."
+  default_source: generic
+  note: "Equivalent to the facing building being taller than the gap between the buildings."
+sky_openness_good_obstruction_angle_deg:
+  value: 25
+  unit: degrees
+  meaning: "Obstruction below this angle means the sky in front of the window is effectively open."
+  default_source: generic
+min_sky_openness_note:
+  value: null
+  unit: note
+  meaning: "Sky openness, floor level and glazed area decide winter brightness; orientation is a summer and shoulder-season criterion."
+  default_source: generic
+  note: "Kept as an id so axis files can reference the rule rather than restate it."
+floor_position_exclusions:
+  value: null
+  unit: list
+  meaning: "Floor positions the user excludes outright, for example ground and basement."
+  default_source: profile
+  profile_key: "floors.reject_ground_floor, floors.prefer_floor_band"
+  note: "Read from the certificate's property type, which records only Ground, Basement, Mid-floor and Top-floor."
+
+# --------------------------------------------------------------- all-in ----
+all_in_ceiling_pcm:
+  value: null
+  unit: GBP_per_month
+  meaning: "Rent plus bills plus council tax ceiling."
+  default_source: profile
+  profile_key: "budget.all_in_pcm_ceiling"
+  note: "The number the verdict is taken against. A named stretch above it belongs in budget.stretch_ceiling_and_conditions, never in this id."
+edge_band_over_ceiling_pcm:
+  value: 100
+  unit: GBP_per_month
+  meaning: "Over the all-in ceiling by up to this much is EDGE, and the report must carry the break-even rent."
+  default_source: generic
+  note: "More than this is a different price bracket, not an edge case."
+bills_low_pcm:
+  value: null
+  unit: GBP_per_month
+  meaning: "Optimistic bills scenario."
+  default_source: profile
+  note: "A shared sensitivity assumption, not a supplier quote. Use the same three figures for every candidate in a run and print them with the totals."
+bills_planning_pcm:
+  value: null
+  unit: GBP_per_month
+  meaning: "Planning bills scenario, the one the verdict is taken on."
+  default_source: profile
+  note: "A shared sensitivity assumption, not a supplier quote for any heating system."
+bills_stress_pcm:
+  value: null
+  unit: GBP_per_month
+  meaning: "Stress bills scenario."
+  default_source: profile
+bridging_weekly_cost:
+  value: null
+  unit: GBP_per_week
+  meaning: "Weekly cost of temporary accommodation while waiting for a later move-in date."
+  default_source: profile
+  note: "Bridging is never an add-on to rent. Compare twelve-month totals: bridging weeks times weekly cost, plus remaining months times all-in."
+move_in_window:
+  value: null
+  unit: date_range
+  meaning: "The user's preferred move-in window."
+  default_source: profile
+  profile_key: "move_in_window.earliest, move_in_window.latest, move_in_window.tolerance_days"
+  note: "Used by the all-in axis when a later start would need bridging."
+
+# ---------------------------------------------------- commute, redundancy ---
+commute_max_minutes:
+  value: null
+  unit: minutes
+  meaning: "Door-to-door ceiling, measured at average walking speed."
+  default_source: profile
+  profile_key: "commute.max_door_to_door_min"
+  note: "The destination and arrival time are also profile values (commute.destination, commute.arrive_by). Neither has a default: the skill never guesses a destination."
+commute_entrance_buffer_min:
+  value: 3
+  unit: minutes
+  meaning: "Buffer added at the destination, from the public door to the actual door."
+  default_source: generic
+  note: "Reported separately. Never folded silently into the headline time."
+redundancy_walk_min:
+  value: 10
+  unit: minutes
+  meaning: "Walk within which a second, independent rail family counts as redundancy."
+  default_source: generic
+redundancy_walk_m:
+  value: 800
+  unit: metres
+  meaning: "Distance equivalent of redundancy_walk_min."
+  default_source: generic
+station_to_door_walk_max_min:
+  value: null
+  unit: minutes
+  meaning: "The user's ceiling for the walk from station to front door."
+  default_source: profile
+  note: "Read the journey legs, not the total: a walking leg can contain zero-time in-station segments."
+
+# -------------------------------------------------- low-maintenance living --
+supermarket_walk_min:
+  value: 3
+  unit: minutes
+  meaning: "A food shop within this walk."
+  default_source: generic
+washing_machine_required:
+  value: null
+  unit: boolean
+  meaning: "Whether a machine inside the flat is a requirement for this user."
+  default_source: profile
+  profile_key: "must_haves (washing_machine_in_flat)"
+  note: "For most users this is close to a hard requirement. Grade the alternatives rather than treating them as equal."
+launderette_trip_cost:
+  value: null
+  unit: GBP_per_trip
+  meaning: "Cost of one launderette trip, for costing a flat with no machine."
+  default_source: profile
+launderette_trip_minutes:
+  value: null
+  unit: minutes
+  meaning: "Time cost of one launderette trip, for costing a flat with no machine."
+  default_source: profile
+
+reject_no_sky:
+  value: null
+  unit: boolean
+  meaning: "Whether a flat whose main windows cannot see sky is a hard fail rather than a deduction."
+  default_source: profile
+  profile_key: "light.reject_no_sky"
+  note: "Applied together with obstruction_angle_kill_deg, which defines what counts as no sky."
+quiet_over_light:
+  value: null
+  unit: boolean
+  meaning: "Whether the quiet elevation wins when quiet and light conflict."
+  default_source: profile
+  profile_key: "quiet_over_light"
+  note: "The rule holds short of the almost-no-light case, which is decided by reject_no_sky."
+redundancy_min_grade:
+  value: null
+  unit: grade
+  meaning: "Lowest acceptable commute redundancy grade."
+  default_source: profile
+  profile_key: "commute.redundancy_min_grade"
+  note: "Letters mean what report-schema.json fixes them to mean: A two independent rail families within redundancy_walk_min, B one rail family plus a bus route that serves the journey, C one line only."
