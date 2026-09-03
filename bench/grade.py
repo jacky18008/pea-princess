@@ -42,6 +42,17 @@ unknown_honesty         of the facts that were not reported correctly, the share
 hard_filter_consistency of the hard-filter rows we can check against truth, the
                         share whose ``pass`` agrees with the profile and the
                         observed value.
+killer_questions_       of the questions the report puts to the agent, the share
+from_bank               that are real: either drawn from
+                        ``references/questions.md`` (at least half of the
+                        question's own content words appear in a bank question) or
+                        naming a landmine or gate code the report itself raised.
+                        A report with no killer questions scores zero here. Soft
+                        questions - "is it well managed?" - do not count.
+gate_questions_present  when the report says it does not know the guarantor route
+                        (G1), the availability (G2), the landlord entity (G3) or
+                        the deposit protection (G4), it has to ask. See THE
+                        QUESTION BANK below.
 
 WHERE THE FACTS ARE LOOKED FOR (the label-matching rules)
 =========================================================
@@ -831,6 +842,293 @@ def truth_display(fact, truth):
     return truth
 
 
+# ----------------------------------------------------------- question bank --
+# skills/vet-flat/references/questions.md is the single source of the questions a
+# report may ask. It is parsed at RUN TIME from its markdown tables, so a
+# maintainer who edits the bank changes what the grader accepts, without touching
+# this file. Two things are scored:
+#
+#   killer_questions_from_bank  every killer question must be grounded: it either
+#                               overlaps a bank question by at least half its own
+#                               content words, or it names a landmine or gate code
+#                               that this report actually raised. A question that
+#                               is neither is a soft question dressed up as a hard
+#                               one - "is the building well managed?" instead of
+#                               "who is the managing agent and what is the target
+#                               repair time?".
+#   gate_questions_present      when the report itself says it does not know the
+#                               guarantor route (G1), the availability (G2), the
+#                               landlord entity (G3) or the deposit protection
+#                               (G4), it has to ask about it.
+#
+# Neither score is part of the pass line; both are reported as diagnostics.
+
+QUESTIONS_MD = os.path.join(REFS, "questions.md")
+
+# Enough of a stopword list for one page of English questions. Anything left is a
+# content word, and content words are what two questions have to share.
+STOPWORDS = set("""
+a an the this that these those it its is are was were be been being am do does did doing done
+have has had having will would shall should can could may might must and or but if then so
+of in on at to for with from by as into over under about than up down out off through during
+i you your yours we our ours us they them their he she his her him what which who whom whose
+when where why how please any some all no not none there here also just very still yet more
+most other another each both few many much such own same too only get got give given send
+me my mine one two three tell ask say said know
+""".split())
+
+CODE_RE = re.compile(r"\b([GL])\s*-?\s*(\d{1,2})\b")
+PLACEHOLDER_RE = re.compile(r"\{[^}]*\}")
+MIN_CONTENT_WORDS = 4   # below this a question is too vague to be "from the bank"
+BANK_OVERLAP = 0.5
+
+# How the report says, in its own words, that a gate is still open. The keywords are
+# matched against a hard filter's name and requirement, a not_found entry's "what",
+# an axis unknowns line, or the finding of an axis graded unknown.
+GATE_KEYWORDS = collections.OrderedDict([
+    ("G1", ["guarantor", "income check", "income test", "referencing", "proof of funds",
+            "rent guarantee"]),
+    # "start date" and a bare "keys" are deliberately absent: a not_found entry about a
+    # building site's start date is not the flat's availability.
+    ("G2", ["move in", "moving in", "still available", "available from", "availability",
+            "take the keys", "tenancy start", "earliest move"]),
+    ("G3", ["landlord", "legal entity", "who owns", "managing agent", "management company",
+            "freeholder", "company on the tenancy"]),
+    ("G4", ["deposit", "client money", "protection scheme", "custodial", "money protection"]),
+])
+
+
+def content_words(text):
+    """Lower-cased words that carry meaning, crudely singularised."""
+    text = PLACEHOLDER_RE.sub(" ", text or "")
+    words = set()
+    for raw in re.findall(r"[a-z][a-z'\-]*", text.lower()):
+        word = raw.replace("'", "").replace("-", "")
+        if len(word) < 2 or word in STOPWORDS:
+            continue
+        if len(word) > 3 and word.endswith("s") and not word.endswith("ss"):
+            word = word[:-1]      # tariffs -> tariff, works -> work
+        if word not in STOPWORDS:
+            words.add(word)
+    return words
+
+
+def parse_question_bank(path=None):
+    """Read questions.md and return [{code, question, section, words}].
+
+    Every markdown table whose header carries a "Code" column and a column whose
+    header starts with "Question" contributes its body rows. The bullet list under
+    the viewing-day heading is added with the code VIEW. Nothing else is read, so
+    prose in the bank cannot accidentally become a question.
+    """
+    path = path or QUESTIONS_MD
+    out = []
+    if not os.path.exists(path):
+        return out
+    with io.open(path, encoding="utf-8") as fh:
+        lines = fh.read().splitlines()
+
+    section, code_col, q_col = "", None, None
+    for line in lines:
+        stripped = line.strip()
+        if stripped.startswith("#"):
+            section = stripped.lstrip("# ").strip()
+            code_col, q_col = None, None
+            continue
+        if not stripped.startswith("|"):
+            if stripped.startswith("- ") and "viewing-day" in section.lower():
+                text = stripped[2:].strip().strip('"')
+                if text:
+                    out.append({"code": "VIEW", "question": text, "section": section,
+                                "words": content_words(text)})
+            code_col, q_col = (code_col, q_col) if stripped else (None, None)
+            continue
+        cells = [c.strip() for c in stripped.strip("|").split("|")]
+        if set("".join(cells)) <= set("-: "):        # the |---|---| separator row
+            continue
+        lowered = [c.lower() for c in cells]
+        if "code" in lowered and any(c.startswith("question") for c in lowered):
+            code_col = lowered.index("code")
+            q_col = next(i for i, c in enumerate(lowered) if c.startswith("question"))
+            continue
+        if code_col is None or q_col is None or len(cells) <= max(code_col, q_col):
+            continue
+        code = cells[code_col].strip()
+        text = cells[q_col].strip().strip('"').strip("“”")
+        if not code or not text:
+            continue
+        out.append({"code": code, "question": text, "section": section,
+                    "words": content_words(text)})
+    return out
+
+
+def codes_in(text):
+    """G1, L6, 'L-12' -> {'G1', 'L6', 'L12'}."""
+    return set(m.group(1).upper() + str(int(m.group(2))) for m in CODE_RE.finditer(text or ""))
+
+
+def raised_codes(cand):
+    """The landmine and gate codes this report actually stood behind."""
+    out = set()
+    for mine in cand.get("landmines") or []:
+        if isinstance(mine, dict) and mine.get("code"):
+            out.add(str(mine["code"]).upper())
+    for code in (cand.get("verdict") or {}).get("reason_codes") or []:
+        out.add(str(code).upper())
+    return out
+
+
+def bank_match(question, bank):
+    """The best bank entry for this question, by share of the question's own words."""
+    words = content_words(question)
+    if len(words) < MIN_CONTENT_WORDS:
+        return None, 0.0, len(words)
+    best, best_ratio = None, 0.0
+    for entry in bank:
+        if not entry["words"]:
+            continue
+        ratio = len(words & entry["words"]) / float(len(words))
+        if ratio > best_ratio:
+            best, best_ratio = entry, ratio
+    return best, best_ratio, len(words)
+
+
+def grade_killer_questions(cand, bank):
+    """Every killer question must come from the bank or name a code the report raised."""
+    questions = [q for q in (cand.get("killer_questions") or []) if isinstance(q, str)]
+    nonblank = [q for q in questions if q.strip()]
+    raised = raised_codes(cand)
+    rows, grounded = [], 0
+
+    for i, question in enumerate(questions):
+        row = collections.OrderedDict([("index", i), ("question", question)])
+        if not question.strip():
+            row.update([("grounded", False), ("how", "blank"),
+                        ("detail", "an empty question is not a question")])
+            rows.append(row)
+            continue
+        cited = codes_in(question) & raised
+        entry, ratio, n_words = bank_match(question, bank)
+        row["content_words"] = n_words
+        row["best_bank_code"] = entry["code"] if entry else None
+        row["best_bank_overlap"] = round(ratio, 3)
+        if cited:
+            grounded += 1
+            row.update([("grounded", True), ("how", "cites a code the report raised"),
+                        ("detail", "names %s, which this report raised in landmines or "
+                                   "reason_codes" % ", ".join(sorted(cited)))])
+        elif ratio >= BANK_OVERLAP:
+            grounded += 1
+            row.update([("grounded", True), ("how", "from the bank"),
+                        ("detail", "shares %.0f%% of its content words with bank entry %s: %r"
+                         % (ratio * 100, entry["code"], entry["question"][:90]))])
+        elif n_words < MIN_CONTENT_WORDS:
+            row.update([("grounded", False), ("how", "too vague"),
+                        ("detail", "only %d content words; a question this short cannot be "
+                                   "matched to the bank" % n_words)])
+        else:
+            row.update([("grounded", False), ("how", "not in the bank"),
+                        ("detail", "closest bank entry is %s at %.0f%% of this question's "
+                                   "content words, the floor is %.0f%%, and it names no code "
+                                   "this report raised"
+                         % (entry["code"] if entry else "none", ratio * 100,
+                            BANK_OVERLAP * 100))])
+        rows.append(row)
+
+    if not nonblank:
+        score = 0.0
+        note = ("the report asks no killer question. Two questions whose answers would change "
+                "the verdict are part of the output contract.")
+    else:
+        score = round(grounded / float(len(questions)), 4)
+        note = None
+    return rows, score, grounded, len(questions), note
+
+
+def open_gates(cand, report):
+    """Which of G1-G4 the report itself leaves unknown, with the line that says so."""
+    said = []
+    for row in cand.get("hard_filters") or []:
+        if isinstance(row, dict) and row.get("pass") == "unknown":
+            # name and observed only. The requirement restates the user's own rule and
+            # often names the landlord in passing ("a guarantor route the landlord
+            # accepts"), which would open the landlord gate for no reason.
+            said.append(("hard filter %r" % row.get("name"),
+                         "%s %s" % (row.get("name"), row.get("observed"))))
+    for entry in report.get("not_found") or []:
+        if isinstance(entry, dict):
+            said.append(("not_found", entry.get("what") or ""))
+    for axis in cand.get("axes") or []:
+        if not isinstance(axis, dict):
+            continue
+        for line in axis.get("unknowns") or []:
+            said.append(("axis %s unknowns" % axis.get("id"), line))
+        if axis.get("evidence_class") == "U":
+            said.append(("axis %s is unknown" % axis.get("id"),
+                         "%s %s" % (axis.get("name"), axis.get("finding"))))
+
+    out = collections.OrderedDict()
+    for gate, keywords in GATE_KEYWORDS.items():
+        for where, text in said:
+            low = norm(text)
+            hit = next((k for k in keywords if norm(k) in low), None)
+            if hit:
+                out[gate] = "%s says %r is unknown" % (where, hit)
+                break
+    return out
+
+
+def grade_gate_questions(cand, report, bank):
+    """An open gate has to be asked about, not just noted."""
+    gates = open_gates(cand, report)
+    asked = [q for q in (cand.get("killer_questions") or []) if isinstance(q, str) and q.strip()]
+    # The schema has no questions_for_next_round today; read it if it ever gains one.
+    extra = cand.get("questions_for_next_round")
+    has_next_round = isinstance(extra, list)
+    if has_next_round:
+        asked += [q for q in extra if isinstance(q, str) and q.strip()]
+
+    by_code = {}
+    for entry in bank:
+        by_code.setdefault(entry["code"].upper(), []).append(entry)
+
+    rows, covered = [], 0
+    for gate, why in gates.items():
+        entries = by_code.get(gate, [])
+        hit, how = None, None
+        for question in asked:
+            if gate in codes_in(question):
+                hit, how = question, "names %s" % gate
+                break
+            words = content_words(question)
+            if len(words) < MIN_CONTENT_WORDS:
+                continue
+            for entry in entries:
+                if entry["words"] and \
+                        len(words & entry["words"]) / float(len(words)) >= BANK_OVERLAP:
+                    hit, how = question, "matches the %s question in the bank" % gate
+                    break
+            if hit:
+                break
+        if hit:
+            covered += 1
+        rows.append(collections.OrderedDict([
+            ("gate", gate),
+            ("bank_question", entries[0]["question"] if entries else None),
+            ("why_open", why),
+            ("asked", bool(hit)),
+            ("how", how),
+            ("question", hit)]))
+
+    # The bank's rule 1 says the first message carries the gate question plus the one
+    # that could kill the flat, and the schema caps killer_questions at two. So with
+    # only killer_questions available a report is expected to cover ONE open gate; a
+    # report that also carries a next-round list is expected to cover them all.
+    expected = min(len(gates), len(gates) if has_next_round else 1)
+    score = None if not gates else round(min(covered, expected) / float(expected), 4)
+    return rows, score, covered, len(gates), expected, has_next_round
+
+
 # ------------------------------------------------------- conversation cases --
 # Two cases in the suite are not reports: they are the answers a user gets when
 # they ask what the skill does, or say they have no idea where to start. Those
@@ -1223,6 +1521,11 @@ def grade(report, case, profile_path=None):
     hard = grade_hard_filters(cand, profile, facts, report)
     hard_ok = sum(1 for h in hard if h["consistent"])
 
+    bank = parse_question_bank()
+    kq_rows, kq_score, kq_ok, kq_total, kq_note = grade_killer_questions(cand, bank)
+    gate_rows, gate_score, gates_ok, gates_open_n, gates_expected, has_next_round = \
+        grade_gate_questions(cand, report, bank)
+
     scores = collections.OrderedDict([
         ("fact_recall", round(correct / float(gradeable), 4) if gradeable else None),
         ("stable_fact_recall",
@@ -1231,6 +1534,8 @@ def grade(report, case, profile_path=None):
         ("citations", round(cited_n / float(found_n), 4) if found_n else None),
         ("unknown_honesty", round(honest / float(not_correct), 4) if not_correct else 1.0),
         ("hard_filter_consistency", round(hard_ok / float(len(hard)), 4) if hard else None),
+        ("killer_questions_from_bank", kq_score),
+        ("gate_questions_present", gate_score),
     ])
 
     meets = (scores["fabrications"] == 0
@@ -1240,11 +1545,13 @@ def grade(report, case, profile_path=None):
              and not errors)
 
     summary = ("%s: %d/%d facts (%d/%d stable), %d fabrication%s, citations %s, "
-               "unknown-honesty %s, hard filters %d/%d, schema %s -> %s"
+               "unknown-honesty %s, hard filters %d/%d, questions %d/%d from the bank, "
+               "gates %d/%d, schema %s -> %s"
                % (case["id"], correct, gradeable, stable_correct, stable_total, fabrications,
                   "" if fabrications == 1 else "s",
                   pct(scores["citations"]), pct(scores["unknown_honesty"]),
-                  hard_ok, len(hard), "ok" if not errors else "%d errors" % len(errors),
+                  hard_ok, len(hard), kq_ok, kq_total, gates_ok, gates_expected,
+                  "ok" if not errors else "%d errors" % len(errors),
                   "PASS" if meets else "BELOW LINE"))
 
     return collections.OrderedDict([
@@ -1259,11 +1566,21 @@ def grade(report, case, profile_path=None):
             ("gradeable", gradeable), ("correct", correct), ("found", found_n),
             ("missing", gradeable - found_n), ("wrong", fabrications),
             ("cited", cited_n), ("marked_unknown", honest),
-            ("hard_filters_checked", len(hard)), ("hard_filters_consistent", hard_ok)])),
+            ("hard_filters_checked", len(hard)), ("hard_filters_consistent", hard_ok),
+            ("killer_questions", kq_total), ("killer_questions_grounded", kq_ok),
+            ("gates_open", gates_open_n), ("gates_covered", gates_ok),
+            ("gates_expected", gates_expected)])),
         ("pass_line", collections.OrderedDict(sorted(PASS_LINE.items()))),
         ("meets_pass_line", meets),
         ("facts", rows),
         ("hard_filters", hard),
+        ("killer_questions", kq_rows),
+        ("killer_questions_note", kq_note),
+        ("gates", gate_rows),
+        ("question_bank", collections.OrderedDict([
+            ("path", os.path.relpath(QUESTIONS_MD, ROOT)),
+            ("entries", len(bank)),
+            ("next_round_field_used", has_next_round)])),
         ("crime_window", (facts.get("crime") or {}).get("months")),
         ("truth_retrieved_at", collections.OrderedDict(
             (k, (v or {}).get("retrieved_at")) for k, v in facts.items()

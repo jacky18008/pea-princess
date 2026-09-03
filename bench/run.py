@@ -449,8 +449,9 @@ def usage_from_stdout(agent, stdout):
 
 # ------------------------------------------------------------- scorecard IO --
 MD_HEADER = ("| run (UTC) | agent | model | case | facts | stable | fabrications | citations | "
-             "unknown honesty | hard filters | schema | wall s | tokens / cost |\n"
-             "|---|---|---|---|---|---|---|---|---|---|---|---|---|\n")
+             "unknown honesty | hard filters | questions | gates | schema | wall s | "
+             "tokens / cost |\n"
+             "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n")
 
 
 def append_scorecard(row, when=None):
@@ -479,13 +480,15 @@ def append_scorecard(row, when=None):
                      "above 95 percent, zero fabrications, citations at 100 percent.\n\n"
                      % day)
             fh.write(MD_HEADER)
-        fh.write("| %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s |\n" % (
-            row["run_at"], row["agent"], row.get("model") or "-", row["case"],
-            row.get("facts") or "-", row.get("stable_facts") or "-",
-            row.get("fabrications", "-"), row.get("citations") or "-",
-            row.get("unknown_honesty") or "-", row.get("hard_filters") or "-",
-            "ok" if row.get("schema_valid") else "FAIL",
-            row.get("wall_time_s", "-"), row.get("cost_note") or "-"))
+        fh.write("| %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s |"
+                 "\n" % (
+                     row["run_at"], row["agent"], row.get("model") or "-", row["case"],
+                     row.get("facts") or "-", row.get("stable_facts") or "-",
+                     row.get("fabrications", "-"), row.get("citations") or "-",
+                     row.get("unknown_honesty") or "-", row.get("hard_filters") or "-",
+                     row.get("questions") or "-", row.get("gates") or "-",
+                     "ok" if row.get("schema_valid") else "FAIL",
+                     row.get("wall_time_s", "-"), row.get("cost_note") or "-"))
     return jpath, mpath
 
 
@@ -524,6 +527,13 @@ def make_row(agent, model, case, card, wall, usage, workdir, command, note=None,
         ("hard_filters", "%s/%s" % (counts.get("hard_filters_consistent"),
                                     counts.get("hard_filters_checked")) if counts else None),
         ("hard_filter_consistency", scores.get("hard_filter_consistency")),
+        ("questions", "%s/%s" % (counts.get("killer_questions_grounded"),
+                                 counts.get("killer_questions"))
+         if counts and counts.get("killer_questions") is not None else None),
+        ("killer_questions_from_bank", scores.get("killer_questions_from_bank")),
+        ("gates", "%s/%s" % (counts.get("gates_covered"), counts.get("gates_expected"))
+         if counts and counts.get("gates_expected") else None),
+        ("gate_questions_present", scores.get("gate_questions_present")),
         ("schema_valid", (card or {}).get("schema", {}).get("valid")),
         ("meets_pass_line", (card or {}).get("meets_pass_line")),
         ("wall_time_s", round(wall, 1) if wall is not None else None),

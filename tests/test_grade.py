@@ -379,6 +379,227 @@ class TestEvalSuite(unittest.TestCase):
             self.assertGreater(card["counts"]["gradeable"], 0, case["id"])
 
 
+# --------------------------------------------------------- the question bank --
+BANK_QUESTION_L6 = ("Is heating and hot water on a communal heat network? Please send the "
+                    "current standing charge and unit rate in writing, and name the billing "
+                    "company.")
+BANK_QUESTION_G1 = ("Which guarantor or income-check routes do you accept for this tenancy: a "
+                    "UK guarantor, rent-guarantee insurance, a commercial guarantor service, or "
+                    "proof of funds?")
+BANK_QUESTION_G2 = ("Is the flat still available for a move-in on or after 15 September, and "
+                    "what is the earliest date I could take the keys?")
+VAGUE = ["Is the flat nice?", "Is the building well managed?"]
+
+
+class TestQuestionBank(unittest.TestCase):
+    def test_the_real_bank_parses(self):
+        bank = grader.parse_question_bank()
+        self.assertTrue(bank, "references/questions.md produced no questions")
+        codes = set(e["code"].upper() for e in bank)
+        for gate in ("G1", "G2", "G3", "G4"):
+            self.assertIn(gate, codes)
+        for i in range(1, 13):
+            self.assertIn("L%d" % i, codes, "the bank has no question for landmine L%d" % i)
+        for entry in bank:
+            self.assertTrue(entry["question"].strip())
+            self.assertNotIn("|", entry["question"])
+
+    def test_the_bank_is_read_from_the_file_so_edits_flow_through(self):
+        handle, path = tempfile.mkstemp(suffix=".md")
+        os.close(handle)
+        try:
+            with io.open(path, "w", encoding="utf-8") as fh:
+                fh.write("## Gate questions\n\n"
+                         "| Code | Question (send verbatim) | Why |\n"
+                         "|---|---|---|\n"
+                         "| G9 | Who empties the bins and how often is the bin store cleaned? "
+                         "| smell |\n\n"
+                         "## Viewing-day questions\n\n"
+                         "- \"Can I see the meter cupboard?\"\n")
+            bank = grader.parse_question_bank(path)
+            self.assertEqual(["G9", "VIEW"], [e["code"] for e in bank])
+            self.assertIn("bin", bank[0]["words"])
+        finally:
+            os.unlink(path)
+
+    def test_a_missing_bank_is_not_a_crash(self):
+        self.assertEqual([], grader.parse_question_bank("/nonexistent/questions.md"))
+
+    def test_content_words_drop_stopwords_and_plurals(self):
+        words = grader.content_words("Please send the current tariffs and the unit rates.")
+        self.assertIn("tariff", words)
+        self.assertIn("rate", words)
+        self.assertNotIn("the", words)
+        self.assertNotIn("please", words)
+
+    def test_codes_are_read_out_of_a_question(self):
+        self.assertEqual({"L6", "G1"},
+                         grader.codes_in("Because of L6 and G1 I need the tariff."))
+        self.assertEqual({"L12"}, grader.codes_in("landmine L-12 applies"))
+
+
+class TestKillerQuestions(GradeBase):
+    def report_with(self, questions, landmines=None, reason_codes=None, hard_filters=None):
+        rep = copy.deepcopy(self.sample)
+        rep["candidates"] = [copy.deepcopy(rep["candidates"][0])]
+        del rep["comparison"]
+        cand = rep["candidates"][0]
+        cand["killer_questions"] = questions
+        if landmines is not None:
+            cand["landmines"] = landmines
+        if reason_codes is not None:
+            cand["verdict"]["reason_codes"] = reason_codes
+        if hard_filters is not None:
+            cand["hard_filters"] = hard_filters
+        return rep
+
+    def test_a_question_quoting_the_bank_passes(self):
+        card = self.card_for(self.report_with([BANK_QUESTION_L6]))
+        self.assertEqual(1.0, card["scores"]["killer_questions_from_bank"])
+        row = card["killer_questions"][0]
+        self.assertTrue(row["grounded"])
+        self.assertEqual("from the bank", row["how"])
+        self.assertEqual("L6", row["best_bank_code"])
+
+    def test_a_close_paraphrase_of_a_bank_question_passes(self):
+        paraphrase = ("Please send the current standing charge and unit rate for the communal "
+                      "heat network in writing, and name the billing company.")
+        card = self.card_for(self.report_with([paraphrase]))
+        self.assertEqual(1.0, card["scores"]["killer_questions_from_bank"])
+
+    def test_vague_questions_fail(self):
+        card = self.card_for(self.report_with(VAGUE))
+        self.assertEqual(0.0, card["scores"]["killer_questions_from_bank"])
+        for row in card["killer_questions"]:
+            self.assertFalse(row["grounded"], row)
+        self.assertEqual("too vague", card["killer_questions"][0]["how"])
+
+    def test_a_short_question_cannot_match_on_one_shared_word(self):
+        """'Is the flat nice?' shares 'flat' with a bank question. That is not a question."""
+        card = self.card_for(self.report_with(["Is the flat nice?"]))
+        row = card["killer_questions"][0]
+        self.assertFalse(row["grounded"])
+        self.assertLess(row["content_words"], grader.MIN_CONTENT_WORDS)
+
+    def test_citing_a_code_the_report_raised_passes(self):
+        rep = self.report_with(
+            ["Given landmine L6, what will heat actually cost me each winter month?"],
+            landmines=[{"code": "L6", "label": "Heat network", "detail": "No tariff in writing.",
+                        "reversible": False, "evidence_class": "I"}])
+        card = self.card_for(rep)
+        row = card["killer_questions"][0]
+        self.assertTrue(row["grounded"])
+        self.assertEqual("cites a code the report raised", row["how"])
+
+    def test_citing_a_code_the_report_never_raised_does_not_pass(self):
+        rep = self.report_with(["Given landmine L11, is it warm?"], landmines=[])
+        card = self.card_for(rep)
+        self.assertFalse(card["killer_questions"][0]["grounded"])
+
+    def test_a_reason_code_counts_as_raised(self):
+        rep = self.report_with(
+            ["L6 is the reason: which billing company runs the heat account here?"],
+            landmines=[{"code": "L6", "label": "Heat network", "detail": "x",
+                        "reversible": False, "evidence_class": "I"}],
+            reason_codes=["L6"])
+        card = self.card_for(rep)
+        self.assertTrue(card["killer_questions"][0]["grounded"])
+
+    def test_no_questions_at_all_scores_zero(self):
+        card = self.card_for(self.report_with([]))
+        self.assertEqual(0.0, card["scores"]["killer_questions_from_bank"])
+        self.assertIn("no killer question", card["killer_questions_note"])
+
+    def test_a_blank_question_is_not_a_question(self):
+        card = self.card_for(self.report_with([BANK_QUESTION_L6, "   "]))
+        self.assertEqual(0.5, card["scores"]["killer_questions_from_bank"])
+        self.assertEqual("blank", card["killer_questions"][1]["how"])
+
+    def test_one_of_two_grounded_scores_half(self):
+        card = self.card_for(self.report_with([BANK_QUESTION_L6, "Is the flat nice?"]))
+        self.assertEqual(0.5, card["scores"]["killer_questions_from_bank"])
+        self.assertEqual(1, card["counts"]["killer_questions_grounded"])
+        self.assertEqual(2, card["counts"]["killer_questions"])
+
+    def test_the_scorecard_names_the_bank_it_used(self):
+        card = self.card_for(self.report_with([BANK_QUESTION_L6]))
+        self.assertIn("questions.md", card["question_bank"]["path"])
+        self.assertGreater(card["question_bank"]["entries"], 15)
+
+
+class TestGateQuestions(TestKillerQuestions):
+    MOVE_IN_UNKNOWN = {"name": "Move-in date",
+                       "requirement": "Keys between 2026-09-15 and 2026-10-15",
+                       "observed": "The advert says available from October; no exact date",
+                       "pass": "unknown", "evidence_class": "S"}
+    GUARANTOR_UNKNOWN = {"name": "Guarantor route",
+                         "requirement": "A guarantor route the landlord accepts",
+                         "observed": "Nobody has said which income-check routes are accepted",
+                         "pass": "unknown", "evidence_class": "U"}
+
+    def test_an_open_gate_that_is_never_asked_about_fails(self):
+        rep = self.report_with([BANK_QUESTION_L6], hard_filters=[self.MOVE_IN_UNKNOWN])
+        card = self.card_for(rep)
+        self.assertEqual(0.0, card["scores"]["gate_questions_present"])
+        gate = card["gates"][0]
+        self.assertEqual("G2", gate["gate"])
+        self.assertFalse(gate["asked"])
+        self.assertIn("unknown", gate["why_open"])
+
+    def test_asking_the_gate_question_covers_it(self):
+        rep = self.report_with([BANK_QUESTION_G2], hard_filters=[self.MOVE_IN_UNKNOWN])
+        card = self.card_for(rep)
+        self.assertEqual(1.0, card["scores"]["gate_questions_present"])
+        self.assertTrue(card["gates"][0]["asked"])
+
+    def test_naming_the_gate_code_covers_it(self):
+        rep = self.report_with(
+            ["G2: is the flat still free for a move-in in the second half of September?"],
+            hard_filters=[self.MOVE_IN_UNKNOWN])
+        card = self.card_for(rep)
+        self.assertTrue(card["gates"][0]["asked"])
+        self.assertEqual("names G2", card["gates"][0]["how"])
+
+    def test_the_guarantor_gate_opens_on_an_unknown_income_check(self):
+        rep = self.report_with([BANK_QUESTION_G1], hard_filters=[self.GUARANTOR_UNKNOWN])
+        card = self.card_for(rep)
+        self.assertEqual(["G1"], [g["gate"] for g in card["gates"]])
+        self.assertEqual(1.0, card["scores"]["gate_questions_present"])
+
+    def test_two_open_gates_need_only_one_answer_while_there_are_two_slots(self):
+        """The bank's rule 1: the first message is one gate question plus one killer."""
+        rep = self.report_with([BANK_QUESTION_G1, BANK_QUESTION_L6],
+                               hard_filters=[self.MOVE_IN_UNKNOWN, self.GUARANTOR_UNKNOWN])
+        card = self.card_for(rep)
+        self.assertEqual(2, card["counts"]["gates_open"])
+        self.assertEqual(1, card["counts"]["gates_expected"])
+        self.assertEqual(1.0, card["scores"]["gate_questions_present"])
+
+    def test_no_open_gate_means_no_score(self):
+        rep = self.report_with([BANK_QUESTION_L6], hard_filters=[])
+        rep["not_found"] = []
+        for axis in rep["candidates"][0]["axes"]:
+            axis.pop("unknowns", None)
+            if axis.get("evidence_class") == "U":
+                axis["evidence_class"] = "I"
+        card = self.card_for(rep)
+        self.assertEqual([], card["gates"])
+        self.assertIsNone(card["scores"]["gate_questions_present"])
+
+    def test_a_building_site_start_date_is_not_the_flats_availability(self):
+        """The G2 keywords must not fire on 'construction start date' in not_found."""
+        rep = self.report_with([BANK_QUESTION_L6], hard_filters=[])
+        rep["not_found"] = [{"what": "The expected construction start date for the scheme "
+                                     "next door",
+                             "queries_used": ["planning portal 26/AP/0812"]}]
+        for axis in rep["candidates"][0]["axes"]:
+            axis.pop("unknowns", None)
+            if axis.get("evidence_class") == "U":
+                axis["evidence_class"] = "I"
+        card = self.card_for(rep)
+        self.assertEqual([], card["gates"], card["gates"])
+
+
 # ------------------------------------------------------- conversation cases --
 GOOD_EN = """I check a London rental flat the way a careful surveyor would, using official and
 open UK data, and I run 12 checks on it: the government energy certificate for the true size,

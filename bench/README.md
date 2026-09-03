@@ -172,7 +172,7 @@ e8-kingsland-high-street-2: 12/12 facts (9/9 stable), 0 fabrications, citations 
 unknown-honesty 100%, hard filters 4/4, schema ok -> PASS
 ```
 
-### The five scores
+### The scores
 
 | score | meaning |
 |---|---|
@@ -182,9 +182,12 @@ unknown-honesty 100%, hard filters 4/4, schema ok -> PASS
 | `unknown_honesty` | of the facts not reported correctly, the share the report explicitly marks unknown — a null value, an axis graded U, an `unknowns[]` line, a `not_found[]` entry, or a hard filter answered `"unknown"` — rather than leaving a silent hole |
 | (conversation cases) | `fact_recall` becomes checks passed over checks that applied; `citations`, `unknown_honesty` and `hard_filter_consistency` do not apply and come back null |
 | `hard_filter_consistency` | of the hard-filter rows that truth can check, the share whose `pass` agrees with the profile and the observed value |
+| `killer_questions_from_bank` | of the questions the report puts to the agent, the share that are **real** questions — see the next section |
+| `gate_questions_present` | when the report says it does not know the guarantor route, the availability, the landlord entity or the deposit protection, did it ask |
 
 `stable_fact_recall` is `fact_recall` restricted to the facts that do not move
-between refreshes. That is the one the pass line is set on.
+between refreshes. That is the one the pass line is set on. The two question scores
+have their own section below.
 
 ### Tolerances
 
@@ -218,13 +221,75 @@ For a model to be called usable for this skill, over the whole suite:
 Volatile facts (crime totals, journey minutes) are reported but are **not** part of
 the line: they carry tolerances and they drift between the truth refresh and the run.
 
-`unknown_honesty` and `hard_filter_consistency` are reported as diagnostics. A model
-below 100 % on `unknown_honesty` is quietly dropping axes; a model below 100 % on
+`unknown_honesty`, `hard_filter_consistency`, `killer_questions_from_bank` and
+`gate_questions_present` are reported as diagnostics. A model below 100 % on
+`unknown_honesty` is quietly dropping axes; a model below 100 % on
 `hard_filter_consistency` is answering the user's own filters wrongly, which is worse
-than a wrong verdict.
+than a wrong verdict; a model below 100 % on the two question scores has written a
+report that reads well and asks nothing, which is the failure a tenant finds out
+about after they have signed.
 
 Verdicts are never scored. Two models with different verdicts and identical facts
 both pass.
+
+---
+
+## The question bank
+
+A report that gets every number right and then asks the agent "is the building well
+managed?" has wasted the one message a letting agent will actually read. So two more
+scores check that the questions are real.
+
+`skills/vet-flat/references/questions.md` holds them: four gate questions (G1
+guarantor route, G2 availability, G3 landlord entity, G4 deposit protection) and at
+least one question per landmine L1–L12, plus the viewing-day questions.
+`bench/grade.py` **parses that file at run time** — any markdown table with a `Code`
+column and a column whose header starts with `Question`, plus the bullets under the
+viewing-day heading. Edit the bank and the grader follows; nothing in `grade.py`
+needs touching.
+
+### `killer_questions_from_bank`
+
+Each of the report's `killer_questions` (the schema caps them at two) must be
+**grounded**, one of two ways:
+
+- **from the bank** — at least half of the question's own content words appear in
+  some bank question. Content words are what survives lower-casing, punctuation
+  stripping, a stopword list and a crude plural strip, so "tariffs" and "tariff" are
+  the same word and a paraphrase still matches.
+- **naming a code** — the question cites a landmine or gate code (`L1`–`L12`,
+  `G1`–`G4`) that **this report actually raised** in `landmines[].code` or
+  `verdict.reason_codes`. Citing a code the report never raised does not count.
+
+A question with fewer than four content words cannot match by overlap at all.
+Without that floor, "Is the flat nice?" would score 50 % against the bank on the word
+"flat" alone — which is the exact failure this check exists to catch. A report with
+no killer questions, or with a blank one, scores zero on that question.
+
+The scorecard shows `best_bank_code` and `best_bank_overlap` for every question, so a
+near miss is visible: a specific, sensible question that simply is not the bank's
+version of itself shows up as, say, "closest bank entry is L5 at 33 %". The bank's
+own rule is *pick by the landmine codes the checks raised; do not invent softer
+versions*, and this score enforces it.
+
+### `gate_questions_present`
+
+A gate is **open** when the report itself says it does not know: a hard filter
+answered `"unknown"`, a `not_found[]` entry, an axis `unknowns[]` line, or an axis
+graded U, whose words belong to that gate. A hard filter is read by its `name` and
+`observed` only — never the `requirement`, which restates the user's own rule and
+often names the landlord in passing. A report that never mentions a gate at all opens
+none; silence is already punished by `unknown_honesty` and is not punished twice.
+
+For every open gate, one of that gate's bank questions has to appear in
+`killer_questions` (matched the same two ways: word overlap, or naming the code).
+How many are expected depends on the room available: rule 1 of the bank says the
+first message carries **the gate question plus the one that could kill this flat**,
+and the schema caps `killer_questions` at two, so with only killer questions a report
+is expected to cover **one** open gate. If the schema ever gains a
+`questions_for_next_round` array and a report fills it, every open gate is expected;
+`grade.py` reads that field if it exists. With no open gate the score is `null`, not
+a free 100 %.
 
 ---
 
@@ -405,6 +470,7 @@ and a deliberately bad answer must fail.
 
 - **Verdict quality.** On purpose. There is no ground truth for "should you rent it".
 - **Anything behind a portal.** Rent, listing photos, price history and resident reviews are all on sites whose terms forbid automated access, so the benchmark holds no truth for price per square foot, management scores or the incentivised-review share, and `grade.py` does not grade them.
+- **Whether the agent answers.** The question scores check that the right question was asked, not what came back. A gate question sent and ignored is rule 4 of the bank — "a non-answer is an answer" — and only the user can record that.
 - **Aspect, light and the flat itself.** No open register knows which way the windows face.
 - **Planning and roads.** `planning.py` and `roads.py` are still being finished; when they land, `nearest_works_m` becomes gradeable and a `planning` block belongs in `expected_facts`.
 - **Taste.** A dull correct report and a vivid correct report score the same, and the same goes for the two conversation answers: only the facts and the shape are scored.
