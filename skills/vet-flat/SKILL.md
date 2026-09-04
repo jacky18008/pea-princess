@@ -24,7 +24,7 @@ Answer from `references/onboarding.md`: the short pitch in the user's language, 
 Read `profile.yaml` (hard filters: floor area, building age, budget bands, move-in window, commute destination and minutes, guarantor route, floor and light rules, must-haves, and `budget_mode` lite/standard/deep — see `references/budget-modes.md`). If it is missing, ask for the six essentials once (budget, area, age, move-in, destination, must-haves), then proceed and state your assumptions.
 
 ## 2. Two presumptions that run through every axis
-1. **Cheap has a reason.** A price below the local band means the landlord or agent has a reason to sell you. Find it and name it (location, age, construction, timing, management, commute, aspect). An unexplained discount is a reason to walk.
+1. **Cheap has a reason.** A price below the local band means the landlord or agent has a reason to sell you. Find it and name it. An unexplained discount is a reason to walk.
 2. **Pay more only for a nameable benefit** (aspect, floor, quiet side, management).
 3. **Landlords and agents are partners, not adversaries.** This skill is a filter; nothing replaces viewing the flat and meeting them.
 Ask of every listing: "What sits under its prettiest feature?"
@@ -60,7 +60,7 @@ Per-borough portals: `references/boroughs.yaml`.
 Follow `references/inputs.md`: try first; collect every gap; ask **once**, with URL, format and why; record `provenance: user_supplied`; mark the axis **U** if it stays unavailable. Never invent a number.
 
 ## 7. Output contract
-Write `report.json` conforming to `references/report-schema.json`. Shell mode: `python3 scripts/render.py report.json > report.html`. Otherwise hand over the JSON and tell the user to paste it into `viewer/viewer.html`. Also print the one-page verdict in the user's language.
+Write `report.json` conforming to `references/report-schema.json`. Shell mode: `python3 scripts/render.py report.json > report.html`. Otherwise give the JSON for `viewer/viewer.html`. Also print the one-page verdict in the user's language.
 Plain language everywhere: short sentences; no jargon without a gloss; every number says what it means and what it is compared with; evidence grades as plain labels.
 Verdict: **PASS** · **EDGE** (with the break-even rent) · **CONDITIONAL** (conditions listed) · **KILL** (fatal axis named). Include: ≤2 killer questions from `references/questions.md`; viewing-day checks; a "not found" table with the search strings; sources with retrieval times; the footer "Generated with vet-flat <version> — <source URL>".
 
