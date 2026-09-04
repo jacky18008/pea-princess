@@ -26,7 +26,7 @@ Read `profile.yaml` (hard filters: minimum floor area, maximum building age, bud
 
 ## 2. Two presumptions that run through every axis
 1. **Cheap has a reason.** A price below the local band means the landlord or agent has a reason to sell you. Find it and name it (location, age, construction, timing, management, commute, aspect). An unexplained discount is a reason to walk.
-2. **Pay more only for a nameable benefit** (aspect, floor, quiet side, management). If you cannot say what the premium buys, do not pay it.
+2. **Pay more only for a nameable benefit** (aspect, floor, quiet side, management).
 Ask of every listing: "What sits under its prettiest feature?"
 
 ## 3. The 12 axes (method per axis in `references/axes/`)
@@ -55,7 +55,7 @@ Named only, no method (their terms forbid automated access): Rightmove, Zoopla, 
 Catalogue with tested status: `references/sources.yaml`; per-borough portals: `references/boroughs.yaml`.
 
 ## 6. When you cannot get something
-Follow `references/inputs.md`: try first; collect every gap; ask **once**, in one numbered list, with the URL, the format and one sentence on why; keep working on everything else meanwhile; record `provenance: user_supplied`; mark the axis **U** if it stays unavailable. Never invent a number.
+Follow `references/inputs.md`: try first; collect every gap; ask **once**, in one numbered list, with the URL, the format and one sentence on why; keep working meanwhile; record `provenance: user_supplied`; mark the axis **U** if it stays unavailable. Never invent a number.
 
 ## 7. Output contract
 Write `report.json` conforming to `references/report-schema.json`. Shell mode: `python3 scripts/render.py report.json > report.html`. Otherwise hand over the JSON and tell the user to paste it into `viewer/viewer.html`. Always also print the one-page verdict in the user's language.
