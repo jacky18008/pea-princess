@@ -10,6 +10,7 @@ Every report's `killer_questions` (at most two) and the enquiry-letter pack are 
 3. **Write down the answer with its evidence class**: a written tariff is G; "the agent said about £120" is S.
 4. **A non-answer is an answer**: silence or deflection on a gate question closes the file.
 5. Never ask about, or volunteer, nationality, ethnicity, religion or immigration status.
+6. **Ask as a partner, not a prosecutor.** The agent or landlord is the person who gets you the keys; the same questions asked of every flat, in a friendly tone, get better answers than an interrogation. A defect you find is shared information, not a charge.
 
 ## Gate questions (ask before any viewing effort)
 

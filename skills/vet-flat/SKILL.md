@@ -14,19 +14,19 @@ metadata:
 
 ## 0. Pick your mode first (tell the user in one line which one you are in)
 - **Shell mode**: you can run `python3` and `curl` with internet access. Run `scripts/*.py`; read only their JSON.
-- **Fetch mode**: you can fetch URLs but not run scripts. Use the open GET sources in `references/sources.yaml`; ask the user for the rest.
+- **Fetch mode**: fetch only, no scripts. Use the open GET sources in `references/sources.yaml`; ask the user for the rest.
 - **Manual mode**: neither. Ask the user to paste pages, following `references/inputs.md`.
-Codex: sandbox network is off by default; enable it or go manual. Robots-honouring fetchers cannot read the EPC register or planning portals; ask the user.
 
 ## 0b. If asked "what can this do", "how do I start", or "I have no idea"
 Answer from `references/onboarding.md`: the short pitch in the user's language, then the four starting points (a listing → vet it; an area or destination → sweep; no idea → the ten-fact primer and six intake questions with defaults; about to sign or need a bridge → axes 15–17). Write the answers into `profile.yaml`, show it back plainly, then start.
 
 ## 1. Load the profile
-Read `profile.yaml` (hard filters: minimum floor area, maximum building age, budget bands, move-in window, commute destination and minutes, guarantor route, floor and light rules, must-haves, and `budget_mode` lite/standard/deep — depths in `references/budget-modes.md`). If it is missing, ask for the six essentials once (budget, area, age, move-in, destination, must-haves), then proceed and state your assumptions.
+Read `profile.yaml` (hard filters: floor area, building age, budget bands, move-in window, commute destination and minutes, guarantor route, floor and light rules, must-haves, and `budget_mode` lite/standard/deep — see `references/budget-modes.md`). If it is missing, ask for the six essentials once (budget, area, age, move-in, destination, must-haves), then proceed and state your assumptions.
 
 ## 2. Two presumptions that run through every axis
 1. **Cheap has a reason.** A price below the local band means the landlord or agent has a reason to sell you. Find it and name it (location, age, construction, timing, management, commute, aspect). An unexplained discount is a reason to walk.
 2. **Pay more only for a nameable benefit** (aspect, floor, quiet side, management).
+3. **Landlords and agents are partners, not adversaries.** This skill is a filter; nothing replaces viewing the flat and meeting the people who let it.
 Ask of every listing: "What sits under its prettiest feature?"
 
 ## 3. The 12 axes (method per axis in `references/axes/`)
@@ -51,16 +51,16 @@ Legal facts (England, Renters' Rights Act 2025, in force 2026-05-01): periodic t
 **G** official register · **S** self-reported (landlord, agent, listing) · **C** third-party (reviews, press) · **I** inference · **U** unknown. Two sources disagreeing is itself a finding. An HTTP 200 with the wrong page is not evidence: check the content.
 
 ## 5. Sources you may automate, and sources you may only name
-Automatable (official or open): EPC register (HTML; single addresses), data.police.uk, Companies House, GLA Planning Datahub, TfL, postcodes.io, Land Registry price-paid, Heat Trust, Client Money Protect, GLA rogue checker.
+Automatable (official or open): EPC register (HTML; single addresses), police.uk, Companies House, GLA Planning Datahub, TfL, postcodes.io, Land Registry price-paid, Heat Trust, CMP, GLA rogue checker.
 Named only, no method (their terms forbid automated access): Rightmove, Zoopla, OnTheMarket, OpenRent, HomeViews, Trustpilot, Google reviews, Airbnb, Booking.com. Ask the user to paste.
 Catalogue with tested status: `references/sources.yaml`; per-borough portals: `references/boroughs.yaml`.
 
 ## 6. When you cannot get something
-Follow `references/inputs.md`: try first; collect every gap; ask **once**, in one numbered list, with URL, format and why; keep working meanwhile; record `provenance: user_supplied`; mark the axis **U** if it stays unavailable. Never invent a number.
+Follow `references/inputs.md`: try first; collect every gap; ask **once**, with URL, format and why; record `provenance: user_supplied`; mark the axis **U** if it stays unavailable. Never invent a number.
 
 ## 7. Output contract
 Write `report.json` conforming to `references/report-schema.json`. Shell mode: `python3 scripts/render.py report.json > report.html`. Otherwise hand over the JSON and tell the user to paste it into `viewer/viewer.html`. Also print the one-page verdict in the user's language.
-Plain language in every text field: short sentences; no jargon without a gloss; every number says what it means and what it is compared with; evidence grades as plain labels.
+Plain language everywhere: short sentences; no jargon without a gloss; every number says what it means and what it is compared with; evidence grades as plain labels.
 Verdict: **PASS** · **EDGE** (with the break-even rent) · **CONDITIONAL** (conditions listed) · **KILL** (fatal axis named). Include: at most two killer questions from `references/questions.md`; viewing-day checks; a "not found" table with the search strings used; sources with retrieval times; the footer "Generated with vet-flat <version> — <source URL>".
 
 ## 8. Never

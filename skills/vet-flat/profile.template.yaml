@@ -97,8 +97,10 @@ commute:
   redundancy_min_grade: "B"
 
 floors:
-  # true = a ground-floor flat is an automatic no (noise, security, privacy, damp).
-  reject_ground_floor: true
+  # Ground and lower-ground flats are a caution, not a no. Plenty are fine; they need extra checks
+  # for damp and mould, security, privacy and light (see references/axes/14-site-visit.md).
+  # Set true only if you already know you will not take one.
+  reject_ground_floor: false
   # The floors you actually want, as a range like "2-8". High floors trade lift dependence
   # and summer heat for light and quiet. Leave blank if you have no preference.
   prefer_floor_band:

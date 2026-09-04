@@ -316,12 +316,12 @@ terms:
     plain-zh-TW: "隔壁每週換人，走廊像旅館。"
     plain-zh-CN: "隔壁每周换人，走廊像旅馆。"
   landmine.L10:
-    en: "Ground floor, or a floor number that is not real"
-    zh-TW: "地面層或樓層編號造假"
-    zh-CN: "地面层或楼层编号造假"
-    plain: "The flat number sounds high up but the official record puts it at street level."
-    plain-zh-TW: "戶號聽起來在高樓層，官方紀錄卻寫在地面層。"
-    plain-zh-CN: "户号听起来在高楼层，官方纪录却写在地面层。"
+    en: "Ground or lower-ground floor, or a floor number that is not real"
+    zh-TW: "地面層或半地下，或樓層編號不實"
+    zh-CN: "地面层或半地下，或楼层编号不实"
+    plain: "Street-level and below-street flats need extra checks for damp, mould, security and light (a caution, not a veto), and the advertised floor may not match the official record."
+    plain-zh-TW: "地面層與半地下要多查潮濕、發霉、安全與採光（是提醒不是否決）；廣告寫的樓層也可能跟官方紀錄不符。"
+    plain-zh-CN: "地面层与半地下要多查潮湿、发霉、安全与采光（是提醒不是否决）；广告写的楼层也可能跟官方纪录不符。"
   landmine.L11:
     en: "Too hot, or smells from shared ventilation"
     zh-TW: "無冷氣、通風串味"

@@ -105,3 +105,12 @@ Confirm the grade from the **written description of your unit**, not the buildin
 5. Find the washing machine, the meter cupboard and the stopcock.
 6. Listen at the window once at about 22:30.
 7. Ask, in writing, the latest date you can extend to, and confirm the notice period for weekly extensions.
+
+## Stays near or over a week: view first, or verify live
+For a stay of five nights or more, treat it like a tenancy: ask to view in person or on a live video call before paying, and run the damp check in `14-site-visit.md` (lower-ground and ground stays especially). Two-night guests do not stay long enough to notice damp, a loud fridge or a light well; their five stars measure cleanliness and a fast reply. Price on a platform is a demand signal, not a quality signal.
+If you arrive and the place is not habitable (damp, mould, water damage, pests, a safety issue):
+1. Photograph everything with something for scale, the same day.
+2. Message the host inside the platform, not on a messaging app, factual and polite: the host is usually trying, and a courteous request for an early check-out with a refund of unused nights is granted more often than a fight.
+3. Do not press "cancel" yourself: that applies the listing's cancellation policy. Use the platform's complaint route for accommodation problems; most platforms have a short window after check-in (often about 72 hours) in which habitability problems can be raised for a refund of unused nights.
+4. Book a cancellable fallback before you sleep on it. Then decide in the morning.
+

@@ -73,3 +73,7 @@ Also fills:
 - `candidates[].killer_questions[]` — the money-gate question usually belongs here.
 - `sources[]` — every registry entry with its `id`, `retrieved_at`, `evidence_class` and, where relevant, the membership or company number in `note`.
 Numbers to record: deposit weeks requested against the cap, months of rent in advance, deposit protection deadline in days, company number, certificate expiry date.
+
+## Working with agents and landlords
+Everything in this axis is verification, not suspicion. Agents and landlords are the other half of every tenancy and the people who will hand over the keys; most are trying to do a decent job under pressure. Ask for documents as a matter of routine ("the same for every flat I look at"), thank them for what they send, and treat a missing document as a question to ask, not a verdict. The skill is a filter that gets you to the right viewings; the viewing, and the conversation there, decides.
+

@@ -68,3 +68,18 @@ Fields are from `references/report-schema.json`. A visit writes into an existing
 - `candidates[].photos_vs_reality_notes` — the gap between the listing photographs and the room.
 - `candidates[].provenance_notes` — the date, time of day, day type and exact standing position, plus the standing rule that a visit may replace an assumption, lower a concern or trigger a withdrawal, and may never raise a verdict to PASS or release a hold.
 - `candidates[].verdict.conditions[]` — a condition the visit satisfied may be struck; a condition may not be struck merely because nothing bad happened during one visit.
+
+## Ground and lower-ground floors: the damp check (a caution, not a veto)
+Many street-level and below-street flats are good homes. They fail in one specific way, damp, and it is invisible in photographs and in two-night reviews. Check, in this order, and photograph with a pen in frame for scale:
+1. **Nose at the door.** Musty, earthy or "old carpet" smell on entry, before anything else.
+2. **Wall corners and skirting.** Bubbling or flaking paint, dark spots, tide marks, salt bloom on plaster.
+3. **Behind radiators and under windows.** Black mould, brown water staining, rust runs from pipes.
+4. **Floorboards.** Blackened joints, edges lifting, a white haze on wood, a soft step: wood that has been wet.
+5. **Windows.** Condensation on the inside in the morning, closed trickle vents, no extractor in bathroom or kitchen.
+6. **Outside.** Where the external ground sits against the wall, blocked gullies, a light well full of leaves.
+7. **Ask, politely:** when was the flat last damp-proofed or redecorated, and is there an extractor that runs on a humidistat. A landlord who answers with dates is a landlord who maintains.
+What it means for the verdict: strong signs on two or more items = walk away from that flat; one weak sign = ask and re-view after rain. Not seen = say "not seen", not "no damp".
+
+## Tone on the day
+The agent or landlord showing you round is the person who will get you the keys. Ask everything on the list, write the answers down, and stay courteous; a defect you found is information for both sides, not an accusation.
+
