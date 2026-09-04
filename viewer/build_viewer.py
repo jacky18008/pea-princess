@@ -30,7 +30,9 @@ GLOSSARY = os.path.join(ROOT, "skills", "vet-flat", "references", "glossary.yaml
 SAMPLE = os.path.join(ROOT, "tests", "fixtures", "report-sample.json")
 SCRIPTS = os.path.join(ROOT, "skills", "vet-flat", "scripts")
 
-SIZE_LIMIT = 120 * 1024
+# 125 KB: the layout, the glossary, the example report and the arithmetic check
+# that mirrors scripts/render.py recompute(). Still one file a phone can open.
+SIZE_LIMIT = 125 * 1024
 
 # viewer.html has to stay one small self-contained file, so it carries only the
 # glossary entries the layout actually looks up: the section titles, the verdict

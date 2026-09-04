@@ -59,6 +59,37 @@ def load_schema():
     return json.loads(read(SCHEMA))
 
 
+def broken_sample():
+    """The sample, with a deposit above the five-week cap and a wrong price per square foot.
+
+    Rent is 2,150 a month, so a week is 496.15 and the cap is 5 x 496.15 = 2,480.77;
+    the deposit below asks 3,200. The energy certificate area is 571 square feet, so
+    the rent per square foot is 2,150 / 571 = 3.77, not the 2.90 written here.
+    """
+    bad = load_sample()
+    cand = bad["candidates"][0]
+    for axis in cand["axes"]:
+        if axis["id"] == 7:
+            axis.setdefault("numbers", []).append({
+                "label": "Deposit asked", "value": 3200, "unit": "GBP",
+                "meaning": "This is what the agent wants to hold for the tenancy.",
+                "compared_to": "The legal maximum is five weeks' rent."})
+        for number in axis.get("numbers") or []:
+            if number.get("label") == "Rent per square foot":
+                number["value"] = 2.9
+    cand["metrics"]["price_per_sqft_epc"]["value"] = 2.9
+    return bad
+
+
+def write_temp(report):
+    import tempfile
+    handle, path = tempfile.mkstemp(suffix=".json")
+    os.close(handle)
+    with io.open(path, "w", encoding="utf-8") as fh:
+        fh.write(json.dumps(report, ensure_ascii=False))
+    return path
+
+
 def run_cli(*args):
     proc = subprocess.Popen([sys.executable, os.path.join(SCRIPTS, "render.py")] + list(args),
                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -277,7 +308,7 @@ class TestViewer(unittest.TestCase):
 
     def test_size_budget(self):
         size = len(self.html.encode("utf-8"))
-        self.assertLess(size, 120 * 1024, "viewer.html is %.1f KB, the budget is 120 KB" % (size / 1024.0))
+        self.assertLess(size, 125 * 1024, "viewer.html is %.1f KB, the budget is 125 KB" % (size / 1024.0))
 
     def test_contains_the_generated_glossary(self):
         self.assertIn("var GLOSSARY = {", self.html)
@@ -320,9 +351,163 @@ class TestViewer(unittest.TestCase):
         self.assertIn("Copy HTML", self.html)
         self.assertIn("Download HTML", self.html)
 
+    def test_carries_the_same_recompute_and_block(self):
+        for needle in ("function recompute(", "function recomputeCandidate(", "function arithBlock(",
+                       "function badLocations(", "ui.arithmetic_check", "ui.check_the_maths",
+                       "weekly rent = monthly rent \u00d7 12 \u00f7 52",
+                       "all-in = rent + bills + council tax + broadband",
+                       "\u00a3 per square foot = rent \u00f7 (floor area in m\u00b2 \u00d7 10.7639)",
+                       "break-even rent = your all-in ceiling \u2212 bills \u2212 council tax",
+                       "bridge total = weeks \u00d7 weekly rate + months \u00d7 all-in",
+                       "WEEKS_PER_YEAR=52.0", "SQFT_PER_M2=10.7639", "SIX_WEEK_ANNUAL_RENT=50000.0",
+                       "TOL_PCT=0.01", "TOL_FLOOR_PCM=1.0", "TOL_FLOOR_RATE=0.01",
+                       "chip maths"):
+            self.assertIn(needle, self.html, "viewer.html is missing %r" % needle)
+
     def test_build_step_is_up_to_date(self):
         self.assertEqual(0, build_viewer.main(["--check"]),
                          "viewer.html is out of date: run python3 viewer/build_viewer.py")
+
+
+# ---------------------------------------------------------- arithmetic check
+class TestArithmeticCheck(unittest.TestCase):
+    """render.py recomputes every derivable number and compares it with the model's."""
+
+    def test_the_sample_is_arithmetically_consistent(self):
+        data = load_sample()
+        entries = render.recompute(data)
+        self.assertEqual(2, len(entries))
+        for entry in entries:
+            bad = [c for c in entry["checks"] if not c["ok"]]
+            self.assertEqual([], bad, "%s: %s" % (entry["candidate_id"], bad))
+            self.assertTrue(entry["arithmetic_ok"])
+        for cand in data["candidates"]:
+            self.assertTrue(cand["arithmetic_check"]["arithmetic_ok"])
+
+    def test_every_check_carries_the_five_fields(self):
+        for entry in render.recompute(load_sample()):
+            for check in entry["checks"]:
+                for key in ("field", "model_value", "recomputed", "delta", "ok"):
+                    self.assertIn(key, check)
+
+    def test_the_fields_it_recomputes(self):
+        fields = [c["field"] for c in render.recompute(load_sample())[0]["checks"]]
+        for expected in ("weekly_rent", "deposit_cap", "holding_deposit_cap", "all_in_low",
+                         "all_in_planning", "all_in_stress", "price_per_sqft", "break_even_rent"):
+            self.assertIn(expected, fields)
+
+    def test_the_formulas_are_the_ones_in_calc_py(self):
+        import calc
+        self.assertEqual(calc.WEEKS_PER_YEAR, render.WEEKS_PER_YEAR)
+        self.assertEqual(calc.SQFT_PER_M2, render.SQFT_PER_M2)
+        rent, area_m2 = 2400.0, 52.0
+        self.assertAlmostEqual(calc.weekly_rent(rent), rent * 12.0 / render.WEEKS_PER_YEAR, 6)
+        self.assertAlmostEqual(rent / (area_m2 * render.SQFT_PER_M2),
+                               rent / (area_m2 * calc.SQFT_PER_M2), 9)
+        self.assertIn("12", render.FORMULAS["weekly_rent"])
+        self.assertIn("52", render.FORMULAS["weekly_rent"])
+        self.assertIn("10.7639", render.FORMULAS["price_per_sqft"])
+
+    def test_the_schema_accepts_what_the_renderer_writes(self):
+        data = load_sample()
+        render.recompute(data)
+        errors, warnings = render.validate(data, load_schema())
+        self.assertEqual([], errors)
+        self.assertEqual([], warnings)
+
+    def test_computed_by_is_allowed_on_numbers_and_metrics(self):
+        data = load_sample()
+        data["candidates"][0]["axes"][0].setdefault("numbers", []).append(
+            {"label": "Made up", "value": 1, "unit": "GBP per month", "meaning": "x",
+             "compared_to": "y", "computed_by": "scripts/calc.py all-in"})
+        data["candidates"][0]["metrics"]["commute_min"]["computed_by"] = "shown formula"
+        errors, _ = render.validate(data, load_schema())
+        self.assertEqual([], errors)
+
+    def test_a_deposit_over_the_cap_and_a_wrong_rate_are_caught(self):
+        entry = render.recompute(broken_sample())[0]
+        self.assertFalse(entry["arithmetic_ok"])
+        failed = dict((c["field"], c) for c in entry["checks"] if not c["ok"])
+        self.assertIn("deposit_cap", failed)
+        self.assertEqual("cap", failed["deposit_cap"]["kind"])
+        self.assertEqual(3200, failed["deposit_cap"]["model_value"])
+        self.assertAlmostEqual(2480.77, failed["deposit_cap"]["recomputed"], 2)
+        self.assertIn("price_per_sqft", failed)
+        self.assertAlmostEqual(3.77, failed["price_per_sqft"]["recomputed"], 2)
+
+    def test_a_penny_off_still_passes(self):
+        data = load_sample()
+        data["candidates"][0]["costs"]["all_in_planning"] = 2528.4
+        self.assertTrue(render.recompute(data)[0]["arithmetic_ok"])
+
+    def test_warnings_name_the_number_and_the_formula(self):
+        lines = render.arithmetic_warnings(broken_sample())
+        joined = "\n".join(lines)
+        self.assertIn("Deposit asked", joined)
+        self.assertIn("above the legal cap", joined)
+        self.assertIn("does not match", joined)
+        self.assertIn("model said", joined)
+        self.assertIn("formula gives", joined)
+        self.assertIn("rent + bills + council tax + broadband", "\n".join(
+            c["formula"] for e in render.recompute(load_sample()) for c in e["checks"]))
+
+
+class TestArithmeticCheckOutput(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.path = write_temp(broken_sample())
+        cls.html_code, cls.html, cls.html_err = run_cli(cls.path)
+        cls.md_code, cls.md, cls.md_err = run_cli(cls.path, "--md")
+        cls.strict = run_cli(cls.path, "--strict", "--validate-only")
+        cls.clean = run_cli(SAMPLE, "--validate-only")
+        cls.clean_strict = run_cli(SAMPLE, "--strict", "--validate-only")
+
+    @classmethod
+    def tearDownClass(cls):
+        os.unlink(cls.path)
+
+    def test_html_has_the_block_the_formulas_and_a_chip(self):
+        self.assertEqual(0, self.html_code, self.html_err)
+        self.assertIn("Arithmetic check", self.html)
+        self.assertIn("weekly rent = monthly rent \u00d7 12 \u00f7 52", self.html)
+        self.assertIn("all-in = rent + bills + council tax + broadband", self.html)
+        self.assertIn("does not match: model said", self.html)
+        self.assertIn("matches (model said", self.html)
+        self.assertIn("is above the legal cap: model said", self.html)
+        self.assertIn('class="chip maths"', self.html)
+        self.assertIn("check the maths", self.html)
+
+    def test_markdown_has_the_block_and_the_flag(self):
+        self.assertEqual(0, self.md_code, self.md_err)
+        self.assertIn("**Arithmetic check**", self.md)
+        self.assertIn("| Numbers | Formula | Result |", self.md)
+        self.assertIn("does not match: model said", self.md)
+        self.assertIn("is above the legal cap: model said", self.md)
+        self.assertIn("**[check the maths]**", self.md)
+
+    def test_a_warning_per_mismatch_on_stderr(self):
+        self.assertIn("WARNING  arithmetic:", self.html_err)
+        self.assertIn("WARNING  arithmetic:", self.strict[2])
+        # the deposit cap, and the wrong rate in both the metric and the axis number
+        self.assertEqual(3, self.html_err.count("WARNING  arithmetic:"), self.html_err)
+
+    def test_strict_turns_a_mismatch_into_an_error(self):
+        self.assertEqual(1, self.strict[0], self.strict[2])
+        self.assertIn("treated as errors", self.strict[2])
+        self.assertIn("arithmetic", self.strict[2])
+
+    def test_the_clean_sample_passes_validate_only_and_strict(self):
+        self.assertEqual(0, self.clean[0], self.clean[2])
+        self.assertNotIn("WARNING  arithmetic:", self.clean[2])
+        self.assertIn("recomputed and matches", self.clean[2])
+        self.assertEqual(0, self.clean_strict[0], self.clean_strict[2])
+
+    def test_the_clean_sample_renders_the_block_with_no_chip(self):
+        code, html, err = run_cli(SAMPLE)
+        self.assertEqual(0, code, err)
+        self.assertIn("Arithmetic check", html)
+        self.assertNotIn('class="chip maths"', html)
+        self.assertIn("not stated in the report; formula gives", html)
 
 
 # ------------------------------------------------------------------- profile

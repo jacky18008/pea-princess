@@ -365,6 +365,447 @@ def validate(data, schema):
     return v.errors, v.warnings
 
 
+# ------------------------------------------------------ arithmetic check ---
+# The same formulas as scripts/calc.py, in the same order of operations. Small
+# models get rent maths wrong, so every number that follows from a raw input is
+# recomputed here and compared with what the model wrote.
+WEEKS_PER_YEAR = 52.0
+SQFT_PER_M2 = 10.7639
+SIX_WEEK_ANNUAL_RENT = 50000.0      # annual rent at or above this: 6 weeks' deposit
+TOL_PCT = 0.01                      # 1 per cent
+TOL_FLOOR_PCM = 1.0                 # ...or GBP 1 on a figure in pounds per month
+TOL_FLOOR_RATE = 0.01               # ...or 1 penny on a figure in pounds per square foot
+
+# Every formula in words, exactly as calc.py computes it.
+FORMULAS = {
+    "weekly_rent": "weekly rent = monthly rent × 12 ÷ 52",
+    "deposit_cap": "deposit cap = 5 weeks' rent when the year's rent is under £50,000, "
+                   "6 weeks at or above it (Tenant Fees Act 2019)",
+    "holding_deposit_cap": "holding deposit cap = one week's rent",
+    "all_in": "all-in = rent + bills + council tax + broadband",
+    "price_per_sqft": "£ per square foot = rent ÷ (floor area in m² × 10.7639)",
+    "price_per_sqft_sqft": "£ per square foot = rent ÷ floor area in square feet",
+    "break_even_rent": "break-even rent = your all-in ceiling − bills − council tax",
+    "bridge_total": "bridge total = weeks × weekly rate + months × all-in",
+}
+
+
+def _norm(text):
+    """Lower case, punctuation to spaces: 'Rent per sq. ft' -> 'rent per sq ft'."""
+    return re.sub(r"[^a-z0-9]+", " ", str(text if text is not None else "").lower()).strip()
+
+
+def _num(value):
+    """The first number in a value, or None. '£2,528 a month' -> 2528.0."""
+    if value is None or isinstance(value, bool):
+        return None
+    if isinstance(value, (int, float)):
+        return float(value)
+    match = re.search(r"-?\d[\d,]*(?:\.\d+)?", str(value))
+    if not match:
+        return None
+    try:
+        return float(match.group(0).replace(",", ""))
+    except ValueError:
+        return None
+
+
+def _has(text, *groups):
+    """True when the text contains at least one word from every group."""
+    norm = _norm(text)
+    return all(any(word in norm for word in group) for group in groups)
+
+
+BRIDGE_WORDS = ["bridge", "bridging", "temporary", "airbnb", "hotel", "hostel"]
+MONEY_WORDS = ["cost", "rent", "deposit", "price", "fee", "total", "rate", "bill"]
+
+
+def _money(entry):
+    """Money, or a count? A stated unit decides; an empty unit falls back to the label."""
+    raw = entry.get("unit") or ""
+    unit = _norm(raw)
+    if "\u00a3" in raw or "gbp" in unit or "pound" in unit or "pcm" in unit:
+        return True
+    if unit:
+        return False
+    return any(word in _norm(entry.get("label")) for word in MONEY_WORDS)
+
+
+def _written_numbers(cand):
+    """Every number the model wrote under an axis, with where it came from."""
+    out = []
+    for axis in cand.get("axes") or []:
+        if not isinstance(axis, dict):
+            continue
+        for index, number in enumerate(axis.get("numbers") or []):
+            if not isinstance(number, dict):
+                continue
+            label = number.get("label") or ""
+            unit = number.get("unit") or ""
+            out.append({"label": label, "unit": unit, "value": _num(number.get("value")),
+                        "text": "%s %s" % (label, unit),
+                        "where": "axis %s · %s" % (axis.get("id"), label),
+                        "loc": {"kind": "axis", "axis": axis.get("id"), "index": index}})
+    return out
+
+
+def _pick(numbers, want, avoid=(), money=None):
+    """The first written number whose label+unit matches every group in want."""
+    for entry in numbers:
+        if entry["value"] is None:
+            continue
+        if avoid and _has(entry["text"], avoid):
+            continue
+        if money is not None and _money(entry) != money:
+            continue
+        if _has(entry["text"], *want):
+            return entry
+    return None
+
+
+def _pick_all(numbers, want, avoid=(), money=None):
+    out = []
+    for entry in numbers:
+        if entry["value"] is None:
+            continue
+        if avoid and _has(entry["text"], avoid):
+            continue
+        if money is not None and _money(entry) != money:
+            continue
+        if _has(entry["text"], *want):
+            out.append(entry)
+    return out
+
+
+def _source(value, where, loc):
+    return None if value is None else {"value": value, "where": where, "loc": loc}
+
+
+def _check(field, label, formula, recomputed, source, kind="equal", floor=TOL_FLOOR_PCM,
+           unit="GBP per month", label_id=None, weeks=None):
+    """One row of the arithmetic check: what the model wrote against the formula."""
+    tolerance = max(floor, abs(recomputed) * TOL_PCT)
+    model = source["value"] if source else None
+    if model is None:
+        delta, ok = None, True          # nothing written to contradict the formula
+    else:
+        delta = round(model - recomputed, 4)
+        ok = abs(delta) <= tolerance if kind == "equal" else model <= recomputed + tolerance
+    return {"field": field, "label": label, "label_id": label_id, "weeks": weeks,
+            "formula": formula, "unit": unit, "kind": kind,
+            "model_value": model, "recomputed": round(recomputed, 2), "delta": delta, "ok": ok,
+            "tolerance": round(tolerance, 4),
+            "where": source["where"] if source else None,
+            "loc": source["loc"] if source else None}
+
+
+def _epc_area(cand, numbers):
+    """The indoor floor area, in square feet, and where it came from.
+
+    Preference: an axis number whose label says indoor / internal / EPC /
+    certificate, then any floor-area number that is not the advertised one, then
+    the 'observed' text of a hard filter about floor area. Square metres are
+    turned into square feet with the calc.py factor.
+    """
+    def as_sqft(value, unit):
+        raw = (unit or "").lower()
+        if "m²" in raw or "m2" in raw or "sq m" in raw or "square met" in raw:
+            return value * SQFT_PER_M2, "m²"
+        if "ft" in raw or "foot" in raw or "feet" in raw:
+            return value, "square feet"
+        return None, None
+
+    avoid = ["advertised", "listing", "brochure", "floor plan", "balcony", "external", "gross", "claimed"]
+    ranked = []
+    for entry in numbers:
+        if entry["value"] is None or _has(entry["text"], ["per"]):
+            continue
+        if not _has(entry["text"], ["area", "size", "floor space"]):
+            continue
+        if _has(entry["text"], avoid):
+            continue
+        sqft, basis = as_sqft(entry["value"], entry["unit"])
+        if sqft is None:
+            continue
+        rank = 0 if _has(entry["text"], ["indoor", "internal", "epc", "certificate"]) else 1
+        ranked.append((rank, sqft, basis, entry["where"]))
+    for filt in cand.get("hard_filters") or []:
+        if not isinstance(filt, dict):
+            continue
+        if not _has("%s %s" % (filt.get("name"), filt.get("requirement")), ["area", "size"]):
+            continue
+        observed = filt.get("observed") or ""
+        value = _num(observed)
+        if value is None:
+            continue
+        sqft, basis = as_sqft(value, observed)
+        if sqft is None:
+            continue
+        ranked.append((2, sqft, basis, "hard filter · %s" % (filt.get("name") or "")))
+    if not ranked:
+        return None
+    ranked.sort(key=lambda row: row[0])
+    return {"sqft": ranked[0][1], "basis": ranked[0][2], "where": ranked[0][3]}
+
+
+def _ceiling(cand, profile):
+    """The user's all-in ceiling: the profile first, then a hard filter that quotes it."""
+    value = _num(profile.get("all_in_pcm_ceiling"))
+    if value is not None:
+        return value
+    for filt in cand.get("hard_filters") or []:
+        if not isinstance(filt, dict):
+            continue
+        text = "%s %s" % (filt.get("name"), filt.get("requirement"))
+        if _has(text, ["total", "all in", "ceiling"], ["cost", "month", "pcm"]):
+            got = _num(filt.get("requirement"))
+            if got is not None:
+                return got
+    return None
+
+
+def recompute_candidate(cand, profile):
+    """Recompute every derivable number for one candidate. See recompute()."""
+    costs = cand.get("costs") if isinstance(cand.get("costs"), dict) else {}
+    metrics = cand.get("metrics") if isinstance(cand.get("metrics"), dict) else {}
+    numbers = _written_numbers(cand)
+    checks = []
+
+    rent = _num(costs.get("rent_pcm"))
+    if rent is None:
+        got = _pick(numbers, [["rent"]], avoid=BRIDGE_WORDS + ["week", "square", "sqft", "sq ft", "deposit"])
+        rent = got["value"] if got else None
+
+    if rent is not None:
+        weekly = rent * 12.0 / WEEKS_PER_YEAR
+        checks.append(_check(
+            "weekly_rent", "Weekly rent", FORMULAS["weekly_rent"], weekly,
+            _pick(numbers, [["week"], ["rent", "rate"]], avoid=BRIDGE_WORDS + ["deposit"]),
+            unit="GBP per week", label_id="ui.arith_weekly_rent"))
+        weeks_cap = 5 if rent * 12.0 < SIX_WEEK_ANNUAL_RENT else 6
+        checks.append(_check(
+            "deposit_cap", "Deposit, legal maximum (%d weeks)" % weeks_cap, FORMULAS["deposit_cap"],
+            weeks_cap * weekly,
+            _pick(numbers, [["deposit"]], avoid=BRIDGE_WORDS + ["holding", "protection", "scheme"], money=True),
+            kind="cap", unit="GBP", label_id="ui.arith_deposit_cap", weeks=weeks_cap))
+        checks.append(_check(
+            "holding_deposit_cap", "Holding deposit, legal maximum (1 week)", FORMULAS["holding_deposit_cap"],
+            weekly, _pick(numbers, [["holding"], ["deposit", "fee"]], money=True), kind="cap", unit="GBP",
+            label_id="ui.arith_holding_deposit_cap"))
+
+    council_tax = _num(costs.get("council_tax")) or 0.0
+    broadband_entry = _pick(numbers, [["broadband", "internet"]], money=True)
+    broadband = broadband_entry["value"] if broadband_entry else 0.0
+    all_in = {}
+    total_words = ["all in", "total", "monthly cost", "cost per month", "everything"]
+    for name, key, extra, ban in (
+            ("low", "bills_low", ["low", "best", "mild", "careful"], ["stress", "worst"]),
+            ("planning", "bills_planning", None, ["stress", "worst", "low", "best", "mild"]),
+            ("stress", "bills_stress", ["stress", "worst", "cold", "bad winter"], ["low", "best", "mild"])):
+        bills = _num(costs.get(key))
+        if rent is None or bills is None:
+            continue
+        total = rent + bills + council_tax + broadband
+        all_in[name] = total
+        want = [total_words] if extra is None else [total_words, extra]
+        sources = []
+        if name == "planning":
+            sources.append(_source(_num(costs.get("all_in_planning")), "costs.all_in_planning",
+                                   {"kind": "costs", "key": "all_in_planning"}))
+            for index, filt in enumerate(cand.get("hard_filters") or []):
+                if not isinstance(filt, dict):
+                    continue
+                if _has("%s %s" % (filt.get("name"), filt.get("requirement")), total_words, ["cost", "month"]):
+                    sources.append(_source(_num(filt.get("observed")),
+                                           "hard filter · %s" % (filt.get("name") or ""),
+                                           {"kind": "hard_filter", "index": index}))
+        for entry in _pick_all(numbers, want, avoid=BRIDGE_WORDS + ban, money=True):
+            sources.append(_source(entry["value"], entry["where"], entry["loc"]))
+        sources = [s for s in sources if s] or [None]
+        label = {"low": "All-in cost, mild month", "planning": "All-in cost, the planning number",
+                 "stress": "All-in cost, cold month"}[name]
+        for source in sources:
+            checks.append(_check("all_in_" + name, label, FORMULAS["all_in"], total, source,
+                                 label_id="ui.arith_all_in_" + name))
+
+    area = _epc_area(cand, numbers)
+    if rent is not None and area and area["sqft"]:
+        rate = rent / area["sqft"]
+        formula = FORMULAS["price_per_sqft"] if area["basis"] == "m²" else FORMULAS["price_per_sqft_sqft"]
+        sources = []
+        measure = metrics.get("price_per_sqft_epc")
+        if isinstance(measure, dict):
+            sources.append(_source(_num(measure.get("value")), "metrics.price_per_sqft_epc",
+                                   {"kind": "metrics", "key": "price_per_sqft_epc"}))
+        for entry in _pick_all(numbers, [["per square", "per sq", "psf", "sqft"]], avoid=BRIDGE_WORDS):
+            sources.append(_source(entry["value"], entry["where"], entry["loc"]))
+        sources = [s for s in sources if s] or [None]
+        for source in sources:
+            checks.append(_check("price_per_sqft", "Rent per square foot", formula, rate, source,
+                                 floor=TOL_FLOOR_RATE, unit="GBP per square foot",
+                                 label_id="ui.arith_price_per_sqft"))
+
+    ceiling = _ceiling(cand, profile)
+    bills_planning = _num(costs.get("bills_planning"))
+    if ceiling is not None and bills_planning is not None:
+        break_even = ceiling - bills_planning - council_tax
+        entry = _pick(numbers, [["break even", "breakeven"]], money=True)
+        checks.append(_check("break_even_rent", "Break-even rent against your ceiling",
+                             FORMULAS["break_even_rent"], break_even,
+                             _source(entry["value"], entry["where"], entry["loc"]) if entry else None,
+                             label_id="ui.arith_break_even"))
+
+    weeks = _pick(numbers, [BRIDGE_WORDS, ["week"]], avoid=["rate", "cost"], money=False)
+    weekly_rate = _pick(numbers, [BRIDGE_WORDS, ["week"]], money=True)
+    months = _pick(numbers, [["month"], ["tenancy", "remaining", "rest of", "after"]], money=False)
+    if weeks and weekly_rate and months and all_in.get("planning") is not None:
+        total = weeks["value"] * weekly_rate["value"] + months["value"] * all_in["planning"]
+        entry = _pick(numbers, [BRIDGE_WORDS, ["total", "twelve", "12 month", "year"]], money=True)
+        checks.append(_check("bridge_total", "Bridging plus tenancy, twelve months",
+                             FORMULAS["bridge_total"], total,
+                             _source(entry["value"], entry["where"], entry["loc"]) if entry else None,
+                             unit="GBP", label_id="ui.arith_bridge_total"))
+
+    return {"arithmetic_ok": all(c["ok"] for c in checks), "checks": checks}
+
+
+def recompute(report):
+    """Recompute every derivable number in the report and compare it with the model's.
+
+    Writes the result to each candidate as `arithmetic_check` (the renderer owns
+    that key; a model may leave it out) and returns the same list, one entry per
+    candidate: {"candidate_id", "arithmetic_ok", "checks"}.
+
+    What is recomputed, and where the model's own figure is looked for. Labels are
+    lower-cased and stripped of punctuation before matching, so 'Rent per sq. ft'
+    and 'rent per sq ft' are the same string. A figure with no match anywhere is
+    still listed, as computed only; it can never fail.
+
+      weekly_rent          rent_pcm x 12 / 52.
+                           Model: an axis number whose label has 'week' and
+                           'rent' or 'rate' (not deposit, not bridging).
+      deposit_cap          5 weeks' rent under GBP 50,000 a year, 6 at or above.
+                           Model: an axis number with 'deposit' (not 'holding',
+                           'protection', 'scheme'). Checked as a CAP: less is fine,
+                           more is illegal.
+      holding_deposit_cap  one week's rent. Model: 'holding' + 'deposit'/'fee'. CAP.
+      all_in_low |
+      all_in_planning |
+      all_in_stress        rent + the matching bills figure + council tax +
+                           broadband (broadband only when a number says so; the
+                           schema already folds it into bills). Model, for the
+                           planning number: costs.all_in_planning, the 'observed'
+                           text of a hard filter about total monthly cost, and any
+                           axis number saying 'all in' / 'total' / 'monthly cost'.
+                           Low and stress additionally need 'low', 'best', 'mild'
+                           or 'stress', 'worst', 'cold' in the label.
+      price_per_sqft       rent / floor area. The area is the indoor EPC area: an
+                           axis number saying 'area' or 'size' that is not the
+                           advertised one, preferring 'indoor', 'internal', 'EPC'
+                           or 'certificate', else a floor-area hard filter's
+                           'observed' text. Square metres are multiplied by
+                           10.7639 first. Model: metrics.price_per_sqft_epc and any
+                           axis number saying 'per square', 'per sq' or 'psf'.
+      break_even_rent      profile_snapshot.all_in_pcm_ceiling (else the ceiling
+                           quoted in a hard filter) - bills_planning - council tax.
+                           Model: an axis number saying 'break even'.
+                           verdict.break_even_rent_pcm is deliberately NOT compared:
+                           that field is the rent at which the flat becomes worth
+                           taking, a judgement, not this formula.
+      bridge_total         weeks x weekly rate + months x all-in, computed only
+                           when an axis number gives bridging weeks, a bridging
+                           weekly rate and a number of tenancy months.
+                           Model: a bridging number saying 'total', 'year' or
+                           '12 month'.
+
+    Tolerance: 1 per cent of the recomputed figure, or GBP 1, whichever is larger.
+    For a figure in pounds per square foot the floor is 1 penny instead of GBP 1,
+    because GBP 1 there is a quarter of the whole number.
+    """
+    profile = report.get("profile_snapshot") if isinstance(report.get("profile_snapshot"), dict) else {}
+    out = []
+    for cand in report.get("candidates") or []:
+        if not isinstance(cand, dict):
+            continue
+        result = recompute_candidate(cand, profile)
+        cand["arithmetic_check"] = {"arithmetic_ok": result["arithmetic_ok"], "checks": result["checks"]}
+        entry = {"candidate_id": cand.get("id")}
+        entry.update(result)
+        out.append(entry)
+    return out
+
+
+def arithmetic_warnings(report):
+    """One WARNING line per number that does not follow from the formula."""
+    lines = []
+    for i, entry in enumerate(recompute(report)):
+        for check in entry["checks"]:
+            if check["ok"]:
+                continue
+            lines.append(
+                "candidates[%d] %s: %s %s: model said %s, formula gives %s (%s)"
+                % (i, entry["candidate_id"], check["where"] or check["field"],
+                   "is above the legal cap" if check["kind"] == "cap" else "does not match",
+                   fmt_value(check["model_value"]), fmt_value(check["recomputed"]), check["formula"]))
+    return lines
+
+
+def bad_locations(report):
+    """{candidate id: {locator: check}} for every number that failed, for the inline chips."""
+    out = {}
+    for entry in recompute(report):
+        marks = {}
+        for check in entry["checks"]:
+            loc = check.get("loc")
+            if check["ok"] or not loc:
+                continue
+            if loc["kind"] == "axis":
+                marks[("axis", loc.get("axis"), loc.get("index"))] = check
+            elif loc["kind"] == "hard_filter":
+                marks[("hard_filter", loc.get("index"))] = check
+            else:
+                marks[(loc["kind"], loc.get("key"))] = check
+        out[entry["candidate_id"]] = marks
+    return out
+
+
+def money_exact(value):
+    """Money for a maths check: whole pounds when it is whole, pence when it is not."""
+    if value is None:
+        return None
+    if not isinstance(value, (int, float)) or isinstance(value, bool):
+        return str(value)
+    if abs(value - round(value)) < 0.005:
+        return "\u00a3{:,.0f}".format(value)
+    return "\u00a3{:,.2f}".format(value)
+
+
+def check_label(check, L):
+    """The figure's name in the reader's language, with the week count where there is one."""
+    text = L.label(check.get("label_id") or "", check["label"])
+    if check.get("weeks") and check.get("label_id"):
+        text = "%s (%d %s)" % (text, check["weeks"], L.label("ui.arith_weeks"))
+    return text
+
+
+def check_status(check, L):
+    """'matches', or 'does not match: model said X, formula gives Y', in the reader's language."""
+    gives = "%s %s" % (L.label("ui.arith_formula_gives"), money_exact(check["recomputed"]))
+    if check["model_value"] is None:
+        return "%s; %s" % (L.label("ui.arith_not_stated"), gives)
+    if check["ok"]:
+        return "%s (%s %s)" % (L.label("ui.arith_matches"), L.label("ui.arith_model_said"),
+                               money_exact(check["model_value"]))
+    verdict = L.label("ui.arith_over_cap") if check["kind"] == "cap" else L.label("ui.arith_mismatch")
+    return "%s: %s %s, %s" % (verdict, L.label("ui.arith_model_said"),
+                              money_exact(check["model_value"]), gives)
+
+
+def check_sentence(check, L):
+    """The one-line tooltip behind an inline warning chip."""
+    return "%s \u2014 %s \u2014 %s" % (check_label(check, L), check_status(check, L), check["formula"])
+
+
 # ------------------------------------------------------------------ helpers ---
 def esc(text):
     if text is None:
@@ -483,6 +924,8 @@ small,.sub{color:var(--muted);font-size:13px;line-height:1.45}
 .chip{display:inline-block;background:var(--chip);color:var(--chip-ink);border-radius:6px;
   padding:2px 8px;font-size:12.5px;border:1px solid var(--line);cursor:help}
 .chip.ev-G{border-color:var(--ok)} .chip.ev-U{border-color:var(--unk)}
+.chip.maths{background:var(--kill-bg);color:var(--kill);border-color:var(--kill);font-weight:600}
+.arith td.bad{color:var(--kill);font-weight:600} .arith td.good{color:var(--ok)}
 .chip.ev-S,.chip.ev-I{border-color:var(--edge)} .chip.ev-C{border-color:var(--accent)}
 .tw{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);
   border-radius:10px;background:var(--panel);margin:10px 0}
@@ -525,6 +968,7 @@ class HtmlRenderer(object):
         self.d = data
         self.L = L
         self.out = []
+        self.bad = bad_locations(data)      # also fills candidate.arithmetic_check
 
     def w(self, text=""):
         self.out.append(text)
@@ -537,13 +981,22 @@ class HtmlRenderer(object):
         return '<span class="chip ev-%s" title="%s">%s</span>' % (
             esc(ec), esc(self.L.tip(tid)), esc(self.L.label(tid, ec)))
 
-    def measure_cell(self, mea):
+    def chip_maths(self, check):
+        """A visible warning chip on a number that does not follow from the formula."""
+        if not check:
+            return ""
+        return ' <span class="chip maths" title="%s">%s</span>' % (
+            esc(check_sentence(check, self.L)), esc(self.L.label("ui.check_the_maths")))
+
+    def measure_cell(self, mea, check=None):
         if not isinstance(mea, dict):
             return '<td>%s</td>' % esc(self.L.label("ui.no_data"))
         value = fmt_value(mea.get("value"), mea.get("unit"))
         if value is None:
             value = self.L.label("ui.no_data")
         bits = ['<span class="meaning" title="%s">%s</span>' % (esc(mea.get("meaning") or ""), esc(value))]
+        if check:
+            bits.append(self.chip_maths(check))
         if mea.get("compared_to"):
             bits.append('<br><small>%s</small>' % esc(mea["compared_to"]))
         if mea.get("evidence_class"):
@@ -613,13 +1066,15 @@ class HtmlRenderer(object):
         marks = {True: ('ok', "ui.pass"), False: ('bad', "ui.fail"), "unknown": ('unk', "ui.unknown")}
         for cand in self.d.get("candidates", []):
             self.w("<h3>%s</h3>" % esc(candidate_name(cand)))
+            bad = self.bad.get(cand.get("id")) or {}
             rows = []
-            for hf in cand.get("hard_filters") or []:
+            for index, hf in enumerate(cand.get("hard_filters") or []):
                 css, tid = marks.get(hf.get("pass"), ('unk', "ui.unknown"))
                 rows.append([
                     "<td><strong>%s</strong></td>" % esc(hf.get("name", "")),
                     "<td>%s</td>" % esc(hf.get("requirement", "")),
-                    "<td>%s</td>" % esc(hf.get("observed", "")),
+                    "<td>%s%s</td>" % (esc(hf.get("observed", "")),
+                                       self.chip_maths(bad.get(("hard_filter", index)))),
                     '<td class="num"><span class="%s" title="%s">%s</span></td>' % (
                         css, esc(L.plain(tid)), esc(L.label(tid))),
                     "<td>%s</td>" % self.chip_evidence(hf.get("evidence_class")),
@@ -669,12 +1124,14 @@ class HtmlRenderer(object):
             if not cand:
                 continue
             metrics = cand.get("metrics") or {}
+            bad = self.bad.get(cand.get("id")) or {}
             cells = ["<td><strong>%s</strong></td>" % esc(candidate_name(cand))]
             for key, _tid in METRIC_KEYS:
-                cells.append(self.measure_cell(metrics.get(key)))
+                cells.append(self.measure_cell(metrics.get(key), bad.get(("metrics", key))))
             costs = cand.get("costs") or {}
-            cells.append('<td class="num"><span class="meaning" title="%s">%s</span><br><small>%s</small></td>' % (
+            cells.append('<td class="num"><span class="meaning" title="%s">%s</span>%s<br><small>%s</small></td>' % (
                 esc(costs.get("basis_note") or ""), esc(money(costs.get("all_in_planning")) or L.label("ui.no_data")),
+                self.chip_maths(bad.get(("costs", "all_in_planning"))),
                 esc(L.plain("ui.all_in_pcm"))))
             rows.append(cells)
         self.table(headers, rows)
@@ -755,6 +1212,7 @@ class HtmlRenderer(object):
         L = self.L
         for cand in self.d.get("candidates", []):
             self.w('<div class="card"><h3>%s</h3>' % esc(candidate_name(cand)))
+            bad = self.bad.get(cand.get("id")) or {}
             for axis in sorted(cand.get("axes") or [], key=lambda a: a.get("id") or 0):
                 aid = axis.get("id")
                 self.w('<div class="axis"><h4>%s. %s %s</h4>' % (
@@ -764,12 +1222,13 @@ class HtmlRenderer(object):
                 numbers = axis.get("numbers") or []
                 if numbers:
                     rows = []
-                    for n in numbers:
+                    for index, n in enumerate(numbers):
                         rows.append([
                             "<td><strong>%s</strong></td>" % esc(n.get("label", "")),
-                            '<td class="num"><span class="meaning" title="%s">%s</span></td>' % (
+                            '<td class="num"><span class="meaning" title="%s">%s</span>%s</td>' % (
                                 esc(n.get("meaning") or ""), esc(fmt_value(n.get("value"), n.get("unit"))
-                                                                 or L.label("ui.no_data"))),
+                                                                 or L.label("ui.no_data")),
+                                self.chip_maths(bad.get(("axis", aid, index)))),
                             "<td><small>%s</small></td>" % esc(n.get("meaning", "")),
                             "<td><small>%s</small></td>" % esc(n.get("compared_to", "")),
                             "<td>%s</td>" % self.chip_evidence(n.get("evidence_class")),
@@ -793,12 +1252,14 @@ class HtmlRenderer(object):
                     if costs.get(key) is None:
                         continue
                     rows.append(['<td title="%s">%s</td>' % (esc(L.plain(tid)), esc(L.label(tid))),
-                                 '<td class="num">%s</td>' % esc(money(costs.get(key)))])
+                                 '<td class="num">%s%s</td>' % (esc(money(costs.get(key))),
+                                                                self.chip_maths(bad.get(("costs", key))))])
                 if rows:
                     self.table([L.label("ui.costs"), ""], rows)
                 if costs.get("basis_note"):
                     self.w('<p class="sub"><strong>%s:</strong> %s</p>' % (
                         esc(L.label("ui.basis_note")), esc(costs["basis_note"])))
+            self.arithmetic_block(cand)
             if cand.get("photos_vs_reality_notes"):
                 self.w("<h4>%s</h4><p>%s</p>" % (esc(L.label("ui.photos_vs_reality")),
                                                  esc(cand["photos_vs_reality_notes"])))
@@ -808,6 +1269,30 @@ class HtmlRenderer(object):
                     self.w("<li><small>%s</small></li>" % esc(note))
                 self.w("</ul>")
             self.w("</div>")
+
+    def arithmetic_block(self, cand):
+        """Section 6: every recomputed figure, with the formula in words."""
+        L = self.L
+        entry = cand.get("arithmetic_check") or {}
+        checks = entry.get("checks") or []
+        if not checks:
+            return
+        chip = ("" if entry.get("arithmetic_ok") else
+                ' <span class="chip maths">%s</span>' % esc(L.label("ui.check_the_maths")))
+        self.w("<h4>%s%s</h4>" % (esc(L.label("ui.arithmetic_check")), chip))
+        self.w('<p class="lede">%s</p>' % esc(L.plain("ui.arithmetic_check")))
+        rows = []
+        for check in checks:
+            source = ("<br><small>%s</small>" % esc(check["where"])) if check.get("where") else ""
+            rows.append([
+                "<td><strong>%s</strong>%s</td>" % (esc(check_label(check, L)), source),
+                "<td><small>%s</small></td>" % esc(check["formula"]),
+                '<td class="%s">%s</td>' % ("good" if check["ok"] else "bad",
+                                            esc(check_status(check, L))),
+            ])
+        self.w('<div class="arith">')
+        self.table([L.label("ui.numbers"), L.label("ui.formula"), L.label("ui.result")], rows)
+        self.w("</div>")
 
     def s7_questions(self):
         L = self.L
@@ -955,6 +1440,13 @@ def md_table(headers, rows):
 
 def render_markdown(data, L):
     o = []
+    bad_by_candidate = bad_locations(data)   # also fills candidate.arithmetic_check
+
+    def maths_flag(bad, key):
+        """The Markdown twin of the inline warning chip."""
+        check = bad.get(key)
+        return "" if not check else " **[%s]**" % L.label("ui.check_the_maths")
+
     names = ", ".join(candidate_name(c) for c in data.get("candidates", []))
     o.append("# %s \u2014 %s" % (L.label("ui.report_title"), names))
     o.append("")
@@ -998,10 +1490,12 @@ def render_markdown(data, L):
     for cand in candidates:
         o.append("")
         o.append("### %s" % candidate_name(cand))
-        rows = [[hf.get("name", ""), hf.get("requirement", ""), hf.get("observed", ""),
+        bad = bad_by_candidate.get(cand.get("id")) or {}
+        rows = [[hf.get("name", ""), hf.get("requirement", ""),
+                 (hf.get("observed", "") or "") + maths_flag(bad, ("hard_filter", i)),
                  L.label(marks.get(hf.get("pass"), "ui.unknown")),
                  L.label("evidence." + (hf.get("evidence_class") or "U"))]
-                for hf in cand.get("hard_filters") or []]
+                for i, hf in enumerate(cand.get("hard_filters") or [])]
         o += md_table(["", L.label("ui.requirement"), L.label("ui.observed"),
                        L.label("ui.result"), L.label("ui.evidence")], rows)
 
@@ -1025,14 +1519,16 @@ def render_markdown(data, L):
             if not cand:
                 continue
             metrics = cand.get("metrics") or {}
+            bad = bad_by_candidate.get(cand.get("id")) or {}
             row = [candidate_name(cand)]
             for key, _t in METRIC_KEYS:
                 mea = metrics.get(key) or {}
                 text = fmt_value(mea.get("value"), mea.get("unit")) or L.label("ui.no_data")
                 if mea.get("compared_to"):
                     text = "%s (%s)" % (text, mea["compared_to"])
-                row.append(text)
-            row.append(money((cand.get("costs") or {}).get("all_in_planning")) or L.label("ui.no_data"))
+                row.append(text + maths_flag(bad, ("metrics", key)))
+            row.append((money((cand.get("costs") or {}).get("all_in_planning")) or L.label("ui.no_data"))
+                       + maths_flag(bad, ("costs", "all_in_planning")))
             rows.append(row)
         o += md_table(headers, rows)
         for key, tid in (("structural_findings", "ui.structural_findings"),
@@ -1088,6 +1584,7 @@ def render_markdown(data, L):
     for cand in candidates:
         o.append("")
         o.append("### %s" % candidate_name(cand))
+        bad = bad_by_candidate.get(cand.get("id")) or {}
         for axis in sorted(cand.get("axes") or [], key=lambda a: a.get("id") or 0):
             aid = axis.get("id")
             o.append("")
@@ -1095,9 +1592,10 @@ def render_markdown(data, L):
                                            L.label("evidence." + (axis.get("evidence_class") or "U"))))
             o.append("")
             o.append(axis.get("finding", ""))
-            for n in axis.get("numbers") or []:
-                o.append("- **%s**: %s \u2014 %s %s" % (
+            for index, n in enumerate(axis.get("numbers") or []):
+                o.append("- **%s**: %s%s \u2014 %s %s" % (
                     n.get("label", ""), fmt_value(n.get("value"), n.get("unit")) or L.label("ui.no_data"),
+                    maths_flag(bad, ("axis", aid, index)),
                     n.get("meaning", ""), n.get("compared_to", "")))
             for unk in axis.get("unknowns") or []:
                 o.append("- %s: %s" % (L.label("ui.unknowns"), unk))
@@ -1105,10 +1603,22 @@ def render_markdown(data, L):
         if costs:
             o.append("")
             o.append("**%s**" % L.label("ui.costs"))
-            rows = [[L.label(t), money(costs.get(k))] for k, t in COST_KEYS if costs.get(k) is not None]
+            rows = [[L.label(t), money(costs.get(k)) + maths_flag(bad, ("costs", k))]
+                    for k, t in COST_KEYS if costs.get(k) is not None]
             o += md_table([L.label("ui.costs"), ""], rows)
             if costs.get("basis_note"):
                 o.append("%s: %s" % (L.label("ui.basis_note"), costs["basis_note"]))
+        arith = cand.get("arithmetic_check") or {}
+        if arith.get("checks"):
+            o.append("")
+            o.append("**%s**%s" % (L.label("ui.arithmetic_check"),
+                                   "" if arith.get("arithmetic_ok") else
+                                   " **[%s]**" % L.label("ui.check_the_maths")))
+            o.append("")
+            o.append("_%s_" % L.plain("ui.arithmetic_check"))
+            o += md_table([L.label("ui.numbers"), L.label("ui.formula"), L.label("ui.result")],
+                          [["%s%s" % (check_label(c, L), " (%s)" % c["where"] if c.get("where") else ""),
+                            c["formula"], check_status(c, L)] for c in arith["checks"]])
         if cand.get("photos_vs_reality_notes"):
             o.append("")
             o.append("**%s**: %s" % (L.label("ui.photos_vs_reality"), cand["photos_vs_reality_notes"]))
@@ -1208,6 +1718,9 @@ def main(argv=None):
     errors, warnings = validate(data, schema)
     for warning in warnings:
         sys.stderr.write("warning  %s\n" % warning)
+    sums = arithmetic_warnings(data)
+    for line in sums:
+        sys.stderr.write("WARNING  arithmetic: %s\n" % line)
     if errors:
         sys.stderr.write("\nThis report does not match report-schema.json. %d problem%s:\n"
                          % (len(errors), "" if len(errors) == 1 else "s"))
@@ -1215,11 +1728,16 @@ def main(argv=None):
             sys.stderr.write("  error  %s\n" % error)
         sys.stderr.write("\nFix the JSON and run again. The schema explains every field:\n  %s\n" % args.schema)
         return 1
-    if warnings and args.strict:
-        sys.stderr.write("\n--strict: %d warning(s) treated as errors.\n" % len(warnings))
+    if (warnings or sums) and args.strict:
+        sys.stderr.write("\n--strict: %d warning(s) treated as errors, %d of them arithmetic.\n"
+                         % (len(warnings) + len(sums), len(sums)))
         return 1
     if args.validate_only:
         sys.stderr.write("OK: the report matches report-schema.json.\n")
+        if sums:
+            sys.stderr.write("But %d number(s) do not follow from the formulas above.\n" % len(sums))
+        else:
+            sys.stderr.write("Every number that follows from a formula was recomputed and matches.\n")
         return 0
 
     try:

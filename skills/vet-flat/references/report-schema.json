@@ -143,6 +143,14 @@
         },
         "sources": {
           "$ref": "#/definitions/source_ids"
+        },
+        "computed_by": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Recommended for every derived number. Say where the number came from: \"scripts/calc.py deposit\", \"scripts/calc.py all-in\", \"scripts/calc.py price-per-sqft\", \"scripts/calc.py break-even\", \"scripts/calc.py bridge\", or \"shown formula\" when you wrote the working out in the text instead. The renderers recompute these numbers anyway and mark any that do not follow from the formula, so an honest note here costs you nothing.",
+          "maxLength": 80
         }
       }
     },
@@ -343,6 +351,85 @@
         },
         "costs": {
           "$ref": "#/definitions/costs"
+        },
+        "arithmetic_check": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Optional, and normally left out: the renderers (scripts/render.py and viewer/viewer.html) recompute every derivable number from the raw inputs and write the answer here, overwriting whatever you put. Tolerance is 1 per cent or one pound, whichever is larger. Do not hand-write it to make a report look checked.",
+          "properties": {
+            "arithmetic_ok": {
+              "type": [
+                "boolean",
+                "null"
+              ],
+              "description": "True when every recomputed figure matches the report inside the tolerance."
+            },
+            "checks": {
+              "type": "array",
+              "description": "One entry per recomputed figure.",
+              "items": {
+                "type": "object",
+                "additionalProperties": true,
+                "description": "One recomputed figure.",
+                "properties": {
+                  "field": {
+                    "type": "string",
+                    "description": "Which figure this is, for example \"all_in_planning\" or \"deposit_cap\".",
+                    "maxLength": 80
+                  },
+                  "label": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "The figure's name in plain words.",
+                    "maxLength": 120
+                  },
+                  "formula": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "The formula in words, the same one scripts/calc.py uses.",
+                    "maxLength": 240
+                  },
+                  "where": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Where in this report the model's own figure was found, for example \"costs.all_in_planning\" or \"axis 10 - Total per month\". Null when the report does not state it.",
+                    "maxLength": 160
+                  },
+                  "model_value": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "description": "The number as written in the report, or null when it was not stated."
+                  },
+                  "recomputed": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "description": "The number the formula gives from the raw inputs."
+                  },
+                  "delta": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "description": "model_value minus recomputed, or null when there is nothing to compare."
+                  },
+                  "ok": {
+                    "type": "boolean",
+                    "description": "True when the two agree inside the tolerance, or when the report states nothing to contradict the formula."
+                  }
+                }
+              }
+            }
+          }
         },
         "worst_reviews": {
           "type": "array",
@@ -723,6 +810,14 @@
         },
         "sources": {
           "$ref": "#/definitions/source_ids"
+        },
+        "computed_by": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Recommended for every derived number. Say where the number came from: \"scripts/calc.py deposit\", \"scripts/calc.py all-in\", \"scripts/calc.py price-per-sqft\", \"scripts/calc.py break-even\", \"scripts/calc.py bridge\", or \"shown formula\" when you wrote the working out in the text instead. The renderers recompute these numbers anyway and mark any that do not follow from the formula, so an honest note here costs you nothing.",
+          "maxLength": 80
         }
       }
     },

@@ -798,6 +798,101 @@ terms:
     zh-TW: "房源審查報告"
     zh-CN: "房源审查报告"
     plain: "The name of this document."
+  ui.arithmetic_check:
+    en: "Arithmetic check"
+    zh-TW: "算術覆核"
+    zh-CN: "算术复核"
+    plain: "Every number that follows from a formula, recomputed and checked against the report."
+  ui.formula:
+    en: "Formula"
+    zh-TW: "公式"
+    zh-CN: "公式"
+    plain: "How the number is worked out, in words."
+  ui.arith_matches:
+    en: "matches"
+    zh-TW: "相符"
+    zh-CN: "相符"
+    plain: "The report and the formula agree."
+  ui.arith_mismatch:
+    en: "does not match"
+    zh-TW: "不相符"
+    zh-CN: "不相符"
+    plain: "The report and the formula disagree by more than rounding."
+  ui.arith_over_cap:
+    en: "is above the legal cap"
+    zh-TW: "超過法定上限"
+    zh-CN: "超过法定上限"
+    plain: "The law caps this. Less is fine; more is not lawful."
+  ui.arith_model_said:
+    en: "model said"
+    zh-TW: "報告寫"
+    zh-CN: "报告写"
+    plain: "The number as the report writes it."
+  ui.arith_formula_gives:
+    en: "formula gives"
+    zh-TW: "公式算出"
+    zh-CN: "公式算出"
+    plain: "The number the formula produces from the raw inputs."
+  ui.arith_not_stated:
+    en: "not stated in the report"
+    zh-TW: "報告未寫"
+    zh-CN: "报告未写"
+    plain: "Nothing to compare with, so only the computed figure is shown."
+  ui.arith_weeks:
+    en: "weeks"
+    zh-TW: "週"
+    zh-CN: "周"
+    plain: "A number of weeks."
+  ui.arith_weekly_rent:
+    en: "Weekly rent"
+    zh-TW: "週租"
+    zh-CN: "周租"
+    plain: "The rent as a week, which is how caps are measured."
+  ui.arith_deposit_cap:
+    en: "Deposit, legal maximum"
+    zh-TW: "押金法定上限"
+    zh-CN: "押金法定上限"
+    plain: "The most a landlord may hold as a deposit."
+  ui.arith_holding_deposit_cap:
+    en: "Holding deposit, legal maximum"
+    zh-TW: "保留金法定上限"
+    zh-CN: "保留金法定上限"
+    plain: "The most a landlord may take to hold the flat: one week."
+  ui.arith_all_in_low:
+    en: "All-in cost, mild month"
+    zh-TW: "全包月成本（溫和月份）"
+    zh-CN: "全包月成本（温和月份）"
+    plain: "Rent plus the low bills figure."
+  ui.arith_all_in_planning:
+    en: "All-in cost, the planning number"
+    zh-TW: "全包月成本（編預算用）"
+    zh-CN: "全包月成本（编预算用）"
+    plain: "Rent plus the planning bills figure. Budget on this."
+  ui.arith_all_in_stress:
+    en: "All-in cost, cold month"
+    zh-TW: "全包月成本（寒冷月份）"
+    zh-CN: "全包月成本（寒冷月份）"
+    plain: "Rent plus the stress bills figure."
+  ui.arith_price_per_sqft:
+    en: "Rent per square foot"
+    zh-TW: "每平方英尺租金"
+    zh-CN: "每平方英尺租金"
+    plain: "What you pay for room, not for the address."
+  ui.arith_break_even:
+    en: "Break-even rent against your ceiling"
+    zh-TW: "對照上限的可負擔租金"
+    zh-CN: "对照上限的可负担租金"
+    plain: "The highest rent that stays inside your ceiling."
+  ui.arith_bridge_total:
+    en: "Bridging plus tenancy, twelve months"
+    zh-TW: "過渡住宿加租約十二個月合計"
+    zh-CN: "过渡住宿加租约十二个月合计"
+    plain: "Temporary stay and tenancy together, over a year."
+  ui.check_the_maths:
+    en: "check the maths"
+    zh-TW: "算術有誤"
+    zh-CN: "算术有误"
+    plain: "This number does not follow from the formula. Check it."
 
   # ----------------------------------------------------------- domain jargon
   epc:

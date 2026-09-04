@@ -66,7 +66,8 @@
           "evidence_class": "I",
           "sources": [
             "s-epc-1"
-          ]
+          ],
+          "computed_by": "scripts/calc.py price-per-sqft"
         },
         "crime_6mo_count": {
           "value": 74,
@@ -401,7 +402,8 @@
               "evidence_class": "I",
               "sources": [
                 "s-epc-1"
-              ]
+              ],
+              "computed_by": "scripts/calc.py price-per-sqft"
             }
           ],
           "unknowns": [
@@ -452,7 +454,8 @@
               "sources": [
                 "s-heat",
                 "s-ctax"
-              ]
+              ],
+              "computed_by": "scripts/calc.py all-in"
             }
           ],
           "unknowns": [
@@ -629,7 +632,8 @@
           "evidence_class": "I",
           "sources": [
             "s-epc-2"
-          ]
+          ],
+          "computed_by": "scripts/calc.py price-per-sqft"
         },
         "crime_6mo_count": {
           "value": 129,
@@ -953,7 +957,8 @@
               "evidence_class": "I",
               "sources": [
                 "s-epc-2"
-              ]
+              ],
+              "computed_by": "scripts/calc.py price-per-sqft"
             }
           ],
           "sources": [
@@ -984,7 +989,8 @@
               "evidence_class": "I",
               "sources": [
                 "s-ctax"
-              ]
+              ],
+              "computed_by": "scripts/calc.py all-in"
             }
           ],
           "sources": [

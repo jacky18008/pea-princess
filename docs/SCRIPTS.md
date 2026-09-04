@@ -736,3 +736,13 @@ python3 skills/vet-flat/scripts/calc.py deposit --rent-pcm 2400
 python3 skills/vet-flat/scripts/calc.py affordability --rent-pcm 2400 --multiple 2.5 --income 65000 --guarantor-multiple 4
 python3 skills/vet-flat/scripts/calc.py guarantor-product --rent-pcm 2400 --model annual --weeks 3 --setup 59.99
 ```
+
+### Arithmetic check (render.py recomputes what calc.py computes)
+`scripts/render.py` carries a `recompute(report)` that redoes, from the raw inputs in the JSON, every number that follows from a formula above: weekly rent, the deposit and holding-deposit caps, the three all-in totals, rent per square foot from the energy-certificate area, break-even rent against the profile ceiling, and the twelve-month bridging total when bridging inputs are present. Each one is compared with the figure the model wrote — `costs`, `metrics`, `axes[].numbers[]` and the `observed` text of a hard filter are searched by key and by label keywords — inside a tolerance of 1 per cent or £1, whichever is larger (a penny rather than £1 on a £/sqft figure). Deposits are checked as caps: less is fine, more is unlawful. `verdict.break_even_rent_pcm` is not compared; that field is a judgement about what the flat is worth, not this formula.
+
+The result is written to each candidate as `arithmetic_check` (`arithmetic_ok` plus one row per figure), printed as one `WARNING  arithmetic:` line per mismatch on stderr, turned into an error by `--strict`, and shown in section 6 of the HTML and Markdown as an **Arithmetic check** table that states each formula in words, with a *check the maths* chip on every number that does not follow from it. `viewer/viewer.html` does the same in the browser with the same formulas and the same tolerance. Put `computed_by: "scripts/calc.py deposit"` (or `"shown formula"`) on any derived number so a reader can see where it came from; the check runs either way.
+
+```
+python3 skills/vet-flat/scripts/render.py report.json --validate-only   # WARNING per mismatch
+python3 skills/vet-flat/scripts/render.py report.json --strict          # mismatches are errors
+```
