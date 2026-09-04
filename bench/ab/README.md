@@ -167,6 +167,9 @@ Per run, on top of the public fact scores from `bench/grade.py`:
 | metric | what it means | good is |
 |---|---|---|
 | `landmine_recall` | of the gold's **high-confidence** codes, the share the report raised | high |
+| `landmine_recall_script` | the same, over only the codes a repo script can establish | high |
+| `landmine_recall_mixed` | the same, over the codes a script half-answers | high |
+| `landmine_recall_reading` | the same, over the codes only prose establishes | context, mostly |
 | `landmine_recall_low_confidence` | the same for low-confidence gold codes, reported separately and **never** counted in the decision | context only |
 | `landmine_precision` | of the codes the report raised, the share in the gold (high or low) | high |
 | `verdict_agreement` | exact PASS/EDGE/CONDITIONAL/KILL match | high |
@@ -175,6 +178,64 @@ Per run, on top of the public fact scores from `bench/grade.py`:
 | `killer_questions_from_bank` | the public check, carried through | high |
 | `unknown_share` | share of the twelve axes graded `U` | low, but honest beats confident |
 | `total_tokens`, `total_cost_usd`, `wall_time_s` | the bill | low |
+
+### Two-layer scoring: what a script can find, and what only reading can
+
+The gold set was written by a person who read the resident reviews, the planning
+documents and the tenancy paperwork, and who walked the route home at night. That is
+what makes it a real test. It is also a **tilt**: an arm that works only from parsed
+registers is being marked against sources it never saw, and one overall recall number
+hides that completely. `A-legacy` reading raw pages and `B-lean` reading script JSON
+are not being asked the same question.
+
+So every gold landmine carries a **layer**, and recall is reported inside each layer as
+well as overall. The two poles are `script` and `reading`; `mixed` is the bridge between
+them.
+
+| layer | what it means | codes | why it is there |
+|---|---|---|---|
+| `script` | a repository script establishes it on its own, with no page read | L1, L3, L4, L5, L10, L12 | `epc.py` (area, floor), `crime.py` (the walk home), `roads.py` (the facade), `planning.py` (the works), `company.py` (the landlord entity) |
+| `mixed` | a script narrows it or gives half the number; prose gives the rest | L2, L6, L7, L11, L16 | obstruction candidates + planning drawings; heating class + a tariff document; RMC/RTM + reviews; air permeability + reviews; `calc.py` + the listing text |
+| `reading` | only pasted or fetched prose establishes it | L8, L9, L13, L14, L15 | reviews, churn, licence terms, published referencing criteria, non-refundable fees |
+
+The mapping is `bench/ab/landmine_layers.yaml`, one line of justification per code, and
+it covers L1–L16 exactly once. A **single gold landmine may override its code's layer**
+by carrying its own `layer:` — an L2 whose only evidence was a sentence in a planning
+officer's report is `reading` for that case, even though L2 is `mixed` in general.
+`build_gold.py` stamps the default onto every gold landmine and carries any hand-written
+override through a regeneration; that is the one hand edit to `gold.json` that survives.
+
+**How to read the three columns.**
+
+* **`script` is the column that compares arms fairly.** Nothing in it needs a page.
+  An arm with no web tools at all should score here, so a miss is a harness or a
+  reasoning failure, never a missing input. If two arms differ here, that difference is
+  real.
+* **`reading` is close to a ceiling.** Nobody pastes a review page into a benchmark run,
+  so a low number here is mostly the suite talking about itself — the same story the
+  "no input" axes tell. It rewards arms that go and fetch, which is exactly the tilt the
+  split exists to make visible. Do not read it as a quality difference on its own.
+* **`mixed` is ambiguous by construction.** Read it next to `script` before concluding
+  anything: an arm that holds `script` and loses `mixed` lost its access to prose, not
+  its judgment.
+* **Null is not zero.** A case with no gold code in a layer scores `null` there, so it
+  never drags that layer's mean down. Layers where the gold is thin — on the current
+  five-case set `reading` holds about 0.4 high-confidence codes per case against
+  `script`'s 3.8 — carry very little weight, and `summary.md` prints those counts next
+  to the table so you can see how much a column is worth before quoting it.
+
+The three columns are **reported, never voted on**. The overall `landmine_recall` and
+the ADOPT / KEEP / UNDECIDED rule below are untouched by this split, and so is the
+ablation table's effect word: the layered numbers are extra columns on that table, there
+to say *where* a factor moved things.
+
+**One practical limit.** A run can only be scored by layer if the codes it raised are
+known, and those come from its report. Reports live in a temp workdir that gets cleaned
+up, so `grade_ab.py` now writes a `landmines_found` list onto each scorecard row it
+regrades. A row without stored codes and without a readable report scores **null** in
+every layer — the grader never guesses which codes a lost run had. The rounds already in
+`bench/results/` mostly predate that, so their layered columns are sparse; from the next
+round they are complete.
 
 ### Why an axis is unknown
 
@@ -254,16 +315,23 @@ is the whole point of running each case more than once.
 
 ## How to read the tables
 
-`summary.md` has four:
+`summary.md` has four, plus the layer block between the first and the second:
 
-1. **Per config** — mean over runs, with min–max in brackets for landmine recall and
-   tokens. Read the brackets first. If they overlap between two arms, the means are
-   telling you very little.
+1. **Per config** — mean over runs, with min–max in brackets for landmine recall, its
+   three layered columns (`script`, `mixed`, `reading`) and tokens. Read the brackets
+   first. If they overlap between two arms, the means are telling you very little. Then
+   read `script` before the overall number: it is the column where every arm had the
+   same input.
 2. **Paired differences** — B minus A, *per case*, plus how many cases B was at least
    as good on. A mean difference of −0.1 made of five −0.02s is a different animal
    from one made of one −0.5, and the per-case table is where you see which.
 3. **Ablation** — one factor at a time against B-lean, with the effect word.
 4. **Basic functions** — the cheap arms, pass or fail, check by check.
+
+Between them sits **Landmine recall by layer**, which says how many gold codes each
+layer holds on the cases that ran, how many runs had codes to score at all, and any
+per-case layer override in the gold. Read it before quoting a layered column: a column
+scored against 0.4 codes per case is not the same evidence as one scored against 3.8.
 
 Then the decision block, with every input it used and the noise floor it compared
 against.
@@ -309,6 +377,10 @@ The gold is generated, never hand-edited. To add a case:
 3. If a landmine code came out wrong, fix the keyword table **in the builder**, not in
    `gold.json`: the file is regenerated and your edit would be lost. `gold_rules.md`
    is regenerated from the same table, so the documentation follows automatically.
+   The one exception is a per-case `layer:` on a gold landmine — that is carried over
+   when the gold is rebuilt, because no keyword rule can know that this particular L2
+   was only ever visible in an officer's report. The code defaults live in
+   `bench/ab/landmine_layers.yaml` and are re-read on every build.
 4. If a case genuinely needs a KILL verdict, no rule produces one automatically — say
    so by hand and write why in `notes`.
 5. Re-run the tests: `python3 -m unittest discover -s tests -p 'test_*.py'`.
@@ -323,6 +395,7 @@ data and is always green.
 
 ```
 bench/ab/configs/*.yaml     the arms
+bench/ab/landmine_layers.yaml  L1-L16 -> script | mixed | reading, one line of why each
 bench/ab/run_ab.py          the sweep: runs x cases x configs, interleaved, resumable
 bench/ab/run_codex.py       one config x case against the Codex CLI
 bench/ab/grade_ab.py        the metrics, the tables, the decision

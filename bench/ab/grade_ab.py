@@ -19,6 +19,16 @@ landmine_recall      of the gold's HIGH-confidence codes, the share the report r
                      Low-confidence gold codes are reported separately and never
                      counted, because they were derived from survey text rather than
                      from the reviewer's stated objection.
+landmine_recall_script / _mixed / _reading
+                     the same recall, split by HOW a landmine can be found:
+                     `script` a repository script establishes it on its own, `mixed`
+                     a script gives half and prose gives the rest, `reading` only
+                     prose establishes it. The gold was written by a person reading
+                     reviews, planning documents and paperwork, which flatters arms
+                     that go and read raw pages; the split says how much of an arm's
+                     score is that tilt. The mapping is bench/ab/landmine_layers.yaml
+                     and a single gold landmine may override it with its own `layer:`.
+                     Null - never zero - when a case has no gold code in that layer.
 landmine_precision   of the codes the report raised, the share that are in the gold
                      (high or low: a low-confidence gold code is still not a
                      hallucination).
@@ -122,6 +132,11 @@ VERDICTS = ("PASS", "EDGE", "CONDITIONAL", "KILL")
 OVERLAP_FLOOR = 0.5          # same floor as the public bank check
 MIN_CONTENT_WORDS = 4        # same as bench/grade.py
 
+# How a landmine can be found. The order is the order the columns are printed in.
+LAYERS = ("script", "mixed", "reading")
+LAYER_MAP_PATH = os.path.join(HERE, "landmine_layers.yaml")
+_LAYER_MAP_CACHE = {}
+
 # The ADOPT rule, in one place so the tests and the README quote the same numbers.
 DECISION = {
     "fact_recall_slack": 0.02,
@@ -142,6 +157,93 @@ BASIC_FUNCTIONS = {
 def load_json(path):
     with io.open(path, encoding="utf-8") as fh:
         return json.load(fh, object_pairs_hook=collections.OrderedDict)
+
+
+def parse_nested_yaml(text):
+    """A deliberately small YAML reader for bench/ab/landmine_layers.yaml.
+
+    It understands exactly what that file uses: comments, blank lines, ``key: scalar``
+    and ``key:`` followed by a more-indented block of the same. No lists, no anchors,
+    no multi-line scalars - anything else raises, so a mapping that needs real YAML
+    fails loudly instead of being silently half-read. Standard library only, per
+    docs/CONVENTIONS.md, and the same policy as bench/run.py's config reader.
+    """
+    root = collections.OrderedDict()
+    stack = [(-1, root)]
+    for lineno, raw in enumerate(text.splitlines(), 1):
+        line = raw.rstrip()
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        if stripped.startswith("- "):
+            raise ValueError("landmine_layers line %d: lists are not supported: %r"
+                             % (lineno, raw))
+        if ":" not in stripped:
+            raise ValueError("landmine_layers line %d: not key: value: %r" % (lineno, raw))
+        indent = len(line) - len(line.lstrip(" "))
+        while len(stack) > 1 and indent <= stack[-1][0]:
+            stack.pop()
+        key, _, value = stripped.partition(":")
+        key, value = key.strip(), value.strip()
+        parent = stack[-1][1]
+        if value == "":
+            child = collections.OrderedDict()
+            parent[key] = child
+            stack.append((indent, child))
+        else:
+            parent[key] = runner.scalar(value)
+    return root
+
+
+def load_layer_map(path=None):
+    """{code: {layer, name, why}} from bench/ab/landmine_layers.yaml.
+
+    The layer here is the code's DEFAULT. A single gold landmine may carry its own
+    ``layer:`` and that wins for that case - see layer_of().
+    """
+    path = path or LAYER_MAP_PATH
+    with io.open(path, encoding="utf-8") as fh:
+        doc = parse_nested_yaml(fh.read())
+    codes = doc.get("codes") or collections.OrderedDict()
+    if not codes:
+        raise ValueError("%s has no `codes:` block" % path)
+    out = collections.OrderedDict()
+    for code in sorted(codes, key=code_order):
+        entry = codes[code] or {}
+        layer = entry.get("layer")
+        if layer not in LAYERS:
+            raise ValueError("%s: %s has layer %r, expected one of %s"
+                             % (path, code, layer, ", ".join(LAYERS)))
+        out[code] = collections.OrderedDict([
+            ("layer", layer), ("name", entry.get("name")), ("why", entry.get("why"))])
+    return out
+
+
+def layer_map(path=None):
+    """load_layer_map(), cached per path: the grader asks for it once per landmine."""
+    key = path or LAYER_MAP_PATH
+    if key not in _LAYER_MAP_CACHE:
+        _LAYER_MAP_CACHE[key] = load_layer_map(key)
+    return _LAYER_MAP_CACHE[key]
+
+
+def layer_of(mine, mapping=None):
+    """The layer for ONE gold landmine entry, or None if the code is not mapped.
+
+    A per-case override wins: an L2 whose only evidence was a sentence in a planning
+    officer's report is `reading` for that case even though L2 is `mixed` in general,
+    and gold.json says so by putting ``"layer": "reading"`` on that entry.
+    """
+    mapping = layer_map() if mapping is None else mapping
+    if isinstance(mine, dict):
+        own = str(mine.get("layer") or "").strip().lower()
+        if own in LAYERS:
+            return own
+        code = mine.get("code")
+    else:
+        code = mine
+    entry = mapping.get(code)
+    return entry["layer"] if entry else None
 
 
 def load_gold(path):
@@ -183,18 +285,51 @@ def reported_codes(cand):
     return grader.raised_codes(cand)
 
 
-def landmine_scores(cand, gold_row):
+def gold_by_layer(gold_row, mapping=None):
+    """{layer: set of HIGH-confidence gold codes in that layer} for one case.
+
+    Only high-confidence codes, so the layered recalls are a partition of exactly the
+    same gold that ``landmine_recall`` scores against. A code whose layer is unknown
+    (not in the mapping, no override) is counted in no layer and is flagged by the
+    caller rather than silently dropped into one.
+    """
+    mapping = layer_map() if mapping is None else mapping
+    buckets = collections.OrderedDict((name, set()) for name in LAYERS)
+    unmapped = set()
+    for mine in gold_row.get("gold_landmines") or []:
+        if not isinstance(mine, dict) or mine.get("confidence") != "high":
+            continue
+        name = layer_of(mine, mapping)
+        if name in buckets:
+            buckets[name].add(mine["code"])
+        else:
+            unmapped.add(mine.get("code"))
+    return buckets, unmapped
+
+
+def landmine_scores(cand, gold_row, found=None, mapping=None):
+    """The landmine block for one run.
+
+    ``found`` overrides the codes read out of the report - pass the row's stored
+    ``landmines_found`` when the workdir is gone. ``None`` means "read the report".
+    """
     high = set(m["code"] for m in gold_row["gold_landmines"] if m["confidence"] == "high")
     low = set(m["code"] for m in gold_row["gold_landmines"] if m["confidence"] == "low")
-    got = set(c for c in reported_codes(cand) if c.startswith("L"))
+    if found is None:
+        got = set(c for c in reported_codes(cand) if c.startswith("L"))
+    else:
+        got = set(str(c).upper() for c in found if str(c).upper().startswith("L"))
 
     recall = len(got & high) / float(len(high)) if high else None
     low_recall = len(got & low) / float(len(low)) if low else None
     precision = len(got & (high | low)) / float(len(got)) if got else None
-    return collections.OrderedDict([
+    out = collections.OrderedDict([
         ("gold_high", sorted(high, key=code_order)),
         ("gold_low", sorted(low, key=code_order)),
         ("reported", sorted(got, key=code_order)),
+        # The durable copy: bench/ab/grade_ab.py --regrade writes this onto the
+        # scorecard row, so a run stays layer-scorable after its workdir is deleted.
+        ("landmines_found", sorted(got, key=code_order)),
         ("hit_high", sorted(got & high, key=code_order)),
         ("missed_high", sorted(high - got, key=code_order)),
         ("extra", sorted(got - high - low, key=code_order)),
@@ -204,6 +339,31 @@ def landmine_scores(cand, gold_row):
         ("landmine_precision", round(precision, 4) if precision is not None else None),
         ("codes_dropped", len(high - got)),
     ])
+    out.update(layered_recall(gold_row, got, mapping))
+    return out
+
+
+def layered_recall(gold_row, got, mapping=None):
+    """Recall inside each layer, over the HIGH-confidence gold codes only.
+
+    ``got`` is the set of codes the run raised, or None when nothing was stored for
+    this run. The recall is **null, never zero**, when the case has no gold code in
+    that layer or when the run's codes were never persisted: a case with nothing to
+    find in a layer must not drag that layer's mean down, and a run nobody can score
+    must not be scored as a miss.
+    """
+    buckets, unmapped = gold_by_layer(gold_row, mapping)
+    out = collections.OrderedDict()
+    for name, codes in buckets.items():
+        out["gold_%s" % name] = sorted(codes, key=code_order)
+    for name, codes in buckets.items():
+        if got is None or not codes:
+            out["landmine_recall_%s" % name] = None
+        else:
+            out["landmine_recall_%s" % name] = round(len(got & codes) / float(len(codes)), 4)
+    if unmapped:
+        out["gold_codes_without_a_layer"] = sorted(unmapped, key=code_order)
+    return out
 
 
 def code_order(code):
@@ -335,7 +495,19 @@ def grade_row(row, gold, bank):
     out["gold"] = gold_row["id"]
     if report is None:
         out["report_missing"] = True
+        # The report is gone (a temp workdir was cleaned up), but a previous grading
+        # may have persisted the codes onto the row. Score the landmines from those
+        # rather than throwing the run away. Nothing else is recoverable: the verdict,
+        # the questions and the axes stay unscored.
+        stored = row.get("landmines_found")
+        if isinstance(stored, list):
+            out["landmine_source"] = "stored codes on the row"
+            out.update(landmine_scores(None, gold_row, found=stored))
+        else:
+            out["landmine_source"] = None
+            out.update(layered_recall(gold_row, None))
         return out
+    out["landmine_source"] = "report"
     out.update(landmine_scores(cand, gold_row))
     out.update(verdict_scores(cand, gold_row))
     out.update(question_scores(cand, gold_row, bank))
@@ -349,8 +521,11 @@ def grade_row(row, gold, bank):
 # ---------------------------------------------------------------- aggregate --
 NUMERIC = ("fact_recall", "stable_fact_recall", "fabrications", "hard_filter_consistency",
            "killer_questions_from_bank", "landmine_recall", "landmine_precision",
-           "landmine_recall_low_confidence", "killer_question_overlap", "unknown_share",
+           "landmine_recall_low_confidence",
+           "landmine_recall_script", "landmine_recall_mixed", "landmine_recall_reading",
+           "killer_question_overlap", "unknown_share",
            "codes_dropped", "total_tokens", "total_cost_usd", "wall_time_s")
+LAYER_METRICS = tuple("landmine_recall_%s" % name for name in LAYERS)
 BOOLEAN = ("verdict_agreement", "verdict_agreement_kill_split", "schema_valid",
            "verdict_present")
 
@@ -563,8 +738,11 @@ def basic_functions(agg, config):
 def factor_table(rows, agg, base):
     """One line per ablation config: within noise / helps / hurts."""
     out = []
+    # The three layered recalls are reported, never voted on: the effect word stays a
+    # function of fact recall, overall landmine recall and verdict agreement, exactly
+    # as before, so the ablation verdicts do not move because a column was added.
     metrics = ("fact_recall", "fabrications", "landmine_recall", "verdict_agreement",
-               "total_tokens", "wall_time_s")
+               "total_tokens", "wall_time_s") + LAYER_METRICS
     for name, block in agg.items():
         if name == base or block.get("phase") != "ablation":
             continue
@@ -792,6 +970,12 @@ def regrade(results_dir, cases_path):
         fresh["regraded_at"] = (datetime.datetime.utcnow().replace(microsecond=0).isoformat()
                                 + "Z")
         fresh["regraded_from"] = where
+        # Persist the codes the report raised. The report itself lives in a temp workdir
+        # that gets cleaned up; without this, a run can never be re-scored - by layer or
+        # at all - once the machine is tidied. Gold-free: these are the run's own codes.
+        fresh["landmines_found"] = sorted(
+            (c for c in grader.raised_codes(first_candidate(report)) if c.startswith("L")),
+            key=code_order)
         updates[row_key(row)] = fresh
         notes.append("%s: %s facts, from %s" % (label, fresh.get("facts"), where))
 
@@ -801,6 +985,53 @@ def regrade(results_dir, cases_path):
     runner.write_scorecard(merged, results_dir, os.path.basename(results_dir.rstrip(os.sep)))
     return collections.OrderedDict([("rows", len(rows)), ("regraded", len(updates)),
                                     ("cases", cases_path), ("notes", notes)])
+
+
+# ---------------------------------------------------------------- layers --
+def layer_breakdown(rows, gold_doc, mapping=None):
+    """What the three layered recalls are scored against, and how many runs can be.
+
+    Counts only the cases this sweep actually ran, so "mean codes per case" is the
+    mean of the cases in front of the reader, not of the whole gold set.
+    """
+    mapping = layer_map() if mapping is None else mapping
+    ran = collections.OrderedDict((r["gold"], None) for r in rows if r.get("gold"))
+    per_layer = collections.OrderedDict(
+        (name, collections.OrderedDict([("codes", 0), ("cases_with_any", 0)]))
+        for name in LAYERS)
+    unmapped = set()
+    for cand in gold_doc.get("candidates") or []:
+        if cand.get("id") not in ran:
+            continue
+        buckets, missing = gold_by_layer(cand, mapping)
+        unmapped |= missing
+        for name, codes in buckets.items():
+            per_layer[name]["codes"] += len(codes)
+            per_layer[name]["cases_with_any"] += 1 if codes else 0
+    for name in LAYERS:
+        per_layer[name]["mean_codes_per_case"] = (
+            round(per_layer[name]["codes"] / float(len(ran)), 3) if ran else None)
+    overrides = []
+    for cand in gold_doc.get("candidates") or []:
+        if cand.get("id") not in ran:
+            continue
+        for mine in cand.get("gold_landmines") or []:
+            own = str((mine or {}).get("layer") or "").strip().lower()
+            code = (mine or {}).get("code")
+            default = (mapping.get(code) or {}).get("layer")
+            if own in LAYERS and own != default:
+                overrides.append("%s %s: %s (default %s)" % (cand["id"], code, own, default))
+    return collections.OrderedDict([
+        ("map", os.path.relpath(LAYER_MAP_PATH, ROOT)),
+        ("layer_of_code", collections.OrderedDict(
+            (code, entry["layer"]) for code, entry in mapping.items())),
+        ("cases", len(ran)),
+        ("per_layer", per_layer),
+        ("runs", len(rows)),
+        ("runs_with_codes", sum(1 for r in rows if r.get("landmine_source"))),
+        ("per_case_overrides", overrides),
+        ("codes_without_a_layer", sorted(unmapped, key=code_order)),
+    ])
 
 
 # ------------------------------------------------------------ why unknown --
@@ -868,12 +1099,15 @@ def markdown(summary):
              "%d runs, %d configs, %d cases, gold %s."
              % (summary["runs"], len(agg), summary["cases"], summary["gold"]), "",
              "## Per config (mean over runs, min-max in brackets)", "",
-             "| config | phase | runs | facts | stable | fab | landmine recall | landmine prec "
+             "| config | phase | runs | facts | stable | fab | landmine recall | script "
+             "| mixed | reading | landmine prec "
              "| verdict exact | KILL split | questions vs gold | from bank | unknown | tokens "
              "| cost $ | wall s |",
-             "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|"]
+             "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:"
+             "|---:|---:|---:|"]
     for name, block in agg.items():
-        lines.append("| %s | %s | %d | %s | %s | %s | %s [%s-%s] | %s | %s | %s | %s | %s | %s "
+        lines.append("| %s | %s | %d | %s | %s | %s | %s [%s-%s] | %s [%s-%s] | %s [%s-%s] "
+                     "| %s [%s-%s] | %s | %s | %s | %s | %s | %s "
                      "| %s [%s-%s] | %s | %s |"
                      % (name, block.get("phase") or "-", block["runs"],
                         mstat(block["fact_recall"]), mstat(block["stable_fact_recall"]),
@@ -881,6 +1115,15 @@ def markdown(summary):
                         mstat(block["landmine_recall"]),
                         mstat(block["landmine_recall"], "min"),
                         mstat(block["landmine_recall"], "max"),
+                        mstat(block["landmine_recall_script"]),
+                        mstat(block["landmine_recall_script"], "min"),
+                        mstat(block["landmine_recall_script"], "max"),
+                        mstat(block["landmine_recall_mixed"]),
+                        mstat(block["landmine_recall_mixed"], "min"),
+                        mstat(block["landmine_recall_mixed"], "max"),
+                        mstat(block["landmine_recall_reading"]),
+                        mstat(block["landmine_recall_reading"], "min"),
+                        mstat(block["landmine_recall_reading"], "max"),
                         mstat(block["landmine_precision"]),
                         fmt(block["verdict_agreement"]),
                         fmt(block["verdict_agreement_kill_split"]),
@@ -892,6 +1135,52 @@ def markdown(summary):
                         mstat(block["total_tokens"], "max", "%.0f"),
                         mstat(block["total_cost_usd"], spec="%.4f"),
                         mstat(block["wall_time_s"], spec="%.0f")))
+
+    lay = summary.get("layers") or {}
+    if lay.get("per_layer"):
+        lines += ["", "## Landmine recall by layer", "",
+                  "The gold set was written by a person who read the resident reviews, the "
+                  "planning documents and the tenancy paperwork, and who walked the route "
+                  "home. That is what makes it a real test, and it is also a tilt: an arm "
+                  "that works only from parsed registers is being marked against sources it "
+                  "never saw. So every gold landmine carries a **layer** saying how it can "
+                  "be found, and recall is reported inside each layer as well as overall.",
+                  "",
+                  "* **script** - a repository script establishes it on its own "
+                  "(`epc.py`, `crime.py`, `roads.py`, `planning.py`, `company.py`). An arm "
+                  "with no web tools should still find it, so a miss here is a harness or a "
+                  "reasoning failure, never a missing input. **This is the column that "
+                  "compares arms fairly.**",
+                  "* **mixed** - a script narrows it or gives half the number and prose "
+                  "gives the rest. Read it next to the script column before concluding "
+                  "anything.",
+                  "* **reading** - only prose establishes it: reviews, an agreement, a fee "
+                  "schedule, a criteria page. Nobody pastes those into a benchmark run, so "
+                  "this column is close to a ceiling and a low number here is mostly the "
+                  "suite talking about itself, not a model that failed.", "",
+                  "The mapping is `%s`; a single gold landmine may override its code's "
+                  "layer with its own `layer:`. Recall in a layer is **null, not zero**, "
+                  "when a case has no gold code in that layer, so a case with nothing to "
+                  "find never drags the mean down." % lay.get("map"), "",
+                  "| layer | gold codes across the %d cases run | cases with at least one "
+                  "| mean codes per case |" % lay.get("cases", 0),
+                  "|---|---:|---:|---:|"]
+        for name in LAYERS:
+            block = lay["per_layer"][name]
+            lines.append("| %s | %d | %d | %s |"
+                         % (name, block["codes"], block["cases_with_any"],
+                            fmt(block["mean_codes_per_case"], "%.2f")))
+        lines += ["", "%d of %d runs had landmine codes to score (a run whose report is gone "
+                      "and whose codes were never persisted scores null in every layer, "
+                      "including the overall recall)."
+                  % (lay.get("runs_with_codes", 0), lay.get("runs", 0))]
+        if lay.get("per_case_overrides"):
+            lines += ["", "Per-case overrides in the gold: %s."
+                      % "; ".join(lay["per_case_overrides"])]
+        if lay.get("codes_without_a_layer"):
+            lines += ["", "**Gold codes with no layer:** %s. Add them to `%s`; they are "
+                          "counted in the overall recall and in none of the three columns."
+                      % (", ".join(lay["codes_without_a_layer"]), lay.get("map"))]
 
     unk = summary.get("unknown") or {}
     if unk.get("configs"):
@@ -953,17 +1242,25 @@ def markdown(summary):
     if summary.get("factors"):
         lines += ["", "## Ablation: one factor at a time against %s" % summary["baseline_lean"],
                   "",
-                  "| config | factor | effect | facts | landmine recall | verdict | tokens | "
-                  "wall s |",
-                  "|---|---|---|---:|---:|---:|---:|---:|"]
+                  "| config | factor | effect | facts | landmine recall | script | mixed "
+                  "| reading | verdict | tokens | wall s |",
+                  "|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|"]
         for row in summary["factors"]:
-            lines.append("| %s | %s | **%s** | %s | %s | %s | %s | %s |"
+            lines.append("| %s | %s | **%s** | %s | %s | %s | %s | %s | %s | %s | %s |"
                          % (row["config"], row["factor"], row["effect"],
                             fmt(row["fact_recall"]["mean_diff"]),
                             fmt(row["landmine_recall"]["mean_diff"]),
+                            fmt(row["landmine_recall_script"]["mean_diff"]),
+                            fmt(row["landmine_recall_mixed"]["mean_diff"]),
+                            fmt(row["landmine_recall_reading"]["mean_diff"]),
                             fmt(row["verdict_agreement"]["mean_diff"]),
                             fmt(row["total_tokens"]["mean_diff"], "%.0f"),
                             fmt(row["wall_time_s"]["mean_diff"], "%.0f")))
+        lines += ["", "The three layered columns are reported, not voted on: the effect "
+                      "word is still decided by facts, overall landmine recall and verdict "
+                      "agreement alone. They are there to say *where* a factor moved things "
+                      "- a factor that only moves the `reading` column moved the arm's access "
+                      "to prose, not its judgment."]
 
     if summary.get("basic_functions"):
         lines += ["", "## Basic functions on the cheapest setup", ""]
@@ -1063,6 +1360,7 @@ def main(argv=None):
         ("per_config", agg),
         ("paired", paired_blocks),
         ("noise_floor", noise_floor),
+        ("layers", layer_breakdown(rows, gold_doc)),
         ("unknown", unknown_breakdown(agg)),
         ("factors", factor_table(rows, agg, args.candidate)),
         ("basic_functions", [b for b in (basic_functions(agg, n.strip())

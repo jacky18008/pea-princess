@@ -208,6 +208,21 @@ Read these before quoting any number above.
   it a real test, and it also tilts the table toward arms that go and read raw pages, because the
   gold was written from raw pages. An arm that works from parsed registers is being marked against
   a source it never saw.
+- **Recall split by layer will be reported from the next round; the numbers above are not split.**
+  Every gold landmine now carries a *layer* saying how it can be found — `script` (a repository
+  script establishes it on its own: area and floor from `epc.py`, the walk home from `crime.py`,
+  the facade from `roads.py`, the works from `planning.py`, the landlord entity from `company.py`),
+  `mixed` (a script gives half and prose gives the rest), or `reading` (only pasted or fetched
+  prose establishes it: reviews, churn, licence terms, referencing criteria, non-refundable fees).
+  The mapping is `bench/ab/landmine_layers.yaml` and the grader now reports `landmine_recall_script`,
+  `landmine_recall_mixed` and `landmine_recall_reading` per arm. That is the honest way to read the
+  bullet above: the `script` column asks every arm the same question, and the `reading` column is
+  close to a ceiling in a benchmark where nobody pastes anything. **The rounds behind the tables on
+  this page cannot be scored that way retrospectively** — a run's per-landmine codes live in its
+  report, the reports lived in temp working directories, and most of those are gone, so only a
+  handful of runs still have codes to split. The grader now persists a `landmines_found` list onto
+  every scorecard row it writes, so from the next round the split is complete and the layered
+  columns will appear here. Until then, read the single recall number knowing the tilt is in it.
 - **In a benchmark, nobody pastes a review page.** The axes that depend on material a person has to
   paste — resident reviews, listing detail, price, a welcome-pack tariff, which way the windows
   face — come back "not known" in *every* arm. That is a shared ceiling, not a model failing, and

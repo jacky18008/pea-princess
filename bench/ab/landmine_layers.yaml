@@ -1,0 +1,102 @@
+# Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen - https://github.com/jacky18008/pea-princess - CC BY 4.0
+#
+# Which landmines a run can find WITHOUT reading a page.
+#
+# The private gold set was written by a person who read the resident reviews, the
+# planning documents and the tenancy paperwork, and who walked the route home. That is
+# what makes it a real test, and it is also a tilt: an arm that works only from parsed
+# registers is being marked against sources it never saw. One overall recall number
+# hides the tilt. Three do not.
+#
+#   script   a repository script can establish it on its own. An arm with no web tools
+#            at all should still find it. A miss here is a harness or a reasoning
+#            failure, never a missing input.
+#   mixed    a script narrows it or supplies half the number; the other half is in text
+#            somebody reads or pastes. A miss here is ambiguous - read it next to the
+#            script column before concluding anything.
+#   reading  only prose establishes it: reviews, an agreement, a fee schedule, a
+#            criteria page. No register and no script in this repository returns it.
+#            In a benchmark run, where nobody pastes anything, this layer is close to a
+#            ceiling, and a low number here is mostly the suite talking about itself.
+#
+# Read by bench/ab/grade_ab.py (the three layered recalls) and by
+# bench/private/build_gold.py (which stamps `layer` onto each gold landmine).
+#
+# PER-CASE OVERRIDE. The layer below is the code's DEFAULT. A single gold landmine may
+# carry its own `layer:` in gold.json and that wins - for example an L2 whose only
+# evidence was a sentence in a planning officer's report is `reading` for that case,
+# even though L2 is `mixed` in general. build_gold.py carries any layer that differs
+# from the default here through a regeneration, so a hand-written override is not lost.
+
+version: 1
+
+layers:
+  script: A repository script can establish it on its own, with no page read.
+  mixed: A script supplies part of it; the rest is in text somebody reads or pastes.
+  reading: Only pasted or fetched prose establishes it. No script returns it.
+
+codes:
+  L1:
+    name: area illusion
+    layer: script
+    why: scripts/epc.py returns the certificate's own total floor area, so the advertised size is contradicted from a register without opening the listing.
+  L2:
+    name: obstruction and no sky
+    layer: mixed
+    why: scripts/roads.py lists the obstruction candidates around the block, but whether the main windows actually lose the sky is settled in planning drawings and elevations someone reads.
+  L3:
+    name: crime nodes on the walk home
+    layer: script
+    why: scripts/crime.py places the recorded offences on the station-to-door route, which is the whole finding.
+  L4:
+    name: road or rail facade
+    layer: script
+    why: scripts/roads.py classifies the roads and railways the building fronts, so a noisy facade is established from the map alone.
+  L5:
+    name: works in the tenancy window
+    layer: script
+    why: scripts/planning.py returns the live applications around the address and the dates their decisions land.
+  L6:
+    name: heat network tariff and billing agent
+    layer: mixed
+    why: scripts/epc.py gives the heating class and the Heat Trust register names the operator, but the standing charge and the unit rate exist only in a tariff document somebody pastes.
+  L7:
+    name: management outsourced with no way to replace it
+    layer: mixed
+    why: scripts/company.py shows whether an RMC or RTM company exists and who its officers are; whether the management is actually failing comes from resident reviews.
+  L8:
+    name: unusable reviews
+    layer: reading
+    why: the incentive, the one-day burst and the age of the reviews are visible only in the review text itself.
+  L9:
+    name: short-let or student churn neighbours
+    layer: reading
+    why: no register records who the neighbours are; it comes from listings, review text and building notices.
+  L10:
+    name: ground floor or misleading floor numbering
+    layer: script
+    why: scripts/epc.py carries the certificate's own floor level and address line for the unit, which is what contradicts the advertised floor.
+  L11:
+    name: no cooling or shared ventilation odours
+    layer: mixed
+    why: scripts/epc.py gives the air permeability and the ventilation type, but overheating in August and cooking smells in the corridor are reported by residents.
+  L12:
+    name: landlord type and money gate
+    layer: script
+    why: scripts/company.py resolves the owning entity, its age and its officers straight from the register.
+  L13:
+    name: licence, not a tenancy
+    layer: reading
+    why: whether the paper is a licence or a tenancy, and whether the deposit is protected, is in the agreement's own words.
+  L14:
+    name: the money gate has no route for you
+    layer: reading
+    why: the published referencing criteria are a page or a pack the applicant has to read; no register lists them.
+  L15:
+    name: non-refundable money paid before certainty
+    layer: reading
+    why: which fees are non-refundable, and when they become due, is in the terms and the fee schedule.
+  L16:
+    name: headline price is not the price
+    layer: mixed
+    why: scripts/calc.py recomputes the true monthly cost once the components are known, but the components - part-month billing, platform fees, a concession that is on the portal and not in the offer - come from the listing and offer text.

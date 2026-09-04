@@ -57,16 +57,29 @@ def report(codes, verdict="CONDITIONAL", questions=None, unknown_axes=0):
     }
 
 
-def gold_doc(cases):
-    """cases = [(id, verdict, [high codes], [low codes], [questions])]"""
+def gold_doc(cases, layers=None):
+    """cases = [(id, verdict, [high codes], [low codes], [questions])]
+
+    `layers` = {case id: {code: layer}} writes a per-case `layer:` onto that gold
+    landmine, which is how gold.json overrides the code's default layer.
+    """
+    layers = layers or {}
+
+    def mine(cid, code, confidence):
+        row = {"code": code, "confidence": confidence, "name": code}
+        override = (layers.get(cid) or {}).get(code)
+        if override:
+            row["layer"] = override
+        return row
+
     return {
         "description": "synthetic",
         "candidates": [{
             "id": cid,
             "address": "somewhere",
             "gold_verdict": verdict,
-            "gold_landmines": ([{"code": c, "confidence": "high", "name": c} for c in high]
-                               + [{"code": c, "confidence": "low", "name": c} for c in low]),
+            "gold_landmines": ([mine(cid, c, "high") for c in high]
+                               + [mine(cid, c, "low") for c in low]),
             "gold_killer_questions": [{"text": q, "source": "test"} for q in questions],
             "notes": "",
         } for cid, verdict, high, low, questions in cases],
@@ -306,6 +319,45 @@ class GoldRules(unittest.TestCase):
         self.assertEqual(build_gold.clean_address("25 Goswell Road, EC1M 7AJ (unit501/502未定)"),
                          "25 Goswell Road, EC1M 7AJ")
 
+    def test_every_derived_landmine_is_stamped_with_its_layer(self):
+        mines = build_gold.derive_landmines(
+            {"verdict": "熱網固定費未確認，風險"}, {"status": "HOLD"})
+        self.assertTrue(mines)
+        for mine in mines:
+            self.assertEqual(mine["layer"],
+                             grade_ab.layer_map()[mine["code"]]["layer"], mine["code"])
+
+    def test_a_carried_over_override_beats_the_mapping_when_gold_is_rebuilt(self):
+        mines = build_gold.derive_landmines(
+            {"verdict": "採光遮擋未確認，風險"}, {}, {"L2": "reading"})
+        by_code = dict((m["code"], m) for m in mines)
+        self.assertEqual(by_code["L2"]["layer"], "reading")   # not the default `mixed`
+
+    def test_only_a_real_override_survives_a_regeneration(self):
+        folder = tempfile.mkdtemp(prefix="vetflat-gold-")
+        path = os.path.join(folder, "gold.json")
+        with io.open(path, "w", encoding="utf-8") as fh:
+            fh.write(json.dumps({"candidates": [
+                {"id": "X", "gold_landmines": [
+                    {"code": "L2", "confidence": "high", "layer": "reading"},   # override
+                    {"code": "L6", "confidence": "high", "layer": "mixed"},     # the default
+                    {"code": "L8", "confidence": "low"},                        # no layer
+                ]}]}))
+        got = build_gold.existing_layer_overrides(path)
+        shutil.rmtree(folder, ignore_errors=True)
+        self.assertEqual(got, {"X": {"L2": "reading"}})
+
+    def test_the_shipped_gold_carries_a_layer_on_every_landmine(self):
+        path = os.path.join(PRIVATE, "gold.json")
+        if not os.path.exists(path):
+            self.skipTest("no gold.json built yet")
+        with io.open(path, encoding="utf-8") as fh:
+            doc = json.load(fh)
+        for row in doc["candidates"]:
+            for mine in row["gold_landmines"]:
+                self.assertIn(mine.get("layer"), grade_ab.LAYERS,
+                              "%s %s" % (row["id"], mine["code"]))
+
 
 # --------------------------------------------------------- grader arithmetic --
 class LandmineAndVerdictScores(unittest.TestCase):
@@ -372,6 +424,184 @@ class LandmineAndVerdictScores(unittest.TestCase):
     def test_unknown_share_counts_axes_graded_U(self):
         self.assertEqual(grade_ab.unknown_share(self.cand([], unknown_axes=3)), 0.25)
         self.assertEqual(grade_ab.unknown_share(self.cand([], unknown_axes=0)), 0.0)
+
+
+# ----------------------------------------------------------- landmine layers --
+class LandmineLayerMap(unittest.TestCase):
+    """bench/ab/landmine_layers.yaml: the shipped mapping, read by the real parser."""
+
+    def setUp(self):
+        self.mapping = grade_ab.load_layer_map()
+
+    def test_the_map_covers_L1_to_L16_exactly_once(self):
+        self.assertEqual(list(self.mapping), ["L%d" % n for n in range(1, 17)])
+        self.assertEqual(len(self.mapping), 16)
+
+    def test_every_code_has_a_known_layer_a_name_and_a_reason(self):
+        for code, entry in self.mapping.items():
+            self.assertIn(entry["layer"], grade_ab.LAYERS, code)
+            self.assertTrue((entry["name"] or "").strip(), code)
+            self.assertTrue((entry["why"] or "").strip(), code)
+
+    def test_the_layers_are_the_ones_the_brief_named(self):
+        by_layer = {}
+        for code, entry in self.mapping.items():
+            by_layer.setdefault(entry["layer"], []).append(code)
+        self.assertEqual(sorted(by_layer["script"], key=grade_ab.code_order),
+                         ["L1", "L3", "L4", "L5", "L10", "L12"])
+        self.assertEqual(sorted(by_layer["mixed"], key=grade_ab.code_order),
+                         ["L2", "L6", "L7", "L11", "L16"])
+        self.assertEqual(sorted(by_layer["reading"], key=grade_ab.code_order),
+                         ["L8", "L9", "L13", "L14", "L15"])
+
+    def test_a_per_case_layer_beats_the_codes_default(self):
+        # An L2 that was only ever visible in a planning officer's report is `reading`
+        # for that case, even though L2 is `mixed` in general.
+        self.assertEqual(grade_ab.layer_of({"code": "L2"}), "mixed")
+        self.assertEqual(grade_ab.layer_of({"code": "L2", "layer": "reading"}), "reading")
+        self.assertEqual(grade_ab.layer_of({"code": "L2", "layer": "READING"}), "reading")
+
+    def test_a_nonsense_override_falls_back_to_the_default(self):
+        self.assertEqual(grade_ab.layer_of({"code": "L2", "layer": "telepathy"}), "mixed")
+
+    def test_a_code_the_map_does_not_know_has_no_layer(self):
+        self.assertIsNone(grade_ab.layer_of({"code": "L99"}))
+
+    def test_a_layer_outside_the_three_is_a_loud_failure(self):
+        path = os.path.join(tempfile.mkdtemp(prefix="vetflat-layers-"), "bad.yaml")
+        with io.open(path, "w", encoding="utf-8") as fh:
+            fh.write("codes:\n  L1:\n    layer: vibes\n    why: no\n")
+        self.assertRaises(ValueError, grade_ab.load_layer_map, path)
+        shutil.rmtree(os.path.dirname(path), ignore_errors=True)
+
+    def test_the_reader_nests_and_refuses_what_it_cannot_read(self):
+        got = grade_ab.parse_nested_yaml("# c\nversion: 1\ncodes:\n  L1:\n    layer: script\n")
+        self.assertEqual(got["version"], 1)
+        self.assertEqual(got["codes"]["L1"]["layer"], "script")
+        self.assertRaises(ValueError, grade_ab.parse_nested_yaml, "codes:\n  - L1\n")
+        self.assertRaises(ValueError, grade_ab.parse_nested_yaml, "no colon here\n")
+
+
+class LayeredRecall(unittest.TestCase):
+    """Recall split by how a landmine can be found: script / mixed / reading."""
+
+    # script L1 + L3, mixed L6, reading L8 + L9 + L13.
+    GOLD = {"id": "c1", "gold_verdict": "CONDITIONAL",
+            "gold_landmines": [{"code": c, "confidence": "high", "name": c}
+                               for c in ("L1", "L3", "L6", "L8", "L9", "L13")]}
+
+    def cand(self, codes):
+        return grade_ab.first_candidate(report(codes))
+
+    def test_recall_inside_each_layer(self):
+        # script 2/2, mixed 0/1, reading 1/3.
+        got = grade_ab.landmine_scores(self.cand(["L1", "L3", "L8"]), self.GOLD)
+        self.assertEqual(got["landmine_recall_script"], 1.0)
+        self.assertEqual(got["landmine_recall_mixed"], 0.0)
+        self.assertEqual(got["landmine_recall_reading"], 0.3333)
+        self.assertEqual(got["gold_script"], ["L1", "L3"])
+        self.assertEqual(got["gold_mixed"], ["L6"])
+        self.assertEqual(got["gold_reading"], ["L8", "L9", "L13"])
+        # and the overall number is unchanged: 3 of 6.
+        self.assertEqual(got["landmine_recall"], 0.5)
+
+    def test_the_three_layers_partition_the_high_confidence_gold(self):
+        got = grade_ab.landmine_scores(self.cand([]), self.GOLD)
+        split = got["gold_script"] + got["gold_mixed"] + got["gold_reading"]
+        self.assertEqual(sorted(split, key=grade_ab.code_order), got["gold_high"])
+        self.assertNotIn("gold_codes_without_a_layer", got)
+
+    def test_a_layer_with_no_gold_code_is_null_not_zero(self):
+        gold = {"id": "c1", "gold_landmines": [{"code": "L1", "confidence": "high",
+                                                "name": "L1"}]}
+        got = grade_ab.landmine_scores(self.cand([]), gold)
+        self.assertEqual(got["landmine_recall_script"], 0.0)
+        self.assertIsNone(got["landmine_recall_mixed"])
+        self.assertIsNone(got["landmine_recall_reading"])
+
+    def test_low_confidence_gold_is_not_in_any_layer(self):
+        gold = {"id": "c1", "gold_landmines": [{"code": "L1", "confidence": "high",
+                                                "name": "L1"},
+                                               {"code": "L8", "confidence": "low",
+                                                "name": "L8"}]}
+        got = grade_ab.landmine_scores(self.cand(["L1", "L8"]), gold)
+        self.assertEqual(got["gold_reading"], [])
+        self.assertIsNone(got["landmine_recall_reading"])
+
+    def test_a_per_case_override_moves_the_code_between_layers(self):
+        gold = {"id": "c1", "gold_landmines": [
+            {"code": "L2", "confidence": "high", "name": "L2", "layer": "reading"},
+            {"code": "L6", "confidence": "high", "name": "L6"}]}
+        got = grade_ab.landmine_scores(self.cand(["L2"]), gold)
+        self.assertEqual(got["gold_reading"], ["L2"])
+        self.assertEqual(got["gold_mixed"], ["L6"])
+        self.assertEqual(got["landmine_recall_reading"], 1.0)
+        self.assertEqual(got["landmine_recall_mixed"], 0.0)
+
+    def test_a_gold_code_with_no_layer_is_named_not_guessed(self):
+        gold = {"id": "c1", "gold_landmines": [{"code": "L99", "confidence": "high",
+                                                "name": "L99"}]}
+        got = grade_ab.landmine_scores(self.cand([]), gold)
+        self.assertEqual(got["gold_codes_without_a_layer"], ["L99"])
+        for layer in grade_ab.LAYERS:
+            self.assertIsNone(got["landmine_recall_%s" % layer])
+
+    def test_stored_codes_score_the_same_as_the_report(self):
+        from_report = grade_ab.landmine_scores(self.cand(["L1", "L3", "L8"]), self.GOLD)
+        from_row = grade_ab.landmine_scores(None, self.GOLD, found=["L1", "L3", "L8"])
+        self.assertEqual(from_row["landmine_recall_script"],
+                         from_report["landmine_recall_script"])
+        self.assertEqual(from_row["landmines_found"], ["L1", "L3", "L8"])
+
+    def test_no_codes_at_all_is_null_in_every_layer(self):
+        got = grade_ab.layered_recall(self.GOLD, None)
+        for layer in grade_ab.LAYERS:
+            self.assertIsNone(got["landmine_recall_%s" % layer])
+
+
+class LayeredRecallOnRows(unittest.TestCase):
+    """A run with no stored report scores null, unless its codes were persisted."""
+
+    def setUp(self):
+        self.gold, _ = self.load()
+
+    def load(self):
+        path = os.path.join(tempfile.mkdtemp(prefix="vetflat-rows-"), "gold.json")
+        with io.open(path, "w", encoding="utf-8") as fh:
+            fh.write(json.dumps(gold_doc([
+                ("c1", "EDGE", ["L1", "L3", "L6", "L8", "L9", "L13"], [], ["q"])])))
+        self.tmp = os.path.dirname(path)
+        return grade_ab.load_gold(path)
+
+    def tearDown(self):
+        shutil.rmtree(getattr(self, "tmp", ""), ignore_errors=True)
+
+    def row(self, **kw):
+        return grade_ab.grade_row(
+            scorecard_row("B-lean", "c1", 1, "/nowhere/report.json", **kw), self.gold, [])
+
+    def test_a_row_with_no_report_and_no_stored_codes_is_null_everywhere(self):
+        got = self.row()
+        self.assertTrue(got["report_missing"])
+        self.assertIsNone(got["landmine_source"])
+        self.assertIsNone(got.get("landmine_recall"))
+        for layer in grade_ab.LAYERS:
+            self.assertIsNone(got["landmine_recall_%s" % layer])
+        # the gold split is still reported, so a reader can see what could not be scored
+        self.assertEqual(got["gold_script"], ["L1", "L3"])
+
+    def test_a_row_that_kept_its_codes_is_still_layer_scorable(self):
+        got = self.row(landmines_found=["L1", "L3", "L8"])
+        self.assertTrue(got["report_missing"])
+        self.assertEqual(got["landmine_source"], "stored codes on the row")
+        self.assertEqual(got["landmine_recall_script"], 1.0)
+        self.assertEqual(got["landmine_recall_mixed"], 0.0)
+        self.assertEqual(got["landmine_recall_reading"], 0.3333)
+
+    def test_an_empty_stored_list_is_zero_not_null(self):
+        got = self.row(landmines_found=[])
+        self.assertEqual(got["landmine_recall_script"], 0.0)
+        self.assertEqual(got["landmine_recall"], 0.0)
 
 
 class Aggregation(unittest.TestCase):
@@ -517,6 +747,66 @@ class Aggregation(unittest.TestCase):
         self.assertIn("landmine recall", text)
         self.assertIn("A-legacy", text)
 
+    def test_the_three_layered_recalls_are_aggregated_per_config(self):
+        # gold: script L1 + L3, mixed L6, reading L8. B-lean finds the two script codes
+        # and nothing else; A-legacy finds the reading one too.
+        gold = gold_doc([("c1", "EDGE", ["L1", "L3", "L6", "L8"], [], ["q"])])
+        summary = self.build([
+            ("A-legacy", "c1", 1, ["L1", "L3", "L8"], "EDGE", {}),
+            ("B-lean", "c1", 1, ["L1", "L3"], "EDGE", {}),
+        ], gold=gold)
+        a = summary["per_config"]["A-legacy"]
+        b = summary["per_config"]["B-lean"]
+        self.assertEqual(a["landmine_recall_script"]["mean"], 1.0)
+        self.assertEqual(b["landmine_recall_script"]["mean"], 1.0)
+        self.assertEqual(a["landmine_recall_mixed"]["mean"], 0.0)
+        self.assertEqual(a["landmine_recall_reading"]["mean"], 1.0)
+        self.assertEqual(b["landmine_recall_reading"]["mean"], 0.0)
+        # the layer block says what the columns were scored against
+        self.assertEqual(summary["layers"]["per_layer"]["script"]["codes"], 2)
+        self.assertEqual(summary["layers"]["per_layer"]["reading"]["codes"], 1)
+        self.assertEqual(summary["layers"]["runs_with_codes"], 2)
+
+    def test_a_per_case_override_reaches_the_summary(self):
+        gold = gold_doc([("c1", "EDGE", ["L2", "L6"], [], ["q"])],
+                        layers={"c1": {"L2": "reading"}})
+        summary = self.build([("B-lean", "c1", 1, ["L2"], "EDGE", {})], gold=gold)
+        block = summary["per_config"]["B-lean"]
+        self.assertEqual(block["landmine_recall_reading"]["mean"], 1.0)
+        self.assertEqual(block["landmine_recall_mixed"]["mean"], 0.0)
+        self.assertEqual(summary["layers"]["per_case_overrides"],
+                         ["c1 L2: reading (default mixed)"])
+
+    def test_the_layer_columns_and_the_explanation_reach_the_markdown(self):
+        self.build([
+            ("A-legacy", "c1", 1, ["L1", "L6"], "CONDITIONAL", {"total_tokens": 200000}),
+            ("B-lean", "c1", 1, ["L1", "L6"], "CONDITIONAL", {"total_tokens": 80000}),
+        ])
+        with io.open(os.path.join(self.ws.results, "summary.md"), encoding="utf-8") as fh:
+            text = fh.read()
+        self.assertIn("## Landmine recall by layer", text)
+        self.assertIn("| script | mixed | reading |", text)
+        self.assertIn("landmine_layers.yaml", text)
+        # the header row still has as many cells as the separator under it
+        table = [line for line in text.splitlines() if line.startswith("| config | phase |")]
+        header = table[0]
+        sep = text.splitlines()[text.splitlines().index(header) + 1]
+        self.assertEqual(header.count("|"), sep.count("|"))
+
+    def test_the_ablation_table_carries_the_layered_recalls(self):
+        summary = self.build([
+            ("B-lean", "c1", 1, ["L1", "L6"], "CONDITIONAL", {}),
+            ("B-lean", "c1", 2, ["L1", "L6"], "CONDITIONAL", {}),
+            ("B-raw", "c1", 1, ["L6"], "CONDITIONAL", {"phase": "ablation"}),
+            ("B-raw", "c1", 2, ["L6"], "CONDITIONAL", {"phase": "ablation"}),
+        ])
+        row = [r for r in summary["factors"] if r["config"] == "B-raw"][0]
+        # L1 is script, L6 is mixed: B-raw lost the script code and kept the mixed one.
+        self.assertEqual(row["landmine_recall_script"]["mean_diff"], -1.0)
+        self.assertEqual(row["landmine_recall_mixed"]["mean_diff"], 0.0)
+        # the effect word is still decided by the unlayered metrics only
+        self.assertIn(row["effect"], ("hurts", "effect within noise"))
+
 
 # ----------------------------------------------------------------- dry runs --
 class Regrade(unittest.TestCase):
@@ -551,6 +841,25 @@ class Regrade(unittest.TestCase):
         self.assertEqual(after[0]["wall_time_s"], 99.0)
         self.assertEqual(after[0]["run_at"], row["run_at"])
         self.assertTrue(after[0]["regraded_at"])
+
+    def test_the_codes_the_report_raised_are_persisted_onto_the_row(self):
+        """The report lives in a temp workdir that gets cleaned up. Without the codes on
+        the row, a run can never be re-scored by layer once the machine is tidied."""
+        path = self.ws.report(["L1", "L6"], questions=["q"])
+        row = scorecard_row("B-lean", "c1", 1, path)
+        self.ws.write([row], gold_doc([("c1", "CONDITIONAL", ["L1", "L6"], [], ["q"])]))
+        self.write_cases({})
+        grade_ab.regrade(self.ws.results, self.cases)
+        with io.open(os.path.join(self.ws.results, "scorecard.json"), encoding="utf-8") as fh:
+            after = json.load(fh)
+        self.assertEqual(after[0]["landmines_found"], ["L1", "L6"])
+        # and that row alone is enough to score it, report or no report
+        after[0]["report_path"] = "/nowhere/report.json"
+        gold, _ = grade_ab.load_gold(self.ws.gold)
+        scored = grade_ab.grade_row(after[0], gold, [])
+        self.assertEqual(scored["landmine_recall"], 1.0)
+        self.assertEqual(scored["landmine_recall_script"], 1.0)
+        self.assertEqual(scored["landmine_recall_mixed"], 1.0)
 
     def test_a_row_with_no_stored_report_is_left_alone(self):
         row = scorecard_row("A-legacy", "c1", 1, os.path.join(self.ws.dir, "gone.json"),
