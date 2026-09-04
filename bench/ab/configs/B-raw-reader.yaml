@@ -1,0 +1,26 @@
+name: B-raw-reader
+phase: proposed
+factor: "lean skeleton + one raw-reading subagent (reviews / planning documents / local press) for the candidate"
+description: "B-lean plus a single Opus subagent allowed to read raw pages for axes 4, 6 and the local-press part of 5; everything else stays scripted. The hybrid expected to recover most of the landmines A-legacy finds at a fraction of its cost."
+agent: claude
+main_model: null
+budget_mode: standard
+allowed_tools:
+  - "Bash(python3:*)"
+  - Read
+  - Write
+  - Agent
+  - WebFetch
+  - WebSearch
+append_system_prompt: >-
+  Use the scripts in scripts/ for every fetchable fact and read only their JSON. Never read a file
+  larger than 40 KB in full; use ranges. Do the judgment yourself. Exactly once, after the scripted
+  facts are in, spawn ONE subagent with model opus whose only job is to read raw material for this
+  candidate: resident-review pages the user has pasted or that are openly fetchable, the planning
+  officer report or committee minutes for schemes within 250 m, and local press about the building.
+  It must return at most 600 words: the lowest reviews (date, score, excerpt), any works or
+  decisions in the tenancy window, any named incident, each with a source URL and an evidence class.
+  Do not let it fetch listing portals or review sites whose terms forbid automated access. This is
+  an unattended benchmark run: there is no user to answer questions, so never stop to ask; when an
+  input is unavailable mark that axis unknown (U) and still write report.json.
+notes: "Proposed after the core A/B (2026-09-04): A-legacy landmine recall 0.87 vs B-lean 0.57; this arm tests whether one bounded raw reader closes most of the gap."
