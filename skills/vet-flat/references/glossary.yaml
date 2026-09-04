@@ -336,6 +336,34 @@ terms:
     plain: "Who actually owns it, and what they will demand up front before handing over keys."
     plain-zh-TW: "真正的產權人是誰，以及交鑰匙前會要求你先付什麼。"
     plain-zh-CN: "真正的产权人是谁，以及交钥匙前会要求你先付什么。"
+  landmine.L13:
+    en: "Licence, not a tenancy"
+    zh-TW: "執照不是租約"
+    zh-CN: "许可不是租约"
+    plain: "A short stay sold as a 'let' but legally only permission to occupy: the deposit need not be protected and renewal is week by week at the operator's say-so."
+    plain-zh-TW: "短租看起來像租約，法律上只是「允許你住」：押金不必託管，續住由業者每週決定。"
+    plain-zh-CN: "短租看起来像租约，法律上只是“允许你住”：押金不必托管，续住由业者每周决定。"
+  landmine.L14:
+    en: "The money gate has no route for you"
+    zh-TW: "錢閘沒有你走得通的路"
+    zh-CN: "钱闸没有你走得通的路"
+    plain: "The landlord's published rules only allow ways to pass the income check that you cannot use, such as a UK guarantor only."
+    plain-zh-TW: "房東公布的收入審核規則裡，只有你走不通的路，例如只收英國保證人。"
+    plain-zh-CN: "房东公布的收入审核规则里，只有你走不通的路，例如只收英国保证人。"
+  landmine.L15:
+    en: "Non-refundable money paid before certainty"
+    zh-TW: "還沒確定就先付的不可退款項"
+    zh-CN: "还没确定就先付的不可退款项"
+    plain: "Fees, premiums or prepaid stays you cannot get back, paid before the dates, your eligibility or your exclusive hold on the flat are confirmed in writing."
+    plain-zh-TW: "在日期、資格或房子是否確定留給你都還沒白紙黑字之前，就先付出去且拿不回來的費用。"
+    plain-zh-CN: "在日期、资格或房子是否确定留给你都还没白纸黑字之前，就先付出去且拿不回来的费用。"
+  landmine.L16:
+    en: "Headline price is not the price"
+    zh-TW: "標價不是實價"
+    zh-CN: "标价不是实价"
+    plain: "The advertised number leaves out the first week, part-month billing, platform or admin fees, or a discount that is on the website but not in your offer."
+    plain-zh-TW: "廣告上的數字沒算進第一週、不足月的計費、平台與行政費，或是網站上有但你的合約裡沒有的折扣。"
+    plain-zh-CN: "广告上的数字没算进第一周、不足月的计费、平台与行政费，或是网站上有但你的合约里没有的折扣。"
 
   # --------------------------------------------------------- comparison table
   ui.price_per_sqft:

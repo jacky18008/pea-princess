@@ -1,5 +1,5 @@
 name: B-raw-reader
-phase: proposed
+phase: ablation
 factor: "lean skeleton + one raw-reading subagent (reviews / planning documents / local press) for the candidate"
 description: "B-lean plus a single Opus subagent allowed to read raw pages for axes 4, 6 and the local-press part of 5; everything else stays scripted. The hybrid expected to recover most of the landmines A-legacy finds at a fraction of its cost."
 agent: claude

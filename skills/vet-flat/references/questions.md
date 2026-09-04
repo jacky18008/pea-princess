@@ -56,3 +56,34 @@ Every report's `killer_questions` (at most two) and the enquiry-letter pack are 
 
 ## Enquiry-letter skeleton (second round, after a human replies)
 Intro (one neutral sentence from `profile.yaml.self_intro_template`) → the two gate questions not yet answered → at most five landmine questions ranked by what could kill the deal → a closing line asking for documents: energy certificate, floor plan with compass, tariff page, deposit scheme name.
+
+## From the bridging and referencing lessons
+
+New gate questions (axes 15–17). Ask G5 and G6 in the same breath as G1: a money gate you cannot pass makes every other answer worthless.
+
+| Code | Question (send verbatim) | Why | If the answer is... |
+|---|---|---|---|
+| G5 | "Please send your published affordability criteria. What income or savings multiple applies to my applicant type, and is that multiple applied to the contractual rent or to any discounted rate?" | The affordability test is the real gate; a spoken multiple is not evidence | refuses to send a document → treat the multiple as unverified and do not view |
+| G6 | "Which guarantor products do you accept, what does each charge for a twelve-month tenancy at this rent, and can I be referenced on proof of funds instead?" | Approved lists are set at group level; the savings route only exists if the landlord enables it | "our list is fixed and there is no savings route" → price the guarantor fee into the all-in before viewing |
+| G7 | "If referencing does not complete, are the guarantor fee and the holding deposit refundable or transferable to another property?" | Both are commonly non-refundable; some products transfer, most fees do not | "nothing is refundable" → do not pay the guarantor fee until the holding deposit is confirmed exclusive |
+| G8 | "Is the deposit five weeks of the contractual rent, held in a government-approved custodial scheme, and can you confirm the scheme and send the certificate once protected?" | The cap and the scheme are law, not preference; deposit-replacement products are a non-refundable fee | offers only a deposit-replacement product → reply "I'd prefer the traditional deposit in a custodial scheme" |
+
+| Code | Landmine | Question |
+|---|---|---|
+| B1 | Bridge: contract type | "Is this a tenancy or a licence to occupy, is the deposit protected in a government scheme, and what is the latest date I could extend to?" |
+| B2 | Bridge: total price | "What is the total for my exact dates, broken into rent, platform or admin fee, deposit, cleaning, and anything else? Which of council tax, electricity, water, heating and Wi-Fi are included?" |
+| B3 | Bridge: who holds the money | "What is the contracting entity and its company number, will rent and deposit be paid to an account in that exact name, and can you send a current client-money-protection certificate?" |
+| B4 | Bridge: refund right | "What is the cancellation deadline and what is refundable after it? Can I view, in person or by live video, before paying anything?" |
+| B5 | Bridge: kitchen and laundry | "Does this unit have a private kitchen with a hob and oven, and is there a washing machine inside the unit? Where is it?" |
+| B6 | Bridge: connectivity | "Is the included Wi-Fi a fixed line with unlimited data, or a mobile router, and what speed?" |
+| B7 | Bridge: post | "Can post be received at the building in my name, and will the agreement show my name and the property address?" |
+| B8 | Short-let churn in a long-let building | "How many flats in this building are let on assured shorthold tenancies, and are any operated as short stays or serviced apartments?" |
+| B9 | Holding deposit exclusivity | "Please confirm in writing that this apartment is reserved exclusively for my application from the date of my holding deposit, including while the payment is clearing, and that no other holding deposit will be accepted for it." |
+| B10 | Deadline for agreement | "What is the deadline-for-agreement date, and can it be extended in writing if the referencing check is slow?" |
+| B11 | Concession | "Does this unit qualify for the advertised rent-free concession, will it be written into the offer, and is it paid as a lump or in instalments that are forfeited on early exit?" |
+| B12 | Savings route | "As a self-funded applicant paying rent from savings, can the savings route be enabled on my check, what is the multiple, and over what look-back period?" |
+| B13 | Statement format | "Will an official bank statement showing the account cover page plus three months of transactions with balances be accepted, and does it need to be in English?" |
+| B14 | Utility charge | "What does the monthly utility charge cover, and how is any overage billed?" |
+| B15 | Heat network tariff | "Please send the current standing charge per day and unit rate per kWh for the heat network in writing." |
+| B16 | Council tax | "Is council tax included in this rate, and will you confirm the property is eligible for the full-time student exemption?" |
+| B17 | Key handover | "If the move-in date falls on a Monday, can keys be released on the preceding Saturday?" |

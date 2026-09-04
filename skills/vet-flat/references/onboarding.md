@@ -15,10 +15,11 @@ Read this when the user asks "what can this do", "how do I start", "what is this
 **简体中文**
 > 我用英国官方与公开数据，像谨慎的验房师一样审查一套伦敦出租公寓：政府能源证书（真实面积、楼龄、供暖方式）、警方犯罪数据、隔壁的规划申请、房东或中介背后的公司、押金与客户资金保护规定、价格对照当地行情、采光、每月全部成本、通勤与备用线路。你会得到白话结论（通过／边缘／有条件／淘汰），每一项发现都标明证据等级。我不猜：拿不到的资料，我会请你贴给我。我也能扫描你目的地周围整个区域，比较各栋建筑。规则由你定（预算、面积、必要条件、雷点）；完全没概念也没关系，我先讲基本常识，再建议默认值。在纯对话框或有完整工具的环境都能用，报告长得一样。
 
-Then offer the three starting points, as one line each:
+Then offer the four starting points, as one line each:
 1. **I have a listing** → paste the link or the page text and I vet it (the 12 checks).
 2. **I have an area or a place I commute to** → I sweep around it and compare buildings.
 3. **I have no idea** → I explain the basics (section 3) and ask six questions (section 2).
+4. **I am about to sign, or I need somewhere for a few weeks first** → the move-in half: bridging stays (`axes/15`), passing the income check (`axes/16`), the first two weeks in the UK (`axes/17`).
 
 Do not list the 12 axes in the pitch unless asked; do not mention vendors, models, or internal file names.
 
@@ -53,6 +54,8 @@ Optional, only if the user is engaged: floor band, light versus quiet, top three
 | "I want a new building" | `max_building_age_years: 10` | axis 3 |
 | "advertised size must be real" | (always on) | L1 area illusion |
 | "landlord must be a company / must be protected deposit" | `tenancy.require_deposit_protection: true` | L12 landlord type and money gate |
+| "I need somewhere for a few weeks first" | see `axes/15-bridging-short-lets.md` | L13 licence not tenancy, L16 headline price |
+| "I have no UK guarantor" | `guarantor_route`, see `axes/16-referencing-and-proof-of-funds.md` | L14 money gate, L15 non-refundable fees |
 
 ## 3. Primer for someone with no idea (ten facts, one screen; cite `references/sources.yaml` ids where numbers appear)
 
