@@ -728,3 +728,11 @@ against a warm cache takes about 54 s. Each of the four candidate files came out
 Volume note: the energy register's robots.txt disallows crawling. This tool keeps
 the built-in spacing, caps the census, and is meant for an area someone is
 actually house-hunting in — not for harvesting a borough.
+
+## calc.py — deterministic arithmetic (no model maths)
+Every computed number in a report comes from here or shows its formula. Subcommands: `deposit`, `affordability`, `all-in`, `price-per-sqft`, `bridge`, `break-even`, `guarantor-product`, `pro-rata`, `pct-diff`. Each prints `inputs`, `formula`, `steps`, `result`.
+```
+python3 skills/vet-flat/scripts/calc.py deposit --rent-pcm 2400
+python3 skills/vet-flat/scripts/calc.py affordability --rent-pcm 2400 --multiple 2.5 --income 65000 --guarantor-multiple 4
+python3 skills/vet-flat/scripts/calc.py guarantor-product --rent-pcm 2400 --model annual --weeks 3 --setup 59.99
+```

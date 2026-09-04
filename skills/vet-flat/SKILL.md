@@ -15,8 +15,8 @@ metadata:
 ## 0. Pick your mode first (tell the user in one line which one you are in)
 - **Shell mode**: you can run `python3` and `curl` with internet access. Run `scripts/*.py`; read only their JSON output, never raw pages.
 - **Fetch mode**: you can fetch URLs but not run scripts. Use the open GET sources in `references/sources.yaml`; ask the user for the rest.
-- **Manual mode**: neither. Ask the user to open pages and paste text, following `references/inputs.md`.
-Codex: sandbox network is off by default; enable it or use manual mode. Fetchers that honour robots.txt cannot read the EPC register or council planning portals; that is expected — ask the user.
+- **Manual mode**: neither. Ask the user to paste pages, following `references/inputs.md`.
+Codex: sandbox network is off by default; enable it or use manual mode. Robots-honouring fetchers cannot read the EPC register or planning portals; ask the user.
 
 ## 0b. If asked "what can this do", "how do I start", or "I have no idea"
 Answer from `references/onboarding.md`: the short pitch in the user's language, then the three starting points (a listing → vet it; an area or destination → sweep; no idea → the ten-fact primer, then six intake questions in one message with a suggested default each). Write the answers into `profile.yaml`, show it back plainly, then start.
@@ -27,10 +27,10 @@ Read `profile.yaml` (hard filters: minimum floor area, maximum building age, bud
 ## 2. Two presumptions that run through every axis
 1. **Cheap has a reason.** A price below the local band means the landlord or agent has a reason to sell you. Find it and name it (location, age, construction, timing, management, commute, aspect). An unexplained discount is a reason to walk.
 2. **Pay more only for a nameable benefit** (aspect, floor, quiet side, management). If you cannot say what the premium buys, do not pay it.
-Ask of every listing: "What sits under its prettiest feature?" and check what that feature costs on the other axes.
+Ask of every listing: "What sits under its prettiest feature?"
 
 ## 3. The 12 axes (method per axis in `references/axes/`)
-1. **Identity** — exact flat number, building, postcode. The EPC register is the arbiter (`scripts/epc.py search`, `cert`). Large buildings span several postcodes; search by street if a flat is missing.
+1. **Identity** — exact flat number, building, postcode. The EPC register is the arbiter (`scripts/epc.py search`, `cert`). Big buildings span postcodes; search by street if a flat is missing.
 2. **Floor area** — EPC internal m² only; balconies excluded; listing and floor-plan figures are claims, not evidence.
 3. **Age and fabric** — first EPC assessment year approximates completion; heating class (heat network, gas, electric, heat pump); air permeability ≤ 5 implies mechanical ventilation; `scripts/epc.py building` gives the whole-building profile.
 4. **Construction nearby** — planning applications within about 250 m, their phase and decision dates; officer reports carry distance numbers; conditions being discharged tell you whether works are starting or finishing.
@@ -43,7 +43,8 @@ Ask of every listing: "What sits under its prettiest feature?" and check what th
 11. **Commute and redundancy** — TfL door-to-door minutes; two independent rail "families" within a 10-minute walk.
 12. **Low-maintenance living** — bundled bills, washing machine in the flat, parcel handling, blackout bedroom, shop within 3 minutes, a direct route.
 **Area sweep** (compare everything around an address): shell mode `python3 scripts/sweep.py --anchor "<postcode>" --radius 800 --dest "<postcode>" --profile profile.yaml --out sweep/`; then read `sweep/summary.md` and `sweep/candidates/*.json`, and send the user `sweep/ask-the-user.md` once. Method: `references/axes/00-area-sweep.md`.
-Legal facts (England): Renters' Rights Act 2025, in force 2026-05-01 — periodic tenancies only, no fixed terms, at most one month's rent in advance, deposit ≤ 5 weeks' rent, holding deposit ≤ 1 week. Cite from `references/sources.yaml`.
+Legal facts (England, Renters' Rights Act 2025, in force 2026-05-01): periodic tenancies only, at most one month's rent in advance, deposit ≤ 5 weeks' rent, holding deposit ≤ 1 week; cite `references/sources.yaml`.
+**Arithmetic is never done in your head.** Deposit caps, affordability multiples, all-in cost, £ per sq ft, bridging totals, break-even rent, guarantor-product fees and pro-rata rent come from `scripts/calc.py` (it prints the formula and every step); with no shell, write the formula and each step in the report and check the result a second way.
 
 ## 4. Evidence grades — mark every finding
 **G** official register · **S** self-reported (landlord, agent, listing) · **C** third-party (reviews, press) · **I** inference · **U** unknown. Two sources disagreeing is itself a finding. An HTTP 200 with the wrong page is not evidence: check the content.
