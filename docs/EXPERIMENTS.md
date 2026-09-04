@@ -1,0 +1,226 @@
+Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen — https://github.com/jacky18008/pea-princess — CC BY 4.0
+
+# Experiments: which configuration should you run?
+
+This page exists so you can choose with evidence instead of vibes. Fifteen configurations of the
+same skill were run against the same five real London flats, and every report was scored against a
+gold set of problems a human had already found in those flats by reading the documents.
+
+**The public default is: a cheap model for the extraction workers, the strongest model you have for
+the judgment.** On Anthropic that is Sonnet-class workers with an Opus-class judge; on OpenAI, the
+mid or small GPT-5.6 model as worker with Sol as judge. The numbers below are here so you can pick
+something else, and so you can see what that choice costs you.
+
+---
+
+## What we measured and how
+
+Five real flats from one person's actual shortlist. For each flat, that person had already read the
+resident reviews, the planning documents and the tenancy paperwork by hand and written down the
+problems worth walking away over — the **landmines**. That hand-written list is the gold set. Each
+configuration then ran the skill end to end on the same five flats, five to ten times each, and the
+grader compared the report it produced against the gold. **Landmine recall** is the share of the
+gold's high-confidence landmines the report raised; **precision** is the share of what the report
+raised that was in the gold; **fabrications** is the count of numbers per run that appear in the
+report and in no source; **fact recall** is the public benchmark's score for getting the checkable
+facts right; **verdict match** is exact agreement on PASS / EDGE / CONDITIONAL / KILL; **unknown
+axes** is the share of axes the report had to mark "not known". The grader is
+`bench/ab/grade_ab.py`; it never reads the headline or the tone, only the numbers and whether each
+one traces to a source. Runs were interleaved (arm A, arm B, arm C, arm A, …) so that time of day
+and server load land on every arm equally.
+
+---
+
+## Results
+
+### Claude Code arms
+
+Five runs each unless noted. Cost is API list-price equivalent, US dollars per run.
+
+| Arm | What it is | Landmine recall (min–max) | Precision | Fact recall | Fabrications / run | Verdict match | Unknown axes | $ / run | Wall s |
+|---|---|---|---|---|---|---|---|---|---|
+| `A-legacy` | one Opus subagent per axis reading raw web pages, whole files read in (4 ok + 1 timeout) | **0.87** (0.60–1.00) | 0.81 | 0.63 | 0.67 | 0.33 | 11% | 31.4 | 1886 |
+| `B-lean` **(default)** | scripts for every fetchable fact, strongest main model, Sonnet workers only for pasted text — 10 runs | 0.57 (0.40–0.78) | 0.91 | 0.70 | **0.30** | 0.50 | 29% | 6.7 | 956 |
+| `B-main-opus` | as `B-lean`, main model Opus | 0.71 (0.60–1.00) | 0.90 | 0.68 | 0.60 | 0.40 | 30% | 6.2 | 910 |
+| `B-readers-sonnet` | as `B-lean` plus up to six parallel Sonnet readers (reviews, planning, press, entity, listing, geometry) | 0.69 (0.60–0.80) | **0.96** | 0.65 | 1.25 | 0.33 | 17% | 9.3 | 2070 |
+| `B-opus-workers` | as `B-lean`, workers Opus | 0.63 (0.40–0.80) | 0.94 | **0.74** | 0.80 | **0.60** | 30% | 5.4 | 888 |
+| `B-raw` | as `B-lean` but raw web pages instead of scripts | 0.58 (0.20–0.80) | 0.85 | 0.68 | 0.60 | 0.40 | 22% | 11.7 | 1198 |
+| `B-main-sonnet` | as `B-lean`, main model Sonnet | 0.46 (0.20–0.67) | 0.91 | 0.66 | 0.80 | **0.60** | 35% | 2.8 | 694 |
+| `B-lite` | as `B-lean` in `lite` budget mode | 0.38 (0.00–0.60) | 0.95 | 0.62 | 2.00 | **0.60** | 55% | 1.4 | 284 |
+| `C-twenty` | Sonnet main, `lite`, no subagents — a £20-plan simulation, 9 runs | 0.15 (0.00–0.20) | 0.88 | 0.40 | 2.33 | 0.50 | 58% | 0.67 | 237 |
+
+### Codex arms (GPT-5.6)
+
+Nine to ten runs each unless noted. These ran on a ChatGPT subscription, so there is no API bill to
+report; cost is input tokens per run, including cached re-reads.
+
+| Arm | What it is | Landmine recall (min–max) | Precision | Fact recall | Fabrications / run | Verdict match | Unknown axes | Tokens / run | Wall s |
+|---|---|---|---|---|---|---|---|---|---|
+| `codex-A-raw-sol` | Sol, raw pages (3 ok + 2 timeouts) | **0.52** (0.44–0.60) | 0.90 | **0.75** | **0.00** | 0.50 | 54% | 12.2M | 1479 |
+| `codex-B-lean-sol` | Sol, scripts, `standard` | 0.30 (0.11–0.40) | **0.98** | 0.66 | 0.80 | 0.60 | 57% | 9.3M | 1343 |
+| `codex-D-luna-standard` | Luna (smallest), scripts, `standard` | 0.46 (0.20–0.80) | 0.89 | 0.74 | 0.67 | **0.67** | 56% | 7.9M | 2903 |
+| `codex-C-sol-lite` | Sol, `lite` | 0.13 (0.00–0.40) | 0.95 | 0.17 | 1.40 | 0.50 | 64% | 0.36M | 450 |
+| `codex-C-terra-lite` | Terra, `lite` | 0.18 (0.00–0.56) | 0.96 | 0.28 | 0.90 | **0.67** | 61% | 0.57M | 287 |
+| `codex-C-luna-lite` | Luna, `lite` | 0.16 (0.00–0.78) | 0.97 | 0.16 | 0.78 | 0.57 | 37% | 0.48M | 435 |
+
+### Worker eval
+
+Fifteen extraction tasks taken from saved pages — a reviews dump, a planning officer's report, a
+tariff page, an energy certificate, a raw journey JSON — each with one answer a person checked. No
+tools, no shell: the model gets the instruction and at most 60 KB of text, and must answer with the
+value and nothing else. Exact match.
+
+| Model | Score | Cost for all 15 |
+|---|---|---|
+| Sonnet | **15 / 15** | $1.09 |
+| Opus | 14 / 15 | $2.62 |
+
+The cheap model is not worse at pulling one number out of one document. That single result is what
+lets the default put cheap models on the extraction work.
+
+---
+
+## The picture
+
+![Scatter chart. Left panel: nine Claude Code configurations, landmine recall against cost per run in US dollars on a log axis. A-legacy — raw web pages with one reader per axis — is the highest and by far the most expensive point, at 0.87 recall for $31.40. The B family clusters between 0.38 and 0.71 recall for $1.40 to $11.70, mostly inside a shaded band marking run-to-run noise around the default B-lean. C-twenty is lowest and cheapest at 0.15 recall for $0.67. Right panel: six Codex GPT-5.6 configurations as hollow markers, recall against input tokens per run on a log axis, running from 0.13 recall at 0.36 million tokens up to 0.52 recall at 12.2 million tokens. Colour marks the data path and budget mode.](experiments-recall-vs-cost.svg)
+
+The shaded band is ±0.17 recall around the default, which is one gold landmine per flat — the noise
+floor the A/B harness computes from the gold set. Points inside it are not distinguishable from the
+default on this many runs.
+
+---
+
+## What it means
+
+- **Scripts instead of raw web pages cost nothing and save most of the bill.** The clean one-factor
+  pair is `B-lean` against `B-raw`: 0.57 recall for $6.70 against 0.58 for $11.70. Identical
+  finding rate, 1.7× the money for the raw pages, and the raw arm's spread is much wider (0.20–0.80
+  against 0.40–0.78) because a page that loads differently changes the whole run. The big gap
+  between `A-legacy` (0.87) and `B-lean` (0.57) is real, but it is not the data path — `A-legacy`
+  also runs one reader per axis. That is the next bullet. On the OpenAI side raw pages did appear to
+  help (`codex-A-raw-sol` 0.52 against `codex-B-lean-sol` 0.30), but that arm timed out on two of
+  five flats, so it is the least trustworthy row in either table.
+- **Breadth is what finds landmines, and breadth is what you pay for.** The two arms that give each
+  axis its own reader are the top two: `A-legacy` at 0.87 and `B-readers-sonnet` at 0.69, against
+  0.57 for the default. `B-readers-sonnet` also has the highest precision in the Claude table
+  (0.96) and the lowest share of unknown axes among the script arms (17% against 29%). It costs
+  1.4× the default and 2.2× the wall time; `A-legacy` costs 4.7× and 2.0×. Nothing else in either
+  table buys recall the way a second pair of eyes on each axis does.
+- **The worker model does not matter; the judge model matters a little.** Swapping the extraction
+  workers from Sonnet to Opus moved recall from 0.57 to 0.63 — inside the noise band — while the
+  worker eval says Sonnet is 15/15 against Opus's 14/15 at 42% of the cost. The main model, which
+  is the one doing the judging, does move things: Opus 0.71, CLI default 0.57, Sonnet 0.46. Each
+  single step is at or inside the noise floor, but the direction is consistent and the ends are
+  0.25 apart. Hence the default: cheap where the work is copying a number out of a document, strong
+  where the work is deciding what it means.
+- **Budget mode matters more than model size.** `lite` on the strongest main model (`B-lite`, 0.38)
+  scores below `standard` on the weakest (`B-main-sonnet`, 0.46), for half the money and 40% of the
+  time. The same holds on the OpenAI side, harder: the smallest model in `standard` mode
+  (`codex-D-luna-standard`, 0.46) beats the biggest model in `lite` (`codex-C-sol-lite`, 0.13) by
+  more than three times. If you have to economise, cut axes, not depth.
+- **Cheap configurations invent numbers.** Fabrications per run climb from 0.30 on the default to
+  2.00 on `B-lite` and 2.33 on `C-twenty` — and the cheapest arms' precision stays high, which
+  means the invented numbers sit inside findings that otherwise look right. This is why the skill
+  makes `scripts/calc.py` do the arithmetic and prints its formula, and why the report contract has
+  no place to put a number without a source: `null` and an honest "not known" are always available,
+  and the grader counts a guess as a fabrication, not as a near miss.
+
+---
+
+## Choose your configuration
+
+| Your goal | Configuration | Expected landmine recall | Cost | Time |
+|---|---|---|---|---|
+| **Quick screen on a £20 plan** | `standard` mode with fewer axes, cheap model throughout, strongest judge the plan gives you. Not `lite` with all axes. | ~0.45 | ~$3, or one message on a subscription | ~12 min |
+| **Shortlist — the default** | Lean skeleton: scripts for every fetchable fact, strong judge, cheap workers for pasted text. `standard` mode. | ~0.55–0.70 | ~$6 | ~15 min |
+| **Final two or three flats** | Breadth: one reader per axis. Accept about 5× the cost and 2× the time. | ~0.85 | ~$30 | ~30 min |
+| **No shell — chat only** | Prompt pack plus `lite` mode; you paste the pages, the viewer renders the report. | ~0.15–0.40 | pennies | ~5 min |
+
+A middle option sits between rows two and three: keep the scripts and add parallel readers only for
+the axes that need a human-written document — reviews, planning, press. That is
+`B-readers-sonnet`: 0.69 recall for 1.4× the cost and 2.2× the time of the default, without any
+raw-page fetching. If the flat is a serious candidate and you do not want to pay for `A-legacy`,
+this is the one to run.
+
+### Which model goes where
+
+Vendor names are your choice; these are roles.
+
+| Role | What to put there | Anthropic | OpenAI | Anywhere else |
+|---|---|---|---|---|
+| **Extraction workers** — pull one number out of one document | the cheapest model that passes the worker eval | Sonnet | GPT-5.6 mid or small (Terra / Luna) | the vendor's mid tier |
+| **Judgment / main loop** — decide what the numbers mean, write the verdict | the strongest model you have | Opus | Sol | the vendor's top tier |
+
+If you only have one model, put it on the judgment and run `standard` mode with fewer axes. If you
+have two and cannot afford the strong one for the whole run, the split above is where the money
+buys the most.
+
+---
+
+## How to reproduce
+
+Dry-run first, every time: it prints the exact commands and runs nothing.
+
+```bash
+# 0. the floor — no model, no network. If this is red, nothing below means anything.
+python3 -m unittest discover -s tests -p 'test_*.py'
+
+# 1. see the commands, run nothing
+bench/ab/run_ab.py --phase core --cases <cases.json> --case-ids <a,b,c,d,e> --runs 1 --dry-run
+
+# 2. one case, one run, every core arm — read the real cost off the first summary.md
+bench/ab/run_ab.py --phase core --cases <cases.json> --case-ids <a> --runs 1
+
+# 3. the sweep behind the tables above
+bench/ab/run_ab.py --phase core     --cases <cases.json> --case-ids <a,b,c,d,e> --runs 3
+bench/ab/run_ab.py --phase ablation --cases <cases.json> --case-ids <a,b,c,d,e> --runs 2
+
+# 4. grade (run_ab.py also calls this after every batch)
+bench/ab/grade_ab.py --results bench/results/<date> --gold <gold.json>
+
+# 5. the worker eval
+bench/ab/worker_eval.py --dry-run
+bench/ab/worker_eval.py --models sonnet,opus
+```
+
+The sweep is resumable — a run whose raw output file already exists is skipped, so you can kill it
+and restart it. The arms are defined in `bench/ab/configs/*.yaml`; the harness and the decision rule
+are documented in `bench/ab/README.md`.
+
+**The gold set used here is not in this repo.** It is one person's real shortlist, with named
+buildings, agents and landlords in it, and it stays private. `bench/private/build_gold.py` builds
+the same structure from your own reviewed shortlist, and the gold-rule tests skip when
+`bench/private/` is absent, which is the normal state of a fresh clone. The **public** benchmark —
+eight real flats, truth produced by this repo's own fetchers, no private material — is
+`bench/README.md`, and it runs out of the box.
+
+---
+
+## Caveats
+
+Read these before quoting any number above.
+
+- **Five flats, five to ten runs per arm.** The differences between most of the Claude arms are
+  within the run-to-run spread. Read the min–max brackets before the means: where the brackets
+  overlap, the means are telling you very little. The shaded band on the chart is that noise floor
+  drawn to scale.
+- **The gold set was built from a human reading reviews and planning documents.** That is what makes
+  it a real test, and it also tilts the table toward arms that go and read raw pages, because the
+  gold was written from raw pages. An arm that works from parsed registers is being marked against
+  a source it never saw.
+- **In a benchmark, nobody pastes a review page.** The axes that depend on material a person has to
+  paste — resident reviews, listing detail, price, a welcome-pack tariff, which way the windows
+  face — come back "not known" in *every* arm. That is a shared ceiling, not a model failing, and
+  it is why even the best arm here still marks 11% of axes unknown. In real use, with the user
+  pasting what they have, those axes fill in.
+- **Costs are API list-price equivalents.** They are not what you were billed. The Codex arms ran
+  on a ChatGPT subscription and have no dollar figure at all, which is why their column is input
+  tokens and why the two tables must not be compared on the x axis. Prices change; the ratios
+  between arms are the durable part.
+- **Two arms had timeouts.** `A-legacy` completed four of five, `codex-A-raw-sol` three of five.
+  Both are raw-page arms, and a timeout is itself a finding about that data path — but it also
+  means those two rows rest on fewer completed runs than the rest.
+- **Verdict match is a weak metric here.** The gold verdicts are all CONDITIONAL or EDGE — no PASS,
+  no KILL — which is what a real shortlist looks like when every candidate still has open
+  questions. Different models reaching different verdicts on the same correct facts is expected and
+  is not counted as an error. The facts are what must be right.

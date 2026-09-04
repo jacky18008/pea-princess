@@ -33,3 +33,14 @@ The prompt pack (`INSTRUCTIONS.md` + references) plus `viewer.html` is the lite 
 - **xAI** has no £20 tier; SuperGrok shows usage as a percentage of an unpublished allowance.
 - **Pay-as-you-go is cheap per flat**: at list API prices a `lite` run costs a few pence and a sweep well under £1 on any vendor's mid-size model. If a plan's windows get in the way, an API key on a cheap model is the predictable route for batch sweeps.
 
+## Which models
+Two jobs, two different answers. Vendor names below are examples, not requirements: pick by role.
+
+- **Extraction workers** — pull one stated number or fact out of one document (a saved reviews page, a planning officer's report, a tariff page, a certificate, a raw journey JSON). Use **the cheapest model that passes the worker eval** (`bench/ab/worker_eval.py`: fifteen tasks, exact match, no tools). A mid-tier model scored 15/15 on that eval at 42% of the cost of the top-tier model, which scored 14/15. Paying more here buys nothing.
+- **Judgment** — the main loop: deciding what the numbers mean, applying the hard filters, weighing evidence grades, writing the verdict and the two killer questions. Use **the strongest model you have**. Across the measured arms this is the one substitution that moved the result: strongest main model 0.71 landmine recall, mid 0.57, cheapest 0.46.
+- **If you only have one model**, put it on the judgment and cut axes instead.
+
+### On a £20 plan
+Keep `standard` mode and run **fewer axes**. Do not switch to `lite` with all twelve. Measured: `lite` on the strongest model found fewer landmines (0.38) than `standard` on the weakest (0.46), and `lite` runs invented numbers far more often (2.0–2.3 fabricated numbers per run against 0.3 in `standard`). Depth is what stops the model guessing; breadth is the part you can safely trade away. When you drop axes, say which ones and mark them `U`.
+
+Full tables, method, caveats and the cost/recall chart: `docs/EXPERIMENTS.md` — https://github.com/jacky18008/pea-princess/blob/main/docs/EXPERIMENTS.md

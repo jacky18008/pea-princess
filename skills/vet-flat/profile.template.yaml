@@ -37,6 +37,21 @@ occupants: 1
 # See references/budget-modes.md for exactly what each level runs.
 budget_mode: standard
 
+# OPTIONAL. Which model does which job. Leave the whole block commented out and the agent uses
+# whatever it is already running; nothing here is required and nothing breaks if it is absent.
+# Two jobs, two answers:
+#   workers: cheap   -> extraction only (pull one stated number out of one pasted document).
+#                       The cheapest model that passes the worker eval is enough; a bigger one
+#                       measured no better and cost more than twice as much.
+#   judge:   strong  -> the main loop: what the numbers mean, the hard filters, the verdict.
+#                       The strongest model you have. This is the substitution that moved the score.
+# Vendor names are your choice — write whatever your agent understands, or leave the words
+# "cheap" and "strong" and let the agent map them. The numbers behind this are in
+# docs/EXPERIMENTS.md (https://github.com/jacky18008/pea-princess/blob/main/docs/EXPERIMENTS.md).
+# models:
+#   workers: cheap
+#   judge: strong
+
 # How much you already know about renting in London: none | some | expert.
 # "none" = the skill explains each term the first time and suggests defaults instead of asking open questions.
 experience: none
