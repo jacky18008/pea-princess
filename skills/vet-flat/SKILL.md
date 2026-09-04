@@ -31,11 +31,11 @@ Ask of every listing: "What sits under its prettiest feature?"
 
 ## 3. The 12 axes (method per axis in `references/axes/`)
 1. **Identity** — exact flat number, building, postcode. The EPC register is the arbiter (`scripts/epc.py search`, `cert`). Big buildings span postcodes; search by street if a flat is missing.
-2. **Floor area** — EPC internal m² only; balconies excluded; listing and floor-plan figures are claims, not evidence.
+2. **Floor area** — EPC internal m² only, balconies excluded; listing and floor-plan figures are claims.
 3. **Age and fabric** — first EPC assessment year approximates completion; heating class (heat network, gas, electric, heat pump); air permeability ≤ 5 implies mechanical ventilation; `scripts/epc.py building` gives the whole-building profile.
 4. **Construction nearby** — planning applications within about 250 m, their phase and decision dates; officer reports carry distance numbers; conditions being discharged tell you whether works are starting or finishing.
 5. **Crime** — data.police.uk, a fixed six-month window in a ~300 m box; type mix; nodes on the walk home count in full; never scale up missing months.
-6. **Management and neighbours** — resident reviews with incentivised and same-day-burst reviews removed; read the lowest reviews in full; move-out reviews weigh most; short-let footprint in the building.
+6. **Management and neighbours** — reviews with incentivised and same-day-burst ones removed; read the lowest in full; move-out reviews weigh most; short-let footprint.
 7. **Agent and landlord compliance** — legal entity on Companies House, redress scheme, client-money protection, deposit protection; landlord type (institutional > professional > absentee).
 8. **Price** — £ per sq ft on EPC area against the local band; a discount must have a name; price-reduction history.
 9. **Aspect and light** — floor-plan compass, sky openness, obstruction angle; quiet beats light unless there is almost no light.
@@ -44,14 +44,14 @@ Ask of every listing: "What sits under its prettiest feature?"
 12. **Low-maintenance living** — bundled bills, washing machine in the flat, parcel handling, blackout bedroom, shop within 3 minutes, a direct route.
 **Area sweep** (compare everything around an address): shell mode `python3 scripts/sweep.py --anchor "<postcode>" --radius 800 --dest "<postcode>" --profile profile.yaml --out sweep/`; then read `sweep/summary.md` and `sweep/candidates/*.json`, and send the user `sweep/ask-the-user.md` once. Method: `references/axes/00-area-sweep.md`.
 Legal facts (England, Renters' Rights Act 2025, in force 2026-05-01): periodic tenancies only, at most one month's rent in advance, deposit ≤ 5 weeks' rent, holding deposit ≤ 1 week; cite `references/sources.yaml`.
-**Arithmetic is never done in your head.** Deposit caps, affordability multiples, all-in cost, £ per sq ft, bridging totals, break-even rent, guarantor-product fees and pro-rata rent come from `scripts/calc.py` (it prints the formula and every step); with no shell, write the formula and each step in the report and check the result a second way.
+**Arithmetic is never done in your head.** Deposit caps, affordability multiples, all-in cost, £ per sq ft, bridging totals, break-even rent, guarantor fees and pro-rata rent come from `scripts/calc.py` (it prints the formula and every step); with no shell, write the formula and each step, then check the result a second way.
 
 ## 4. Evidence grades — mark every finding
 **G** official register · **S** self-reported (landlord, agent, listing) · **C** third-party (reviews, press) · **I** inference · **U** unknown. Two sources disagreeing is itself a finding. An HTTP 200 with the wrong page is not evidence: check the content.
 
 ## 5. Sources you may automate, and sources you may only name
 Automatable (official or open): EPC register (HTML only; single addresses, built-in spacing), data.police.uk, Companies House, GLA Planning Datahub, TfL, postcodes.io, Land Registry price-paid, Heat Trust, Client Money Protect, GLA rogue landlord checker.
-Named only, no method given (their terms forbid automated access): Rightmove, Zoopla, OnTheMarket, OpenRent, HomeViews, Trustpilot, Google reviews, Airbnb, Booking.com. Ask the user to paste the page.
+Named only, no method (their terms forbid automated access): Rightmove, Zoopla, OnTheMarket, OpenRent, HomeViews, Trustpilot, Google reviews, Airbnb, Booking.com. Ask the user to paste.
 Catalogue with tested status: `references/sources.yaml`; per-borough portals: `references/boroughs.yaml`.
 
 ## 6. When you cannot get something
@@ -60,7 +60,7 @@ Follow `references/inputs.md`: try first; collect every gap; ask **once**, in on
 ## 7. Output contract
 Write `report.json` conforming to `references/report-schema.json`. Shell mode: `python3 scripts/render.py report.json > report.html`. Otherwise hand over the JSON and tell the user to paste it into `viewer/viewer.html`. Always also print the one-page verdict in the user's language.
 Plain language in every text field: short sentences; no jargon without a gloss; every number says what it means and what it is compared with; evidence grades as plain labels.
-Verdict: **PASS** · **EDGE** (with the break-even rent) · **CONDITIONAL** (conditions listed) · **KILL** (fatal axis named). Include: at most two killer questions for the agent, drawn from `references/questions.md`; viewing-day checks that only the site can answer; a "not found" table listing the search strings you used; sources with retrieval times; and the footer "Generated with vet-flat <version> — <source URL>".
+Verdict: **PASS** · **EDGE** (with the break-even rent) · **CONDITIONAL** (conditions listed) · **KILL** (fatal axis named). Include: at most two killer questions from `references/questions.md`; viewing-day checks; a "not found" table with the search strings used; sources with retrieval times; the footer "Generated with vet-flat <version> — <source URL>".
 
 ## 8. Never
 Sign on the viewing day. Treat listing area as fact. Scale crime figures for missing months. Turn a missing item into a pass. Drop a red flag to make the report tidy. Use ethnicity or nationality as a risk factor.
