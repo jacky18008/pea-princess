@@ -634,6 +634,21 @@ def write_raw(stdout, config_name, case_label, run_index, when=None, results_roo
     return path
 
 
+
+def persist_report(report, config_name, case_label, run_index, when=None, results_root=None):
+    """Copy the located report next to the raw stdout as <config>-<case>-<run>.report.json.
+    Temp workdirs do not survive a Claude Code restart; the results tree must be self-contained."""
+    if report is None:
+        return None
+    day = (when or datetime.datetime.utcnow()).strftime("%Y-%m-%d")
+    folder = os.path.join(results_root or RESULTS, day, "raw")
+    os.makedirs(folder, exist_ok=True)
+    path = os.path.join(folder, raw_name(config_name, case_label, run_index).replace(".json", ".report.json"))
+    with io.open(path, "w", encoding="utf-8") as fh:
+        json.dump(report, fh, ensure_ascii=False, indent=1)
+    return path
+
+
 def raw_name(config_name, case_label, run_index):
     def safe(text):
         return re.sub(r"[^A-Za-z0-9._#-]+", "-", str(text or "none"))
@@ -945,6 +960,10 @@ def run_one(args, case, variant=None, prompt=None):
         card["report"] = path
     else:
         report, path = find_report(workdir, stdout)
+        try:
+            persist_report(report, config.get('name') if isinstance(config, dict) else None, case['id'], args.run_index, results_root=getattr(args, 'results', None))
+        except Exception as exc:  # never let bookkeeping kill a run
+            print('could not persist report: %s' % exc, file=sys.stderr)
         if report is None:
             note = (note + "; " if note else "") + ("no report.json and no JSON object in the "
                                                     "output")

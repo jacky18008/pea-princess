@@ -702,7 +702,10 @@ def strings_in(node, depth=0):
 
 def locate_report(row, results_dir):
     """(report, where) for one scorecard row, most reliable source first."""
-    for path, label in ((row.get("report_path"), "report_path"),
+    persisted = os.path.join(results_dir, "raw", runner.raw_name(row.get("config"), row.get("case"),
+                                                                 row.get("run_index") or 1).replace(".json", ".report.json"))
+    for path, label in ((persisted, "persisted copy"),
+                        (row.get("report_path"), "report_path"),
                         (os.path.join(row.get("workdir") or "", "report.json"), "workdir")):
         if path and os.path.exists(path):
             try:

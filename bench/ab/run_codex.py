@@ -265,6 +265,10 @@ def main(argv=None):
     usage = usage_from_events(stdout)
 
     report, path = runner.find_report(workdir, last_message(workdir, stdout))
+    try:
+        runner.persist_report(report, config.get('name'), case['id'], args.run, results_root=getattr(args, 'results', None))
+    except Exception as exc:
+        print('could not persist report: %s' % exc, file=sys.stderr)
     if report is None:
         note = (note + "; " if note else "") + "no report.json and no JSON object in the output"
         row = runner.make_row("codex", args.model or config.get("main_model"), case, None,
