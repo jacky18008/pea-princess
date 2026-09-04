@@ -746,3 +746,15 @@ The result is written to each candidate as `arithmetic_check` (`arithmetic_ok` p
 python3 skills/vet-flat/scripts/render.py report.json --validate-only   # WARNING per mismatch
 python3 skills/vet-flat/scripts/render.py report.json --strict          # mismatches are errors
 ```
+
+### No source, no number (render.py enforces what the schema states)
+Every number a report states — each `axes[].numbers[]` entry and each `metrics` measure — has to carry at least one id in `sources` (resolving to the top-level `sources` list) or a `computed_by` note saying how it was worked out. The rule is written into `references/report-schema.json` as an `anyOf` on the `labelled_number` and `measure` definitions, so the `required` list is unchanged and a report written against schema 1.0 still validates. `render.py` reads those keys back out of the schema rather than hard-coding them, and prints one `WARNING  no source:` line per offending number; `--strict` turns each into an error and exits 1. Both renderers put a *no source* chip on the number itself (`**[no source]**` in Markdown), and `viewer/viewer.html` runs the same check in the browser. A `null` value is never flagged: there is no number in it to source.
+
+```
+python3 skills/vet-flat/scripts/render.py report.json                   # WARNING per unsourced number, page still written
+python3 skills/vet-flat/scripts/render.py report.json --strict --validate-only   # each one is an error, exit 1
+python3 bench/release_gate.py bench/results/<date>                      # the pre-release gate: 0 fabrications, schema ok
+```
+
+### The configuration line (which rung of the escalation ladder ran)
+`generated_by.tier` (`lite` | `standard` | `breadth` | `manual`) and `generated_by.escalation_reason` are optional fields that say how much machine was behind the report. Both renderers print `Configuration: <tier> — <reason or "default">; workers: <cheap|strong>; judge: <model_name>` as the first line under the title and again in *About this report*; a report with no tier prints `not stated`. The workers half follows from the tier — `standard`, `breadth` and `lite` run cheap workers with a strong judge, `manual` runs none — and the ladder itself, including the triggers and the fan-out rule, is in `references/budget-modes.md`.

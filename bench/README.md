@@ -234,6 +234,51 @@ both pass.
 
 ---
 
+## The pre-release gate (`bench/release_gate.py`)
+
+Before a release: **run the default configuration on the public cases; fabrications must be 0.**
+That is the whole gate, and one script enforces it.
+
+```bash
+python3 bench/run.py --agent claude --all-cases --config bench/ab/configs/B-lean.yaml --timeout 900
+python3 bench/release_gate.py bench/results/$(date -u +%F)
+```
+
+`release_gate.py` reads `scorecard.json` in the results directory you name (or every
+`*/scorecard.json` beneath it, so `bench/results` works too), keeps the rows whose
+`config` is the one being released, **re-grades each of those runs with `grade.py`**
+against the case's recorded truth, prints one table, and exits 1 unless every run has
+`fabrications == 0` and a valid schema. It re-grades rather than trusting the recorded
+score, so a scorecard edited by hand cannot let a fabrication through.
+
+- `--config <name>` picks the configuration. The default is the one marked
+  `default: true` in `bench/ab/configs/`, and `B-lean` when none is marked.
+- `--evals <file>` points at the case file the runs used (default `evals/evals.json`).
+- `--json-out <file>` writes the same result as JSON for CI.
+
+Each run is re-graded from the report kept beside the raw stdout at
+`raw/<config>-<case>-<run>.report.json`. A run whose report is gone (an older tree, or a
+conversation case) falls back to the score the scorecard recorded and the table says
+`scorecard` instead of `re-graded`; a run that was never graded at all fails.
+
+The table also counts, per run, the numbers that carry neither a source id nor a
+`computed_by` note — the "no source, no number" rule that `report-schema.json` states and
+`render.py --strict` enforces. That column is **reported, not gated**, so an older results
+tree stays gateable; use `render.py --strict` on the reports themselves when you want it
+to fail.
+
+```
+case                                run  fabrications  schema  no source  graded      result
+----------------------------------  ---  ------------  ------  ---------  ----------  ------
+se1-london-bridge-hotel-200         1    0             ok      0          re-graded   PASS
+e14-marsh-wall-301                  1    0             ok      0          re-graded   PASS
+
+Gate: every run of B-lean must have 0 fabrications and a valid schema. 2 run(s), 2 passing.
+VERDICT: PASS
+```
+
+---
+
 ## The question bank
 
 A report that gets every number right and then asks the agent "is the building well

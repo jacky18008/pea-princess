@@ -136,6 +136,13 @@ default on this many runs.
 | **Final two or three flats** | Breadth: one reader per axis. Accept about 5× the cost and 2× the time. | ~0.85 | ~$30 | ~30 min |
 | **No shell — chat only** | Prompt pack plus `lite` mode; you paste the pages, the viewer renders the report. | ~0.15–0.40 | pennies | ~5 min |
 
+These rows are the rungs of the escalation ladder, and the skill climbs them by itself: every
+candidate starts on row two, and moves to row three only when it reaches the final shortlist of two
+or three, or the verdict is CONDITIONAL or EDGE with more than 40 % of the axes unknown. The report
+records which rung ran, in `generated_by.tier` and `generated_by.escalation_reason`, and both
+renderers print it as the first line. The triggers and the fan-out rule (four or more subagents at
+once always use the cheap model) are in `skills/vet-flat/references/budget-modes.md`.
+
 A middle option sits between rows two and three: keep the scripts and add parallel readers only for
 the axes that need a human-written document — reviews, planning, press. That is
 `B-readers-sonnet`: 0.69 recall for 1.4× the cost and 2.2× the time of the default, without any

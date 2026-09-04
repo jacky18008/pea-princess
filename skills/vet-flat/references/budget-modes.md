@@ -2,7 +2,7 @@ Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen — https://github.com
 
 # Budget modes: the same checks at three depths
 
-People on a £20-a-month plan share usage caps and smaller sandboxes; people with no tools at all paste pages by hand. The skill must still give them the basic functions: hard filters, a verdict, and the two killer questions. `profile.yaml: budget_mode` selects the depth. Default `standard`. The agent states the mode on the first line of the report and lists what was skipped.
+People on a £20-a-month plan share usage caps and smaller sandboxes; people with no tools at all paste pages by hand. The skill must still give them the basic functions: hard filters, a verdict, and the two killer questions. `profile.yaml: budget_mode` selects the depth. Default `standard`. The agent states the mode on the first line of the report and lists what was skipped. Depth also moves on its own during a run: see "The escalation ladder" below.
 
 | | `lite` | `standard` | `deep` |
 |---|---|---|---|
@@ -16,6 +16,38 @@ People on a £20-a-month plan share usage caps and smaller sandboxes; people wit
 | Reviews | ask the user for the lowest reviews only | full paste, incentivised and burst filters | + Trustpilot/press, cross-building matrix |
 | Report | verdict card, hard filters, 2 questions, 12 axes with U where skipped | full | full + comparison |
 | Area sweep | not offered; suggest `standard` | `sweep.py --radius 600 --max-buildings 6` | run several `--radius 1000` sweeps on different anchors (one per neighbourhood) with `--max-buildings 8` each; a single 3,200 m sweep trips the map service's rate limit and needs the filter caps raised |
+
+## The escalation ladder (automatic)
+
+Depth is not chosen up front. Every candidate starts at tier 1, and moves up only when a stated
+trigger fires. Record where you ended up in the report: `generated_by.tier` and
+`generated_by.escalation_reason`. Both renderers print them as the first line under the title, so the
+reader can see how much machine was behind the words before reading a single finding.
+
+| Tier | Name | What runs | When |
+|---|---|---|---|
+| 1 | `standard` | Scripts for every fetchable fact; cheap workers only for text the user pasted; the strongest model you have doing the judging. | The default for every candidate. Always start here. |
+| 2 | `breadth` | One bounded reader per reading-heavy axis — reviews, planning, press, the landlord entity, the listing, the geometry — up to six, in parallel, on the cheap model. One document in, one small JSON object out. | Only on a trigger, below. |
+| 3 | `manual` / `lite` | No shell: the user pastes, the model writes, the viewer renders. `lite` is the same shape with a fetch budget of about eight calls. | Chat-only runs, and £20 plans that have to stretch one window over many flats. |
+
+**Escalate to `breadth` when either of these is true:**
+- the candidate is in the final shortlist of two or three; or
+- the verdict is CONDITIONAL or EDGE **and** more than 40 % of the axes are unknown (5 or more of the 12).
+
+**Never start at breadth.** Run tier 1 first, escalate on a trigger, and say so in
+`escalation_reason` ("final shortlist of three", "CONDITIONAL with 6 of 12 axes unknown"). Breadth
+buys roughly 0.55–0.70 landmine recall up to about 0.85, and costs about five times the tokens and
+twice the wall time (`docs/EXPERIMENTS.md`). That is worth paying on the last two or three flats and
+wasted on a flat a hard filter kills in one line.
+
+**Fan-out rule.** Whenever four or more subagents run at once, they use the cheap tier, whatever the
+budget says. Fan-out, not depth, is what empties a subscription window: four parallel readers on the
+strongest model burn more in a minute than a whole `standard` run.
+
+**What the tier implies.** Tiers 1, 2 and `lite` run cheap workers with a strong judge; `manual` runs
+no workers at all. The renderers print `Configuration: <tier> — <reason or "default">; workers:
+<cheap|strong>; judge: <model_name>` under the title and again in "About this report". A report with no
+`tier` prints "not stated", which is itself a finding about the report.
 
 ## What never gets cut
 Hard filters from the profile · evidence grades · the "not found" table · the attribution footer · "never sign on the viewing day" · asking the user once, in one list, for what cannot be fetched.

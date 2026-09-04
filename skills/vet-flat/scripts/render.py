@@ -13,6 +13,11 @@ Usage:
   render.py report.json --lang zh-TW     > report.zh-TW.html
   render.py report.json --md             > report.md
   render.py report.json --validate-only            # check, print nothing
+  render.py report.json --strict --validate-only   # ...and fail on any warning
+
+Every number needs a source: each axis number and each metric must carry at least one
+id in `sources` or a `computed_by` note. One that carries neither is a warning here and
+an error under --strict, and both renderers mark it "no source".
 
 Exit codes: 0 ok, 1 the report failed validation, 2 wrong arguments.
 Errors and warnings go to stderr; the report goes to stdout.
@@ -363,6 +368,124 @@ def validate(data, schema):
     v.check(data, schema, "")
     semantic_checks(data, v)
     return v.errors, v.warnings
+
+
+# ------------------------------------------------ no source, no number ---
+# The rule lives in report-schema.json as an `anyOf` on the two number
+# definitions, so the required list is unchanged and an older report still
+# validates. The schema is still the source of truth here: the keys below are
+# read out of it, not hard-coded, and the fallback is only for a caller that
+# renders without a schema file.
+DEFAULT_SOURCE_KEYS = ["sources", "computed_by"]
+
+
+def source_alternatives(schema, definition):
+    """The keys the schema will accept as backing for one number."""
+    node = ((schema or {}).get("definitions") or {}).get(definition) or {}
+    keys = []
+    for branch in node.get("anyOf") or []:
+        for key in branch.get("required") or []:
+            if key not in keys:
+                keys.append(key)
+    return keys or list(DEFAULT_SOURCE_KEYS)
+
+
+def _backed(item, keys):
+    """True when at least one of the keys carries something a reader can follow."""
+    for key in keys:
+        value = item.get(key)
+        if isinstance(value, list):
+            if any(isinstance(x, str) and x.strip() for x in value):
+                return True
+        elif isinstance(value, str) and value.strip():
+            return True
+    return False
+
+
+def unsourced_numbers(report, schema=None):
+    """One entry per stated number with neither a source id nor a computed_by note.
+
+    A null value is not flagged: there is no number in it to source. Each entry
+    carries `candidate_id`, `loc` (the same locator the arithmetic chips use) and
+    a `message` written for the model that has to fix it.
+    """
+    out = []
+    axis_keys = source_alternatives(schema, "labelled_number")
+    metric_keys = source_alternatives(schema, "measure")
+    for i, cand in enumerate(report.get("candidates") or []):
+        if not isinstance(cand, dict):
+            continue
+        cid = cand.get("id")
+        for j, axis in enumerate(sorted([a for a in cand.get("axes") or [] if isinstance(a, dict)],
+                                        key=lambda a: a.get("id") or 0)):
+            aid = axis.get("id")
+            for index, number in enumerate(axis.get("numbers") or []):
+                if not isinstance(number, dict) or number.get("value") is None:
+                    continue
+                if _backed(number, axis_keys):
+                    continue
+                out.append({
+                    "candidate_id": cid,
+                    "loc": ("axis", aid, index),
+                    "label": number.get("label") or "",
+                    "keys": axis_keys,
+                    "message": ('candidates[%d] %s, axis %s, number %d "%s": no source id and no '
+                                "computed_by note. Cite a source from the top-level sources list, or "
+                                "say in computed_by how you worked it out."
+                                % (i, cid, aid, index + 1, number.get("label") or "")),
+                })
+        metrics = cand.get("metrics") or {}
+        if not isinstance(metrics, dict):
+            continue
+        for key, _tid in METRIC_KEYS:
+            measure = metrics.get(key)
+            if not isinstance(measure, dict) or measure.get("value") is None:
+                continue
+            if _backed(measure, metric_keys):
+                continue
+            out.append({
+                "candidate_id": cid,
+                "loc": ("metrics", key),
+                "label": key,
+                "keys": metric_keys,
+                "message": ("candidates[%d] %s, metrics.%s: no source id and no computed_by note. "
+                            "Cite a source from the top-level sources list, or say in computed_by "
+                            "how you worked it out." % (i, cid, key)),
+            })
+    return out
+
+
+def unsourced_locations(report, schema=None):
+    """{candidate id: set of locators} for the inline "no source" chips."""
+    out = {}
+    for gap in unsourced_numbers(report, schema):
+        out.setdefault(gap["candidate_id"], set()).add(gap["loc"])
+    return out
+
+
+# ---------------------------------------------------- the configuration line ---
+# Which rung of the escalation ladder the run finished on, and what that implies
+# about the models. references/budget-modes.md, "The escalation ladder".
+TIER_WORKERS = {"standard": "cheap", "breadth": "cheap", "lite": "cheap", "manual": "none"}
+
+
+def configuration_line(data, L):
+    """'Configuration: <tier> - <reason or default>; workers: <cheap>; judge: <model>'.
+
+    The whole sentence is one glossary term with four slots, so a translator moves the
+    words and the renderers only fill the holes. Missing tier prints as "not stated".
+    """
+    gb = data.get("generated_by") or {}
+    unknown = L.label("ui.not_stated")
+    tier = gb.get("tier")
+    reason = (gb.get("escalation_reason") or "").strip()
+    if not reason:
+        reason = L.label("ui.tier_default") if tier else unknown
+    return (L.label("ui.configuration")
+            .replace("{tier}", tier or unknown)
+            .replace("{reason}", reason)
+            .replace("{workers}", TIER_WORKERS.get(tier, unknown))
+            .replace("{judge}", (gb.get("model_name") or "").strip() or unknown))
 
 
 # ------------------------------------------------------ arithmetic check ---
@@ -925,6 +1048,7 @@ small,.sub{color:var(--muted);font-size:13px;line-height:1.45}
   padding:2px 8px;font-size:12.5px;border:1px solid var(--line);cursor:help}
 .chip.ev-G{border-color:var(--ok)} .chip.ev-U{border-color:var(--unk)}
 .chip.maths{background:var(--kill-bg);color:var(--kill);border-color:var(--kill);font-weight:600}
+.chip.nosource{color:var(--edge);border-color:var(--edge)}
 .arith td.bad{color:var(--kill);font-weight:600} .arith td.good{color:var(--ok)}
 .chip.ev-S,.chip.ev-I{border-color:var(--edge)} .chip.ev-C{border-color:var(--accent)}
 .tw{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);
@@ -964,11 +1088,12 @@ a{color:var(--accent)}
 
 # -------------------------------------------------------------------- HTML ---
 class HtmlRenderer(object):
-    def __init__(self, data, L):
+    def __init__(self, data, L, schema=None):
         self.d = data
         self.L = L
         self.out = []
         self.bad = bad_locations(data)      # also fills candidate.arithmetic_check
+        self.nosource = unsourced_locations(data, schema)
 
     def w(self, text=""):
         self.out.append(text)
@@ -988,7 +1113,14 @@ class HtmlRenderer(object):
         return ' <span class="chip maths" title="%s">%s</span>' % (
             esc(check_sentence(check, self.L)), esc(self.L.label("ui.check_the_maths")))
 
-    def measure_cell(self, mea, check=None):
+    def chip_nosource(self, missing):
+        """A visible chip on a number that names no source and no formula."""
+        if not missing:
+            return ""
+        return ' <span class="chip nosource" title="%s">%s</span>' % (
+            esc(self.L.plain("ui.no_source")), esc(self.L.label("ui.no_source")))
+
+    def measure_cell(self, mea, check=None, missing=False):
         if not isinstance(mea, dict):
             return '<td>%s</td>' % esc(self.L.label("ui.no_data"))
         value = fmt_value(mea.get("value"), mea.get("unit"))
@@ -997,6 +1129,7 @@ class HtmlRenderer(object):
         bits = ['<span class="meaning" title="%s">%s</span>' % (esc(mea.get("meaning") or ""), esc(value))]
         if check:
             bits.append(self.chip_maths(check))
+        bits.append(self.chip_nosource(missing))
         if mea.get("compared_to"):
             bits.append('<br><small>%s</small>' % esc(mea["compared_to"]))
         if mea.get("evidence_class"):
@@ -1125,9 +1258,11 @@ class HtmlRenderer(object):
                 continue
             metrics = cand.get("metrics") or {}
             bad = self.bad.get(cand.get("id")) or {}
+            gaps = self.nosource.get(cand.get("id")) or set()
             cells = ["<td><strong>%s</strong></td>" % esc(candidate_name(cand))]
             for key, _tid in METRIC_KEYS:
-                cells.append(self.measure_cell(metrics.get(key), bad.get(("metrics", key))))
+                cells.append(self.measure_cell(metrics.get(key), bad.get(("metrics", key)),
+                                               ("metrics", key) in gaps))
             costs = cand.get("costs") or {}
             cells.append('<td class="num"><span class="meaning" title="%s">%s</span>%s<br><small>%s</small></td>' % (
                 esc(costs.get("basis_note") or ""), esc(money(costs.get("all_in_planning")) or L.label("ui.no_data")),
@@ -1213,6 +1348,7 @@ class HtmlRenderer(object):
         for cand in self.d.get("candidates", []):
             self.w('<div class="card"><h3>%s</h3>' % esc(candidate_name(cand)))
             bad = self.bad.get(cand.get("id")) or {}
+            gaps = self.nosource.get(cand.get("id")) or set()
             for axis in sorted(cand.get("axes") or [], key=lambda a: a.get("id") or 0):
                 aid = axis.get("id")
                 self.w('<div class="axis"><h4>%s. %s %s</h4>' % (
@@ -1225,10 +1361,11 @@ class HtmlRenderer(object):
                     for index, n in enumerate(numbers):
                         rows.append([
                             "<td><strong>%s</strong></td>" % esc(n.get("label", "")),
-                            '<td class="num"><span class="meaning" title="%s">%s</span>%s</td>' % (
+                            '<td class="num"><span class="meaning" title="%s">%s</span>%s%s</td>' % (
                                 esc(n.get("meaning") or ""), esc(fmt_value(n.get("value"), n.get("unit"))
                                                                  or L.label("ui.no_data")),
-                                self.chip_maths(bad.get(("axis", aid, index)))),
+                                self.chip_maths(bad.get(("axis", aid, index))),
+                                self.chip_nosource(("axis", aid, index) in gaps)),
                             "<td><small>%s</small></td>" % esc(n.get("meaning", "")),
                             "<td><small>%s</small></td>" % esc(n.get("compared_to", "")),
                             "<td>%s</td>" % self.chip_evidence(n.get("evidence_class")),
@@ -1371,6 +1508,7 @@ class HtmlRenderer(object):
 
     def s10_about(self):
         L = self.L
+        self.w("<p class=\"sub\"><strong>%s</strong></p>" % esc(configuration_line(self.d, L)))
         gb = self.d.get("generated_by") or {}
         rows = [
             ("ui.tool", gb.get("tool")),
@@ -1412,6 +1550,7 @@ class HtmlRenderer(object):
         self.w("<title>%s</title>" % esc(title))
         self.w("<style>%s</style></head><body><div class=\"wrap\">" % CSS)
         self.w("<h1>%s</h1>" % esc(L.label("ui.report_title")))
+        self.w("<p class=\"sub\"><strong>%s</strong></p>" % esc(configuration_line(self.d, L)))
         self.w('<p class="sub">%s &middot; %s</p>' % (esc(names), esc(self.d.get("generated_at", ""))))
         renderers = [self.s1_verdict, self.s2_hard_filters, self.s3_comparison, self.s4_worst_reviews,
                      self.s5_landmines, self.s6_axes, self.s7_questions, self.s8_gaps,
@@ -1438,17 +1577,24 @@ def md_table(headers, rows):
     return out
 
 
-def render_markdown(data, L):
+def render_markdown(data, L, schema=None):
     o = []
     bad_by_candidate = bad_locations(data)   # also fills candidate.arithmetic_check
+    gaps_by_candidate = unsourced_locations(data, schema)
 
     def maths_flag(bad, key):
         """The Markdown twin of the inline warning chip."""
         check = bad.get(key)
         return "" if not check else " **[%s]**" % L.label("ui.check_the_maths")
 
+    def source_flag(gaps, key):
+        """The Markdown twin of the inline "no source" chip."""
+        return " **[%s]**" % L.label("ui.no_source") if key in gaps else ""
+
     names = ", ".join(candidate_name(c) for c in data.get("candidates", []))
     o.append("# %s \u2014 %s" % (L.label("ui.report_title"), names))
+    o.append("")
+    o.append(configuration_line(data, L))
     o.append("")
     o.append("_%s_" % data.get("generated_at", ""))
 
@@ -1520,13 +1666,15 @@ def render_markdown(data, L):
                 continue
             metrics = cand.get("metrics") or {}
             bad = bad_by_candidate.get(cand.get("id")) or {}
+            gaps = gaps_by_candidate.get(cand.get("id")) or set()
             row = [candidate_name(cand)]
             for key, _t in METRIC_KEYS:
                 mea = metrics.get(key) or {}
                 text = fmt_value(mea.get("value"), mea.get("unit")) or L.label("ui.no_data")
                 if mea.get("compared_to"):
                     text = "%s (%s)" % (text, mea["compared_to"])
-                row.append(text + maths_flag(bad, ("metrics", key)))
+                row.append(text + maths_flag(bad, ("metrics", key))
+                           + source_flag(gaps, ("metrics", key)))
             row.append((money((cand.get("costs") or {}).get("all_in_planning")) or L.label("ui.no_data"))
                        + maths_flag(bad, ("costs", "all_in_planning")))
             rows.append(row)
@@ -1585,6 +1733,7 @@ def render_markdown(data, L):
         o.append("")
         o.append("### %s" % candidate_name(cand))
         bad = bad_by_candidate.get(cand.get("id")) or {}
+        gaps = gaps_by_candidate.get(cand.get("id")) or set()
         for axis in sorted(cand.get("axes") or [], key=lambda a: a.get("id") or 0):
             aid = axis.get("id")
             o.append("")
@@ -1593,9 +1742,10 @@ def render_markdown(data, L):
             o.append("")
             o.append(axis.get("finding", ""))
             for index, n in enumerate(axis.get("numbers") or []):
-                o.append("- **%s**: %s%s \u2014 %s %s" % (
+                o.append("- **%s**: %s%s%s \u2014 %s %s" % (
                     n.get("label", ""), fmt_value(n.get("value"), n.get("unit")) or L.label("ui.no_data"),
                     maths_flag(bad, ("axis", aid, index)),
+                    source_flag(gaps, ("axis", aid, index)),
                     n.get("meaning", ""), n.get("compared_to", "")))
             for unk in axis.get("unknowns") or []:
                 o.append("- %s: %s" % (L.label("ui.unknowns"), unk))
@@ -1663,6 +1813,8 @@ def render_markdown(data, L):
                    L.label("ui.evidence"), L.label("ui.provenance")], rows)
 
     head(10, "section.about")
+    o.append("")
+    o.append(configuration_line(data, L))
     gb = data.get("generated_by") or {}
     rows = [[L.label("ui.tool"), gb.get("tool")], [L.label("ui.version"), gb.get("version")],
             [L.label("ui.runtime"), gb.get("runtime")], [L.label("ui.mode"), gb.get("mode")],
@@ -1693,7 +1845,9 @@ def build_parser():
     p.add_argument("--validate-only", action="store_true", help="check the report and write nothing")
     p.add_argument("--schema", default=DEFAULT_SCHEMA, help="path to report-schema.json")
     p.add_argument("--glossary", default=DEFAULT_GLOSSARY, help="path to glossary.yaml")
-    p.add_argument("--strict", action="store_true", help="treat warnings as errors")
+    p.add_argument("--strict", action="store_true",
+                   help="treat warnings as errors, including every number with no source and no "
+                        "computed_by note")
     return p
 
 
@@ -1721,6 +1875,9 @@ def main(argv=None):
     sums = arithmetic_warnings(data)
     for line in sums:
         sys.stderr.write("WARNING  arithmetic: %s\n" % line)
+    gaps = unsourced_numbers(data, schema)
+    for gap in gaps:
+        sys.stderr.write("WARNING  no source: %s\n" % gap["message"])
     if errors:
         sys.stderr.write("\nThis report does not match report-schema.json. %d problem%s:\n"
                          % (len(errors), "" if len(errors) == 1 else "s"))
@@ -1728,12 +1885,16 @@ def main(argv=None):
             sys.stderr.write("  error  %s\n" % error)
         sys.stderr.write("\nFix the JSON and run again. The schema explains every field:\n  %s\n" % args.schema)
         return 1
-    if (warnings or sums) and args.strict:
-        sys.stderr.write("\n--strict: %d warning(s) treated as errors, %d of them arithmetic.\n"
-                         % (len(warnings) + len(sums), len(sums)))
+    if (warnings or sums or gaps) and args.strict:
+        sys.stderr.write("\n--strict: %d warning(s) treated as errors, %d of them arithmetic, "
+                         "%d number(s) with no source.\n"
+                         % (len(warnings) + len(sums) + len(gaps), len(sums), len(gaps)))
         return 1
     if args.validate_only:
         sys.stderr.write("OK: the report matches report-schema.json.\n")
+        if gaps:
+            sys.stderr.write("But %d number(s) name no source and no formula; both renderers mark "
+                             "them \"no source\".\n" % len(gaps))
         if sums:
             sys.stderr.write("But %d number(s) do not follow from the formulas above.\n" % len(sums))
         else:
@@ -1747,7 +1908,8 @@ def main(argv=None):
         return 2
     lang = args.lang or data.get("language") or "en"
     labels = Labels(terms, lang)
-    text = render_markdown(data, labels) if args.md else HtmlRenderer(data, labels).render()
+    text = (render_markdown(data, labels, schema) if args.md
+            else HtmlRenderer(data, labels, schema).render())
     out = getattr(sys.stdout, "buffer", sys.stdout)
     out.write(text.encode("utf-8"))
     out.write(b"\n")

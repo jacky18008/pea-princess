@@ -19,7 +19,7 @@
   "properties": {
     "schema_version": {
       "type": "string",
-      "description": "Write the version of THIS schema that you followed. Today that is \"1.0\". Do not write your own tool version here; that goes in generated_by.version.",
+      "description": "Write the version of THIS schema that you followed. Today that is \"1.1\"; \"1.0\" is still accepted and still renders. What changed in 1.1: generated_by.tier and generated_by.escalation_reason record which rung of the escalation ladder the run finished on, and every number - each axes[].numbers[] entry and each metrics measure - has to carry at least one source id in sources, or a computed_by note saying where it came from. That rule is written as an anyOf on the two number definitions, so the required list is unchanged and an older 1.0 report still validates; a number with neither is a warning by default, and an error under render.py --strict, and both renderers mark it \"no source\". Do not write your own tool version here; that goes in generated_by.version.",
       "pattern": "^[0-9]+\\.[0-9]+$"
     },
     "generated_by": {
@@ -102,12 +102,40 @@
     },
     "measure": {
       "type": "object",
-      "description": "One number, plus the two things a reader needs to use it: what it means and what it is compared with. Never publish a bare number.",
+      "description": "One number, plus the two things a reader needs to use it: what it means and what it is compared with. Never publish a bare number. NO SOURCE, NO NUMBER: every number needs at least one entry in sources (an id from the top-level sources list) or a computed_by note saying how you worked it out. Written as the anyOf below, so the required list is unchanged and an older report still validates; a number with neither is a warning, an error under render.py --strict, and both renderers mark it \"no source\".",
       "additionalProperties": false,
       "required": [
         "value",
         "meaning",
         "compared_to"
+      ],
+      "anyOf": [
+        {
+          "title": "at least one source id in sources",
+          "description": "The number was read off something: list the source ids here and put the source in the top-level sources list.",
+          "required": [
+            "sources"
+          ],
+          "properties": {
+            "sources": {
+              "type": "array",
+              "minItems": 1
+            }
+          }
+        },
+        {
+          "title": "a computed_by note saying where the number came from",
+          "description": "The number was worked out: name the script and subcommand, or write 'shown formula' and show the working in the text.",
+          "required": [
+            "computed_by"
+          ],
+          "properties": {
+            "computed_by": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
       ],
       "properties": {
         "value": {
@@ -204,6 +232,24 @@
           ],
           "description": "Write your own model name as free text, for example 'claude-opus-4', 'gpt-5-codex', 'gemini-2.5-pro', 'grok-4', 'qwen3-coder-30b (local)'. Any model may fill this in; it is not a Claude-only field. Write null if you do not know it.",
           "maxLength": 80
+        },
+        "tier": {
+          "type": "string",
+          "enum": [
+            "lite",
+            "standard",
+            "breadth",
+            "manual"
+          ],
+          "description": "Optional, and added in schema 1.1. Which rung of the escalation ladder this run finished on (references/budget-modes.md). standard = scripts for every fetchable fact, cheap workers only for pasted text, a strong judge; this is the default and every candidate starts here. breadth = one bounded reader per reading-heavy axis, up to six, in parallel, on the cheap model; only after a trigger fired. manual = no shell, you worked from what the user pasted. lite = the cut-down fetch budget. Never start at breadth: escalate, then say why in escalation_reason. Leave this out if you truly do not know; the renderers then print 'not stated'."
+        },
+        "escalation_reason": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Optional, and added in schema 1.1. If you moved up a tier, say in one short sentence what triggered it: 'final shortlist of three', 'CONDITIONAL with 6 of 12 axes unknown'. Leave it out or write null when you stayed on the default rung; the renderers then print 'default'.",
+          "maxLength": 200
         }
       }
     },
@@ -763,12 +809,41 @@
     },
     "labelled_number": {
       "type": "object",
+      "description": "One number inside an axis. NO SOURCE, NO NUMBER: every number needs at least one entry in sources (an id from the top-level sources list) or a computed_by note saying how you worked it out. Written as the anyOf below, so the required list is unchanged and an older report still validates; a number with neither is a warning, an error under render.py --strict, and both renderers mark it \"no source\".",
       "additionalProperties": false,
       "required": [
         "label",
         "value",
         "meaning",
         "compared_to"
+      ],
+      "anyOf": [
+        {
+          "title": "at least one source id in sources",
+          "description": "The number was read off something: list the source ids here and put the source in the top-level sources list.",
+          "required": [
+            "sources"
+          ],
+          "properties": {
+            "sources": {
+              "type": "array",
+              "minItems": 1
+            }
+          }
+        },
+        {
+          "title": "a computed_by note saying where the number came from",
+          "description": "The number was worked out: name the script and subcommand, or write 'shown formula' and show the working in the text.",
+          "required": [
+            "computed_by"
+          ],
+          "properties": {
+            "computed_by": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
       ],
       "properties": {
         "label": {

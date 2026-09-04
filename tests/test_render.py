@@ -81,6 +81,25 @@ def broken_sample():
     return bad
 
 
+def unsourced_sample():
+    """The sample, with one axis number and one metric that name no source and no formula.
+
+    Everything else in the fixture cites a source id, so exactly two numbers are
+    expected to warn: the invented service charge and the stripped metric.
+    """
+    bad = load_sample()
+    cand = bad["candidates"][0]
+    for axis in cand["axes"]:
+        if axis["id"] == 6:
+            axis.setdefault("numbers", []).append({
+                "label": "Rumoured service charge", "value": 210, "unit": "GBP per month",
+                "meaning": "Someone wrote this in a forum thread.",
+                "compared_to": "No local benchmark found."})
+    cand["metrics"]["nearest_works_m"].pop("sources", None)
+    cand["metrics"]["nearest_works_m"].pop("computed_by", None)
+    return bad
+
+
 def write_temp(report):
     import tempfile
     handle, path = tempfile.mkstemp(suffix=".json")
@@ -112,7 +131,8 @@ class TestGlossary(unittest.TestCase):
         needed += [tid for _, tid in render.METRIC_KEYS]
         needed += [tid for _, tid in render.COST_KEYS]
         needed += ["ui.report_title", "ui.requirement", "ui.observed", "ui.result", "ui.pass",
-                   "ui.fail", "ui.unknown", "ui.evidence", "ui.nothing_listed", "ui.no_data"]
+                   "ui.fail", "ui.unknown", "ui.evidence", "ui.nothing_listed", "ui.no_data",
+                   "ui.configuration", "ui.tier_default", "ui.not_stated", "ui.no_source"]
         missing = [t for t in needed if t not in self.terms]
         self.assertEqual([], missing, "glossary.yaml is missing: %s" % missing)
 
@@ -508,6 +528,200 @@ class TestArithmeticCheckOutput(unittest.TestCase):
         self.assertIn("Arithmetic check", html)
         self.assertNotIn('class="chip maths"', html)
         self.assertIn("not stated in the report; formula gives", html)
+
+
+# ------------------------------------------------- no source, no number
+class TestUnsourcedNumbers(unittest.TestCase):
+    def setUp(self):
+        self.schema = load_schema()
+
+    def test_the_rule_is_in_the_schema_as_an_anyof_on_both_number_definitions(self):
+        for name in ("labelled_number", "measure"):
+            branches = self.schema["definitions"][name].get("anyOf")
+            self.assertTrue(branches, "%s has no anyOf" % name)
+            required = sorted(sum([b.get("required", []) for b in branches], []))
+            self.assertEqual(["computed_by", "sources"], required)
+            self.assertEqual(["sources", "computed_by"],
+                             render.source_alternatives(self.schema, name))
+
+    def test_the_required_list_did_not_change_so_older_reports_still_validate(self):
+        for name in ("labelled_number", "measure"):
+            self.assertNotIn("sources", self.schema["definitions"][name]["required"])
+            self.assertNotIn("computed_by", self.schema["definitions"][name]["required"])
+        old = load_sample()
+        old["schema_version"] = "1.0"
+        old["generated_by"].pop("tier", None)
+        old["generated_by"].pop("escalation_reason", None)
+        errors, warnings = render.validate(old, self.schema)
+        self.assertEqual([], errors)
+        self.assertEqual([], warnings)
+
+    def test_the_sample_sources_every_number_it_states(self):
+        self.assertEqual([], render.unsourced_numbers(load_sample(), self.schema))
+
+    def test_a_number_with_a_source_or_a_formula_passes(self):
+        data = load_sample()
+        axis = [a for a in data["candidates"][0]["axes"] if a["id"] == 6][0]
+        axis.setdefault("numbers", []).append(
+            {"label": "Worked out", "value": 12, "unit": "GBP per month", "meaning": "x",
+             "compared_to": "y", "computed_by": "shown formula"})
+        self.assertEqual([], render.unsourced_numbers(data, self.schema))
+
+    def test_an_empty_sources_list_is_not_a_source(self):
+        data = load_sample()
+        data["candidates"][0]["metrics"]["commute_min"]["sources"] = []
+        gaps = render.unsourced_numbers(data, self.schema)
+        self.assertEqual([("metrics", "commute_min")], [g["loc"] for g in gaps])
+
+    def test_a_null_value_is_not_flagged_because_there_is_no_number_in_it(self):
+        data = load_sample()
+        metric = data["candidates"][0]["metrics"]["commute_min"]
+        metric["sources"] = []
+        metric["value"] = None
+        self.assertEqual([], render.unsourced_numbers(data, self.schema))
+
+    def test_it_finds_both_the_axis_number_and_the_metric(self):
+        gaps = render.unsourced_numbers(unsourced_sample(), self.schema)
+        self.assertEqual(2, len(gaps), gaps)
+        self.assertEqual([("axis", 6, 2), ("metrics", "nearest_works_m")],
+                         [g["loc"] for g in gaps])
+        joined = "\n".join(g["message"] for g in gaps)
+        self.assertIn("Rumoured service charge", joined)
+        self.assertIn("nearest_works_m", joined)
+        self.assertIn("computed_by", joined)
+
+
+class TestUnsourcedOutput(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.path = write_temp(unsourced_sample())
+        cls.code, cls.html, cls.err = run_cli(cls.path)
+        cls.md_code, cls.md, cls.md_err = run_cli(cls.path, "--md")
+        cls.strict = run_cli(cls.path, "--strict", "--validate-only")
+
+    @classmethod
+    def tearDownClass(cls):
+        os.unlink(cls.path)
+
+    def test_a_warning_per_number_by_default_and_the_page_is_still_written(self):
+        self.assertEqual(0, self.code, self.err)
+        self.assertEqual(2, self.err.count("WARNING  no source:"), self.err)
+        self.assertIn("Rumoured service charge", self.err)
+        self.assertIn("metrics.nearest_works_m", self.err)
+        self.assertIn("</html>", self.html)
+
+    def test_strict_makes_each_one_an_error(self):
+        code, out, err = self.strict
+        self.assertEqual(1, code, err)
+        self.assertIn("WARNING  no source:", err)
+        self.assertIn("2 number(s) with no source", err)
+        self.assertEqual("", out)
+
+    def test_the_html_marks_the_number_with_a_visible_chip(self):
+        self.assertEqual(2, self.html.count('class="chip nosource"'), self.html.count("nosource"))
+        self.assertIn(">no source<", self.html)
+        self.assertIn(".chip.nosource{", self.html)
+
+    def test_the_markdown_marks_the_number_too(self):
+        self.assertEqual(0, self.md_code, self.md_err)
+        self.assertEqual(2, self.md.count("**[no source]**"), self.md)
+
+    def test_the_clean_sample_is_marked_nowhere(self):
+        code, html, err = run_cli(SAMPLE)
+        self.assertEqual(0, code, err)
+        self.assertNotIn('class="chip nosource"', html)
+        self.assertNotIn("WARNING  no source:", err)
+
+    def test_the_viewer_runs_the_same_check_and_draws_the_same_chip(self):
+        viewer = read(VIEWER)
+        for needle in ('var SOURCE_KEYS = ["sources","computed_by"]', "function noSrc(",
+                       "function unsourcedNumbers(", "function chipNoSource(",
+                       'chip("nosource"', ".chip.nosource{", "ui.no_source"):
+            self.assertIn(needle, viewer, needle)
+
+
+# ------------------------------------------------------- the escalation ladder
+class TestEscalationLadder(unittest.TestCase):
+    def setUp(self):
+        self.schema = load_schema()
+
+    def test_the_schema_carries_the_two_optional_fields(self):
+        gb = self.schema["definitions"]["generated_by"]
+        self.assertEqual(["lite", "standard", "breadth", "manual"],
+                         gb["properties"]["tier"]["enum"])
+        self.assertEqual(200, gb["properties"]["escalation_reason"]["maxLength"])
+        for key in ("tier", "escalation_reason"):
+            self.assertNotIn(key, gb["required"], "%s must stay optional" % key)
+
+    def test_an_unknown_tier_is_rejected(self):
+        bad = load_sample()
+        bad["generated_by"]["tier"] = "deep"
+        errors, _ = render.validate(bad, self.schema)
+        self.assertTrue(any("tier" in e and "breadth" in e for e in errors), errors)
+
+    def test_the_line_names_the_tier_the_reason_the_workers_and_the_judge(self):
+        L = render.Labels(render.load_glossary(GLOSSARY), "en")
+        data = load_sample()
+        self.assertEqual("Configuration: breadth \u2014 final shortlist of two; "
+                         "workers: cheap; judge: example-model-1 (fixture, not a real run)",
+                         render.configuration_line(data, L))
+
+    def test_no_escalation_reads_default(self):
+        L = render.Labels(render.load_glossary(GLOSSARY), "en")
+        data = load_sample()
+        data["generated_by"]["tier"] = "standard"
+        data["generated_by"].pop("escalation_reason")
+        self.assertIn("Configuration: standard \u2014 default; workers: cheap;",
+                      render.configuration_line(data, L))
+
+    def test_a_missing_tier_reads_not_stated(self):
+        L = render.Labels(render.load_glossary(GLOSSARY), "en")
+        data = load_sample()
+        data["generated_by"].pop("tier")
+        data["generated_by"].pop("escalation_reason")
+        self.assertEqual("Configuration: not stated \u2014 not stated; workers: not stated; "
+                         "judge: example-model-1 (fixture, not a real run)",
+                         render.configuration_line(data, L))
+
+    def test_a_manual_run_says_it_had_no_workers(self):
+        L = render.Labels(render.load_glossary(GLOSSARY), "en")
+        data = load_sample()
+        data["generated_by"]["tier"] = "manual"
+        self.assertIn("workers: none;", render.configuration_line(data, L))
+
+    def test_the_html_prints_it_first_under_the_title_and_again_in_about(self):
+        code, html, err = run_cli(SAMPLE)
+        self.assertEqual(0, code, err)
+        line = "Configuration: breadth \u2014 final shortlist of two; workers: cheap; judge:"
+        self.assertEqual(2, html.count(line), html.count("Configuration:"))
+        title = html.index("</h1>")
+        self.assertLess(html.index(line), html.index("&middot;", title))
+        self.assertLess(html.index("10. About this report"), html.rindex(line))
+
+    def test_the_markdown_prints_it_in_both_places(self):
+        code, md, err = run_cli(SAMPLE, "--md")
+        self.assertEqual(0, code, err)
+        lines = md.splitlines()
+        self.assertTrue(lines[0].startswith("# "), lines[0])
+        self.assertTrue(lines[2].startswith("Configuration: breadth \u2014 "), lines[:4])
+        self.assertEqual(2, md.count("Configuration: breadth \u2014 "), md.count("Configuration"))
+        after = md[md.index("## 10. About this report"):]
+        self.assertIn("Configuration: breadth \u2014 ", after)
+
+    def test_the_viewer_prints_the_same_line(self):
+        viewer = read(VIEWER)
+        for needle in ("function configLine(", "function configP(", "TIER_WORKERS",
+                       "ui.configuration", "ui.not_stated", "ui.tier_default", "{judge}"):
+            self.assertIn(needle, viewer, needle)
+
+    def test_the_ladder_is_documented_where_the_skill_points(self):
+        modes = read(os.path.join(REFS, "budget-modes.md"))
+        self.assertIn("## The escalation ladder (automatic)", modes)
+        for needle in ("`standard`", "`breadth`", "`manual`", "`lite`",
+                       "generated_by.tier", "escalation_reason",
+                       "final shortlist of two or three", "40 %",
+                       "Never start at breadth", "four or more subagents"):
+            self.assertIn(needle, modes, needle)
 
 
 # ------------------------------------------------------------------- profile

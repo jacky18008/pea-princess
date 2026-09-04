@@ -888,6 +888,26 @@ terms:
     zh-TW: "過渡住宿加租約十二個月合計"
     zh-CN: "过渡住宿加租约十二个月合计"
     plain: "Temporary stay and tenancy together, over a year."
+  ui.configuration:
+    en: "Configuration: {tier} \u2014 {reason}; workers: {workers}; judge: {judge}"
+    zh-TW: "配置：{tier} \u2014 {reason}；讀稿工：{workers}；判斷者：{judge}"
+    zh-CN: "配置：{tier} \u2014 {reason}；读稿工：{workers}；判断者：{judge}"
+    plain: "Which rung the run reached, and which models did the work."
+  ui.tier_default:
+    en: "default"
+    zh-TW: "預設"
+    zh-CN: "预设"
+    plain: "Nothing was escalated; every flat starts here."
+  ui.not_stated:
+    en: "not stated"
+    zh-TW: "未載明"
+    zh-CN: "未载明"
+    plain: "The report does not say."
+  ui.no_source:
+    en: "no source"
+    zh-TW: "無來源"
+    zh-CN: "无来源"
+    plain: "No source and no formula, so nobody can check it."
   ui.check_the_maths:
     en: "check the maths"
     zh-TW: "算術有誤"
