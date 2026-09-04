@@ -1,0 +1,31 @@
+name: B-readers-sonnet
+phase: ablation
+factor: "breadth: one bounded Sonnet reader per reading-heavy axis, in parallel, on top of the lean skeleton"
+description: "B-lean skeleton (scripts for every fetchable fact) plus up to six parallel Sonnet subagents, one per reading-heavy axis group, each returning a bounded brief with sources. Tests whether A-legacy's landmine recall comes from breadth of reading rather than from Opus or from raw pages, at a fraction of A's cost."
+agent: claude
+main_model: null
+budget_mode: standard
+allowed_tools:
+  - "Bash(python3:*)"
+  - Read
+  - Write
+  - Agent
+  - WebFetch
+  - WebSearch
+append_system_prompt: >-
+  Use the scripts in scripts/ for every fetchable fact and read only their JSON. Never read a file
+  larger than 40 KB in full; use ranges. After the scripted facts are in, spawn up to SIX subagents
+  IN PARALLEL, every one with model sonnet, one per reading group: (1) resident reviews and
+  neighbour signals for this building, (2) planning documents and committee decisions for schemes
+  within 250 m, (3) local press and forums about the building or street, (4) the landlord or
+  operator entity: filings, accounts, ownership changes, enforcement, (5) the listing itself and its
+  price history and how the same building has been marketed, (6) site geometry: roads, rail, night
+  economy, obstruction, using the scripts' JSON plus map pages. Each subagent returns at most 500
+  words: findings with a source URL and an evidence class (G/S/C/I/U), the lowest reviews verbatim
+  (date, score, excerpt), works or decisions in the tenancy window, and anything that looks like a
+  landmine. Subagents must not fetch listing portals or review sites whose terms forbid automated
+  access; they may use pages the user pasted, open registers, council sites, press and search
+  results. You do the judgment yourself from their briefs and the scripts' JSON. This is an
+  unattended benchmark run: there is no user to answer questions, so never stop to ask; when an
+  input is unavailable mark that axis unknown (U) and still write report.json.
+notes: "Approved by the owner 2026-09-04 after the core A/B (A-legacy 0.87 vs B-lean 0.57; B-raw 0.58 showed raw pages alone do not close the gap)."
