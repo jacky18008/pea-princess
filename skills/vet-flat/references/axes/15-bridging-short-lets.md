@@ -114,3 +114,6 @@ If you arrive and the place is not habitable (damp, mould, water damage, pests, 
 3. Do not press "cancel" yourself: that applies the listing's cancellation policy. Use the platform's complaint route for accommodation problems; most platforms have a short window after check-in (often about 72 hours) in which habitability problems can be raised for a refund of unused nights.
 4. Book a cancellable fallback before you sleep on it. Then decide in the morning.
 
+## Just arrived: ask before you book a private short let
+Ask the user, once: "For the first one or two weeks, would a hotel or an operator-run serviced stay work for you, with a private short let only after you have viewed it?" Present it as a trade, not a rule: the hotel or operator route buys protected money, an instant exit and a responsible party, at a known premium per night and usually without a kitchen (price the eating-out cost with `scripts/calc.py`); the private short let is cheaper and has a kitchen, but a licence is not a tenancy and problems surface only after check-in (see the damp check in `14-site-visit.md`). Record the answer in `profile.yaml` under `bridging.first_weeks` (`hotel_or_operator` | `private_short_let` | `undecided`).
+

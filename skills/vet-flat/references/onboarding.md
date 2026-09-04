@@ -31,7 +31,7 @@ Ask all six in one numbered message. Accept "don't know" for any: then use the d
 |---|---|---|---|
 | 1 | Where do you need to get to most days, and by what time? | none: this one must be answered | `commute.destination`, `commute.arrive_by` |
 | 2 | The most you can pay per month for everything: rent, energy, water, broadband, council tax? | ask for a number; explain that rent alone is usually 80–90% of it in a modern flat | `budget.all_in_pcm_ceiling` |
-| 3 | When do you need to move in, earliest and latest? | earliest = today + 3 weeks; latest = + 8 weeks | `move_in_window` |
+| 3 | When do you need to move in, earliest and latest? If you are arriving from abroad: would you consider a hotel or an operator-run serviced stay for the first one to two weeks, and a private short let only after you have seen it? | earliest = today + 3 weeks; latest = + 8 weeks; first weeks in a hotel or operator-run stay is the safer default (protected money, instant exit, someone responsible) at a known premium and usually without a kitchen | `move_in_window`, `bridging.first_weeks` |
 | 4 | What kind of home and how much space? Studio, or a one-bedroom with a real door? | one-bedroom with a door, at least 450 sq ft indoors (government-certificate measure; balconies don't count) | `flat_type`, `separate_bedroom_required`, `min_floor_area_sqft` |
 | 5 | Deal-breakers: pick from the menu below or add your own | ground floor; windows that cannot see sky; no washing machine | `avoid`, `floors`, `light`, `must_haves` |
 | 6 | How will you pass the landlord's income check? | if unknown, explain the three routes in section 3 and set "don't know yet" | `guarantor_route` |
@@ -78,6 +78,7 @@ Then say: "First step: give me your destination and the most you can pay all-in,
 - **Do you scrape Rightmove / Zoopla / HomeViews?** No. Their terms forbid it. I ask you to paste the page.
 - **Can I use it on ChatGPT, Gemini, DeepSeek, Grok, Codex?** Yes. With a shell and internet I fetch the data myself; in a chat box I list what to paste, once.
 - **Where does my data go?** Only to the public sources listed in `references/sources.yaml`, and only what is needed for the lookup. Nothing goes to the author.
+- **I have just landed. Where do I sleep this week?** For the first one or two weeks a hotel or an operator-run serviced stay is the safer default: your money is protected, you can leave at once, and someone is responsible. A private short let is fine once you have seen it. It costs more per night and often has no kitchen; the skill will price both.
 - **Does it decide for me?** No. It gives a verdict with the evidence behind it; you decide, after viewing the flat and meeting the people who let it. Landlords and agents are partners here, not opponents.
 - **How accurate is it?** Facts come from official registers and are graded; anything unknown is shown as unknown, never filled in.
 - **What does a report look like?** A verdict card, your must-haves versus the flat, a comparison table, the worst reviews, the landmines, the twelve checks, questions for the viewing, what could not be found, and the sources with dates.

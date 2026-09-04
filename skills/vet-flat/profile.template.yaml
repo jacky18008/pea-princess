@@ -87,6 +87,12 @@ budget:
   # An unnamed stretch budget becomes your real budget within a week.
   stretch_ceiling_and_conditions:
 
+# Where to sleep for the first one or two weeks after arriving: hotel_or_operator | private_short_let | undecided.
+# Hotel or operator-run stays protect your money and let you leave at once; private short lets are
+# cheaper and have kitchens but should be viewed first (see references/axes/15-bridging-short-lets.md).
+bridging:
+  first_weeks: undecided
+
 move_in_window:
   # Earliest date you can take the keys, as YYYY-MM-DD.
   earliest:
