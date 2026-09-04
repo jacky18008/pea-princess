@@ -52,6 +52,14 @@ ROOT = os.path.abspath(os.path.join(HERE, ".."))
 SCRIPTS = os.path.join("skills", "vet-flat", "scripts")
 EVALS_JSON = os.path.join(ROOT, "evals", "evals.json")
 TRUTH_DIR = os.path.join(ROOT, "evals", "truth")
+PRIVATE_TRUTH_DIR = os.path.join(ROOT, "bench", "private", "truth")  # cases from bench/private never write to the public tree
+
+
+def truth_dir_for(evals_path):
+    """Public cases keep evals/truth/; anything under bench/private/ writes to bench/private/truth/."""
+    if evals_path and os.path.abspath(evals_path).startswith(os.path.join(ROOT, "bench", "private")):
+        return PRIVATE_TRUTH_DIR
+    return TRUTH_DIR
 
 BLOCKS = ["epc", "crime", "commute", "company", "landregistry"]
 PAUSE_S = 1.5
@@ -106,7 +114,7 @@ class Runner(object):
 
 
 def save_raw(case_id, name, payload):
-    d = os.path.join(TRUTH_DIR, case_id)
+    d = os.path.join(truth_dir_for(getattr(args_ns, "evals", None)) if "args_ns" in globals() else TRUTH_DIR, case_id)
     if not os.path.isdir(d):
         os.makedirs(d)
     path = os.path.join(d, name + ".json")
@@ -367,6 +375,7 @@ def build_parser():
 
 def main(argv=None):
     args = build_parser().parse_args(argv)
+    globals()["args_ns"] = args  # lets case_dir() route private cases to bench/private/truth
     only = [b.strip() for b in args.only.split(",")] if args.only else BLOCKS
     for b in only:
         if b not in BLOCKS:
