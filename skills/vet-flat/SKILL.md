@@ -62,7 +62,7 @@ Follow `references/inputs.md`: try first; collect every gap; ask **once**, with 
 ## 7. Output contract
 Write `report.json` per `references/report-schema.json`. Shell mode: `python3 scripts/render.py report.json > report.html`. Otherwise give the JSON for `viewer/viewer.html`. Also print the one-page verdict in the user's language.
 Plain language everywhere: short sentences; no jargon without a gloss; every number says what it means and is compared with; evidence grades as plain labels.
-Verdict: **PASS** · **EDGE** (break-even rent) · **CONDITIONAL** (conditions listed) · **KILL** (fatal axis named). Include: answers to each of the user's `my_questions` from the profile, with evidence grades; ≤2 killer questions from `references/questions.md`; viewing-day checks; a "not found" table with the search strings; sources with retrieval times; the footer "Generated with vet-flat <version> — <source URL>".
+Verdict: **PASS** · **EDGE** (break-even rent) · **CONDITIONAL** (conditions listed) · **KILL** (fatal axis named). Include: the user's `my_questions` answered at their stage (filter/vet/compare/viewing/sign), with evidence grades; ≤2 killer questions from `references/questions.md`; viewing-day checks; a "not found" table with the search strings; sources with retrieval times; the footer "Generated with vet-flat <version> — <source URL>".
 
 ## 8. Never
 Sign on the viewing day. Treat listing area as fact. Scale crime figures for missing months. Turn a missing item into a pass. Hide a red flag. Use ethnicity or nationality as a factor.
