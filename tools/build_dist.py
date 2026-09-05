@@ -53,6 +53,9 @@ def main():
     prof = os.path.join(SKILL, "profile.template.yaml")
     if os.path.exists(prof):
         shutil.copy(prof, pack)
+    profiles = os.path.join(SKILL, "profiles")
+    if os.path.isdir(profiles):
+        shutil.copytree(profiles, os.path.join(pack, "profiles"))
     viewer = os.path.join(ROOT, "viewer", "viewer.html")
     if os.path.exists(viewer):
         shutil.copy(viewer, pack)

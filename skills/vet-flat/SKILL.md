@@ -33,13 +33,13 @@ Ask of every listing: "What sits under its prettiest feature?"
 1. **Identity** — exact flat number, building, postcode; the EPC register is the arbiter (`scripts/epc.py search`, `cert`). Big buildings span postcodes; search by street if needed.
 2. **Floor area** — EPC internal m² only, balconies excluded; listing and floor-plan figures are claims.
 3. **Age and fabric** — first EPC assessment year ≈ completion; heating class (heat network, gas, electric, heat pump); air permeability ≤ 5 implies mechanical ventilation; `scripts/epc.py building` profiles the whole building.
-4. **Construction nearby** — planning applications within ~250 m, phase and decision dates; officer reports carry distance numbers; conditions being discharged show whether works start or finish.
+4. **Construction nearby** — planning applications within ~250 m, phase and decision dates; officer reports carry distances; discharged conditions show whether works start or finish.
 5. **Crime** — data.police.uk, fixed six-month window in a ~300 m box; type mix; nodes on the walk home count in full; never scale up missing months.
-6. **Management and neighbours** — reviews with incentivised and same-day-burst ones removed; read the lowest in full; move-out reviews weigh most; short-let footprint.
+6. **Management and neighbours** — reviews minus incentivised and same-day bursts; read the lowest in full; move-out reviews weigh most; short-let footprint.
 7. **Agent and landlord compliance** — legal entity on Companies House, redress scheme, client-money protection, deposit protection; landlord type (institutional > professional > absentee).
-8. **Price** — £ per sq ft on EPC area against the local band; a discount must have a name; price-reduction history.
+8. **Price** — £ per sq ft on EPC area vs the local band; a discount must have a name; reduction history.
 9. **Aspect and light** — floor-plan compass, sky openness, obstruction angle; quiet beats light unless there is almost none.
-10. **All-in cost** — rent + bills model + council tax on one basis for every candidate.
+10. **All-in cost** — rent + bills model + council tax, one basis for all.
 11. **Commute and redundancy** — TfL door-to-door minutes; two independent rail families within a 10-minute walk.
 12. **Low-maintenance living** — bundled bills, in-flat washing machine, parcel handling, blackout bedroom, shop within 3 minutes, direct route.
 **Move-in half**: `references/axes/15`–`17` (bridging, referencing, first weeks); also `13` (adversarial review), `14` (site visit).
@@ -60,9 +60,9 @@ Per-borough portals: `references/boroughs.yaml`.
 Follow `references/inputs.md`: try first; collect every gap; ask **once**, with URL, format and why; record `provenance: user_supplied`; mark the axis **U** if it stays unavailable. Never invent a number.
 
 ## 7. Output contract
-Write `report.json` conforming to `references/report-schema.json`. Shell mode: `python3 scripts/render.py report.json > report.html`. Otherwise give the JSON for `viewer/viewer.html`. Also print the one-page verdict in the user's language.
+Write `report.json` per `references/report-schema.json`. Shell mode: `python3 scripts/render.py report.json > report.html`. Otherwise give the JSON for `viewer/viewer.html`. Also print the one-page verdict in the user's language.
 Plain language everywhere: short sentences; no jargon without a gloss; every number says what it means and what it is compared with; evidence grades as plain labels.
-Verdict: **PASS** · **EDGE** (with the break-even rent) · **CONDITIONAL** (conditions listed) · **KILL** (fatal axis named). Include: ≤2 killer questions from `references/questions.md`; viewing-day checks; a "not found" table with the search strings; sources with retrieval times; the footer "Generated with vet-flat <version> — <source URL>".
+Verdict: **PASS** · **EDGE** (break-even rent) · **CONDITIONAL** (conditions listed) · **KILL** (fatal axis named). Include: ≤2 killer questions from `references/questions.md`; viewing-day checks; a "not found" table with the search strings; sources with retrieval times; the footer "Generated with vet-flat <version> — <source URL>".
 
 ## 8. Never
 Sign on the viewing day. Treat listing area as fact. Scale crime figures for missing months. Turn a missing item into a pass. Hide a red flag. Use ethnicity or nationality as a risk factor.

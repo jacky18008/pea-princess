@@ -1,0 +1,99 @@
+# Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen — https://github.com/jacky18008/pea-princess — CC BY 4.0
+#
+# EXAMPLE PROFILE — "the quiet postgraduate, one bed, central commute"
+# Derived from the author's own first search (2026), de-identified and with the budget lowered so it is a
+# realistic starting point rather than a personal file. Copy it to profile.yaml and change what is yours.
+# What this person is afraid of is written out in `avoid`: every item cost them time or money once.
+
+flat_type: one_bed
+separate_bedroom_required: true      # a "studio suite" with a bed alcove is not a one-bed
+occupants: 1
+experience: some                     # has rented in big cities before, first time in the UK
+budget_mode: standard
+
+min_floor_area_sqft: 450             # measured the government-certificate way; balconies do not count
+max_building_age_years: 20           # newer fabric: sound insulation, mechanical ventilation, lifts that work
+
+budget:
+  rent_pcm_target: 1900
+  all_in_pcm_ceiling: 2100           # rent + energy + water + broadband (+ council tax if not a full-time student)
+  stretch_ceiling_and_conditions: "Up to 150 more per month only for cooling or a second rail line within 8 minutes."
+
+bridging:
+  first_weeks: hotel_or_operator     # arrive, sleep somewhere with protected money, view flats, then commit
+
+move_in_window:
+  earliest:                          # set to about 3 weeks from today
+  latest:                            # about 8 weeks from today
+  tolerance_days: 14
+
+commute:
+  destination: "Holborn Underground Station"   # stand-in for a central campus; replace with yours
+  arrive_by: "09:00"
+  max_door_to_door_min: 35
+  redundancy_min_grade: "B"          # two independent rail options, or one plus a bus that really works
+
+floors:
+  reject_ground_floor: false         # ground and lower-ground are a caution: damp, security, light — run the damp check
+  prefer_floor_band: "3-12"
+
+light:
+  reject_no_sky: true                # a main window facing a wall or a deep light well is the one real veto
+  aspect_scores: {N: 2, NE: 2, E: 4, SE: 5, S: 4, SW: 4, W: 2, NW: 2}
+
+quiet_over_light: true               # sleep is upstream of everything; light is a bonus
+
+avoid:                               # in plain words; each maps to a landmine code in references/onboarding.md
+  - main windows facing a main road or a railway (L4)
+  - active building works next door during the tenancy (L5)
+  - heat network without a written tariff and a named billing company (L6)
+  - management with no resident route to replace it (L7)
+  - reviews that are all incentivised or years old (L8)
+  - short-let or hotel-style neighbours in the building (L9)
+  - damp or mould signs on a ground or lower-ground flat (L10 damp check)
+  - no cooling and shared ventilation that carries neighbours' smoke (L11)
+  - a landlord who accepts only a UK guarantor with no alternative (L14)
+  - non-refundable fees before the tenancy is certain (L15)
+  - a headline price that is not the price (L16)
+  - advertised floor area that includes the balcony (L1)
+
+priorities:
+  - quiet
+  - commute
+  - price
+  - light
+
+must_haves:
+  - washing_machine_in_flat
+  - separate_bedroom_door
+  - openable_windows
+  - parcel_room_or_concierge
+
+nice_to_haves:
+  - cooling_or_mechanical_ventilation
+  - bills_included_or_one_billing_company
+  - supermarket_within_3_min_walk
+  - lift
+  - blackout_blinds_in_bedroom
+  - dishwasher
+
+guarantor_route: "rent guarantee insurance"   # no UK guarantor; commercial guarantor product acceptable
+
+tenancy:
+  max_months_upfront: 1
+  max_deposit_weeks: 5
+  require_deposit_protection: true
+
+self_intro_template: >-
+  I am a full-time postgraduate student looking for a home for one person, non-smoking, no pets,
+  able to provide proof of funds, with a rent guarantee product for the income check.
+
+story_summary: >-
+  Moved to London for a one-year course after years of city-flat living, and cares more about sleeping
+  well and a home that runs itself than about views. Has been burned by a damp lower-ground short let,
+  by an advertised size that included the balcony, and by bills that only appeared after signing.
+  Would rather pay a little more for a quiet side, a real bedroom door and someone who answers when
+  the heating fails.
+story_taken_on: "2026-09-05"
+
+language: "zh-TW"
