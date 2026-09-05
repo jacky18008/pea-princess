@@ -1266,8 +1266,8 @@ def build_parser():
                     help="claude only: carry the session with --resume, replay the transcript, "
                          "or probe `claude --help` and decide (default)")
     ap.add_argument("--timeout", type=int, default=int(os.environ.get("VETFLAT_TURN_TIMEOUT",
-                                                                      600)),
-                    help="seconds per turn, default 600")
+                                                                      1200)),
+                    help="seconds per turn, default 1200")
     ap.add_argument("--workdir", help="use this directory instead of a fresh temp one")
     ap.add_argument("--keep", action="store_true", help="do not delete the temp workdir")
     return ap
