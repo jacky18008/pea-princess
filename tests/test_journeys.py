@@ -704,6 +704,34 @@ class TestFileChecksAndRegrade(unittest.TestCase):
         self.assertEqual("pass", facts["deposit_cap_gbp"]["status"], facts["deposit_cap_gbp"]["detail"])
         self.assertEqual("pass", facts["listing_rent_pcm"]["status"], facts["listing_rent_pcm"]["detail"])
 
+    def test_price_per_square_foot_and_the_listing_ask_are_not_fabrications(self):
+        doc = runner.load_journeys()
+        j3 = [j for j in doc["journeys"] if j["id"] == "j3-vet-this-listing-zh"][0]
+        reply = ("廣告租金 £2,350 pcm，EPC 室內 48 平方米，2019 年首次評估。\n"
+                 "| 8 價格 | 真實室內價是 £4.55/sq ft，租金是 **£4.55／平方呎** |\n"
+                 "廣告要 6 週押金；年租 £28,200，法定上限 5 週。\n"
+                 "押金法定上限 5 週 = £2,711.54。\n")
+        card = runner.score_turn(j3["turns"][0], reply, j3)
+        facts = dict((r["check"], r) for r in card["checks"] if r["kind"] == "fact")
+        self.assertEqual(0, card["fabrications"], [(k, v["detail"]) for k, v in facts.items() if v["status"] == "fail"])
+        self.assertEqual("pass", facts["listing_rent_pcm"]["status"], facts["listing_rent_pcm"]["detail"])
+        self.assertEqual("pass", facts["deposit_cap_weeks"]["status"], facts["deposit_cap_weeks"]["detail"])
+        self.assertEqual("pass", facts["deposit_cap_gbp"]["status"], facts["deposit_cap_gbp"]["detail"])
+
+    def test_the_deposit_cap_next_to_the_holding_deposit_is_not_a_holding_fabrication(self):
+        doc = runner.load_journeys()
+        j1 = doc["journeys"][0]
+        self.assertEqual("j1-from-zero-zh", j1["id"])
+        one_line = "押金上限 5 週租金；訂金上限 1 週租金。法規 2026-05-01 起。\n"
+        card = runner.score_turn(j1["turns"][0], one_line, j1)
+        self.assertEqual(0, card["fabrications"], [r["detail"] for r in card["checks"] if r["kind"] == "fact" and r["status"] == "fail"])
+        two_lines = "押金上限 5 週租金。\n訂金上限 1 週租金。\n"
+        card = runner.score_turn(j1["turns"][0], two_lines, j1)
+        facts = dict((r["check"], r) for r in card["checks"] if r["kind"] == "fact")
+        self.assertEqual("pass", facts["holding_deposit_weeks"]["status"], facts["holding_deposit_weeks"]["detail"])
+        self.assertEqual("pass", facts["deposit_cap_weeks"]["status"], facts["deposit_cap_weeks"]["detail"])
+        self.assertEqual(0, card["fabrications"])
+
     def test_the_pasted_profile_becomes_a_real_file_without_its_title_line(self):
         folder = tempfile.mkdtemp()
         try:

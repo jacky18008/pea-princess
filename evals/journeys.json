@@ -291,7 +291,7 @@
         "required": false,
         "patterns": [
          "(?:holding deposit|訂金|保留金)[^.。\\n]{0,40}?([0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)",
-         "([0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)[^.。\\n]{0,16}?(?:holding deposit|訂金|保留金)"
+         "([0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)[^.。;；,，\\n]{0,16}?(?:holding deposit|訂金|保留金)"
         ],
         "source": "skills/vet-flat/SKILL.md legal facts",
         "why": "A holding deposit is capped at one week's rent."
@@ -710,7 +710,8 @@
          "(?m)^[ \\t#*\\-\\d.]*(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^\\n]*(?:\\n+(?![0-9]+\\.\\s|#|\\|)[^\\n]+)*",
          "(?:月租|年租|租金|rent|annual)[^\\n]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "£\\s?50,?000",
-         "£\\s?[0-9][0-9,]*\\s*(?:pcm|per month|/ ?月|每月)"
+         "£\\s?[0-9][0-9,]*\\s*(?:pcm|per month|/ ?月|每月)",
+         "£\\s?[0-9]+(?:\\.[0-9]+)?\\s*(?:/|／|per|每)\\s*(?:sq|平方|ft|呎|m²|m2)"
         ]
        }
       },
@@ -1359,6 +1360,9 @@
         "why": "The advertised rent, exactly as pasted.",
         "line_mask": [
          "全包|all-in|all in|情境|scenario|bills model|帳單模型|低／規劃／壓力|低/規劃/壓力"
+        ],
+        "mask_patterns": [
+         "£\\s?[0-9]+(?:\\.[0-9]+)?\\s*(?:/|／|per|每)\\s*(?:sq|平方|ft|呎|m²|m2)"
         ]
        },
        "listing_area_sqft": {
@@ -1421,7 +1425,8 @@
          "(?m)^[ \\t#*\\-\\d.]*(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^\\n]*(?:\\n+(?![0-9]+\\.\\s|#|\\|)[^\\n]+)*",
          "(?:月租|年租|租金|rent|annual)[^\\n]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "£\\s?50,?000",
-         "£\\s?[0-9][0-9,]*\\s*(?:pcm|per month|/ ?月|每月)"
+         "£\\s?[0-9][0-9,]*\\s*(?:pcm|per month|/ ?月|每月)",
+         "£\\s?[0-9]+(?:\\.[0-9]+)?\\s*(?:/|／|per|每)\\s*(?:sq|平方|ft|呎|m²|m2)"
         ]
        }
       },
@@ -1795,6 +1800,9 @@
         "why": "The advertised rent, exactly as pasted.",
         "line_mask": [
          "全包|all-in|all in|情境|scenario|bills model|帳單模型|低／規劃／壓力|低/規劃/壓力"
+        ],
+        "mask_patterns": [
+         "£\\s?[0-9]+(?:\\.[0-9]+)?\\s*(?:/|／|per|每)\\s*(?:sq|平方|ft|呎|m²|m2)"
         ]
        },
        "listing_area_sqft": {
@@ -1821,7 +1829,6 @@
         "why": "3.4 on the certificate; at or below 5 it implies mechanical ventilation, which is worth saying and worth getting right."
        },
        "deposit_cap_weeks": {
-        "value": 5,
         "tolerance": 0.0,
         "required": false,
         "patterns": [
@@ -1834,9 +1841,13 @@
          "listing|廣告|刊登|仲介要求|advert|asks for|asked for"
         ],
         "source": "skills/vet-flat/SKILL.md legal facts",
-        "why": "Five weeks is the cap; the listing's six weeks is the ask, so only a CAP sentence is read here.",
+        "why": "Five weeks is the cap; the listing's six weeks is the ask, so only a CAP sentence is read here. Six is the listing's own ask and sits in the pasted material; a reply that quotes it beside the cap is not inventing a number.",
         "mask_patterns": [
          "(?m)^[ \\t#*\\-\\d.]*(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^\\n]*(?:\\n+(?![0-9]+\\.\\s|#|\\|)[^\\n]+)*"
+        ],
+        "values": [
+         5,
+         6
         ]
        },
        "deposit_cap_gbp": {
@@ -1859,7 +1870,8 @@
          "(?m)^[ \\t#*\\-\\d.]*(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^\\n]*(?:\\n+(?![0-9]+\\.\\s|#|\\|)[^\\n]+)*",
          "(?:月租|年租|租金|rent|annual)[^\\n]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "£\\s?50,?000",
-         "£\\s?[0-9][0-9,]*\\s*(?:pcm|per month|/ ?月|每月)"
+         "£\\s?[0-9][0-9,]*\\s*(?:pcm|per month|/ ?月|每月)",
+         "£\\s?[0-9]+(?:\\.[0-9]+)?\\s*(?:/|／|per|每)\\s*(?:sq|平方|ft|呎|m²|m2)"
         ]
        }
       },
@@ -3165,7 +3177,8 @@
          "(?m)^[ \\t#*\\-\\d.]*(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^\\n]*(?:\\n+(?![0-9]+\\.\\s|#|\\|)[^\\n]+)*",
          "(?:月租|年租|租金|rent|annual)[^\\n]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "£\\s?50,?000",
-         "£\\s?[0-9][0-9,]*\\s*(?:pcm|per month|/ ?月|每月)"
+         "£\\s?[0-9][0-9,]*\\s*(?:pcm|per month|/ ?月|每月)",
+         "£\\s?[0-9]+(?:\\.[0-9]+)?\\s*(?:/|／|per|每)\\s*(?:sq|平方|ft|呎|m²|m2)"
         ]
        },
        "holding_deposit_gbp": {
@@ -4205,7 +4218,8 @@
         "source": "computed from the two advertised rents",
         "why": "Five weeks of each rent: 2250 x 12 / 52 x 5 = 2596.15 and 2100 x 12 / 52 x 5 = 2423.08.",
         "mask_patterns": [
-         "(?m)^[ \\t#*\\-\\d.]*(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^\\n]*(?:\\n+(?![0-9]+\\.\\s|#|\\|)[^\\n]+)*"
+         "(?m)^[ \\t#*\\-\\d.]*(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^\\n]*(?:\\n+(?![0-9]+\\.\\s|#|\\|)[^\\n]+)*",
+         "£\\s?[0-9]+(?:\\.[0-9]+)?\\s*(?:/|／|per|每)\\s*(?:sq|平方|ft|呎|m²|m2)"
         ]
        }
       },
