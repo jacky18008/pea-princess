@@ -3,6 +3,8 @@
 Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen — https://github.com/jacky18008/pea-princess — CC BY 4.0
 Verified against vendor documentation on 2026-09-03; product features change, so check the linked pages if a step looks different.
 
+**Never used a terminal?** You do not need to. Sections B and C need only a chat app; section A is one pasted line and then everything is sentences too. Plain-words walkthrough: `docs/USING.md`.
+
 ## A. Agents with a shell (best experience — scripts run, the model reads JSON)
 
 | Product | Install | Note |

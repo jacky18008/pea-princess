@@ -1,0 +1,170 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/jacky18008/pea-princess/blob/main/skills/vet-flat/references/seed-schema.json",
+  "title": "Pea Princess seed",
+  "description": "Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen - https://github.com/jacky18008/pea-princess - CC BY 4.0. The object behind a seed code: a person's rental preferences, reduced so that they can be posted in public. The code is the four characters PP1. followed by base64url of this object with no padding; scripts/seed.py writes and reads it, and references/seed-format.md tells a model how to do the same by hand. THE KEYS BELOW ARE THE WHOLE ALLOW-LIST. A seed never carries an address, a person's or a company's name, a workplace, an exact budget, an exact date, savings, income, an income-check route, a self-introduction, or anything about health, nationality, ethnicity, religion or immigration status. If you are writing a seed by hand and a value does not fit one of these keys, leave it out; do not invent a key. Empty values are omitted rather than sent as null.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["v"],
+  "properties": {
+    "v": {
+      "const": 1,
+      "description": "Seed format version. 1 today. A reader that does not know the version must say so and stop, not guess."
+    },
+    "n": {
+      "type": "string",
+      "maxLength": 60,
+      "description": "A label the person chose for this seed, such as 'quiet, high, morning sun'. Their own name never goes here."
+    },
+    "t": {
+      "type": "string",
+      "enum": ["studio", "one_bed", "two_bed", "three_bed_plus", "any"],
+      "description": "The kind of home, from profile.yaml `flat_type`."
+    },
+    "b": {
+      "type": "string",
+      "maxLength": 60,
+      "description": "The budget as a BAND, never as the person's real ceiling: for example '£2,000–2,400 all-in'. Round the ceiling up to the nearest 100 for the top of the band and take 200 off it below £1,500, otherwise 400. Exact numbers appear only when the person asked for them with --exact."
+    },
+    "m": {
+      "type": "string",
+      "enum": ["lite", "standard", "deep"],
+      "description": "How deep this person runs the checks, from profile.yaml `budget_mode`."
+    },
+    "c": {
+      "type": "string",
+      "maxLength": 40,
+      "description": "Where they commute to, reduced to a postcode district ('WC2R'), a zone ('Zone 1') or a borough. Never a full postcode, an address, a campus, an office or an employer. Leave it out if you cannot reduce it."
+    },
+    "w": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}$",
+      "description": "The move-in window as a month, '2026-10'. Exact dates are never shared: they say when a stranger's flat is empty."
+    },
+    "mh": {
+      "type": "array",
+      "maxItems": 8,
+      "items": {"type": "string", "maxLength": 120},
+      "description": "Must-haves, in the person's own plain words."
+    },
+    "av": {
+      "type": "array",
+      "maxItems": 8,
+      "items": {"type": "string", "maxLength": 120},
+      "description": "Deal-breakers, in the person's own plain words."
+    },
+    "pr": {
+      "type": "array",
+      "maxItems": 3,
+      "items": {"type": "string", "maxLength": 120},
+      "description": "The top three priorities, in order: quiet, light, price, space, commute, and so on."
+    },
+    "qs": {
+      "type": "array",
+      "maxItems": 5,
+      "description": "The questions this person makes every report answer, in their own words. The most useful thing in a seed, and the part worth copying from someone else: an agent that imports this seed must answer each one by name. An entry is either a bare string, which means `when: vet, kind: answer`, or an object. `trigger` is never shared: it stays in the sender's profile.",
+      "items": {
+        "oneOf": [
+          {"type": "string", "maxLength": 200, "description": "The question, at the defaults: asked while the flat is being checked, answered from data."},
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["text"],
+            "properties": {
+              "text": {"type": "string", "maxLength": 200, "description": "The question in the person's own words."},
+              "when": {
+                "type": "string",
+                "enum": ["filter", "vet", "compare", "viewing", "sign"],
+                "description": "Which stage it belongs to. filter = before any work, it decides whether a flat is worth looking at; vet = while the flat is being checked (the default); compare = only once there is more than one candidate; viewing = on the day, in the flat; sign = just before the contract. Missing means vet."
+              },
+              "kind": {
+                "type": "string",
+                "enum": ["answer", "ask", "check"],
+                "description": "What answers it. answer = the agent works it out from data (the default); ask = it is put to the landlord or agent in writing; check = the person checks it themselves, with their own eyes, nose or ears. Missing means answer."
+              }
+            }
+          }
+        ]
+      }
+    },
+    "fl": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Floor rules.",
+      "properties": {
+        "reject_ground_floor": {"type": "boolean", "description": "true = a ground-floor flat is an automatic no."},
+        "prefer_floor_band": {"type": "string", "maxLength": 20, "description": "The floors they want, as '2-8'."}
+      }
+    },
+    "li": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Light rules.",
+      "properties": {
+        "reject_no_sky": {"type": "boolean", "description": "true = windows that cannot see sky are an automatic no."},
+        "best_aspects": {
+          "type": "array",
+          "maxItems": 3,
+          "items": {"type": "string", "enum": ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]},
+          "description": "The compass directions they scored highest, not the whole score table."
+        }
+      }
+    },
+    "q": {
+      "type": "boolean",
+      "description": "true = quiet wins when quiet and light conflict."
+    },
+    "fw": {
+      "type": "string",
+      "enum": ["hotel_or_operator", "private_short_let", "undecided"],
+      "description": "The plan for the first weeks after arriving. This is the only key allowed out of profile.yaml `bridging`; nothing else under it is shareable."
+    },
+    "s": {
+      "type": "string",
+      "maxLength": 600,
+      "description": "The three-sentence summary the agent wrote from the person's stories about places they have lived (profile.yaml `story_summary`). Derived preferences only: the stories themselves are never stored, quoted or shared. A long seed drops this key first to stay short enough to paste; the card still carries it."
+    }
+  },
+  "definitions": {
+    "journey": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "OPTIONAL and separate from the seed: journey.json, the running record of one person's search, kept next to profile.yaml. The agent appends one candidate per flat it vets. seed.py --journey turns it into the 'what I found' lines on the card: how many flats, how the verdicts fell, and what was chosen. Nothing in this file is written into a seed code.",
+      "required": ["started", "candidates"],
+      "properties": {
+        "started": {"type": "string", "maxLength": 20, "description": "The day the search started, as 2026-09-05."},
+        "profile_seed": {"type": "string", "maxLength": 2000, "description": "The seed code this search started from, if it started from one."},
+        "candidates": {
+          "type": "array",
+          "description": "One entry per flat vetted, appended as you go.",
+          "items": {
+            "type": "object",
+            "additionalProperties": true,
+            "required": ["id", "label", "verdict"],
+            "properties": {
+              "id": {"type": "string", "maxLength": 40, "description": "Your own short id for the flat, matching the report."},
+              "label": {"type": "string", "maxLength": 120, "description": "What the flat was, in words, WITH NO ADDRESS: '2019 build, courtyard side, 4th floor'. A label with a postcode in it is scrubbed before it reaches a card."},
+              "verdict": {"type": "string", "enum": ["PASS", "EDGE", "CONDITIONAL", "KILL"], "description": "The verdict that report reached."},
+              "tier": {"type": "string", "maxLength": 20, "description": "The escalation tier that run used: standard or breadth."},
+              "date": {"type": "string", "maxLength": 20, "description": "The day it was vetted."}
+            }
+          }
+        },
+        "chosen": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "The flat that was taken, if the search ended.",
+          "properties": {
+            "label": {"type": "string", "maxLength": 120, "description": "What it was, in words, with no address."},
+            "verdict": {"type": "string", "enum": ["PASS", "EDGE", "CONDITIONAL", "KILL"]},
+            "area_m2": {"type": ["number", "null"], "description": "Indoor area in square metres from the energy certificate."},
+            "floor": {"type": ["number", "string", "null"], "description": "Which floor it is on."},
+            "all_in_band": {"type": "string", "maxLength": 60, "description": "What it costs all-in, as a band."},
+            "address": {"type": "string", "maxLength": 200, "description": "OPTIONAL and off by default. It is printed on a card only when the person passes --reveal-address. Leave it out unless you have a reason to keep it here."}
+          }
+        },
+        "notes": {"type": "string", "maxLength": 2000, "description": "Whatever the person wants to remember. Never printed on a card."}
+      }
+    }
+  }
+}

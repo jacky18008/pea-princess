@@ -15,8 +15,8 @@ min_floor_area_sqft: 450             # measured the government-certificate way; 
 max_building_age_years: 20           # newer fabric: sound insulation, mechanical ventilation, lifts that work
 
 budget:
-  rent_pcm_target: 1900
-  all_in_pcm_ceiling: 2100           # rent + energy + water + broadband (+ council tax if not a full-time student)
+  rent_pcm_target: 1650              # mid-market solo one-bed (tier b in docs/london-rent-levels-2026.md)
+  all_in_pcm_ceiling: 1900           # rent + energy + water + broadband; full-time students pay no council tax
   stretch_ceiling_and_conditions: "Up to 150 more per month only for cooling or a second rail line within 8 minutes."
 
 bridging:

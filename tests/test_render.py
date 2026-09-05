@@ -328,7 +328,10 @@ class TestViewer(unittest.TestCase):
 
     def test_size_budget(self):
         size = len(self.html.encode("utf-8"))
-        self.assertLess(size, 125 * 1024, "viewer.html is %.1f KB, the budget is 125 KB" % (size / 1024.0))
+        self.assertEqual(build_viewer.SIZE_LIMIT, 130 * 1024, "the budget is 130 KB")
+        self.assertLess(size, build_viewer.SIZE_LIMIT,
+                        "viewer.html is %.1f KB, the budget is %.0f KB"
+                        % (size / 1024.0, build_viewer.SIZE_LIMIT / 1024.0))
 
     def test_contains_the_generated_glossary(self):
         self.assertIn("var GLOSSARY = {", self.html)
@@ -383,6 +386,22 @@ class TestViewer(unittest.TestCase):
                        "TOL_PCT=0.01", "TOL_FLOOR_PCM=1.0", "TOL_FLOOR_RATE=0.01",
                        "chip maths"):
             self.assertIn(needle, self.html, "viewer.html is missing %r" % needle)
+
+    def test_the_share_card_mirrors_seed_py_and_shares_nothing_else(self):
+        sys.path.insert(0, SCRIPTS)
+        import seed  # noqa: E402  (same reduction, in Python)
+        for needle in ("function shareBlock(", "function seedFrom(", "function seedSentences(",
+                       "function sBand(", "Share card", "sharetext", "sharecopy",
+                       "[postcode removed]", "what I found: ", "My questions:",
+                       "I will not take: ", "quiet wins when quiet and light conflict"):
+            self.assertIn(needle, self.html, "viewer.html is missing %r" % needle)
+        # the band rule is the one in seed.py and references/seed-format.md
+        self.assertIn("hi=Math.ceil(v/100)*100, lo=Math.max(0,hi-(hi<1500?200:400))", self.html)
+        self.assertEqual(seed.band(2400), "\u00a32,000\u20132,400 all-in")
+        # a snapshot may hold these; the card may not read them
+        body = self.html[self.html.index("/* ---- share card"):self.html.index("/* ---- page wiring")]
+        for forbidden in ("guarantor_route", "notes", "rent_pcm_target", "self_intro"):
+            self.assertNotIn(forbidden, body, "the share card must not read %s" % forbidden)
 
     def test_build_step_is_up_to_date(self):
         self.assertEqual(0, build_viewer.main(["--check"]),

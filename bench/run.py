@@ -284,11 +284,11 @@ def prepare_workdir(case, agent, evals_path, workdir=None, link=True):
             plan.append("symlink skills/vet-flat -> %s/vet-flat" % SKILL_HOME[agent])
         else:
             shutil.copytree(SKILL_DIR, dst)
+            plan.append("copy skills/vet-flat -> %s/vet-flat" % SKILL_HOME[agent])
         override = os.environ.get("VETFLAT_SKILL_MD_OVERRIDE")
         if override and os.path.exists(override):
             shutil.copy(override, os.path.join(dst, "SKILL.md"))
             plan.append("SKILL.md overridden by %s (ablation variant)" % override)
-            plan.append("copy skills/vet-flat -> %s/vet-flat" % SKILL_HOME[agent])
     return path, plan
 
 

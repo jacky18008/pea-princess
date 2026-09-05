@@ -21,11 +21,11 @@ DIST = os.path.join(ROOT, "dist")
 LIMIT = 8000
 
 
-DIGEST_SOURCES = [
-    ("references/report-contract.md", "## What every report contains", "## Plain-language rules"),
-    ("references/report-contract.md", "## Plain-language rules", "## Never"),
+DIGEST_SOURCES = [  # in priority order; short, high-value sections first
     ("references/inputs.md", "## Rules for asking", "## What to ask for"),
     ("references/arithmetic.md", "## Without a shell", "## Constants"),
+    ("references/report-contract.md", "## Plain-language rules", "## Never"),
+    ("references/report-contract.md", "## What every report contains", "## Plain-language rules"),
 ]
 
 
@@ -49,11 +49,14 @@ def compose_instructions(limit=LIMIT):
             if sec:
                 parts.append(sec)
     header = "\n---\n# Manual-mode digest (from the references; the full files are attached)\n\n"
-    out = body + header + "\n".join(parts)
-    while len(out) > limit and parts:
-        parts.pop()
-        out = body + header + "\n".join(parts) if parts else body
-    return out
+    kept = []
+    for sec in parts:  # greedy in priority order: keep every section that still fits
+        candidate = body + header + "\n".join(kept + [sec])
+        if len(candidate) <= limit:
+            kept.append(sec)
+    if not kept:
+        raise SystemExit("SKILL.md leaves no room for the manual-mode digest; shorten SKILL.md")
+    return body + header + "\n".join(kept)
 
 
 def main():

@@ -36,6 +36,8 @@ Ask all six in one numbered message. Accept "don't know" for any: then use the d
 | 5 | Deal-breakers: pick from the menu below or add your own | ground floor; windows that cannot see sky; no washing machine | `avoid`, `floors`, `light`, `must_haves` |
 | 6 | How will you pass the landlord's income check? | if unknown, explain the three routes in section 3 and set "don't know yet" | `guarantor_route` |
 
+Then ask the seventh, of everyone, in one line: **"Are there questions you always ask of every place? Tell me and I will answer them in every report."** They go to `my_questions`, and section 2b says how to classify and confirm them.
+
 Optional, only if the user is engaged: floor band, light versus quiet, top three priorities, nice-to-haves. If they cannot answer those, or answered "don't know" more than twice above, offer the five-minute story session in section 2b instead of asking harder questions.
 
 **Deal-breaker menu** (plain words → what the skill checks):
@@ -96,6 +98,7 @@ Any transcript works. Bad punctuation, filler words and repetition are fine and 
 | The three things mentioned most, in the order of heat in their voice | `priorities` (exactly three, in order) | — |
 | "I paid more for X and it was worth it" / "I paid more just to stop looking, and I regret it" | `budget.stretch_ceiling_and_conditions`, as one sentence naming the benefit and the cap | — |
 | Anything about the kind of home itself (a studio they outgrew, a bedroom with no door) | `flat_type`, `separate_bedroom_required`, `min_floor_area_sqft` | L1 |
+| A thing they say they always want to know before deciding, or wish they had asked last time | `my_questions` (see the seventh question below) | — |
 
 Rules that are not negotiable when you do this:
 
@@ -104,6 +107,42 @@ Rules that are not negotiable when you do this:
 3. **Do not diagnose.** "The damp made me ill" becomes `avoid: damp or a history of mould`, never a health note.
 4. **Preferences are not evidence about a flat.** Everything from the stories is graded **S** (self-reported) and shapes the ruler, never a finding.
 5. **Nothing is written until the user says yes.** Show, then write.
+
+### The seventh question (ask it here, or at the end of the six)
+
+> **Are there questions you always ask of every place? Tell me and I will answer them in every report.**
+
+Optional, one line, and worth asking of everyone — not only the people who did the story session.
+Whatever they say goes into `my_questions` in `profile.yaml`, and from then on **every report has to
+answer every one of them by name**, with evidence, or say "I could not find out". They are also the
+most useful thing in a shareable seed (`references/sharing.md`), so people who have none are worth
+offering these two:
+
+> If this is unusually cheap or unusually good next to its neighbours, what is the hidden problem?
+> Cheap has a reason.
+
+> If it is pricier, am I buying visible value I actually care about, or just paying more?
+
+A question carries two labels. `when` is the stage — `filter` (before any work), `vet` (while the
+flat is checked; the default), `compare` (only with more than one candidate), `viewing` (on the day)
+or `sign` (just before the contract). `kind` is what answers it — `answer` (you work it out from
+data; the default), `ask` (it is put to the landlord or agent in writing) or `check` (the user
+checks it themselves). A bare line of text means `vet` and `answer`.
+
+**When the user gives you a bare question, classify it, then show them the classification and let
+them correct it.** In this order, first match wins:
+
+| The question contains | Set |
+|---|---|
+| "compared to", "neighbours", "cheaper", "pricier", "for the money" | `when: compare` |
+| "must", "never", "no way", "I refuse" | `when: filter` |
+| "ask the landlord", "ask the agent", "will they" | `kind: ask`, `when: viewing` |
+| "smell", "noise", "feel", "sounds like", "looks like" | `kind: check`, `when: viewing` |
+| anything else | `when: vet`, `kind: answer` |
+
+Say it back in one line each — *"I have this as a compare-stage question I answer from data: …"* —
+and change whatever they correct. If they add a condition ("only when it looks cheap"), write it
+into that question's `trigger`, which stays in their file and is never shared.
 
 ### Write it back like this
 
@@ -154,7 +193,7 @@ Eight changed lines in the preference block of `profile.yaml` (the summary block
 +  stretch_ceiling_and_conditions: "Up to 100 more per month only for a quiet-side flat on the second floor or above; never to end a search."
 ```
 
-`must_haves` gains `washing_machine_in_flat` only if it is not already there ("never again" is a hard filter), `story_summary` gets the three sentences above and `story_taken_on` today's date. Nothing else moves: the transcript is not saved, the landlord is not named, and no number came out of the stories that the user did not say out loud.
+`must_haves` gains `washing_machine_in_flat` only if it is not already there ("never again" is a hard filter), `story_summary` gets the three sentences above and `story_taken_on` today's date. The last line of the transcript is also a question waiting to be written down — offer it back as one: *"If it is pricier, am I buying visible value I actually care about, or just paying more?"*, `when: compare`, `kind: answer`. Nothing else moves: the transcript is not saved, the landlord is not named, and no number came out of the stories that the user did not say out loud.
 
 ## 3. Primer for someone with no idea (ten facts, one screen; cite `references/sources.yaml` ids where numbers appear)
 

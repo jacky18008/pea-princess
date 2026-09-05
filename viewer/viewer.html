@@ -101,6 +101,8 @@ textarea{width:100%;min-height:150px;font-family:ui-monospace,SFMono-Regular,Men
 .msg.err{border-left:4px solid var(--kill)} .msg.warn{border-left:4px solid var(--edge)}
 .msg.ok{border-left:4px solid var(--pass)}
 .msg ul{margin:6px 0 0}
+#share{margin:8px 0}
+#share pre{white-space:pre-wrap;word-break:break-word;font-size:12px;margin:6px 0 0}
 </style></head>
 <body><div class="wrap">
 
@@ -129,6 +131,7 @@ textarea{width:100%;min-height:150px;font-family:ui-monospace,SFMono-Regular,Men
   </div>
 </div>
 <div id="messages"></div>
+<div id="share" class="noprint"></div>
 </div>
 
 <div id="report"></div>
@@ -804,6 +807,67 @@ function standaloneHtml(d,L){
     "<body><div class=\"wrap\">\n"+renderBody(d,L)+"\n</div></body></html>\n";
 }
 
+/* ---- share card: the profile_snapshot reduced the way scripts/seed.py reduces a
+   profile.yaml. The rules are in references/sharing.md.                        */
+var SEED_PC=/\b[A-Z]{1,2}[0-9][A-Z0-9]?\s*[0-9][A-Z]{2}\b/gi;
+var SEED_TYPES={studio:"a studio",one_bed:"a one-bedroom flat",two_bed:"a two-bedroom flat",
+  three_bed_plus:"a flat with three or more bedrooms",any:"a flat"};
+function sClean(t){ return String(t==null?"":t).replace(SEED_PC,"[postcode removed]").trim(); }
+function sList(v,n){ return (Array.isArray(v)?v:[]).map(sClean).filter(Boolean).slice(0,n); }
+function sBand(v){ if(typeof v!=="number"||!(v>0)) return null;
+  var hi=Math.ceil(v/100)*100, lo=Math.max(0,hi-(hi<1500?200:400));
+  return "£"+lo.toLocaleString("en-GB")+"–"+hi.toLocaleString("en-GB")+" all-in"; }
+function sJoin(a,last){ a=(a||[]).filter(Boolean); if(!a.length) return "";
+  return a.length<2?a[0]:a.slice(0,-1).join(", ")+" "+(last||"and")+" "+a[a.length-1]; }
+function seedFrom(d){
+  var p=d.profile_snapshot||{},
+      m=/^\d{4}-\d{2}/.exec(String(p.move_in_earliest||p.move_in_latest||"")),
+      c=/\b([A-Z]{1,2}[0-9][A-Z0-9]?)\s*[0-9][A-Z]{2}\b/i.exec(p.commute_destination||"");
+  return {flat_type:p.flat_type||null, band:sBand(p.all_in_pcm_ceiling),
+    area:c?c[1].toUpperCase():null, month:m?m[0]:null,
+    must_haves:sList(p.must_haves,8), avoid:sList(p.avoid,8), priorities:sList(p.priorities,3),
+    questions:(Array.isArray(p.my_questions)?p.my_questions:[]).map(function(q){
+      return typeof q==="string"?{text:sClean(q),when:"vet",kind:"answer"}
+        :{text:sClean(q&&q.text),when:(q&&q.when)||"vet",kind:(q&&q.kind)||"answer"}; })
+      .filter(function(q){ return q.text; }).slice(0,5),
+    ground:!!p.reject_ground_floor, floors:p.prefer_floor_band||null,
+    sky:!!p.reject_no_sky, quiet:!!p.quiet_over_light};
+}
+function seedSentences(s){
+  var want=[SEED_TYPES[s.flat_type]||"a flat"];
+  if(s.floors) want.push("on floors "+s.floors);
+  if(s.area) want.push("within reach of "+s.area);
+  if(s.month) want.push("from "+new Date(s.month+"-01T00:00:00Z")
+    .toLocaleString("en-GB",{month:"long",year:"numeric",timeZone:"UTC"}));
+  if(s.band) want.push("at "+s.band);
+  var one="I want "+want.join(", ");
+  if(s.must_haves.length) one+="; it must have "+sJoin(s.must_haves.slice(0,3));
+  if(s.priorities.length) one+="; and I rank "+sJoin(s.priorities)+" in that order";
+  var no=s.avoid.slice(0);
+  if(s.ground&&!/ground/i.test(no.join(" "))) no.unshift("a ground-floor flat");
+  if(s.sky) no.push("windows that cannot see sky");
+  var at=-1;
+  s.priorities.forEach(function(x,i){ if(at<0&&/^(price|budget|cost|cheap)$/i.test(x)) at=i; });
+  var three="Price "+(at===0?"leads: I take the cheapest home that clears every rule above"
+    :(at<0?"is not in my top three":"sits "+(at===1?"second":"last")+" of my three priorities")+
+     ": I will pay towards the top of the band for a benefit I can name");
+  three+=s.quiet?", and quiet wins when quiet and light conflict.":", and I would rather have light than silence.";
+  var q=s.questions.filter(function(x){ return x.text.length<=100; })[0];
+  if(q) three+=" I ask of every flat: “"+q.text+"”";
+  return [one+".", no.length?"I will not take: "+no.slice(0,5).join("; ")+".":"I have no absolute deal-breakers.", three];
+}
+function shareBlock(d){
+  var s=seedFrom(d), cs=d.candidates||[], by={}, bits=[], text=seedSentences(s).join("\n");
+  cs.forEach(function(c){ var v=((c.verdict||{}).status)||""; if(v) by[v]=(by[v]||0)+1; });
+  ["PASS","EDGE","CONDITIONAL","KILL"].forEach(function(v){ if(by[v]) bits.push(by[v]+" "+v); });
+  if(cs.length) text+="\n\nwhat I found: "+cs.length+" flat"+(cs.length===1?"":"s")+" vetted"+
+    (bits.length?" — "+bits.join(", "):"")+".";
+  if(s.questions.length) text+="\n\nMy questions:\n"+s.questions.map(function(q){
+    return "  ["+q.when+(q.kind==="answer"?"":" · "+q.kind)+"] "+q.text; }).join("\n");
+  return '<div class="card"><h3>Share card</h3><p class="sub">Small enough to post: preferences and '+
+    'bands, never an address, a name or money. Code to paste: <code>seed.py export</code>.</p>'+
+    '<pre id="sharetext">'+esc(text)+'</pre><p><button id="sharecopy">Copy the share card</button></p></div>';
+}
 /* ---- page wiring -------------------------------------------------------- */
 var $=function(id){ return document.getElementById(id); };
 var current=null, currentL=null;
@@ -839,6 +903,10 @@ function run(){
   currentL=new Labels($("lang").value || data.language || "en");
   document.documentElement.lang=currentL.lang;
   $("report").innerHTML='<div class="wrap">'+renderBody(data,currentL)+"</div>";
+  try{ $("share").innerHTML=shareBlock(data);
+    $("sharecopy").addEventListener("click",function(){ copyText($("sharetext").textContent,
+      "The share card is on your clipboard. Read it before you post it."); });
+  }catch(e){ $("share").innerHTML=""; }
 }
 
 $("render").addEventListener("click",run);
@@ -871,13 +939,16 @@ $("download").addEventListener("click",function(){
     $("messages").innerHTML=say("warn","This page cannot start a download here. Use Copy HTML instead and paste it into a file.",[String(err)]);
   }
 });
+function copyText(text,msg){
+  var done=function(){ $("messages").innerHTML=say("ok",msg); };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done, function(){ fallbackCopy(text,done); });
+  } else { fallbackCopy(text,done); }
+}
 $("copy").addEventListener("click",function(){
   if(!current){ $("messages").innerHTML=say("warn","Render a report first."); return; }
-  var html=standaloneHtml(current,currentL);
-  var done=function(){ $("messages").innerHTML=say("ok","The whole page is on your clipboard. Paste it into a file called flat-report.html."); };
-  if(navigator.clipboard && navigator.clipboard.writeText){
-    navigator.clipboard.writeText(html).then(done, function(){ fallbackCopy(html,done); });
-  } else { fallbackCopy(html,done); }
+  copyText(standaloneHtml(current,currentL),
+    "The whole page is on your clipboard. Paste it into a file called flat-report.html.");
 });
 function fallbackCopy(text,done){
   var t=document.createElement("textarea");

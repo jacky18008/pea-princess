@@ -866,3 +866,80 @@ $ streetview.py fetch --lat 51.5045 --lng -0.0865 --toward-lat 51.5047 \
 Tests: `tests/test_streetview.py` (no network — headings, URL building, key
 redaction in the manifest, no-key behaviour, the cost arithmetic against the
 verified constants, and the brief).
+
+## `seed.py` — the shareable seed (no network, no key)
+
+```
+seed.py export --profile profile.yaml [--name "quiet, high, morning sun"]
+               [--journey journey.json] [--exact] [--commute-area "Zone 1"]
+               [--hide-commute] [--reveal-address] [--max-code 400] [--json]
+seed.py import "PP1.eyJ2Ijox…" [--out profile.yaml] [--force] [--json]
+seed.py import seed-card.txt --out profile.yaml
+```
+
+Turns the user's own `profile.yaml` into something postable: a **card** (three
+sentences drafted from the profile, then a compact YAML block) and a **code**
+(`PP1.` plus base64url of a minimal JSON), and reads a code back into a fresh
+profile. Not a data source; it fetches nothing.
+
+The scrub is an **allow-list**, so a field the profile grows later cannot leak:
+seed name, `flat_type`, budget as a **band**, `budget_mode`, the commute
+destination reduced to a **postcode district**, the move-in window as a
+**month**, `must_haves`, `avoid`, `priorities`, `my_questions` (text, stage and
+kind — never the `trigger`), floor rules, light rules, `quiet_over_light`,
+`bridging.first_weeks`, `story_summary`. Never: an address, a name, income,
+savings, `guarantor_route`, `self_intro_template`, exact dates, exact money
+(unless `--exact`), `tenancy`, `occupants`, or anything under `bridging` beyond
+`first_weeks`. Free text is swept for UK postcodes on the way out.
+
+The band rule: round the all-in ceiling up to the nearest 100 for the top, take
+200 off below £1,500 and 400 otherwise for the bottom. A bare profile makes a
+code of about 250 characters; a full one with a summary and questions runs 600
+to 1,000, and `--max-code` (default 400, `0` = no limit) drops exactly one key
+to get closer — `s`, the summary, which stays on the card.
+
+`--journey journey.json` adds the "what I found" lines: how many flats were
+vetted, how the verdicts fell, and what was chosen — never the address, unless
+`--reveal-address`. The format is in `references/seed-schema.json`
+(`definitions.journey`) and `references/sharing.md`.
+
+`import` writes a profile with the seed's preferences and `# FILL IN` on
+everything that is not inheritable: floor area, budget numbers, dates, the
+destination, the income-check route, the self-introduction. Somebody else's
+ceiling is a comment, never a value. It refuses to overwrite an existing file
+without `--force`, and it reads a code out of a saved card as happily as off the
+command line.
+
+```console
+$ seed.py export --profile profile.yaml --name "quiet, high, morning sun"
+Pea Princess seed — quiet, high, morning sun
+what I am looking for, and nothing about where I live, what I earn or who I am.
+
+I want a one-bedroom flat, on floors 2-8, with windows facing E or SE, within reach of
+WC2R, from October 2026, at £2,000–2,400 all-in; it must have washing machine in the
+flat; and I rank quiet, light and price in that order.
+I will not take: ground floor; heating with no written tariff; windows that cannot see sky.
+Price sits last of my three priorities: I will pay towards the top of the band for a
+benefit I can name, and quiet wins when quiet and light conflict.
+
+seed:
+  name: quiet, high, morning sun
+  flat_type: one_bed
+  budget_band: "£2,000–2,400 all-in"
+  # My questions — every report has to answer each of these by name, at the stage in brackets
+  my_questions:
+    - "[compare] If this is unusually cheap next to its neighbours, what is the hidden problem?"
+  …
+seed code (paste it into any AI agent that has the Pea Princess skill, …):
+PP1.eyJhdiI6WyJncm91bmQgZmxvb3IiXSwicHIiOlsicXVpZXQiLCJsaWdodCIsInByaWNlIl0sInEiOnRydWUs…
+```
+
+The agent-facing rules are `references/sharing.md`; the exact code format, for a
+runtime with no shell, is `references/seed-format.md`. `viewer/viewer.html`
+draws the same three sentences from a report's `profile_snapshot` under **Share
+card**, with a copy button (no code: the snapshot holds less than a profile).
+
+Tests: `tests/test_seed.py` (no network — the allow-list, the scrub against a
+profile stuffed with secrets, the code's prefix, alphabet and length formula, the
+worked example in `seed-format.md`, the export/import round trip, the questions'
+stages, the journey lines, and the blanks an imported profile leaves).

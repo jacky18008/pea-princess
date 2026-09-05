@@ -57,6 +57,19 @@ budget_mode: standard
 #   workers: cheap
 #   judge: strong
 
+# Depth per axis, when you want some checks deeper or lighter than budget_mode: lite | standard | deep.
+# Say it in words ("dig deeper on crime and management, keep the rest light") and the agent fills this in,
+# shows you the change, and applies it only when you say yes. Unset axes follow budget_mode.
+axis_depth:
+  # crime: deep
+  # management: deep
+  # price: lite
+
+# Hard caps the agent must respect whatever the depth: fetches per flat and minutes per flat.
+limits:
+  max_fetches_per_flat: 40
+  max_minutes_per_flat: 20
+
 # How much you already know about renting in London: none | some | expert.
 # "none" = the skill explains each term the first time and suggests defaults instead of asking open questions.
 experience: none
@@ -83,6 +96,38 @@ story_taken_on:
 #   - management with no resident route to replace it
 avoid:
   - ground floor
+
+# The questions you always ask of every place, in your own words. One to five of them.
+# These are not decoration: the agent must answer EVERY question here explicitly, for every flat,
+# in the report — by name, with evidence, and with "I could not find out" if that is the honest
+# answer.
+#
+# A question can be one line of plain text, or a block with three more fields:
+#   text:     the question itself, in your own words. Required.
+#   when:     which stage of the search it belongs to. Default: vet.
+#               filter   before any work: it decides whether a flat is worth looking at at all
+#               vet      while the flat is being checked (this is the ordinary case)
+#               compare  only once there is more than one candidate, side by side
+#               viewing  on the day, standing in the flat
+#               sign     just before the contract, when it is the last chance to ask
+#   kind:     what has to happen to answer it. Default: answer.
+#               answer   the agent works it out from data and says so
+#               ask      it is put to the landlord or agent, as a question, in writing
+#               check    you check it yourself with your own eyes, nose or ears
+#   trigger:  optional, one line: when this question becomes relevant at all. Leave it out and
+#             the question is asked every time. This stays in your file: it is never shared.
+#
+# Two that most people should keep (uncomment them, or write your own):
+my_questions:
+  # - text: "If this is unusually cheap or unusually good next to its neighbours, what is the hidden problem? Cheap has a reason."
+  #   when: compare
+  #   kind: answer
+  #   trigger: "price below the local band by 10% or more, or one headline feature unusually good"
+  # - text: "If it is pricier, am I buying visible value I actually care about, or just paying more?"
+  #   when: compare
+  #   kind: answer
+  #   trigger: "price above the local band"
+  # - "A plain line like this one still works: it means when: vet, kind: answer."
 
 # Your top three priorities, in order. Words such as: quiet, light, price, space, commute,
 # new building, bills included, on-site management, outdoor space.

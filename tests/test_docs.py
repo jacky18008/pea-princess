@@ -1,6 +1,7 @@
 """Guards for the human-facing contract: SKILL.md size, onboarding coverage, profile fields."""
 import os
 import re
+import sys
 import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -75,8 +76,176 @@ class TestProfileTemplate(unittest.TestCase):
     def test_new_fields(self):
         s = read("profile.template.yaml")
         for key in ["flat_type:", "separate_bedroom_required:", "experience:", "avoid:", "priorities:",
-                    "all_in_pcm_ceiling:", "destination:", "guarantor_route:"]:
+                    "all_in_pcm_ceiling:", "destination:", "guarantor_route:",
+                    "story_summary:", "story_taken_on:", "my_questions:"]:
             self.assertIn(key, s)
+
+    def test_the_story_fields_say_what_may_not_go_in_them(self):
+        s = read("profile.template.yaml")
+        block = s[s.index("story_summary") - 900:s.index("story_taken_on")]
+        self.assertIn("never the stories themselves", block.lower().replace("preferences, never", "never"))
+        for forbidden in ("health", "nationality", "religion", "immigration status"):
+            self.assertIn(forbidden, block)
+        for blank in ("story_summary:", "story_taken_on:"):
+            self.assertIn("\n" + blank + "\n", s, "%s must be left blank in the template" % blank)
+
+    def test_my_questions_documents_the_stages_the_kinds_and_the_two_examples(self):
+        s = read("profile.template.yaml")
+        block = s[s.index("# The questions you always ask"):s.index("# Your top three priorities")]
+        for stage in ("filter", "vet", "compare", "viewing", "sign"):
+            self.assertIn(stage, block, stage)
+        for kind in ("answer", "ask", "check"):
+            self.assertIn(kind, block, kind)
+        self.assertIn("Cheap has a reason", block)
+        self.assertIn("am I buying visible value", block)
+        self.assertIn("trigger:", block)
+        self.assertIn("price below the local band by 10% or more", block)
+        self.assertIn("price above the local band", block)
+        self.assertIn("must answer EVERY question here", block)
+
+
+class TestStoryIntake(unittest.TestCase):
+    """The five-minute story session in onboarding.md section 2b."""
+
+    def setUp(self):
+        self.s = read("references", "onboarding.md")
+        self.section = self.s[self.s.index("## 2b."):self.s.index("## 3. Primer")]
+
+    def test_the_section_is_there_and_says_it_is_optional(self):
+        self.assertIn("## 2b. Tell me about the places you have lived (optional, 5 minutes)", self.s)
+        self.assertIn("dictation", self.section)
+        self.assertIn("voice memo", self.section)
+
+    def test_it_names_at_most_two_dictation_apps_and_says_any_works(self):
+        offer = self.section[self.section.index("Say it roughly"):self.section.index("Any transcript")]
+        self.assertIn("any of them works", offer)
+        named = [app for app in ("Otter", "Notta", "Whisper", "Dragon", "Rev", "Descript")
+                 if app in offer]
+        self.assertLessEqual(len(named), 2, "name at most two dictation apps: %s" % named)
+
+    def test_it_listens_for_the_good_the_bad_and_the_money(self):
+        for signal in ("light", "quiet", "kitchen", "neighbours", "management", "location habits",
+                       "damp", "noise", "landlord", "bill shocks", "commute", "Money attitudes",
+                       "shops"):
+            self.assertIn(signal, self.section, signal)
+
+    def test_every_story_element_lands_in_a_profile_field(self):
+        for field in ("`avoid`", "`priorities`", "`must_haves`", "`nice_to_haves`",
+                      "quiet_over_light", "light.reject_no_sky", "floors.reject_ground_floor",
+                      "budget.stretch_ceiling_and_conditions", "`my_questions`"):
+            self.assertIn(field, self.section, field)
+        for code in ("L2", "L4", "L5", "L6", "L7", "L9", "L10", "L11"):
+            self.assertIn("| " + code + " |", self.section, code)
+
+    def test_the_stories_themselves_are_never_stored(self):
+        self.assertIn("Never store the stories", self.section)
+        self.assertIn("Do not save the transcript", self.section)
+        for forbidden in ("ethnicity", "nationality", "religion", "health", "immigration status"):
+            self.assertIn(forbidden, self.section, forbidden)
+        self.assertIn("Do not diagnose", self.section)
+
+    def test_the_write_back_is_three_sentences_and_needs_a_yes(self):
+        self.assertIn("exactly three sentences", self.section)
+        self.assertIn("story_summary", self.section)
+        self.assertIn("story_taken_on", self.section)
+        self.assertIn("Shall I save these?", self.section)
+
+    def test_the_worked_example_is_six_lines_in_and_eight_lines_out(self):
+        example = self.section[self.section.index("### Worked example"):]
+        transcript = [line for line in example.split("```diff")[0].splitlines()
+                      if line.startswith("> The") or line.startswith("> I ") or
+                      line.startswith("> One")]
+        self.assertEqual(len(transcript), 6, "the story is meant to be six lines")
+        diff = example.split("```diff")[1].split("```")[0]
+        self.assertEqual(len([line for line in diff.splitlines() if line.startswith("+")]), 8,
+                         "the worked example is meant to change eight lines")
+        self.assertIn("(fictional)", self.section)
+
+    def test_the_seventh_question_is_asked_and_classified(self):
+        seventh = self.section[self.section.index("### The seventh question"):]
+        self.assertIn("Are there questions you always ask of every place?", seventh)
+        for word in ("compare", "filter", "viewing", "vet", "ask", "check", "trigger"):
+            self.assertIn(word, seventh, word)
+        self.assertIn("let\nthem correct it", seventh.replace("  ", " "))
+
+
+class TestSharing(unittest.TestCase):
+    """The seed: references/sharing.md, seed-format.md and seed-schema.json."""
+
+    def setUp(self):
+        self.sharing = read("references", "sharing.md")
+        self.fmt = read("references", "seed-format.md")
+
+    def test_the_headings_cover_the_card_the_code_and_the_import(self):
+        for heading in ["# Sharing a seed: the card, the code, the import",
+                        "## 1. When the user asks",
+                        "## 2. What is shared, in plain words",
+                        "## 3. Share your questions",
+                        "## 4. The social post, ready to send",
+                        "## 5. `journey.json` — the record of one search",
+                        "## 6. Importing somebody else's seed"]:
+            self.assertIn(heading, self.sharing, heading)
+
+    def test_it_names_the_triggers_in_three_languages(self):
+        for trigger in ("share my seed", "分享我的設定檔", "分享我的设置"):
+            self.assertIn(trigger, self.sharing, trigger)
+
+    def test_the_social_post_is_written_in_three_languages(self):
+        post = self.sharing[self.sharing.index("## 4. The social post"):
+                            self.sharing.index("## 5. `journey.json`")]
+        for lang in ("**English**", "**繁體中文**", "**简体中文**"):
+            self.assertIn(lang, post, lang)
+        self.assertIn("I found a flat in London with this Pea Princess seed", post)
+        self.assertEqual(post.count("PP1."), 3, "each post carries the code")
+
+    def test_it_says_what_is_shared_and_what_never_is(self):
+        for shared in ("band", "district", "month", "deal-breakers", "must-haves", "priorities"):
+            self.assertIn(shared, self.sharing, shared)
+        for never in ("address", "income", "savings", "guarantor route", "introduce themselves",
+                      "exact dates", "immigration status"):
+            self.assertIn(never, self.sharing, never)
+
+    def test_it_tells_the_agent_what_to_do_with_and_without_a_shell(self):
+        self.assertIn("scripts/seed.py export", self.sharing)
+        self.assertIn("Without a shell", self.sharing)
+        self.assertIn("references/seed-format.md", self.sharing)
+
+    def test_it_describes_the_journey_file(self):
+        journey = self.sharing[self.sharing.index("## 5. `journey.json`"):]
+        for key in ("started", "profile_seed", "candidates", "label", "verdict", "tier", "date",
+                    "chosen", "area_m2", "floor", "all_in_band", "notes", "--reveal-address"):
+            self.assertIn(key, journey, key)
+        self.assertIn("no address", journey)
+
+    def test_the_questions_are_encouraged_and_the_stages_explained(self):
+        block = self.sharing[self.sharing.index("## 3. Share your questions"):
+                             self.sharing.index("## 4. The social post")]
+        self.assertIn("Cheap has a reason", block)
+        self.assertIn("steal other people's", block)
+        for stage in ("`filter`", "`vet`", "`compare`", "`viewing`", "`sign`"):
+            self.assertIn(stage, block, stage)
+        for kind in ("`answer`", "`ask`", "`check`"):
+            self.assertIn(kind, block, kind)
+        self.assertIn("Triggers are not shared", block)
+
+    def test_the_format_reference_is_model_followable(self):
+        self.assertIn("PP1.", self.fmt)
+        self.assertIn("base64url", self.fmt)
+        for key in ("`v`", "`n`", "`t`", "`b`", "`m`", "`c`", "`w`", "`mh`", "`av`", "`pr`",
+                    "`qs`", "`fl`", "`li`", "`q`", "`fw`", "`s`"):
+            self.assertIn("| " + key + " |", self.fmt, key)
+        self.assertIn("worked example", self.fmt.lower())
+        self.assertIn("83 bytes", self.fmt)
+
+    def test_the_seed_schema_is_valid_json_and_matches_the_script(self):
+        import json
+        schema = json.loads(read("references", "seed-schema.json"))
+        sys.path.insert(0, os.path.join(HERE, "..", "skills", "vet-flat", "scripts"))
+        import seed as seed_script
+        self.assertEqual(sorted(schema["properties"]),
+                         sorted(["v"] + [short for _, short in seed_script.ALLOW]))
+        self.assertIn("journey", schema["definitions"])
+        self.assertEqual(schema["additionalProperties"], False)
 
 
 if __name__ == "__main__":

@@ -13,7 +13,7 @@ metadata:
 
 ## Start
 1. **Mode** (say it in one line): **shell** (`python3` + `curl` with internet: run `scripts/*.py`, read only their JSON) · **fetch** (open GET sources in `references/sources.yaml`; ask for the rest) · **manual** (the user pastes; `references/inputs.md`).
-2. **Profile**: read `profile.yaml`; if missing, ask the six essentials once (budget, area, age, move-in, destination, must-haves), then proceed and state assumptions. Examples: `profiles/`.
+2. **Profile**: read `profile.yaml`; if missing, ask the six essentials once (budget, area, age, move-in, destination, must-haves) and state assumptions. Examples: `profiles/`.
 3. **Route by intent** — read the file before acting:
 
 | The user… | Read |
@@ -22,10 +22,12 @@ metadata:
 | gives a listing or an address → vet it | `references/axes/01`–`12` |
 | wants candidates around an area or a commute destination | `references/axes/00-area-sweep.md` (shell: `scripts/sweep.py`) |
 | wants a shortlist roasted (尻洗) or two flats compared | `references/axes/13-adversarial-review.md`, then the report contract |
-| is about to sign, needs a bridge stay, or asks about referencing or first-week admin | `references/axes/15`, `16`, `17` |
+| is about to sign, needs a bridge stay, or asks about referencing or first weeks | `references/axes/15`–`17` |
 | is going to a viewing, or has just been to one | `references/axes/14-site-visit.md`, `18-street-view.md` |
 | asks about depth, cost, budget mode or which model | `references/budget-modes.md` (escalation ladder) |
-| wants to share or import a profile seed, or tells stories about past homes | `references/sharing.md` (`scripts/seed.py`), onboarding |
+| wants to share or import a profile seed, or tells stories about past homes | `references/sharing.md` (`scripts/seed.py`) |
+| asks how this works or wants to change any setting by talking | `references/how-to-use.md` (show the diff, confirm, run `scripts/profile_check.py`) |
+| is a student weighing halls or student blocks against a private flat, or asks what rent is normal | `references/student-housing.md` |
 | needs any number computed | `references/arithmetic.md` (`scripts/calc.py`) |
 | the report itself | `references/report-contract.md` + `references/report-schema.json` |
 
