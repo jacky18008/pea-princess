@@ -80,48 +80,57 @@ lets the default put cheap models on the extraction work.
 
 ---
 
-### Journeys: a settings change and a cold start (Codex, 2026-09-05)
+### Journeys: whole conversations on four models (2026-09-05)
 
 The single-turn arms above score one finished report. `evals/journeys.json` scores whole
-conversations (see `docs/JOURNEYS.md`). Two of the nine were run on the three Codex tiers,
-one run each, so treat every number as a small-sample diagnostic ●, not a verdict.
+conversations (see `docs/JOURNEYS.md`). All nine ran on the two cheaper Codex tiers; the
+settings change also on the strongest Codex tier; four of them on Claude Sonnet through
+Claude Code. One run each, so every number is a small-sample diagnostic ●, not a verdict.
+Score / invented numbers; **PASS** = 0.90 or better with no invented number and no tone hit.
 
-| journey | tier | score | invented numbers | file checks | wall |
-|---|---|---|---|---|---|
-| Change my settings by talking, zh (3 turns) | Luna (cheapest) | 0.82 | 0 | 7 / 7 | 201 s |
-| | Terra (middle) | 0.94 | 0 | 7 / 7 | 389 s |
-| | Sol (strongest) | 0.92 | 0 | 7 / 7 | 251 s |
-| Change my settings by talking, en (3 turns) | Luna | 0.90 | 0 | 7 / 7 | 202 s |
-| | Terra | 0.94 | 0 | 7 / 7 | 334 s |
-| | Sol | 0.96 | 0 | 7 / 7 | 254 s |
-| From zero: "teach me", zh (7 turns) | Luna | 0.79 | 1 | – | 1,125 s |
-| | Terra | 0.76 | 0 | – | 2,104 s |
-
-The pass line is 0.90 with no invented number and no tone hit. "File checks" are the seven
-things `profile.yaml` had to contain, or no longer contain, after the user said yes: the new
-ceiling, the two axes set to deep, the three limits that were not mentioned and had to stay,
-and the old ceiling gone.
+| journey | Luna (cheapest) | Terra (middle) | Sol (strongest) | Sonnet |
+|---|---:|---:|---:|---:|
+| Change my settings by talking, zh (3 turns) | 0.82 / 0 | **0.94 / 0** | **0.92 / 0** | 0.80 / 0 |
+| Change my settings by talking, en (3 turns) | **0.90 / 0** | **0.94 / 0** | **0.96 / 0** | 0.88 / 0 |
+| From zero: "teach me", zh (7 turns) | 0.78 / 2 | 0.76 / 0 | – | 0.80 / 0 |
+| An area and a budget, en (5 turns) | 0.80 / 0 | 0.84 / 1 | – | – |
+| Vet this listing, zh (4 turns) | 0.75 / 2 | 0.72 / 2 | – | 0.77 / 0 |
+| Roast my short stays, en (4 turns) | 0.71 / 4 | 0.78 / 2 | – | – |
+| Offer and referencing, zh (4 turns) | 0.73 / 1 | 0.76 / 0 | – | – |
+| Arrived, damp lower ground, zh (3 turns) | 0.76 / 0 | 0.73 / 0 | – | – |
+| Compare two flats, en (3 turns) | 0.73 / 2 | 0.76 / 0 | – | – |
+| Licence and advance-rent clause, zh (2 turns) | 0.86 / 0 | 0.75 / 0 | – | – |
+| **mean** | 0.78 · 1.1 invented per run | 0.80 · 0.5 | 0.94 · 0 | 0.81 · 0 |
 
 What it says:
 
-- **Every tier edits the file correctly.** The cheapest model applied the four-field change
-  exactly, touched nothing else, and ran the validator. The score gap between tiers is
-  entirely in what they *say*: naming the validator, stating what was left alone, saying what
-  the change costs or buys. A natural-language settings change does not need a strong model.
-- **The cold start is where cheap and middle both fall short, and in the same places.** Both
-  skipped the law's date, both forgot "never sign on the viewing day" at the end, neither gave
-  the user a polite sentence to send to the agent, and the middle tier missed eight of the ten
-  primer facts on turn one. The primer is written as prose the model is meant to remember;
-  it is not remembered. The fix under consideration is a fixed form of must-answer items with
-  three states (found with a quote / asked the user / unknown), enforced by the schema.
+- **Every model edits the settings file correctly.** All four applied the four-field change
+  exactly, touched nothing else, and — once the turn-1 file check existed — changed nothing
+  before the user said yes (10 of 10 file checks for Sonnet and the reruns; 7 of 7 on the
+  earlier form). The scores differ only in what is *said*: naming the validator, stating what
+  was left alone, saying what the change costs. A natural-language settings change does not
+  need a strong model; it needs a form.
+- **Everything else sits at 0.71–0.86 on every tier, and the misses are the same items.**
+  The law's date, "never sign on the viewing day", a polite sentence the user can send to
+  the agent, the first EPC assessment year, the expected-value and single-building points
+  in the comparison. Cheap and middle tiers forget the same prose; Sonnet does not do better
+  on the four it ran. That is the case for the fixed form (landed after these runs).
+- **Invented numbers fall with tier**: 1.1 a run on the cheapest, 0.5 in the middle, none on
+  the strongest tier or Sonnet. What remains after calibration is real: a rent ceiling derived
+  with no bills basis, a wrong nightly rate, a per-stay total that is off.
+- **The grader needed nine calibration fixes before these numbers meant anything**: a unified
+  diff is a diff; a restated rent target is not a new ceiling; "reply yes to save" is asking;
+  price per square foot, rent multiples, income multiples and the rent inside a formula are
+  not rents or deposits; the listing's own six-week ask beside the cap is not an invented cap;
+  a comparison table leaks one stay's numbers into another unless each stay is read from its
+  own lines; "non-refundable" contains "refundable". Every fix carries a regression test, and
+  `bench/journeys.py --regrade` re-scored the paid-for runs. Expect more of this on any fresh
+  dataset; the fabrication count is only as good as the masks.
 - **Grade the file, not the sentence.** The first run of the cheapest tier answered
   "validator: valid" inside a read-only sandbox where nothing could have run. Shell-mode
-  journeys now get a workspace and are graded on the file afterwards; the turn-1 check that the
-  file still holds the *old* values is the ground truth for "never apply before the yes".
-- **Three grader fixes came out of the first eight runs** (a unified diff is a diff; restating
-  the untouched rent target is not a new ceiling; "reply yes to save" is asking). That is why
-  `bench/journeys.py --regrade` exists: the replies were paid for once and re-scored, not
-  re-run. Two of the eight rows changed by more than 0.05 after calibration.
+  journeys now get a workspace and are graded on the file afterwards.
+- **Wall time**: the cheapest tier 200–1,100 s per journey, the middle tier 330–2,100 s (one
+  four-listing turn ran past ten minutes), Sonnet 20–150 s per turn.
 
 ### Router SKILL.md versus the monolithic one (Claude, 2026-09-05)
 
