@@ -13,7 +13,7 @@ metadata:
 # vet-flat — London flat vetting
 
 ## 0. Pick your mode first (tell the user in one line which one you are in)
-- **Shell mode**: you can run `python3` and `curl` with internet access. Run `scripts/*.py`; read only their JSON.
+- **Shell mode**: `python3` and `curl` with internet. Run `scripts/*.py`; read only their JSON.
 - **Fetch mode**: fetch only, no scripts. Use the open GET sources in `references/sources.yaml`; ask the user for the rest.
 - **Manual mode**: neither. Ask the user to paste pages (`references/inputs.md`).
 
@@ -57,12 +57,12 @@ Named only, no method (terms forbid automated access): Rightmove, Zoopla, OnTheM
 Per-borough portals: `references/boroughs.yaml`.
 
 ## 6. When you cannot get something
-Follow `references/inputs.md`: try first; collect every gap; ask **once**, with URL, format and why; record `provenance: user_supplied`; mark the axis **U** if it stays unavailable. Never invent a number.
+Follow `references/inputs.md`: try first; collect every gap; ask **once**, with URL, format and why; record `provenance: user_supplied`; mark the axis **U** if unavailable. Never invent a number.
 
 ## 7. Output contract
 Write `report.json` per `references/report-schema.json`. Shell mode: `python3 scripts/render.py report.json > report.html`. Otherwise give the JSON for `viewer/viewer.html`. Also print the one-page verdict in the user's language.
-Plain language everywhere: short sentences; no jargon without a gloss; every number says what it means and what it is compared with; evidence grades as plain labels.
-Verdict: **PASS** · **EDGE** (break-even rent) · **CONDITIONAL** (conditions listed) · **KILL** (fatal axis named). Include: ≤2 killer questions from `references/questions.md`; viewing-day checks; a "not found" table with the search strings; sources with retrieval times; the footer "Generated with vet-flat <version> — <source URL>".
+Plain language everywhere: short sentences; no jargon without a gloss; every number says what it means and is compared with; evidence grades as plain labels.
+Verdict: **PASS** · **EDGE** (break-even rent) · **CONDITIONAL** (conditions listed) · **KILL** (fatal axis named). Include: answers to each of the user's `my_questions` from the profile, with evidence grades; ≤2 killer questions from `references/questions.md`; viewing-day checks; a "not found" table with the search strings; sources with retrieval times; the footer "Generated with vet-flat <version> — <source URL>".
 
 ## 8. Never
-Sign on the viewing day. Treat listing area as fact. Scale crime figures for missing months. Turn a missing item into a pass. Hide a red flag. Use ethnicity or nationality as a risk factor.
+Sign on the viewing day. Treat listing area as fact. Scale crime figures for missing months. Turn a missing item into a pass. Hide a red flag. Use ethnicity or nationality as a factor.

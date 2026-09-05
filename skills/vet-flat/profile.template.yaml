@@ -17,6 +17,9 @@
 # These are pass/fail. A flat that misses one is not "a bit worse"; it is out, or it is an
 # exception you make on purpose and write down.
 
+# Room only (shared flats): smallest bedroom you will take, in square metres (10-12 is a typical floor).
+min_room_area_m2:
+
 # Smallest indoor area you will live in, in square feet, from the energy certificate.
 # Leave blank if you have no floor. Typical one-bed floors people set: 450-550.
 min_floor_area_sqft:
@@ -26,7 +29,9 @@ min_floor_area_sqft:
 # insulation, no mechanical ventilation, and single-supplier heating is less likely.
 max_building_age_years:
 
-# What kind of home. One of: studio | one_bed | two_bed | three_bed_plus | any
+# What kind of home. One of: room_in_shared_flat | studio | one_bed | two_bed | three_bed_plus | any
+# For a room in a shared flat the whole-flat checks still apply (building, area, landlord, bills split);
+# set min_room_area_m2 instead of min_floor_area_sqft.
 flat_type: one_bed
 # true = the bedroom must have a door and a window. A "studio suite" with a bed alcove does not count.
 separate_bedroom_required: true
@@ -55,6 +60,16 @@ budget_mode: standard
 # How much you already know about renting in London: none | some | expert.
 # "none" = the skill explains each term the first time and suggests defaults instead of asking open questions.
 experience: none
+
+# OPTIONAL. If you talked me through the places you have lived (the five-minute story session in
+# references/onboarding.md), this is the three-sentence summary I wrote back and you approved.
+# It is a summary of your PREFERENCES, never the stories themselves: no addresses, no landlords,
+# no employers, no dates, and nothing about health, nationality, religion or immigration status.
+# Edit it freely; if it no longer sounds like you, delete it and we will do the five minutes again.
+story_summary:
+# The day those stories were taken, as YYYY-MM-DD. Taste drifts. If this is more than a year old
+# I will ask once whether it still holds before I judge anything by it.
+story_taken_on:
 
 # Your deal-breakers in plain words, one per line. The skill maps them to its checks
 # (menu in references/onboarding.md). Examples:
