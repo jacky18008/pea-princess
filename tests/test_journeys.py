@@ -665,6 +665,28 @@ class TestFileChecksAndRegrade(unittest.TestCase):
         self.assertFalse(runner.transient_error(""))
         self.assertGreaterEqual(runner.MAX_ATTEMPTS, 2)
 
+    def test_reply_yes_to_save_is_a_confirmation_ask(self):
+        reply = ("Proposed change:\n\n```diff\n must_haves:\n   - washing_machine_in_flat\n"
+                 "+  - EPC rating B or better\n```\n\nThere is no field for an EPC minimum, so it goes "
+                 "into must_haves, the nearest thing that exists; the rating governs energy cost, and a flat "
+                 "with an exemption cannot pass. Nothing else changes. Reply `yes` to save.\n")
+        card = runner.score_turn(self.zh["turns"][2], reply, self.zh)
+        by = dict((r["check"], r["status"]) for r in card["checks"])
+        self.assertEqual("pass", by["asks before applying anything"])
+        self.assertEqual("pass", by["ends_with"])
+
+    def test_nothing_reaches_the_file_before_the_yes(self):
+        spec = self.zh["turns"][0]["expect"]["workdir_expect"]
+        folder = tempfile.mkdtemp()
+        try:
+            runner.materialise_attachments(self.zh["turns"][0], folder, "codex")
+            self.assertTrue(all(r["status"] == "pass" for r in runner.check_workdir(folder, spec, "codex")))
+            with io.open(os.path.join(folder, "profile.yaml"), "a", encoding="utf-8") as fh:
+                fh.write("axis_depth:\n  crime: deep\n")
+            self.assertTrue(any(r["status"] == "fail" for r in runner.check_workdir(folder, spec, "codex")))
+        finally:
+            shutil.rmtree(folder, ignore_errors=True)
+
     def test_the_pasted_profile_becomes_a_real_file_without_its_title_line(self):
         folder = tempfile.mkdtemp()
         try:

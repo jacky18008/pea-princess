@@ -4925,7 +4925,18 @@
         "why": "450 sq ft is what the pasted profile says."
        }
       },
-      "max_questions": 3
+      "max_questions": 3,
+      "workdir_expect": {
+       "profile.yaml": {
+        "contains": [
+         "all_in_pcm_ceiling: 2200"
+        ],
+        "absent": [
+         "all_in_pcm_ceiling: 2300",
+         "crime: deep"
+        ]
+       }
+      }
      },
      "judge_notes": "Four field names, four values, one question. Anything longer than a short diff plus a sentence is the wrong shape for this ask."
     },
@@ -5119,7 +5130,14 @@
          "confirm",
          "shall i",
          "would you like",
-         "好嗎"
+         "好嗎",
+         "reply",
+         "say yes",
+         "yes to",
+         "回覆",
+         "回我",
+         "跟我說",
+         "告訴我"
         ]
        },
        {
@@ -5179,7 +5197,15 @@
         "確認",
         "confirm",
         "?",
-        "？"
+        "？",
+        "yes",
+        "reply",
+        "apply",
+        "save",
+        "回覆",
+        "回我",
+        "套用",
+        "寫入"
        ]
       }
      },
