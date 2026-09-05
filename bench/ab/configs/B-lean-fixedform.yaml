@@ -1,0 +1,31 @@
+# Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen - https://github.com/jacky18008/pea-princess - CC BY 4.0
+# A/B harness config. Read by bench/run.py --config and bench/ab/run_ab.py.
+
+name: B-lean-fixedform
+agent: claude
+phase: ablation
+factor: "the skill at 06fcf90 (fixed form of fourteen must-answer questions, no-source-no-number, axis-10 estimate-not-unknown) instead of the 875c17a skill; run with VETFLAT_SKILL_DIR pinned to bench/ab/skill-variants/skill-06fcf90"
+description: |
+  Same lean harness as B-lean; only the skill folder differs (see factor). Launched 2026-09-05 evening
+  into the router-vs-monolithic results folder so grade_ab reads it against B-lean.
+  The lean harness: the repository's own scripts instead of raw pages, Sonnet subagents for
+  reading pasted text, Opus (the CLI default) doing the judgment, no whole-file reads, compact
+  JSON in and one report JSON out.
+main_model: null
+worker_model: sonnet
+budget_mode: standard
+allowed_tools:
+  - "Bash(python3:*)"
+  - Read
+  - Write
+  - Agent
+append_system_prompt: |
+  Use the scripts in scripts/ for every fetchable fact and read only their JSON. Never read a
+  file larger than 40 KB in full; use ranges. Spawn subagents only for reading pasted review
+  or report text, with model sonnet; do judgment yourself. Keep the report JSON as the only
+  large output.
+  This is an unattended benchmark run: there is no user to answer questions, so never stop to ask; when an input is unavailable mark that axis unknown (U) and still write report.json.
+notes: |
+  No WebFetch and no WebSearch: every fetchable fact has to come through a script, which is
+  what makes the token bill collapse. If a fact is not fetchable by a script the run must say
+  so in not_found rather than guess.
