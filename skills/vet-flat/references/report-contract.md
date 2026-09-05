@@ -10,13 +10,13 @@ Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen — https://github.com
 ## What every report contains
 1. **Verdict card** per candidate: PASS · EDGE (with the break-even rent) · CONDITIONAL (conditions listed) · KILL (the fatal axis named), a one-line headline, and the landmine codes as plain labels.
 2. **Your must-haves versus this flat**: every hard filter from the profile with requirement, observed value, pass / fail / unknown and its evidence grade.
-3. **Your questions, answered**: each entry of the profile's `my_questions`, placed at its stage — filter questions with the hard filters, vet questions under the verdict, compare questions as extra rows of the comparison table, viewing and sign questions in the checklists — with an answer, an evidence grade and whether the trigger fired.
+3. **Your questions, answered**: each entry of the profile's `my_questions`, placed at its stage — filter questions with the hard filters, vet questions under the verdict, compare questions as extra rows of the comparison table, viewing and sign questions in the checklists — with an answer, an evidence grade and whether the trigger fired. Written as `question_answers` on the candidate.
 4. **Side by side** when there is more than one candidate: £ per sq ft on EPC area, crime six-month count, commute minutes and redundancy grade, management organic score and incentivised share, nearest works, landlord type, all-in monthly cost; every number carries what it means and what it is compared with.
 5. **Worst resident reviews**: building, source, date, score, organic or not, a short excerpt, why it matters.
 6. **Landmines** L1–L16 with a plain label and whether they are reversible.
 7. **The 12 checks in detail** with an evidence chip on each finding and an unknowns list.
 8. **Questions and the viewing day**: at most two killer questions drawn from `questions.md`, then the checks only the site can answer.
-9. **What only you can tell**: the axes marked unknown and the things the tool cannot sense (smell, noise at night, light on the day, how the street feels), phrased as a request, not a gap.
+9. **What only you can tell**: the axes marked unknown and the things the tool cannot sense (smell, noise at night, light on the day, how the street feels), phrased as a request, not a gap; the report's own asks go in `only_you_can_tell`, and leaving it out asks the four standard ones.
 10. **What we could not find**, with the search strings and the blocked sources; **sources** with retrieval times; the arithmetic check; **About this report** with the configuration line again and the footer `Generated with vet-flat <version> — <source URL>`.
 
 ## Plain-language rules (every text field)

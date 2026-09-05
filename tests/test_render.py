@@ -40,6 +40,7 @@ SECTION_TITLES_EN = [
     "Landmines",
     "The 12 checks in detail",
     "Questions to ask, and what to check on the day",
+    "What only you can tell",
     "What we could not find",
     "Sources and when they were read",
     "About this report",
@@ -100,6 +101,34 @@ def unsourced_sample():
     return bad
 
 
+# The five stages of the user's own questions, as the example report answers them.
+Q_FILTER = "Is the bedroom on the quiet side, away from a main road or a railway?"
+Q_VET = "What does this flat cost me every month, once the heating is paid for?"
+Q_COMPARE = "If this flat is unusually cheap, unusually good or unusually available"
+Q_VIEWING = "Can I hear the lift and the corridor door from the bedroom?"
+Q_SIGN = "Is the deposit no more than five weeks' rent, and which scheme will hold it?"
+
+
+def unknown_axes_sample():
+    """The sample with two axes graded unknown, so section 8 has axes to ask about."""
+    data = load_sample()
+    for axis in data["candidates"][0]["axes"]:
+        if axis["id"] in (4, 9):
+            axis["evidence_class"] = "U"
+    return data
+
+
+def unsourced_answer_sample():
+    """The sample, with one answer that states a number and names nothing to back it."""
+    data = load_sample()
+    data["candidates"][0]["question_answers"].append({
+        "question": "How many flats in the building are let by the night?",
+        "when": "vet", "kind": "answer",
+        "answer": "About 6 of the 41 flats, going by what neighbours say.",
+        "evidence_class": "C"})
+    return data
+
+
 def write_temp(report):
     import tempfile
     handle, path = tempfile.mkstemp(suffix=".json")
@@ -133,6 +162,9 @@ class TestGlossary(unittest.TestCase):
         needed += ["ui.report_title", "ui.requirement", "ui.observed", "ui.result", "ui.pass",
                    "ui.fail", "ui.unknown", "ui.evidence", "ui.nothing_listed", "ui.no_data",
                    "ui.configuration", "ui.tier_default", "ui.not_stated", "ui.no_source"]
+        needed += ["section.only_you", "ui.your_questions", "ui.before_signing", "ui.trigger_fired",
+                   "ui.trigger_not_fired", "ui.no_trigger", "ui.unknown_axes_request"]
+        needed += render.ONLY_YOU_DEFAULTS
         missing = [t for t in needed if t not in self.terms]
         self.assertEqual([], missing, "glossary.yaml is missing: %s" % missing)
 
@@ -243,7 +275,7 @@ class TestHtmlOutput(unittest.TestCase):
         self.assertTrue(self.html.startswith("<!doctype html>"))
         self.assertIn("</html>", self.html)
 
-    def test_all_ten_section_headings(self):
+    def test_all_eleven_section_headings(self):
         for i, title in enumerate(SECTION_TITLES_EN, 1):
             self.assertIn(">%d. %s</h2>" % (i, title), self.html,
                           "section %d (%s) is missing from the HTML" % (i, title))
@@ -308,7 +340,7 @@ class TestMarkdownOutput(unittest.TestCase):
     def test_exit_code(self):
         self.assertEqual(0, self.code, self.err)
 
-    def test_same_ten_sections_in_the_same_order(self):
+    def test_same_eleven_sections_in_the_same_order(self):
         found = [line for line in self.md.splitlines() if line.startswith("## ")]
         self.assertEqual(["## %d. %s" % (i, t) for i, t in enumerate(SECTION_TITLES_EN, 1)], found)
 
@@ -328,7 +360,9 @@ class TestViewer(unittest.TestCase):
 
     def test_size_budget(self):
         size = len(self.html.encode("utf-8"))
-        self.assertEqual(build_viewer.SIZE_LIMIT, 130 * 1024, "the budget is 130 KB")
+        # 140 KB since the report grew the two sections the contract asks for: the user's own
+        # questions answered at their stage, and "What only you can tell".
+        self.assertEqual(build_viewer.SIZE_LIMIT, 140 * 1024, "the budget is 140 KB")
         self.assertLess(size, build_viewer.SIZE_LIMIT,
                         "viewer.html is %.1f KB, the budget is %.0f KB"
                         % (size / 1024.0, build_viewer.SIZE_LIMIT / 1024.0))
@@ -659,6 +693,303 @@ class TestUnsourcedOutput(unittest.TestCase):
             self.assertIn(needle, viewer, needle)
 
 
+# ------------------------------------------ your questions, answered
+def section_html(html, anchor):
+    """The HTML of one section: from its <h2> to the next one."""
+    start = html.index('<h2 id="%s"' % anchor)
+    nxt = html.find("<h2 id=", start + 1)
+    return html[start:nxt if nxt > 0 else len(html)]
+
+
+def section_md(md, heading):
+    start = md.index("## %s" % heading)
+    nxt = md.find("\n## ", start + 1)
+    return md[start:nxt if nxt > 0 else len(md)]
+
+
+class TestQuestionAnswersSchema(unittest.TestCase):
+    def setUp(self):
+        self.schema = load_schema()
+        self.data = load_sample()
+        self.entry = {"question": "Who pays for the heating?", "when": "vet", "kind": "answer",
+                      "answer": "The tenant, on the building tariff.", "evidence_class": "S",
+                      "triggered": None, "sources": ["s-heat"]}
+
+    def test_a_valid_entry_is_accepted(self):
+        self.data["candidates"][0]["question_answers"].append(self.entry)
+        errors, warnings = render.validate(self.data, self.schema)
+        self.assertEqual([], errors)
+        self.assertEqual([], warnings)
+
+    def test_an_unknown_stage_is_rejected(self):
+        self.entry["when"] = "signing"
+        self.data["candidates"][0]["question_answers"].append(self.entry)
+        errors, _ = render.validate(self.data, self.schema)
+        joined = "\n".join(errors)
+        self.assertIn("when", joined)
+        self.assertIn("signing", joined)
+        self.assertIn("viewing", joined)  # the allowed stages are quoted back to the model
+
+    def test_an_unknown_kind_is_rejected(self):
+        self.entry["kind"] = "guess"
+        self.data["candidates"][0]["question_answers"].append(self.entry)
+        errors, _ = render.validate(self.data, self.schema)
+        self.assertTrue(any("kind" in e and "guess" in e for e in errors), errors)
+
+    def test_the_question_and_the_answer_are_required(self):
+        del self.entry["answer"]
+        self.data["candidates"][0]["question_answers"].append(self.entry)
+        errors, _ = render.validate(self.data, self.schema)
+        self.assertTrue(any("answer" in e for e in errors), errors)
+
+    def test_a_request_the_user_cannot_read_in_one_line_is_rejected(self):
+        self.data["candidates"][0]["only_you_can_tell"] = ["x" * 241]
+        errors, _ = render.validate(self.data, self.schema)
+        self.assertTrue(any("only_you_can_tell" in e and "240" in e for e in errors), errors)
+
+    def test_the_stages_are_the_ones_the_profile_validator_accepts(self):
+        """render.py places exactly the stages profile_check.py lets a user write."""
+        import subprocess as sp
+        import tempfile
+        check = os.path.join(SCRIPTS, "profile_check.py")
+        body = "my_questions:\n" + "".join(
+            '  - text: "q%d"\n    when: %s\n    kind: answer\n' % (i, stage)
+            for i, stage in enumerate(render.QUESTION_STAGES))
+        for text, ok in ((body, True), (body + '  - text: "q"\n    when: someday\n', False)):
+            handle, path = tempfile.mkstemp(suffix=".yaml")
+            os.close(handle)
+            try:
+                with io.open(path, "w", encoding="utf-8") as fh:
+                    fh.write(text)
+                proc = sp.Popen([sys.executable, check, path, "--json"], stdout=sp.PIPE, stderr=sp.PIPE)
+                out, _err = proc.communicate()
+                res = json.loads(out.decode("utf-8"))
+                stage_errors = [e for e in res["errors"] if "my_questions.when" in e]
+                if ok:
+                    self.assertEqual([], stage_errors, res["errors"])
+                else:
+                    self.assertTrue(stage_errors, res["errors"])
+            finally:
+                os.unlink(path)
+        self.assertEqual(sorted(render.QUESTION_STAGES),
+                         sorted(self.schema["definitions"]["question_answer"]
+                                ["properties"]["when"]["enum"]))
+
+    def test_the_no_source_rule_is_in_the_schema_as_an_anyof(self):
+        branches = self.schema["definitions"]["question_answer"].get("anyOf")
+        self.assertTrue(branches, "question_answer has no anyOf")
+        self.assertEqual(["computed_by", "sources"],
+                         sorted(sum([b.get("required", []) for b in branches], [])))
+        self.assertEqual(["sources", "computed_by"],
+                         render.source_alternatives(self.schema, "question_answer"))
+        for key in ("sources", "computed_by"):
+            self.assertNotIn(key, self.schema["definitions"]["question_answer"]["required"])
+
+    def test_a_compare_question_with_nothing_to_compare_is_a_warning(self):
+        one = load_sample()
+        one["candidates"] = one["candidates"][:1]
+        del one["comparison"]
+        _errors, warnings = render.validate(one, self.schema)
+        self.assertTrue(any("compare question" in w for w in warnings), warnings)
+
+    def test_a_compare_question_answered_for_one_candidate_only_is_a_warning(self):
+        half = load_sample()
+        half["candidates"][1]["question_answers"] = []
+        _errors, warnings = render.validate(half, self.schema)
+        self.assertTrue(any("hole" in w for w in warnings), warnings)
+
+
+class TestUnsourcedAnswers(unittest.TestCase):
+    def setUp(self):
+        self.schema = load_schema()
+
+    def test_an_answer_with_a_bare_number_is_flagged(self):
+        gaps = render.unsourced_numbers(unsourced_answer_sample(), self.schema)
+        self.assertEqual([("question", 6)], [g["loc"] for g in gaps])
+        self.assertIn("question_answers[6]", gaps[0]["message"])
+        self.assertIn("computed_by", gaps[0]["message"])
+
+    def test_an_answer_with_no_number_in_it_is_not_flagged(self):
+        data = unsourced_answer_sample()
+        data["candidates"][0]["question_answers"][-1]["answer"] = "Nobody would say."
+        self.assertEqual([], render.unsourced_numbers(data, self.schema))
+
+    def test_the_example_report_backs_every_answer_that_states_a_number(self):
+        self.assertEqual([], render.unsourced_numbers(load_sample(), self.schema))
+
+    def test_strict_turns_it_into_an_error(self):
+        path = write_temp(unsourced_answer_sample())
+        try:
+            code, out, err = run_cli(path, "--strict", "--validate-only")
+            self.assertEqual(1, code, err)
+            self.assertIn("WARNING  no source:", err)
+            self.assertIn("1 number(s) with no source", err)
+            self.assertEqual("", out)
+        finally:
+            os.unlink(path)
+
+    def test_the_html_marks_that_answer_and_the_clean_one_is_marked_nowhere(self):
+        path = write_temp(unsourced_answer_sample())
+        try:
+            code, html, err = run_cli(path)
+            self.assertEqual(0, code, err)
+            self.assertEqual(1, html.count('class="chip nosource"'), html.count("nosource"))
+        finally:
+            os.unlink(path)
+        code, html, err = run_cli(SAMPLE)
+        self.assertEqual(0, code, err)
+        self.assertNotIn('class="chip nosource"', html)
+
+
+class TestQuestionAnswersOutput(unittest.TestCase):
+    """Every question is answered where the user reads it, in both renderers."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.code, cls.html, cls.err = run_cli(SAMPLE)
+        cls.md_code, cls.md, cls.md_err = run_cli(SAMPLE, "--md")
+
+    def test_a_filter_question_sits_with_the_hard_filters_and_nowhere_else(self):
+        self.assertEqual(0, self.code, self.err)
+        self.assertIn(Q_FILTER, section_html(self.html, "hard-filters"))
+        self.assertEqual(1, self.html.count(Q_FILTER), "a question belongs to one stage only")
+        self.assertEqual(1, self.md.count(Q_FILTER), self.md_err)
+        self.assertIn(Q_FILTER, section_md(self.md, "2. Your must-haves"))
+
+    def test_a_vet_question_sits_under_the_verdict(self):
+        verdict = section_html(self.html, "verdict")
+        self.assertIn(Q_VET, verdict)
+        self.assertIn("Your questions, answered", verdict)
+        self.assertIn(Q_VET, section_md(self.md, "1. Verdict"))
+
+    def test_a_compare_question_is_a_row_of_the_side_by_side_table(self):
+        comparison = section_html(self.html, "comparison")
+        self.assertIn(Q_COMPARE, comparison)
+        # one row for the question, one cell per candidate, so the text appears once
+        self.assertEqual(1, comparison.count(Q_COMPARE))
+        self.assertIn(Q_COMPARE, section_md(self.md, "3. Side by side"))
+
+    def test_the_viewing_and_signing_questions_sit_in_the_checklists(self):
+        questions = section_html(self.html, "questions")
+        self.assertIn(Q_VIEWING, questions)
+        self.assertIn(Q_SIGN, questions)
+        self.assertIn("Before you sign", questions)
+        md = section_md(self.md, "7. Questions to ask")
+        self.assertIn(Q_VIEWING, md)
+        self.assertIn(Q_SIGN, md)
+        self.assertIn("**Before you sign**", md)
+
+    def test_each_answer_carries_an_evidence_grade_and_whether_the_trigger_fired(self):
+        for needle in ("the trigger fired", "the trigger did not fire", "asked of every flat"):
+            self.assertIn(needle, self.html, needle)
+            self.assertIn(needle, self.md, needle)
+        filters = section_html(self.html, "hard-filters")
+        self.assertIn("the trigger fired", filters)
+        self.assertIn("Self-reported", filters)
+
+    def test_the_reader_sees_the_labels_in_their_own_language(self):
+        code, zh, err = run_cli(SAMPLE, "--lang", "zh-TW")
+        self.assertEqual(0, code, err)
+        self.assertIn("\u4f60\u7684\u554f\u984c\uff0c\u7b54\u6848\u5728\u9019", zh)   # Your questions, answered
+        self.assertIn("\u4f60\u8a2d\u7684\u689d\u4ef6\u6210\u7acb\u4e86", zh)              # the trigger fired
+        self.assertIn("\u7c3d\u7d04\u4e4b\u524d", zh)                                    # Before you sign
+
+
+class TestOnlyYouCanTell(unittest.TestCase):
+    """Section 8: the unknown axes and the things no tool can sense, as a request."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.path = write_temp(unknown_axes_sample())
+        cls.code, cls.html, cls.err = run_cli(cls.path)
+        cls.md_code, cls.md, cls.md_err = run_cli(cls.path, "--md")
+        cls.plain_code, cls.plain_html, cls.plain_err = run_cli(SAMPLE)
+
+    @classmethod
+    def tearDownClass(cls):
+        os.unlink(cls.path)
+
+    def test_the_section_is_between_the_questions_and_the_gaps(self):
+        self.assertEqual(0, self.plain_code, self.plain_err)
+        self.assertIn('<h2 id="only-you">8. What only you can tell</h2>', self.plain_html)
+        self.assertLess(self.plain_html.index('id="questions"'), self.plain_html.index('id="only-you"'))
+        self.assertLess(self.plain_html.index('id="only-you"'), self.plain_html.index('id="gaps"'))
+        self.assertEqual(("section.only_you", "only-you"), render.SECTIONS[7])
+
+    def test_it_opens_with_a_request_not_a_gap(self):
+        block = section_html(self.plain_html, "only-you")
+        self.assertIn("We could not check these for you.", block)
+        self.assertIn("Please", block)
+
+    def test_it_lists_every_unknown_axis_by_its_label(self):
+        self.assertEqual(0, self.code, self.err)
+        block = section_html(self.html, "only-you")
+        for label in ("Construction nearby", "Aspect and light"):
+            self.assertIn("<strong>%s</strong>" % label, block)
+        self.assertNotIn("<strong>Crime</strong>", block)   # graded official, not unknown
+        for label in ("Construction nearby", "Aspect and light"):
+            self.assertIn("**%s**" % label, section_md(self.md, "8. What only you can tell"))
+
+    def test_it_shows_what_the_report_asked_for(self):
+        block = section_html(self.plain_html, "only-you")
+        self.assertIn("the ventilation is shared", block)
+        self.assertIn("reached for the light", block)
+        self.assertIn("the ventilation is shared", section_md(self.md, "8. What only you can tell"))
+
+    def test_a_candidate_that_asked_for_nothing_gets_the_four_standard_requests(self):
+        L = render.Labels(render.load_glossary(GLOSSARY), "en")
+        block = section_html(self.plain_html, "only-you")
+        second = block[block.index("Flat 201, Marlow Wharf"):]
+        self.assertEqual(4, len(render.ONLY_YOU_DEFAULTS))
+        for term_id in render.ONLY_YOU_DEFAULTS:
+            self.assertIn(L.label(term_id), second, term_id)
+            self.assertIn(L.label(term_id), section_md(self.md, "8. What only you can tell"))
+
+    def test_the_requests_read_the_same_in_chinese(self):
+        code, zh, err = run_cli(SAMPLE, "--lang", "zh-TW")
+        self.assertEqual(0, code, err)
+        L = render.Labels(render.load_glossary(GLOSSARY), "zh-TW")
+        self.assertIn(L.label("section.only_you"), zh)
+        self.assertIn(L.label("only_you.smell"), zh)
+
+
+class TestViewerDrawsBothSections(unittest.TestCase):
+    def setUp(self):
+        self.viewer = read(VIEWER)
+
+    def test_it_carries_the_same_pieces(self):
+        for needle in ("function qaAt(", "function qaBlock(", "function trigState(",
+                       "function onlyYouAsks(", "function noSrcQA(", "ONLY_YOU_DEFAULTS",
+                       "ui.your_questions", "ui.before_signing", "ui.trigger_fired",
+                       "ui.trigger_not_fired", "ui.no_trigger", "ui.unknown_axes_request",
+                       '["section.only_you","only-you"]',
+                       "var RENDERERS=[s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11]"):
+            self.assertIn(needle, self.viewer.replace(", ", ","), needle)
+
+    def test_it_carries_the_four_standard_requests_in_three_languages(self):
+        start = self.viewer.index("/*BEGIN:GLOSSARY*/")
+        block = self.viewer[start:self.viewer.index("/*END:GLOSSARY*/")]
+        payload = json.loads(block[block.index("{"):block.rindex("}") + 1])
+        for term_id in render.ONLY_YOU_DEFAULTS + ["section.only_you", "ui.your_questions"]:
+            self.assertIn(term_id, payload)
+            for lang in ("en", "zh-TW", "zh-CN"):
+                self.assertTrue(payload[term_id].get(lang), "%s has no %s" % (term_id, lang))
+
+    def test_the_example_it_ships_answers_the_questions(self):
+        start = self.viewer.index("/*BEGIN:SAMPLE*/")
+        block = self.viewer[start:self.viewer.index("/*END:SAMPLE*/")]
+        payload = json.loads(block[block.index("{"):block.rindex("}") + 1])
+        stages = [qa["when"] for qa in payload["candidates"][0]["question_answers"]]
+        self.assertEqual(["filter", "vet", "compare", "compare", "viewing", "sign"], stages)
+        self.assertTrue(payload["candidates"][0]["only_you_can_tell"])
+        self.assertNotIn("only_you_can_tell", payload["candidates"][1],
+                         "the second candidate exercises the four standard requests")
+
+    def test_the_build_step_is_up_to_date_and_inside_the_budget(self):
+        self.assertEqual(0, build_viewer.main(["--check"]))
+        self.assertLess(len(self.viewer.encode("utf-8")), build_viewer.SIZE_LIMIT)
+
+
 # ------------------------------------------------------- the escalation ladder
 class TestEscalationLadder(unittest.TestCase):
     def setUp(self):
@@ -715,7 +1046,7 @@ class TestEscalationLadder(unittest.TestCase):
         self.assertEqual(2, html.count(line), html.count("Configuration:"))
         title = html.index("</h1>")
         self.assertLess(html.index(line), html.index("&middot;", title))
-        self.assertLess(html.index("10. About this report"), html.rindex(line))
+        self.assertLess(html.index("11. About this report"), html.rindex(line))
 
     def test_the_markdown_prints_it_in_both_places(self):
         code, md, err = run_cli(SAMPLE, "--md")
@@ -724,7 +1055,7 @@ class TestEscalationLadder(unittest.TestCase):
         self.assertTrue(lines[0].startswith("# "), lines[0])
         self.assertTrue(lines[2].startswith("Configuration: breadth \u2014 "), lines[:4])
         self.assertEqual(2, md.count("Configuration: breadth \u2014 "), md.count("Configuration"))
-        after = md[md.index("## 10. About this report"):]
+        after = md[md.index("## 11. About this report"):]
         self.assertIn("Configuration: breadth \u2014 ", after)
 
     def test_the_viewer_prints_the_same_line(self):

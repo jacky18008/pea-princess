@@ -30,18 +30,21 @@ GLOSSARY = os.path.join(ROOT, "skills", "vet-flat", "references", "glossary.yaml
 SAMPLE = os.path.join(ROOT, "tests", "fixtures", "report-sample.json")
 SCRIPTS = os.path.join(ROOT, "skills", "vet-flat", "scripts")
 
-# 130 KB: the layout, the glossary, the example report, the arithmetic check that
+# 140 KB: the layout, the glossary, the example report, the arithmetic check that
 # mirrors scripts/render.py recompute(), and the share card that mirrors
-# scripts/seed.py. Still one file a phone can open.
-SIZE_LIMIT = 130 * 1024
+# scripts/seed.py. Raised from 130 KB for the two contract sections the report owed
+# the reader: the user's own questions answered at their stage, and "What only you
+# can tell". Still one file a phone can open.
+SIZE_LIMIT = 140 * 1024
 
 # viewer.html has to stay one small self-contained file, so it carries only the
 # glossary entries the layout actually looks up: the section titles, the verdict
 # statuses, the evidence grades, the twelve axis names, the twelve landmine codes
-# and the table labels. The domain jargon entries (EPC, heat network, Right to
+# and the table labels, plus the four "only you can tell" requests both renderers
+# fall back to. The domain jargon entries (EPC, heat network, Right to
 # Manage...) stay in glossary.yaml for the skill and for human readers; no
 # renderer resolves them, so inlining them would add weight and no behaviour.
-LAYOUT_PREFIXES = ("section", "verdict", "evidence", "axis", "landmine", "ui")
+LAYOUT_PREFIXES = ("section", "verdict", "evidence", "axis", "landmine", "ui", "only_you")
 
 
 def layout_terms(terms):

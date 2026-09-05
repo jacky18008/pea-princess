@@ -39,7 +39,7 @@ DEFAULT_GLOSSARY = os.path.join(REFS, "glossary.yaml")
 FOOTER_TEMPLATE = "Generated with vet-flat {version} \u2014 {url}"
 DEFAULT_SOURCE_URL = "https://github.com/jacky18008/pea-princess"
 
-# The ten sections, in order. (glossary id, html anchor)
+# The eleven sections, in order. (glossary id, html anchor)
 SECTIONS = [
     ("section.verdict", "verdict"),
     ("section.hard_filters", "hard-filters"),
@@ -48,6 +48,7 @@ SECTIONS = [
     ("section.landmines", "landmines"),
     ("section.axes", "axes"),
     ("section.questions", "questions"),
+    ("section.only_you", "only-you"),
     ("section.gaps", "gaps"),
     ("section.sources", "sources"),
     ("section.about", "about"),
@@ -78,6 +79,16 @@ PROFILE_KEYS = [
     "move_in_earliest", "move_in_latest", "commute_destination", "commute_max_min",
     "reject_ground_floor", "must_haves", "guarantor_route", "notes",
 ]
+
+# The user's own questions (profile.yaml my_questions) are answered where they are read:
+# filter with the hard filters, vet under the verdict, compare as rows of the side-by-side
+# table, viewing with the viewing-day checks, sign in its own list before signing.
+QUESTION_STAGES = ["filter", "vet", "compare", "viewing", "sign"]
+
+# Section 8, "What only you can tell": what no register, feed or photo can carry. Asked
+# only when the report named nothing of its own, and always as a request, not a gap.
+ONLY_YOU_DEFAULTS = ["only_you.smell", "only_you.noise_night",
+                     "only_you.light_today", "only_you.street_feel"]
 
 
 # --------------------------------------------------------------- glossary ---
@@ -321,6 +332,30 @@ def semantic_checks(data, v):
                    "%s is given as a reason but there is no landmine entry with that code" % code)
         if len(candidates) > 1 and not cand.get("metrics"):
             v.warn(path, "has no metrics, so it will be blank in the side-by-side table")
+        for j, qa in enumerate(cand.get("question_answers") or []):
+            if not isinstance(qa, dict):
+                continue
+            if qa.get("when") == "compare" and len(candidates) < 2:
+                v.warn("%s.question_answers[%d]" % (path, j),
+                       "is a compare question, but this report has one candidate and no "
+                       "side-by-side table to put it in. Answer it under the verdict instead: "
+                       "set when to 'vet'.")
+
+    if len(candidates) > 1:
+        asked = {}
+        for cand in candidates:
+            if not isinstance(cand, dict):
+                continue
+            for qa in cand.get("question_answers") or []:
+                if isinstance(qa, dict) and qa.get("when") == "compare" and qa.get("question"):
+                    asked.setdefault(qa["question"], set()).add(cand.get("id"))
+        for question in sorted(asked):
+            silent = [c for c in ids if c not in asked[question]]
+            if silent:
+                v.warn("candidates.question_answers",
+                       "%r is answered for some candidates but not for %s, so the comparison "
+                       "row will have a hole. Answer it for every candidate, or say what you "
+                       "tried." % (question[:60], ", ".join(repr(c) for c in silent)))
 
     comparison = data.get("comparison")
     if len(candidates) > 1:
@@ -402,16 +437,31 @@ def _backed(item, keys):
     return False
 
 
+HAS_A_DIGIT = re.compile(r"[0-9]")
+
+
+def states_a_number(text):
+    """True when a sentence puts a figure in front of the reader.
+
+    Prose carries numbers too: "the site runs until 2028", "5 weeks' deposit". An
+    answer that states one has to name a source or a formula, like any other number.
+    """
+    return bool(text) and bool(HAS_A_DIGIT.search(text))
+
+
 def unsourced_numbers(report, schema=None):
     """One entry per stated number with neither a source id nor a computed_by note.
 
-    A null value is not flagged: there is no number in it to source. Each entry
-    carries `candidate_id`, `loc` (the same locator the arithmetic chips use) and
-    a `message` written for the model that has to fix it.
+    Walks the axis numbers, the comparison metrics and the answers to the user's own
+    questions. A null value is not flagged: there is no number in it to source, and an
+    answer with no figure in it is not flagged either. Each entry carries
+    `candidate_id`, `loc` (the same locator the arithmetic chips use) and a `message`
+    written for the model that has to fix it.
     """
     out = []
     axis_keys = source_alternatives(schema, "labelled_number")
     metric_keys = source_alternatives(schema, "measure")
+    answer_keys = source_alternatives(schema, "question_answer")
     for i, cand in enumerate(report.get("candidates") or []):
         if not isinstance(cand, dict):
             continue
@@ -451,6 +501,21 @@ def unsourced_numbers(report, schema=None):
                 "message": ("candidates[%d] %s, metrics.%s: no source id and no computed_by note. "
                             "Cite a source from the top-level sources list, or say in computed_by "
                             "how you worked it out." % (i, cid, key)),
+            })
+        for index, qa in enumerate(cand.get("question_answers") or []):
+            if not isinstance(qa, dict) or not states_a_number(qa.get("answer")):
+                continue
+            if _backed(qa, answer_keys):
+                continue
+            out.append({
+                "candidate_id": cid,
+                "loc": ("question", index),
+                "label": qa.get("question") or "",
+                "keys": answer_keys,
+                "message": ('candidates[%d] %s, question_answers[%d] "%s": the answer states a '
+                            "number but names no source id and no computed_by note. Cite a source "
+                            "from the top-level sources list, or say in computed_by how you worked "
+                            "it out." % (i, cid, index, (qa.get("question") or "")[:60])),
             })
     return out
 
@@ -970,6 +1035,48 @@ def candidate_name(cand):
             or cand.get("id") or "?")
 
 
+def staged_questions(cand, when):
+    """(index, entry) for the user's own questions answered at one stage, in report order.
+
+    The index is the position in `question_answers`, so an answer with an unsourced
+    number can be marked with the same ("question", index) locator the chips use.
+    """
+    out = []
+    for index, qa in enumerate(cand.get("question_answers") or []):
+        if isinstance(qa, dict) and qa.get("when") == when:
+            out.append((index, qa))
+    return out
+
+
+def trigger_state(qa, L):
+    """Did the question's trigger fire? A question with no trigger is asked every time."""
+    fired = qa.get("triggered")
+    if fired is None:
+        return L.label("ui.no_trigger")
+    return L.label("ui.trigger_fired") if fired else L.label("ui.trigger_not_fired")
+
+
+def only_you_asks(cand, L):
+    """(label, request) lines for section 8, in the order the reader needs them.
+
+    First the axes graded unknown, each named and followed by what was tried; then what
+    the report itself asked for; and if it asked for nothing, the four standard requests.
+    Every line is a request to the person who will stand there, never a list of failures.
+    """
+    out = []
+    for axis in sorted(cand.get("axes") or [], key=lambda a: a.get("id") or 0):
+        if not isinstance(axis, dict) or axis.get("evidence_class") != "U":
+            continue
+        tid = "axis.%s" % axis.get("id")
+        text = (axis.get("finding") or "").strip() or L.plain(tid)
+        out.append((L.label(tid, axis.get("name", "")), text))
+    supplied = [line for line in (cand.get("only_you_can_tell") or [])
+                if isinstance(line, str) and line.strip()]
+    for line in supplied or [L.label(tid) for tid in ONLY_YOU_DEFAULTS]:
+        out.append(("", line))
+    return out
+
+
 def profile_rows(snapshot, L):
     rows = []
     seen = set()
@@ -1143,6 +1250,24 @@ class HtmlRenderer(object):
         if gloss:
             self.w('<p class="lede">%s</p>' % esc(gloss))
 
+    def questions_block(self, cand, when, title=None):
+        """The user's own questions, answered, at the stage where they are read."""
+        L = self.L
+        rows = staged_questions(cand, when)
+        if not rows:
+            return
+        gaps = self.nosource.get(cand.get("id")) or set()
+        if title:
+            self.w('<p class="sub"><strong>%s</strong></p>' % esc(title))
+        for index, qa in rows:
+            self.w('<div class="q"><strong>%s</strong>' % esc(qa.get("question", "")))
+            self.w("<p>%s%s</p>" % (esc(qa.get("answer", "")),
+                                    self.chip_nosource(("question", index) in gaps)))
+            bits = [self.chip_evidence(qa.get("evidence_class")), esc(trigger_state(qa, L))]
+            if qa.get("trigger"):
+                bits.append(esc(qa["trigger"]))
+            self.w('<p class="sub">%s</p></div>' % " \u00b7 ".join(b for b in bits if b))
+
     def table(self, headers, rows):
         self.w('<div class="tw"><table><thead><tr>')
         for head in headers:
@@ -1192,6 +1317,7 @@ class HtmlRenderer(object):
                 for cond in verdict["conditions"]:
                     self.w("<li>%s</li>" % esc(cond))
                 self.w("</ol>")
+            self.questions_block(cand, "vet", L.label("ui.your_questions"))
             self.w("</div>")
 
     def s2_hard_filters(self):
@@ -1200,6 +1326,7 @@ class HtmlRenderer(object):
         for cand in self.d.get("candidates", []):
             self.w("<h3>%s</h3>" % esc(candidate_name(cand)))
             bad = self.bad.get(cand.get("id")) or {}
+            gaps = self.nosource.get(cand.get("id")) or set()
             rows = []
             for index, hf in enumerate(cand.get("hard_filters") or []):
                 css, tid = marks.get(hf.get("pass"), ('unk', "ui.unknown"))
@@ -1211,6 +1338,15 @@ class HtmlRenderer(object):
                     '<td class="num"><span class="%s" title="%s">%s</span></td>' % (
                         css, esc(L.plain(tid)), esc(L.label(tid))),
                     "<td>%s</td>" % self.chip_evidence(hf.get("evidence_class")),
+                ])
+            for index, qa in staged_questions(cand, "filter"):
+                rows.append([
+                    "<td><strong>%s</strong></td>" % esc(qa.get("question", "")),
+                    "<td>%s</td>" % esc(qa.get("trigger") or "\u2014"),
+                    "<td>%s%s</td>" % (esc(qa.get("answer", "")),
+                                       self.chip_nosource(("question", index) in gaps)),
+                    '<td class="num">%s</td>' % esc(trigger_state(qa, L)),
+                    "<td>%s</td>" % self.chip_evidence(qa.get("evidence_class")),
                 ])
             if not rows:
                 self.w("<p>%s</p>" % esc(L.label("ui.nothing_listed")))
@@ -1270,6 +1406,35 @@ class HtmlRenderer(object):
                 esc(L.plain("ui.all_in_pcm"))))
             rows.append(cells)
         self.table(headers, rows)
+
+        shown = [cid for cid in order if by_id.get(cid)]
+        texts = []
+        for cid in shown:
+            for _index, qa in staged_questions(by_id[cid], "compare"):
+                if qa.get("question") and qa["question"] not in texts:
+                    texts.append(qa["question"])
+        if texts:
+            self.w("<h3>%s</h3>" % esc(L.label("ui.your_questions")))
+            self.w('<p class="lede">%s</p>' % esc(L.plain("ui.your_questions")))
+            rows = []
+            for text in texts:
+                cells = ["<td><strong>%s</strong></td>" % esc(text)]
+                for cid in shown:
+                    gaps = self.nosource.get(cid) or set()
+                    answers = [(i, qa) for i, qa in staged_questions(by_id[cid], "compare")
+                               if qa.get("question") == text]
+                    if not answers:
+                        cells.append("<td>%s</td>" % esc(L.label("ui.no_data")))
+                        continue
+                    index, qa = answers[0]
+                    cells.append("<td>%s%s<br>%s <small>%s</small></td>" % (
+                        esc(qa.get("answer", "")),
+                        self.chip_nosource(("question", index) in gaps),
+                        self.chip_evidence(qa.get("evidence_class")),
+                        esc(trigger_state(qa, L))))
+                rows.append(cells)
+            self.table([L.label("ui.your_questions")]
+                       + [candidate_name(by_id[cid]) for cid in shown], rows)
 
         for key, tid in (("structural_findings", "ui.structural_findings"),
                          ("single_building_findings", "ui.single_building_findings")):
@@ -1452,8 +1617,23 @@ class HtmlRenderer(object):
                 self.w("</ol>")
             else:
                 self.w("<p>%s</p>" % esc(L.label("ui.nothing_listed")))
+            self.questions_block(cand, "viewing", L.label("ui.your_questions"))
+            if staged_questions(cand, "sign"):
+                self.w("<h4>%s</h4>" % esc(L.label("ui.before_signing")))
+                self.w('<p class="lede">%s</p>' % esc(L.plain("ui.before_signing")))
+                self.questions_block(cand, "sign")
 
-    def s8_gaps(self):
+    def s8_only_you(self):
+        L = self.L
+        for cand in self.d.get("candidates", []):
+            self.w("<h3>%s</h3>" % esc(candidate_name(cand)))
+            self.w("<p>%s</p><ul>" % esc(L.label("ui.unknown_axes_request")))
+            for label, text in only_you_asks(cand, L):
+                self.w("<li><strong>%s</strong>: %s</li>" % (esc(label), esc(text))
+                       if label else "<li>%s</li>" % esc(text))
+            self.w("</ul>")
+
+    def s9_gaps(self):
         L = self.L
         rows = []
         for entry in self.d.get("not_found") or []:
@@ -1484,7 +1664,7 @@ class HtmlRenderer(object):
         else:
             self.w("<p>%s</p>" % esc(L.label("ui.nothing_listed")))
 
-    def s9_sources(self):
+    def s10_sources(self):
         L = self.L
         rows = []
         for src in self.d.get("sources") or []:
@@ -1506,7 +1686,7 @@ class HtmlRenderer(object):
         else:
             self.w("<p>%s</p>" % esc(L.label("ui.nothing_listed")))
 
-    def s10_about(self):
+    def s11_about(self):
         L = self.L
         self.w("<p class=\"sub\"><strong>%s</strong></p>" % esc(configuration_line(self.d, L)))
         gb = self.d.get("generated_by") or {}
@@ -1553,8 +1733,8 @@ class HtmlRenderer(object):
         self.w("<p class=\"sub\"><strong>%s</strong></p>" % esc(configuration_line(self.d, L)))
         self.w('<p class="sub">%s &middot; %s</p>' % (esc(names), esc(self.d.get("generated_at", ""))))
         renderers = [self.s1_verdict, self.s2_hard_filters, self.s3_comparison, self.s4_worst_reviews,
-                     self.s5_landmines, self.s6_axes, self.s7_questions, self.s8_gaps,
-                     self.s9_sources, self.s10_about]
+                     self.s5_landmines, self.s6_axes, self.s7_questions, self.s8_only_you,
+                     self.s9_gaps, self.s10_sources, self.s11_about]
         for i, ((term_id, anchor), fn) in enumerate(zip(SECTIONS, renderers), 1):
             self.section(i, term_id, anchor)
             fn()
@@ -1590,6 +1770,24 @@ def render_markdown(data, L, schema=None):
     def source_flag(gaps, key):
         """The Markdown twin of the inline "no source" chip."""
         return " **[%s]**" % L.label("ui.no_source") if key in gaps else ""
+
+    def questions_block(cand, when, title=None):
+        """The Markdown twin of the staged block of the user's own questions."""
+        rows = staged_questions(cand, when)
+        if not rows:
+            return
+        gaps = gaps_by_candidate.get(cand.get("id")) or set()
+        if title:
+            o.append("")
+            o.append("**%s**" % title)
+        for index, qa in rows:
+            bits = [L.label("evidence." + (qa.get("evidence_class") or "U")), trigger_state(qa, L)]
+            if qa.get("trigger"):
+                bits.append(qa["trigger"])
+            o.append("")
+            o.append("- **%s**" % qa.get("question", ""))
+            o.append("  - %s%s" % (qa.get("answer", ""), source_flag(gaps, ("question", index))))
+            o.append("  - %s" % " \u00b7 ".join(bits))
 
     names = ", ".join(candidate_name(c) for c in data.get("candidates", []))
     o.append("# %s \u2014 %s" % (L.label("ui.report_title"), names))
@@ -1630,6 +1828,7 @@ def render_markdown(data, L, schema=None):
                                      L.label("axis.%s" % verdict["fatal_axis"])))
         for cond in verdict.get("conditions") or []:
             o.append("- %s" % cond)
+        questions_block(cand, "vet", L.label("ui.your_questions"))
 
     head(2, "section.hard_filters")
     marks = {True: "ui.pass", False: "ui.fail", "unknown": "ui.unknown"}
@@ -1637,11 +1836,17 @@ def render_markdown(data, L, schema=None):
         o.append("")
         o.append("### %s" % candidate_name(cand))
         bad = bad_by_candidate.get(cand.get("id")) or {}
+        gaps = gaps_by_candidate.get(cand.get("id")) or set()
         rows = [[hf.get("name", ""), hf.get("requirement", ""),
                  (hf.get("observed", "") or "") + maths_flag(bad, ("hard_filter", i)),
                  L.label(marks.get(hf.get("pass"), "ui.unknown")),
                  L.label("evidence." + (hf.get("evidence_class") or "U"))]
                 for i, hf in enumerate(cand.get("hard_filters") or [])]
+        rows += [[qa.get("question", ""), qa.get("trigger") or "\u2014",
+                  (qa.get("answer", "") or "") + source_flag(gaps, ("question", i)),
+                  trigger_state(qa, L),
+                  L.label("evidence." + (qa.get("evidence_class") or "U"))]
+                 for i, qa in staged_questions(cand, "filter")]
         o += md_table(["", L.label("ui.requirement"), L.label("ui.observed"),
                        L.label("ui.result"), L.label("ui.evidence")], rows)
 
@@ -1679,6 +1884,34 @@ def render_markdown(data, L, schema=None):
                        + maths_flag(bad, ("costs", "all_in_planning")))
             rows.append(row)
         o += md_table(headers, rows)
+        shown = [c for c in (by_id.get(e.get("candidate_id"))
+                             for e in comparison.get("ranking") or []) if c]
+        texts = []
+        for cand in shown:
+            for _i, qa in staged_questions(cand, "compare"):
+                if qa.get("question") and qa["question"] not in texts:
+                    texts.append(qa["question"])
+        if texts:
+            o.append("")
+            o.append("### %s" % L.label("ui.your_questions"))
+            rows = []
+            for text in texts:
+                row = [text]
+                for cand in shown:
+                    gaps = gaps_by_candidate.get(cand.get("id")) or set()
+                    answers = [(i, qa) for i, qa in staged_questions(cand, "compare")
+                               if qa.get("question") == text]
+                    if not answers:
+                        row.append(L.label("ui.no_data"))
+                        continue
+                    index, qa = answers[0]
+                    row.append("%s%s (%s \u00b7 %s)" % (
+                        qa.get("answer", ""), source_flag(gaps, ("question", index)),
+                        L.label("evidence." + (qa.get("evidence_class") or "U")),
+                        trigger_state(qa, L)))
+                rows.append(row)
+            o += md_table([L.label("ui.your_questions")]
+                          + [candidate_name(c) for c in shown], rows)
         for key, tid in (("structural_findings", "ui.structural_findings"),
                          ("single_building_findings", "ui.single_building_findings")):
             findings = comparison.get(key) or []
@@ -1787,8 +2020,22 @@ def render_markdown(data, L, schema=None):
         o.append("**%s**" % L.label("ui.viewing_checks"))
         for check in cand.get("viewing_day_checks") or []:
             o.append("- [ ] %s" % check)
+        questions_block(cand, "viewing", L.label("ui.your_questions"))
+        if staged_questions(cand, "sign"):
+            o.append("")
+            o.append("**%s**" % L.label("ui.before_signing"))
+            questions_block(cand, "sign")
 
-    head(8, "section.gaps")
+    head(8, "section.only_you")
+    for cand in candidates:
+        o.append("")
+        o.append("### %s" % candidate_name(cand))
+        o.append("")
+        o.append(L.label("ui.unknown_axes_request"))
+        for label, text in only_you_asks(cand, L):
+            o.append("- **%s**: %s" % (label, text) if label else "- %s" % text)
+
+    head(9, "section.gaps")
     rows = [[e.get("what", ""), "; ".join("`%s`" % q for q in e.get("queries_used") or []),
              e.get("where_looked") or "", e.get("next_step") or ""]
             for e in data.get("not_found") or []]
@@ -1804,7 +2051,7 @@ def render_markdown(data, L, schema=None):
         o += md_table([L.label("ui.blocked_source"), L.label("ui.http_status"),
                        L.label("ui.blocked_reason"), L.label("ui.workaround")], rows)
 
-    head(9, "section.sources")
+    head(10, "section.sources")
     rows = [[s.get("id", ""), s.get("name") or "", s.get("url") or "", s.get("retrieved_at", ""),
              L.label("evidence." + (s.get("evidence_class") or "U")),
              " ".join(x for x in (s.get("provenance"), s.get("note")) if x)]
@@ -1812,7 +2059,7 @@ def render_markdown(data, L, schema=None):
     o += md_table(["", L.label("ui.source_name"), L.label("ui.url"), L.label("ui.retrieved_at"),
                    L.label("ui.evidence"), L.label("ui.provenance")], rows)
 
-    head(10, "section.about")
+    head(11, "section.about")
     o.append("")
     o.append(configuration_line(data, L))
     gb = data.get("generated_by") or {}

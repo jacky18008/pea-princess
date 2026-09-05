@@ -601,6 +601,77 @@
    "provenance_notes": [
     "The energy certificate page was read directly from the government register on 2026-09-03.",
     "The resident review pages were supplied by the user on 2026-09-03; the review site does not allow automated access."
+   ],
+   "question_answers": [
+    {
+     "question": "Is the bedroom on the quiet side, away from a main road or a railway?",
+     "when": "filter",
+     "kind": "answer",
+     "answer": "The bedroom faces the courtyard. The living room faces the street, which is a bus route. Read off the aspect, not confirmed.",
+     "evidence_class": "S",
+     "triggered": true,
+     "trigger": "a bus route, a main road or a railway within 100 metres",
+     "sources": [
+      "s-listing-1"
+     ]
+    },
+    {
+     "question": "What does this flat cost me every month, once the heating is paid for?",
+     "when": "vet",
+     "kind": "answer",
+     "answer": "2,528 a month all in: rent 2,150, heat and power 175, water and broadband 55, council tax 148. That is 72 under your 2,600 ceiling.",
+     "evidence_class": "I",
+     "triggered": null,
+     "computed_by": "scripts/calc.py all-in"
+    },
+    {
+     "question": "If this flat is unusually cheap, unusually good or unusually available next to its neighbours, what is the hidden problem? Cheap has a reason.",
+     "when": "compare",
+     "kind": "answer",
+     "answer": "At the bottom of the band, 3.77 a square foot against 3.80 to 4.40. The reason has a name: an approved block 180 metres away, and a heat network you cannot leave.",
+     "evidence_class": "I",
+     "triggered": true,
+     "sources": [
+      "s-plan-1",
+      "s-heat"
+     ]
+    },
+    {
+     "question": "If it is pricier than its neighbours, am I buying visible value I actually care about (quiet side, floor, light, management), or just paying more?",
+     "when": "compare",
+     "kind": "answer",
+     "answer": "Not pricier: 3.77 a square foot sits just under the band. No premium to justify.",
+     "evidence_class": "I",
+     "triggered": false,
+     "sources": [
+      "s-epc-1"
+     ]
+    },
+    {
+     "question": "Can I hear the lift and the corridor door from the bedroom?",
+     "when": "viewing",
+     "kind": "check",
+     "answer": "Nothing online settles this. Shut the bedroom door, have someone call the lift, and listen.",
+     "evidence_class": "U",
+     "sources": [
+      "s-reviews-1"
+     ]
+    },
+    {
+     "question": "Is the deposit no more than five weeks' rent, and which scheme will hold it?",
+     "when": "sign",
+     "kind": "ask",
+     "answer": "Five weeks on this rent is 2,481, the legal maximum. No scheme has been named yet. Get it in writing first.",
+     "evidence_class": "U",
+     "triggered": true,
+     "trigger": "any deposit asked for before the contract is signed",
+     "computed_by": "scripts/calc.py deposit"
+    }
+   ],
+   "only_you_can_tell": [
+    "Please tell us whether the corridor smells of other people's cooking: the ventilation is shared.",
+    "Please stand in the living room at about four and say if you reached for the light.",
+    "Please say how the walk from the second station reads after dark."
    ]
   },
   {
@@ -1156,6 +1227,30 @@
    "provenance_notes": [
     "The energy certificate page was read directly from the government register on 2026-09-03. The register was searched by street name because no Flat 201 exists at this postcode.",
     "The resident review pages were supplied by the user on 2026-09-03."
+   ],
+   "question_answers": [
+    {
+     "question": "If this flat is unusually cheap, unusually good or unusually available next to its neighbours, what is the hidden problem? Cheap has a reason.",
+     "when": "compare",
+     "kind": "answer",
+     "answer": "It is 401 a month cheaper all in, and that is what the discount buys: street level, 474 square feet against the 490 you asked for.",
+     "evidence_class": "I",
+     "triggered": true,
+     "sources": [
+      "s-epc-2"
+     ]
+    },
+    {
+     "question": "If it is pricier than its neighbours, am I buying visible value I actually care about (quiet side, floor, light, management), or just paying more?",
+     "when": "compare",
+     "kind": "answer",
+     "answer": "Not pricier: 3.79 a square foot is at the bottom of the band. The saving is in the address, not in the rate.",
+     "evidence_class": "I",
+     "triggered": false,
+     "sources": [
+      "s-epc-2"
+     ]
+    }
    ]
   }
  ],

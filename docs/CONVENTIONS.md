@@ -21,6 +21,7 @@
 
 ## Report contract
 - `references/report-schema.json` is the single source of truth for the report. Text fields follow the plain-language rules in SKILL.md §7. `render.py` (shell) and `viewer/viewer.html` (browser) must produce the same layout from the same JSON, and both print the footer `Generated with vet-flat <version> — https://github.com/jacky18008/pea-princess`.
+- Eleven sections in this order: verdict, hard filters, side by side, worst reviews, landmines, the 12 checks, questions and the viewing day, what only you can tell, what we could not find, sources, about. Adding one means `SECTIONS` in `render.py`, `SECTIONS` in `viewer/viewer.html`, a `section.*` entry in `glossary.yaml` in three languages, and a line in `report-contract.md`.
 
 ## Git
 - Small commits per script or reference, with tests. Commit messages end with the Co-Authored-By trailer used in this repo.

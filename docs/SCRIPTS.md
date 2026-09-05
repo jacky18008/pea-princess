@@ -756,6 +756,9 @@ python3 skills/vet-flat/scripts/render.py report.json --strict --validate-only  
 python3 bench/release_gate.py bench/results/<date>                      # the pre-release gate: 0 fabrications, schema ok
 ```
 
+### Your questions, and what only you can tell (two report sections)
+`candidates[].question_answers` holds the user's own `my_questions` from `profile.yaml`, answered. Each entry carries the question, the stage it belongs to (`when`: filter, vet, compare, viewing, sign), the answer, an evidence grade and whether the trigger fired, and both renderers put it where the user reads it: filter answers as extra rows of the hard-filter table, vet answers under the verdict card, compare answers as one row per question with a cell per candidate, viewing answers with the viewing-day checks and sign answers under *Before you sign*. An answer that states a number obeys the same no-source-no-number rule as every other number. Section 8, *What only you can tell*, then asks for what the tool cannot sense: every axis graded unknown, followed by `candidates[].only_you_can_tell` or, when that is empty, the four standard requests in `glossary.yaml` (`only_you.smell`, `only_you.noise_night`, `only_you.light_today`, `only_you.street_feel`).
+
 ### The configuration line (which rung of the escalation ladder ran)
 `generated_by.tier` (`lite` | `standard` | `breadth` | `manual`) and `generated_by.escalation_reason` are optional fields that say how much machine was behind the report. Both renderers print `Configuration: <tier> — <reason or "default">; workers: <cheap|strong>; judge: <model_name>` as the first line under the title and again in *About this report*; a report with no tier prints `not stated`. The workers half follows from the tier — `standard`, `breadth` and `lite` run cheap workers with a strong judge, `manual` runs none — and the ladder itself, including the triggers and the fan-out rule, is in `references/budget-modes.md`.
 

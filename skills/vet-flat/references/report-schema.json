@@ -526,6 +526,22 @@
             "minLength": 1,
             "maxLength": 240
           }
+        },
+        "question_answers": {
+          "type": "array",
+          "description": "The user's own questions from profile.yaml my_questions, answered. One entry per question you answered for this flat. Each entry says at which stage the question belongs (when), so the renderers put it where the user reads it: filter questions sit with the hard filters, vet questions under the verdict, compare questions become rows of the side-by-side table, viewing and sign questions join the checklists. Answer the question the user actually asked, in their words, and grade the evidence like everything else. If you could not answer one, say what you tried and grade it unknown - never drop it.",
+          "items": {
+            "$ref": "#/definitions/question_answer"
+          }
+        },
+        "only_you_can_tell": {
+          "type": "array",
+          "description": "The things this tool cannot sense, written as a request to the user, not as a gap in the report: how the corridor smelled, what the street sounds like at 23:00, where the light actually falls, how the walk from the station reads after dark. One line each, warm and specific to this flat. Leave it out and the renderers ask the four standard questions instead; the axes you graded unknown are added automatically either way.",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 240
+          }
         }
       }
     },
@@ -708,6 +724,104 @@
         "landlord_type": {
           "$ref": "#/definitions/measure",
           "description": "Who you would actually be renting from, as a short label in value: 'build-to-rent operator', 'professional portfolio landlord', 'individual owner via agent', 'unknown'. Put what it means for repairs and deposits in meaning. Judge the entity and its record only - never the person, and never their background."
+        }
+      }
+    },
+    "question_answer": {
+      "type": "object",
+      "description": "One of the user's own questions, answered for this flat. NO SOURCE, NO NUMBER applies here too: if the answer states a number, the entry needs at least one id in sources (from the top-level sources list) or a computed_by note saying how you worked it out. Written as the anyOf below, so the required list is unchanged and an older report still validates; an answer that states a number with neither is a warning, an error under render.py --strict, and both renderers mark it \"no source\".",
+      "additionalProperties": false,
+      "required": [
+        "question",
+        "when",
+        "answer"
+      ],
+      "anyOf": [
+        {
+          "title": "at least one source id in sources",
+          "description": "The answer was read off something: list the source ids here and put the source in the top-level sources list.",
+          "required": [
+            "sources"
+          ],
+          "properties": {
+            "sources": {
+              "type": "array",
+              "minItems": 1
+            }
+          }
+        },
+        {
+          "title": "a computed_by note saying where the number came from",
+          "description": "The answer was worked out: name the script and subcommand, or write 'shown formula' and show the working in the answer.",
+          "required": [
+            "computed_by"
+          ],
+          "properties": {
+            "computed_by": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      ],
+      "properties": {
+        "question": {
+          "type": "string",
+          "description": "The question in the user's own words, copied from profile.yaml my_questions text. Do not rewrite it into your words: they must recognise their own sentence.",
+          "minLength": 1,
+          "maxLength": 400
+        },
+        "when": {
+          "type": "string",
+          "enum": [
+            "filter",
+            "vet",
+            "compare",
+            "viewing",
+            "sign"
+          ],
+          "description": "The stage the question belongs to, copied from the profile. filter = the first pass, shown with the hard filters. vet = this single flat, shown under the verdict. compare = the shortlist, shown as a row of the side-by-side table. viewing = on the day, shown with the viewing-day checks. sign = before signing, shown as its own list. Use the stage the user wrote; do not move a question to make the layout tidier."
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "answer",
+            "ask",
+            "check"
+          ],
+          "description": "What has to happen, copied from the profile. answer = you answer it here from evidence. ask = it goes to the agent or landlord in writing. check = the user verifies it on site with their own eyes, nose or ears."
+        },
+        "answer": {
+          "type": "string",
+          "description": "The answer in plain words, short sentences, every number followed by what it means and what it is compared with. If you could not answer it, say what you looked at and why it did not settle the question, and grade the evidence unknown. Roast the listing, never the person.",
+          "minLength": 1,
+          "maxLength": 1200
+        },
+        "evidence_class": {
+          "$ref": "#/definitions/evidence_class"
+        },
+        "triggered": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Did the question's trigger fire for this flat? true = the trigger fired, so the answer matters here. false = the trigger did not fire; answer it anyway and say so. null (or leave it out) = the question has no trigger, so it is asked of every flat."
+        },
+        "trigger": {
+          "type": "string",
+          "description": "The trigger in one line, copied from the profile, so the reader can see why the question fired or did not. Leave it out for a question with no trigger.",
+          "maxLength": 240
+        },
+        "sources": {
+          "$ref": "#/definitions/source_ids"
+        },
+        "computed_by": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Where a number in the answer came from: \"scripts/calc.py all-in\", \"scripts/crime.py\", or \"shown formula\" when the working is written into the answer itself.",
+          "maxLength": 80
         }
       }
     },

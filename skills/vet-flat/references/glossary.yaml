@@ -67,6 +67,13 @@ terms:
     plain: "What to ask before you go, and what only your own eyes and nose can settle."
     plain-zh-TW: "去之前要問什麼，以及只有你的眼睛和鼻子能判定的事。"
     plain-zh-CN: "去之前要问什么，以及只有你的眼睛和鼻子能判定的事。"
+  section.only_you:
+    en: "What only you can tell"
+    zh-TW: "只有你能告訴我們的"
+    zh-CN: "只有你能告诉我们的"
+    plain: "The things no website holds. Go, look, and tell us what you found."
+    plain-zh-TW: "網路上查不到的事。你去現場看一趟，再回來告訴我們。"
+    plain-zh-CN: "网路上查不到的事。你去现场看一趟，再回来告诉我们。"
   section.gaps:
     en: "What we could not find"
     zh-TW: "沒查到的東西"
@@ -592,6 +599,40 @@ terms:
     plain: "Things only standing in the flat can settle."
     plain-zh-TW: "只有人站在屋裡才測得到的事。"
     plain-zh-CN: "只有人站在屋里才测得到的事。"
+  ui.your_questions:
+    en: "Your questions, answered"
+    zh-TW: "你的問題，答案在這"
+    zh-CN: "你的问题，答案在这"
+    plain: "The questions you ask of every flat, answered for this one."
+    plain-zh-TW: "你每一戶都會問的那幾題，這一戶的答案。"
+    plain-zh-CN: "你每一户都会问的那几题，这一户的答案。"
+  ui.before_signing:
+    en: "Before you sign"
+    zh-TW: "簽約之前"
+    zh-CN: "签约之前"
+    plain: "Settle these before your name goes on the contract. Never sign on the viewing day."
+    plain-zh-TW: "名字簽下去之前先把這幾件事弄清楚。看房當天絕不簽約。"
+    plain-zh-CN: "名字签下去之前先把这几件事弄清楚。看房当天绝不签约。"
+  ui.trigger_fired:
+    en: "the trigger fired"
+    zh-TW: "你設的條件成立了"
+    zh-CN: "你设的条件成立了"
+    plain: "What you said would make this question matter did happen here."
+  ui.trigger_not_fired:
+    en: "the trigger did not fire"
+    zh-TW: "你設的條件沒成立"
+    zh-CN: "你设的条件没成立"
+    plain: "It did not happen here. The question is answered anyway."
+  ui.no_trigger:
+    en: "asked of every flat"
+    zh-TW: "每一戶都問"
+    zh-CN: "每一户都问"
+    plain: "You set no condition, so it is asked every time."
+  ui.unknown_axes_request:
+    en: "We could not check these for you. You can, on the day. Tell us, and the report is finished."
+    zh-TW: "這幾件我們查不到，你到現場就看得到。回來告訴我們，報告就補得完。"
+    zh-CN: "这几件我们查不到，你到现场就看得到。回来告诉我们，报告就补得完。"
+    plain: "Not a list of failures: what to bring back from the viewing."
   ui.photos_vs_reality:
     en: "Photos versus reality"
     zh-TW: "照片與現實"
@@ -913,6 +954,32 @@ terms:
     zh-TW: "算術有誤"
     zh-CN: "算术有误"
     plain: "This number does not follow from the formula. Check it."
+
+  # ------------------------------------------- what only you can tell (default asks)
+  # Four things no register, feed or photo can carry. The renderers ask these when the
+  # report named none of its own; viewer/build_viewer.py inlines them with the ui labels.
+  # The label is the whole request, so nothing prints the gloss: it stays English-only,
+  # like the trigger labels above, and viewer.html stays inside its size budget.
+  only_you.smell:
+    en: "Please tell us what the corridor and the flat smelled of: damp, drains, smoke, or nothing."
+    zh-TW: "請告訴我們，走廊和屋裡是什麼味道：霉味、水管味、菸味？"
+    zh-CN: "请告诉我们，走廊和屋里是什么味道：霉味、水管味、烟味？"
+    plain: "The first sign of damp, and no website records it."
+  only_you.noise_night:
+    en: "Please open the bedroom window at eleven at night and say what you hear."
+    zh-TW: "請在晚上十一點打開臥室窗戶，說說你聽見什麼。"
+    zh-CN: "请在晚上十一点打开卧室窗户，说说你听见什么。"
+    plain: "Noise maps say nothing about the hour you sleep."
+  only_you.light_today:
+    en: "Please say how light the main room was, and whether you would have put a lamp on."
+    zh-TW: "請說說屋裡採光如何，你會不會想開燈。"
+    zh-CN: "请说说屋里采光如何，你会不会想开灯。"
+    plain: "The aspect is on record; how dark it feels is not."
+  only_you.street_feel:
+    en: "Please walk from the station to the door at the hour you really would, and say how it felt."
+    zh-TW: "請挑你平常會走的時段，從車站走到大門，說說感覺。"
+    zh-CN: "请挑你平常会走的时段，从车站走到大门，说说感觉。"
+    plain: "Crime counts do not say if the street is lit and busy."
 
   # ----------------------------------------------------------- domain jargon
   epc:
