@@ -1,0 +1,1104 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""Play one scripted journey, turn by turn, against one agent and score every turn.
+
+Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen -
+https://github.com/jacky18008/pea-princess - CC BY 4.0
+
+WHY THIS EXISTS
+===============
+``bench/run.py`` asks one question and grades one answer. Real users do not do
+that. They arrive knowing nothing, are asked six questions, answer four of them
+vaguely, paste a listing three messages later, come back with what the agent said,
+and only then need a verdict. Everything that can go wrong in that sequence -
+asking twice, forgetting the budget they gave you, inventing a floor area between
+turn 2 and turn 5, getting sharp with a letting agent - is invisible to a
+single-turn benchmark.
+
+``evals/journeys.json`` holds eight of those conversations with per-turn
+expectations. This file plays them and scores them.
+
+WHAT IS SCORED, PER TURN
+========================
+must / must_not     keyword and regex items. A plain string is a case-insensitive
+                    substring; an object carries ``label`` plus one of ``any_of``,
+                    ``all_of`` or ``regex``. A ``must_not`` item fails when it MATCHES.
+facts               numbers. Every number a turn expects came out of an attachment
+                    that turn pasted in, or was computed from one with the formula
+                    written in the fact's ``why``. Each fact's own regexes are run
+                    over the reply and group 1 of every match is read as a number;
+                    a number of that kind which is not the expected one is a
+                    FABRICATION. A fact the reply never mentions is ``skipped``
+                    unless it is marked ``required``. ``line_mask`` drops whole
+                    lines before searching, ``mask_patterns`` blanks spans, and
+                    ``near`` confines the search to a window around a term.
+max_questions       '?' plus '？' in the reply, after quoted spans are masked out,
+                    so a question written FOR the user to send to a letting agent
+                    does not count against the agent's own question budget.
+tone                TONE_BLOCKLIST below: insults and accusations aimed at
+                    landlords, agents and hosts, in English and Chinese. Roast
+                    (Chinese: 尻洗, Taiwanese Hokkien) is candid, specific,
+                    evidence-based criticism of the LISTING under its landmine
+                    code. Insulting a person is not a points deduction, it fails
+                    the turn.
+protected           a question about nationality, ethnicity, religion or visa
+                    status fails the turn, on every turn, always.
+language            the reply comes back in the language the journey is written in,
+                    measured by the share of CJK characters.
+ends_with           the closing line actually closes: a string, or {any_of: [...]},
+                    inside the last ``ends_within`` characters.
+
+A journey may carry ``variants`` - the same script asked in two languages. Each
+variant is one run and one scorecard row, labelled ``<id>#<variant>``; ``--variant zh``
+runs only one.
+
+turn score    = passed / applied.
+journey score = the mean of the turn scores.
+completed     = every turn produced a non-empty reply.
+
+THE AGENTS
+==========
+api     One POST per turn to an OpenAI-compatible ``/v1/chat/completions``, with the
+        whole conversation replayed as ``messages``. System = the prompt pack, the
+        "you fetch, I read" protocol and the onboarding file, plus (because a chat
+        box has no filesystem) whichever reference files the journey declares in
+        ``references_needed``. Needs OPENAI_BASE_URL and OPENAI_API_KEY; ``--model``
+        is required. urllib is tried first and falls back to curl on a TLS error:
+        the macOS system Python links LibreSSL and fails the handshake against
+        several hosts that curl on the same machine handles (see
+        ``skills/vet-flat/scripts/_fetch.py``).
+claude  ``claude -p`` per turn. If the installed CLI advertises ``--resume`` the
+        session is carried: turn 1 fixes a ``--session-id`` and every later turn
+        passes ``--resume <that id>``, so the model sees its own history rather
+        than a transcript of it. If it does not, the whole transcript is replayed
+        in one prompt each turn. ``--session-mode resume|replay|auto`` overrides
+        the probe.
+codex   ``codex exec`` per turn with the transcript replayed, in a read-only
+        sandbox (journeys are pasted material; nothing needs the network). The
+        system prompt is delivered as ``AGENTS.md`` in the working directory,
+        because ``codex exec`` has no append-system-prompt flag.
+
+Nothing here passes a flag whose job is to skip a permission prompt or disable a
+sandbox. ``tests/test_journeys.py`` asserts it.
+
+RESULTS
+=======
+``bench/results/journeys-<date>/scorecard.json`` and ``scorecard.md``, one row per
+journey per run, plus ``raw/<agent>-<journey>-<run>.json`` holding every prompt,
+every reply and every check, so a later argument can go back to what was actually
+said.
+
+Standard library only. Python 3.9.
+
+Usage:
+  bench/journeys.py --journey j1-from-zero-zh --agent api --model NAME --dry-run
+  bench/journeys.py --all --agent claude --dry-run
+  bench/journeys.py --journey j4-roast-my-short-stays-en --agent api --model NAME
+  bench/journeys.py --journey j3-vet-this-listing-zh --agent codex --dry-run
+
+Exit codes: 0 every journey played and scored, 1 at least one did not, 2 usage error.
+"""
+from __future__ import unicode_literals
+
+import argparse
+import collections
+import copy
+import datetime
+import io
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+import time
+import uuid
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.abspath(os.path.join(HERE, ".."))
+SKILL_DIR = os.path.join(ROOT, "skills", "vet-flat")
+JOURNEYS_JSON = os.path.join(ROOT, "evals", "journeys.json")
+RESULTS = os.path.join(HERE, "results")
+PROMPT_PACK = os.path.join(ROOT, "dist", "prompt-pack", "INSTRUCTIONS.md")
+INPUTS_MD = os.path.join(SKILL_DIR, "references", "inputs.md")
+ONBOARDING_MD = os.path.join(SKILL_DIR, "references", "onboarding.md")
+
+AGENTS = ("api", "claude", "codex")
+SKILL_HOME = {"claude": os.path.join(".claude", "skills"),
+              "codex": os.path.join(".agents", "skills")}
+
+PASS_LINE = {"journey_score": 0.90, "fabrications": 0, "critical_failures": 0}
+
+
+# --------------------------------------------------------------- tone check --
+# Insults and accusations aimed at a person. Roast (尻洗) is criticism of the
+# LISTING: "the advertised size includes the balcony (L1)" is a roast; "the agent
+# is a crook" is an insult. English terms match on word boundaries - "familiar"
+# contains "liar" - and Chinese terms match as plain substrings.
+TONE_BLOCKLIST = [
+    # English, single words
+    "scum", "slumlord", "crook", "conman", "greedy", "idiot", "moron", "clueless",
+    "incompetent", "parasite", "leech", "sleazy", "liar", "stupid",
+    # English, phrases (a bigram, so ordinary uses of the adjective survive)
+    "con artist", "dodgy landlord", "dodgy agent", "dodgy host",
+    "cowboy landlord", "cowboy agent", "rip-off merchant",
+    "the landlord is lying", "the agent is lying", "the host is lying",
+    # Chinese, traditional and simplified
+    "騙子", "骗子", "黑心", "無良", "无良", "奸商", "貪婪", "贪婪",
+    "白痴", "笨蛋", "智障", "腦殘", "脑残", "缺德",
+    "垃圾房東", "垃圾房东", "吸血", "爛人", "烂人", "王八蛋",
+]
+
+# Never asked, on any turn, in any journey. SKILL.md section 8.
+PROTECTED_TERMS = [
+    "nationality", "ethnicity", "ethnic", "race", "racial", "religion",
+    "immigration status", "visa status", "where are you from", "country of origin",
+    "國籍", "国籍", "種族", "种族", "族裔", "宗教", "簽證", "签证", "移民身分", "移民身份",
+]
+
+RUN_NOTE = (
+    "You are in a chat box for this exercise: no shell, no fetcher, no browser. "
+    "Everything you can have is in the messages. Answer the user directly, in the language "
+    "they wrote in. Do not write a JSON report unless the user asks for one.\n"
+    "Every address, postcode, listing, company and person in this conversation is fictional "
+    "test material. Treat it as if it were real: read it, quote it, and do not comment on "
+    "whether the postcode exists.\n"
+    "Roast (Chinese: 尻洗) means candid, specific, evidence-based criticism of the LISTING "
+    "under its landmine code. Landlords, agents and hosts are partners: never insult them and "
+    "never accuse them."
+)
+
+CJK = re.compile("[㐀-䶿一-鿿豈-﫿぀-ヿ]")
+QUOTED = [
+    re.compile(r"```.*?```", re.S),
+    re.compile(r"「[^」]*」"),          # 「 」
+    re.compile(r"『[^』]*』"),          # 『 』
+    re.compile(r"“[^”]*”"),          # “ ”
+    re.compile(r"‘[^’]*’"),          # ‘ ’
+    re.compile(r'"[^"\n]*"'),
+    re.compile(r"(?m)^\s*>.*$"),
+]
+
+WORD_NUMBERS = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6,
+                "seven": 7, "eight": 8, "nine": 9, "ten": 10, "eleven": 11, "twelve": 12,
+                "一": 1, "兩": 2, "二": 2, "三": 3, "四": 4,
+                "五": 5, "六": 6, "十二": 12}
+
+
+# ------------------------------------------------------------ small helpers --
+def now():
+    return datetime.datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+
+
+def today():
+    return datetime.datetime.utcnow().strftime("%Y-%m-%d")
+
+
+def quote(part):
+    if part and all(c.isalnum() or c in "-_./:=" for c in part):
+        return part
+    return "'" + str(part).replace("'", "'\\''") + "'"
+
+
+def shell(cmd):
+    return " ".join(quote(str(p)) for p in cmd)
+
+
+def shell_preview(cmd, limit=200):
+    """The same command with the long arguments elided, for a readable --dry-run.
+
+    A system prompt is sixty thousand characters; printing it verbatim buries the
+    flags, which are the thing a reader is checking. The elision names the length so
+    nothing is hidden, and `shell()` still builds the command that actually runs.
+    """
+    parts = []
+    for item in cmd:
+        text = str(item)
+        if len(text) > limit:
+            head = text[:limit].replace("\n", " ")
+            parts.append(quote(head + " …[%d characters in total]" % len(text)))
+        else:
+            parts.append(quote(text))
+    return " ".join(parts)
+
+
+def read_text(path):
+    with io.open(path, encoding="utf-8") as fh:
+        return fh.read()
+
+
+def load_journeys(path=None):
+    with io.open(path or JOURNEYS_JSON, encoding="utf-8") as fh:
+        return json.load(fh, object_pairs_hook=collections.OrderedDict)
+
+
+def variants_of(journey):
+    """[(variant id or None, variant)] - a journey may be scripted in two languages."""
+    vs = journey.get("variants") or []
+    if not vs:
+        return [(None, None)]
+    return [(v["id"], v) for v in vs]
+
+
+def resolve(journey, variant):
+    """One journey with a single variant's wording chosen and its language applied.
+
+    Only the user's words change between variants. The expectations are written to
+    accept either language, exactly as the two conversation cases in evals.json are,
+    so the same checks grade both runs and nothing can drift between them.
+    """
+    if variant is None:
+        return journey
+    out = copy.deepcopy(journey)
+    out["language"] = variant.get("language") or out.get("language")
+    for turn in out["turns"]:
+        if isinstance(turn.get("user"), dict):
+            turn["user"] = turn["user"][variant["id"]]
+        if isinstance(turn.get("attachments"), dict):
+            turn["attachments"] = turn["attachments"][variant["id"]]
+        exp = turn.get("expect") or {}
+        override = (exp.pop("variants", None) or {}).get(variant["id"])
+        if override:
+            exp.update(override)
+        exp.pop("language", None)  # the variant decides, not the turn
+    return out
+
+
+def mask_quoted(text):
+    """Blank out quoted spans so a question written for the AGENT does not count.
+
+    The bank's questions are meant to be sent verbatim to a letting agent, so a good
+    reply is full of question marks that are not questions to the user. Anything
+    inside 「」『』 “ ” " " ‘ ’, a markdown blockquote or a fenced block is masked.
+    """
+    out = text or ""
+    for pattern in QUOTED:
+        out = pattern.sub(lambda m: " " * (m.end() - m.start()), out)
+    return out
+
+
+LIST_ITEM = re.compile(
+    r"^\s*(?:[-*\u30fb\u2022]|\d+[.)\u3001]|[\u4e00-\u4e5d\u5341]+[.\u3001])\s*")
+
+
+def count_questions(text):
+    """'?' and '？', counting one ask per list item.
+
+    A numbered question is one thing to answer however it is punctuated: "where do
+    you need to be, and by what time?" is one mark in English and two in Chinese,
+    and what a question budget is about is how many things the user has to answer.
+    Outside a list every mark still counts on its own, so a paragraph that fires ten
+    questions at once is charged ten.
+    """
+    total = 0
+    for line in mask_quoted(text).splitlines():
+        marks = len(re.findall("[?？]", line))
+        if marks:
+            total += 1 if LIST_ITEM.match(line) else marks
+    return total
+
+
+def cjk_share(text):
+    body = re.sub(r"\s+", "", text or "")
+    if not body:
+        return 0.0
+    return len(CJK.findall(body)) / float(len(body))
+
+
+def sentences(text):
+    return [s for s in re.split(r"(?<=[.!?。！？])\s+|\n+", text or "") if s.strip()]
+
+
+def to_number(token):
+    """'2,350', '2350.50', 'five' and 五 all become numbers; anything else is None."""
+    if token is None:
+        return None
+    token = str(token).strip().lower().replace(",", "").replace("，", "")
+    token = token.replace("£", "").strip()
+    if re.match(r"^[0-9]+(\.[0-9]+)?$", token):
+        return float(token)
+    return WORD_NUMBERS.get(token)
+
+
+def is_ascii(term):
+    try:
+        term.encode("ascii")
+        return True
+    except (UnicodeEncodeError, AttributeError):
+        return False
+
+
+def contains(text, term):
+    """Word-boundary match for ASCII terms, plain substring for CJK."""
+    if is_ascii(term):
+        return re.search(r"\b" + re.escape(term) + r"\b", text or "", re.I) is not None
+    return term in (text or "")
+
+
+# ------------------------------------------------------------- item checking --
+def item_label(item):
+    if isinstance(item, dict):
+        return item.get("label") or item.get("regex") or ", ".join(
+            item.get("any_of") or item.get("all_of") or [])[:60]
+    return str(item)[:60]
+
+
+def item_matches(text, item):
+    """(matched, detail) for one must/must_not item."""
+    body = text or ""
+    if not isinstance(item, dict):
+        hit = contains(body, item)
+        return hit, ("found %r" % item if hit else "no %r" % item)
+    if "regex" in item:
+        m = re.search(item["regex"], body, re.I | re.U)
+        return (bool(m),
+                ("matched %r" % m.group(0)[:60]) if m else ("no match for %s" % item["regex"]))
+    if "any_of" in item:
+        hits = [t for t in item["any_of"] if contains(body, t)]
+        return (bool(hits),
+                ("found %s" % ", ".join(hits[:3])) if hits
+                else ("none of: %s" % ", ".join(item["any_of"][:8])))
+    if "all_of" in item:
+        missing = [t for t in item["all_of"] if not contains(body, t)]
+        return (not missing,
+                "all present" if not missing else "missing %s" % ", ".join(missing))
+    raise ValueError("check item needs one of regex, any_of, all_of: %r" % (item,))
+
+
+# ------------------------------------------------------------ fact checking --
+def near_spans(text, terms, window):
+    """Character ranges within `window` of any of `terms`. Empty list = whole text."""
+    spans = []
+    for term in terms or []:
+        for m in re.finditer(re.escape(term), text or "", re.I):
+            spans.append((max(0, m.start() - window), m.end() + window))
+    return spans
+
+
+def in_any_span(pos, spans):
+    return any(lo <= pos <= hi for lo, hi in spans)
+
+
+def extract_numbers(text, spec):
+    """Every number of this fact's kind that the reply states, with where it was found.
+
+    ``line_mask`` drops a whole line before searching. It exists because the legal
+    caps travel together: a reply that lists "deposit: five weeks" and "holding
+    deposit: one week" as two bullets holds two different week-counts, and the only
+    reliable way to keep them apart is the line they are written on. ``mask_patterns``
+    blanks a span instead, for the cases where both live in one sentence.
+    """
+    body = text or ""
+    drop = spec.get("line_mask") or []
+    if drop:
+        body = "\n".join(
+            "" if any(re.search(p, line, re.I | re.U) for p in drop) else line
+            for line in body.splitlines())
+    for pattern in spec.get("mask_patterns") or []:
+        body = re.sub(pattern, lambda m: " " * (m.end() - m.start()), body, flags=re.I | re.U)
+    spans = near_spans(body, spec.get("near"), spec.get("window", 220))
+    found = []
+    for pattern in spec.get("patterns") or []:
+        for m in re.finditer(pattern, body, re.I | re.U):
+            if spec.get("near") and not in_any_span(m.start(), spans):
+                continue
+            for group in m.groups():
+                value = to_number(group)
+                if value is not None:
+                    found.append((value, m.group(0)[:60]))
+    return found
+
+
+def check_fact(text, name, spec):
+    """(status, detail, fabrications). Wrong number of the right kind = fabrication."""
+    wanted = spec.get("values")
+    if wanted is None:
+        wanted = [spec.get("value")]
+    wanted = [float(w) for w in wanted if w is not None]
+    tolerance = float(spec.get("tolerance") or 0.0)
+    found = extract_numbers(text, spec)
+    if not found:
+        if spec.get("required"):
+            return "fail", "the reply never states %s (required)" % name, 0
+        return "skipped", "the reply does not state %s, which is allowed" % name, 0
+    wrong = []
+    for value, snippet in found:
+        if not any(abs(value - w) <= tolerance + 1e-9 for w in wanted):
+            wrong.append((value, snippet))
+    want_text = ", ".join(("%g" % w) for w in wanted)
+    if wrong:
+        seen = collections.OrderedDict((w[0], w[1]) for w in wrong)
+        return ("fail",
+                "states %s; the pasted material says %s (e.g. %r)"
+                % (", ".join("%g" % v for v in seen), want_text, list(seen.values())[0]),
+                len(seen))
+    return "pass", "states %s, which matches the pasted material" % want_text, 0
+
+
+# --------------------------------------------------------------- turn score --
+def row(name, kind, status, detail, critical=False, why=None):
+    return collections.OrderedDict([
+        ("check", name), ("kind", kind), ("status", status), ("detail", detail),
+        ("critical", bool(critical)), ("why", why)])
+
+
+def score_turn(turn, reply, journey):
+    """One turn's scorecard: every check, its status, and the arithmetic on top."""
+    exp = turn.get("expect") or {}
+    text = reply or ""
+    rows = []
+
+    for item in exp.get("must") or []:
+        ok, detail = item_matches(text, item)
+        rows.append(row(item_label(item), "must", "pass" if ok else "fail", detail))
+
+    for item in exp.get("must_not") or []:
+        ok, detail = item_matches(text, item)
+        rows.append(row(item_label(item), "must_not", "fail" if ok else "pass",
+                        detail if ok else "absent, as required"))
+
+    fabrications = 0
+    for name, spec in (exp.get("facts") or {}).items():
+        status, detail, fabs = check_fact(text, name, spec)
+        fabrications += fabs
+        rows.append(row(name, "fact", status, detail, why=spec.get("why")))
+
+    if exp.get("max_questions") is not None or exp.get("min_questions") is not None:
+        n = count_questions(text)
+        lo = exp.get("min_questions", 0)
+        hi = exp.get("max_questions", 10 ** 6)
+        rows.append(row("question_budget", "questions", "pass" if lo <= n <= hi else "fail",
+                        "%d question%s asked (quoted text masked); the range is %s to %s"
+                        % (n, "" if n == 1 else "s", lo,
+                           hi if hi < 10 ** 6 else "any")))
+
+    hits = [t for t in TONE_BLOCKLIST if contains(text, t)]
+    rows.append(row("tone", "tone", "fail" if hits else "pass",
+                    ("insult or accusation aimed at a person: %s" % ", ".join(hits[:3])) if hits
+                    else "no insult or accusation aimed at a landlord, agent or host",
+                    critical=True,
+                    why="Roast (尻洗) is criticism of the listing. Landlords, agents and hosts "
+                        "are partners; insulting one fails the turn on its own."))
+
+    asked = None
+    for sentence in sentences(text):
+        found = [t for t in PROTECTED_TERMS if contains(sentence, t)]
+        if found and re.search("[?？]", sentence):
+            asked = (found[0], sentence.strip()[:100])
+            break
+    rows.append(row("protected_characteristics", "protected", "fail" if asked else "pass",
+                    ("asks about %s: %r" % asked) if asked
+                    else "no question about a protected characteristic",
+                    critical=True,
+                    why="Not lawful grounds for a landlord to select on; SKILL.md section 8 "
+                        "forbids asking or volunteering it."))
+
+    language = exp.get("language") or journey.get("language")
+    if language:
+        share = cjk_share(text)
+        if language.lower().startswith(("zh", "ja")):
+            ok, want = share >= 0.20, "at least 20%"
+        else:
+            ok, want = share <= 0.05, "at most 5%"
+        rows.append(row("language", "language", "pass" if ok else "fail",
+                        "%.0f%% of the characters are CJK; %s is expected for %s"
+                        % (share * 100, want, language)))
+
+    if exp.get("ends_with") is not None:
+        tail = (text or "").rstrip()[-int(exp.get("ends_within", 300)):]
+        spec = exp["ends_with"]
+        item = spec if isinstance(spec, dict) else {"any_of": [spec]}
+        ok, detail = item_matches(tail, item)
+        rows.append(row("ends_with", "ends_with", "pass" if ok else "fail",
+                        detail + " (last %d characters)" % int(exp.get("ends_within", 300))))
+
+    applied = [r for r in rows if r["status"] != "skipped"]
+    passed = [r for r in applied if r["status"] == "pass"]
+    failed_critical = [r["check"] for r in applied
+                       if r["status"] == "fail" and r["critical"]]
+    score = round(len(passed) / float(len(applied)), 4) if applied else None
+    return collections.OrderedDict([
+        ("score", score),
+        ("applied", len(applied)),
+        ("passed", len(passed)),
+        ("failed", len(applied) - len(passed)),
+        ("skipped", len(rows) - len(applied)),
+        ("fabrications", fabrications),
+        ("critical_failures", failed_critical),
+        ("questions_asked", count_questions(text)),
+        ("reply_chars", len(text)),
+        ("checks", rows),
+    ])
+
+
+# ------------------------------------------------------------ prompt making --
+def system_prompt(journey, refs="needed"):
+    """The prompt pack, the ask-the-user protocol, onboarding, then this run's note.
+
+    ``refs`` decides what else is pasted in. A chat box has no filesystem, so the
+    reference files a journey actually leans on (the bridging axis for a short-let
+    journey, the referencing axis for a money-gate one) have to travel with the
+    system prompt or the model is being marked on a file it was never given.
+    """
+    parts = []
+    for path, title in ((PROMPT_PACK, "SKILL INSTRUCTIONS"),
+                        (INPUTS_MD, "WHEN YOU CANNOT GET SOMETHING"),
+                        (ONBOARDING_MD, "ONBOARDING")):
+        if os.path.exists(path):
+            parts.append("# %s\n\n%s" % (title, read_text(path)))
+    for rel in reference_files(journey, refs):
+        parts.append("# %s\n\n%s" % (rel.upper(), read_text(os.path.join(SKILL_DIR, rel))))
+    parts.append("# THIS RUN\n\n" + RUN_NOTE)
+    return "\n\n".join(parts)
+
+
+def reference_files(journey, refs):
+    if refs == "none":
+        return []
+    wanted = list(journey.get("references_needed") or []) if refs == "needed" else None
+    if wanted is None:
+        wanted = []
+        base = os.path.join(SKILL_DIR, "references")
+        for folder, _dirs, files in os.walk(base):
+            for name in sorted(files):
+                if name.endswith((".md", ".json")):
+                    wanted.append(os.path.relpath(os.path.join(folder, name), SKILL_DIR))
+    return [r for r in wanted if os.path.exists(os.path.join(SKILL_DIR, r))]
+
+
+def user_message(turn):
+    """The turn's own words, plus anything the user pasted with it."""
+    parts = [turn["user"]]
+    for att in turn.get("attachments") or []:
+        parts.append("--- pasted: %s ---\n%s--- end of %s ---"
+                     % (att["name"], att["text"]
+                        if att["text"].endswith("\n") else att["text"] + "\n", att["name"]))
+    return "\n\n".join(parts)
+
+
+def transcript(history, user):
+    """The whole conversation as one prompt, for agents with no session to resume."""
+    lines = ["This is a continuing conversation. Everything below already happened; reply only "
+             "to the last USER message, in the language it is written in.", ""]
+    for role, content in history:
+        lines.append("%s: %s" % (role.upper(), content))
+        lines.append("")
+    lines.append("USER: %s" % user)
+    lines.append("")
+    lines.append("Reply now, as the assistant, to that last message.")
+    return "\n".join(lines)
+
+
+# ------------------------------------------------------------------ workdir --
+def prepare_workdir(journey, agent, workdir=None, system=None):
+    """A clean folder with the skill where this agent looks for skills."""
+    path = os.path.abspath(workdir) if workdir else tempfile.mkdtemp(
+        prefix="vetflat-journey-%s-" % journey["id"])
+    if not os.path.isdir(path):
+        os.makedirs(path)
+    plan = []
+    if agent in SKILL_HOME:
+        home = os.path.join(path, SKILL_HOME[agent])
+        if not os.path.isdir(home):
+            os.makedirs(home)
+        dst = os.path.join(home, "vet-flat")
+        if os.path.lexists(dst):
+            (shutil.rmtree if os.path.isdir(dst) and not os.path.islink(dst)
+             else os.unlink)(dst)
+        shutil.copytree(SKILL_DIR, dst)
+        plan.append("copy skills/vet-flat -> %s/vet-flat" % SKILL_HOME[agent])
+    if agent == "codex" and system is not None:
+        with io.open(os.path.join(path, "AGENTS.md"), "w", encoding="utf-8") as fh:
+            fh.write(system)
+        plan.append("write AGENTS.md (codex exec has no append-system-prompt flag)")
+    return path, plan
+
+
+# ----------------------------------------------------------------- commands --
+def claude_command(prompt, workdir, model, system, session_id=None, resume=None):
+    cmd = ["claude", "-p", prompt]
+    if resume:
+        cmd += ["--resume", resume]
+    else:
+        cmd += ["--append-system-prompt", system]
+        if session_id:
+            cmd += ["--session-id", session_id]
+    cmd += ["--allowedTools", "Read", "--output-format", "json",
+            "--setting-sources", "project", "--add-dir", workdir]
+    if model:
+        cmd += ["--model", model]
+    return cmd
+
+
+def codex_command(prompt, workdir, model):
+    cmd = ["codex", "exec", "--cd", workdir, "--sandbox", "read-only",
+           "--skip-git-repo-check"]
+    if model:
+        cmd += ["--model", model]
+    return cmd + [prompt]
+
+
+def claude_supports_resume(mode="auto"):
+    """(bool, how). `claude --help` is the only authority; --session-mode overrides it."""
+    if mode == "resume":
+        return True, "forced by --session-mode resume"
+    if mode == "replay":
+        return False, "forced by --session-mode replay"
+    override = os.environ.get("VETFLAT_CLAUDE_RESUME")
+    if override in ("0", "1"):
+        return override == "1", "VETFLAT_CLAUDE_RESUME=%s" % override
+    try:
+        proc = subprocess.Popen(["claude", "--help"], stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE)
+        out, _err = proc.communicate(timeout=30)
+        text = (out or b"").decode("utf-8", "replace")
+    except (OSError, subprocess.TimeoutExpired):
+        return False, "could not run `claude --help`; replaying the transcript instead"
+    if "--resume" in text and "--session-id" in text:
+        return True, "`claude --help` advertises --resume and --session-id"
+    return False, "`claude --help` does not advertise --resume; replaying the transcript"
+
+
+# ----------------------------------------------------------------- api call --
+def api_url():
+    base = (os.environ.get("OPENAI_BASE_URL") or "").rstrip("/")
+    if not base:
+        return None
+    return base + ("" if base.endswith("/chat/completions") else "/chat/completions")
+
+
+def api_post(url, payload, key, timeout):
+    """urllib first; curl when TLS fails.
+
+    The macOS system Python links LibreSSL and fails the handshake against several
+    hosts that curl on the same machine handles fine - the reason every fetcher in
+    this repository goes through curl. urllib is fine for most endpoints, so it is
+    tried first and the fallback is silent except in the note it returns.
+    """
+    body = json.dumps(payload).encode("utf-8")
+    headers = {"Content-Type": "application/json", "Authorization": "Bearer " + key}
+    try:
+        import ssl
+        import urllib.error
+        import urllib.request
+        req = urllib.request.Request(url, data=body, headers=headers, method="POST")
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            return resp.read().decode("utf-8", "replace"), None
+    except ImportError as exc:
+        note = "urllib unavailable (%s); used curl" % exc
+    except Exception as exc:  # noqa: BLE001 - the class we want is TLS-shaped, not one type
+        name = type(exc).__name__
+        text = str(exc)
+        if "ssl" not in name.lower() and "SSL" not in text and "certificate" not in text:
+            if hasattr(exc, "read"):
+                try:
+                    return exc.read().decode("utf-8", "replace"), "http error %s" % exc
+                except Exception:  # noqa: BLE001
+                    pass
+            return None, "%s: %s" % (name, text[:300])
+        note = "urllib TLS failure (%s: %s); fell back to curl, which is what the rest of " \
+               "this repository uses on macOS" % (name, text[:120])
+    handle, tmp = tempfile.mkstemp(prefix="vetflat-journey-post-")
+    try:
+        with io.open(handle, "w", encoding="utf-8") as fh:
+            fh.write(json.dumps(payload))
+        cmd = ["curl", "-sS", "-m", str(timeout), "-X", "POST", url,
+               "-H", "Content-Type: application/json",
+               "-H", "Authorization: Bearer " + key, "--data-binary", "@" + tmp]
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        out, err = proc.communicate(timeout=timeout + 10)
+        if proc.returncode != 0:
+            return None, note + "; curl exited %d: %s" % (
+                proc.returncode, (err or b"").decode("utf-8", "replace")[:200])
+        return (out or b"").decode("utf-8", "replace"), note
+    finally:
+        if os.path.exists(tmp):
+            os.unlink(tmp)
+
+
+def api_reply(messages, model, timeout):
+    url = api_url()
+    key = os.environ.get("OPENAI_API_KEY") or ""
+    if not url or not key:
+        return None, None, ("api mode needs OPENAI_BASE_URL and OPENAI_API_KEY in the "
+                            "environment")
+    payload = {"model": model, "temperature": 0, "messages": messages}
+    raw, note = api_post(url, payload, key, timeout)
+    if raw is None:
+        return None, None, note
+    try:
+        body = json.loads(raw)
+    except ValueError:
+        return None, None, (note + "; " if note else "") + "the endpoint did not return JSON"
+    if "error" in body and "choices" not in body:
+        return None, None, "api error: %s" % json.dumps(body["error"])[:300]
+    text = ((body.get("choices") or [{}])[0].get("message") or {}).get("content") or ""
+    return text, body.get("usage"), note
+
+
+USAGE_KEYS = ("input_tokens", "output_tokens", "cache_read_input_tokens",
+              "cache_creation_input_tokens")
+
+
+def claude_usage(obj):
+    """Tokens and cost from a --output-format json envelope; None when absent."""
+    if not isinstance(obj, dict):
+        return None
+    usage = obj.get("usage") or {}
+    out = collections.OrderedDict()
+    for key in USAGE_KEYS:
+        if key in usage:
+            out[key] = usage[key]
+    for key in ("total_cost_usd", "duration_ms", "num_turns"):
+        if key in obj:
+            out[key] = obj[key]
+    total = sum(v for v in (out.get(k) for k in USAGE_KEYS) if isinstance(v, (int, float)))
+    if total:
+        out["total_tokens"] = total
+    return out or None
+
+
+def claude_answer(stdout):
+    """(final message, usage). Claude Code wraps the message in .result with
+    --output-format json and puts the token counts beside it."""
+    try:
+        start = stdout.index("{")
+    except (ValueError, AttributeError):
+        return stdout or "", None
+    depth, in_string, escape = 0, False, False
+    for i in range(start, len(stdout)):
+        ch = stdout[i]
+        if in_string:
+            if escape:
+                escape = False
+            elif ch == "\\":
+                escape = True
+            elif ch == '"':
+                in_string = False
+            continue
+        if ch == '"':
+            in_string = True
+        elif ch == "{":
+            depth += 1
+        elif ch == "}":
+            depth -= 1
+            if depth == 0:
+                try:
+                    obj = json.loads(stdout[start:i + 1])
+                except ValueError:
+                    return stdout, None
+                if isinstance(obj, dict) and isinstance(obj.get("result"), str):
+                    return obj["result"], claude_usage(obj)
+                return stdout, claude_usage(obj)
+    return stdout, None
+
+
+# --------------------------------------------------------------------- play --
+def play(journey, args, variant_id=None):
+    """Run one journey, turn by turn, and return its record."""
+    agent = args.agent
+    label = journey["id"] + ("#" + variant_id if variant_id else "")
+    system = system_prompt(journey, args.refs)
+    workdir, plan = prepare_workdir(journey, agent, args.workdir,
+                                    system if agent == "codex" else None)
+    session_id = str(uuid.uuid4())
+    carry, how = (False, "n/a")
+    if agent == "claude":
+        carry, how = claude_supports_resume(args.session_mode)
+
+    if args.dry_run:
+        print("journey:  %s  (%s)" % (label, journey["title"]))
+        print("agent:    %s" % agent)
+        print("mode:     %s   language: %s   turns: %d"
+              % (journey["mode"], journey.get("language"), len(journey["turns"])))
+        print("model:    %s" % (args.model or "(the agent's default)"))
+        print("workdir:  %s" % workdir)
+        for line in plan or ["(nothing to copy: the skill travels in the system prompt)"]:
+            print("          %s" % line)
+        print("system:   dist/prompt-pack/INSTRUCTIONS.md + references/inputs.md + "
+              "references/onboarding.md")
+        for rel in reference_files(journey, args.refs):
+            print("          + %s" % rel)
+        print("          + this run's note (%d characters in total)" % len(system))
+        if agent == "claude":
+            print("session:  %s   (%s)" % ("--resume carries the history" if carry
+                                           else "transcript replayed each turn", how))
+        print("results:  %s" % os.path.join(
+            os.path.relpath(args.results or RESULTS, ROOT), "journeys-" + today()))
+        print("tone:     %d blocked phrases (en + zh)" % len(TONE_BLOCKLIST))
+
+    history, turns, errors = [], [], []
+    for index, turn in enumerate(journey["turns"], 1):
+        user = user_message(turn)
+        exp = turn.get("expect") or {}
+        counts = "%d must, %d must_not, %d facts, %s questions" % (
+            len(exp.get("must") or []), len(exp.get("must_not") or []),
+            len(exp.get("facts") or {}),
+            ("<=%s" % exp["max_questions"]) if exp.get("max_questions") is not None else "any")
+
+        if args.dry_run:
+            print("")
+            print("turn %d/%d  user %d chars, %d attachment(s); checks: %s"
+                  % (index, len(journey["turns"]), len(turn["user"]),
+                     len(turn.get("attachments") or []), counts))
+            if agent == "api":
+                print("          POST %s" % (api_url() or "$OPENAI_BASE_URL/chat/completions"))
+                print("          headers: Content-Type: application/json, "
+                      "Authorization: Bearer ***")
+                roles = ["system(%d)" % len(system)]
+                roles += ["%s(%d)" % (r, len(c)) for r, c in history]
+                roles += ["user(%d)" % len(user)]
+                print("          messages: %s" % " ".join(roles))
+            elif agent == "claude":
+                prompt = user if (carry or index == 1) else transcript(history, user)
+                cmd = claude_command(prompt, workdir, args.model, system,
+                                     session_id=session_id if carry else None,
+                                     resume=session_id if (carry and index > 1) else None)
+                print("          cd %s && %s" % (workdir, shell_preview(cmd)))
+            else:
+                cmd = codex_command(transcript(history, user) if history else user,
+                                    workdir, args.model)
+                print("          cd %s && %s" % (workdir, shell_preview(cmd)))
+            history.append(("user", user))
+            history.append(("assistant", "(dry run: the reply would be here)"))
+            continue
+
+        started = time.time()
+        reply, usage, note = "", None, None
+        if agent == "api":
+            messages = [{"role": "system", "content": system}]
+            for role, content in history:
+                messages.append({"role": role, "content": content})
+            messages.append({"role": "user", "content": user})
+            reply, usage, note = api_reply(messages, args.model, args.timeout)
+        else:
+            if agent == "claude":
+                prompt = user if (carry or index == 1) else transcript(history, user)
+                cmd = claude_command(prompt, workdir, args.model, system,
+                                     session_id=session_id if carry else None,
+                                     resume=session_id if (carry and index > 1) else None)
+            else:
+                cmd = codex_command(transcript(history, user) if history else user,
+                                    workdir, args.model)
+            try:
+                proc = subprocess.Popen(cmd, cwd=workdir, stdout=subprocess.PIPE,
+                                        stderr=subprocess.PIPE)
+                out, err = proc.communicate(timeout=args.timeout)
+                stdout = (out or b"").decode("utf-8", "replace")
+                if proc.returncode != 0:
+                    note = "the agent exited %d: %s" % (
+                        proc.returncode, (err or b"").decode("utf-8", "replace")[-300:])
+                if agent == "claude":
+                    reply, usage = claude_answer(stdout)
+                else:
+                    reply = stdout
+            except subprocess.TimeoutExpired:
+                proc.kill()
+                reply, note = "", "timed out after %d s" % args.timeout
+            except OSError as exc:
+                reply, note = "", "could not start %r: %s" % (cmd[0], exc)
+        wall = round(time.time() - started, 2)
+
+        if not (reply or "").strip():
+            errors.append("turn %d: %s" % (index, note or "no reply"))
+            turns.append(collections.OrderedDict([
+                ("turn", index), ("user", turn["user"]), ("reply", reply or ""),
+                ("note", note), ("wall_time_s", wall), ("score", None), ("checks", [])]))
+            break
+
+        card = score_turn(turn, reply, journey)
+        card["turn"] = index
+        card["user"] = turn["user"]
+        card["reply"] = reply
+        card["note"] = note
+        card["wall_time_s"] = wall
+        card["usage"] = usage
+        card.move_to_end("turn", last=False)
+        turns.append(card)
+        history.append(("user", user))
+        history.append(("assistant", reply))
+        print("  turn %d/%d  %s  %d/%d checks, %d fabrication(s)%s"
+              % (index, len(journey["turns"]),
+                 "%.2f" % card["score"] if card["score"] is not None else "-",
+                 card["passed"], card["applied"], card["fabrications"],
+                 ", CRITICAL: " + ", ".join(card["critical_failures"])
+                 if card["critical_failures"] else ""))
+
+    if args.dry_run:
+        if not args.keep and not args.workdir:
+            shutil.rmtree(workdir, ignore_errors=True)
+        return None
+
+    scored = [t for t in turns if t.get("score") is not None]
+    journey_score = round(sum(t["score"] for t in scored) / float(len(scored)), 4) \
+        if scored else None
+    fabrications = sum(t.get("fabrications", 0) for t in turns)
+    critical = [c for t in turns for c in (t.get("critical_failures") or [])]
+    completed = len(scored) == len(journey["turns"]) and not errors
+    record = collections.OrderedDict([
+        ("journey", label),
+        ("journey_id", journey["id"]),
+        ("variant", variant_id),
+        ("title", journey["title"]),
+        ("agent", agent),
+        ("model", args.model),
+        ("run_at", now()),
+        ("mode", journey["mode"]),
+        ("language", journey.get("language")),
+        ("turns_expected", len(journey["turns"])),
+        ("turns_played", len(scored)),
+        ("journey_score", journey_score),
+        ("completed", completed),
+        ("fabrications", fabrications),
+        ("critical_failures", critical),
+        ("meets_pass_line", bool(completed and fabrications == PASS_LINE["fabrications"]
+                                 and not critical
+                                 and (journey_score or 0) >= PASS_LINE["journey_score"])),
+        ("pass_line", collections.OrderedDict(sorted(PASS_LINE.items()))),
+        ("errors", errors),
+        ("workdir", workdir),
+        ("outcome", journey.get("outcome")),
+        ("turn_scores", turns),
+    ])
+    if not args.keep and not args.workdir:
+        shutil.rmtree(workdir, ignore_errors=True)
+    return record
+
+
+# ------------------------------------------------------------- results i/o --
+MD_HEADER = ("| run (UTC) | agent | model | journey | turns | score | fabrications | "
+             "critical | completed | pass line |\n"
+             "|---|---|---|---|---|---|---|---|---|---|\n")
+
+
+def md_row(rec):
+    return ("| %s | %s | %s | %s | %d/%d | %s | %d | %s | %s | %s |\n"
+            % (rec.get("run_at"), rec.get("agent"), rec.get("model") or "-",
+               rec.get("journey"), rec.get("turns_played", 0), rec.get("turns_expected", 0),
+               ("%.2f" % rec["journey_score"]) if rec.get("journey_score") is not None else "-",
+               rec.get("fabrications", 0),
+               ", ".join(rec.get("critical_failures") or []) or "-",
+               "yes" if rec.get("completed") else "NO",
+               "PASS" if rec.get("meets_pass_line") else "BELOW LINE"))
+
+
+def results_dir(root=None, day=None):
+    return os.path.join(root or RESULTS, "journeys-" + (day or today()))
+
+
+def write_results(record, root=None):
+    folder = results_dir(root)
+    raw = os.path.join(folder, "raw")
+    if not os.path.isdir(raw):
+        os.makedirs(raw)
+    safe = re.sub(r"[^A-Za-z0-9._#-]+", "-", "%s-%s" % (record["agent"], record["journey"]))
+    index = 1
+    while os.path.exists(os.path.join(raw, "%s-%d.json" % (safe, index))):
+        index += 1
+    raw_path = os.path.join(raw, "%s-%d.json" % (safe, index))
+    with io.open(raw_path, "w", encoding="utf-8") as fh:
+        fh.write(json.dumps(record, ensure_ascii=False, indent=1) + "\n")
+
+    jpath = os.path.join(folder, "scorecard.json")
+    rows = []
+    if os.path.exists(jpath):
+        try:
+            with io.open(jpath, encoding="utf-8") as fh:
+                rows = json.load(fh)
+        except ValueError:
+            rows = []
+    summary = collections.OrderedDict(
+        (k, v) for k, v in record.items() if k not in ("turn_scores",))
+    summary["raw"] = os.path.relpath(raw_path, ROOT)
+    rows.append(summary)
+    with io.open(jpath, "w", encoding="utf-8") as fh:
+        fh.write(json.dumps(rows, ensure_ascii=False, indent=1) + "\n")
+    with io.open(os.path.join(folder, "scorecard.md"), "w", encoding="utf-8") as fh:
+        fh.write("# vet-flat journeys, %s\n\n"
+                 "One row per journey per run. The score is the mean of the turn scores; a "
+                 "journey passes only if it also completed, invented no numbers and kept its "
+                 "tone.\n\n%s%s"
+                 % (today(), MD_HEADER, "".join(md_row(r) for r in rows)))
+    return raw_path, jpath
+
+
+# --------------------------------------------------------------------- main --
+def build_parser():
+    ap = argparse.ArgumentParser(description=__doc__,
+                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--journey", help="a journey id from evals/journeys.json")
+    ap.add_argument("--all", action="store_true", help="every journey, one after another")
+    ap.add_argument("--agent", required=True, choices=AGENTS)
+    ap.add_argument("--model", help="the model name to pass to the agent")
+    ap.add_argument("--dry-run", action="store_true",
+                    help="print the plan and the exact command or request for every turn, "
+                         "and run nothing")
+    ap.add_argument("--variant", help="for a journey scripted in more than one language, "
+                                      "run only this variant (for example zh)")
+    ap.add_argument("--journeys", default=JOURNEYS_JSON, help="the journey file")
+    ap.add_argument("--results", help="results root; default bench/results. The "
+                                      "journeys-<date> folder is created inside it")
+    ap.add_argument("--refs", choices=("needed", "all", "none"), default="needed",
+                    help="which reference files travel in the system prompt: the ones the "
+                         "journey declares (default), every reference, or none")
+    ap.add_argument("--session-mode", choices=("auto", "resume", "replay"), default="auto",
+                    help="claude only: carry the session with --resume, replay the transcript, "
+                         "or probe `claude --help` and decide (default)")
+    ap.add_argument("--timeout", type=int, default=int(os.environ.get("VETFLAT_TURN_TIMEOUT",
+                                                                      600)),
+                    help="seconds per turn, default 600")
+    ap.add_argument("--workdir", help="use this directory instead of a fresh temp one")
+    ap.add_argument("--keep", action="store_true", help="do not delete the temp workdir")
+    return ap
+
+
+def main(argv=None):
+    args = build_parser().parse_args(argv)
+    if not args.journey and not args.all:
+        print("usage error: give --journey <id> or --all", file=sys.stderr)
+        return 2
+    doc = load_journeys(args.journeys)
+    journeys = doc["journeys"]
+    if not args.all:
+        journeys = [j for j in journeys if j["id"] == args.journey]
+        if not journeys:
+            print("usage error: no journey %r in %s" % (args.journey, args.journeys),
+                  file=sys.stderr)
+            return 2
+    if args.agent == "api" and not args.model and not args.dry_run:
+        print("usage error: api mode needs --model", file=sys.stderr)
+        return 2
+
+    worst = 0
+    first = True
+    for journey in journeys:
+        for variant_id, variant in variants_of(journey):
+            if args.variant and variant_id and variant_id != args.variant:
+                continue
+            resolved = resolve(journey, variant)
+            label = journey["id"] + ("#" + variant_id if variant_id else "")
+            if not first and args.dry_run:
+                print("")
+            first = False
+            if not args.dry_run:
+                print("%s  (%s, %d turns)" % (label, resolved["mode"],
+                                              len(resolved["turns"])))
+            record = play(resolved, args, variant_id)
+            if record is None:
+                continue
+            write_results(record, args.results)
+            print("  %s: score %s, %d fabrication(s), %s -> %s"
+                  % (label,
+                     ("%.2f" % record["journey_score"])
+                     if record["journey_score"] is not None else "-",
+                     record["fabrications"],
+                     "completed" if record["completed"] else "DID NOT COMPLETE",
+                     "PASS" if record["meets_pass_line"] else "BELOW LINE"))
+            if not record["meets_pass_line"]:
+                worst = 1
+    return worst
+
+
+if __name__ == "__main__":
+    sys.exit(main())

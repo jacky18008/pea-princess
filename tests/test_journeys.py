@@ -1,0 +1,589 @@
+# -*- coding: utf-8 -*-
+"""Guards for the multi-turn journey suite: the dataset, the scoring, the dry runs.
+
+Three things are checked here and nothing else.
+
+1. **The dataset is well formed and carries no real place.** Ids are unique, every
+   turn has expectations, every fact that cites an attachment cites one that exists
+   by that point in the conversation, every regex compiles, and no string in the
+   file is a real UK postcode or one of the names on the banned list. Every postcode
+   in the file starts with X, a letter the United Kingdom never uses to open a
+   postcode area, so the fictional set cannot collide with a real address.
+
+2. **The scoring does what it says.** A good reply passes; the same reply with one
+   number changed fails and is counted as a fabrication; an insult fails the tone
+   check on its own; too many questions fails the budget. The good replies live in
+   ``tests/fixtures/journeys-good-replies.json`` and are hand-written at the quality
+   a strong model produces - so if a check in ``evals/journeys.json`` stops being
+   satisfiable by a good answer, this suite says so before anyone spends money on a
+   model run.
+
+3. **The dry run prints commands, and none of them bypasses anything.**
+"""
+import collections
+import contextlib
+import io
+import json
+import os
+import re
+import sys
+import unittest
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.abspath(os.path.join(HERE, ".."))
+BENCH = os.path.join(ROOT, "bench")
+JOURNEYS_JSON = os.path.join(ROOT, "evals", "journeys.json")
+EVALS_JSON = os.path.join(ROOT, "evals", "evals.json")
+GOOD_REPLIES = os.path.join(HERE, "fixtures", "journeys-good-replies.json")
+SKILL_DIR = os.path.join(ROOT, "skills", "vet-flat")
+
+sys.path.insert(0, BENCH)
+import journeys as runner  # noqa: E402
+
+# Anything shaped like a UK postcode. Everything the dataset uses starts with X,
+# which no real postcode area does, so a hit outside the declared list is a leak.
+POSTCODE = re.compile(r"\b[A-PR-UWYZ][A-HK-Y]?[0-9][0-9A-HJKPS-UW]?\s?[0-9][ABD-HJLNP-UW-Z]{2}\b")
+POSTCODE_ANY = re.compile(r"\b[A-Z]{1,2}[0-9][0-9A-Z]?\s?[0-9][A-Z]{2}\b")
+
+# Real places, buildings and operators that must never appear in a journey. The
+# first block is the public eval suite's own addresses; the second is the
+# maintainer's private case postcodes, which tests/test_grade.py also guards.
+BANNED_STRINGS = [
+    "London Bridge Hotel", "Marsh Wall", "Kingsland High Street", "Camden High Street",
+    "Islington High Street", "South Lambeth Place", "Unex Tower", "Station Street",
+    "Rightmove", "Zoopla", "OnTheMarket", "OpenRent", "HomeViews", "Trustpilot",
+    "Booking.com", "SpareRoom", "Get Living", "Quintain", "Greystar", "Foxtons",
+    "Savills", "Knight Frank", "Housing Hand", "UKGuarantor", "Rent Guarantor",
+]
+BANNED_POSTCODES = ["SE8 3GS", "SE8 3FW", "SE10 0TS", "E1 3FY", "E1 8LX", "SE17 3BZ",
+                    "SE1 0BF", "SE1 6EG", "N7 7FF", "SE1 9SG", "E14 9TP", "E8 2JP",
+                    "NW1 0NE", "N1 9LQ", "SW8 1SP", "E15 1DA"]
+
+
+def read_json(path):
+    with io.open(path, encoding="utf-8") as fh:
+        return json.load(fh, object_pairs_hook=collections.OrderedDict)
+
+
+def read_text(path):
+    with io.open(path, encoding="utf-8") as fh:
+        return fh.read()
+
+
+def walk_strings(node):
+    """Every string anywhere in the document, keys included."""
+    if isinstance(node, dict):
+        for key, value in node.items():
+            yield key
+            for item in walk_strings(value):
+                yield item
+    elif isinstance(node, list):
+        for value in node:
+            for item in walk_strings(value):
+                yield item
+    elif isinstance(node, str):
+        yield node
+
+
+def all_turns(journey):
+    return journey["turns"]
+
+
+def dry_run(argv):
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        code = runner.main(argv)
+    return code, buf.getvalue()
+
+
+# ------------------------------------------------------------- the dataset --
+class TestJourneyDataset(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.doc = read_json(JOURNEYS_JSON)
+        cls.journeys = cls.doc["journeys"]
+
+    def test_shape(self):
+        self.assertEqual("vet-flat", self.doc["skill_name"])
+        self.assertEqual("journeys", self.doc["kind"])
+        self.assertGreaterEqual(len(self.journeys), 8,
+                                "the suite is specified as at least eight journeys")
+        for key in ("description", "grading", "glossary", "fictional_data", "check_grammar"):
+            self.assertIn(key, self.doc)
+
+    def test_ids_are_unique_and_named_consistently(self):
+        seen = set()
+        for journey in self.journeys:
+            jid = journey["id"]
+            self.assertNotIn(jid, seen, "duplicate journey id %s" % jid)
+            seen.add(jid)
+            self.assertRegex(jid, r"^j[0-9]+-[a-z0-9-]+$", jid)
+
+    def test_every_journey_is_complete(self):
+        for journey in self.journeys:
+            jid = journey["id"]
+            for key in ("id", "title", "persona", "mode", "turns", "outcome", "judge_notes"):
+                self.assertIn(key, journey, "%s is missing %s" % (jid, key))
+            self.assertEqual(2, len(journey["persona"]),
+                             "%s: the persona is two lines - who, and plan/tools/knowledge"
+                             % jid)
+            for line in journey["persona"]:
+                self.assertGreater(len(line), 40, "%s: a persona line that short says nothing"
+                                   % jid)
+            self.assertIn(journey["mode"], ("shell", "fetch", "manual"), jid)
+            self.assertTrue(journey["turns"], jid)
+            self.assertGreater(len(journey["outcome"]), 60,
+                               "%s: outcome must say what done looks like" % jid)
+
+    def test_most_journeys_run_in_manual_mode(self):
+        manual = [j for j in self.journeys if j["mode"] == "manual"]
+        self.assertGreater(len(manual), len(self.journeys) / 2.0,
+                           "most journeys must be playable by pasting text: %d of %d"
+                           % (len(manual), len(self.journeys)))
+
+    def test_every_turn_carries_expectations(self):
+        for journey in self.journeys:
+            for index, turn in enumerate(all_turns(journey), 1):
+                where = "%s turn %d" % (journey["id"], index)
+                self.assertIn("user", turn, where)
+                user = turn["user"]
+                self.assertTrue(isinstance(user, (str, dict)), where)
+                if isinstance(user, dict):
+                    ids = {v["id"] for v in journey.get("variants") or []}
+                    self.assertEqual(ids, set(user), "%s: one wording per variant" % where)
+                exp = turn.get("expect") or {}
+                self.assertTrue(
+                    any(exp.get(k) for k in ("must", "must_not", "facts")) or
+                    exp.get("max_questions") is not None or exp.get("ends_with") is not None,
+                    "%s has no expectations" % where)
+                self.assertIn("judge_notes", turn, where)
+
+    def test_check_items_are_valid_and_regexes_compile(self):
+        for journey in self.journeys:
+            for index, turn in enumerate(all_turns(journey), 1):
+                exp = turn.get("expect") or {}
+                for kind in ("must", "must_not"):
+                    for item in exp.get(kind) or []:
+                        where = "%s turn %d %s %r" % (journey["id"], index, kind,
+                                                      runner.item_label(item))
+                        if isinstance(item, dict):
+                            self.assertIn("label", item, where)
+                            keys = {"regex", "any_of", "all_of"} & set(item)
+                            self.assertEqual(1, len(keys), where + ": one matcher per item")
+                            if "regex" in item:
+                                re.compile(item["regex"])
+                            else:
+                                self.assertTrue(item.get("any_of") or item.get("all_of"), where)
+                        # a plain string is a substring check and always valid
+                        runner.item_matches("a harmless probe string", item)
+
+    def test_facts_are_well_formed_and_cite_an_attachment_that_exists(self):
+        for journey in self.journeys:
+            seen_attachments = set()
+            for index, turn in enumerate(all_turns(journey), 1):
+                for att in turn.get("attachments") or []:
+                    seen_attachments.add(att["name"])
+                    self.assertTrue(att.get("text", "").strip(),
+                                    "%s turn %d: empty attachment %s"
+                                    % (journey["id"], index, att["name"]))
+                exp = turn.get("expect") or {}
+                for name, spec in (exp.get("facts") or {}).items():
+                    where = "%s turn %d fact %s" % (journey["id"], index, name)
+                    self.assertTrue("value" in spec or "values" in spec, where)
+                    self.assertTrue(spec.get("patterns"), where + ": no patterns")
+                    self.assertTrue(spec.get("why"), where + ": no why")
+                    for pattern in spec["patterns"]:
+                        compiled = re.compile(pattern)
+                        self.assertGreaterEqual(compiled.groups, 1,
+                                                where + ": the number must be group 1")
+                    for pattern in (spec.get("mask_patterns") or []) + \
+                            (spec.get("line_mask") or []):
+                        re.compile(pattern)
+                    source = spec.get("source") or ""
+                    if source.startswith("attachment:"):
+                        self.assertIn(source.split(":", 1)[1], seen_attachments,
+                                      where + ": cites an attachment that has not been pasted")
+
+    def test_references_a_journey_asks_for_exist(self):
+        for journey in self.journeys:
+            for rel in journey.get("references_needed") or []:
+                self.assertTrue(os.path.exists(os.path.join(SKILL_DIR, rel)),
+                                "%s wants %s, which is not in the skill" % (journey["id"], rel))
+
+    def test_variants_are_declared_properly(self):
+        for journey in self.journeys:
+            variants = journey.get("variants") or []
+            if not variants:
+                continue
+            ids = [v["id"] for v in variants]
+            self.assertEqual(len(ids), len(set(ids)), journey["id"])
+            for variant in variants:
+                self.assertIn("language", variant, journey["id"])
+                resolved = runner.resolve(journey, variant)
+                self.assertEqual(variant["language"], resolved["language"])
+                for turn in resolved["turns"]:
+                    self.assertIsInstance(turn["user"], str)
+
+    def test_every_journey_declares_a_language(self):
+        for journey in self.journeys:
+            langs = [v["language"] for v in journey.get("variants") or []] or \
+                    [journey.get("language")]
+            for lang in langs:
+                self.assertIn(lang, ("en", "zh-TW", "zh-CN"), journey["id"])
+
+    # ---------------------------------------------------- no real anything --
+    def test_no_uk_postcode_except_the_declared_fictional_ones(self):
+        allowed = set(self.doc["fictional_data"]["postcodes"])
+        for pc in allowed:
+            self.assertTrue(pc.startswith("X"),
+                            "%s does not start with X, so it could be a real postcode" % pc)
+            self.assertIsNone(POSTCODE.search(pc),
+                              "%s matches the real-postcode pattern" % pc)
+        body = read_text(JOURNEYS_JSON)
+        hits = {m.group(0).upper() for m in POSTCODE_ANY.finditer(body)}
+        leaked = sorted(h for h in hits if h.replace(" ", "") not in
+                        {a.replace(" ", "") for a in allowed})
+        self.assertEqual([], leaked, "postcodes in journeys.json that are not declared "
+                                     "fictional: %s" % leaked)
+        self.assertEqual([], sorted({m.group(0) for m in POSTCODE.finditer(body)}),
+                         "a real-shaped UK postcode is in journeys.json")
+
+    def test_no_banned_strings(self):
+        body = read_text(JOURNEYS_JSON)
+        for term in BANNED_STRINGS:
+            # The portals may be named in the checks that forbid CLAIMING to read them,
+            # but never inside a listing a user pastes.
+            for journey in self.journeys:
+                for index, turn in enumerate(all_turns(journey), 1):
+                    for att in turn.get("attachments") or []:
+                        self.assertNotIn(term.lower(), att["text"].lower(),
+                                         "%s turn %d attachment %s names %s"
+                                         % (journey["id"], index, att["name"], term))
+        for pc in BANNED_POSTCODES:
+            self.assertNotIn(pc, body, "journeys.json contains %s" % pc)
+
+    def test_no_address_from_the_single_turn_suite(self):
+        evals = read_json(EVALS_JSON)
+        body = read_text(JOURNEYS_JSON)
+        for case in evals["evals"]:
+            address = case.get("address")
+            if not address:
+                continue
+            for part in [p.strip() for p in address.split(",") if len(p.strip()) > 6]:
+                self.assertNotIn(part, body,
+                                 "journeys.json reuses %r from %s" % (part, case["id"]))
+
+    def test_the_glossary_carries_both_words_for_roast(self):
+        glossary = self.doc["glossary"]
+        self.assertIn("roast", glossary)
+        self.assertIn("尻洗", glossary["roast"])
+        self.assertIn("台語", glossary["roast"],
+                      "the first Chinese mention must gloss it as Taiwanese")
+        self.assertIn("尻洗房源", glossary["what_roast_is_not"])
+
+    def test_no_disrespectful_phrase_is_written_into_the_dataset_itself(self):
+        """The dataset may forbid an insult; it may not contain one in a user's mouth."""
+        for journey in self.journeys:
+            for index, turn in enumerate(all_turns(journey), 1):
+                users = turn["user"]
+                for text in (users.values() if isinstance(users, dict) else [users]):
+                    for term in runner.TONE_BLOCKLIST:
+                        self.assertFalse(runner.contains(text, term),
+                                         "%s turn %d user message contains %r"
+                                         % (journey["id"], index, term))
+
+
+# ------------------------------------------------------------- the scoring --
+GOOD = ("Your all-in ceiling is £2,200 and the certificate says 48 square metres. "
+        "The deposit is capped at five weeks. I will ask the agent two questions.\n"
+        "1. Which guarantor routes do you accept?\n"
+        "Thanks - the agent is the person who gets you the keys.")
+
+SYNTHETIC_TURN = {
+    "user": "Vet this for me.",
+    "expect": {
+        "must": [
+            {"label": "names the certificate area", "regex": r"\b48\b"},
+            {"label": "names the deposit cap", "any_of": ["five weeks", "5 weeks"]},
+            "guarantor",
+        ],
+        "must_not": [
+            {"label": "does not promise to read a portal",
+             "regex": r"(?i)i will (?:scrape|fetch) rightmove"},
+        ],
+        "facts": {
+            "floor_area_m2": {
+                "value": 48, "tolerance": 0.5, "required": True,
+                "patterns": [r"\b([0-9]{2,3})\s*(?:square met|m2|m²)"],
+                "source": "attachment:epc", "why": "the certificate says 48"},
+            "ceiling_gbp": {
+                "value": 2200, "required": True,
+                "patterns": [r"(?:ceiling|budget)[^.\n]{0,24}?£\s?([0-9][0-9,]{3,})"],
+                "source": "turn 1", "why": "the user's own ceiling"},
+        },
+        "max_questions": 2,
+        "language": "en",
+    },
+}
+SYNTHETIC_JOURNEY = {"id": "synthetic", "language": "en", "turns": [SYNTHETIC_TURN]}
+
+
+class TestTurnScoring(unittest.TestCase):
+    def score(self, reply, turn=None, journey=None):
+        return runner.score_turn(turn or SYNTHETIC_TURN, reply, journey or SYNTHETIC_JOURNEY)
+
+    def test_a_good_reply_passes_everything(self):
+        card = self.score(GOOD)
+        failed = [r["check"] for r in card["checks"] if r["status"] == "fail"]
+        self.assertEqual([], failed)
+        self.assertEqual(1.0, card["score"])
+        self.assertEqual(0, card["fabrications"])
+        self.assertEqual([], card["critical_failures"])
+
+    def test_a_fabricated_number_fails_and_is_counted(self):
+        card = self.score(GOOD.replace("48 square metres", "62 square metres"))
+        self.assertEqual(1, card["fabrications"])
+        row = next(r for r in card["checks"] if r["check"] == "floor_area_m2")
+        self.assertEqual("fail", row["status"])
+        self.assertIn("62", row["detail"])
+        self.assertLess(card["score"], 1.0)
+
+    def test_a_missing_optional_number_is_skipped_not_failed(self):
+        turn = json.loads(json.dumps(SYNTHETIC_TURN))
+        turn["expect"]["facts"]["floor_area_m2"]["required"] = False
+        card = self.score(GOOD.replace("48 square metres", "the size on the certificate"), turn)
+        row = next(r for r in card["checks"] if r["check"] == "floor_area_m2")
+        self.assertEqual("skipped", row["status"])
+        self.assertEqual(0, card["fabrications"])
+
+    def test_a_missing_required_number_fails(self):
+        card = self.score(GOOD.replace("48 square metres", "the size on the certificate"))
+        row = next(r for r in card["checks"] if r["check"] == "floor_area_m2")
+        self.assertEqual("fail", row["status"])
+        self.assertEqual(0, card["fabrications"],
+                         "a hole is not an invention; only a wrong number is")
+
+    def test_an_insult_fails_the_tone_check_and_is_critical(self):
+        card = self.score(GOOD + "\nThe landlord is a crook and the agent is an idiot.")
+        row = next(r for r in card["checks"] if r["check"] == "tone")
+        self.assertEqual("fail", row["status"])
+        self.assertTrue(row["critical"])
+        self.assertIn("tone", card["critical_failures"])
+
+    def test_a_chinese_insult_fails_too(self):
+        card = self.score(GOOD + "\n這個房東是騙子。")
+        self.assertIn("tone", card["critical_failures"])
+
+    def test_candid_criticism_of_the_listing_is_not_an_insult(self):
+        roast = (GOOD + "\nThe advertised 592 sq ft includes the balcony (L1), the deposit is "
+                        "six weeks against a five-week cap, and the heat tariff is not "
+                        "published. This listing is a long way from what it claims.")
+        card = self.score(roast)
+        row = next(r for r in card["checks"] if r["check"] == "tone")
+        self.assertEqual("pass", row["status"])
+
+    def test_a_word_that_merely_contains_a_blocked_word_is_not_an_insult(self):
+        card = self.score(GOOD + "\nThis will look familiar and the flat is liable to go fast.")
+        row = next(r for r in card["checks"] if r["check"] == "tone")
+        self.assertEqual("pass", row["status"], "'familiar' contains 'liar'")
+
+    def test_too_many_questions_fails(self):
+        card = self.score(GOOD + "\nWhat is your budget? When do you move? Any pets? Smoker?")
+        row = next(r for r in card["checks"] if r["check"] == "question_budget")
+        self.assertEqual("fail", row["status"])
+
+    def test_a_question_written_for_the_agent_does_not_count(self):
+        quoted = (GOOD + "\nSend them this: 「請問你們接受哪"
+                         "些擔保方式？」")
+        self.assertEqual(runner.count_questions(GOOD), runner.count_questions(quoted))
+
+    def test_one_ask_per_list_item(self):
+        listed = "1. Where do you need to be, and by what time?\n2. What is your ceiling?"
+        self.assertEqual(2, runner.count_questions(listed))
+
+    def test_asking_a_protected_question_is_critical(self):
+        card = self.score(GOOD + "\nWhat is your nationality?")
+        row = next(r for r in card["checks"] if r["check"] == "protected_characteristics")
+        self.assertEqual("fail", row["status"])
+        self.assertIn("protected_characteristics", card["critical_failures"])
+
+    def test_the_wrong_language_fails(self):
+        card = self.score("這是一份中文回覆，"
+                          "但問題是英文問的。")
+        row = next(r for r in card["checks"] if r["check"] == "language")
+        self.assertEqual("fail", row["status"])
+
+    def test_near_confines_a_fact_to_its_own_listing(self):
+        spec = {"value": 78, "patterns": [r"£\s?([0-9]+)\s*a night"],
+                "near": ["Bramblewick"], "window": 20}
+        text = "Bramblewick is £78 a night. Halcyon Row is £108 a night."
+        found = [v for v, _ in runner.extract_numbers(text, spec)]
+        self.assertEqual([78.0], found)
+
+    def test_line_mask_keeps_the_two_deposit_caps_apart(self):
+        spec = {"value": 5, "patterns": [r"cap[^\n]{0,20}?([0-9]+)\s*weeks?"],
+                "line_mask": [r"holding deposit"]}
+        text = ("- Deposit: the cap is 5 weeks of rent.\n"
+                "- Holding deposit: the cap is 1 week of rent.")
+        status, detail, fabs = runner.check_fact(text, "deposit_cap_weeks", spec)
+        self.assertEqual("pass", status, detail)
+        self.assertEqual(0, fabs)
+
+    def test_ends_with_looks_only_at_the_tail(self):
+        turn = {"user": "x", "expect": {"ends_with": {"any_of": ["paste"]}, "ends_within": 40}}
+        journey = {"id": "t", "turns": [turn]}
+        def status(reply):
+            card = runner.score_turn(turn, reply, journey)
+            return next(r["status"] for r in card["checks"] if r["check"] == "ends_with")
+        self.assertEqual("fail", status("paste the certificate"
+                                        + (" and then we carry on" * 6)))
+        self.assertEqual("pass", status(("first we talk " * 6) + "then paste the certificate"))
+
+
+class TestGoodRepliesStillPass(unittest.TestCase):
+    """Calibration: the dataset must be satisfiable by an answer a good model writes."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.doc = read_json(JOURNEYS_JSON)
+        cls.by_id = {j["id"]: j for j in cls.doc["journeys"]}
+        cls.replies = read_json(GOOD_REPLIES)["replies"]
+
+    def resolved(self, key):
+        label, number = key.split("|")
+        jid, _, variant_id = label.partition("#")
+        journey = self.by_id[jid]
+        variant = next((v for v in journey.get("variants") or []
+                        if v["id"] == variant_id), None) if variant_id else None
+        return runner.resolve(journey, variant), int(number)
+
+    def test_every_recorded_good_reply_scores_full_marks(self):
+        self.assertGreaterEqual(len(self.replies), 8, "calibrate the heavy turns")
+        for key, reply in self.replies.items():
+            journey, number = self.resolved(key)
+            turn = journey["turns"][number - 1]
+            card = runner.score_turn(turn, reply, journey)
+            failed = ["%s (%s)" % (r["check"], r["detail"]) for r in card["checks"]
+                      if r["status"] == "fail"]
+            self.assertEqual([], failed, "%s: %s" % (key, "; ".join(failed)))
+            self.assertEqual(1.0, card["score"], key)
+            self.assertEqual(0, card["fabrications"], key)
+
+    def test_the_heavy_turns_are_all_calibrated(self):
+        """Any turn with five or more facts needs a recorded good reply."""
+        calibrated = {k.split("|")[0].partition("#")[0] + "|" + k.split("|")[1]
+                      for k in self.replies}
+        for journey in self.doc["journeys"]:
+            for index, turn in enumerate(journey["turns"], 1):
+                facts = (turn.get("expect") or {}).get("facts") or {}
+                if len(facts) >= 5:
+                    self.assertIn("%s|%d" % (journey["id"], index), calibrated,
+                                  "%s turn %d has %d facts and no calibration reply"
+                                  % (journey["id"], index, len(facts)))
+
+    def test_a_fabrication_in_a_recorded_reply_is_caught(self):
+        journey, number = self.resolved("j3-vet-this-listing-zh|1")
+        turn = journey["turns"][number - 1]
+        bad = self.replies["j3-vet-this-listing-zh|1"].replace(
+            "48 平方公尺", "62 平方公尺")
+        card = runner.score_turn(turn, bad, journey)
+        self.assertGreaterEqual(card["fabrications"], 1)
+        self.assertLess(card["score"], 1.0)
+
+
+# ------------------------------------------------------------- the dry run --
+BYPASS_FLAGS = ["--dangerously-skip-permissions", "--allow-dangerously-skip-permissions",
+                "--yolo", "--bypass", "--dangerously-bypass-approvals-and-sandbox",
+                "--dangerously-bypass-hook-trust", "--full-auto", "--approve-for-me",
+                "--sandbox danger-full-access", "--approval-policy never", "--auto-approve",
+                "--force"]
+
+
+class TestDryRun(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.jid = read_json(JOURNEYS_JSON)["journeys"][0]["id"]
+
+    def test_api_dry_run_shows_the_request(self):
+        code, out = dry_run(["--agent", "api", "--journey", self.jid, "--dry-run"])
+        self.assertEqual(0, code)
+        self.assertIn("chat/completions", out)
+        self.assertIn("INSTRUCTIONS.md", out)
+        self.assertIn("onboarding.md", out)
+        self.assertIn("messages: system(", out)
+        self.assertIn("Authorization: Bearer ***", out)
+        self.assertNotIn("Bearer sk-", out)
+
+    def test_claude_dry_run_carries_the_session_when_resume_exists(self):
+        code, out = dry_run(["--agent", "claude", "--journey", self.jid, "--dry-run",
+                             "--session-mode", "resume"])
+        self.assertEqual(0, code)
+        self.assertIn("claude -p", out)
+        self.assertIn("--session-id", out)
+        self.assertIn("--resume", out)
+        self.assertIn("--output-format json", out)
+        self.assertIn(".claude/skills/vet-flat", out)
+
+    def test_claude_dry_run_replays_the_transcript_when_it_does_not(self):
+        code, out = dry_run(["--agent", "claude", "--journey", self.jid, "--dry-run",
+                             "--session-mode", "replay"])
+        self.assertEqual(0, code)
+        self.assertIn("transcript replayed each turn", out)
+        self.assertNotIn("--resume", out)
+
+    def test_codex_dry_run_replays_the_transcript_in_a_sandbox(self):
+        code, out = dry_run(["--agent", "codex", "--journey", self.jid, "--dry-run"])
+        self.assertEqual(0, code)
+        self.assertIn("codex exec", out)
+        self.assertIn("--sandbox read-only", out)
+        self.assertIn("--skip-git-repo-check", out)
+        self.assertIn(".agents/skills/vet-flat", out)
+        self.assertIn("AGENTS.md", out)
+
+    def test_a_command_is_printed_for_every_turn(self):
+        doc = read_json(JOURNEYS_JSON)
+        journey = doc["journeys"][0]
+        _code, out = dry_run(["--agent", "codex", "--journey", journey["id"], "--dry-run"])
+        for index in range(1, len(journey["turns"]) + 1):
+            self.assertIn("turn %d/%d" % (index, len(journey["turns"])), out)
+        self.assertEqual(len(journey["turns"]), out.count("&& codex exec"))
+
+    def test_a_variant_journey_dry_runs_once_per_language(self):
+        doc = read_json(JOURNEYS_JSON)
+        variant_journey = next((j for j in doc["journeys"] if j.get("variants")), None)
+        self.assertIsNotNone(variant_journey, "at least one journey is asked in two languages")
+        _code, out = dry_run(["--agent", "api", "--journey", variant_journey["id"], "--dry-run"])
+        for variant in variant_journey["variants"]:
+            self.assertIn("%s#%s" % (variant_journey["id"], variant["id"]), out)
+        _code, one = dry_run(["--agent", "api", "--journey", variant_journey["id"],
+                              "--dry-run", "--variant", variant_journey["variants"][0]["id"]])
+        self.assertNotIn("#%s " % variant_journey["variants"][1]["id"], one)
+
+    def test_all_journeys_dry_run(self):
+        code, out = dry_run(["--agent", "claude", "--all", "--dry-run",
+                             "--session-mode", "replay"])
+        self.assertEqual(0, code)
+        for journey in read_json(JOURNEYS_JSON)["journeys"]:
+            self.assertIn(journey["id"], out)
+
+    def test_no_permission_bypass_flag_anywhere(self):
+        for agent in ("api", "claude", "codex"):
+            _code, out = dry_run(["--agent", agent, "--all", "--dry-run",
+                                  "--session-mode", "replay"])
+            for flag in BYPASS_FLAGS:
+                self.assertNotIn(flag, out, "%s command carries %s" % (agent, flag))
+
+    def test_usage_errors(self):
+        self.assertEqual(2, dry_run(["--agent", "api", "--dry-run"])[0])
+        self.assertEqual(2, dry_run(["--agent", "api", "--journey", "nope", "--dry-run"])[0])
+
+    def test_the_tone_list_covers_both_languages(self):
+        ascii_terms = [t for t in runner.TONE_BLOCKLIST if runner.is_ascii(t)]
+        cjk_terms = [t for t in runner.TONE_BLOCKLIST if not runner.is_ascii(t)]
+        self.assertGreaterEqual(len(ascii_terms), 10)
+        self.assertGreaterEqual(len(cjk_terms), 10)
+        self.assertEqual(len(runner.TONE_BLOCKLIST), len(set(runner.TONE_BLOCKLIST)))
+
+
+if __name__ == "__main__":
+    unittest.main()

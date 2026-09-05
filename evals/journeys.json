@@ -1,0 +1,5141 @@
+{
+ "skill_name": "vet-flat",
+ "kind": "journeys",
+ "version": "1.0.0",
+ "description": "Eight scripted multi-turn conversations, from a user's first message to the end of a search. Each turn carries its own expectations, so any model or agent can be scored on the whole journey rather than on one finished report. Facts come only from the attachments a turn pastes in, or from the legal facts in the skill; every expectation is checkable by keyword, regex or numeric extraction.",
+ "grading": {
+  "harness": "python3 bench/journeys.py --journey <id> --agent <api|claude|codex>",
+  "turn_score": "passed checks / checks that applied on that turn",
+  "journey_score": "the mean of the turn scores",
+  "completed": "true when every turn produced a non-empty reply",
+  "facts": "Every number a turn expects is extracted from the reply by that fact's own regexes and compared with the value taken from the attachment (or computed from it with the formula in `why`). A number of the same kind that is not the expected one is counted as a fabrication. A fact the reply never states is `skipped` unless it is marked `required`.",
+  "tone": "A blocklist of disrespectful phrases in English and Chinese, held in bench/journeys.py as TONE_BLOCKLIST, is applied to every reply. 'Roast' means candid, specific, evidence-based criticism of the LISTING under its landmine code. Insults or accusations about landlords, agents or hosts fail the turn outright.",
+  "questions": "max_questions counts '?' and '？' after masking quoted spans, so a question written FOR the user to send to an agent does not count against the agent's own question budget.",
+  "judge_notes": "Per turn and per journey, for an optional model judge. Nothing reads them for the score."
+ },
+ "glossary": {
+  "roast": "The candid, specific, evidence-based critique of a listing or a building: every criticism carries the landmine code and the line on the page that earned it. In Chinese the word is 尻洗（台語，roast）- Taiwanese Hokkien, and it marks the author's origin. Both words mean the same thing and either may appear in a user turn or in a reply; the checks accept both.",
+  "what_roast_is_not": "Not an insult and not an accusation about a person. Landlords, agents and hosts are partners in the search. Roast the listing, never the person - 尻洗房源，不尻洗人。 TONE_BLOCKLIST in bench/journeys.py enforces it on every reply."
+ },
+ "fictional_data": {
+  "notice": "Every address, postcode, building, company and person in this file is invented. The postcodes all begin with X, a letter the United Kingdom never uses to start a postcode area, so none of them can collide with a real address. The runner tells the agent under test that the material is fictional test data and should be treated as real for the exercise.",
+  "postcodes": [
+   "XC1 2AB",
+   "XC1 9RF",
+   "XC2 4QF",
+   "XE1 5PT",
+   "XE2 7HD",
+   "XE3 6BQ",
+   "XE3 6RN",
+   "XE4 2GH",
+   "XN4 3RD",
+   "XS9 6LT",
+   "XW3 8NB"
+  ],
+  "buildings": [
+   "Pargeter Yard",
+   "Halyard Court",
+   "Bramblewick Court",
+   "Netherfield Row",
+   "Quillon Wharf Serviced Apartments",
+   "Halcyon Row Studios",
+   "Sallowfield Court",
+   "Ashgrove Point"
+  ],
+  "companies": [
+   "Fenn & Aldridge Lettings",
+   "Thornbury Lets",
+   "Kestrel Stay Ltd"
+  ],
+  "people": [
+   "Wei",
+   "Priya",
+   "Chen",
+   "Tom",
+   "Mei-Ling",
+   "Jing",
+   "Dan",
+   "Ken"
+  ]
+ },
+ "check_grammar": {
+  "must": "a list of items. A plain string is a case-insensitive substring. An object takes `label` plus exactly one of `any_of` (one of these substrings is present), `all_of` (all of them are), or `regex` (a Python regex that matches).",
+  "must_not": "the same grammar; the item fails the turn when it MATCHES.",
+  "facts": "name -> {value | values, tolerance, required, patterns, near, window, mask_patterns, source, why}. Group 1 of each pattern is the number.",
+  "max_questions": "an integer ceiling on '?' plus '？' in the reply, quoted spans masked out.",
+  "min_questions": "optional floor, same counting rule.",
+  "ends_with": "a string, or {any_of: [...]}, that must appear in the last `ends_within` characters (default 300).",
+  "language": "'en' or a zh tag; checked by the share of CJK characters in the reply."
+ },
+ "journeys": [
+  {
+   "id": "j1-from-zero-zh",
+   "title": "從零開始 — from nothing to a first candidate",
+   "persona": [
+    "Wei, 23, a Taiwanese postgraduate who starts a London master's in October and has rented only in Taipei; has never seen a UK tenancy, an energy certificate or a referencing check.",
+    "Chat box on a phone: no shell, no fetcher, no browser add-on, so everything the agent needs must be pasted in by hand. Knowledge level: beginner - does not know what a holding deposit or a guarantor is."
+   ],
+   "mode": "manual",
+   "language": "zh-TW",
+   "references_needed": [
+    "references/onboarding.md",
+    "references/questions.md",
+    "references/inputs.md"
+   ],
+   "outcome": "The user arrives knowing nothing and leaves with: the ten basics stated with the correct legal caps, a profile written back to her in plain words with every default named, a manual-mode paste list given once, one candidate held under two gate questions, and a next-step checklist. Nothing about any flat is asserted that she did not paste.",
+   "judge_notes": "Does it read as one person talking to a frightened beginner, or as a form? Are the defaults sensible for London in October rather than arbitrary? Does it keep moving - proposing the next step itself instead of waiting to be asked? Does it stay warm about the agent and landlord she will have to deal with?",
+   "turns": [
+    {
+     "user": "我 10 月要去倫敦讀書，現在要開始找房子，可不可以教教我？",
+     "expect": {
+      "must": [
+       {
+        "label": "says in one line what it actually does",
+        "any_of": [
+         "審查",
+         "檢查",
+         "把關",
+         "篩",
+         "看房源"
+        ]
+       },
+       {
+        "label": "primer 1 - timing and the order of the steps",
+        "any_of": [
+         "referencing",
+         "資格審查",
+         "背景審查",
+         "流程",
+         "順序"
+        ]
+       },
+       {
+        "label": "primer 2a - council tax, and students are exempt",
+        "any_of": [
+         "council tax",
+         "市政稅",
+         "地方稅",
+         "Class N",
+         "N 類",
+         "學生免"
+        ]
+       },
+       {
+        "label": "primer 2b - heat network bills heat separately",
+        "any_of": [
+         "熱網",
+         "集中供暖",
+         "共同鍋爐",
+         "社區供暖",
+         "heat network",
+         "統一供暖"
+        ]
+       },
+       {
+        "label": "primer 3 - the law in force since 2026-05-01",
+        "any_of": [
+         "2026-05-01",
+         "2026 年 5 月 1 日",
+         "2026年5月1日",
+         "1 May 2026",
+         "2026/05/01"
+        ]
+       },
+       {
+        "label": "primer 4 - the income check and the guarantor",
+        "any_of": [
+         "擔保人",
+         "guarantor",
+         "30 倍",
+         "三十倍",
+         "30倍",
+         "收入審查"
+        ]
+       },
+       {
+        "label": "primer 5 - the energy certificate gives the true size",
+        "any_of": [
+         "能源證書",
+         "EPC",
+         "能源效率證書"
+        ]
+       },
+       {
+        "label": "primer 6 - who the landlord legally is matters",
+        "any_of": [
+         "法人",
+         "公司",
+         "合約上的房東",
+         "房東是誰",
+         "legal entity"
+        ]
+       },
+       {
+        "label": "primer 7 - money safety: nothing before a viewing, protected deposit",
+        "any_of": [
+         "看房前",
+         "押金保護",
+         "保護方案",
+         "政府核可",
+         "個人帳戶"
+        ]
+       },
+       {
+        "label": "primer 8 - never sign on the viewing day",
+        "any_of": [
+         "當天不要簽",
+         "不要當天簽",
+         "看房當天",
+         "隔天再"
+        ]
+       },
+       {
+        "label": "primer 9 - crime is public street by street",
+        "any_of": [
+         "犯罪",
+         "治安",
+         "警方",
+         "police"
+        ]
+       },
+       {
+        "label": "primer 10 - where to look, and that it will ask her to paste",
+        "any_of": [
+         "貼",
+         "paste",
+         "入口網站",
+         "平台",
+         "網站"
+        ]
+       },
+       {
+        "label": "asks the six intake questions in one numbered message",
+        "regex": "(?ms)^\\s*[1１][.)、][\\s\\S]{0,2000}?^\\s*[6６][.)、]"
+       },
+       {
+        "label": "offers a suggested default so she can answer 'use the defaults'",
+        "any_of": [
+         "預設",
+         "建議值",
+         "如果不確定",
+         "不知道也沒關係",
+         "不清楚也沒關係",
+         "先假設"
+        ]
+       }
+      ],
+      "must_not": [
+       {
+        "label": "does not promise to read a portal or platform automatically",
+        "regex": "(?i)(?:i(?:'| wi)?ll|i can|automatically|directly)\\s+(?:fetch|download|pull|read|scrape|crawl|check|search)[^.。\\n]{0,40}(rightmove|zoopla|onthemarket|openrent|homeviews|trustpilot|airbnb|booking\\.com)"
+       },
+       {
+        "label": "no insult or accusation aimed at the landlord, agent or host",
+        "any_of": [
+         "scum",
+         "slumlord",
+         "crook",
+         "con artist",
+         "conman",
+         "greedy",
+         "idiot",
+         "moron",
+         "clueless",
+         "parasite",
+         "dodgy landlord",
+         "dodgy agent",
+         "dodgy host",
+         "騙子",
+         "骗子",
+         "黑心",
+         "無良",
+         "无良",
+         "奸商",
+         "貪婪",
+         "贪婪",
+         "垃圾房東",
+         "垃圾房东"
+        ]
+       },
+       {
+        "label": "never asks about nationality, visa, race or religion",
+        "regex": "(國籍|簽證|移民身分|種族|宗教|nationality|visa status)[^。！？?!\\n]{0,25}[？?]"
+       }
+      ],
+      "facts": {
+       "deposit_cap_weeks": {
+        "value": 5,
+        "tolerance": 0.0,
+        "required": false,
+        "patterns": [
+         "(?:cap(?:ped)?(?:\\s+at)?|at most|no more than|maximum|legal limit|上限|最多|不得超過|不能超過|法定)[^.。\\n]{0,32}?([0-9]+|one|two|three|four|five|six|一|兩|二|三|四|五|六)\\s*(?:週|周|星期|weeks?)",
+         "([0-9]+|one|two|three|four|five|six|一|兩|二|三|四|五|六)\\s*(?:週|周|星期|weeks?)[^.。\\n]{0,20}?(?:is the cap|is the legal|maximum|上限|為上限|是上限)",
+         "押金[^。\\n]{0,24}?([0-9]+|一|兩|二|三|四|五|六)\\s*(?:週|周|星期)",
+         "deposit[^.\\n]{0,40}?([0-9]+|one|two|three|four|five|six)\\s*weeks?"
+        ],
+        "line_mask": [
+         "holding deposit|訂金|保留金"
+        ],
+        "source": "skills/vet-flat/SKILL.md legal facts",
+        "why": "The legal cap is five weeks' rent. A bigger number told to a tenant is money she should not hand over."
+       },
+       "holding_deposit_weeks": {
+        "value": 1,
+        "tolerance": 0.0,
+        "required": false,
+        "patterns": [
+         "(?:holding deposit|訂金|保留金)[^.。\\n]{0,40}?([0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)",
+         "([0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)[^.。\\n]{0,16}?(?:holding deposit|訂金|保留金)"
+        ],
+        "source": "skills/vet-flat/SKILL.md legal facts",
+        "why": "A holding deposit is capped at one week's rent."
+       },
+       "rent_in_advance_months": {
+        "value": 1,
+        "tolerance": 0.0,
+        "required": false,
+        "patterns": [
+         "([0-9]+|one|two|three|six|twelve|一|兩|二|三|六|十二)\\s*(?:個月|months?)[^.。,，\\n]{0,30}?(?:in advance|up ?front|預付|先付|預繳)",
+         "(?:in advance|up ?front|預付|先付|預繳)[^.。,，\\n]{0,30}?([0-9]+|one|two|three|六|一|兩|二|三)\\s*(?:個月|months?)"
+        ],
+        "source": "skills/vet-flat/SKILL.md legal facts",
+        "why": "Since 2026-05-01 a landlord in England may take at most one month's rent in advance. Six months up front is a signal, not a normal ask."
+       }
+      },
+      "max_questions": 6,
+      "language": "zh-TW"
+     },
+     "judge_notes": "Ten facts on one screen without becoming a wall of law. Does the message end by inviting her to answer 'all defaults'?"
+    },
+    {
+     "user": "我不太確定欸…預算大概兩千多鎊吧？學校在市中心，房子小一點沒關係，其他你幫我決定就好。",
+     "expect": {
+      "must": [
+       {
+        "label": "writes the profile back in plain words",
+        "any_of": [
+         "以下是我幫你記下",
+         "你的條件",
+         "條件如下",
+         "我先這樣記",
+         "profile",
+         "檔案",
+         "設定如下"
+        ]
+       },
+       {
+        "label": "names which values are defaults or assumptions",
+        "any_of": [
+         "預設",
+         "假設",
+         "先假設",
+         "如果不對再告訴我",
+         "我先用"
+        ]
+       },
+       {
+        "label": "first step is built on where she has to be most days",
+        "any_of": [
+         "目的地",
+         "通勤",
+         "校區",
+         "每天要到",
+         "學校在哪"
+        ]
+       },
+       {
+        "label": "first step leads to a sweep or a comparison, not one guess",
+        "any_of": [
+         "掃描",
+         "sweep",
+         "比較",
+         "候選",
+         "名單"
+        ]
+       },
+       {
+        "label": "explains what 'all-in' has to include",
+        "any_of": [
+         "全部成本",
+         "all-in",
+         "含帳單",
+         "水電",
+         "網路",
+         "council tax",
+         "市政稅"
+        ]
+       },
+       {
+        "label": "asks her to turn '兩千多' into one number",
+        "any_of": [
+         "確切",
+         "具體",
+         "上限",
+         "最多",
+         "一個數字"
+        ]
+       }
+      ],
+      "must_not": [
+       {
+        "label": "does not quote a local rent band it has not looked up",
+        "regex": "(平均租金|行情|市場價|市場行情)[^。\\n]{0,20}£\\s?[0-9]"
+       },
+       {
+        "label": "no insult or accusation aimed at the landlord, agent or host",
+        "any_of": [
+         "scum",
+         "slumlord",
+         "crook",
+         "con artist",
+         "conman",
+         "greedy",
+         "idiot",
+         "moron",
+         "clueless",
+         "parasite",
+         "dodgy landlord",
+         "dodgy agent",
+         "dodgy host",
+         "騙子",
+         "骗子",
+         "黑心",
+         "無良",
+         "无良",
+         "奸商",
+         "貪婪",
+         "贪婪",
+         "垃圾房東",
+         "垃圾房东"
+        ]
+       }
+      ],
+      "max_questions": 2,
+      "language": "zh-TW"
+     },
+     "judge_notes": "Does the profile echo use her words rather than field names? Does it move on its own instead of waiting for permission?"
+    },
+    {
+     "user": "校區的郵遞區號是 XC1 2AB，平日早上九點前要到。全部加起來一個月最多 £2,000。",
+     "expect": {
+      "must": [
+       {
+        "label": "repeats the destination exactly as given",
+        "any_of": [
+         "XC1 2AB"
+        ]
+       },
+       {
+        "label": "repeats the all-in ceiling exactly as given",
+        "regex": "£\\s?2[,，]?000|2[,，]?000\\s*(?:鎊|英鎊|GBP)"
+       },
+       {
+        "label": "says what it will run: a sweep or a comparison",
+        "any_of": [
+         "掃描",
+         "sweep",
+         "比較",
+         "候選"
+        ]
+       },
+       {
+        "label": "says what she has to paste",
+        "any_of": [
+         "貼",
+         "paste",
+         "複製"
+        ]
+       },
+       {
+        "label": "names the energy certificate as the first thing to paste",
+        "any_of": [
+         "能源證書",
+         "EPC",
+         "find-energy-certificate"
+        ]
+       },
+       {
+        "label": "states which mode it is in",
+        "any_of": [
+         "手動",
+         "manual",
+         "純對話",
+         "沒有工具",
+         "有工具",
+         "shell",
+         "模式"
+        ]
+       }
+      ],
+      "facts": {
+       "all_in_ceiling_gbp": {
+        "value": 2000,
+        "tolerance": 0.0,
+        "required": true,
+        "patterns": [
+         "(?:上限|最多|全部加起來|全部|all-?in|ceiling|預算)[^。\\n]{0,24}?£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)",
+         "£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)[^。\\n]{0,14}(?:上限|全部|all-?in|以內)"
+        ],
+        "source": "turn 3 user message",
+        "why": "The ceiling she stated. Any other figure presented as her ceiling is the agent rewriting the user's own budget."
+       }
+      },
+      "max_questions": 3,
+      "language": "zh-TW"
+     },
+     "judge_notes": "Does it say plainly what a sweep is before offering one? Does it promise only what a chat box can do?"
+    },
+    {
+     "user": "我沒有 shell、沒有瀏覽器外掛，只能複製貼上網頁給你。",
+     "expect": {
+      "must": [
+       {
+        "label": "confirms manual mode in one line",
+        "any_of": [
+         "手動模式",
+         "manual",
+         "純對話",
+         "只靠你貼",
+         "貼上模式"
+        ]
+       },
+       {
+        "label": "asks once, as one numbered list",
+        "regex": "(?m)^\\s*(?:1[.)、]|一[.、])"
+       },
+       {
+        "label": "gives the place to get it",
+        "any_of": [
+         "find-energy-certificate",
+         "gov.uk",
+         "GOV.UK",
+         "政府網站"
+        ]
+       },
+       {
+        "label": "gives the format wanted back",
+        "any_of": [
+         "整頁",
+         "全文",
+         "貼上",
+         "文字",
+         "截圖"
+        ]
+       },
+       {
+        "label": "gives one short reason per item",
+        "any_of": [
+         "因為",
+         "用來",
+         "這會決定",
+         "目的",
+         "為什麼"
+        ]
+       },
+       {
+        "label": "says plainly it will not read the portals itself",
+        "any_of": [
+         "不能自動",
+         "無法自動",
+         "條款",
+         "不抓",
+         "請你貼",
+         "需要你貼"
+        ]
+       }
+      ],
+      "must_not": [
+       {
+        "label": "does not promise to read a portal or platform automatically",
+        "regex": "(?i)(?:i(?:'| wi)?ll|i can|automatically|directly)\\s+(?:fetch|download|pull|read|scrape|crawl|check|search)[^.。\\n]{0,40}(rightmove|zoopla|onthemarket|openrent|homeviews|trustpilot|airbnb|booking\\.com)"
+       },
+       {
+        "label": "no insult or accusation aimed at the landlord, agent or host",
+        "any_of": [
+         "scum",
+         "slumlord",
+         "crook",
+         "con artist",
+         "conman",
+         "greedy",
+         "idiot",
+         "moron",
+         "clueless",
+         "parasite",
+         "dodgy landlord",
+         "dodgy agent",
+         "dodgy host",
+         "騙子",
+         "骗子",
+         "黑心",
+         "無良",
+         "无良",
+         "奸商",
+         "貪婪",
+         "贪婪",
+         "垃圾房東",
+         "垃圾房东"
+        ]
+       }
+      ],
+      "max_questions": 2,
+      "language": "zh-TW"
+     },
+     "judge_notes": "Is the list short enough that a tired person would actually do it? Does it say what it will get on with meanwhile?"
+    },
+    {
+     "user": "我在 XE2 7HD 看到一間一房，仲介說 £1,850 pcm，含水電。",
+     "expect": {
+      "must": [
+       {
+        "label": "repeats the postcode she gave",
+        "any_of": [
+         "XE2 7HD"
+        ]
+       },
+       {
+        "label": "marks what the agent said as self-reported, not official",
+        "any_of": [
+         "仲介說",
+         "自述",
+         "未經證實",
+         "S（",
+         "S ",
+         "self-reported"
+        ]
+       },
+       {
+        "label": "says out loud what it does not yet know",
+        "any_of": [
+         "未知",
+         "不知道",
+         "無法確認",
+         "還不知道",
+         "U"
+        ]
+       },
+       {
+        "label": "puts the guarantor gate question first",
+        "any_of": [
+         "G1",
+         "擔保",
+         "guarantor"
+        ]
+       },
+       {
+        "label": "asks for the energy certificate for this exact flat",
+        "any_of": [
+         "能源證書",
+         "EPC"
+        ]
+       },
+       {
+        "label": "wants 'bills included' in writing",
+        "any_of": [
+         "書面",
+         "白紙黑字",
+         "寫在",
+         "email",
+         "電子郵件",
+         "文字"
+        ]
+       }
+      ],
+      "must_not": [
+       {
+        "label": "does not assert this flat's floor area before seeing a certificate",
+        "regex": "(這間|該戶|此戶|這戶)[^。\\n]{0,12}(?:是|有|為)\\s?[0-9]{2,3}\\s*(?:平方公尺|平方米|m²|m2)"
+       },
+       {
+        "label": "no insult or accusation aimed at the landlord, agent or host",
+        "any_of": [
+         "scum",
+         "slumlord",
+         "crook",
+         "con artist",
+         "conman",
+         "greedy",
+         "idiot",
+         "moron",
+         "clueless",
+         "parasite",
+         "dodgy landlord",
+         "dodgy agent",
+         "dodgy host",
+         "騙子",
+         "骗子",
+         "黑心",
+         "無良",
+         "无良",
+         "奸商",
+         "貪婪",
+         "贪婪",
+         "垃圾房東",
+         "垃圾房东"
+        ]
+       }
+      ],
+      "facts": {
+       "rent_pcm": {
+        "value": 1850,
+        "tolerance": 0.0,
+        "required": true,
+        "patterns": [
+         "£\\s?([0-9][0-9,]{3,})\\s*(?:pcm|per month|/ ?月|每月|一個月)",
+         "(?:月租|租金)[^。\\n]{0,10}£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)"
+        ],
+        "source": "turn 5 user message",
+        "why": "The rent she was quoted. A different rent in the reply is the agent rewriting the only price fact it has."
+       },
+       "deposit_cap_gbp": {
+        "value": 2134.62,
+        "tolerance": 1.5,
+        "required": false,
+        "patterns": [
+         "(?:押金|deposit)[\\s\\S]{0,160}?£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)"
+        ],
+        "line_mask": [
+         "holding deposit|訂金|保留金"
+        ],
+        "source": "computed from the rent in turn 5",
+        "why": "Five weeks of GBP 1,850 pcm: 1850 x 12 / 52 x 5 = 2134.62. Stated differently, the arithmetic was done in the model's head and got it wrong."
+       }
+      },
+      "max_questions": 2,
+      "language": "zh-TW"
+     },
+     "judge_notes": "Does it resist writing a verdict on one line of hearsay? Does it show the deposit arithmetic step by step rather than asserting it?"
+    },
+    {
+     "user": "仲介回說：要先付三個月房租當保證，這樣才願意保留。",
+     "expect": {
+      "must": [
+       {
+        "label": "dates the rule correctly",
+        "any_of": [
+         "2026-05-01",
+         "2026 年 5 月 1 日",
+         "2026年5月1日",
+         "1 May 2026"
+        ]
+       },
+       {
+        "label": "states the one-month ceiling on rent in advance",
+        "any_of": [
+         "一個月",
+         "1 個月",
+         "one month"
+        ]
+       },
+       {
+        "label": "names the right instrument for holding a flat",
+        "any_of": [
+         "holding deposit",
+         "訂金",
+         "保留金"
+        ]
+       },
+       {
+        "label": "gives a sentence she can send, politely",
+        "any_of": [
+         "可以請問",
+         "想請教",
+         "請幫我確認",
+         "方便的話",
+         "麻煩您",
+         "謝謝"
+        ]
+       },
+       {
+        "label": "treats the agent as a partner, not a suspect",
+        "any_of": [
+         "合作",
+         "一起",
+         "可能是舊資料",
+         "可能還沒更新",
+         "理解",
+         "常見"
+        ]
+       }
+      ],
+      "must_not": [
+       {
+        "label": "no insult or accusation aimed at the landlord, agent or host",
+        "any_of": [
+         "scum",
+         "slumlord",
+         "crook",
+         "con artist",
+         "conman",
+         "greedy",
+         "idiot",
+         "moron",
+         "clueless",
+         "parasite",
+         "dodgy landlord",
+         "dodgy agent",
+         "dodgy host",
+         "騙子",
+         "骗子",
+         "黑心",
+         "無良",
+         "无良",
+         "奸商",
+         "貪婪",
+         "贪婪",
+         "垃圾房東",
+         "垃圾房东",
+         "他在騙你",
+         "這是詐騙集團",
+         "違法的房東",
+         "對方違法"
+        ]
+       }
+      ],
+      "facts": {
+       "rent_in_advance_months": {
+        "value": 1,
+        "tolerance": 0.0,
+        "required": true,
+        "patterns": [
+         "(?:cap(?:ped)?(?:\\s+at)?|at most|no more than|maximum|may only take|can only take|上限|最多|不得超過|不能超過|只能收|法定)[^.。\\n]{0,32}?([0-9]+|one|two|three|six|twelve|一|兩|二|三|六|十二)\\s*(?:個月|months?)[^.。\\n]{0,20}?(?:in advance|up ?front|預付|先付)?",
+         "([0-9]+|one|two|three|一|兩|二|三)\\s*(?:個月|months?)\\s*(?:rent\\s*)?(?:in advance|up ?front|預付|先付)[^.。\\n]{0,20}?(?:at most|maximum|上限|為上限|是上限)"
+        ],
+        "source": "skills/vet-flat/SKILL.md legal facts",
+        "why": "The cap is one month. The three months in the user's message is the ask, not the law, so only a CAP sentence is read here."
+       },
+       "holding_deposit_weeks": {
+        "value": 1,
+        "tolerance": 0.0,
+        "required": false,
+        "patterns": [
+         "(?:holding deposit|訂金|保留金)[^.。\\n]{0,40}?([0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)"
+        ],
+        "source": "skills/vet-flat/SKILL.md legal facts",
+        "why": "One week's rent is the legal ceiling on a holding deposit."
+       }
+      },
+      "max_questions": 2,
+      "language": "zh-TW"
+     },
+     "judge_notes": "Does it separate 'this is not allowed' from 'this person is bad'? Does it offer the agent a way to say yes?"
+    },
+    {
+     "user": "了解！那我接下來該做什麼？",
+     "expect": {
+      "must": [
+       {
+        "label": "gives the next steps as a list",
+        "regex": "(?m)^\\s*(?:1[.)、]|一[.、]|[-*・]\\s)"
+       },
+       {
+        "label": "includes the viewing",
+        "any_of": [
+         "看房",
+         "看屋",
+         "現場",
+         "viewing"
+        ]
+       },
+       {
+        "label": "repeats: never sign on the viewing day",
+        "any_of": [
+         "當天不要簽",
+         "不要當天簽",
+         "看房當天"
+        ]
+       },
+       {
+        "label": "says what is still missing and who has to supply it",
+        "any_of": [
+         "還缺",
+         "需要你",
+         "請你貼",
+         "尚未",
+         "還沒拿到"
+        ]
+       }
+      ],
+      "must_not": [
+       {
+        "label": "no insult or accusation aimed at the landlord, agent or host",
+        "any_of": [
+         "scum",
+         "slumlord",
+         "crook",
+         "con artist",
+         "conman",
+         "greedy",
+         "idiot",
+         "moron",
+         "clueless",
+         "parasite",
+         "dodgy landlord",
+         "dodgy agent",
+         "dodgy host",
+         "騙子",
+         "骗子",
+         "黑心",
+         "無良",
+         "无良",
+         "奸商",
+         "貪婪",
+         "贪婪",
+         "垃圾房東",
+         "垃圾房东"
+        ]
+       }
+      ],
+      "max_questions": 2,
+      "ends_with": {
+       "any_of": [
+        "貼",
+        "看房",
+        "下一步",
+        "能源證書",
+        "清單"
+       ]
+      },
+      "language": "zh-TW"
+     },
+     "judge_notes": "Does the closing line give her exactly one thing to do next?"
+    }
+   ]
+  },
+  {
+   "id": "j2-area-and-budget-en",
+   "title": "Area and budget - a sweep from a one-line brief",
+   "persona": [
+    "Priya, 29, moving down from Manchester for a 1 November start; has rented twice in the UK, knows what a deposit and a reference are, but does not know east London.",
+    "Runs the skill in a terminal with python3 and internet, so the open registers are reachable; the listing portals still have to be pasted. Knowledge level: intermediate."
+   ],
+   "mode": "shell",
+   "language": "en",
+   "references_needed": [
+    "references/onboarding.md",
+    "references/questions.md",
+    "references/axes/00-area-sweep.md",
+    "references/inputs.md"
+   ],
+   "outcome": "From one sentence the agent gets the two things it was not given (destination, deal-breakers), never re-asks the four it was, and produces an empty candidates table with the right columns plus the exact paste request. The first listing she pastes is read back with the advertised figures intact and the two illegal terms named.",
+   "judge_notes": "Does it ask only for what is missing, or does it run the whole intake at someone who has already answered? Is the candidates skeleton usable as a real worksheet? Are the two questions ones a letting agent would actually answer?",
+   "turns": [
+    {
+     "user": "I want a one-bed in east London, zone 2, £2,200 all-in, moving 1 November.",
+     "expect": {
+      "must": [
+       {
+        "label": "states which mode it is in",
+        "any_of": [
+         "shell mode",
+         "manual mode",
+         "fetch mode",
+         "paste"
+        ]
+       },
+       {
+        "label": "offers a sweep or a comparison as the first step",
+        "any_of": [
+         "sweep",
+         "scan the area",
+         "compare buildings",
+         "shortlist",
+         "candidates"
+        ]
+       },
+       {
+        "label": "echoes the all-in ceiling",
+        "regex": "£\\s?2[,.]?200"
+       },
+       {
+        "label": "echoes the move-in date",
+        "any_of": [
+         "1 november",
+         "1 nov",
+         "november 1",
+         "2026-11-01"
+        ]
+       },
+       {
+        "label": "asks where she has to be most days",
+        "any_of": [
+         "where you need to be",
+         "where you have to be",
+         "destination",
+         "commute",
+         "get to most days",
+         "office",
+         "site"
+        ]
+       },
+       {
+        "label": "says what all-in has to cover",
+        "any_of": [
+         "council tax",
+         "energy",
+         "water",
+         "broadband",
+         "bills"
+        ]
+       }
+      ],
+      "must_not": [
+       {
+        "label": "does not re-ask the budget she just gave",
+        "regex": "(?i)(what|how much)[^.?\\n]{0,45}budget[^.?\\n]{0,25}\\?"
+       },
+       {
+        "label": "does not re-ask the move-in date she just gave",
+        "regex": "(?i)when[^.?\\n]{0,35}(move in|moving in|move-in)[^.?\\n]{0,25}\\?"
+       },
+       {
+        "label": "does not promise to read a portal or platform automatically",
+        "regex": "(?i)(?:i(?:'| wi)?ll|i can|automatically|directly)\\s+(?:fetch|download|pull|read|scrape|crawl|check|search)[^.。\\n]{0,40}(rightmove|zoopla|onthemarket|openrent|homeviews|trustpilot|airbnb|booking\\.com)"
+       },
+       {
+        "label": "no insult or accusation aimed at the landlord, agent or host",
+        "any_of": [
+         "scum",
+         "slumlord",
+         "crook",
+         "con artist",
+         "conman",
+         "greedy",
+         "idiot",
+         "moron",
+         "clueless",
+         "parasite",
+         "dodgy landlord",
+         "dodgy agent",
+         "dodgy host",
+         "騙子",
+         "骗子",
+         "黑心",
+         "無良",
+         "无良",
+         "奸商",
+         "貪婪",
+         "贪婪",
+         "垃圾房東",
+         "垃圾房东"
+        ]
+       }
+      ],
+      "facts": {
+       "all_in_ceiling_gbp": {
+        "value": 2200,
+        "tolerance": 0.0,
+        "required": true,
+        "patterns": [
+         "(?:all-?in|ceiling|budget|total|cap)[^.\\n]{0,24}?£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)",
+         "£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)[^.\\n]{0,16}(?:all-?in|total|budget|a month|pcm)"
+        ],
+        "source": "turn 1 user message",
+        "why": "Her stated ceiling. Anything else presented as her ceiling is the agent rewriting the user's budget."
+       }
+      },
+      "max_questions": 4,
+      "language": "en"
+     },
+     "judge_notes": "Two or three questions, not six. Does it already start describing the sweep it will run?"
+    },
+    {
+     "user": "My site's postcode is XE3 6BQ and I need to be there by 08:00. No ground floor, and a washing machine in the flat.",
+     "expect": {
+      "must": [
+       {
+        "label": "repeats the destination exactly",
+        "any_of": [
+         "XE3 6BQ"
+        ]
+       },
+       {
+        "label": "writes the profile back",
+        "any_of": [
+         "profile",
+         "here is what i have",
+         "here's what i have",
+         "your rules",
+         "hard filters",
+         "to confirm"
+        ]
+       },
+       {
+        "label": "records the ground-floor deal-breaker",
+        "any_of": [
+         "ground floor"
+        ]
+       },
+       {
+        "label": "records the washing machine",
+        "any_of": [
+         "washing machine"
+        ]
+       },
+       {
+        "label": "says how wide it will search",
+        "any_of": [
+         "radius",
+         "anchor",
+         "around",
+         "within",
+         "metres",
+         "minutes"
+        ]
+       },
+       {
+        "label": "asks the money-gate question",
+        "any_of": [
+         "guarantor",
+         "income check",
+         "referencing",
+         "affordability"
+        ]
+       }
+      ],
+      "must_not": [
+       {
+        "label": "no insult or accusation aimed at the landlord, agent or host",
+        "any_of": [
+         "scum",
+         "slumlord",
+         "crook",
+         "con artist",
+         "conman",
+         "greedy",
+         "idiot",
+         "moron",
+         "clueless",
+         "parasite",
+         "dodgy landlord",
+         "dodgy agent",
+         "dodgy host",
+         "騙子",
+         "骗子",
+         "黑心",
+         "無良",
+         "无良",
+         "奸商",
+         "貪婪",
+         "贪婪",
+         "垃圾房東",
+         "垃圾房东"
+        ]
+       }
+      ],
+      "max_questions": 3,
+      "language": "en"
+     },
+     "judge_notes": "Does the profile echo include the defaults it filled in for her, and say they are defaults?"
+    },
+    {
+     "user": "I have a UK guarantor. Go ahead.",
+     "expect": {
+      "must": [
+       {
+        "label": "produces a candidates skeleton",
+        "any_of": [
+         "candidate",
+         "shortlist",
+         "table",
+         "column",
+         "worksheet"
+        ]
+       },
+       {
+        "label": "column: certificate floor area",
+        "any_of": [
+         "floor area",
+         "m²",
+         "m2",
+         "square metres",
+         "sq ft"
+        ]
+       },
+       {
+        "label": "column: all-in monthly cost",
+        "any_of": [
+         "all-in",
+         "total monthly",
+         "bills",
+         "council tax"
+        ]
+       },
+       {
+        "label": "column: commute",
+        "any_of": [
+         "commute",
+         "door to door",
+         "door-to-door",
+         "minutes"
+        ]
+       },
+       {
+        "label": "every cell starts unknown until something is pasted",
+        "any_of": [
+         "unknown",
+         "not yet",
+         "blank",
+         "to be filled",
+         "empty",
+         "u "
+        ]
+       },
+       {
+        "label": "asks for the listings to be pasted",
+        "any_of": [
+         "paste",
+         "copy",
+         "save the page",
+         "select all"
+        ]
+       }
+      ],
+      "must_not": [
+       {
+        "label": "does not invent candidate buildings with prices",
+        "regex": "(?i)\\b(candidate|option|flat)\\s*[123ABC]\\b[^\\n]{0,60}£\\s?[0-9]"
+       },
+       {
+        "label": "does not promise to read a portal or platform automatically",
+        "regex": "(?i)(?:i(?:'| wi)?ll|i can|automatically|directly)\\s+(?:fetch|download|pull|read|scrape|crawl|check|search)[^.。\\n]{0,40}(rightmove|zoopla|onthemarket|openrent|homeviews|trustpilot|airbnb|booking\\.com)"
+       },
+       {
+        "label": "no insult or accusation aimed at the landlord, agent or host",
+        "any_of": [
+         "scum",
+         "slumlord",
+         "crook",
+         "con artist",
+         "conman",
+         "greedy",
+         "idiot",
+         "moron",
+         "clueless",
+         "parasite",
+         "dodgy landlord",
+         "dodgy agent",
+         "dodgy host",
+         "騙子",
+         "骗子",
+         "黑心",
+         "無良",
+         "无良",
+         "奸商",
+         "貪婪",
+         "贪婪",
+         "垃圾房東",
+         "垃圾房东"
+        ]
+       }
+      ],
+      "max_questions": 3,
+      "language": "en"
+     },
+     "judge_notes": "Is the skeleton the same shape as the report the user will get later, so nothing has to be re-entered?"
+    },
+    {
+     "user": "Here's the first one.",
+     "attachments": [
+      {
+       "name": "listing-halyard-court",
+       "text": "LISTING PAGE TEXT (fictional test data, copied by the user 2026-09-04)\nFlat 9, 14 Halyard Court, London XE3 6RN\n£2,050 pcm  (£473 pw)\n1 bedroom · 1 bathroom · 560 sq ft\nFourth floor, lift. Available 1 November 2026.\nUnfurnished. Balcony 4 sq m (included in the stated area).\nHeating: individual gas boiler. Council tax band C.\nDeposit: 6 weeks' rent. Holding deposit: 1 week's rent.\nRent in advance: 3 months required where there is no UK guarantor.\nBills: tenant pays energy, water and broadband.\nMarketed by Thornbury Lets.\n"
+      }
+     ],
+     "expect": {
+      "must": [
+       {
+        "label": "repeats the advertised rent as advertised",
+        "regex": "£\\s?2[,.]?050"
+       },
+       {
+        "label": "treats the advertised size as a claim, not a fact",
+        "any_of": [
+         "claim",
+         "advertised",
+         "not verified",
+         "certificate",
+         "epc",
+         "balcony"
+        ]
+       },
+       {
+        "label": "names the five-week deposit cap",
+        "any_of": [
+         "five weeks",
+         "5 weeks",
+         "five weeks'"
+        ]
+       },
+       {
+        "label": "names the one-month ceiling on rent in advance",
+        "any_of": [
+         "one month",
+         "1 month"
+        ]
+       },
+       {
+        "label": "names a landmine code",
+        "regex": "\\bL(?:1|12)\\b"
+       },
+       {
+        "label": "asks a gate question about money",
+        "any_of": [
+         "G1",
+         "G4",
+         "G8",
+         "deposit protection",
+         "custodial",
+         "guarantor"
+        ]
+       },
+       {
+        "label": "says which axis is still unknown",
+        "any_of": [
+         "unknown",
+         "not found",
+         "cannot",
+         "u "
+        ]
+       }
+      ],
+      "must_not": [
+       {
+        "label": "does not state a certificate floor area it has not seen",
+        "regex": "(?i)(certificate|epc)[^.\\n]{0,30}\\b(5[0-9]|4[0-9])\\s*(?:m²|m2|square)"
+       },
+       {
+        "label": "no insult or accusation aimed at the landlord, agent or host",
+        "any_of": [
+         "scum",
+         "slumlord",
+         "crook",
+         "con artist",
+         "conman",
+         "greedy",
+         "idiot",
+         "moron",
+         "clueless",
+         "parasite",
+         "dodgy landlord",
+         "dodgy agent",
+         "dodgy host",
+         "騙子",
+         "骗子",
+         "黑心",
+         "無良",
+         "无良",
+         "奸商",
+         "貪婪",
+         "贪婪",
+         "垃圾房東",
+         "垃圾房东"
+        ]
+       }
+      ],
+      "facts": {
+       "listing_rent_pcm": {
+        "value": 2050,
+        "tolerance": 0.0,
+        "required": true,
+        "patterns": [
+         "£\\s?([0-9][0-9,]{3,})\\s*(?:pcm|per month|a month|/ ?month)",
+         "(?:rent|advertised at)[^.\\n]{0,16}?£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)"
+        ],
+        "source": "attachment:listing-halyard-court",
+        "why": "The advertised rent, exactly as pasted."
+       },
+       "listing_area_sqft": {
+        "value": 560,
+        "tolerance": 0.0,
+        "required": false,
+        "patterns": [
+         "\\b([0-9]{3})\\s*(?:sq ?\\.?\\s?ft|square feet)"
+        ],
+        "source": "attachment:listing-halyard-court",
+        "why": "The advertised size, exactly as pasted; it is a claim, and the reply may repeat it but not change it."
+       },
+       "deposit_cap_weeks": {
+        "value": 5,
+        "tolerance": 0.0,
+        "required": false,
+        "patterns": [
+         "(?:cap(?:ped)?(?:\\s+at)?|at most|no more than|maximum|legal limit|上限|最多|不得超過|不能超過|法定)[^.。\\n]{0,32}?([0-9]+|one|two|three|four|five|six|一|兩|二|三|四|五|六)\\s*(?:週|周|星期|weeks?)",
+         "([0-9]+|one|two|three|four|five|six|一|兩|二|三|四|五|六)\\s*(?:週|周|星期|weeks?)[^.。\\n]{0,20}?(?:is the cap|is the legal|maximum|上限|為上限|是上限)"
+        ],
+        "line_mask": [
+         "holding deposit|訂金|保留金"
+        ],
+        "source": "skills/vet-flat/SKILL.md legal facts",
+        "why": "Five weeks is the cap; the advertised six weeks is the listing's ask, so only a CAP sentence is read here."
+       },
+       "rent_in_advance_months": {
+        "value": 1,
+        "tolerance": 0.0,
+        "required": true,
+        "patterns": [
+         "(?:cap(?:ped)?(?:\\s+at)?|at most|no more than|maximum|may only take|can only take|上限|最多|不得超過|不能超過|只能收|法定)[^.。\\n]{0,32}?([0-9]+|one|two|three|six|twelve|一|兩|二|三|六|十二)\\s*(?:個月|months?)[^.。\\n]{0,20}?(?:in advance|up ?front|預付|先付)?",
+         "([0-9]+|one|two|three|一|兩|二|三)\\s*(?:個月|months?)\\s*(?:rent\\s*)?(?:in advance|up ?front|預付|先付)[^.。\\n]{0,20}?(?:at most|maximum|上限|為上限|是上限)"
+        ],
+        "source": "skills/vet-flat/SKILL.md legal facts",
+        "why": "One month is the cap; the listing's three months is the ask."
+       },
+       "deposit_cap_gbp": {
+        "values": [
+         2365.38,
+         2838.46
+        ],
+        "tolerance": 1.5,
+        "required": false,
+        "patterns": [
+         "(?:deposit|押金)[\\s\\S]{0,160}?£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)"
+        ],
+        "line_mask": [
+         "holding deposit|訂金|保留金"
+        ],
+        "source": "computed from the advertised rent",
+        "why": "Five weeks of GBP 2,050 pcm: 2050 x 12 / 52 x 5 = 2365.38. The advertised six weeks, 2838.46, is allowed because the listing asks for it and a good reply prices both."
+       }
+      },
+      "max_questions": 6,
+      "language": "en"
+     },
+     "judge_notes": "Does it separate 'the listing says' from 'the register says' in every sentence? Does it keep the tone of someone helping her get this flat?"
+    },
+    {
+     "user": "Which two questions should I send them first?",
+     "expect": {
+      "must": [
+       {
+        "label": "exactly two, numbered",
+        "regex": "(?ms)^\\s*1[.)][^\\n]{10,}[\\s\\S]{0,900}?^\\s*2[.)]"
+       },
+       {
+        "label": "one of them is a gate question",
+        "any_of": [
+         "G1",
+         "G4",
+         "G8",
+         "guarantor",
+         "deposit",
+         "custodial",
+         "scheme"
+        ]
+       },
+       {
+        "label": "written so they can be sent verbatim, politely",
+        "any_of": [
+         "please",
+         "could you",
+         "would you",
+         "i'd be grateful"
+        ]
+       },
+       {
+        "label": "says why two and not ten",
+        "any_of": [
+         "first message",
+         "short",
+         "template",
+         "two at most",
+         "one message"
+        ]
+       },
+       {
+        "label": "frames the agent as the person who gets her the keys",
+        "any_of": [
+         "partner",
+         "keys",
+         "same questions",
+         "friendly",
+         "every flat"
+        ]
+       }
+      ],
+      "must_not": [
+       {
+        "label": "no third question in the first message",
+        "regex": "(?m)^\\s*3[.)]\\s+\\S"
+       },
+       {
+        "label": "no interrogation framing",
+        "any_of": [
+         "demand",
+         "you must answer",
+         "or else",
+         "if they refuse to answer i"
+        ]
+       },
+       {
+        "label": "no insult or accusation aimed at the landlord, agent or host",
+        "any_of": [
+         "scum",
+         "slumlord",
+         "crook",
+         "con artist",
+         "conman",
+         "greedy",
+         "idiot",
+         "moron",
+         "clueless",
+         "parasite",
+         "dodgy landlord",
+         "dodgy agent",
+         "dodgy host",
+         "騙子",
+         "骗子",
+         "黑心",
+         "無良",
+         "无良",
+         "奸商",
+         "貪婪",
+         "贪婪",
+         "垃圾房東",
+         "垃圾房东"
+        ]
+       }
+      ],
+      "max_questions": 4,
+      "ends_with": {
+       "any_of": [
+        "?",
+        "please",
+        "thank"
+       ]
+      },
+      "language": "en"
+     },
+     "judge_notes": "Are the two drawn from the bank rather than softened? Would a letting agent read them in ten seconds?"
+    }
+   ]
+  },
+  {
+   "id": "j3-vet-this-listing-zh",
+   "title": "這個房源幫我尻洗 — one listing, one certificate, one gate",
+   "persona": [
+    "Chen, 26, a Taiwanese design student already in London on a two-week hotel booking; she has found one flat she likes and wants a second opinion before she pays anything.",
+    "Chat box only: she copies pages out of the browser and pastes them. Reads English fine but wants the verdict in Chinese. Knowledge level: has read a bit, believes the advertised square footage."
+   ],
+   "mode": "manual",
+   "language": "zh-TW",
+   "references_needed": [
+    "references/questions.md",
+    "references/axes/14-site-visit.md",
+    "references/axes/16-referencing-and-proof-of-funds.md",
+    "references/inputs.md"
+   ],
+   "outcome": "A verdict built only on the two pages she pasted: 48 m² from the certificate against 592 sq ft advertised (the balcony), first assessment 2019, a communal heat network with no tariff, and three money terms above the legal caps. Two killer questions from the bank, the viewing-day checks, and when the agent answers 'UK guarantor only' the G1 gate is applied politely rather than argued with.",
+   "judge_notes": "Does every number in the verdict trace to one of the two pasted pages? Is the area illusion explained so a beginner sees it, rather than asserted? When the gate closes, does the reply keep the door open with the agent instead of blaming them?",
+   "turns": [
+    {
+     "user": "這間我很喜歡，幫我尻洗一下，不用客氣。",
+     "attachments": [
+      {
+       "name": "listing-pargeter-yard",
+       "text": "LISTING PAGE TEXT (fictional test data, copied by the user 2026-09-04)\nFlat 5, 12 Pargeter Yard, London XE2 7HD\n£2,350 pcm  (£542 pw)\n1 bedroom · 1 bathroom · 592 sq ft\nFifth floor with lift. Available 1 October 2026.\nFurnished. Concierge Monday to Friday. Residents' gym. Bike store.\nBalcony 7 sq m.\nHeating and hot water: communal system, heat charged separately by the building's billing company.\nDeposit: 6 weeks' rent. Holding deposit: 2 weeks' rent.\nRent in advance: 3 months for applicants without a UK guarantor.\nCouncil tax band D. EPC rating B.\nBills: tenant pays electricity, water and broadband; heat billed by the building.\nMarketed by Fenn & Aldridge Lettings.\n"
+      },
+      {
+       "name": "epc-pargeter-yard",
+       "text": "ENERGY PERFORMANCE CERTIFICATE (fictional test data, copied by the user 2026-09-04 from the government register)\nFlat 5, 12 Pargeter Yard, London, XE2 7HD\nCertificate number: 0000-0000-0000-0000-0001\nProperty type: Mid-floor flat\nTotal floor area: 48 square metres\nDate of assessment: 12 March 2019\nDate of certificate: 14 March 2019\nValid until: 13 March 2029\nEnergy rating: B with a score of 84\nType of assessment: SAP\nMain heating: Community scheme\nHot water: Community scheme\nAir permeability: 3.4 m3/h.m2 at 50 Pa\nMain heating controls: Time and temperature zone control\nWindows: Fully double glazed\nOther certificates for this property: none\n"
+      }
+     ],
+     "expect": {
+      "must": [
+       {
+        "label": "uses the certificate area, 48 m²",
+        "regex": "48\\s*(?:平方公尺|平方米|m²|m2|sq ?m|square met)"
+       },
+       {
+        "label": "quotes the advertised 592 sq ft as the claim it is",
+        "any_of": [
+         "592"
+        ]
+       },
+       {
+        "label": "names the area-illusion landmine",
+        "regex": "\\bL1\\b"
+       },
+       {
+        "label": "explains the gap is the balcony",
+        "any_of": [
+         "陽台",
+         "balcony",
+         "7 平方公尺",
+         "7 sq"
+        ]
+       },
+       {
+        "label": "first assessment year from the certificate",
+        "any_of": [
+         "2019"
+        ]
+       },
+       {
+        "label": "heating is a communal / heat-network scheme",
+        "any_of": [
+         "社區",
+         "熱網",
+         "集中",
+         "共同",
+         "community"
+        ]
+       },
+       {
+        "label": "asks for the heat tariff in writing",
+        "any_of": [
+         "費率",
+         "tariff",
+         "單價",
+         "standing charge",
+         "計費公司",
+         "帳單公司"
+        ]
+       },
+       {
+        "label": "names the five-week deposit cap",
+        "any_of": [
+         "五週",
+         "5 週",
+         "5 weeks",
+         "五周"
+        ]
+       },
+       {
+        "label": "names the one-week holding-deposit cap",
+        "any_of": [
+         "一週",
+         "1 週",
+         "one week",
+         "一周"
+        ]
+       },
+       {
+        "label": "names the one-month ceiling on rent in advance",
+        "any_of": [
+         "一個月",
+         "one month",
+         "1 個月"
+        ]
+       },
+       {
+        "label": "dates the rule",
+        "any_of": [
+         "2026-05-01",
+         "2026 年 5 月 1 日",
+         "2026年5月1日",
+         "1 May 2026"
+        ]
+       },
+       {
+        "label": "two killer questions, numbered",
+        "regex": "(?ms)^\\s*(?:1[.)、]|一[.、])[^\\n]{6,}[\\s\\S]{0,900}?^\\s*(?:2[.)、]|二[.、])"
+       },
+       {
+        "label": "viewing-day checks",
+        "any_of": [
+         "看房",
+         "看屋",
+         "現場",
+         "viewing"
+        ]
+       },
+       {
+        "label": "never sign on the viewing day",
+        "any_of": [
+         "當天不要簽",
+         "不要當天簽",
+         "看房當天"
+        ]
+       },
+       {
+        "label": "marks evidence grades",
+        "any_of": [
+         "官方",
+         "自述",
+         "證據等級",
+         "G（",
+         "S（",
+         "未知",
+         "G ",
+         "S "
+        ]
+       },
+       {
+        "label": "gives one of the four verdicts",
+        "any_of": [
+         "PASS",
+         "EDGE",
+         "CONDITIONAL",
+         "KILL",
+         "通過",
+         "邊緣",
+         "有條件",
+         "淘汰"
+        ]
+       },
+       {
+        "label": "engages with the request for a candid critique - 尻洗 or roast, either word, or a plain synonym",
+        "any_of": [
+         "尻洗",
+         "roast",
+         "直說",
+         "不客氣地說",
+         "毫不留情",
+         "挑毛病",
+         "老實說",
+         "candid",
+         "blunt"
+        ]
+       }
+      ],
+      "must_not": [
+       {
+        "label": "does not present 592 sq ft or 55 m² as the real indoor size",
+        "regex": "(室內|實際|真實|真正)[^。\\n]{0,12}(?:592|55)\\s*(?:平方英尺|sq ?ft|平方公尺|平方米|m²|m2)"
+       },
+       {
+        "label": "does not invent a crime, planning or review finding it was not given",
+        "regex": "(犯罪(?:率|件數)|planning application|規劃申請)[^。\\n]{0,20}[0-9]"
+       },
+       {
+        "label": "does not promise to read a portal or platform automatically",
+        "regex": "(?i)(?:i(?:'| wi)?ll|i can|automatically|directly)\\s+(?:fetch|download|pull|read|scrape|crawl|check|search)[^.。\\n]{0,40}(rightmove|zoopla|onthemarket|openrent|homeviews|trustpilot|airbnb|booking\\.com)"
+       },
+       {
+        "label": "no insult or accusation aimed at the landlord, agent or host",
+        "any_of": [
+         "scum",
+         "slumlord",
+         "crook",
+         "con artist",
+         "conman",
+         "greedy",
+         "idiot",
+         "moron",
+         "clueless",
+         "parasite",
+         "dodgy landlord",
+         "dodgy agent",
+         "dodgy host",
+         "騙子",
+         "骗子",
+         "黑心",
+         "無良",
+         "无良",
+         "奸商",
+         "貪婪",
+         "贪婪",
+         "垃圾房東",
+         "垃圾房东"
+        ]
+       }
+      ],
+      "facts": {
+       "epc_floor_area_m2": {
+        "values": [
+         48,
+         55
+        ],
+        "tolerance": 0.5,
+        "required": true,
+        "patterns": [
+         "\\b([0-9]{2,3}(?:\\.[0-9])?)\\s*(?:平方公尺|平方米|m²|m2|sq ?m|square met)"
+        ],
+        "source": "attachment:epc-pargeter-yard",
+        "why": "The certificate says 48 m². 55 is allowed only because it is the advertised 592 sq ft converted, which a good reply prints beside it; any other floor area for this flat is invented."
+       },
+       "epc_first_assessment_year": {
+        "value": 2019,
+        "tolerance": 0.0,
+        "required": true,
+        "patterns": [
+         "(?:評估|assessed|assessment|首次|first|證書日期|certificate)[^。\\n]{0,26}?\\b(20[0-2][0-9])\\b",
+         "\\b(20[0-2][0-9])\\b[^。\\n]{0,16}(?:年首次|首次評估|assessment)"
+        ],
+        "source": "attachment:epc-pargeter-yard",
+        "why": "First assessed 2019, which is the building-age proxy."
+       },
+       "listing_rent_pcm": {
+        "value": 2350,
+        "tolerance": 0.0,
+        "required": true,
+        "patterns": [
+         "£\\s?([0-9][0-9,]{3,})\\s*(?:pcm|per month|/ ?月|每月|一個月)",
+         "(?:月租|租金|rent)[^。\\n]{0,12}?£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)"
+        ],
+        "source": "attachment:listing-pargeter-yard",
+        "why": "The advertised rent, exactly as pasted."
+       },
+       "listing_area_sqft": {
+        "values": [
+         592,
+         516.7
+        ],
+        "tolerance": 1.0,
+        "required": false,
+        "patterns": [
+         "\\b([0-9]{3})\\s*(?:平方英尺|sq ?\\.?\\s?ft|square feet)"
+        ],
+        "source": "attachment:listing-pargeter-yard",
+        "why": "The advertised 592 sq ft, and 516.7 because that is the certificate's 48 m² converted; anything else is invented."
+       },
+       "epc_air_permeability": {
+        "value": 3.4,
+        "tolerance": 0.05,
+        "required": false,
+        "patterns": [
+         "(?:氣密|air permeability)[^。\\n]{0,20}?([0-9]+(?:\\.[0-9])?)"
+        ],
+        "source": "attachment:epc-pargeter-yard",
+        "why": "3.4 on the certificate; at or below 5 it implies mechanical ventilation, which is worth saying and worth getting right."
+       },
+       "deposit_cap_weeks": {
+        "value": 5,
+        "tolerance": 0.0,
+        "required": false,
+        "patterns": [
+         "(?:cap(?:ped)?(?:\\s+at)?|at most|no more than|maximum|legal limit|上限|最多|不得超過|不能超過|法定)[^.。\\n]{0,32}?([0-9]+|one|two|three|four|five|six|一|兩|二|三|四|五|六)\\s*(?:週|周|星期|weeks?)",
+         "([0-9]+|one|two|three|four|five|six|一|兩|二|三|四|五|六)\\s*(?:週|周|星期|weeks?)[^.。\\n]{0,20}?(?:is the cap|is the legal|maximum|上限|為上限|是上限)"
+        ],
+        "line_mask": [
+         "holding deposit|訂金|保留金"
+        ],
+        "source": "skills/vet-flat/SKILL.md legal facts",
+        "why": "Five weeks is the cap; the listing's six weeks is the ask, so only a CAP sentence is read here."
+       },
+       "deposit_cap_gbp": {
+        "values": [
+         2711.54,
+         3253.85
+        ],
+        "tolerance": 1.5,
+        "required": false,
+        "patterns": [
+         "(?:押金|deposit)[\\s\\S]{0,160}?£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)"
+        ],
+        "line_mask": [
+         "holding deposit|訂金|保留金"
+        ],
+        "source": "computed from the advertised rent",
+        "why": "Five weeks of GBP 2,350 pcm: 2350 x 12 / 52 x 5 = 2711.54. The advertised six weeks, 3253.85, is allowed because the listing asks for it and a good reply prices both."
+       }
+      },
+      "max_questions": 8,
+      "language": "zh-TW"
+     },
+     "judge_notes": "The verdict word itself is not graded; the numbers under it are. Does the report say plainly which of the twelve checks it could not run at all from two pasted pages?"
+    },
+    {
+     "user": "仲介回信說：這間只接受英國本地擔保人，沒有其他方案。",
+     "expect": {
+      "must": [
+       {
+        "label": "recognises this as the answer to the G1 gate",
+        "any_of": [
+         "G1",
+         "擔保",
+         "guarantor"
+        ]
+       },
+       {
+        "label": "says the honest consequence: walk, or ask for an alternative",
+        "any_of": [
+         "替代",
+         "其他方案",
+         "商業擔保",
+         "存款",
+         "放棄",
+         "不再花時間",
+         "走"
+        ]
+       },
+       {
+        "label": "names the three routes",
+        "any_of": [
+         "商業擔保",
+         "擔保公司",
+         "存款",
+         "資金證明",
+         "proof of funds",
+         "savings"
+        ]
+       },
+       {
+        "label": "stays courteous and thanks them",
+        "any_of": [
+         "謝謝",
+         "感謝",
+         "理解",
+         "方便的話",
+         "可以請問"
+        ]
+       },
+       {
+        "label": "gives a sentence she can send as it stands",
+        "any_of": [
+         "「",
+         "\"",
+         "請問",
+         "想確認",
+         "以下"
+        ]
+       },
+       {
+        "label": "a non-answer or a firm no is itself a finding",
+        "any_of": [
+         "本身就是",
+         "就是答案",
+         "紀錄",
+         "記下"
+        ]
+       }
+      ],
+      "must_not": [
+       {
+        "label": "does not accuse the agent or landlord of discrimination or law-breaking",
+        "any_of": [
+         "他們在歧視",
+         "這是歧視",
+         "他們違法",
+         "對方違法",
+         "仲介違法"
+        ]
+       },
+       {
+        "label": "no insult or accusation aimed at the landlord, agent or host",
+        "any_of": [
+         "scum",
+         "slumlord",
+         "crook",
+         "con artist",
+         "conman",
+         "greedy",
+         "idiot",
+         "moron",
+         "clueless",
+         "parasite",
+         "dodgy landlord",
+         "dodgy agent",
+         "dodgy host",
+         "騙子",
+         "骗子",
+         "黑心",
+         "無良",
+         "无良",
+         "奸商",
+         "貪婪",
+         "贪婪",
+         "垃圾房東",
+         "垃圾房东"
+        ]
+       }
+      ],
+      "max_questions": 3,
+      "language": "zh-TW"
+     },
+     "judge_notes": "Does it distinguish 'this landlord has not switched the route on' from 'this landlord is refusing you'? Does it say what to do with the viewing slot she was about to book?"
+    },
+    {
+     "user": "那我可以買商業擔保服務嗎？大概多少錢？",
+     "expect": {
+      "must": [
+       {
+        "label": "names both fee models",
+        "any_of": [
+         "一次性",
+         "年費",
+         "保費",
+         "one-off",
+         "annual",
+         "每年"
+        ]
+       },
+       {
+        "label": "the liability still sits with the tenant",
+        "any_of": [
+         "責任",
+         "仍由你",
+         "向你追討",
+         "保的是房東",
+         "不是保你"
+        ]
+       },
+       {
+        "label": "the fee is usually not refundable",
+        "any_of": [
+         "不退",
+         "不可退",
+         "non-refundable"
+        ]
+       },
+       {
+        "label": "ask the landlord which providers are approved first",
+        "any_of": [
+         "核可",
+         "名單",
+         "接受哪些",
+         "approved",
+         "先問"
+        ]
+       },
+       {
+        "label": "names the right bank question",
+        "regex": "\\bG[567]\\b"
+       },
+       {
+        "label": "gives a range, not a made-up price",
+        "any_of": [
+         "視",
+         "依",
+         "範圍",
+         "區間",
+         "不同業者",
+         "大約",
+         "約"
+        ]
+       }
+      ],
+      "must_not": [
+       {
+        "label": "does not name and endorse a real guarantor company",
+        "regex": "(?i)\\b(housing ?hand|rent ?guarantor|ukguarantor|your ?guarantor)\\b"
+       },
+       {
+        "label": "no insult or accusation aimed at the landlord, agent or host",
+        "any_of": [
+         "scum",
+         "slumlord",
+         "crook",
+         "con artist",
+         "conman",
+         "greedy",
+         "idiot",
+         "moron",
+         "clueless",
+         "parasite",
+         "dodgy landlord",
+         "dodgy agent",
+         "dodgy host",
+         "騙子",
+         "骗子",
+         "黑心",
+         "無良",
+         "无良",
+         "奸商",
+         "貪婪",
+         "贪婪",
+         "垃圾房東",
+         "垃圾房东"
+        ]
+       }
+      ],
+      "max_questions": 3,
+      "language": "zh-TW"
+     },
+     "judge_notes": "Does it compare the two models on the six axes the reference lists (fee model, cover cap, renewal, transferability, liability, credit effect) without inventing a price?"
+    },
+    {
+     "user": "好，我先不付錢。看房那天我要注意什麼？",
+     "expect": {
+      "must": [
+       {
+        "label": "gives it as a list",
+        "regex": "(?m)^\\s*(?:1[.)、]|一[.、]|[-*・]\\s)"
+       },
+       {
+        "label": "the smell test",
+        "any_of": [
+         "氣味",
+         "味道",
+         "聞"
+        ]
+       },
+       {
+        "label": "window open and shut, noise",
+        "any_of": [
+         "開窗",
+         "噪音",
+         "安靜",
+         "關窗"
+        ]
+       },
+       {
+        "label": "the meter cupboard or heat interface unit",
+        "any_of": [
+         "表",
+         "HIU",
+         "熱交換",
+         "電表",
+         "計量",
+         "管道間"
+        ]
+       },
+       {
+        "label": "never sign on the day",
+        "any_of": [
+         "當天不要簽",
+         "不要當天簽",
+         "看房當天"
+        ]
+       },
+       {
+        "label": "stay courteous with whoever shows her round",
+        "any_of": [
+         "禮貌",
+         "客氣",
+         "合作",
+         "謝謝"
+        ]
+       },
+       {
+        "label": "get the tariff and the deposit position in writing first",
+        "any_of": [
+         "書面",
+         "費率",
+         "tariff",
+         "押金",
+         "文件"
+        ]
+       },
+       {
+        "label": "one visit is one sample",
+        "any_of": [
+         "一次",
+         "只是一個",
+         "樣本",
+         "不同時段",
+         "晚上"
+        ]
+       }
+      ],
+      "must_not": [
+       {
+        "label": "no insult or accusation aimed at the landlord, agent or host",
+        "any_of": [
+         "scum",
+         "slumlord",
+         "crook",
+         "con artist",
+         "conman",
+         "greedy",
+         "idiot",
+         "moron",
+         "clueless",
+         "parasite",
+         "dodgy landlord",
+         "dodgy agent",
+         "dodgy host",
+         "騙子",
+         "骗子",
+         "黑心",
+         "無良",
+         "无良",
+         "奸商",
+         "貪婪",
+         "贪婪",
+         "垃圾房東",
+         "垃圾房东"
+        ]
+       }
+      ],
+      "max_questions": 4,
+      "ends_with": {
+       "any_of": [
+        "看房",
+        "現場",
+        "當天",
+        "清單",
+        "問"
+       ]
+      },
+      "language": "zh-TW"
+     },
+     "judge_notes": "Are the checks the ones only a visit can settle, or a rerun of the desk research? Does it tell her what a visit may NOT be used to claim?"
+    }
+   ]
+  },
+  {
+   "id": "j4-roast-my-short-stays-en",
+   "title": "Roast my short stays / 幫我尻洗這幾間短租 - four bridges, one arithmetic",
+   "persona": [
+    "Tom, 31, lands on Sunday and needs 30 nights while he house-hunts; he has booked short lets before and thinks he can spot a bad one from the photographs.",
+    "Chat box only, on a phone at the airport, so everything is pasted. Knowledge level: confident but wrong about total price; has asked in so many words for blunt criticism."
+   ],
+   "mode": "manual",
+   "language": "en",
+   "references_needed": [
+    "references/axes/15-bridging-short-lets.md",
+    "references/axes/14-site-visit.md",
+    "references/questions.md"
+   ],
+   "outcome": "Four listings criticised one by one on what the pages actually say - bookability tier, true total for 30 nights, who holds the deposit, licence or tenancy, kitchen grade - with L13 and L16 named and the damp caution attached to the lower-ground one. A recommendation that puts the hotel-or-operator question to him as a trade. Not one word against any host, and the whole-year arithmetic in the last turn instead of a bridge surcharge.",
+   "judge_notes": "Is the criticism specific to what each page says, or generic short-let advice? Does 'roast' come out as evidence rather than attitude? Would a host reading it recognise the criticism as fair? Landlords, agents and hosts are partners. 'Roast' in English, 尻洗 in Chinese (Taiwanese Hokkien), means candid, specific, evidence-based criticism of the LISTING under its landmine code - never an insult or an accusation about a person.",
+   "turns": [
+    {
+     "user": "I land Sunday and need somewhere for 30 nights while I look. Here are the four I've shortlisted - roast them.",
+     "attachments": [
+      {
+       "name": "stay-a-bramblewick",
+       "text": "SHORT-LET LISTING, peer-to-peer platform (fictional test data, copied 2026-09-04)\n\"Bright garden studio at Bramblewick Court\" - London XE1 5PT\nLower ground floor, own entrance off the light well.\n£78 per night. Cleaning fee £65 (one-off). Platform service fee £315 (one-off, non-refundable).\nMinimum stay 28 nights; the monthly discount is already in the nightly price.\nKitchenette: hob and microwave, no oven. Shared laundry in the basement.\nHost: private host, 41 reviews, 4.83 average. Newest review 3 weeks ago; the reviews are almost all 2 and 3 night stays.\nCancellation: full refund up to 5 days before check-in.\nDeposit: none. Wi-Fi: \"fast broadband\", no speed given.\nNo licence, tenancy or agreement type stated.\n"
+      },
+      {
+       "name": "stay-b-netherfield",
+       "text": "SHORT-LET LISTING, flatshare board (fictional test data, copied 2026-09-04)\n\"Netherfield Row - one bed, available now\" - London XW3 8NB\n£1,900 per month. First floor.\nMinimum let one month. Billed in whole calendar months: a stay crossing a month boundary is charged as two months.\nDeposit: one month's rent, held by the landlord personally.\nBills: \"all included except electricity\".\nNo agent and no company: the landlord manages directly. Payment by bank transfer only.\nSix photos, no floor plan. The landlord asks for the first month's rent plus the deposit before any viewing, \"to hold it\".\n"
+      },
+      {
+       "name": "stay-c-quillon-wharf",
+       "text": "SHORT-LET LISTING, relocation marketplace reselling operator stock (fictional test data, copied 2026-09-04)\n\"Quillon Wharf Serviced Apartments - studio\" - London XC1 9RF\n£445 per week for stays of 28 nights or more; part weeks billed pro rata by night.\nThird floor, lift.\nAgreement: \"licence to occupy\", renewed on a 7-day rolling basis; the operator may decline to renew.\nDeposit £500, paid to the operator, not to the platform. Platform booking fee £180, non-refundable.\nIncluded: electricity, water, heating, Wi-Fi (fixed line, 200 Mbps), weekly clean, council tax.\nKitchen: full kitchen with oven. No washing machine in the unit; laundry room on the ground floor.\nCancellation: free until the operator accepts; nothing refundable afterwards.\nOperator: Kestrel Stay Ltd. No company number shown on the listing.\n"
+      },
+      {
+       "name": "stay-d-halcyon-row",
+       "text": "APARTHOTEL RATE PAGE, operator's own site (fictional test data, copied 2026-09-04)\n\"Halcyon Row Studios\" - London XE4 2GH\nStudio, 30 nights: £3,240 total on the flexible rate (free cancellation until 24 hours before arrival).\nNon-refundable rate for the same 30 nights: £2,700 total, charged in full at booking.\nCard pre-authorisation £150 at check-in; no deposit held.\nIncluded: all utilities, Wi-Fi, weekly housekeeping, 24-hour front desk. No council tax payable by the guest.\nKitchen: hob, microwave, fridge. No oven. Laundry room on site, £4 a wash.\nOperated by the hotel group directly; registered company name, number and address in the site footer.\n"
+      }
+     ],
+     "expect": {
+      "must": [
+       {
+        "label": "assigns bookability tiers",
+        "regex": "(?i)\\btier\\s*[A-F]\\b"
+       },
+       {
+        "label": "names the licence-not-tenancy landmine",
+        "regex": "\\bL13\\b"
+       },
+       {
+        "label": "names the headline-price landmine",
+        "regex": "\\bL16\\b"
+       },
+       {
+        "label": "damp caution on the lower-ground one",
+        "any_of": [
+         "damp",
+         "mould",
+         "mold",
+         "musty",
+         "light well"
+        ]
+       },
+       {
+        "label": "licence versus tenancy explained",
+        "any_of": [
+         "licence",
+         "license",
+         "not a tenancy"
+        ]
+       },
+       {
+        "label": "a licence deposit need not go into a government scheme",
+        "any_of": [
+         "not protected",
+         "government-approved",
+         "protection scheme",
+         "not required to",
+         "small claims",
+         "redress"
+        ]
+       },
+       {
+        "label": "asks who holds each deposit",
+        "any_of": [
+         "who holds",
+         "held by the operator",
+         "held by the platform",
+         "held by the landlord"
+        ]
+       },
+       {
+        "label": "total for stay A, 78x30 + 65 + 315",
+        "any_of": [
+         "2,720",
+         "2720"
+        ]
+       },
+       {
+        "label": "stay B is billed as two whole months",
+        "any_of": [
+         "3,800",
+         "3800"
+        ]
+       },
+       {
+        "label": "total for stay C, 445/7x30 + 180",
+        "any_of": [
+         "2,087",
+         "2087",
+         "2,086",
+         "2086"
+        ]
+       },
+       {
+        "label": "stay D totals repeated as published",
+        "any_of": [
+         "3,240",
+         "3240"
+        ]
+       },
+       {
+        "label": "shows the arithmetic, not just the answer",
+        "regex": "[0-9][^\\n]{0,24}(?:×|x|\\*|multiplied by)[^\\n]{0,24}[0-9]"
+       },
+       {
+        "label": "converts every candidate to the same per-week basis",
+        "any_of": [
+         "per week",
+         "a week",
+         "weekly",
+         "per night"
+        ]
+       },
+       {
+        "label": "puts the hotel or operator-run question to him as a trade",
+        "any_of": [
+         "hotel",
+         "operator-run",
+         "front desk",
+         "aparthotel"
+        ]
+       },
+       {
+        "label": "names one he would book and why",
+        "any_of": [
+         "i'd take",
+         "i would take",
+         "recommend",
+         "my pick",
+         "i'd book",
+         "the one i would",
+         "book",
+         "go with",
+         "start with"
+        ]
+       },
+       {
+        "label": "view in person or on live video before paying",
+        "any_of": [
+         "live video",
+         "walkthrough",
+         "before you pay",
+         "before paying",
+         "view it"
+        ]
+       },
+       {
+        "label": "payment armour for the one asking for money before a viewing",
+        "any_of": [
+         "before viewing",
+         "payee",
+         "bank transfer",
+         "one week's rent",
+         "never pay"
+        ]
+       },
+       {
+        "label": "two-night reviews do not measure damp or noise",
+        "any_of": [
+         "two-night",
+         "2 night",
+         "short stays",
+         "cleanliness",
+         "fast reply"
+        ]
+       },
+       {
+        "label": "kitchen and laundry grade per unit",
+        "any_of": [
+         "oven",
+         "washing machine",
+         "kitchenette",
+         "laundry",
+         "k3",
+         "k2",
+         "k1"
+        ]
+       },
+       {
+        "label": "engages with the roast - either word, or a plain synonym",
+        "any_of": [
+         "roast",
+         "尻洗",
+         "blunt",
+         "candid",
+         "straight",
+         "no sugar",
+         "honestly",
+         "hard look"
+        ]
+       }
+      ],
+      "must_not": [
+       {
+        "label": "no insult or accusation aimed at the landlord, agent or host",
+        "any_of": [
+         "scum",
+         "slumlord",
+         "crook",
+         "con artist",
+         "conman",
+         "greedy",
+         "idiot",
+         "moron",
+         "clueless",
+         "parasite",
+         "dodgy landlord",
+         "dodgy agent",
+         "dodgy host",
+         "騙子",
+         "骗子",
+         "黑心",
+         "無良",
+         "无良",
+         "奸商",
+         "貪婪",
+         "贪婪",
+         "垃圾房東",
+         "垃圾房东",
+         "greedy host",
+         "dodgy host",
+         "the host is lying",
+         "the landlord is a",
+         "these hosts are"
+        ]
+       },
+       {
+        "label": "does not accuse a host of fraud",
+        "regex": "(?i)(host|landlord|operator)[^.\\n]{0,20}(is|are)\\s+(a\\s+)?(fraud|scamming|criminal|liar)"
+       },
+       {
+        "label": "does not promise to read a portal or platform automatically",
+        "regex": "(?i)(?:i(?:'| wi)?ll|i can|automatically|directly)\\s+(?:fetch|download|pull|read|scrape|crawl|check|search)[^.。\\n]{0,40}(rightmove|zoopla|onthemarket|openrent|homeviews|trustpilot|airbnb|booking\\.com)"
+       }
+      ],
+      "facts": {
+       "stay_a_nightly_gbp": {
+        "value": 78,
+        "tolerance": 0.0,
+        "required": false,
+        "patterns": [
+         "£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)\\s*(?:per night|a night|/ ?night|pn\\b|nightly)"
+        ],
+        "near": [
+         "Bramblewick",
+         "garden studio",
+         "Stay A",
+         "Listing A",
+         "Option A"
+        ],
+        "window": 400,
+        "source": "attachment:stay-a-bramblewick",
+        "why": "£78 a night, exactly as the page says."
+       },
+       "stay_a_cleaning_gbp": {
+        "value": 65,
+        "tolerance": 0.0,
+        "required": false,
+        "patterns": [
+         "clean(?:ing)?(?:\\s+fee)?\\s*(?:of|:|=|is|at|-)?\\s*£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)",
+         "£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)\\s*(?:one-off\\s+)?clean"
+        ],
+        "near": [
+         "Bramblewick",
+         "garden studio",
+         "Stay A",
+         "Listing A"
+        ],
+        "window": 400,
+        "source": "attachment:stay-a-bramblewick",
+        "why": "£65 cleaning fee, exactly as the page says."
+       },
+       "stay_a_platform_fee_gbp": {
+        "value": 315,
+        "tolerance": 0.0,
+        "required": false,
+        "patterns": [
+         "(?:platform|service)\\s+fee\\s*(?:of|:|=|is|at|-)?\\s*£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)",
+         "£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)\\s*(?:non-refundable\\s+)?(?:platform|service)\\s+fee"
+        ],
+        "near": [
+         "Bramblewick",
+         "garden studio",
+         "Stay A",
+         "Listing A"
+        ],
+        "window": 400,
+        "source": "attachment:stay-a-bramblewick",
+        "why": "£315 platform service fee, exactly as the page says."
+       },
+       "stay_b_monthly_gbp": {
+        "value": 1900,
+        "tolerance": 0.0,
+        "required": false,
+        "patterns": [
+         "£\\s?([0-9][0-9,]{3,})\\s*(?:per month|pcm|a month|/ ?month|per calendar month)"
+        ],
+        "near": [
+         "Netherfield",
+         "Stay B",
+         "Listing B",
+         "Option B"
+        ],
+        "window": 400,
+        "source": "attachment:stay-b-netherfield",
+        "why": "£1,900 a month, exactly as the page says."
+       },
+       "stay_c_weekly_gbp": {
+        "value": 445,
+        "tolerance": 0.0,
+        "required": false,
+        "patterns": [
+         "£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)\\s*(?:per week|a week|/ ?week|pw\\b|weekly)"
+        ],
+        "near": [
+         "Quillon",
+         "Stay C",
+         "Listing C",
+         "Option C"
+        ],
+        "window": 400,
+        "source": "attachment:stay-c-quillon-wharf",
+        "why": "£445 a week, exactly as the page says."
+       },
+       "stay_c_booking_fee_gbp": {
+        "value": 180,
+        "tolerance": 0.0,
+        "required": false,
+        "patterns": [
+         "(?:booking|platform)\\s+fee\\s*(?:of|:|=|is|at|-)?\\s*£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)",
+         "£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)\\s*(?:non-refundable\\s+)?(?:booking|platform)\\s+fee"
+        ],
+        "near": [
+         "Quillon",
+         "Stay C",
+         "Listing C"
+        ],
+        "window": 400,
+        "source": "attachment:stay-c-quillon-wharf",
+        "why": "£180 non-refundable platform booking fee."
+       },
+       "stay_c_deposit_gbp": {
+        "value": 500,
+        "tolerance": 0.0,
+        "required": false,
+        "patterns": [
+         "deposit\\s*(?:of|:|=|is|at|-)?\\s*£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)",
+         "£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)\\s*deposit"
+        ],
+        "near": [
+         "Quillon",
+         "Stay C",
+         "Listing C"
+        ],
+        "window": 400,
+        "source": "attachment:stay-c-quillon-wharf",
+        "why": "£500, and the page says it goes to the operator, not the platform."
+       },
+       "stay_d_flexible_total_gbp": {
+        "value": 3240,
+        "tolerance": 0.0,
+        "required": false,
+        "patterns": [
+         "(?:flexible|free cancellation|refundable rate)[^.\\n]{0,40}?£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)"
+        ],
+        "near": [
+         "Halcyon",
+         "Stay D",
+         "Listing D",
+         "Option D"
+        ],
+        "window": 500,
+        "source": "attachment:stay-d-halcyon-row",
+        "why": "£3,240 on the flexible rate for 30 nights, as published."
+       },
+       "stay_d_nonrefundable_total_gbp": {
+        "value": 2700,
+        "tolerance": 0.0,
+        "required": false,
+        "patterns": [
+         "non-?refundable[^.\\n]{0,40}?£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)"
+        ],
+        "near": [
+         "Halcyon",
+         "Stay D",
+         "Listing D",
+         "Option D"
+        ],
+        "window": 500,
+        "source": "attachment:stay-d-halcyon-row",
+        "why": "£2,700 on the non-refundable rate for the same 30 nights."
+       }
+      },
+      "max_questions": 6,
+      "language": "en"
+     },
+     "judge_notes": "Four separate critiques, not one paragraph repeated. Does each one name the thing on the page that earned the criticism?"
+    },
+    {
+     "user": "Fair. Which one would you actually book?",
+     "expect": {
+      "must": [
+       {
+        "label": "names one of the four",
+        "any_of": [
+         "Halcyon",
+         "Quillon",
+         "Bramblewick",
+         "Netherfield"
+        ]
+       },
+       {
+        "label": "says what the cheaper option is missing",
+        "any_of": [
+         "front desk",
+         "review history",
+         "refund right",
+         "protected deposit",
+         "what you give up",
+         "missing"
+        ]
+       },
+       {
+        "label": "prices the hotel-or-operator trade rather than ruling",
+        "any_of": [
+         "premium",
+         "instant exit",
+         "someone responsible",
+         "protected",
+         "no kitchen",
+         "eating out"
+        ]
+       },
+       {
+        "label": "book the refundable option as an insurance position",
+        "any_of": [
+         "refundable",
+         "free cancellation",
+         "cancel it later",
+         "insurance"
+        ]
+       },
+       {
+        "label": "write the cancellation deadline down the day it is booked",
+        "any_of": [
+         "deadline",
+         "calendar",
+         "diary",
+         "note the date",
+         "24 hours"
+        ]
+       },
+       {
+        "label": "resolve questions by phone before submitting on a platform",
+        "any_of": [
+         "phone",
+         "call",
+         "before you submit",
+         "before you book"
+        ]
+       }
+      ],
+      "must_not": [
+       {
+        "label": "no insult or accusation aimed at the landlord, agent or host",
+        "any_of": [
+         "scum",
+         "slumlord",
+         "crook",
+         "con artist",
+         "conman",
+         "greedy",
+         "idiot",
+         "moron",
+         "clueless",
+         "parasite",
+         "dodgy landlord",
+         "dodgy agent",
+         "dodgy host",
+         "騙子",
+         "骗子",
+         "黑心",
+         "無良",
+         "无良",
+         "奸商",
+         "貪婪",
+         "贪婪",
+         "垃圾房東",
+         "垃圾房东"
+        ]
+       },
+       {
+        "label": "does not promise to read a portal or platform automatically",
+        "regex": "(?i)(?:i(?:'| wi)?ll|i can|automatically|directly)\\s+(?:fetch|download|pull|read|scrape|crawl|check|search)[^.。\\n]{0,40}(rightmove|zoopla|onthemarket|openrent|homeviews|trustpilot|airbnb|booking\\.com)"
+       }
+      ],
+      "max_questions": 3,
+      "language": "en"
+     },
+     "judge_notes": "Is the recommendation a decision with a reason, or a hedge? Does it leave him free to choose the cheaper one knowingly?"
+    },
+    {
+     "user": "OK, I've booked the flexible rate at Halcyon Row for 30 nights. What do I check when I get there?",
+     "expect": {
+      "must": [
+       {
+        "label": "do it before unpacking",
+        "any_of": [
+         "before you unpack",
+         "first 30 minutes",
+         "30 minutes",
+         "straight away"
+        ]
+       },
+       {
+        "label": "photograph or film every room, existing damage included",
+        "any_of": [
+         "photograph",
+         "photos",
+         "video",
+         "film"
+        ]
+       },
+       {
+        "label": "get the evidence off the phone",
+        "any_of": [
+         "upload",
+         "off-device",
+         "cloud",
+         "back it up",
+         "backup"
+        ]
+       },
+       {
+        "label": "smell test: corridor, bin store, the unit",
+        "any_of": [
+         "smell"
+        ]
+       },
+       {
+        "label": "hot tap and shower pressure",
+        "any_of": [
+         "hot tap",
+         "shower",
+         "hot water",
+         "pressure"
+        ]
+       },
+       {
+        "label": "is the Wi-Fi a fixed line",
+        "any_of": [
+         "wi-fi",
+         "wifi",
+         "fixed line",
+         "router",
+         "speed"
+        ]
+       },
+       {
+        "label": "listen at the window late",
+        "any_of": [
+         "22:30",
+         "10:30",
+         "at night",
+         "window"
+        ]
+       },
+       {
+        "label": "find the meter cupboard, stopcock, laundry",
+        "any_of": [
+         "stopcock",
+         "meter",
+         "washing machine",
+         "laundry"
+        ]
+       },
+       {
+        "label": "ask in writing the latest date he can extend to",
+        "any_of": [
+         "extend",
+         "in writing",
+         "latest date",
+         "notice"
+        ]
+       }
+      ],
+      "must_not": [
+       {
+        "label": "no insult or accusation aimed at the landlord, agent or host",
+        "any_of": [
+         "scum",
+         "slumlord",
+         "crook",
+         "con artist",
+         "conman",
+         "greedy",
+         "idiot",
+         "moron",
+         "clueless",
+         "parasite",
+         "dodgy landlord",
+         "dodgy agent",
+         "dodgy host",
+         "騙子",
+         "骗子",
+         "黑心",
+         "無良",
+         "无良",
+         "奸商",
+         "貪婪",
+         "贪婪",
+         "垃圾房東",
+         "垃圾房东"
+        ]
+       }
+      ],
+      "max_questions": 3,
+      "language": "en"
+     },
+     "judge_notes": "Is it the arrival checklist for a bridge (clean, quiet enough, can receive post) rather than a full twelve-axis vetting of a tent?"
+    },
+    {
+     "user": "And what do I tell the long-let agents about my dates?",
+     "expect": {
+      "must": [
+       {
+        "label": "compare whole years, not monthly averages",
+        "any_of": [
+         "12-month",
+         "12 month",
+         "twelve",
+         "whole year",
+         "annual",
+         "year"
+        ]
+       },
+       {
+        "label": "waiting for a cheaper flat can be cheaper overall",
+        "any_of": [
+         "cheaper",
+         "waiting",
+         "lower",
+         "worth waiting"
+        ]
+       },
+       {
+        "label": "do not amortise the bridge into the year",
+        "any_of": [
+         "do not amortise",
+         "don't amortise",
+         "not a surcharge",
+         "double count",
+         "double-count",
+         "not an extra cost"
+        ]
+       },
+       {
+        "label": "offer a flexible start date",
+        "any_of": [
+         "flexible start",
+         "flexible on the start",
+         "start date"
+        ]
+       },
+       {
+        "label": "offer willingness to extend",
+        "any_of": [
+         "extend",
+         "extension"
+        ]
+       },
+       {
+        "label": "never offer to shorten the stay",
+        "any_of": [
+         "shorten",
+         "shortening",
+         "cut the stay"
+        ]
+       },
+       {
+        "label": "put the seam on a weekend, at most two blocks",
+        "any_of": [
+         "weekend",
+         "seam",
+         "two blocks",
+         "one move"
+        ]
+       },
+       {
+        "label": "keeps the agent on side",
+        "any_of": [
+         "partner",
+         "helps both",
+         "friendly",
+         "same questions",
+         "makes it easy"
+        ]
+       }
+      ],
+      "must_not": [
+       {
+        "label": "no insult or accusation aimed at the landlord, agent or host",
+        "any_of": [
+         "scum",
+         "slumlord",
+         "crook",
+         "con artist",
+         "conman",
+         "greedy",
+         "idiot",
+         "moron",
+         "clueless",
+         "parasite",
+         "dodgy landlord",
+         "dodgy agent",
+         "dodgy host",
+         "騙子",
+         "骗子",
+         "黑心",
+         "無良",
+         "无良",
+         "奸商",
+         "貪婪",
+         "贪婪",
+         "垃圾房東",
+         "垃圾房东"
+        ]
+       }
+      ],
+      "max_questions": 3,
+      "ends_with": {
+       "any_of": [
+        "extend",
+        "date",
+        "weekend",
+        "agent"
+       ]
+      },
+      "language": "en"
+     },
+     "judge_notes": "Does it price the bridge as a substitution for rent rather than an extra, and say what waiting really costs (two moves, extension risk)?"
+    }
+   ]
+  },
+  {
+   "id": "j5-offer-and-referencing-zh",
+   "title": "拿到 offer，referencing — the money gate, with savings and no UK guarantor",
+   "persona": [
+    "Mei-Ling, 24, a full-time master's student with savings in a Taiwanese bank, no UK income and no UK guarantor; her offer on a one-bed at £2,150 pcm was accepted this morning.",
+    "Chat box only. She has never been referenced before and does not know what a UK checking company expects a bank statement to look like. Knowledge level: beginner on process, careful with money."
+   ],
+   "mode": "manual",
+   "language": "zh-TW",
+   "references_needed": [
+    "references/axes/16-referencing-and-proof-of-funds.md",
+    "references/questions.md"
+   ],
+   "outcome": "She leaves with the three routes compared, the multiple that applies to a student and to the savings route, the deposit and holding-deposit caps computed step by step from her own rent, a document pack she can start today, and the four questions (G1, G5, G6, G7) to put to the agent in writing - with the reminder that the first message carries two.",
+   "judge_notes": "Does it get the arithmetic right and show it? Does it protect her from the two expensive mistakes in the reference - moving money out of the evidenced account, and paying a guarantor fee before the holding deposit is exclusive? Is the tone toward the agent that of someone trying to get the tenancy over the line?",
+   "turns": [
+    {
+     "user": "我的 offer 過了！房租 £2,150 pcm，仲介叫我準備文件做 referencing。我是學生，有存款但沒有英國擔保人，怎麼辦？",
+     "expect": {
+      "must": [
+       {
+        "label": "route 1: a personal UK guarantor",
+        "any_of": [
+         "個人擔保人",
+         "英國擔保人",
+         "本地擔保人",
+         "personal guarantor"
+        ]
+       },
+       {
+        "label": "route 2: a commercial guarantor product",
+        "any_of": [
+         "商業擔保",
+         "擔保公司",
+         "commercial guarantor",
+         "擔保產品"
+        ]
+       },
+       {
+        "label": "route 3: proof of funds / savings",
+        "any_of": [
+         "存款",
+         "資金證明",
+         "proof of funds",
+         "savings",
+         "存款路線"
+        ]
+       },
+       {
+        "label": "a student's guarantor is tested at about 4x",
+        "any_of": [
+         "4 倍",
+         "四倍",
+         "4倍"
+        ]
+       },
+       {
+        "label": "the savings route threshold is about 36x monthly rent",
+        "any_of": [
+         "36 倍",
+         "三十六倍",
+         "36倍"
+        ]
+       },
+       {
+        "label": "the check reads the lowest balance across the look-back",
+        "any_of": [
+         "最低餘額",
+         "回溯",
+         "3 個月",
+         "三個月",
+         "look-back",
+         "期間內"
+        ]
+       },
+       {
+        "label": "the deposit cap is five weeks",
+        "any_of": [
+         "五週",
+         "5 週",
+         "5 weeks",
+         "五周"
+        ]
+       },
+       {
+        "label": "shows the deposit arithmetic from her own rent",
+        "regex": "2[,，]?150[^\\n]{0,44}(?:×|x|\\*|乘|/|÷)"
+       },
+       {
+        "label": "gives the deposit cap in pounds",
+        "any_of": [
+         "2,480",
+         "2480",
+         "2,481",
+         "2481"
+        ]
+       },
+       {
+        "label": "the holding deposit is capped at one week",
+        "any_of": [
+         "一週",
+         "1 週",
+         "one week",
+         "一周"
+        ]
+       },
+       {
+        "label": "names the questions to put in writing",
+        "regex": "\\bG[1567]\\b"
+       },
+       {
+        "label": "do not move money out of the evidenced account",
+        "any_of": [
+         "不要把錢",
+         "不要轉出",
+         "不要動",
+         "移出",
+         "不要換匯"
+        ]
+       },
+       {
+        "label": "ask for the published affordability criteria as a document",
+        "any_of": [
+         "書面",
+         "文件",
+         "criteria",
+         "標準",
+         "published",
+         "寄給我"
+        ]
+       }
+      ],
+      "must_not": [
+       {
+        "label": "does not suggest paying a year's rent up front, a route the law closed",
+        "any_of": [
+         "一次付一年",
+         "付一年房租",
+         "一年份房租",
+         "12 個月房租預付",
+         "預付一年"
+        ]
+       },
+       {
+        "label": "never asks about nationality, visa or immigration status",
+        "regex": "(國籍|簽證|移民身分|nationality|visa status)[^。！？?!\\n]{0,25}[？?]"
+       },
+       {
+        "label": "no insult or accusation aimed at the landlord, agent or host",
+        "any_of": [
+         "scum",
+         "slumlord",
+         "crook",
+         "con artist",
+         "conman",
+         "greedy",
+         "idiot",
+         "moron",
+         "clueless",
+         "parasite",
+         "dodgy landlord",
+         "dodgy agent",
+         "dodgy host",
+         "騙子",
+         "骗子",
+         "黑心",
+         "無良",
+         "无良",
+         "奸商",
+         "貪婪",
+         "贪婪",
+         "垃圾房東",
+         "垃圾房东"
+        ]
+       }
+      ],
+      "facts": {
+       "rent_pcm": {
+        "value": 2150,
+        "tolerance": 0.0,
+        "required": true,
+        "patterns": [
+         "£\\s?([0-9][0-9,]{3,})\\s*(?:pcm|per month|/ ?月|每月|一個月)",
+         "(?:月租|租金|rent)[^。\\n]{0,12}?£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)"
+        ],
+        "source": "turn 1 user message",
+        "why": "Her rent, exactly as she stated it. Everything else is computed from it, so a wrong echo poisons the whole turn."
+       },
+       "deposit_cap_gbp": {
+        "value": 2480.77,
+        "tolerance": 1.5,
+        "required": true,
+        "patterns": [
+         "(?:押金|deposit)[\\s\\S]{0,160}?£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)"
+        ],
+        "line_mask": [
+         "holding deposit|訂金|保留金"
+        ],
+        "source": "computed from the rent in turn 1",
+        "why": "Five weeks of GBP 2,150 pcm: 2150 x 12 / 52 x 5 = 2480.77."
+       },
+       "holding_deposit_gbp": {
+        "value": 496.15,
+        "tolerance": 1.5,
+        "required": false,
+        "patterns": [
+         "(?:訂金|保留金|holding deposit)[^。\\n]{0,40}£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)"
+        ],
+        "source": "computed from the rent in turn 1",
+        "why": "One week of GBP 2,150 pcm: 2150 x 12 / 52 = 496.15."
+       },
+       "deposit_cap_weeks": {
+        "value": 5,
+        "tolerance": 0.0,
+        "required": false,
+        "patterns": [
+         "(?:cap(?:ped)?(?:\\s+at)?|at most|no more than|maximum|legal limit|上限|最多|不得超過|不能超過|法定)[^.。\\n]{0,32}?([0-9]+|one|two|three|four|five|six|一|兩|二|三|四|五|六)\\s*(?:週|周|星期|weeks?)",
+         "([0-9]+|one|two|three|four|five|six|一|兩|二|三|四|五|六)\\s*(?:週|周|星期|weeks?)[^.。\\n]{0,20}?(?:is the cap|is the legal|maximum|上限|為上限|是上限)"
+        ],
+        "line_mask": [
+         "holding deposit|訂金|保留金"
+        ],
+        "source": "skills/vet-flat/SKILL.md legal facts",
+        "why": "Five weeks is the statutory cap."
+       }
+      },
+      "max_questions": 4,
+      "language": "zh-TW"
+     },
+     "judge_notes": "Does it treat 'student with savings' as a route that exists only if the landlord enabled it, rather than as a right? Does it say only 'above your threshold' rather than volunteering a total?"
+    },
+    {
+     "user": "仲介說如果 referencing 沒過，擔保公司的費用和 holding deposit 都不退。",
+     "expect": {
+      "must": [
+       {
+        "label": "names G7",
+        "regex": "\\bG7\\b"
+       },
+       {
+        "label": "confirm the holding deposit is exclusive before paying a guarantor fee",
+        "any_of": [
+         "獨占",
+         "排他",
+         "保留",
+         "先確認",
+         "確認後再付",
+         "確認是我的"
+        ]
+       },
+       {
+        "label": "a holding deposit generally cannot be kept when she was truthful",
+        "any_of": [
+         "誠實",
+         "據實",
+         "配合",
+         "通常不能",
+         "不能沒收",
+         "法律"
+        ]
+       },
+       {
+        "label": "the statutory deadline for agreement can be extended in writing",
+        "any_of": [
+         "15 天",
+         "十五天",
+         "15天",
+         "deadline for agreement",
+         "書面延長"
+        ]
+       },
+       {
+        "label": "gives her a polite sentence to send",
+        "any_of": [
+         "可以請問",
+         "想確認",
+         "請幫我",
+         "麻煩",
+         "謝謝"
+        ]
+       },
+       {
+        "label": "note it, do not argue it before it is needed",
+        "any_of": [
+         "先記下",
+         "記錄",
+         "不用現在爭",
+         "先不要爭",
+         "留存"
+        ]
+       }
+      ],
+      "must_not": [
+       {
+        "label": "does not accuse the agent of breaking the law",
+        "any_of": [
+         "仲介違法",
+         "他們違法",
+         "這是詐騙",
+         "他們在騙"
+        ]
+       },
+       {
+        "label": "no insult or accusation aimed at the landlord, agent or host",
+        "any_of": [
+         "scum",
+         "slumlord",
+         "crook",
+         "con artist",
+         "conman",
+         "greedy",
+         "idiot",
+         "moron",
+         "clueless",
+         "parasite",
+         "dodgy landlord",
+         "dodgy agent",
+         "dodgy host",
+         "騙子",
+         "骗子",
+         "黑心",
+         "無良",
+         "无良",
+         "奸商",
+         "貪婪",
+         "贪婪",
+         "垃圾房東",
+         "垃圾房东"
+        ]
+       }
+      ],
+      "facts": {
+       "holding_deposit_weeks": {
+        "value": 1,
+        "tolerance": 0.0,
+        "required": false,
+        "patterns": [
+         "(?:holding deposit|訂金|保留金)[^.。\\n]{0,40}?([0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)"
+        ],
+        "source": "skills/vet-flat/SKILL.md legal facts",
+        "why": "One week's rent is the cap; naming a different one misstates the law."
+       }
+      },
+      "max_questions": 3,
+      "language": "zh-TW"
+     },
+     "judge_notes": "Does it separate what the contract says from what the law allows, without turning the agent into an opponent?"
+    },
+    {
+     "user": "我要準備哪些文件？我的銀行帳戶在台灣。",
+     "expect": {
+      "must": [
+       {
+        "label": "passport and the immigration document the check formally needs",
+        "any_of": [
+         "護照"
+        ]
+       },
+       {
+        "label": "offer or enrolment letter with the course dates",
+        "any_of": [
+         "入學",
+         "offer",
+         "錄取",
+         "在學證明",
+         "課程"
+        ]
+       },
+       {
+        "label": "an official bank statement including the account cover page",
+        "any_of": [
+         "對帳單",
+         "封面",
+         "帳戶頁",
+         "statement",
+         "存摺"
+        ]
+       },
+       {
+        "label": "three to six months of transactions with running balances",
+        "any_of": [
+         "3 個月",
+         "三個月",
+         "6 個月",
+         "六個月",
+         "3-6",
+         "3–6",
+         "餘額"
+        ]
+       },
+       {
+        "label": "screenshots are commonly rejected",
+        "any_of": [
+         "截圖"
+        ]
+       },
+       {
+        "label": "remove the PDF password",
+        "any_of": [
+         "密碼",
+         "加密"
+        ]
+       },
+       {
+        "label": "in English where the bank can issue it",
+        "any_of": [
+         "英文"
+        ]
+       },
+       {
+        "label": "previous tenancy and previous landlord contact",
+        "any_of": [
+         "租約",
+         "前房東",
+         "上一個房東"
+        ]
+       },
+       {
+        "label": "say only that she is above the threshold",
+        "any_of": [
+         "高於",
+         "門檻",
+         "不用說",
+         "不必透露",
+         "不用主動"
+        ]
+       }
+      ],
+      "must_not": [
+       {
+        "label": "no insult or accusation aimed at the landlord, agent or host",
+        "any_of": [
+         "scum",
+         "slumlord",
+         "crook",
+         "con artist",
+         "conman",
+         "greedy",
+         "idiot",
+         "moron",
+         "clueless",
+         "parasite",
+         "dodgy landlord",
+         "dodgy agent",
+         "dodgy host",
+         "騙子",
+         "骗子",
+         "黑心",
+         "無良",
+         "无良",
+         "奸商",
+         "貪婪",
+         "贪婪",
+         "垃圾房東",
+         "垃圾房东"
+        ]
+       }
+      ],
+      "max_questions": 3,
+      "language": "zh-TW"
+     },
+     "judge_notes": "Is the list something she can start today from Taiwan, with the look-back planned before the search rather than after?"
+    },
+    {
+     "user": "我要寫信給仲介，幫我列要問的問題。",
+     "expect": {
+      "must": [
+       {
+        "label": "G1 - which guarantor and income-check routes are accepted",
+        "regex": "\\bG1\\b"
+       },
+       {
+        "label": "G5 - the published affordability criteria as a document",
+        "regex": "\\bG5\\b"
+       },
+       {
+        "label": "G6 - which guarantor products, at what cost, and the savings route",
+        "regex": "\\bG6\\b"
+       },
+       {
+        "label": "G7 - what is refundable or transferable if referencing fails",
+        "regex": "\\bG7\\b"
+       },
+       {
+        "label": "asks for documents, not opinions",
+        "any_of": [
+         "文件",
+         "書面",
+         "請寄",
+         "criteria",
+         "標準",
+         "證明"
+        ]
+       },
+       {
+        "label": "first message carries two questions at most",
+        "any_of": [
+         "兩題",
+         "兩個問題",
+         "最多兩",
+         "先問兩",
+         "第一封"
+        ]
+       },
+       {
+        "label": "courteous, partner framing",
+        "any_of": [
+         "謝謝",
+         "感謝",
+         "麻煩",
+         "合作",
+         "幫忙",
+         "配合"
+        ]
+       }
+      ],
+      "must_not": [
+       {
+        "label": "no prosecutorial framing",
+        "any_of": [
+         "限你",
+         "否則我",
+         "我要投訴",
+         "我會檢舉"
+        ]
+       },
+       {
+        "label": "no insult or accusation aimed at the landlord, agent or host",
+        "any_of": [
+         "scum",
+         "slumlord",
+         "crook",
+         "con artist",
+         "conman",
+         "greedy",
+         "idiot",
+         "moron",
+         "clueless",
+         "parasite",
+         "dodgy landlord",
+         "dodgy agent",
+         "dodgy host",
+         "騙子",
+         "骗子",
+         "黑心",
+         "無良",
+         "无良",
+         "奸商",
+         "貪婪",
+         "贪婪",
+         "垃圾房東",
+         "垃圾房东"
+        ]
+       }
+      ],
+      "max_questions": 6,
+      "ends_with": {
+       "any_of": [
+        "謝謝",
+        "感謝",
+        "麻煩",
+        "？",
+        "?"
+       ]
+      },
+      "language": "zh-TW"
+     },
+     "judge_notes": "Are the questions sent verbatim from the bank rather than softened, and is the two-question rule actually honoured in the draft?"
+    }
+   ]
+  },
+  {
+   "id": "j6-arrived-damp-lower-ground-zh",
+   "title": "剛到，半地下潮濕 — same-day evidence and a polite way out",
+   "persona": [
+    "Jing, 27, landed six hours ago and has just opened the door of a 30-night lower-ground short let; the hall smells of damp, there is black mould behind the bedroom radiator and condensation inside the windows.",
+    "Chat box only, on a phone, jet-lagged and near tears. Knowledge level: none about platform complaint windows; needs wording she can send now, not a lecture."
+   ],
+   "mode": "manual",
+   "language": "zh-TW",
+   "references_needed": [
+    "references/axes/15-bridging-short-lets.md",
+    "references/axes/14-site-visit.md"
+   ],
+   "outcome": "Within one message she has: the same-day evidence checklist, a polite in-platform message she can copy, the instruction not to press cancel herself, the platform complaint window, and a cancellable fallback booked before she sleeps on it. The host is treated as someone who will probably help.",
+   "judge_notes": "Does the first reply give her something to do in the next ten minutes? Is the message to the host one a host would want to say yes to? Does it avoid making her the plaintiff in a fight she has not started? Landlords, agents and hosts are partners. 'Roast' in English, 尻洗 in Chinese (Taiwanese Hokkien), means candid, specific, evidence-based criticism of the LISTING under its landmine code - never an insult or an accusation about a person.",
+   "turns": [
+    {
+     "user": "我剛到，是半地下的短租。一進門就有霉味，臥室暖氣後面有黑色霉斑，窗戶內側都是水。怎麼辦？",
+     "expect": {
+      "must": [
+       {
+        "label": "photograph or film everything today, with something for scale",
+        "any_of": [
+         "拍照",
+         "照片",
+         "錄影",
+         "拍下"
+        ]
+       },
+       {
+        "label": "get the evidence off the phone",
+        "any_of": [
+         "雲端",
+         "備份",
+         "上傳",
+         "手機以外",
+         "另外存"
+        ]
+       },
+       {
+        "label": "message the host inside the platform, not on a messaging app",
+        "any_of": [
+         "站內",
+         "平台",
+         "App",
+         "應用程式",
+         "不要用 WhatsApp",
+         "不要私訊"
+        ]
+       },
+       {
+        "label": "do not press cancel yourself",
+        "any_of": [
+         "不要自己取消",
+         "不要按取消",
+         "自行取消",
+         "不要自己按"
+        ]
+       },
+       {
+        "label": "the platform's complaint window after check-in",
+        "any_of": [
+         "72",
+         "三天",
+         "入住後",
+         "申訴",
+         "客服"
+        ]
+       },
+       {
+        "label": "book a cancellable fallback before sleeping on it",
+        "any_of": [
+         "備案",
+         "可取消",
+         "先訂",
+         "退路",
+         "另外訂"
+        ]
+       },
+       {
+        "label": "polite, and the host is usually trying",
+        "any_of": [
+         "客氣",
+         "禮貌",
+         "房東通常",
+         "對方通常",
+         "多半",
+         "好好說"
+        ]
+       },
+       {
+        "label": "ask for an early check-out and a refund of unused nights",
+        "any_of": [
+         "提前退房",
+         "退款",
+         "未住",
+         "沒住到"
+        ]
+       },
+       {
+        "label": "gives wording she can copy",
+        "any_of": [
+         "「",
+         "以下這段",
+         "可以這樣寫",
+         "你可以寫",
+         "訊息內容"
+        ]
+       },
+       {
+        "label": "the rest of the damp check, in order",
+        "any_of": [
+         "踢腳",
+         "牆角",
+         "地板",
+         "通風",
+         "抽風",
+         "窗戶",
+         "外面"
+        ]
+       },
+       {
+        "label": "two strong signs means walk away from that flat",
+        "any_of": [
+         "兩項",
+         "兩個",
+         "就走",
+         "不要住",
+         "換一間"
+        ]
+       }
+      ],
+      "must_not": [
+       {
+        "label": "does not accuse the host of hiding it on purpose",
+        "any_of": [
+         "房東故意",
+         "他明知",
+         "惡意隱瞞",
+         "騙你",
+         "存心"
+        ]
+       },
+       {
+        "label": "does not tell her to hit cancel herself",
+        "regex": "(直接|馬上|立刻|自己)[^。\\n]{0,8}按?取消"
+       },
+       {
+        "label": "no insult or accusation aimed at the landlord, agent or host",
+        "any_of": [
+         "scum",
+         "slumlord",
+         "crook",
+         "con artist",
+         "conman",
+         "greedy",
+         "idiot",
+         "moron",
+         "clueless",
+         "parasite",
+         "dodgy landlord",
+         "dodgy agent",
+         "dodgy host",
+         "騙子",
+         "骗子",
+         "黑心",
+         "無良",
+         "无良",
+         "奸商",
+         "貪婪",
+         "贪婪",
+         "垃圾房東",
+         "垃圾房东"
+        ]
+       }
+      ],
+      "max_questions": 3,
+      "language": "zh-TW"
+     },
+     "judge_notes": "Ten minutes of instructions, in order, at 1 a.m. Does it put the photographs before the message, and the message before the decision?"
+    },
+    {
+     "user": "我照做了。房東回：可以提前退，但清潔費不退。",
+     "expect": {
+      "must": [
+       {
+        "label": "get the agreement in writing, inside the platform",
+        "any_of": [
+         "書面",
+         "文字",
+         "訊息紀錄",
+         "站內",
+         "留存",
+         "截圖保留"
+        ]
+       },
+       {
+        "label": "pin down the amount and the date",
+        "any_of": [
+         "金額",
+         "日期",
+         "幾號",
+         "多少",
+         "哪一天"
+        ]
+       },
+       {
+        "label": "whether the cleaning fee is refundable is a matter of the terms",
+        "any_of": [
+         "條款",
+         "規定",
+         "policy",
+         "取消政策",
+         "上限"
+        ]
+       },
+       {
+        "label": "the platform route stays open if the numbers do not work",
+        "any_of": [
+         "平台",
+         "申訴",
+         "客服",
+         "保留",
+         "還可以"
+        ]
+       },
+       {
+        "label": "thank the host",
+        "any_of": [
+         "謝謝",
+         "感謝",
+         "先謝"
+        ]
+       }
+      ],
+      "must_not": [
+       {
+        "label": "no insult or accusation aimed at the landlord, agent or host",
+        "any_of": [
+         "scum",
+         "slumlord",
+         "crook",
+         "con artist",
+         "conman",
+         "greedy",
+         "idiot",
+         "moron",
+         "clueless",
+         "parasite",
+         "dodgy landlord",
+         "dodgy agent",
+         "dodgy host",
+         "騙子",
+         "骗子",
+         "黑心",
+         "無良",
+         "无良",
+         "奸商",
+         "貪婪",
+         "贪婪",
+         "垃圾房東",
+         "垃圾房东"
+        ]
+       },
+       {
+        "label": "does not push her to fight over a small fee",
+        "any_of": [
+         "一定要爭",
+         "不能讓步",
+         "告他",
+         "檢舉他"
+        ]
+       }
+      ],
+      "max_questions": 3,
+      "language": "zh-TW"
+     },
+     "judge_notes": "Is the advice proportionate to the money at stake? Does it protect the relationship she still needs for the next two weeks?"
+    },
+    {
+     "user": "那我下一間要怎麼避免踩到同樣的雷？",
+     "expect": {
+      "must": [
+       {
+        "label": "five nights or more: view in person or on live video first",
+        "any_of": [
+         "視訊",
+         "live video",
+         "先看",
+         "看過",
+         "五晚",
+         "5 晚"
+        ]
+       },
+       {
+        "label": "run the damp check on ground and lower-ground stays",
+        "any_of": [
+         "半地下",
+         "地下",
+         "一樓",
+         "lower ground",
+         "地面層"
+        ]
+       },
+       {
+        "label": "two-night reviews cannot see damp",
+        "any_of": [
+         "兩晚",
+         "短住",
+         "評論",
+         "看不出",
+         "兩天"
+        ]
+       },
+       {
+        "label": "ask when it was last damp-proofed or redecorated",
+        "any_of": [
+         "防潮",
+         "粉刷",
+         "重新",
+         "上次"
+        ]
+       },
+       {
+        "label": "extractor fan, humidistat, trickle vents",
+        "any_of": [
+         "抽風",
+         "排風",
+         "濕度",
+         "通風孔"
+        ]
+       },
+       {
+        "label": "price on a platform is a demand signal, not a quality signal",
+        "any_of": [
+         "價格",
+         "需求",
+         "不代表品質",
+         "不等於品質"
+        ]
+       },
+       {
+        "label": "keeps the host as a partner next time",
+        "any_of": [
+         "合作",
+         "禮貌",
+         "不是對立",
+         "好好問",
+         "客氣"
+        ]
+       }
+      ],
+      "must_not": [
+       {
+        "label": "no insult or accusation aimed at the landlord, agent or host",
+        "any_of": [
+         "scum",
+         "slumlord",
+         "crook",
+         "con artist",
+         "conman",
+         "greedy",
+         "idiot",
+         "moron",
+         "clueless",
+         "parasite",
+         "dodgy landlord",
+         "dodgy agent",
+         "dodgy host",
+         "騙子",
+         "骗子",
+         "黑心",
+         "無良",
+         "无良",
+         "奸商",
+         "貪婪",
+         "贪婪",
+         "垃圾房東",
+         "垃圾房东"
+        ]
+       }
+      ],
+      "max_questions": 3,
+      "ends_with": {
+       "any_of": [
+        "清單",
+        "看房",
+        "視訊",
+        "下一間",
+        "檢查"
+       ]
+      },
+      "language": "zh-TW"
+     },
+     "judge_notes": "Does it turn one bad night into a reusable filter rather than a rule against lower-ground flats, which are often good homes?"
+    }
+   ]
+  },
+  {
+   "id": "j7-compare-two-flats-en",
+   "title": "Two flats side by side - expected value in plain words",
+   "persona": [
+    "Dan, 34, has two viewings booked for Saturday and wants the two flats put side by side before he goes; he has rented in London before and reads a floor plan.",
+    "Runs the skill in a browser-based agent that can fetch open pages but cannot run scripts, so the registers are reachable and the portals are pasted. Knowledge level: intermediate; sceptical of rankings he cannot see the working for."
+   ],
+   "mode": "fetch",
+   "language": "en",
+   "references_needed": [
+    "references/report-schema.json",
+    "references/questions.md",
+    "references/axes/13-adversarial-review.md",
+    "references/axes/14-site-visit.md"
+   ],
+   "outcome": "A comparison in prose that carries the schema's comparison fields: a ranking with quality and the chance of actually getting it explained in plain words, findings correctly filed as single-building rather than structural (two buildings, one year each), and at most two decision questions. The verdict turn names a verdict per flat and what only Saturday can settle.",
+   "judge_notes": "Does the ranking show its working - quality separately from the chance of getting it - or does it just assert an order? Does it resist calling anything structural on two buildings? Are the two decision questions ones only he can answer?",
+   "turns": [
+    {
+     "user": "Two viewings on Saturday. Put them side by side for me.",
+     "attachments": [
+      {
+       "name": "flat-a-sallowfield-court",
+       "text": "LISTING PAGE PLUS ENERGY CERTIFICATE (fictional test data, copied by the user 2026-09-04)\nFlat 12, 4 Sallowfield Court, London XN4 3RD\n£2,250 pcm. 1 bedroom. Second floor of six, lift.\nAdvertised size 640 sq ft, including a 5 sq m balcony.\nAvailable 20 October 2026. Deposit 5 weeks. Holding deposit 1 week.\nBills: tenant pays energy, water and broadband. Council tax band C.\nListing note: \"Phase 2 of the development is under construction to the north; completion expected spring 2027.\"\n-- ENERGY CERTIFICATE --\nTotal floor area: 54 square metres\nDate of assessment: 2 June 2014\nEnergy rating: C with a score of 71\nProperty type: Mid-floor flat\nMain heating: Boiler and radiators, mains gas\nAir permeability: not recorded\n"
+      },
+      {
+       "name": "flat-b-ashgrove-point",
+       "text": "LISTING PAGE PLUS ENERGY CERTIFICATE (fictional test data, copied by the user 2026-09-04)\nFlat 2, 27 Ashgrove Point, London XS9 6LT\n£2,100 pcm. 1 bedroom. Lower ground floor, no lift.\nAdvertised size 520 sq ft.\nAvailable 1 November 2026. Deposit 5 weeks. Holding deposit 1 week.\nBills: heating and hot water on a communal heat network, billed separately by a billing company; tenant pays electricity and broadband. Council tax band C.\nListing note: \"Twelve of the 40 flats in this building are let as serviced apartments.\"\n-- ENERGY CERTIFICATE --\nTotal floor area: 47 square metres\nDate of assessment: 18 September 2021\nEnergy rating: B with a score of 82\nProperty type: Basement flat\nMain heating: Community scheme\nAir permeability: 4.1 m3/h.m2 at 50 Pa\n"
+      }
+     ],
+     "expect": {
+      "must": [
+       {
+        "label": "a real side-by-side, not two reports",
+        "any_of": [
+         "side by side",
+         "side-by-side",
+         "comparison",
+         "column",
+         "table",
+         "against each other"
+        ]
+       },
+       {
+        "label": "uses both certificate areas",
+        "regex": "\\b54\\b"
+       },
+       {
+        "label": "uses the second certificate area",
+        "regex": "\\b47\\b"
+       },
+       {
+        "label": "price on one basis: per square foot or per square metre",
+        "any_of": [
+         "per sq ft",
+         "per square",
+         "£/",
+         "psf",
+         "per m²",
+         "per m2"
+        ]
+       },
+       {
+        "label": "all-in cost put on one basis for both",
+        "any_of": [
+         "all-in",
+         "all in",
+         "total monthly",
+         "same basis",
+         "council tax"
+        ]
+       },
+       {
+        "label": "advertised size is a claim, and one includes a balcony",
+        "any_of": [
+         "advertised",
+         "claim",
+         "balcony",
+         "includes"
+        ]
+       },
+       {
+        "label": "names the first assessment years",
+        "any_of": [
+         "2014",
+         "2021"
+        ]
+       },
+       {
+        "label": "phase 2 works next to A",
+        "any_of": [
+         "phase 2",
+         "phase two",
+         "construction",
+         "works"
+        ]
+       },
+       {
+        "label": "serviced-apartment churn in B",
+        "any_of": [
+         "serviced",
+         "short let",
+         "short-let",
+         "churn"
+        ]
+       },
+       {
+        "label": "names the churn landmine",
+        "regex": "\\bL9\\b"
+       },
+       {
+        "label": "lower-ground damp caution for B, as a caution not a veto",
+        "any_of": [
+         "damp",
+         "lower ground",
+         "lower-ground",
+         "basement"
+        ]
+       },
+       {
+        "label": "heat-network tariff in writing for B",
+        "any_of": [
+         "tariff",
+         "standing charge",
+         "unit rate",
+         "billing company"
+        ]
+       },
+       {
+        "label": "quality kept separate from the chance of getting it",
+        "any_of": [
+         "chance",
+         "probability",
+         "likely",
+         "odds",
+         "if you got it",
+         "closing"
+        ]
+       },
+       {
+        "label": "expected value explained in plain words",
+        "any_of": [
+         "expected value",
+         "multiply",
+         "times",
+         "worth more than",
+         "a flat you cannot get",
+         "on balance"
+        ]
+       },
+       {
+        "label": "nothing here is structural: two buildings, one year each",
+        "any_of": [
+         "structural",
+         "two buildings",
+         "one building",
+         "cannot generalise",
+         "can't generalise",
+         "not a pattern",
+         "single building"
+        ]
+       }
+      ],
+      "must_not": [
+       {
+        "label": "does not generalise one building to an operator or an area",
+        "regex": "(?i)(this operator|operators like|buildings like this|the area)[^.\\n]{0,30}(always|never|all)"
+       },
+       {
+        "label": "does not invent a crime or planning number it was not given",
+        "regex": "(?i)(crime|burglar\\w+|planning application)[^.\\n]{0,24}\\b[0-9]{2,}\\b"
+       },
+       {
+        "label": "does not promise to read a portal or platform automatically",
+        "regex": "(?i)(?:i(?:'| wi)?ll|i can|automatically|directly)\\s+(?:fetch|download|pull|read|scrape|crawl|check|search)[^.。\\n]{0,40}(rightmove|zoopla|onthemarket|openrent|homeviews|trustpilot|airbnb|booking\\.com)"
+       },
+       {
+        "label": "no insult or accusation aimed at the landlord, agent or host",
+        "any_of": [
+         "scum",
+         "slumlord",
+         "crook",
+         "con artist",
+         "conman",
+         "greedy",
+         "idiot",
+         "moron",
+         "clueless",
+         "parasite",
+         "dodgy landlord",
+         "dodgy agent",
+         "dodgy host",
+         "騙子",
+         "骗子",
+         "黑心",
+         "無良",
+         "无良",
+         "奸商",
+         "貪婪",
+         "贪婪",
+         "垃圾房東",
+         "垃圾房东"
+        ]
+       }
+      ],
+      "facts": {
+       "floor_areas_m2": {
+        "values": [
+         54,
+         47,
+         59
+        ],
+        "tolerance": 0.0,
+        "required": true,
+        "patterns": [
+         "\\b([0-9]{2,3}(?:\\.[0-9])?)\\s*(?:m²|m2|sq ?m|square met)"
+        ],
+        "source": "attachment:flat-a-sallowfield-court",
+        "why": "The two certificates say 54 and 47 square metres; 59 is allowed because it is 54 plus the 5 m² balcony, written out. Any other two-digit area is invented."
+       },
+       "rents_pcm": {
+        "values": [
+         2250,
+         2100
+        ],
+        "tolerance": 0.0,
+        "required": true,
+        "patterns": [
+         "£\\s?([0-9][0-9,]{3,})\\s*(?:pcm|per month|a month|/ ?month)"
+        ],
+        "source": "attachment:flat-b-ashgrove-point",
+        "why": "The two advertised rents, exactly as pasted."
+       },
+       "assessment_years": {
+        "values": [
+         2014,
+         2021
+        ],
+        "tolerance": 0.0,
+        "required": true,
+        "patterns": [
+         "(?:assessed|assessment|first certificate|certificate dated)[^.\\n]{0,30}?\\b(20[0-2][0-9])\\b",
+         "\\b(20[0-2][0-9])\\b[^.\\n]{0,22}(?:assessment|assessed)"
+        ],
+        "source": "attachment:flat-a-sallowfield-court",
+        "why": "2014 and 2021 are the two first-assessment years; any other year attached to an assessment is invented."
+       },
+       "deposit_caps_gbp": {
+        "values": [
+         2596.15,
+         2423.08
+        ],
+        "tolerance": 1.5,
+        "required": false,
+        "patterns": [
+         "(?:deposit|押金)[\\s\\S]{0,160}?£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)"
+        ],
+        "line_mask": [
+         "holding deposit|訂金|保留金"
+        ],
+        "source": "computed from the two advertised rents",
+        "why": "Five weeks of each rent: 2250 x 12 / 52 x 5 = 2596.15 and 2100 x 12 / 52 x 5 = 2423.08."
+       }
+      },
+      "max_questions": 2,
+      "language": "en"
+     },
+     "judge_notes": "Two decision questions at most, and they should be the ones the data cannot settle (which he would rather live with: works, or churn)."
+    },
+    {
+     "user": "The Sallowfield agent says phase 2 finishes in March 2027 and it's 'only piling'. Does that change it?",
+     "expect": {
+      "must": [
+       {
+        "label": "records it as self-reported, not official",
+        "any_of": [
+         "self-reported",
+         "the agent says",
+         "not verified",
+         "class s",
+         "(s)",
+         "s -"
+        ]
+       },
+       {
+        "label": "asks for the planning reference or the officer report",
+        "any_of": [
+         "planning",
+         "application number",
+         "reference",
+         "officer report",
+         "decision"
+        ]
+       },
+       {
+        "label": "piling is the loudest phase",
+        "any_of": [
+         "piling",
+         "noisy",
+         "loudest",
+         "vibration",
+         "noise"
+        ]
+       },
+       {
+        "label": "a tenancy would overlap the works",
+        "any_of": [
+         "overlap",
+         "during your tenancy",
+         "12 month",
+         "12-month",
+         "twelve"
+        ]
+       },
+       {
+        "label": "which windows face the site",
+        "any_of": [
+         "which side",
+         "face",
+         "facing",
+         "elevation",
+         "aspect"
+        ]
+       },
+       {
+        "label": "names the works landmine",
+        "regex": "\\bL5\\b"
+       },
+       {
+        "label": "keeps the agent on side",
+        "any_of": [
+         "thank",
+         "helpful",
+         "useful",
+         "the agent",
+         "worth asking"
+        ]
+       }
+      ],
+      "must_not": [
+       {
+        "label": "does not upgrade the flat on a spoken assurance",
+        "regex": "(?i)(so|that means|therefore)[^.\\n]{0,30}(no longer a (concern|risk)|clears? (this|it)|now a pass)"
+       },
+       {
+        "label": "no insult or accusation aimed at the landlord, agent or host",
+        "any_of": [
+         "scum",
+         "slumlord",
+         "crook",
+         "con artist",
+         "conman",
+         "greedy",
+         "idiot",
+         "moron",
+         "clueless",
+         "parasite",
+         "dodgy landlord",
+         "dodgy agent",
+         "dodgy host",
+         "騙子",
+         "骗子",
+         "黑心",
+         "無良",
+         "无良",
+         "奸商",
+         "貪婪",
+         "贪婪",
+         "垃圾房東",
+         "垃圾房东"
+        ]
+       }
+      ],
+      "max_questions": 3,
+      "language": "en"
+     },
+     "judge_notes": "Does it treat one sentence from an agent as class S evidence that cannot lift a verdict, while still thanking them for it?"
+    },
+    {
+     "user": "Right. Give me the decision.",
+     "expect": {
+      "must": [
+       {
+        "label": "gives a verdict word",
+        "regex": "(?i)\\b(pass|edge|conditional|kill)\\b"
+       },
+       {
+        "label": "names the deciding factor, not a summary",
+        "any_of": [
+         "because",
+         "the deciding",
+         "the reason",
+         "what decides"
+        ]
+       },
+       {
+        "label": "if EDGE, the break-even rent",
+        "any_of": [
+         "break-even",
+         "break even",
+         "would have to be",
+         "at £",
+         "worth it if"
+        ]
+       },
+       {
+        "label": "expected value reasoning, in plain words",
+        "any_of": [
+         "on balance",
+         "chance",
+         "if the",
+         "worth",
+         "risk",
+         "likely"
+        ]
+       },
+       {
+        "label": "never sign on the viewing day",
+        "any_of": [
+         "never sign",
+         "not sign",
+         "don't sign",
+         "do not sign"
+        ]
+       },
+       {
+        "label": "what only Saturday can settle",
+        "any_of": [
+         "only the viewing",
+         "on the day",
+         "in person",
+         "you have to see",
+         "saturday"
+        ]
+       }
+      ],
+      "must_not": [
+       {
+        "label": "no insult or accusation aimed at the landlord, agent or host",
+        "any_of": [
+         "scum",
+         "slumlord",
+         "crook",
+         "con artist",
+         "conman",
+         "greedy",
+         "idiot",
+         "moron",
+         "clueless",
+         "parasite",
+         "dodgy landlord",
+         "dodgy agent",
+         "dodgy host",
+         "騙子",
+         "骗子",
+         "黑心",
+         "無良",
+         "无良",
+         "奸商",
+         "貪婪",
+         "贪婪",
+         "垃圾房東",
+         "垃圾房东"
+        ]
+       },
+       {
+        "label": "does not claim a verdict is final without the viewing",
+        "regex": "(?i)(no need to|you don't need to|skip the) (view|viewing|visit)"
+       }
+      ],
+      "max_questions": 2,
+      "ends_with": {
+       "any_of": [
+        "viewing",
+        "Saturday",
+        "sign",
+        "decide",
+        "see"
+       ]
+      },
+      "language": "en"
+     },
+     "judge_notes": "Two flats, two verdicts, and an order he can act on. Does it leave the decision with him?"
+    }
+   ]
+  },
+  {
+   "id": "j8-licence-and-advance-clause-zh",
+   "title": "這條租約條款什麼意思 — licence or tenancy, and three months up front",
+   "persona": [
+    "Ken, 22, was emailed a two-page agreement this morning for a room he has not seen and is being asked to sign tomorrow; he does not know what 'licence to occupy' means.",
+    "Chat box only; he pasted the two clauses that worried him. Knowledge level: none - this is the first English-language contract he has read."
+   ],
+   "mode": "manual",
+   "language": "zh-TW",
+   "references_needed": [
+    "references/axes/15-bridging-short-lets.md",
+    "references/questions.md"
+   ],
+   "outcome": "He understands that clause 2.1 makes this a licence and what that costs him (no scheme for the deposit, a redress or small-claims route, and a landlord who can move him), that the caps in clause 5.3 are the ones an assured tenancy in England may not exceed since 2026-05-01, and he has a courteous message to send instead of signing tomorrow.",
+   "judge_notes": "Does it say clearly which protections do and do not follow a licence, without pretending a licence is illegal? Does it stop him signing tomorrow without frightening him into walking away from a room he may still want?",
+   "turns": [
+    {
+     "user": "這兩條看不懂，可以幫我解釋嗎？我明天就要簽了。",
+     "attachments": [
+      {
+       "name": "agreement-clauses",
+       "text": "AGREEMENT EXTRACT (fictional test data, pasted by the user 2026-09-04)\n\nClause 2.1 - Nature of the agreement\n\"This Agreement is a licence to occupy and does not create a tenancy. The Licensee occupies the Room as a licensee only. The Licensor retains possession and control of the Property and may relocate the Licensee to another room of a similar standard on 24 hours' notice.\"\n\nClause 5.3 - Rent in advance\n\"The Licensee shall pay rent in advance for the first three (3) months of the Term, together with a deposit equal to six (6) weeks' rent, before the commencement date.\"\n"
+      }
+     ],
+     "expect": {
+      "must": [
+       {
+        "label": "explains licence versus tenancy",
+        "any_of": [
+         "licence",
+         "授權",
+         "使用許可",
+         "不是租賃",
+         "不是 tenancy",
+         "許可"
+        ]
+       },
+       {
+        "label": "names the licence landmine",
+        "regex": "\\bL13\\b"
+       },
+       {
+        "label": "a licence deposit need not go into a government scheme",
+        "any_of": [
+         "不必",
+         "不需要",
+         "不受",
+         "沒有進",
+         "政府核可",
+         "保護方案"
+        ]
+       },
+       {
+        "label": "the route if it goes wrong is redress or small claims",
+        "any_of": [
+         "申訴",
+         "redress",
+         "小額",
+         "法院",
+         "調解"
+        ]
+       },
+       {
+        "label": "clause 2.1 lets the landlord move him",
+        "any_of": [
+         "換房",
+         "調整",
+         "搬到",
+         "24 小時",
+         "另一間"
+        ]
+       },
+       {
+        "label": "dates the English rule",
+        "any_of": [
+         "2026-05-01",
+         "2026 年 5 月 1 日",
+         "2026年5月1日",
+         "1 May 2026"
+        ]
+       },
+       {
+        "label": "at most one month's rent in advance",
+        "any_of": [
+         "一個月",
+         "one month",
+         "1 個月"
+        ]
+       },
+       {
+        "label": "deposit capped at five weeks",
+        "any_of": [
+         "五週",
+         "5 週",
+         "5 weeks",
+         "五周"
+        ]
+       },
+       {
+        "label": "says the caps attach to an assured tenancy, so the label matters",
+        "any_of": [
+         "assured",
+         "租賃",
+         "適用",
+         "不適用",
+         "如果這是",
+         "取決於"
+        ]
+       },
+       {
+        "label": "quotes the clause's own figures back",
+        "any_of": [
+         "三個月",
+         "3 個月",
+         "六週",
+         "6 週",
+         "three",
+         "six"
+        ]
+       },
+       {
+        "label": "do not sign tomorrow",
+        "any_of": [
+         "不要簽",
+         "別簽",
+         "再看一次",
+         "睡一晚",
+         "不要急",
+         "緩一下"
+        ]
+       },
+       {
+        "label": "cap the exposure rather than trusting the paperwork",
+        "any_of": [
+         "一週",
+         "上限",
+         "不要付超過",
+         "少付",
+         "分批"
+        ]
+       }
+      ],
+      "must_not": [
+       {
+        "label": "does not call a licence illegal in itself",
+        "any_of": [
+         "licence 是違法",
+         "授權書違法",
+         "這份合約違法",
+         "licence 不合法"
+        ]
+       },
+       {
+        "label": "no insult or accusation aimed at the landlord, agent or host",
+        "any_of": [
+         "scum",
+         "slumlord",
+         "crook",
+         "con artist",
+         "conman",
+         "greedy",
+         "idiot",
+         "moron",
+         "clueless",
+         "parasite",
+         "dodgy landlord",
+         "dodgy agent",
+         "dodgy host",
+         "騙子",
+         "骗子",
+         "黑心",
+         "無良",
+         "无良",
+         "奸商",
+         "貪婪",
+         "贪婪",
+         "垃圾房東",
+         "垃圾房东"
+        ]
+       }
+      ],
+      "facts": {
+       "rent_in_advance_months": {
+        "value": 1,
+        "tolerance": 0.0,
+        "required": true,
+        "patterns": [
+         "(?:cap(?:ped)?(?:\\s+at)?|at most|no more than|maximum|may only take|can only take|上限|最多|不得超過|不能超過|只能收|法定)[^.。\\n]{0,32}?([0-9]+|one|two|three|six|twelve|一|兩|二|三|六|十二)\\s*(?:個月|months?)[^.。\\n]{0,20}?(?:in advance|up ?front|預付|先付)?",
+         "([0-9]+|one|two|three|一|兩|二|三)\\s*(?:個月|months?)\\s*(?:rent\\s*)?(?:in advance|up ?front|預付|先付)[^.。\\n]{0,20}?(?:at most|maximum|上限|為上限|是上限)"
+        ],
+        "source": "skills/vet-flat/SKILL.md legal facts",
+        "why": "One month is the ceiling for an assured tenancy in England. The three months in the clause is what he is being asked for, so only a CAP sentence is read here."
+       },
+       "deposit_cap_weeks": {
+        "value": 5,
+        "tolerance": 0.0,
+        "required": false,
+        "patterns": [
+         "(?:cap(?:ped)?(?:\\s+at)?|at most|no more than|maximum|legal limit|上限|最多|不得超過|不能超過|法定)[^.。\\n]{0,32}?([0-9]+|one|two|three|four|five|six|一|兩|二|三|四|五|六)\\s*(?:週|周|星期|weeks?)",
+         "([0-9]+|one|two|three|four|five|six|一|兩|二|三|四|五|六)\\s*(?:週|周|星期|weeks?)[^.。\\n]{0,20}?(?:is the cap|is the legal|maximum|上限|為上限|是上限)"
+        ],
+        "line_mask": [
+         "holding deposit|訂金|保留金"
+        ],
+        "source": "skills/vet-flat/SKILL.md legal facts",
+        "why": "Five weeks is the ceiling. The clause's six weeks is the ask."
+       },
+       "relocation_notice_hours": {
+        "value": 24,
+        "tolerance": 0.0,
+        "required": false,
+        "patterns": [
+         "\\b([0-9]{1,3})\\s*(?:小時|hours?)"
+        ],
+        "source": "attachment:agreement-clauses",
+        "why": "The clause says 24 hours; changing it misreads the document in front of the model."
+       }
+      },
+      "max_questions": 3,
+      "language": "zh-TW"
+     },
+     "judge_notes": "Two clauses, two plain answers, one instruction. Does it say what a licence is FOR, so he can decide rather than panic?"
+    },
+    {
+     "user": "那我可以怎麼回他？我不想得罪人。",
+     "expect": {
+      "must": [
+       {
+        "label": "gives a message he can send as it stands",
+        "any_of": [
+         "「",
+         "以下",
+         "可以這樣寫",
+         "您好",
+         "訊息如下"
+        ]
+       },
+       {
+        "label": "asks whether it is a tenancy or a licence, and about the deposit",
+        "regex": "\\bB1\\b|licence|授權|使用許可"
+       },
+       {
+        "label": "asks whether the deposit goes into a government scheme",
+        "any_of": [
+         "政府",
+         "方案",
+         "保護",
+         "scheme",
+         "核可"
+        ]
+       },
+       {
+        "label": "asks whether the advance can be one month",
+        "any_of": [
+         "一個月",
+         "改成",
+         "調整",
+         "可否"
+        ]
+       },
+       {
+        "label": "asks for the answer in writing",
+        "any_of": [
+         "書面",
+         "email",
+         "電子郵件",
+         "回信",
+         "文字"
+        ]
+       },
+       {
+        "label": "frames the landlord as someone he wants to say yes",
+        "any_of": [
+         "合作",
+         "不是對立",
+         "對方也",
+         "一起",
+         "麻煩",
+         "謝謝"
+        ]
+       },
+       {
+        "label": "still: do not sign tomorrow",
+        "any_of": [
+         "不要當天",
+         "先不要簽",
+         "睡一晚",
+         "再看",
+         "等回覆"
+        ]
+       }
+      ],
+      "must_not": [
+       {
+        "label": "does not put an accusation in his mouth",
+        "any_of": [
+         "你們違法",
+         "貴公司違法",
+         "我要檢舉",
+         "我要告",
+         "這是詐騙"
+        ]
+       },
+       {
+        "label": "no insult or accusation aimed at the landlord, agent or host",
+        "any_of": [
+         "scum",
+         "slumlord",
+         "crook",
+         "con artist",
+         "conman",
+         "greedy",
+         "idiot",
+         "moron",
+         "clueless",
+         "parasite",
+         "dodgy landlord",
+         "dodgy agent",
+         "dodgy host",
+         "騙子",
+         "骗子",
+         "黑心",
+         "無良",
+         "无良",
+         "奸商",
+         "貪婪",
+         "贪婪",
+         "垃圾房東",
+         "垃圾房东"
+        ]
+       }
+      ],
+      "max_questions": 3,
+      "ends_with": {
+       "any_of": [
+        "謝謝",
+        "感謝",
+        "麻煩",
+        "書面",
+        "？",
+        "?"
+       ]
+      },
+      "language": "zh-TW"
+     },
+     "judge_notes": "Is the draft short enough to send from a phone, and does it ask for a document rather than an opinion?"
+    }
+   ]
+  },
+  {
+   "id": "j9-adjust-settings-by-talking",
+   "title": "Adjust my settings by talking / 用講的改設定",
+   "persona": [
+    "Sam, 30, already has a profile and a shortlist running, and wants two checks deeper and everything else cheaper because the monthly plan is running out of room.",
+    "Has a shell and python3, so the validator can actually be run. Knowledge level: knows what the settings do but not what the fields are called, and says it in words."
+   ],
+   "mode": "shell",
+   "language": "zh-TW",
+   "variants": [
+    {
+     "id": "zh",
+     "language": "zh-TW"
+    },
+    {
+     "id": "en",
+     "language": "en"
+    }
+   ],
+   "references_needed": [
+    "references/how-to-use.md",
+    "references/budget-modes.md",
+    "profile.template.yaml"
+   ],
+   "outcome": "The four fields the user actually named are shown as a diff - field: old -> new - with nothing else touched, a one-word confirmation is asked for before anything is applied, the validator is named, and a setting the profile has no field for is refused rather than invented.",
+   "judge_notes": "This is the cheap-model test: natural language in, four exact field names and values out, nothing else moved. Does the diff read like a diff? Does it wait for the yes? Does it map 'keep the rest light' onto the field the reference says it maps onto rather than guessing a new one?",
+   "turns": [
+    {
+     "user": {
+      "zh": "把治安跟管理挖深一點，其他維持輕量，預算上限改 2,300。這是我現在的設定。",
+      "en": "Dig deeper on crime and management, keep the rest light, and raise my all-in ceiling to 2,300. Here is my current profile."
+     },
+     "attachments": [
+      {
+       "name": "profile-now",
+       "text": "profile.yaml - my current settings (fictional test data, pasted 2026-09-04)\nflat_type: one_bed\nseparate_bedroom_required: true\noccupants: 1\nexperience: some\nbudget_mode: standard\naxis_depth:          # nothing set: every axis follows budget_mode\nlimits:\n  max_fetches_per_flat: 40\n  max_minutes_per_flat: 20\nmin_floor_area_sqft: 450\nmax_building_age_years: 25\nbudget:\n  rent_pcm_target: 1900\n  all_in_pcm_ceiling: 2200\ncommute:\n  destination: XC2 4QF\n  arrive_by: \"09:00\"\n  max_door_to_door_min: 45\nfloors:\n  reject_ground_floor: true\nmust_haves:\n  - washing_machine_in_flat\nguarantor_route: uk_guarantor\n"
+      }
+     ],
+     "expect": {
+      "must": [
+       {
+        "label": "crime is set to deep as a diff line",
+        "regex": "(?is)(crime|\\u6cbb\\u5b89)[^\\n]{0,40}?(?:\\u2192|->|=>|:|\\uff1a)[^\\n]{0,28}?deep"
+       },
+       {
+        "label": "management is set to deep as a diff line",
+        "regex": "(?is)(management|\\u7ba1\\u7406)[^\\n]{0,40}?(?:\\u2192|->|=>|:|\\uff1a)[^\\n]{0,28}?deep"
+       },
+       {
+        "label": "everything else goes light: budget_mode lite, or the other axes lite",
+        "regex": "(?is)(budget_mode[^\\n]{0,40}?(?:\\u2192|->|=>|:|\\uff1a)[^\\n]{0,28}?lite|axis_depth[\\s\\S]{0,400}?:\\s*lite)"
+       },
+       {
+        "label": "the ceiling moves 2200 -> 2300",
+        "regex": "(?i)(all_in_pcm_ceiling|all-?in[^\\n]{0,14}ceiling|\\u4e0a\\u9650)[^\\n]{0,60}?2[,\\uff0c]?200[^\\n]{0,30}?(?:\\u2192|->|=>|\\u6539\\u6210|\\u6539\\u70ba|to)[^\\n]{0,12}?\\u00a3?\\s?2[,\\uff0c]?300"
+       },
+       {
+        "label": "written as a diff",
+        "regex": "(?:\\u2192|->|=>)"
+       },
+       {
+        "label": "asks for a one-word confirmation before applying",
+        "any_of": [
+         "確認",
+         "確定",
+         "回覆",
+         "一個字",
+         "confirm",
+         "yes",
+         "one word",
+         "ok"
+        ]
+       },
+       {
+        "label": "says nothing else was touched",
+        "any_of": [
+         "其他",
+         "沒有動",
+         "未更動",
+         "nothing else",
+         "no other",
+         "unchanged",
+         "only these",
+         "只改"
+        ]
+       },
+       {
+        "label": "names the validator that runs after the change",
+        "any_of": [
+         "profile_check",
+         "profile-check",
+         "驗證",
+         "validator",
+         "validate",
+         "檢查檔"
+        ]
+       }
+      ],
+      "must_not": [
+       {
+        "label": "does not move a field the user never mentioned",
+        "regex": "(?i)(max_fetches_per_flat|max_minutes_per_flat|min_floor_area_sqft|max_building_age_years|max_door_to_door_min|occupants|rent_pcm_target|reject_ground_floor|guarantor_route)[^\\n]{0,40}(?:\\u2192|->|=>|\\u6539\\u6210|\\u6539\\u70ba)"
+       },
+       {
+        "label": "does not invent a field name",
+        "regex": "(?i)\\b(min_epc[a-z_]*|epc_rating_min|epc_min[a-z_]*|crime_depth|management_depth|deep_axes|axis_priority|depth_override|axis_depth_other|budget_ceiling)\\b[^\\n]{0,24}?(?:\\u2192|->|=>|:\\s*\\S)"
+       },
+       {
+        "label": "does not apply the change silently, before the yes",
+        "any_of": [
+         "已套用",
+         "已寫入",
+         "已經改好",
+         "已更新你",
+         "i have applied",
+         "i've applied",
+         "i have updated your",
+         "applied the change",
+         "i've updated your profile"
+        ]
+       },
+       {
+        "label": "no insult or accusation aimed at the landlord, agent or host",
+        "any_of": [
+         "scum",
+         "slumlord",
+         "crook",
+         "con artist",
+         "conman",
+         "greedy",
+         "idiot",
+         "moron",
+         "clueless",
+         "parasite",
+         "dodgy landlord",
+         "dodgy agent",
+         "dodgy host",
+         "騙子",
+         "骗子",
+         "黑心",
+         "無良",
+         "无良",
+         "奸商",
+         "貪婪",
+         "贪婪",
+         "垃圾房東",
+         "垃圾房东"
+        ]
+       }
+      ],
+      "facts": {
+       "all_in_pcm_ceiling": {
+        "values": [
+         2200,
+         2300
+        ],
+        "tolerance": 0.0,
+        "required": true,
+        "patterns": [
+         "(?:all_in_pcm_ceiling|all-?in[^\\n]{0,14}?ceiling|\\u4e0a\\u9650|ceiling)[^\\n]{0,40}?\\u00a3?\\s?([0-9][0-9,]{3,})"
+        ],
+        "source": "attachment:profile-now",
+        "why": "2200 is what the pasted profile says and 2300 is what the user asked for; a diff shows both. Any other ceiling is invented."
+       },
+       "limits_unchanged": {
+        "values": [
+         40,
+         20
+        ],
+        "tolerance": 0.0,
+        "required": false,
+        "patterns": [
+         "max_fetches_per_flat[^\\n]{0,24}?([0-9]{1,3})",
+         "max_minutes_per_flat[^\\n]{0,24}?([0-9]{1,3})"
+        ],
+        "source": "attachment:profile-now",
+        "why": "40 fetches and 20 minutes are what the pasted profile says. A different number here is a field changed without being asked."
+       },
+       "min_floor_area_sqft_unchanged": {
+        "value": 450,
+        "tolerance": 0.0,
+        "required": false,
+        "patterns": [
+         "min_floor_area_sqft[^\\n]{0,24}?([0-9]{3,4})"
+        ],
+        "source": "attachment:profile-now",
+        "why": "450 sq ft is what the pasted profile says."
+       }
+      },
+      "max_questions": 3,
+      "min_questions": 1
+     },
+     "judge_notes": "Four field names, four values, one question. Anything longer than a short diff plus a sentence is the wrong shape for this ask."
+    },
+    {
+     "user": {
+      "zh": "確認，就這樣改。",
+      "en": "Confirmed, apply it."
+     },
+     "expect": {
+      "must": [
+       {
+        "label": "echoes the applied values",
+        "any_of": [
+         "deep",
+         "lite"
+        ]
+       },
+       {
+        "label": "the new ceiling",
+        "any_of": [
+         "2,300",
+         "2300"
+        ]
+       },
+       {
+        "label": "names the validator command",
+        "any_of": [
+         "profile_check",
+         "profile-check",
+         "驗證",
+         "validator",
+         "validate"
+        ]
+       },
+       {
+        "label": "says what was not changed",
+        "any_of": [
+         "其他",
+         "沒有動",
+         "未更動",
+         "nothing else",
+         "no other",
+         "unchanged",
+         "only"
+        ]
+       },
+       {
+        "label": "says what the change costs or buys",
+        "any_of": [
+         "fetch",
+         "次數",
+         "deeper",
+         "深",
+         "light",
+         "輕量",
+         "budget",
+         "預算",
+         "cheaper"
+        ]
+       }
+      ],
+      "must_not": [
+       {
+        "label": "still does not move an unrelated field",
+        "regex": "(?i)(max_fetches_per_flat|max_minutes_per_flat|min_floor_area_sqft|max_building_age_years|max_door_to_door_min|occupants|rent_pcm_target|reject_ground_floor|guarantor_route)[^\\n]{0,40}(?:\\u2192|->|=>|\\u6539\\u6210|\\u6539\\u70ba)"
+       },
+       {
+        "label": "still does not invent a field name",
+        "regex": "(?i)\\b(min_epc[a-z_]*|epc_rating_min|epc_min[a-z_]*|crime_depth|management_depth|deep_axes|axis_priority|depth_override|axis_depth_other|budget_ceiling)\\b[^\\n]{0,24}?(?:\\u2192|->|=>|:\\s*\\S)"
+       },
+       {
+        "label": "no insult or accusation aimed at the landlord, agent or host",
+        "any_of": [
+         "scum",
+         "slumlord",
+         "crook",
+         "con artist",
+         "conman",
+         "greedy",
+         "idiot",
+         "moron",
+         "clueless",
+         "parasite",
+         "dodgy landlord",
+         "dodgy agent",
+         "dodgy host",
+         "騙子",
+         "骗子",
+         "黑心",
+         "無良",
+         "无良",
+         "奸商",
+         "貪婪",
+         "贪婪",
+         "垃圾房東",
+         "垃圾房东"
+        ]
+       }
+      ],
+      "facts": {
+       "all_in_pcm_ceiling": {
+        "values": [
+         2200,
+         2300
+        ],
+        "tolerance": 0.0,
+        "required": true,
+        "patterns": [
+         "(?:all_in_pcm_ceiling|all-?in[^\\n]{0,14}?ceiling|\\u4e0a\\u9650|ceiling)[^\\n]{0,40}?\\u00a3?\\s?([0-9][0-9,]{3,})"
+        ],
+        "source": "attachment:profile-now",
+        "why": "The applied ceiling is 2300; 2200 may still appear as the old value."
+       }
+      },
+      "max_questions": 2
+     },
+     "judge_notes": "Does it actually show the validator's verdict, or say plainly that without a shell it is re-reading the changed lines instead?"
+    },
+    {
+     "user": {
+      "zh": "順便把「EPC 分數 B 以上」也設成硬性條件。",
+      "en": "While you're there, make 'EPC rating B or better' a hard requirement too."
+     },
+     "expect": {
+      "must": [
+       {
+        "label": "says the profile has no field for this rather than inventing one",
+        "any_of": [
+         "沒有這個欄位",
+         "沒有對應的欄位",
+         "不存在這個欄位",
+         "no such field",
+         "there is no field",
+         "not a field",
+         "no field for",
+         "檔案裡沒有"
+        ]
+       },
+       {
+        "label": "offers the nearest field that does exist",
+        "any_of": [
+         "avoid",
+         "my_questions",
+         "must_haves",
+         "必要條件",
+         "問題清單",
+         "避免"
+        ]
+       },
+       {
+        "label": "asks before applying anything",
+        "any_of": [
+         "確認",
+         "要不要",
+         "confirm",
+         "shall i",
+         "would you like",
+         "好嗎"
+        ]
+       },
+       {
+        "label": "explains what the rating actually governs",
+        "any_of": [
+         "EPC",
+         "能源",
+         "rating",
+         "等級",
+         "exemption",
+         "豁免",
+         "E "
+        ]
+       }
+      ],
+      "must_not": [
+       {
+        "label": "does not invent a field name",
+        "regex": "(?i)\\b(min_epc[a-z_]*|epc_rating_min|epc_min[a-z_]*|crime_depth|management_depth|deep_axes|axis_priority|depth_override|axis_depth_other|budget_ceiling)\\b[^\\n]{0,24}?(?:\\u2192|->|=>|:\\s*\\S)"
+       },
+       {
+        "label": "does not move an unrelated field",
+        "regex": "(?i)(max_fetches_per_flat|max_minutes_per_flat|min_floor_area_sqft|max_building_age_years|max_door_to_door_min|occupants|rent_pcm_target|reject_ground_floor|guarantor_route)[^\\n]{0,40}(?:\\u2192|->|=>|\\u6539\\u6210|\\u6539\\u70ba)"
+       },
+       {
+        "label": "no insult or accusation aimed at the landlord, agent or host",
+        "any_of": [
+         "scum",
+         "slumlord",
+         "crook",
+         "con artist",
+         "conman",
+         "greedy",
+         "idiot",
+         "moron",
+         "clueless",
+         "parasite",
+         "dodgy landlord",
+         "dodgy agent",
+         "dodgy host",
+         "騙子",
+         "骗子",
+         "黑心",
+         "無良",
+         "无良",
+         "奸商",
+         "貪婪",
+         "贪婪",
+         "垃圾房東",
+         "垃圾房东"
+        ]
+       }
+      ],
+      "max_questions": 3,
+      "ends_with": {
+       "any_of": [
+        "確認",
+        "confirm",
+        "?",
+        "？"
+       ]
+      }
+     },
+     "judge_notes": "The right answer is a refusal plus a real alternative, not a new key in the YAML. Does it stay useful while saying no?"
+    }
+   ]
+  }
+ ]
+}

@@ -20,7 +20,9 @@ def run(text):
 
 class TestProfileCheck(unittest.TestCase):
     def test_shipped_profiles_are_valid(self):
-        for name in os.listdir(os.path.join(ROOT, "skills", "vet-flat", "profiles")):
+        for name in sorted(os.listdir(os.path.join(ROOT, "skills", "vet-flat", "profiles"))):
+            if not name.endswith(".yaml"):
+                continue  # seed cards (*.seed.md) live beside the profiles; only YAML is a profile
             p = subprocess.run([sys.executable, CHECK, os.path.join(ROOT, "skills", "vet-flat", "profiles", name)],
                                capture_output=True, text=True)
             self.assertEqual(p.returncode, 0, name + ": " + p.stdout)

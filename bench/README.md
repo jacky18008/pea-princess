@@ -100,6 +100,34 @@ The two conversation cases carry a `judge_notes` field describing what a model j
 could add later (is the pitch concrete rather than salesy; do the defaults suit
 London). Nothing reads it yet, and the score does not need it.
 
+### The nine journeys
+
+Both kinds above stop at one message. `evals/journeys.json` and `bench/journeys.py` go
+the other way: nine scripted **multi-turn conversations**, 35 turns in all, from a
+user's first message to the end of a search — the Chinese beginner who knows nothing,
+the one-line east London brief, a listing and its certificate pasted together, four
+short stays roasted (尻洗), the money gate after an offer, a damp lower-ground arrival
+at 1 a.m., two flats side by side, a licence clause the day before signing, and a
+settings change made by talking. Every turn carries its own expectations, so what is
+scored is the whole journey and not one finished report: asking twice, forgetting the
+budget the user gave you three turns ago, inventing a floor area between turn 2 and
+turn 5, or getting sharp with a letting agent are all failures a single-turn benchmark
+cannot see. Each turn is scored on keyword and regex `must` / `must_not` items, numbers
+extracted by regex and compared with the attachment they came from (any other number of
+the same kind is a fabrication), a question budget, a tone blocklist in English and
+Chinese — roast the listing, never the person — and the language the reply came back
+in; the journey score is the mean of the turn scores, beside a `completed` flag. It
+runs against an OpenAI-compatible API, Claude Code (carrying the session with
+`--resume` where the CLI supports it) or Codex, always with `--dry-run` available, and
+writes to `bench/results/journeys-<date>/`. Everything in the dataset is fictional and
+every postcode starts with X, which no real UK postcode area does. Full documentation,
+including how to add one: **[`docs/JOURNEYS.md`](../docs/JOURNEYS.md)**.
+
+```bash
+python3 bench/journeys.py --journey j1-from-zero-zh --agent api --model NAME --dry-run
+python3 bench/journeys.py --all --agent claude
+```
+
 ---
 
 ## How truth is produced
