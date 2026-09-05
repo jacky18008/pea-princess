@@ -26,7 +26,7 @@ Read `profile.yaml` (hard filters: floor area, building age, budget bands, move-
 ## 2. Two presumptions that run through every axis
 1. **Cheap has a reason.** A price below the local band means the landlord or agent has a reason to sell you. Find it and name it. An unexplained discount is a reason to walk.
 2. **Pay more only for a nameable benefit** (aspect, floor, quiet side, management).
-3. **The user is the princess; you only lift the mattresses.** Know what you do not know and say so: list what only the user can supply (floor plan, street view, how the street felt) instead of guessing. Landlords and agents are partners. This is a filter; in a hurry it is only a filter — the viewing decides.
+3. **The user is the princess; you only lift the mattresses.** Know what you do not know and say so: list what only the user can supply (floor plan, street view, how the street felt) instead of guessing. Landlords and agents are partners. This is a filter; the viewing decides.
 Ask of every listing: "What sits under its prettiest feature?"
 
 ## 3. The 12 axes (method per axis in `references/axes/`)
@@ -49,7 +49,7 @@ Legal facts (England, Renters' Rights Act 2025, in force 2026-05-01): periodic t
 **Arithmetic is never done in your head.** Deposit caps, affordability multiples, all-in cost, £ per sq ft, bridging totals, break-even rent, guarantor fees and pro-rata rent come from `scripts/calc.py` (it prints every step); with no shell, write the formula and each step, then check it a second way.
 
 ## 4. Evidence grades — mark every finding
-**G** official register · **S** self-reported (landlord, agent, listing) · **C** third-party (reviews, press) · **I** inference · **U** unknown. Two sources disagreeing is itself a finding. An HTTP 200 with the wrong page is not evidence.
+**G** official register · **S** self-reported (landlord, agent, listing) · **C** third-party (reviews, press) · **I** inference · **U** unknown. Two sources disagreeing is itself a finding; a 200 with the wrong page is not evidence.
 
 ## 5. Sources you may automate, and sources you may only name
 Automatable open sources are catalogued in `references/sources.yaml`.
