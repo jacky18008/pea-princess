@@ -96,9 +96,12 @@ its own history rather than a transcript of it. `bench/journeys.py` decides by r
 `VETFLAT_CLAUDE_RESUME=0|1` overrides it in the environment. The dry run says which it
 chose and why.
 
-The skill is copied into `.claude/skills/vet-flat` in the working directory, and
-`--allowedTools Read` is the only tool the run may use — a journey is pasted material,
-so nothing needs a shell or the network.
+The skill is copied into `.claude/skills/vet-flat` in the working directory. A
+manual or fetch journey runs with `--allowedTools Read` and nothing else — it is pasted
+material, so nothing needs a shell or the network. A **shell-mode** journey (the two
+that ask the agent to change settings) also gets `Edit`, `Write` and `Bash` limited to
+`profile_check.py`, because "apply the change" is graded on the file afterwards (see
+`workdir_expect` below). Still no network, still no permission bypass.
 
 ### Codex
 
@@ -108,7 +111,9 @@ python3 bench/journeys.py --journey j3-vet-this-listing-zh --agent codex --dry-r
 
 `codex exec` has no flag for appending a system prompt, so the system prompt is written
 to `AGENTS.md` in the working directory and the skill is copied into
-`.agents/skills/vet-flat`. Each turn replays the transcript, in a `read-only` sandbox.
+`.agents/skills/vet-flat`. Each turn replays the transcript. Manual and fetch journeys
+run in a `read-only` sandbox; shell-mode journeys run in `workspace-write` (network off),
+so the model can edit the profile it was asked to change and run the validator.
 (`codex exec resume <id>` exists and would carry the session; replay is used here so
 the two non-Claude paths behave identically.)
 
@@ -135,8 +140,9 @@ and nothing can drift between them.
 | `max_questions` / `min_questions` | `?` plus `？` in the reply, quoted spans masked out, **one ask per list item**. A numbered question is one thing to answer however it is punctuated, and a question written *for the user to send to a letting agent* — the bank's questions are meant to be sent verbatim — does not count against the agent's own budget. Outside a list every mark still counts on its own, so a paragraph that fires ten questions at once is charged ten. |
 | `tone` | the blocklist below. **Critical**: one hit fails the turn on its own. |
 | `protected_characteristics` | a question about nationality, ethnicity, religion or visa status. **Critical**, on every turn, always (SKILL.md §8). |
-| `language` | the reply comes back in the language the journey is written in, measured by the share of CJK characters (≥ 20 % for a zh journey, ≤ 5 % for an en one). |
+| `language` | the reply comes back in the language the journey is written in, measured by the share of CJK characters (≥ 20 % for a zh journey, ≤ 5 % for an en one) with fenced and inline code left out — a settings diff is field names, not prose. |
 | `ends_with` | the closing line actually closes: a string, or `{any_of: [...]}`, inside the last `ends_within` characters (default 300). |
+| `workdir_expect` | `file -> {contains: [...], absent: [...]}` (a plain list means `contains`), checked in the run's own folder **after** the turn. This is how "I have applied it" is graded on the file rather than on the sentence. An attachment that carries `file: profile.yaml` is written into the folder before its turn, title line dropped, so the model edits a real file. Skipped, not failed, for the `api` agent (no folder) and in a regrade. |
 
 ### The tone list
 
@@ -195,6 +201,19 @@ beside the five the law allows, or the advertised square footage converted to me
 it is added to `values` with the reason in `why`, rather than being hidden.
 
 ---
+
+## Re-scoring a run you already paid for
+
+```bash
+python3 bench/journeys.py --regrade bench/results/journeys-2026-09-05
+```
+
+Every raw record under `raw/` is scored again with the current `evals/journeys.json`;
+the replies stay what they were. Use it after a calibration fix — the first Codex run
+wrote its diff as `-old` / `+new` lines and the check only knew arrows, which is a
+grader's mistake, not the model's. File checks cannot be re-run (the folder is gone), so
+their stored rows are carried over. The scorecard is rebuilt in run order and each raw
+record gets a `regraded_at` stamp.
 
 ## Reading the scores
 
