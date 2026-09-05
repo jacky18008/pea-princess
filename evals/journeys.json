@@ -702,7 +702,8 @@
          "(?:annual|yearly|a year|per year|年租|全年)[^\\n]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:a year|per year|pa\\b|p\\.a\\.|/ ?yr|/ ?year)",
          "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:under|over|below|above|short of|more than|less than|cheaper|dearer|higher|lower|difference)\\b",
-         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:/ ?wk|/ ?week|pw\\b|per week|a week|每週|/週)"
+         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:/ ?wk|/ ?week|pw\\b|per week|a week|每週|/週)",
+         "(?:一週|每週|單週|週|weekly|a week's|one week's|per-week)\\s*(?:的)?(?:租金|rent)[^\\n]{0,10}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?"
         ]
        },
        "deposit_cap_gbp": {
@@ -1387,7 +1388,8 @@
          "(?:annual|yearly|a year|per year|年租|全年)[^\\n]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:a year|per year|pa\\b|p\\.a\\.|/ ?yr|/ ?year)",
          "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:under|over|below|above|short of|more than|less than|cheaper|dearer|higher|lower|difference)\\b",
-         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:/ ?wk|/ ?week|pw\\b|per week|a week|每週|/週)"
+         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:/ ?wk|/ ?week|pw\\b|per week|a week|每週|/週)",
+         "(?:一週|每週|單週|週|weekly|a week's|one week's|per-week)\\s*(?:的)?(?:租金|rent)[^\\n]{0,10}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?"
         ]
        },
        "listing_area_sqft": {
@@ -1847,7 +1849,8 @@
          "(?:annual|yearly|a year|per year|年租|全年)[^\\n]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:a year|per year|pa\\b|p\\.a\\.|/ ?yr|/ ?year)",
          "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:under|over|below|above|short of|more than|less than|cheaper|dearer|higher|lower|difference)\\b",
-         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:/ ?wk|/ ?week|pw\\b|per week|a week|每週|/週)"
+         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:/ ?wk|/ ?week|pw\\b|per week|a week|每週|/週)",
+         "(?:一週|每週|單週|週|weekly|a week's|one week's|per-week)\\s*(?:的)?(?:租金|rent)[^\\n]{0,10}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?"
         ]
        },
        "listing_area_sqft": {
@@ -3248,7 +3251,8 @@
          "(?:annual|yearly|a year|per year|年租|全年)[^\\n]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:a year|per year|pa\\b|p\\.a\\.|/ ?yr|/ ?year)",
          "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:under|over|below|above|short of|more than|less than|cheaper|dearer|higher|lower|difference)\\b",
-         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:/ ?wk|/ ?week|pw\\b|per week|a week|每週|/週)"
+         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:/ ?wk|/ ?week|pw\\b|per week|a week|每週|/週)",
+         "(?:一週|每週|單週|週|weekly|a week's|one week's|per-week)\\s*(?:的)?(?:租金|rent)[^\\n]{0,10}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?"
         ]
        },
        "deposit_cap_gbp": {

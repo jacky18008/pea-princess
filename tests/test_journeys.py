@@ -813,6 +813,15 @@ class TestFileChecksAndRegrade(unittest.TestCase):
         self.assertEqual("pass", facts["listing_area_sqft"]["status"], facts["listing_area_sqft"]["detail"])
         self.assertEqual("pass", facts["deposit_cap_gbp"]["status"], facts["deposit_cap_gbp"]["detail"])
 
+    def test_a_weekly_rent_labelled_rent_is_not_a_second_monthly_rent(self):
+        doc = runner.load_journeys()
+        j5 = [j for j in doc["journeys"] if j["id"] == "j5-offer-and-referencing-zh"][0]
+        reply = "月租 £2,150。週租 = 2,150 × 12 ÷ 52 ≈ 496.15，一週租金 ≈ £496.15；押金上限 5 週 = £2,480.77。\n"
+        card = runner.score_turn(j5["turns"][0], reply, j5)
+        facts = dict((r["check"], r) for r in card["checks"] if r["kind"] == "fact")
+        self.assertEqual("pass", facts["rent_pcm"]["status"], facts["rent_pcm"]["detail"])
+        self.assertEqual(0, card["fabrications"], [(k, v["detail"]) for k, v in facts.items() if v["status"] == "fail"])
+
     def test_the_pasted_profile_becomes_a_real_file_without_its_title_line(self):
         folder = tempfile.mkdtemp()
         try:
