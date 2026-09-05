@@ -4667,7 +4667,6 @@
         "why": "One month is the ceiling for an assured tenancy in England. The three months in the clause is what he is being asked for, so only a CAP sentence is read here."
        },
        "deposit_cap_weeks": {
-        "value": 5,
         "tolerance": 0.0,
         "required": false,
         "patterns": [
@@ -4678,11 +4677,15 @@
          "listing|廣告|刊登|仲介要求|advert|asks for|asked for"
         ],
         "source": "skills/vet-flat/SKILL.md legal facts",
-        "why": "Five weeks is the ceiling. The clause's six weeks is the ask.",
+        "why": "Five weeks is the ceiling. The clause's six weeks is the ask. Six is what the pasted clause asks for; quoting it beside the cap is not inventing a number.",
         "mask_patterns": [
          "(?m)^[ \\t#*\\-\\d.]*(?:留位金|留位費|留位|保留金|訂金|holding deposit)(?:(?!押金|tenancy deposit|deposit cap|security deposit)[^\\n])*(?:\\n+(?![0-9]+\\.\\s|#|\\|)[^\\n]+)*",
          "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^。\\n£]{0,40}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^.。\\n]{0,40}?(?:[0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)"
+        ],
+        "values": [
+         5,
+         6
         ]
        },
        "relocation_notice_hours": {
