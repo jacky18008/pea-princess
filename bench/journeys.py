@@ -397,20 +397,22 @@ def in_any_span(pos, spans):
 def extract_numbers(text, spec):
     """Every number of this fact's kind that the reply states, with where it was found.
 
-    ``line_mask`` drops a whole line before searching. It exists because the legal
+    ``mask_patterns`` blank spans first, then ``line_mask`` drops whole lines. It exists because the legal
     caps travel together: a reply that lists "deposit: five weeks" and "holding
     deposit: one week" as two bullets holds two different week-counts, and the only
     reliable way to keep them apart is the line they are written on. ``mask_patterns``
     blanks a span instead, for the cases where both live in one sentence.
     """
     body = text or ""
+    # Span masks run first: a span that starts at a heading ("Holding deposit ...") must
+    # see that heading before a line mask blanks it.
+    for pattern in spec.get("mask_patterns") or []:
+        body = re.sub(pattern, lambda m: " " * (m.end() - m.start()), body, flags=re.I | re.U)
     drop = spec.get("line_mask") or []
     if drop:
         body = "\n".join(
             "" if any(re.search(p, line, re.I | re.U) for p in drop) else line
             for line in body.splitlines())
-    for pattern in spec.get("mask_patterns") or []:
-        body = re.sub(pattern, lambda m: " " * (m.end() - m.start()), body, flags=re.I | re.U)
     spans = near_spans(body, spec.get("near"), spec.get("window", 220))
     found = []
     for pattern in spec.get("patterns") or []:

@@ -275,10 +275,15 @@
          "deposit[^.\\n]{0,40}?([0-9]+|one|two|three|four|five|six)\\s*weeks?"
         ],
         "line_mask": [
-         "holding deposit|訂金|保留金"
+         "holding deposit|訂金|保留金",
+         "holding deposit|訂金|保留金|留位",
+         "listing|廣告|刊登|仲介要求|advert|asks for|asked for"
         ],
         "source": "skills/vet-flat/SKILL.md legal facts",
-        "why": "The legal cap is five weeks' rent. A bigger number told to a tenant is money she should not hand over."
+        "why": "The legal cap is five weeks' rent. A bigger number told to a tenant is money she should not hand over.",
+        "mask_patterns": [
+         "(?m)^[ \\t#*\\-\\d.]*(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^\\n]*(?:\\n+(?![0-9]+\\.\\s|#|\\|)[^\\n]+)*"
+        ]
        },
        "holding_deposit_weeks": {
         "value": 1,
@@ -696,10 +701,17 @@
          "(?:押金|deposit)[\\s\\S]{0,160}?£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)"
         ],
         "line_mask": [
-         "holding deposit|訂金|保留金"
+         "holding deposit|訂金|保留金",
+         "holding deposit|訂金|保留金|留位"
         ],
         "source": "computed from the rent in turn 5",
-        "why": "Five weeks of GBP 1,850 pcm: 1850 x 12 / 52 x 5 = 2134.62. Stated differently, the arithmetic was done in the model's head and got it wrong."
+        "why": "Five weeks of GBP 1,850 pcm: 1850 x 12 / 52 x 5 = 2134.62. Stated differently, the arithmetic was done in the model's head and got it wrong.",
+        "mask_patterns": [
+         "(?m)^[ \\t#*\\-\\d.]*(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^\\n]*(?:\\n+(?![0-9]+\\.\\s|#|\\|)[^\\n]+)*",
+         "(?:月租|年租|租金|rent|annual)[^\\n]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "£\\s?50,?000",
+         "£\\s?[0-9][0-9,]*\\s*(?:pcm|per month|/ ?月|每月)"
+        ]
        }
       },
       "max_questions": 2,
@@ -1344,7 +1356,10 @@
          "(?:rent|advertised at)[^.\\n]{0,16}?£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)"
         ],
         "source": "attachment:listing-halyard-court",
-        "why": "The advertised rent, exactly as pasted."
+        "why": "The advertised rent, exactly as pasted.",
+        "line_mask": [
+         "全包|all-in|all in|情境|scenario|bills model|帳單模型|低／規劃／壓力|低/規劃/壓力"
+        ]
        },
        "listing_area_sqft": {
         "value": 560,
@@ -1365,10 +1380,15 @@
          "([0-9]+|one|two|three|four|five|six|一|兩|二|三|四|五|六)\\s*(?:週|周|星期|weeks?)[^.。\\n]{0,20}?(?:is the cap|is the legal|maximum|上限|為上限|是上限)"
         ],
         "line_mask": [
-         "holding deposit|訂金|保留金"
+         "holding deposit|訂金|保留金",
+         "holding deposit|訂金|保留金|留位",
+         "listing|廣告|刊登|仲介要求|advert|asks for|asked for"
         ],
         "source": "skills/vet-flat/SKILL.md legal facts",
-        "why": "Five weeks is the cap; the advertised six weeks is the listing's ask, so only a CAP sentence is read here."
+        "why": "Five weeks is the cap; the advertised six weeks is the listing's ask, so only a CAP sentence is read here.",
+        "mask_patterns": [
+         "(?m)^[ \\t#*\\-\\d.]*(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^\\n]*(?:\\n+(?![0-9]+\\.\\s|#|\\|)[^\\n]+)*"
+        ]
        },
        "rent_in_advance_months": {
         "value": 1,
@@ -1392,10 +1412,17 @@
          "(?:deposit|押金)[\\s\\S]{0,160}?£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)"
         ],
         "line_mask": [
-         "holding deposit|訂金|保留金"
+         "holding deposit|訂金|保留金",
+         "holding deposit|訂金|保留金|留位"
         ],
         "source": "computed from the advertised rent",
-        "why": "Five weeks of GBP 2,050 pcm: 2050 x 12 / 52 x 5 = 2365.38. The advertised six weeks, 2838.46, is allowed because the listing asks for it and a good reply prices both."
+        "why": "Five weeks of GBP 2,050 pcm: 2050 x 12 / 52 x 5 = 2365.38. The advertised six weeks, 2838.46, is allowed because the listing asks for it and a good reply prices both.",
+        "mask_patterns": [
+         "(?m)^[ \\t#*\\-\\d.]*(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^\\n]*(?:\\n+(?![0-9]+\\.\\s|#|\\|)[^\\n]+)*",
+         "(?:月租|年租|租金|rent|annual)[^\\n]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "£\\s?50,?000",
+         "£\\s?[0-9][0-9,]*\\s*(?:pcm|per month|/ ?月|每月)"
+        ]
        }
       },
       "max_questions": 6,
@@ -1765,7 +1792,10 @@
          "(?:月租|租金|rent)[^。\\n]{0,12}?£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)"
         ],
         "source": "attachment:listing-pargeter-yard",
-        "why": "The advertised rent, exactly as pasted."
+        "why": "The advertised rent, exactly as pasted.",
+        "line_mask": [
+         "全包|all-in|all in|情境|scenario|bills model|帳單模型|低／規劃／壓力|低/規劃/壓力"
+        ]
        },
        "listing_area_sqft": {
         "values": [
@@ -1799,10 +1829,15 @@
          "([0-9]+|one|two|three|four|five|six|一|兩|二|三|四|五|六)\\s*(?:週|周|星期|weeks?)[^.。\\n]{0,20}?(?:is the cap|is the legal|maximum|上限|為上限|是上限)"
         ],
         "line_mask": [
-         "holding deposit|訂金|保留金"
+         "holding deposit|訂金|保留金",
+         "holding deposit|訂金|保留金|留位",
+         "listing|廣告|刊登|仲介要求|advert|asks for|asked for"
         ],
         "source": "skills/vet-flat/SKILL.md legal facts",
-        "why": "Five weeks is the cap; the listing's six weeks is the ask, so only a CAP sentence is read here."
+        "why": "Five weeks is the cap; the listing's six weeks is the ask, so only a CAP sentence is read here.",
+        "mask_patterns": [
+         "(?m)^[ \\t#*\\-\\d.]*(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^\\n]*(?:\\n+(?![0-9]+\\.\\s|#|\\|)[^\\n]+)*"
+        ]
        },
        "deposit_cap_gbp": {
         "values": [
@@ -1815,10 +1850,17 @@
          "(?:押金|deposit)[\\s\\S]{0,160}?£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)"
         ],
         "line_mask": [
-         "holding deposit|訂金|保留金"
+         "holding deposit|訂金|保留金",
+         "holding deposit|訂金|保留金|留位"
         ],
         "source": "computed from the advertised rent",
-        "why": "Five weeks of GBP 2,350 pcm: 2350 x 12 / 52 x 5 = 2711.54. The advertised six weeks, 3253.85, is allowed because the listing asks for it and a good reply prices both."
+        "why": "Five weeks of GBP 2,350 pcm: 2350 x 12 / 52 x 5 = 2711.54. The advertised six weeks, 3253.85, is allowed because the listing asks for it and a good reply prices both.",
+        "mask_patterns": [
+         "(?m)^[ \\t#*\\-\\d.]*(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^\\n]*(?:\\n+(?![0-9]+\\.\\s|#|\\|)[^\\n]+)*",
+         "(?:月租|年租|租金|rent|annual)[^\\n]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "£\\s?50,?000",
+         "£\\s?[0-9][0-9,]*\\s*(?:pcm|per month|/ ?月|每月)"
+        ]
        }
       },
       "max_questions": 8,
@@ -3114,10 +3156,17 @@
          "(?:押金|deposit)[\\s\\S]{0,160}?£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)"
         ],
         "line_mask": [
-         "holding deposit|訂金|保留金"
+         "holding deposit|訂金|保留金",
+         "holding deposit|訂金|保留金|留位"
         ],
         "source": "computed from the rent in turn 1",
-        "why": "Five weeks of GBP 2,150 pcm: 2150 x 12 / 52 x 5 = 2480.77."
+        "why": "Five weeks of GBP 2,150 pcm: 2150 x 12 / 52 x 5 = 2480.77.",
+        "mask_patterns": [
+         "(?m)^[ \\t#*\\-\\d.]*(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^\\n]*(?:\\n+(?![0-9]+\\.\\s|#|\\|)[^\\n]+)*",
+         "(?:月租|年租|租金|rent|annual)[^\\n]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "£\\s?50,?000",
+         "£\\s?[0-9][0-9,]*\\s*(?:pcm|per month|/ ?月|每月)"
+        ]
        },
        "holding_deposit_gbp": {
         "value": 496.15,
@@ -3138,10 +3187,15 @@
          "([0-9]+|one|two|three|four|five|six|一|兩|二|三|四|五|六)\\s*(?:週|周|星期|weeks?)[^.。\\n]{0,20}?(?:is the cap|is the legal|maximum|上限|為上限|是上限)"
         ],
         "line_mask": [
-         "holding deposit|訂金|保留金"
+         "holding deposit|訂金|保留金",
+         "holding deposit|訂金|保留金|留位",
+         "listing|廣告|刊登|仲介要求|advert|asks for|asked for"
         ],
         "source": "skills/vet-flat/SKILL.md legal facts",
-        "why": "Five weeks is the statutory cap."
+        "why": "Five weeks is the statutory cap.",
+        "mask_patterns": [
+         "(?m)^[ \\t#*\\-\\d.]*(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^\\n]*(?:\\n+(?![0-9]+\\.\\s|#|\\|)[^\\n]+)*"
+        ]
        }
       },
       "max_questions": 4,
@@ -4145,10 +4199,14 @@
          "(?:deposit|押金)[\\s\\S]{0,160}?£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)"
         ],
         "line_mask": [
-         "holding deposit|訂金|保留金"
+         "holding deposit|訂金|保留金",
+         "holding deposit|訂金|保留金|留位"
         ],
         "source": "computed from the two advertised rents",
-        "why": "Five weeks of each rent: 2250 x 12 / 52 x 5 = 2596.15 and 2100 x 12 / 52 x 5 = 2423.08."
+        "why": "Five weeks of each rent: 2250 x 12 / 52 x 5 = 2596.15 and 2100 x 12 / 52 x 5 = 2423.08.",
+        "mask_patterns": [
+         "(?m)^[ \\t#*\\-\\d.]*(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^\\n]*(?:\\n+(?![0-9]+\\.\\s|#|\\|)[^\\n]+)*"
+        ]
        }
       },
       "max_questions": 2,
@@ -4575,10 +4633,15 @@
          "([0-9]+|one|two|three|four|five|six|一|兩|二|三|四|五|六)\\s*(?:週|周|星期|weeks?)[^.。\\n]{0,20}?(?:is the cap|is the legal|maximum|上限|為上限|是上限)"
         ],
         "line_mask": [
-         "holding deposit|訂金|保留金"
+         "holding deposit|訂金|保留金",
+         "holding deposit|訂金|保留金|留位",
+         "listing|廣告|刊登|仲介要求|advert|asks for|asked for"
         ],
         "source": "skills/vet-flat/SKILL.md legal facts",
-        "why": "Five weeks is the ceiling. The clause's six weeks is the ask."
+        "why": "Five weeks is the ceiling. The clause's six weeks is the ask.",
+        "mask_patterns": [
+         "(?m)^[ \\t#*\\-\\d.]*(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^\\n]*(?:\\n+(?![0-9]+\\.\\s|#|\\|)[^\\n]+)*"
+        ]
        },
        "relocation_notice_hours": {
         "value": 24,

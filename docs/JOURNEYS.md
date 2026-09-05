@@ -179,7 +179,7 @@ that the agent was not given.
 }
 ```
 
-1. `line_mask` drops whole lines, then `mask_patterns` blanks spans, then `near`
+1. `mask_patterns` blanks spans (first, so a span anchored on a heading still finds it), then `line_mask` drops whole lines, then `near`
    (with `window`) confines the search to a range around a term.
 2. Every `patterns` entry is run over what is left, and **group 1 of every match** is
    read as a number. `2,350`, `2350.50`, `five` and 五 all parse; anything else is

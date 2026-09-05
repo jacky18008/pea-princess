@@ -687,6 +687,23 @@ class TestFileChecksAndRegrade(unittest.TestCase):
         finally:
             shutil.rmtree(folder, ignore_errors=True)
 
+    def test_rent_holding_and_all_in_numbers_are_not_deposit_or_rent_fabrications(self):
+        # The shape Codex Luna produced on the listing journey, 2026-09-05: correct numbers
+        # that the deposit and rent facts used to read as wrong ones.
+        doc = runner.load_journeys()
+        j3 = [j for j in doc["journeys"] if j["id"] == "j3-vet-this-listing-zh"][0]
+        reply = ("### 最毒的三刀\n\n1. **押金 6 週違規**\n\n月租 £2,350，年租 £28,200，低於 £50,000。\n\n"
+                 "- 法定上限：5 週 = **£2,711.54**\n- Listing：6 週 ≈ **£3,253.85**\n- 多收約 **£542.31**\n\n"
+                 "2. **Holding deposit 2 週違規**\n\n- 法定上限：1 週 = **£542.31**\n- Listing：2 週 ≈ **£1,084.62**\n\n"
+                 "| 10 全包成本 | 低／規劃／壓力情境約 **£2,505／£2,555／£2,630 pcm**。這不是供應商報價。 |\n"
+                 "廣告租金 £2,350 pcm；EPC 室內 48 平方米，2019 年首次評估。\n")
+        card = runner.score_turn(j3["turns"][0], reply, j3)
+        facts = dict((r["check"], r) for r in card["checks"] if r["kind"] == "fact")
+        self.assertEqual(0, card["fabrications"], [(k, v["detail"]) for k, v in facts.items() if v["status"] == "fail"])
+        self.assertEqual("pass", facts["deposit_cap_weeks"]["status"], facts["deposit_cap_weeks"]["detail"])
+        self.assertEqual("pass", facts["deposit_cap_gbp"]["status"], facts["deposit_cap_gbp"]["detail"])
+        self.assertEqual("pass", facts["listing_rent_pcm"]["status"], facts["listing_rent_pcm"]["detail"])
+
     def test_the_pasted_profile_becomes_a_real_file_without_its_title_line(self):
         folder = tempfile.mkdtemp()
         try:
