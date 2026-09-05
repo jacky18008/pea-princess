@@ -698,7 +698,11 @@
          "個月\\s*=\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "(?:週租|weeks?'?\\s*rent|per week|pw)\\s*=?\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "(?:倍|times|x)\\s*(?:的)?(?:月租|租金|rent)[^\\n]{0,10}£\\s?[0-9][0-9,]*",
-         "(?:年收入|年薪|annual income|income|salary|earn)[^\\n]{0,24}£\\s?[0-9][0-9,]*"
+         "(?:年收入|年薪|annual income|income|salary|earn)[^\\n]{0,24}£\\s?[0-9][0-9,]*",
+         "(?:annual|yearly|a year|per year|年租|全年)[^\\n]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:a year|per year|pa\\b|p\\.a\\.|/ ?yr|/ ?year)",
+         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:under|over|below|above|short of|more than|less than|cheaper|dearer|higher|lower|difference)\\b",
+         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:/ ?wk|/ ?week|pw\\b|per week|a week|每週|/週)"
         ]
        },
        "deposit_cap_gbp": {
@@ -719,7 +723,10 @@
          "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^。\\n£]{0,40}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^.。\\n]{0,40}?(?:[0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)",
          "(?<=\\d)\\s*[×x]\\s*\\(?\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
-         "\\(\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*[×x]"
+         "\\(\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*[×x]",
+         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:/ ?wk|/ ?week|pw\\b|per week|a week|每週|/週)",
+         "(?:annual|yearly|a year|per year|年租|全年)[^\\n]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:a year|per year|pa\\b|p\\.a\\.|/ ?yr|/ ?year)"
         ]
        }
       },
@@ -1376,18 +1383,29 @@
          "個月\\s*=\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "(?:週租|weeks?'?\\s*rent|per week|pw)\\s*=?\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "(?:倍|times|x)\\s*(?:的)?(?:月租|租金|rent)[^\\n]{0,10}£\\s?[0-9][0-9,]*",
-         "(?:年收入|年薪|annual income|income|salary|earn)[^\\n]{0,24}£\\s?[0-9][0-9,]*"
+         "(?:年收入|年薪|annual income|income|salary|earn)[^\\n]{0,24}£\\s?[0-9][0-9,]*",
+         "(?:annual|yearly|a year|per year|年租|全年)[^\\n]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:a year|per year|pa\\b|p\\.a\\.|/ ?yr|/ ?year)",
+         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:under|over|below|above|short of|more than|less than|cheaper|dearer|higher|lower|difference)\\b",
+         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:/ ?wk|/ ?week|pw\\b|per week|a week|每週|/週)"
         ]
        },
        "listing_area_sqft": {
-        "value": 560,
-        "tolerance": 0.0,
+        "tolerance": 1.0,
         "required": false,
         "patterns": [
          "\\b([0-9]{3})\\s*(?:sq ?\\.?\\s?ft|square feet)"
         ],
         "source": "attachment:listing-halyard-court",
-        "why": "The advertised size, exactly as pasted; it is a claim, and the reply may repeat it but not change it."
+        "why": "The advertised size, exactly as pasted; it is a claim, and the reply may repeat it but not change it. 560 sq ft is advertised and includes a 4 m² balcony; 517 is the internal-only figure a careful reply derives (560 − 43).",
+        "mask_patterns": [
+         "(?:≥|>=|minimum|min\\.?|at least|your|floor of|threshold of)\\s*(?:of\\s*)?[0-9]{3,4}\\s*sq ?\\.?\\s?ft",
+         "[0-9]{3,4}\\s*sq ?\\.?\\s?ft\\s*(?:floor|minimum|requirement|threshold)"
+        ],
+        "values": [
+         560,
+         517
+        ]
        },
        "deposit_cap_weeks": {
         "value": 5,
@@ -1440,7 +1458,10 @@
          "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^。\\n£]{0,40}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^.。\\n]{0,40}?(?:[0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)",
          "(?<=\\d)\\s*[×x]\\s*\\(?\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
-         "\\(\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*[×x]"
+         "\\(\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*[×x]",
+         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:/ ?wk|/ ?week|pw\\b|per week|a week|每週|/週)",
+         "(?:annual|yearly|a year|per year|年租|全年)[^\\n]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:a year|per year|pa\\b|p\\.a\\.|/ ?yr|/ ?year)"
         ]
        }
       },
@@ -1822,7 +1843,11 @@
          "個月\\s*=\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "(?:週租|weeks?'?\\s*rent|per week|pw)\\s*=?\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "(?:倍|times|x)\\s*(?:的)?(?:月租|租金|rent)[^\\n]{0,10}£\\s?[0-9][0-9,]*",
-         "(?:年收入|年薪|annual income|income|salary|earn)[^\\n]{0,24}£\\s?[0-9][0-9,]*"
+         "(?:年收入|年薪|annual income|income|salary|earn)[^\\n]{0,24}£\\s?[0-9][0-9,]*",
+         "(?:annual|yearly|a year|per year|年租|全年)[^\\n]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:a year|per year|pa\\b|p\\.a\\.|/ ?yr|/ ?year)",
+         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:under|over|below|above|short of|more than|less than|cheaper|dearer|higher|lower|difference)\\b",
+         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:/ ?wk|/ ?week|pw\\b|per week|a week|每週|/週)"
         ]
        },
        "listing_area_sqft": {
@@ -1836,7 +1861,11 @@
          "\\b([0-9]{3})\\s*(?:平方英尺|sq ?\\.?\\s?ft|square feet)"
         ],
         "source": "attachment:listing-pargeter-yard",
-        "why": "The advertised 592 sq ft, and 516.7 because that is the certificate's 48 m² converted; anything else is invented."
+        "why": "The advertised 592 sq ft, and 516.7 because that is the certificate's 48 m² converted; anything else is invented.",
+        "mask_patterns": [
+         "(?:≥|>=|minimum|min\\.?|at least|your|floor of|threshold of)\\s*(?:of\\s*)?[0-9]{3,4}\\s*sq ?\\.?\\s?ft",
+         "[0-9]{3,4}\\s*sq ?\\.?\\s?ft\\s*(?:floor|minimum|requirement|threshold)"
+        ]
        },
        "epc_air_permeability": {
         "value": 3.4,
@@ -1891,7 +1920,10 @@
          "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^。\\n£]{0,40}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^.。\\n]{0,40}?(?:[0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)",
          "(?<=\\d)\\s*[×x]\\s*\\(?\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
-         "\\(\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*[×x]"
+         "\\(\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*[×x]",
+         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:/ ?wk|/ ?week|pw\\b|per week|a week|每週|/週)",
+         "(?:annual|yearly|a year|per year|年租|全年)[^\\n]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:a year|per year|pa\\b|p\\.a\\.|/ ?yr|/ ?year)"
         ]
        }
       },
@@ -3212,7 +3244,11 @@
          "個月\\s*=\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "(?:週租|weeks?'?\\s*rent|per week|pw)\\s*=?\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "(?:倍|times|x)\\s*(?:的)?(?:月租|租金|rent)[^\\n]{0,10}£\\s?[0-9][0-9,]*",
-         "(?:年收入|年薪|annual income|income|salary|earn)[^\\n]{0,24}£\\s?[0-9][0-9,]*"
+         "(?:年收入|年薪|annual income|income|salary|earn)[^\\n]{0,24}£\\s?[0-9][0-9,]*",
+         "(?:annual|yearly|a year|per year|年租|全年)[^\\n]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:a year|per year|pa\\b|p\\.a\\.|/ ?yr|/ ?year)",
+         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:under|over|below|above|short of|more than|less than|cheaper|dearer|higher|lower|difference)\\b",
+         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:/ ?wk|/ ?week|pw\\b|per week|a week|每週|/週)"
         ]
        },
        "deposit_cap_gbp": {
@@ -3233,7 +3269,10 @@
          "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^。\\n£]{0,40}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^.。\\n]{0,40}?(?:[0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)",
          "(?<=\\d)\\s*[×x]\\s*\\(?\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
-         "\\(\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*[×x]"
+         "\\(\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*[×x]",
+         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:/ ?wk|/ ?week|pw\\b|per week|a week|每週|/週)",
+         "(?:annual|yearly|a year|per year|年租|全年)[^\\n]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:a year|per year|pa\\b|p\\.a\\.|/ ?yr|/ ?year)"
         ]
        },
        "holding_deposit_gbp": {
@@ -4274,7 +4313,10 @@
          "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^。\\n£]{0,40}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^.。\\n]{0,40}?(?:[0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)",
          "(?<=\\d)\\s*[×x]\\s*\\(?\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
-         "\\(\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*[×x]"
+         "\\(\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*[×x]",
+         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:/ ?wk|/ ?week|pw\\b|per week|a week|每週|/週)",
+         "(?:annual|yearly|a year|per year|年租|全年)[^\\n]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:a year|per year|pa\\b|p\\.a\\.|/ ?yr|/ ?year)"
         ]
        }
       },

@@ -796,6 +796,23 @@ class TestFileChecksAndRegrade(unittest.TestCase):
         for k in ("stay_a_nightly_gbp", "stay_c_deposit_gbp", "stay_d_flexible_total_gbp", "stay_d_nonrefundable_total_gbp"):
             self.assertEqual("pass", facts[k]["status"], (k, facts[k]["detail"]))
 
+    def test_annual_rent_a_difference_the_users_minimum_and_a_balcony_stripped_area_are_not_fabrications(self):
+        # The shape Claude Sonnet produced on the area-and-budget journey, 2026-09-05.
+        doc = runner.load_journeys()
+        j2 = [j for j in doc["journeys"] if j["id"] == "j2-area-and-budget-en"][0]
+        turn = j2["turns"][3]
+        reply = ("The listing asks £2,050 pcm. Weekly rent = £2,050 × 12 ÷ 52 = **£473.08/wk** (matches their own £473 pw). "
+                 "Annual rent = £24,600, under the £50,000 threshold, so the deposit cap is 5 weeks = £2,365.38; the six weeks the listing asks for is £2,838.46.\n"
+                 "Rent alone is £150 under your £2,200 ceiling.\n"
+                 "| ≥450 sq ft internal | 560 sq ft advertised, balcony included | Pass on paper (~517 sq ft once the balcony is stripped out) |\n"
+                 "Rent in advance: at most one month once the tenancy is periodic.\n")
+        card = runner.score_turn(turn, reply, j2)
+        facts = dict((r["check"], r) for r in card["checks"] if r["kind"] == "fact")
+        self.assertEqual(0, card["fabrications"], [(k, v["detail"]) for k, v in facts.items() if v["status"] == "fail"])
+        self.assertEqual("pass", facts["listing_rent_pcm"]["status"], facts["listing_rent_pcm"]["detail"])
+        self.assertEqual("pass", facts["listing_area_sqft"]["status"], facts["listing_area_sqft"]["detail"])
+        self.assertEqual("pass", facts["deposit_cap_gbp"]["status"], facts["deposit_cap_gbp"]["detail"])
+
     def test_the_pasted_profile_becomes_a_real_file_without_its_title_line(self):
         folder = tempfile.mkdtemp()
         try:
