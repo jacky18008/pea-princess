@@ -1,0 +1,784 @@
+<title>Pea Princess Copy Deck</title>
+<style>
+  :root {
+    color-scheme: light dark;
+
+    --ground: #F1F0F4;
+    --surface: #FFFFFF;
+    --surface-sunk: #EAE8EF;
+    --ink: #1F1D26;
+    --muted: #6B6679;
+    --faint: #918CA0;
+    --line: #DCD8E5;
+    --line-soft: #E8E5EE;
+    --accent: #8A2846;
+    --accent-soft: #F3E3E8;
+    --good: #2F6F55;
+    --good-soft: #E1EFE8;
+    --shadow: 0 1px 2px rgba(31, 29, 38, .06), 0 8px 24px -12px rgba(31, 29, 38, .28);
+
+    --prose: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia,
+             "PingFang TC", "PingFang SC", "Heiti TC", "Microsoft JhengHei", serif;
+    --ui: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, "PingFang TC", "PingFang SC", "Microsoft JhengHei", sans-serif;
+    --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #141319;
+      --surface: #1D1B24;
+      --surface-sunk: #191720;
+      --ink: #ECEAF2;
+      --muted: #9D98AC;
+      --faint: #7A7589;
+      --line: #302D3B;
+      --line-soft: #262330;
+      --accent: #E8909F;
+      --accent-soft: #34212A;
+      --good: #74C7A0;
+      --good-soft: #1B2C25;
+      --shadow: 0 1px 2px rgba(0, 0, 0, .5), 0 10px 28px -14px rgba(0, 0, 0, .8);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground: #141319;
+    --surface: #1D1B24;
+    --surface-sunk: #191720;
+    --ink: #ECEAF2;
+    --muted: #9D98AC;
+    --faint: #7A7589;
+    --line: #302D3B;
+    --line-soft: #262330;
+    --accent: #E8909F;
+    --accent-soft: #34212A;
+    --good: #74C7A0;
+    --good-soft: #1B2C25;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .5), 0 10px 28px -14px rgba(0, 0, 0, .8);
+  }
+
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--ui);
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  .wrap { max-width: 47rem; margin: 0 auto; padding: 0 1rem 6rem; }
+
+  a { color: inherit; }
+  button { font: inherit; color: inherit; }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 3px;
+  }
+
+  /* ---------------------------------------------------------------- masthead -- */
+  .masthead { padding: 2rem 0 1.25rem; display: grid; gap: 1.25rem; }
+
+  .brow {
+    font-size: .72rem; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--faint); font-weight: 600;
+  }
+  h1 {
+    font-family: var(--prose);
+    font-weight: 400; font-size: clamp(1.75rem, 7vw, 2.35rem);
+    line-height: 1.12; margin: .35rem 0 0; text-wrap: balance;
+  }
+  .standfirst {
+    font-family: var(--prose); font-size: 1.02rem; line-height: 1.55;
+    color: var(--muted); margin: .6rem 0 0; max-width: 34rem;
+  }
+  .standfirst strong { color: var(--ink); font-weight: 600; }
+
+  /* the stack: one mattress per file, filled as its sentences are rewritten */
+  .stack { display: grid; gap: .55rem; }
+  .tally {
+    display: flex; align-items: baseline; gap: .5rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .tally .n { font-family: var(--prose); font-size: 1.9rem; line-height: 1; }
+  .tally .of { color: var(--muted); font-size: .95rem; }
+  .tally .label { font-size: .78rem; color: var(--muted); }
+
+  .mattresses { display: grid; gap: 3px; }
+  .mattress {
+    display: grid; grid-template-columns: 6.2rem 1fr auto; align-items: center;
+    gap: .5rem; width: 100%; text-align: left; cursor: pointer;
+    background: none; border: 0; padding: .1rem 0; border-radius: 3px;
+  }
+  .mattress .tag {
+    font-family: var(--mono); font-size: .62rem; letter-spacing: .05em;
+    color: var(--faint); text-align: right; overflow: hidden; text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .mattress .bar {
+    height: 10px; background: var(--surface-sunk);
+    border: 1px solid var(--line-soft); border-radius: 2px;
+    position: relative; overflow: hidden; min-width: 0;
+  }
+  .mattress .fill {
+    position: absolute; inset: 0 auto 0 0; width: 0;
+    background: var(--accent); opacity: .85; transition: width .32s ease;
+  }
+  .mattress .n { font-size: .64rem; color: var(--faint); font-variant-numeric: tabular-nums; }
+  .mattress:hover .tag, .mattress:hover .n { color: var(--ink); }
+  .mattress:hover .bar { border-color: var(--accent); }
+
+  .stack-caption {
+    display: flex; align-items: center; gap: .4rem;
+    font-size: .72rem; color: var(--faint); padding-left: 6.7rem;
+  }
+  .pea { width: 7px; height: 7px; border-radius: 50%; background: var(--good); flex: none; }
+
+  /* ----------------------------------------------------------------- toolbar -- */
+  .toolbar {
+    position: sticky; top: 0; z-index: 5;
+    background: var(--ground);
+    background: color-mix(in srgb, var(--ground) 92%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+    margin: 0 -1rem; padding: .55rem 1rem;
+    display: flex; flex-wrap: wrap; gap: .4rem; align-items: center;
+  }
+  .chip {
+    border: 1px solid var(--line); background: var(--surface);
+    border-radius: 999px; padding: .3rem .7rem; font-size: .78rem;
+    cursor: pointer; white-space: nowrap;
+  }
+  .chip[aria-pressed="true"] {
+    background: var(--ink); color: var(--ground); border-color: var(--ink);
+  }
+  .search {
+    flex: 1 1 8rem; min-width: 7rem;
+    border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+    border-radius: 999px; padding: .32rem .8rem; font-size: .8rem; font-family: var(--ui);
+  }
+  .toolbar-sep { flex-basis: 100%; height: 0; }
+
+  .status {
+    font-size: .76rem; color: var(--muted);
+    display: flex; align-items: center; gap: .4rem; padding: .5rem 0 0;
+  }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--faint); flex: none; }
+  .dot.live { background: var(--good); }
+  .dot.local { background: var(--accent); }
+
+  /* ---------------------------------------------------------------- surfaces -- */
+  section.surface { margin: 2.25rem 0 0; scroll-margin-top: 4rem; }
+  .surface-head { border-top: 2px solid var(--ink); padding-top: .6rem; }
+  .surface-head h2 {
+    font-family: var(--prose); font-weight: 400; font-size: 1.3rem;
+    margin: 0; line-height: 1.25; text-wrap: balance;
+  }
+  .surface-meta {
+    display: flex; flex-wrap: wrap; gap: .5rem 1rem; align-items: baseline;
+    margin-top: .3rem; font-size: .76rem; color: var(--muted);
+  }
+  .surface-meta code { font-family: var(--mono); font-size: .72rem; color: var(--ink); }
+  .surface-note { font-size: .84rem; color: var(--muted); margin: .5rem 0 0; max-width: 36rem; }
+
+  /* ------------------------------------------------------------------ blocks -- */
+  .block {
+    border-bottom: 1px solid var(--line-soft);
+    padding: 1rem 0 1.1rem .9rem;
+    border-left: 2px solid transparent;
+    margin-left: -.9rem;
+    transition: background .18s ease, border-color .18s ease;
+  }
+  .block[data-state="edited"] { border-left-color: var(--accent); }
+  .block[data-state="readonly"] { border-left: 2px dotted var(--line); }
+  .block.open {
+    background: var(--surface); box-shadow: var(--shadow);
+    border-left-color: var(--accent); border-bottom-color: transparent;
+    border-radius: 0 4px 4px 0; padding-right: .9rem; margin-right: -.9rem;
+  }
+
+  .block-head {
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: .3rem .55rem;
+    font-size: .72rem; color: var(--muted);
+  }
+  .bid { font-family: var(--mono); font-size: .7rem; color: var(--faint); }
+  .path { font-family: var(--mono); font-size: .7rem; color: var(--muted); }
+  .badge {
+    font-size: .64rem; letter-spacing: .06em; text-transform: uppercase; font-weight: 700;
+    padding: .1rem .4rem; border-radius: 3px; border: 1px solid var(--line);
+  }
+  .badge.lang-zh { border-color: var(--line); color: var(--muted); text-transform: none;
+                   letter-spacing: 0; font-weight: 600; font-size: .68rem; }
+  .badge.edited { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+  .badge.saved { color: var(--good); border-color: var(--good); background: var(--good-soft); }
+  .badge.ro { color: var(--faint); }
+
+  .text {
+    font-family: var(--prose); font-size: 1rem; line-height: 1.62;
+    margin: .5rem 0 0; white-space: pre-wrap; overflow-wrap: anywhere;
+  }
+  .text.mono { font-family: var(--mono); font-size: .84rem; line-height: 1.55; }
+
+  .actions { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .7rem; }
+  .btn {
+    border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+    border-radius: 4px; padding: .38rem .75rem; font-size: .8rem; cursor: pointer;
+  }
+  .btn:hover { border-color: var(--ink); }
+  .btn.primary { background: var(--ink); color: var(--ground); border-color: var(--ink); }
+  .btn.primary:hover { opacity: .88; }
+  .btn.quiet { border-color: transparent; color: var(--muted); padding-left: .3rem; padding-right: .3rem; }
+  .btn:disabled { opacity: .45; cursor: default; }
+
+  textarea.editor {
+    width: 100%; margin-top: .5rem; resize: vertical; min-height: 6rem;
+    font-family: var(--prose); font-size: 1rem; line-height: 1.62;
+    color: var(--ink); background: var(--surface-sunk);
+    border: 1px solid var(--line); border-radius: 4px; padding: .6rem .7rem;
+    tab-size: 2;
+  }
+  textarea.editor.mono { font-family: var(--mono); font-size: .84rem; line-height: 1.55; }
+
+  details.original { margin-top: .55rem; }
+  details.original > summary {
+    cursor: pointer; font-size: .74rem; color: var(--muted); list-style: none;
+  }
+  details.original > summary::-webkit-details-marker { display: none; }
+  details.original > summary::before { content: "▸ "; }
+  details.original[open] > summary::before { content: "▾ "; }
+  details.original .text { color: var(--muted); font-size: .92rem; }
+
+  .hint { font-size: .74rem; color: var(--faint); margin-top: .45rem; }
+
+  /* ------------------------------------------------------------------ export -- */
+  .export { margin-top: 2.5rem; border-top: 2px solid var(--ink); padding-top: .9rem; }
+  .export h2 { font-family: var(--prose); font-weight: 400; font-size: 1.15rem; margin: 0; }
+  .export p { font-size: .84rem; color: var(--muted); max-width: 36rem; }
+  .export pre {
+    font-family: var(--mono); font-size: .76rem; background: var(--surface-sunk);
+    border: 1px solid var(--line-soft); border-radius: 4px;
+    padding: .55rem .7rem; overflow-x: auto; margin: .5rem 0 0;
+  }
+  #exportBox {
+    width: 100%; min-height: 12rem; margin-top: .6rem;
+    font-family: var(--mono); font-size: .74rem; line-height: 1.45;
+    background: var(--surface-sunk); color: var(--ink);
+    border: 1px solid var(--line); border-radius: 4px; padding: .6rem;
+  }
+
+  .empty { color: var(--muted); font-size: .88rem; padding: 1.5rem 0; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+</style>
+
+<div class="wrap">
+  <header class="masthead">
+    <div>
+      <div class="brow">Pea Princess · vet-flat</div>
+      <h1>The copy deck</h1>
+      <p class="standfirst">
+        Every sentence a reader sees, pulled out of the repo and laid flat.
+        <strong>Rewrite anything here in your own voice.</strong> Edits are kept against
+        the block id, and go back into the source files with
+        <code>copy_deck.py apply</code>.
+      </p>
+    </div>
+
+    <div class="stack">
+      <p class="tally">
+        <span class="n" id="countEdited">0</span>
+        <span class="of">of <span id="countTotal">0</span></span>
+        <span class="label">sentences rewritten</span>
+      </p>
+      <div class="mattresses" id="mattresses"></div>
+      <p class="stack-caption"><span class="pea"></span> one mattress per file — tap to jump</p>
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <button class="chip" id="fAll" aria-pressed="true" data-filter="all">All</button>
+    <button class="chip" id="fTodo" aria-pressed="false" data-filter="todo">Untouched</button>
+    <button class="chip" id="fDone" aria-pressed="false" data-filter="edited">Rewritten</button>
+    <button class="chip" id="fZh" aria-pressed="false" data-filter="zh">中文</button>
+    <input class="search" id="search" type="search" placeholder="Find a phrase…" aria-label="Find a phrase">
+  </div>
+
+  <p class="status"><span class="dot" id="storeDot"></span><span id="storeText">Checking where edits can be saved…</span></p>
+
+  <main id="surfaces"></main>
+
+  <section class="export">
+    <h2>Getting the edits back into the repo</h2>
+    <p id="exportLead">
+      Ask the agent to read the store and merge, or copy the edits and paste them into a chat.
+    </p>
+    <pre id="exportCmd">python3 tools/copy_deck.py merge --from edits.md
+python3 tools/copy_deck.py apply --dry-run
+python3 tools/copy_deck.py apply</pre>
+    <div class="actions">
+      <button class="btn primary" id="copyBtn">Copy edits as Markdown</button>
+      <button class="btn" id="showBtn">Show them instead</button>
+    </div>
+    <textarea id="exportBox" hidden readonly aria-label="Edits as Markdown"></textarea>
+  </section>
+</div>
+
+<script type="application/json" id="deck-data">{"blocks":[{"anchor":"# Pea Princess · 豌豆公主 (`vet-flat`)","from":3,"id":"deck:readme:1","kind":"para","lang":"en","rw":true,"src":"README.md","text":"**EN** — A vendor-neutral agent skill that vets a London rental flat the way a careful surveyor would: identity, floor area, age, heating, construction nearby, crime, management reviews, agent compliance, price, light, all-in cost and commute, from official and open UK data, ending in a plain-language verdict. Works with any agent that reads the [Agent Skills](https://agentskills.io) format (Claude Code, Codex, Gemini CLI, Grok CLI, Cursor, Copilot, OpenCode, Cline, Goose, OpenHands, Kimi Code, Qwen Code, pi, OpenClaw, Hermes Agent…) and, in reduced modes, with chat products that cannot run scripts.","to":3},{"anchor":"# Pea Princess · 豌豆公主 (`vet-flat`)","from":5,"id":"deck:readme:2","kind":"para","lang":"zh-TW","rw":true,"src":"README.md","text":"**繁中** — 這是一個不綁定任何廠商的 agent skill，用官方與公開的英國資料，像謹慎的驗屋師一樣尻洗（台語，roast）一間倫敦出租公寓：身份、面積、屋齡、供暖、周邊工地、治安、管理評價、仲介合規、價格、採光、全部月成本、通勤，最後給出白話判決。任何支援 Agent Skills 格式的 agent 都能用；只能對話不能跑程式的產品也能用「精簡模式」。","to":5},{"anchor":"# Pea Princess · 豌豆公主 (`vet-flat`)","from":7,"id":"deck:readme:3","kind":"blockquote","lang":"en","rw":true,"src":"README.md","text":"> Status: **draft** (2026-09-03). Nine fetchers, the report schema, both renderers, 15 axis references, onboarding, the question bank, budget modes and the benchmark are in; the area-sweep orchestrator is in progress. Docs: `docs/INSTALL.md`, `docs/SCRIPTS.md`, `docs/CONVENTIONS.md`.","to":7},{"anchor":"# claude.ai / Claude Cowork / ChatGPT Skills: upload the zip from Releases","from":24,"id":"deck:readme:4","kind":"para","lang":"en","rw":true,"src":"README.md","text":"Codex: enable sandbox network (`sandbox_workspace_write.network_access = true`) or use manual mode.","to":24},{"anchor":"## Scripts (Python 3.9 standard library only; network via curl)","from":27,"id":"deck:readme:5","kind":"para","lang":"en","rw":true,"src":"README.md","text":"All in `skills/vet-flat/scripts/`; each prints one JSON object with `source_url`, `retrieved_at`, `http_status`, `ok` and an evidence class. Usage details: `docs/SCRIPTS.md`.","to":27},{"anchor":"## Scripts (Python 3.9 standard library only; network via curl)","from":42,"id":"deck:readme:6","kind":"para","lang":"en","rw":true,"src":"README.md","text":"Report layout for people without a shell: open `viewer/viewer.html` in a browser and paste the JSON.","to":42},{"anchor":"## Why \"Pea Princess\"","from":45,"id":"deck:readme:7","kind":"para","lang":"en","rw":true,"src":"README.md","text":"In the fairy tale only the real princess feels the pea through twenty mattresses. Here **you** are the princess. This tool lifts the mattresses one by one: it reads the registers, counts the crimes, checks the planning applications and the company filings, and tells you where the pea might be. Only you can feel it: go and see the flat, walk the street, talk to the agent and the landlord. The report is a filter, and when you are in a hurry it is only a filter. Its first duty is to say what it does not know and ask you for it.","to":45},{"anchor":"## No code required · 不用會寫程式","from":48,"id":"deck:readme:8","kind":"para","lang":"en","rw":true,"src":"README.md","text":"Everything is done by typing sentences: install (one pasted line, or a zip upload in a chat app), then ask, paste what it asks for, read the report, and change any setting by saying it. `docs/USING.md` walks through it in five minutes, in English and Chinese.","to":48},{"anchor":"## Start here, on any platform","from":51,"id":"deck:readme:9","kind":"para","lang":"en","rw":true,"src":"README.md","text":"Ask **\"What can this do?\"** (or 這能幹嘛？). The answer comes from `skills/vet-flat/references/onboarding.md`: a short pitch, three starting points (a listing → vet it; an area or destination → sweep; no idea → a ten-fact primer and six questions with suggested defaults). Your rules live in `profile.yaml` (budget, size, flat type, deal-breakers, priorities, `budget_mode` lite/standard/deep for £20 plans and chat-only use). The hard follow-up questions the agent must ask are in `references/questions.md`.","to":51},{"anchor":"## Benchmark (facts must be right on every model; verdicts may differ)","from":54,"id":"deck:readme:10","kind":"para","lang":"en","rw":true,"src":"README.md","text":"`evals/evals.json` has 8 real flats across 7 boroughs plus 2 conversation cases (\"what can this do\", \"I have no idea\"), with truth produced by the repo's own fetchers on 2026-09-03. `bench/grade.py` scores fact recall, fabrications, citations, unknown-honesty and hard-filter consistency; `bench/run.py --dry-run` prints the exact command for Claude Code, Codex, Gemini CLI or an OpenAI-compatible API. See `bench/README.md`.","to":54},{"anchor":"## Benchmark (facts must be right on every model; verdicts may differ)","from":56,"id":"deck:readme:11","kind":"para","lang":"en","rw":true,"src":"README.md","text":"**Which configuration to run:** `docs/EXPERIMENTS.md` compares fifteen setups on five real flats against a human-built gold set of landmines, with a cost-versus-recall chart. The default it argues for is a cheap model for the extraction workers and the strongest model you have for the judgment — the tables are there so you can pick something else.","to":56},{"anchor":"## Sources you will not find here","from":64,"id":"deck:readme:12","kind":"para","lang":"en","rw":true,"src":"README.md","text":"Rightmove, Zoopla, OnTheMarket, OpenRent, HomeViews, Trustpilot, Airbnb, Booking.com are listed by name only. Their terms forbid automated access, so this project gives no method for them; the skill asks you to paste the page.","to":64},{"anchor":"## Licence and attribution (proposed)","from":67,"id":"deck:readme:13","kind":"para","lang":"en","rw":true,"src":"README.md","text":"Documentation and skill text: CC BY 4.0. Code: MIT. Every report carries \"Generated with vet-flat <version> — <source URL>\". Please keep it.","to":67},{"anchor":"## English","from":7,"id":"deck:using:1","kind":"para","lang":"en","rw":true,"src":"docs/USING.md","text":"**Everything in Pea Princess is done by typing sentences.** No code, no settings files to hand-edit, no programming ideas. The words \"terminal\", \"Codex\" and \"Claude Code\" in the install guide mean a text box where you type sentences to an assistant that can also run the checks for you. If you would rather not see a terminal at all, use a chat app instead (Claude, ChatGPT and others accept the same skill as an upload); you lose nothing except speed.","to":7},{"anchor":"### Five minutes, start to finish","from":10,"id":"deck:using:2","kind":"ol","lang":"en","rw":true,"src":"docs/USING.md","text":"1. **Install** (one of): paste one line into the assistant's text box (the install guide shows it), or upload the zip in your chat app's Skills page. Done.","to":10},{"anchor":"### Five minutes, start to finish","from":11,"id":"deck:using:3","kind":"ol","lang":"en","rw":true,"src":"docs/USING.md","text":"2. **Type:** \"What can this do?\" — you get a short answer and three ways to start.","to":11},{"anchor":"### Five minutes, start to finish","from":12,"id":"deck:using:4","kind":"ol","lang":"en","rw":true,"src":"docs/USING.md","text":"3. **Type one of:**","to":12},{"anchor":"### Five minutes, start to finish","from":13,"id":"deck:using:5","kind":"ul","lang":"en","rw":true,"src":"docs/USING.md","text":"   - \"I'm moving to London in October and starting from zero. Teach me.\"","to":13},{"anchor":"### Five minutes, start to finish","from":14,"id":"deck:using:6","kind":"ul","lang":"en","rw":true,"src":"docs/USING.md","text":"   - \"I want a one-bed in east London, £2,200 all-in, moving 1 November.\"","to":14},{"anchor":"### Five minutes, start to finish","from":15,"id":"deck:using:7","kind":"ul","lang":"en","rw":true,"src":"docs/USING.md","text":"   - \"Roast this flat: \" and paste the listing text.","to":15},{"anchor":"### Five minutes, start to finish","from":16,"id":"deck:using:8","kind":"ul","lang":"en","rw":true,"src":"docs/USING.md","text":"   - \"Here are four short stays, roast them\" and paste them.","to":16},{"anchor":"### Five minutes, start to finish","from":17,"id":"deck:using:9","kind":"ol","lang":"en","rw":true,"src":"docs/USING.md","text":"4. **Answer the six questions** it asks (budget, space, dates, destination, deal-breakers, income check). \"Don't know\" is a fine answer; it suggests a default.","to":17},{"anchor":"### Five minutes, start to finish","from":18,"id":"deck:using:10","kind":"ol","lang":"en","rw":true,"src":"docs/USING.md","text":"5. **Paste what it asks for** — a page's text, a floor-plan picture, a street-view screenshot — once, from a list it gives you with links.","to":18},{"anchor":"### Five minutes, start to finish","from":19,"id":"deck:using:11","kind":"ol","lang":"en","rw":true,"src":"docs/USING.md","text":"6. **Read the report.** The first line says which configuration it used. Every number says where it came from. \"Unknown\" means it does not know, and it tells you how to find out.","to":19},{"anchor":"### Changing anything","from":22,"id":"deck:using:12","kind":"para","lang":"en","rw":true,"src":"docs/USING.md","text":"Say it. \"Raise my all-in ceiling to 2,300.\" \"Dig deeper on crime and management, keep the rest light.\" \"I hate noise.\" \"I always ask whether a cheap flat is cheap for a reason.\" The assistant shows you exactly what will change, waits for your yes, then applies it. It never changes a setting silently.","to":22},{"anchor":"### Sharing","from":25,"id":"deck:using:13","kind":"para","lang":"en","rw":true,"src":"docs/USING.md","text":"\"Share my seed\" gives you a short code and a three-sentence card to post; a friend pastes the code into their own assistant and starts with your preferences and your questions.","to":25},{"anchor":"### The only three rules to remember","from":28,"id":"deck:using:14","kind":"ul","lang":"en","rw":true,"src":"docs/USING.md","text":"- It is a filter. Go and see the flat; talk to the agent and the landlord. You are the princess; it only lifts the mattresses.","to":28},{"anchor":"### The only three rules to remember","from":29,"id":"deck:using:15","kind":"ul","lang":"en","rw":true,"src":"docs/USING.md","text":"- It will say \"unknown\" and ask you rather than guess. Give it what only you have.","to":29},{"anchor":"### The only three rules to remember","from":30,"id":"deck:using:16","kind":"ul","lang":"en","rw":true,"src":"docs/USING.md","text":"- Never sign on the viewing day.","to":30},{"anchor":"## 繁體中文","from":34,"id":"deck:using:17","kind":"para","lang":"zh-TW","rw":true,"src":"docs/USING.md","text":"**豌豆公主的每一件事都是「打一句話」完成的。** 不用寫程式、不用手改設定檔、不需要任何程式概念。安裝說明裡的「終端機」「Codex」「Claude Code」，其實就是一個打字框：你打句子給助理，助理順便幫你跑查核。如果你完全不想看到終端機，就用聊天軟體（Claude、ChatGPT 等都能上傳同一個 skill），只是慢一點而已。","to":34},{"anchor":"### 五分鐘從頭到尾","from":37,"id":"deck:using:18","kind":"ol","lang":"zh-TW","rw":true,"src":"docs/USING.md","text":"1. **安裝**（擇一）：把安裝說明給的一行字貼進助理的打字框；或在聊天軟體的 Skills 頁上傳 zip。完成。","to":37},{"anchor":"### 五分鐘從頭到尾","from":38,"id":"deck:using:19","kind":"ol","lang":"zh-TW","rw":true,"src":"docs/USING.md","text":"2. **打**：「這能幹嘛？」你會得到短短的回答和三個開始方式。","to":38},{"anchor":"### 五分鐘從頭到尾","from":39,"id":"deck:using:20","kind":"ol","lang":"zh-TW","rw":true,"src":"docs/USING.md","text":"3. **打其中一句**：","to":39},{"anchor":"### 五分鐘從頭到尾","from":40,"id":"deck:using:21","kind":"ul","lang":"zh-TW","rw":true,"src":"docs/USING.md","text":"   - 「我 10 月要去倫敦，從零開始，教教我。」","to":40},{"anchor":"### 五分鐘從頭到尾","from":41,"id":"deck:using:22","kind":"ul","lang":"zh-TW","rw":true,"src":"docs/USING.md","text":"   - 「我想在東倫敦找一房，含帳單 2,200，11 月 1 日入住。」","to":41},{"anchor":"### 五分鐘從頭到尾","from":42,"id":"deck:using:23","kind":"ul","lang":"zh-TW","rw":true,"src":"docs/USING.md","text":"   - 「幫我尻洗（台語，roast）這個房源：」然後貼上房源文字。","to":42},{"anchor":"### 五分鐘從頭到尾","from":43,"id":"deck:using:24","kind":"ul","lang":"zh-TW","rw":true,"src":"docs/USING.md","text":"   - 「這是四間短租，幫我尻洗。」然後貼上。","to":43},{"anchor":"### 五分鐘從頭到尾","from":44,"id":"deck:using:25","kind":"ol","lang":"zh-TW","rw":true,"src":"docs/USING.md","text":"4. **回答它問的六個問題**（預算、坪數、日期、目的地、地雷、收入審核）。「不知道」也是好答案，它會建議預設值。","to":44},{"anchor":"### 五分鐘從頭到尾","from":45,"id":"deck:using:26","kind":"ol","lang":"zh-TW","rw":true,"src":"docs/USING.md","text":"5. **貼它要的東西**：頁面文字、戶型圖、街景截圖。它會一次列清單、附網址，只問一次。","to":45},{"anchor":"### 五分鐘從頭到尾","from":46,"id":"deck:using:27","kind":"ol","lang":"zh-TW","rw":true,"src":"docs/USING.md","text":"6. **看報告**。第一行寫用了哪一級設定；每個數字都寫出處；「未知」就是它不知道，並告訴你怎麼查。","to":46},{"anchor":"### 想改什麼，用說的","from":49,"id":"deck:using:28","kind":"para","lang":"zh-TW","rw":true,"src":"docs/USING.md","text":"「把含帳單上限改成 2,300。」「治安跟管理挖深一點，其他維持輕量。」「我怕吵。」「我每次都會問：便宜是不是有原因。」助理會先把「哪一項從什麼改成什麼」列給你看，等你說好才改，絕不偷偷改。","to":49},{"anchor":"### 分享","from":52,"id":"deck:using:29","kind":"para","lang":"zh-TW","rw":true,"src":"docs/USING.md","text":"「分享我的設定檔」會給你一段短碼和三句話的卡片；朋友把短碼貼進自己的助理，就從你的偏好和你的問題開始。","to":52},{"anchor":"### 只要記得三件事","from":55,"id":"deck:using:30","kind":"ul","lang":"zh-TW","rw":true,"src":"docs/USING.md","text":"- 它是篩子。房子要親自去看、要跟仲介和房東聊。你才是豌豆公主，它只負責掀床墊。","to":55},{"anchor":"### 只要記得三件事","from":56,"id":"deck:using:31","kind":"ul","lang":"zh-TW","rw":true,"src":"docs/USING.md","text":"- 它會說「不知道」然後問你，不會亂編。把只有你有的東西給它。","to":56},{"anchor":"### 只要記得三件事","from":57,"id":"deck:using:32","kind":"ul","lang":"zh-TW","rw":true,"src":"docs/USING.md","text":"- 看房當天不簽約。","to":57},{"anchor":"## 简体中文（摘要）","from":60,"id":"deck:using:33","kind":"para","lang":"zh-CN","rw":true,"src":"docs/USING.md","text":"每件事都是打一句话完成：不用写代码、不用改设置文件。安装是贴一行字或上传 zip；然后打「这能干嘛？」开始。想改设置就用说的，助理会先列出改动、等你说好才改。它是筛子，房子要亲自去看；看房当天不签约。","to":60},{"anchor":"# Install (every channel) · 安裝方式（各平台）","from":4,"id":"deck:install:1","kind":"para","lang":"en","rw":true,"src":"docs/INSTALL.md","text":"Verified against vendor documentation on 2026-09-03; product features change, so check the linked pages if a step looks different.","to":4},{"anchor":"# Install (every channel) · 安裝方式（各平台）","from":6,"id":"deck:install:2","kind":"para","lang":"en","rw":true,"src":"docs/INSTALL.md","text":"**Never used a terminal?** You do not need to. Sections B and C need only a chat app; section A is one pasted line and then everything is sentences too. Plain-words walkthrough: `docs/USING.md`.","to":6},{"anchor":"## A2. Which harness for the plan you already pay for (verified 2026-09-03)","from":22,"id":"deck:install:3","kind":"para","lang":"en","rw":true,"src":"docs/INSTALL.md","text":"The skill does not care which harness runs it. What decides your experience is whether your subscription is allowed inside that harness:","to":22},{"anchor":"## A2. Which harness for the plan you already pay for (verified 2026-09-03)","from":32,"id":"deck:install:4","kind":"para","lang":"en","rw":true,"src":"docs/INSTALL.md","text":"**Which plan, from the author (personal experience, 2026-09; not a measured result).** At about £20 a month, ChatGPT Plus with Codex gives the most published headroom and the only numbers you can plan with (messages per five-hour window plus a credit rate card); Claude Pro works well in `lite` mode but publishes no usage figures and shares one pool with chat. At the top tier the author's daily experience is that Claude's largest model (Fable 5.1) is markedly stronger than GPT-5.6 Sol on the judgment parts of this work: reading the lowest reviews, naming what sits under a discount, deciding what to ask. That is an opinion from use, not a benchmark: the suite in `bench/` grades facts, not judgment, and the facts come from the scripts, so any model that runs them gets the same numbers. Run the benchmark on the plan you have and decide for yourself.","to":32},{"anchor":"## A2. Which harness for the plan you already pay for (verified 2026-09-03)","from":34,"id":"deck:install:5","kind":"para","lang":"en","rw":true,"src":"docs/INSTALL.md","text":"On a £20-a-month plan set `budget_mode: lite` in `profile.yaml` (see `skills/vet-flat/references/budget-modes.md`): a single flat takes fewer than ten fetches and still gets the hard filters, the verdict and the two killer questions.","to":34},{"anchor":"## A3. Subscription or API key?","from":38,"id":"deck:install:6","kind":"para","lang":"en","rw":true,"src":"docs/INSTALL.md","text":"Subscription by default. This workload is cheap in absolute terms at pay-as-you-go prices (a `lite` check of one flat costs a few pence, an area sweep well under £1, a whole search of 20–30 flats and a few sweeps roughly £2–£20 on a mid-size model), so what a subscription buys is not savings but zero setup: no account, card, key, config file or bill to understand. Heavy users on £100+ plans get far more than the equivalent API spend; for this workload that only matters if you already pay for one.","to":38},{"anchor":"## C. Chat boxes without Skills (manual mode: paste the instructions, attach the references)","from":58,"id":"deck:install:7","kind":"para","lang":"en","rw":true,"src":"docs/INSTALL.md","text":"Use `dist/prompt-pack/` from Releases: `INSTRUCTIONS.md` (the SKILL.md text, under 8,000 characters) plus the reference files.","to":58},{"anchor":"## C. Chat boxes without Skills (manual mode: paste the instructions, attach the references)","from":68,"id":"deck:install:8","kind":"para","lang":"en","rw":true,"src":"docs/INSTALL.md","text":"In manual mode the skill will list, once, the pages you need to open and paste (see `skills/vet-flat/references/inputs.md`).","to":68},{"anchor":"## D. Verify","from":71,"id":"deck:install:9","kind":"para","lang":"en","rw":true,"src":"docs/INSTALL.md","text":"Ask: \"Vet this flat: <address or postcode>, flat <n>.\" The first line of the answer states the mode (shell / fetch / manual). The report ends with \"Generated with vet-flat <version> — https://github.com/jacky18008/pea-princess\".","to":71},{"anchor":"# Experiments: which configuration should you run?","from":5,"id":"deck:experiments:1","kind":"para","lang":"en","rw":true,"src":"docs/EXPERIMENTS.md","text":"This page exists so you can choose with evidence instead of vibes. Fifteen configurations of the\nsame skill were run against the same five real London flats, and every report was scored against a\ngold set of problems a human had already found in those flats by reading the documents.","to":7},{"anchor":"# Experiments: which configuration should you run?","from":9,"id":"deck:experiments:2","kind":"para","lang":"en","rw":true,"src":"docs/EXPERIMENTS.md","text":"**The public default is: a cheap model for the extraction workers, the strongest model you have for\nthe judgment.** On Anthropic that is Sonnet-class workers with an Opus-class judge; on OpenAI, the\nmid or small GPT-5.6 model as worker with Sol as judge. The numbers below are here so you can pick\nsomething else, and so you can see what that choice costs you.","to":12},{"anchor":"## What it means","from":95,"id":"deck:experiments:3","kind":"ul","lang":"en","rw":true,"src":"docs/EXPERIMENTS.md","text":"- **Scripts instead of raw web pages cost nothing and save most of the bill.** The clean one-factor\n  pair is `B-lean` against `B-raw`: 0.57 recall for $6.70 against 0.58 for $11.70. Identical\n  finding rate, 1.7× the money for the raw pages, and the raw arm's spread is much wider (0.20–0.80\n  against 0.40–0.78) because a page that loads differently changes the whole run. The big gap\n  between `A-legacy` (0.87) and `B-lean` (0.57) is real, but it is not the data path — `A-legacy`\n  also runs one reader per axis. That is the next bullet. On the OpenAI side raw pages did appear to\n  help (`codex-A-raw-sol` 0.52 against `codex-B-lean-sol` 0.30), but that arm timed out on two of\n  five flats, so it is the least trustworthy row in either table.","to":102},{"anchor":"## What it means","from":103,"id":"deck:experiments:4","kind":"ul","lang":"en","rw":true,"src":"docs/EXPERIMENTS.md","text":"- **Breadth is what finds landmines, and breadth is what you pay for.** The two arms that give each\n  axis its own reader are the top two: `A-legacy` at 0.87 and `B-readers-sonnet` at 0.69, against\n  0.57 for the default. `B-readers-sonnet` also has the highest precision in the Claude table\n  (0.96) and the lowest share of unknown axes among the script arms (17% against 29%). It costs\n  1.4× the default and 2.2× the wall time; `A-legacy` costs 4.7× and 2.0×. Nothing else in either\n  table buys recall the way a second pair of eyes on each axis does.","to":108},{"anchor":"## What it means","from":109,"id":"deck:experiments:5","kind":"ul","lang":"en","rw":true,"src":"docs/EXPERIMENTS.md","text":"- **The worker model does not matter; the judge model matters a little.** Swapping the extraction\n  workers from Sonnet to Opus moved recall from 0.57 to 0.63 — inside the noise band — while the\n  worker eval says Sonnet is 15/15 against Opus's 14/15 at 42% of the cost. The main model, which\n  is the one doing the judging, does move things: Opus 0.71, CLI default 0.57, Sonnet 0.46. Each\n  single step is at or inside the noise floor, but the direction is consistent and the ends are\n  0.25 apart. Hence the default: cheap where the work is copying a number out of a document, strong\n  where the work is deciding what it means.","to":115},{"anchor":"## What it means","from":116,"id":"deck:experiments:6","kind":"ul","lang":"en","rw":true,"src":"docs/EXPERIMENTS.md","text":"- **Budget mode matters more than model size.** `lite` on the strongest main model (`B-lite`, 0.38)\n  scores below `standard` on the weakest (`B-main-sonnet`, 0.46), for half the money and 40% of the\n  time. The same holds on the OpenAI side, harder: the smallest model in `standard` mode\n  (`codex-D-luna-standard`, 0.46) beats the biggest model in `lite` (`codex-C-sol-lite`, 0.13) by\n  more than three times. If you have to economise, cut axes, not depth.","to":120},{"anchor":"## What it means","from":121,"id":"deck:experiments:7","kind":"ul","lang":"en","rw":true,"src":"docs/EXPERIMENTS.md","text":"- **Cheap configurations invent numbers.** Fabrications per run climb from 0.30 on the default to\n  2.00 on `B-lite` and 2.33 on `C-twenty` — and the cheapest arms' precision stays high, which\n  means the invented numbers sit inside findings that otherwise look right. This is why the skill\n  makes `scripts/calc.py` do the arithmetic and prints its formula, and why the report contract has\n  no place to put a number without a source: `null` and an honest \"not known\" are always available,\n  and the grader counts a guess as a fabrication, not as a near miss.","to":126},{"anchor":"## 1. The pitch (say it in the user's language, at this length)","from":10,"id":"deck:onboarding:1","kind":"blockquote","lang":"en","rw":true,"src":"skills/vet-flat/references/onboarding.md","text":"> I check a London rental flat the way a careful surveyor would, using official and open UK data: the government energy certificate (true size, age, heating), police crime data, planning applications next door, the company behind the landlord or agent, deposit and money-protection rules, price against the local band, light, all-in monthly cost, and the commute with a backup line. You get a plain verdict (PASS / EDGE / CONDITIONAL / KILL) with every finding graded by evidence. I never guess: what I cannot reach, I ask you to paste. I can also sweep a whole area around your destination and compare buildings. You set the rules (budget, size, must-haves, deal-breakers), or if you have no idea yet, I explain the basics first and suggest defaults. Works from a chat box or with a full toolset; the report looks the same either way. You are the princess; I only lift the mattresses. I am a filter, not a replacement for viewing the flat and meeting the agent or landlord: they are partners in this, and only you can feel the pea.","to":10},{"anchor":"## 1. The pitch (say it in the user's language, at this length)","from":13,"id":"deck:onboarding:2","kind":"blockquote","lang":"zh-TW","rw":true,"src":"skills/vet-flat/references/onboarding.md","text":"> 我用英國官方與公開資料，像謹慎的驗屋師一樣尻洗（台語，roast）一間倫敦出租公寓：政府能源證書（真實坪數、屋齡、供暖方式）、警方犯罪資料、隔壁的規劃申請案、房東或仲介背後的公司、押金與客戶資金保護規定、價格對照當地行情、採光、每月全部成本、通勤與備援路線。你會得到白話判決（通過／邊緣／有條件／淘汰），每一項發現都標明證據等級。我不猜：拿不到的資料，我會請你貼給我。我也能掃描你目的地周圍整個區域，比較各棟建築。規則由你定（預算、坪數、必要條件、地雷）；完全沒概念也沒關係，我先講基本常識，再建議預設值。在純對話框或有完整工具的環境都能用，報告長得一樣。你才是豌豆公主，我只負責把床墊一層層掀開。我是篩子，不能取代實地看房與見仲介、房東；他們是合作對象，那顆豌豆只有你躺上去才感覺得到。","to":13},{"anchor":"## 1. The pitch (say it in the user's language, at this length)","from":16,"id":"deck:onboarding:3","kind":"blockquote","lang":"zh-CN","rw":true,"src":"skills/vet-flat/references/onboarding.md","text":"> 我用英国官方与公开数据，像谨慎的验房师一样尻洗（台语，roast）一套伦敦出租公寓：政府能源证书（真实面积、楼龄、供暖方式）、警方犯罪数据、隔壁的规划申请、房东或中介背后的公司、押金与客户资金保护规定、价格对照当地行情、采光、每月全部成本、通勤与备用线路。你会得到白话结论（通过／边缘／有条件／淘汰），每一项发现都标明证据等级。我不猜：拿不到的资料，我会请你贴给我。我也能扫描你目的地周围整个区域，比较各栋建筑。规则由你定（预算、面积、必要条件、雷点）；完全没概念也没关系，我先讲基本常识，再建议默认值。在纯对话框或有完整工具的环境都能用，报告长得一样。你才是豌豆公主，我只负责把床垫一层层掀开。我是筛子，不能取代实地看房与见中介、房东；他们是合作对象，那颗豌豆只有你躺上去才感觉得到。","to":16},{"anchor":"## 1. The pitch (say it in the user's language, at this length)","from":19,"id":"deck:onboarding:4","kind":"ol","lang":"en","rw":true,"src":"skills/vet-flat/references/onboarding.md","text":"1. **I have a listing** → paste the link or the page text and I roast it (the 12 checks).","to":19},{"anchor":"## 1. The pitch (say it in the user's language, at this length)","from":20,"id":"deck:onboarding:5","kind":"ol","lang":"en","rw":true,"src":"skills/vet-flat/references/onboarding.md","text":"2. **I have an area or a place I commute to** → I sweep around it and compare buildings.","to":20},{"anchor":"## 1. The pitch (say it in the user's language, at this length)","from":21,"id":"deck:onboarding:6","kind":"ol","lang":"en","rw":true,"src":"skills/vet-flat/references/onboarding.md","text":"3. **I have no idea** → I explain the basics (section 3) and ask six questions (section 2).","to":21},{"anchor":"## 1. The pitch (say it in the user's language, at this length)","from":22,"id":"deck:onboarding:7","kind":"ol","lang":"en","rw":true,"src":"skills/vet-flat/references/onboarding.md","text":"4. **I am about to sign, or I need somewhere for a few weeks first** → the move-in half: bridging stays (`axes/15`), passing the income check (`axes/16`), the first two weeks in the UK (`axes/17`).","to":22},{"anchor":"## 3. Primer for someone with no idea (ten facts, one screen; cite `references/sources.yaml` ids where numbers appear)","from":200,"id":"deck:onboarding:8","kind":"ol","lang":"en","rw":true,"src":"skills/vet-flat/references/onboarding.md","text":"1. **Timing.** Listings appear about four to eight weeks before the move-in date; good flats go within days. The order is: enquiry → viewing → \"referencing\" (income and identity checks) → holding deposit → contract → deposit → keys.","to":200},{"anchor":"## 3. Primer for someone with no idea (ten facts, one screen; cite `references/sources.yaml` ids where numbers appear)","from":201,"id":"deck:onboarding:9","kind":"ol","lang":"en","rw":true,"src":"skills/vet-flat/references/onboarding.md","text":"2. **What you pay.** Rent, plus council tax (full-time students are exempt: Class N), energy, water, broadband. Buildings on a **heat network** (one boiler for the whole building) bill heat separately through a billing company: ask for the tariff in writing before you sign.","to":201},{"anchor":"## 3. Primer for someone with no idea (ten facts, one screen; cite `references/sources.yaml` ids where numbers appear)","from":202,"id":"deck:onboarding:10","kind":"ol","lang":"en","rw":true,"src":"skills/vet-flat/references/onboarding.md","text":"3. **The law since 2026-05-01** (Renters' Rights Act 2025): tenancies are periodic (no fixed term), the landlord cannot take more than **one month's rent in advance**, the deposit is capped at **five weeks' rent**, a holding deposit at **one week**, and the deposit must go into a government-approved protection scheme.","to":202},{"anchor":"## 3. Primer for someone with no idea (ten facts, one screen; cite `references/sources.yaml` ids where numbers appear)","from":203,"id":"deck:onboarding:11","kind":"ol","lang":"en","rw":true,"src":"skills/vet-flat/references/onboarding.md","text":"4. **The income check.** Landlords usually want yearly income of roughly thirty times the monthly rent, or a guarantor. If you have neither, there are rent-guarantee or \"commercial guarantor\" services many landlords accept. Ask every landlord first: \"which guarantor routes do you accept?\"","to":203},{"anchor":"## 3. Primer for someone with no idea (ten facts, one screen; cite `references/sources.yaml` ids where numbers appear)","from":204,"id":"deck:onboarding:12","kind":"ol","lang":"en","rw":true,"src":"skills/vet-flat/references/onboarding.md","text":"5. **The energy certificate (EPC) is your friend.** It is public, free, and gives the true indoor size, the building's first assessment year (≈ its age) and the heating type. Advertised sizes often include the balcony.","to":204},{"anchor":"## 3. Primer for someone with no idea (ten facts, one screen; cite `references/sources.yaml` ids where numbers appear)","from":205,"id":"deck:onboarding:13","kind":"ol","lang":"en","rw":true,"src":"skills/vet-flat/references/onboarding.md","text":"6. **Who the landlord is matters more than the brand.** Purpose-built rental buildings are run by companies with on-site management; private landlords vary from excellent to absent. The legal entity on the contract is what counts; the skill looks it up.","to":205},{"anchor":"## 3. Primer for someone with no idea (ten facts, one screen; cite `references/sources.yaml` ids where numbers appear)","from":206,"id":"deck:onboarding:14","kind":"ol","lang":"en","rw":true,"src":"skills/vet-flat/references/onboarding.md","text":"7. **Money safety.** Never pay anything before you have viewed (in person or on a verified live video) and have a written tenancy. Deposits go to a protection scheme, never to a personal bank account. Requests to move to WhatsApp or to transfer money \"to secure it\" are a reason to walk.","to":206},{"anchor":"## 3. Primer for someone with no idea (ten facts, one screen; cite `references/sources.yaml` ids where numbers appear)","from":207,"id":"deck:onboarding:15","kind":"ol","lang":"en","rw":true,"src":"skills/vet-flat/references/onboarding.md","text":"8. **Never sign on the viewing day.** Sleep on it. Ask two questions that could kill the deal (the skill writes them for you).","to":207},{"anchor":"## 3. Primer for someone with no idea (ten facts, one screen; cite `references/sources.yaml` ids where numbers appear)","from":208,"id":"deck:onboarding:16","kind":"ol","lang":"en","rw":true,"src":"skills/vet-flat/references/onboarding.md","text":"9. **Streets, roads, rails.** Police crime data is public by street; roads and railways are on the map; ask which side the windows face. \"Quiet side or road side\" is often the same price for two different homes.","to":208},{"anchor":"## 3. Primer for someone with no idea (ten facts, one screen; cite `references/sources.yaml` ids where numbers appear)","from":209,"id":"deck:onboarding:17","kind":"ol","lang":"en","rw":true,"src":"skills/vet-flat/references/onboarding.md","text":"10. **Where to look.** The big listing portals, the rental operators' own sites, and resident-review sites. The skill tells you exactly what to open and paste; it does not scrape them.","to":209},{"anchor":"## 4. Short answers to common questions","from":215,"id":"deck:onboarding:18","kind":"ul","lang":"en","rw":true,"src":"skills/vet-flat/references/onboarding.md","text":"- **Only London?** The law is England-wide; the data sources and the crime/commute tooling are London-specific. Elsewhere the method applies with different sources.","to":215},{"anchor":"## 4. Short answers to common questions","from":216,"id":"deck:onboarding:19","kind":"ul","lang":"en","rw":true,"src":"skills/vet-flat/references/onboarding.md","text":"- **Do you scrape Rightmove / Zoopla / HomeViews?** No. Their terms forbid it. I ask you to paste the page.","to":216},{"anchor":"## 4. Short answers to common questions","from":217,"id":"deck:onboarding:20","kind":"ul","lang":"en","rw":true,"src":"skills/vet-flat/references/onboarding.md","text":"- **Can I use it on ChatGPT, Gemini, DeepSeek, Grok, Codex?** Yes. With a shell and internet I fetch the data myself; in a chat box I list what to paste, once.","to":217},{"anchor":"## 4. Short answers to common questions","from":218,"id":"deck:onboarding:21","kind":"ul","lang":"en","rw":true,"src":"skills/vet-flat/references/onboarding.md","text":"- **Where does my data go?** Only to the public sources listed in `references/sources.yaml`, and only what is needed for the lookup. Nothing goes to the author.","to":218},{"anchor":"## 4. Short answers to common questions","from":219,"id":"deck:onboarding:22","kind":"ul","lang":"en","rw":true,"src":"skills/vet-flat/references/onboarding.md","text":"- **I have just landed. Where do I sleep this week?** For the first one or two weeks a hotel or an operator-run serviced stay is the safer default: your money is protected, you can leave at once, and someone is responsible. A private short let is fine once you have seen it. It costs more per night and often has no kitchen; the skill will price both.","to":219},{"anchor":"## 4. Short answers to common questions","from":220,"id":"deck:onboarding:23","kind":"ul","lang":"en","rw":true,"src":"skills/vet-flat/references/onboarding.md","text":"- **What can it not do?** It cannot smell the hallway, hear the road at 2 a.m., or feel whether the street is yours. It says \"unknown\" where it does not know and asks you for what only you can supply: the floor plan, a street-view screenshot, your impression on the day.","to":220},{"anchor":"## 4. Short answers to common questions","from":221,"id":"deck:onboarding:24","kind":"ul","lang":"en","rw":true,"src":"skills/vet-flat/references/onboarding.md","text":"- **Does it decide for me?** No. It gives a verdict with the evidence behind it; you decide, after viewing the flat and meeting the people who let it. Landlords and agents are partners here, not opponents.","to":221},{"anchor":"## 4. Short answers to common questions","from":222,"id":"deck:onboarding:25","kind":"ul","lang":"en","rw":true,"src":"skills/vet-flat/references/onboarding.md","text":"- **How accurate is it?** Facts come from official registers and are graded; anything unknown is shown as unknown, never filled in.","to":222},{"anchor":"## 4. Short answers to common questions","from":223,"id":"deck:onboarding:26","kind":"ul","lang":"en","rw":true,"src":"skills/vet-flat/references/onboarding.md","text":"- **What does a report look like?** A verdict card, your must-haves versus the flat, a comparison table, the worst reviews, the landmines, the twelve checks, questions for the viewing, what could not be found, and the sources with dates.","to":223},{"anchor":"## 3. Share your questions","from":71,"id":"deck:sharing:1","kind":"blockquote","lang":"en","rw":true,"src":"skills/vet-flat/references/sharing.md","text":"> If this is unusually cheap or unusually good next to its neighbours, what is the hidden problem?\n> Cheap has a reason.","to":72},{"anchor":"## 3. Share your questions","from":74,"id":"deck:sharing:2","kind":"blockquote","lang":"en","rw":true,"src":"skills/vet-flat/references/sharing.md","text":"> If it is pricier, am I buying visible value I actually care about, or just paying more?","to":74},{"anchor":"## 4. The social post, ready to send","from":110,"id":"deck:sharing:3","kind":"blockquote","lang":"en","rw":true,"src":"skills/vet-flat/references/sharing.md","text":"> I found a flat in London with this Pea Princess seed — paste it into any AI agent that has the\n> skill and it will check flats the way mine did: PP1.…\n>\n> What it means: [three sentences from the card]\n> What I asked of every flat: [the questions]\n> What I found: 14 flats vetted — 2 PASS, 3 EDGE, 9 KILL.","to":115},{"anchor":"## 4. The social post, ready to send","from":119,"id":"deck:sharing:4","kind":"blockquote","lang":"zh-TW","rw":true,"src":"skills/vet-flat/references/sharing.md","text":"> 我用這組「豌豆公主」條件碼在倫敦找到房子了——把它貼給任何裝了這個技能的 AI 代理，\n> 它就會照我的標準幫你審房：PP1.…\n>\n> 這組條件是什麼意思：〔卡片上的三句話〕\n> 我要求每間房都回答的問題：〔你的問題〕\n> 結果：看了 14 間，2 間通過、3 間邊緣、9 間淘汰。","to":124},{"anchor":"## 4. The social post, ready to send","from":128,"id":"deck:sharing:5","kind":"blockquote","lang":"zh-CN","rw":true,"src":"skills/vet-flat/references/sharing.md","text":"> 我用这组「豌豆公主」条件码在伦敦找到房子了——把它贴给任何装了这个技能的 AI 代理，\n> 它就会照我的标准帮你审房：PP1.…\n>\n> 这组条件是什么意思：〔卡片上的三句话〕\n> 我要求每套房都回答的问题：〔你的问题〕\n> 结果：看了 14 套，2 套通过、3 套边缘、9 套淘汰。","to":133},{"anchor":"## 6. Importing somebody else's seed","from":183,"id":"deck:sharing:6","kind":"blockquote","lang":"en","rw":true,"src":"skills/vet-flat/references/sharing.md","text":"> This is somebody else's taste, not a recommendation. Their budget band, their district and their\n> month are comments in the file, not your numbers — tell me yours. Read their deal-breakers and\n> their questions and keep the ones you agree with; delete the rest. If their three-sentence summary\n> is not about you, delete it and I will ask you about the places you have lived instead\n> (`references/onboarding.md`, section 2b).","to":187},{"anchor":"## Template for the ask (copy, fill, send once)","from":58,"id":"deck:inputs:1","kind":"fence","lang":"en","rw":true,"src":"skills/vet-flat/references/inputs.md","text":"I can finish X of 12 axes myself. To complete the rest I need 3 things:\n1. EPC page for Flat 12, 4 London Bridge Street — go to\n   https://find-energy-certificate.service.gov.uk, search postcode SE1 9SG, open\n   the row for Flat 12, and paste the whole page here. (Sets the floor area, age\n   and heating type; everything else keys off it.)\n2. The floor plan image from the listing. (Orientation and windowless rooms.)\n3. The HomeViews page text for \"<development>\", all review pages, oldest first.\n   (Management score after removing incentivised reviews.)\nMeanwhile I am running crime, commute, planning and company checks.","to":66},{"anchor":"my_questions:","from":64,"id":"deck:example-quiet-postgraduate-one-bed:1","kind":"yaml","lang":"en","rw":true,"src":"skills/vet-flat/profiles/example-quiet-postgraduate-one-bed.yaml","text":"  - text: \"If this flat is unusually cheap, unusually good or unusually available next to its neighbours, what is the hidden problem? Cheap has a reason.\"","to":64},{"anchor":"my_questions:","from":68,"id":"deck:example-quiet-postgraduate-one-bed:2","kind":"yaml","lang":"en","rw":true,"src":"skills/vet-flat/profiles/example-quiet-postgraduate-one-bed.yaml","text":"  - text: \"If it is pricier than its neighbours, am I buying visible value I actually care about (quiet side, floor, light, management), or just paying more?\"","to":68},{"anchor":"self_intro_template:","from":101,"id":"deck:example-quiet-postgraduate-one-bed:3","kind":"yaml","lang":"en","rw":true,"src":"skills/vet-flat/profiles/example-quiet-postgraduate-one-bed.yaml","text":"  I am a full-time postgraduate student looking for a home for one person, non-smoking, no pets,\n  able to provide proof of funds, with a rent guarantee product for the income check.","to":102},{"anchor":"story_summary:","from":105,"id":"deck:example-quiet-postgraduate-one-bed:4","kind":"yaml","lang":"en","rw":true,"src":"skills/vet-flat/profiles/example-quiet-postgraduate-one-bed.yaml","text":"  Moved to London for a one-year course after years of city-flat living, and cares more about sleeping\n  well and a home that runs itself than about views. Has been burned by a damp lower-ground short let,\n  by an advertised size that included the balcony, and by bills that only appeared after signing.\n  Would rather pay a little more for a quiet side, a real bedroom door and someone who answers when\n  the heating fails.","to":109},{"anchor":"my_questions:","from":49,"id":"deck:example-solo-engineer-one-bed:1","kind":"yaml","lang":"en","rw":true,"src":"skills/vet-flat/profiles/example-solo-engineer-one-bed.yaml","text":"  - text: \"Would I feel fine walking from the station to the door alone at 11 pm? What is on that route?\"","to":49},{"anchor":"my_questions:","from":53,"id":"deck:example-solo-engineer-one-bed:2","kind":"yaml","lang":"en","rw":true,"src":"skills/vet-flat/profiles/example-solo-engineer-one-bed.yaml","text":"  - text: \"Who exactly am I renting from, and can I verify them before I hand over any money?\"","to":53},{"anchor":"my_questions:","from":57,"id":"deck:example-solo-engineer-one-bed:3","kind":"yaml","lang":"en","rw":true,"src":"skills/vet-flat/profiles/example-solo-engineer-one-bed.yaml","text":"  - text: \"If this is cheaper than its neighbours, what is the reason?\"","to":57},{"anchor":"self_intro_template:","from":99,"id":"deck:example-solo-engineer-one-bed:4","kind":"yaml","lang":"en","rw":true,"src":"skills/vet-flat/profiles/example-solo-engineer-one-bed.yaml","text":"  I am a software engineer employed full-time in London, looking for a home for one person,\n  non-smoking, no pets, with payslips and a contract for the income check.","to":100},{"anchor":"story_summary:","from":103,"id":"deck:example-solo-engineer-one-bed:5","kind":"yaml","lang":"en","rw":true,"src":"skills/vet-flat/profiles/example-solo-engineer-one-bed.yaml","text":"  Moving to London for a first job in the UK and renting alone for the first time. Wants a home that\n  feels safe to come back to late, a bedroom that is dark and quiet, and a landlord who can be\n  verified before any money moves. Has read enough scam warnings to refuse to pay before a viewing,\n  and would rather pay a little more for a staffed building than save on a street that feels empty.","to":106},{"anchor":"my_questions:","from":47,"id":"deck:example-student-shared-room:1","kind":"yaml","lang":"en","rw":true,"src":"skills/vet-flat/profiles/example-student-shared-room.yaml","text":"  - text: \"Is everyone in this household a full-time student, and is the tenancy joint or individual?\"","to":47},{"anchor":"my_questions:","from":51,"id":"deck:example-student-shared-room:2","kind":"yaml","lang":"en","rw":true,"src":"skills/vet-flat/profiles/example-student-shared-room.yaml","text":"  - text: \"Are bills really included, and is there a cap after which I pay?\"","to":51},{"anchor":"my_questions:","from":55,"id":"deck:example-student-shared-room:3","kind":"yaml","lang":"en","rw":true,"src":"skills/vet-flat/profiles/example-student-shared-room.yaml","text":"  - text: \"If this room is cheaper than the others on the street, why?\"","to":55},{"anchor":"self_intro_template:","from":93,"id":"deck:example-student-shared-room:4","kind":"yaml","lang":"en","rw":true,"src":"skills/vet-flat/profiles/example-student-shared-room.yaml","text":"  I am a full-time student looking for a room in a shared flat, non-smoking, no pets, able to\n  provide proof of funds, with a rent guarantee product for the income check.","to":94},{"anchor":"story_summary:","from":97,"id":"deck:example-student-shared-room:5","kind":"yaml","lang":"en","rw":true,"src":"skills/vet-flat/profiles/example-student-shared-room.yaml","text":"  First time renting abroad, on a student budget, and would rather share a well-run flat near the\n  campus than live alone far out. Has heard enough about deposits vanishing and bills surprises to\n  insist on a protected deposit and a written answer on what \"bills included\" means.","to":99},{"anchor":"def sentences(","from":543,"id":"deck:seed:1","kind":"pystr","lang":"en","rw":false,"src":"skills/vet-flat/scripts/seed.py","text":"\"a flat\"","to":543},{"anchor":"def sentences(","from":545,"id":"deck:seed:2","kind":"pystr","lang":"en","rw":false,"src":"skills/vet-flat/scripts/seed.py","text":"\"on floors %s\"","to":545},{"anchor":"def sentences(","from":547,"id":"deck:seed:3","kind":"pystr","lang":"en","rw":false,"src":"skills/vet-flat/scripts/seed.py","text":"\"with windows facing %s\"","to":547},{"anchor":"def sentences(","from":549,"id":"deck:seed:4","kind":"pystr","lang":"en","rw":false,"src":"skills/vet-flat/scripts/seed.py","text":"\"within reach of %s\"","to":549},{"anchor":"def sentences(","from":554,"id":"deck:seed:5","kind":"pystr","lang":"en","rw":false,"src":"skills/vet-flat/scripts/seed.py","text":"\"I want %s\"","to":554},{"anchor":"def sentences(","from":556,"id":"deck:seed:6","kind":"pystr","lang":"en","rw":false,"src":"skills/vet-flat/scripts/seed.py","text":"\"; it must have %s\"","to":556},{"anchor":"def sentences(","from":558,"id":"deck:seed:7","kind":"pystr","lang":"en","rw":false,"src":"skills/vet-flat/scripts/seed.py","text":"\"; and I rank %s in that order\"","to":558},{"anchor":"def sentences(","from":563,"id":"deck:seed:8","kind":"pystr","lang":"en","rw":false,"src":"skills/vet-flat/scripts/seed.py","text":"\"a ground-floor flat\"","to":563},{"anchor":"def sentences(","from":565,"id":"deck:seed:9","kind":"pystr","lang":"en","rw":false,"src":"skills/vet-flat/scripts/seed.py","text":"\"windows that cannot see sky\"","to":565},{"anchor":"def sentences(","from":566,"id":"deck:seed:10","kind":"pystr","lang":"en","rw":false,"src":"skills/vet-flat/scripts/seed.py","text":"\"I have no absolute deal-breakers.\"","to":566},{"anchor":"def sentences(","from":566,"id":"deck:seed:11","kind":"pystr","lang":"en","rw":false,"src":"skills/vet-flat/scripts/seed.py","text":"\"I will not take: %s.\"","to":566},{"anchor":"def sentences(","from":571,"id":"deck:seed:12","kind":"pystr","lang":"en","rw":false,"src":"skills/vet-flat/scripts/seed.py","text":"\"Price leads: I take the cheapest home that clears every rule above\"","to":571},{"anchor":"def sentences(","from":573,"id":"deck:seed:13","kind":"pystr","lang":"en","rw":false,"src":"skills/vet-flat/scripts/seed.py","text":"\"Price is not in my top three: I will pay to the top of the band for a benefit \"\n                 \"I can name\"","to":574},{"anchor":"def sentences(","from":576,"id":"deck:seed:14","kind":"pystr","lang":"en","rw":false,"src":"skills/vet-flat/scripts/seed.py","text":"\"Price sits %s of my three priorities: I will pay towards the top of the band for \"\n                 \"a benefit I can name\"","to":577},{"anchor":"def sentences(","from":578,"id":"deck:seed:15","kind":"pystr","lang":"en","rw":false,"src":"skills/vet-flat/scripts/seed.py","text":"\", and quiet wins when quiet and light conflict.\"","to":578},{"anchor":"def sentences(","from":579,"id":"deck:seed:16","kind":"pystr","lang":"en","rw":false,"src":"skills/vet-flat/scripts/seed.py","text":"\", and I would rather have light than silence.\"","to":579},{"anchor":"def sentences(","from":581,"id":"deck:seed:17","kind":"pystr","lang":"en","rw":false,"src":"skills/vet-flat/scripts/seed.py","text":"\" I plan on %s.\"","to":581},{"anchor":"def sentences(","from":585,"id":"deck:seed:18","kind":"pystr","lang":"en","rw":false,"src":"skills/vet-flat/scripts/seed.py","text":"\" I ask of every flat: \\u201c%s\\u201d\"","to":585},{"anchor":"def journey_lines(","from":682,"id":"deck:seed:19","kind":"pystr","lang":"en","rw":false,"src":"skills/vet-flat/scripts/seed.py","text":"\"what I found: %d flat%s vetted\"","to":682},{"anchor":"def journey_lines(","from":690,"id":"deck:seed:20","kind":"pystr","lang":"en","rw":false,"src":"skills/vet-flat/scripts/seed.py","text":"\"the one I took\"","to":690},{"anchor":"def journey_lines(","from":694,"id":"deck:seed:21","kind":"pystr","lang":"en","rw":false,"src":"skills/vet-flat/scripts/seed.py","text":"\"about %s m²\"","to":694},{"anchor":"def card(","from":707,"id":"deck:seed:22","kind":"pystr","lang":"en","rw":false,"src":"skills/vet-flat/scripts/seed.py","text":"\"Pea Princess seed\"","to":707},{"anchor":"def card(","from":711,"id":"deck:seed:23","kind":"pystr","lang":"en","rw":false,"src":"skills/vet-flat/scripts/seed.py","text":"\"what I am looking for, and nothing about where I live, what I earn or who I am.\"","to":711},{"anchor":"def card(","from":722,"id":"deck:seed:24","kind":"pystr","lang":"en","rw":false,"src":"skills/vet-flat/scripts/seed.py","text":"\"seed code (paste it into any AI agent that has the Pea Princess skill, \"\n               \"and it will set itself up the way I did):\"","to":723},{"anchor":"def card(","from":726,"id":"deck:seed:25","kind":"pystr","lang":"en","rw":false,"src":"skills/vet-flat/scripts/seed.py","text":"\"(the code leaves out the %s to stay short enough to paste; it is on the card \"\n                   \"above)\"","to":727}],"surfaces":[{"ids":["deck:readme:1","deck:readme:2","deck:readme:3","deck:readme:4","deck:readme:5","deck:readme:6","deck:readme:7","deck:readme:8","deck:readme:9","deck:readme:10","deck:readme:11","deck:readme:12","deck:readme:13"],"note":"All prose paragraphs. Tables, headings and code blocks are not in the deck.","path":"README.md","short":"README","title":"README — the front page"},{"ids":["deck:using:1","deck:using:2","deck:using:3","deck:using:4","deck:using:5","deck:using:6","deck:using:7","deck:using:8","deck:using:9","deck:using:10","deck:using:11","deck:using:12","deck:using:13","deck:using:14","deck:using:15","deck:using:16","deck:using:17","deck:using:18","deck:using:19","deck:using:20","deck:using:21","deck:using:22","deck:using:23","deck:using:24","deck:using:25","deck:using:26","deck:using:27","deck:using:28","deck:using:29","deck:using:30","deck:using:31","deck:using:32","deck:using:33"],"note":"Every paragraph, step and bullet, in all three languages. Headings are not in the deck.","path":"docs/USING.md","short":"USING","title":"docs/USING.md — the plain-words walkthrough"},{"ids":["deck:install:1","deck:install:2","deck:install:3","deck:install:4","deck:install:5","deck:install:6","deck:install:7","deck:install:8","deck:install:9"],"note":"The intro and every section's prose. The install tables are not in the deck.","path":"docs/INSTALL.md","short":"INSTALL","title":"docs/INSTALL.md — install page"},{"ids":["deck:experiments:1","deck:experiments:2","deck:experiments:3","deck:experiments:4","deck:experiments:5","deck:experiments:6","deck:experiments:7"],"note":"The intro, and the “What it means” bullets. Result tables and caveats are not in the deck.","path":"docs/EXPERIMENTS.md","short":"EXPERIMENTS","title":"docs/EXPERIMENTS.md — which configuration to run"},{"ids":["deck:onboarding:1","deck:onboarding:2","deck:onboarding:3","deck:onboarding:4","deck:onboarding:5","deck:onboarding:6","deck:onboarding:7","deck:onboarding:8","deck:onboarding:9","deck:onboarding:10","deck:onboarding:11","deck:onboarding:12","deck:onboarding:13","deck:onboarding:14","deck:onboarding:15","deck:onboarding:16","deck:onboarding:17","deck:onboarding:18","deck:onboarding:19","deck:onboarding:20","deck:onboarding:21","deck:onboarding:22","deck:onboarding:23","deck:onboarding:24","deck:onboarding:25","deck:onboarding:26"],"note":"The three pitches, the four starting points, the ten-fact primer, the Q&A answers. The intake tables and the distilling rules are model-facing and not in the deck.","path":"skills/vet-flat/references/onboarding.md","short":"ONBOARDING","title":"onboarding.md — what the skill says to a new user"},{"ids":["deck:sharing:1","deck:sharing:2","deck:sharing:3","deck:sharing:4","deck:sharing:5","deck:sharing:6"],"note":"The three social posts, the two questions worth copying, and what to say to somebody importing another person's seed. The rest of the file is model-facing.","path":"skills/vet-flat/references/sharing.md","short":"SHARING","title":"sharing.md — social posts and the card description"},{"ids":["deck:inputs:1"],"note":"The ask template only. The per-axis table is model-facing.","path":"skills/vet-flat/references/inputs.md","short":"INPUTS","title":"inputs.md — the one message that asks the user for what is missing"},{"ids":["deck:example-quiet-postgraduate-one-bed:1","deck:example-quiet-postgraduate-one-bed:2","deck:example-quiet-postgraduate-one-bed:3","deck:example-quiet-postgraduate-one-bed:4","deck:example-solo-engineer-one-bed:1","deck:example-solo-engineer-one-bed:2","deck:example-solo-engineer-one-bed:3","deck:example-solo-engineer-one-bed:4","deck:example-solo-engineer-one-bed:5","deck:example-student-shared-room:1","deck:example-student-shared-room:2","deck:example-student-shared-room:3","deck:example-student-shared-room:4","deck:example-student-shared-room:5"],"note":"`story_summary`, `self_intro_template` and the `my_questions` texts. Keep the YAML shape: the key, the indent and the quotes are part of the block.","path":"skills/vet-flat/profiles/*.yaml","short":"PROFILES","title":"profiles/ — the sentences a profile carries"},{"ids":["deck:seed:1","deck:seed:2","deck:seed:3","deck:seed:4","deck:seed:5","deck:seed:6","deck:seed:7","deck:seed:8","deck:seed:9","deck:seed:10","deck:seed:11","deck:seed:12","deck:seed:13","deck:seed:14","deck:seed:15","deck:seed:16","deck:seed:17","deck:seed:18","deck:seed:19","deck:seed:20","deck:seed:21","deck:seed:22","deck:seed:23","deck:seed:24","deck:seed:25"],"note":"Fragments the card assembles at run time; `%s` is filled in from the profile. Shown verbatim as Python literals. Write-back is off for this file — edit it in the source.","path":"skills/vet-flat/scripts/seed.py","short":"SEED","title":"seed.py — the seed card sentences (read-only here)"}]}</script>
+
+<script>
+(function () {
+  "use strict";
+
+  var DATA = JSON.parse(document.getElementById("deck-data").textContent);
+  var BLOCKS = DATA.blocks || [];
+  var SURFACES = DATA.surfaces || [];
+  var LS_KEY = "pea-princess-copy-deck-v1";
+
+  var byId = {};
+  BLOCKS.forEach(function (b) { byId[b.id] = b; });
+
+  // edits[id] = {text, at}
+  var edits = {};
+  var db = null;
+  var filter = "all";
+  var query = "";
+
+  // ------------------------------------------------------------------ storage --
+  function loadLocal() {
+    try {
+      var raw = window.localStorage.getItem(LS_KEY);
+      if (raw) { edits = JSON.parse(raw) || {}; }
+    } catch (e) { edits = {}; }
+  }
+
+  function saveLocal() {
+    try { window.localStorage.setItem(LS_KEY, JSON.stringify(edits)); } catch (e) { /* private mode */ }
+  }
+
+  function setStore(kind, text) {
+    var dot = document.getElementById("storeDot");
+    var label = document.getElementById("storeText");
+    dot.className = "dot" + (kind ? " " + kind : "");
+    label.textContent = text;
+  }
+
+  function persist(id, text) {
+    edits[id] = { text: text, at: new Date().toISOString() };
+    saveLocal();
+    if (!db) { return Promise.resolve("local"); }
+    var block = byId[id];
+    return db.doc("edits/" + id).set({
+      id: id,
+      text: text,
+      source: block.src,
+      lang: block.lang,
+      original: block.text,
+      updated: new Date().toISOString()
+    }).then(function () { return "store"; });
+  }
+
+  function forget(id) {
+    delete edits[id];
+    saveLocal();
+    if (!db) { return Promise.resolve("local"); }
+    return db.doc("edits/" + id).delete().then(function () { return "store"; });
+  }
+
+  // -------------------------------------------------------------------- render --
+  var LANG_LABEL = { "en": "EN", "zh-TW": "繁中", "zh-CN": "简中" };
+
+  function currentText(b) {
+    return edits[b.id] ? edits[b.id].text : b.text;
+  }
+
+  function isEdited(b) {
+    return !!edits[b.id] && edits[b.id].text !== b.text;
+  }
+
+  function matches(b) {
+    if (filter === "todo" && isEdited(b)) { return false; }
+    if (filter === "edited" && !isEdited(b)) { return false; }
+    if (filter === "zh" && b.lang === "en") { return false; }
+    if (query) {
+      var hay = (b.id + " " + b.src + " " + b.text + " " + currentText(b)).toLowerCase();
+      if (hay.indexOf(query) === -1) { return false; }
+    }
+    return true;
+  }
+
+  function el(tag, cls, text) {
+    var node = document.createElement(tag);
+    if (cls) { node.className = cls; }
+    if (text !== undefined && text !== null) { node.textContent = text; }
+    return node;
+  }
+
+  function badge(cls, text) { return el("span", "badge " + cls, text); }
+
+  function grow(area) {
+    area.style.height = "auto";
+    area.style.height = Math.max(area.scrollHeight + 4, 96) + "px";
+  }
+
+  function renderBlock(b) {
+    var wrap = el("article", "block");
+    wrap.id = "b-" + b.id.replace(/[^A-Za-z0-9]+/g, "-");
+    wrap.dataset.id = b.id;
+
+    var head = el("div", "block-head");
+    head.appendChild(el("span", "bid", b.id));
+    var span = b.from === b.to ? "L" + b.from : "L" + b.from + "–" + b.to;
+    head.appendChild(el("span", "path", b.src + " · " + span));
+    if (b.lang !== "en") { head.appendChild(badge("lang-zh", LANG_LABEL[b.lang] || b.lang)); }
+    if (!b.rw) { head.appendChild(badge("ro", "read-only")); }
+    var mark = badge("edited", "rewritten");
+    mark.hidden = true;
+    head.appendChild(mark);
+    wrap.appendChild(head);
+
+    var mono = (b.kind === "pystr" || b.kind === "fence" || b.kind === "yaml");
+    var view = el("div", "text" + (mono ? " mono" : ""), currentText(b));
+    wrap.appendChild(view);
+
+    var original = el("details", "original");
+    var summary = el("summary", null, "original");
+    original.appendChild(summary);
+    original.appendChild(el("div", "text" + (mono ? " mono" : ""), b.text));
+    original.hidden = true;
+    wrap.appendChild(original);
+
+    var actions = el("div", "actions");
+    var rewrite = el("button", "btn", "Rewrite");
+    var revert = el("button", "btn quiet", "Revert");
+    revert.hidden = true;
+    actions.appendChild(rewrite);
+    actions.appendChild(revert);
+    wrap.appendChild(actions);
+
+    var editor = el("textarea", "editor" + (mono ? " mono" : ""));
+    editor.hidden = true;
+    editor.spellcheck = true;
+    wrap.appendChild(editor);
+
+    var editActions = el("div", "actions");
+    var save = el("button", "btn primary", "Save");
+    var cancel = el("button", "btn", "Cancel");
+    editActions.appendChild(save);
+    editActions.appendChild(cancel);
+    editActions.hidden = true;
+    wrap.appendChild(editActions);
+
+    var hint = el("p", "hint", "");
+    wrap.appendChild(hint);
+
+    function shapeHint() {
+      if (b.kind === "yaml") { return "Keep the key, the indent and the quotes — they are part of the file."; }
+      if (b.kind === "blockquote") { return "Every line starts with “> ”. Keep it."; }
+      if (b.kind === "ol" || b.kind === "ul") { return "Keep the list marker at the front and the indent on any wrapped line."; }
+      if (b.kind === "fence") { return "This is the whole template, exactly as it is sent."; }
+      if (b.kind === "pystr") { return "Read-only: a Python literal the card assembles at run time."; }
+      return "";
+    }
+
+    function paint() {
+      var changed = isEdited(b);
+      view.textContent = currentText(b);
+      mark.hidden = !changed;
+      revert.hidden = !changed;
+      original.hidden = !changed;
+      wrap.dataset.state = !b.rw ? "readonly" : (changed ? "edited" : "clean");
+      wrap.hidden = !matches(b);
+    }
+
+    function open() {
+      editor.value = currentText(b);
+      editor.hidden = false;
+      editActions.hidden = false;
+      actions.hidden = true;
+      view.hidden = true;
+      wrap.classList.add("open");
+      hint.textContent = shapeHint();
+      grow(editor);
+      editor.focus();
+    }
+
+    function close() {
+      editor.hidden = true;
+      editActions.hidden = true;
+      actions.hidden = false;
+      view.hidden = false;
+      wrap.classList.remove("open");
+      hint.textContent = "";
+    }
+
+    rewrite.addEventListener("click", open);
+    cancel.addEventListener("click", close);
+    editor.addEventListener("input", function () { grow(editor); });
+
+    save.addEventListener("click", function () {
+      var next = editor.value;
+      close();
+      if (next === b.text) {
+        forget(b.id).then(paint, paint);
+        paint();
+        refreshCounts();
+        return;
+      }
+      save.disabled = true;
+      persist(b.id, next).then(function (where) {
+        save.disabled = false;
+        if (where === "local") { flash(mark, "saved here"); }
+        paint(); refreshCounts();
+      }, function (err) {
+        save.disabled = false;
+        edits[b.id] = { text: next, at: new Date().toISOString() };
+        saveLocal(); paint(); refreshCounts();
+        setStore("local", "Saved on this device only — the shared store refused the write (" +
+          ((err && err.code) || "unknown") + "). Use “Copy edits as Markdown”.");
+      });
+      paint();
+      refreshCounts();
+    });
+
+    revert.addEventListener("click", function () {
+      forget(b.id).then(function () { paint(); refreshCounts(); },
+                        function () { paint(); refreshCounts(); });
+      paint();
+      refreshCounts();
+    });
+
+    if (!b.rw) {
+      rewrite.disabled = true;
+      rewrite.textContent = "Read-only";
+      hint.textContent = shapeHint();
+    }
+
+    paint();
+    b._paint = paint;
+    return wrap;
+  }
+
+  function flash(node, text) {
+    var was = node.textContent;
+    node.textContent = text;
+    node.hidden = false;
+    window.setTimeout(function () { node.textContent = was; }, 1400);
+  }
+
+  function renderAll() {
+    var root = document.getElementById("surfaces");
+    root.textContent = "";
+    SURFACES.forEach(function (s, i) {
+      var section = el("section", "surface");
+      section.id = "s-" + i;
+      var head = el("div", "surface-head");
+      head.appendChild(el("h2", null, s.title));
+      var meta = el("div", "surface-meta");
+      var code = el("code", null, s.path);
+      meta.appendChild(code);
+      meta.appendChild(el("span", null, s.ids.length + (s.ids.length === 1 ? " block" : " blocks")));
+      head.appendChild(meta);
+      if (s.note) { head.appendChild(el("p", "surface-note", s.note)); }
+      section.appendChild(head);
+      s.ids.forEach(function (id) {
+        if (byId[id]) { section.appendChild(renderBlock(byId[id])); }
+      });
+      var empty = el("p", "empty", "Nothing in this surface matches the filter.");
+      empty.hidden = true;
+      section.appendChild(empty);
+      section._empty = empty;
+      root.appendChild(section);
+    });
+    refreshCounts();
+  }
+
+  function repaint() {
+    BLOCKS.forEach(function (b) { if (b._paint) { b._paint(); } });
+    var root = document.getElementById("surfaces");
+    Array.prototype.forEach.call(root.children, function (section) {
+      var shown = Array.prototype.filter.call(section.querySelectorAll(".block"), function (n) {
+        return !n.hidden;
+      }).length;
+      if (section._empty) { section._empty.hidden = shown !== 0; }
+    });
+    refreshCounts();
+  }
+
+  function refreshCounts() {
+    var done = BLOCKS.filter(isEdited).length;
+    document.getElementById("countEdited").textContent = done;
+    document.getElementById("countTotal").textContent = BLOCKS.length;
+    SURFACES.forEach(function (s, i) {
+      var fill = document.querySelector('[data-mattress="' + i + '"] .fill');
+      if (!fill) { return; }
+      var n = s.ids.filter(function (id) { return byId[id] && isEdited(byId[id]); }).length;
+      fill.style.width = (s.ids.length ? Math.round((n / s.ids.length) * 100) : 0) + "%";
+    });
+  }
+
+  function renderStack() {
+    var host = document.getElementById("mattresses");
+    host.textContent = "";
+    SURFACES.forEach(function (s, i) {
+      var band = el("button", "mattress");
+      band.dataset.mattress = String(i);
+      band.type = "button";
+      band.title = s.title + " — " + s.ids.length + " blocks";
+      band.setAttribute("aria-label", "Jump to " + s.title);
+      band.appendChild(el("span", "tag", s.short));
+      var bar = el("span", "bar");
+      bar.appendChild(el("span", "fill"));
+      band.appendChild(bar);
+      band.appendChild(el("span", "n", String(s.ids.length)));
+      band.addEventListener("click", function () {
+        var target = document.getElementById("s-" + i);
+        if (target) { target.scrollIntoView({ behavior: "smooth", block: "start" }); }
+      });
+      host.appendChild(band);
+    });
+  }
+
+  // -------------------------------------------------------------------- export --
+  function fenceFor(text) {
+    var longest = 0;
+    (text.match(/`+/g) || []).forEach(function (run) { longest = Math.max(longest, run.length); });
+    var n = Math.max(3, longest + 1);
+    return new Array(n + 1).join("`");
+  }
+
+  function exportMarkdown() {
+    var changed = BLOCKS.filter(isEdited);
+    var out = [
+      "# Copy deck — edits from the review board",
+      "",
+      changed.length + " block(s) rewritten. Save this as `edits.md` and run:",
+      "",
+      "    python3 tools/copy_deck.py merge --from edits.md",
+      "    python3 tools/copy_deck.py apply --dry-run",
+      "    python3 tools/copy_deck.py apply",
+      ""
+    ];
+    changed.forEach(function (b) {
+      var text = currentText(b);
+      var mark = fenceFor(text);
+      var span = b.from === b.to ? "L" + b.from : "L" + b.from + "-L" + b.to;
+      out.push("### " + b.id, "");
+      out.push("- source: `" + b.src + "` · " + span);
+      out.push("- lang: " + b.lang);
+      out.push("");
+      out.push(mark + "text");
+      out.push(text);
+      out.push(mark);
+      out.push("");
+    });
+    if (!changed.length) { out.push("_Nothing has been rewritten yet._", ""); }
+    return out.join("\n");
+  }
+
+  function wireExport() {
+    var box = document.getElementById("exportBox");
+    document.getElementById("copyBtn").addEventListener("click", function (ev) {
+      var text = exportMarkdown();
+      var button = ev.currentTarget;
+      var done = function () {
+        button.textContent = "Copied";
+        window.setTimeout(function () { button.textContent = "Copy edits as Markdown"; }, 1600);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, function () { reveal(text, box); });
+      } else {
+        reveal(text, box);
+      }
+    });
+    document.getElementById("showBtn").addEventListener("click", function () {
+      reveal(exportMarkdown(), box);
+    });
+  }
+
+  function reveal(text, box) {
+    box.value = text;
+    box.hidden = false;
+    box.focus();
+    box.select();
+  }
+
+  // ------------------------------------------------------------------- filters --
+  function wireFilters() {
+    var chips = document.querySelectorAll(".chip");
+    Array.prototype.forEach.call(chips, function (chip) {
+      chip.addEventListener("click", function () {
+        var next = chip.dataset.filter;
+        filter = (filter === next && next !== "all") ? "all" : next;
+        Array.prototype.forEach.call(chips, function (c) {
+          c.setAttribute("aria-pressed", String(c.dataset.filter === filter));
+        });
+        repaint();
+      });
+    });
+    document.getElementById("search").addEventListener("input", function (ev) {
+      query = ev.target.value.trim().toLowerCase();
+      repaint();
+    });
+  }
+
+  // ---------------------------------------------------------------------- boot --
+  loadLocal();
+  renderStack();
+  renderAll();
+  wireFilters();
+  wireExport();
+  setStore("local", "Edits are held in this browser. Looking for the shared store…");
+
+  if (window.claude && typeof window.claude.use === "function") {
+    window.claude.use("db").then(function (store) {
+      if (!store) {
+        setStore("local", "No shared store here — edits stay in this browser. " +
+          "Use “Copy edits as Markdown” to send them back.");
+        return;
+      }
+      db = store;
+      setStore("live", "Saving to the shared store. The agent can read these edits back directly.");
+      var firstSnapshot = true;
+      db.collection("edits").onSnapshot(function (snap) {
+        var next = {};
+        snap.docs.forEach(function (doc) {
+          var row = doc.data() || {};
+          if (typeof row.text === "string") { next[doc.id] = { text: row.text, at: row.updated }; }
+        });
+        if (firstSnapshot) {
+          // Anything typed before the store answered is real work: keep it and push it up.
+          var pending = Object.keys(edits).filter(function (id) { return !next[id] && byId[id]; });
+          pending.forEach(function (id) {
+            next[id] = edits[id];
+            persist(id, edits[id].text);
+          });
+          if (pending.length) {
+            setStore("live", "Saving to the shared store — " + pending.length +
+              " edit(s) made before it answered have been sent up.");
+          }
+          firstSnapshot = false;
+        }
+        edits = next;
+        saveLocal();
+        repaint();
+      }, function (err) {
+        setStore("local", "The shared store stopped responding (" + ((err && err.code) || "unknown") +
+          "). Edits are held in this browser — use “Copy edits as Markdown”.");
+      });
+    }, function () {
+      setStore("local", "No shared store here — edits stay in this browser.");
+    });
+  } else {
+    setStore("local", "Opened as a plain file: edits stay in this browser. " +
+      "Use “Copy edits as Markdown” to send them back.");
+  }
+})();
+</script>
