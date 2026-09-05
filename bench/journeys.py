@@ -1023,8 +1023,11 @@ def play(journey, args, variant_id=None):
             try:
                 while True:
                     attempts += 1
+                    # stdin is closed on purpose: `claude -p` treats anything piped on stdin as part of the
+                    # prompt, and a runner launched from a shell heredoc hands that heredoc to every child.
+                    # On 2026-09-05 four journey runs and ten sweep rows carried a launcher script that way.
                     proc = subprocess.Popen(cmd, cwd=workdir, stdout=subprocess.PIPE,
-                                            stderr=subprocess.PIPE)
+                                            stderr=subprocess.PIPE, stdin=subprocess.DEVNULL)
                     out, err = proc.communicate(timeout=args.timeout)
                     stdout = (out or b"").decode("utf-8", "replace")
                     stderr_text = (err or b"").decode("utf-8", "replace")

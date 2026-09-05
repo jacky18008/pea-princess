@@ -732,6 +732,16 @@ class TestFileChecksAndRegrade(unittest.TestCase):
         self.assertEqual("pass", facts["deposit_cap_weeks"]["status"], facts["deposit_cap_weeks"]["detail"])
         self.assertEqual(0, card["fabrications"])
 
+    def test_every_agent_launch_closes_stdin(self):
+        # claude -p reads piped stdin as prompt material; a runner started from a heredoc
+        # would feed that heredoc to the model (it happened on 2026-09-05).
+        for rel in ("bench/journeys.py", "bench/run.py", "bench/ab/run_codex.py"):
+            src = read_text(os.path.join(ROOT, rel))
+            launches = [m.start() for m in re.finditer(r"subprocess\.Popen\((?:cmd|command), cwd=workdir", src)]
+            self.assertTrue(launches, rel)
+            for pos in launches:
+                self.assertIn("stdin=subprocess.DEVNULL", src[pos:pos + 260], "%s: an agent launch leaves stdin open" % rel)
+
     def test_the_pasted_profile_becomes_a_real_file_without_its_title_line(self):
         folder = tempfile.mkdtemp()
         try:
