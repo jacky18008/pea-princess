@@ -765,6 +765,19 @@ class TestFileChecksAndRegrade(unittest.TestCase):
         self.assertEqual("pass", facts["rent_pcm"]["status"], facts["rent_pcm"]["detail"])
         self.assertEqual(0, card["fabrications"], [(k, v["detail"]) for k, v in facts.items() if v["status"] == "fail"])
 
+    def test_a_landmine_named_in_plain_words_counts_as_named(self):
+        doc = runner.load_journeys()
+        j7 = [j for j in doc["journeys"] if j["id"] == "j7-compare-two-flats-en"][0]
+        turn = j7["turns"][0]
+        item = [m for m in turn["expect"]["must"] if m.get("label") == "names the churn landmine"][0]
+        self.assertTrue(runner.item_matches("Two of the six reviews mention short-let churn on the floor.", item)[0])
+        self.assertTrue(runner.item_matches("Landmine L9 applies.", item)[0])
+        self.assertFalse(runner.item_matches("Nothing about the neighbours.", item)[0])
+        reply = "Deposit arithmetic: A's maximum five-week deposit is `5 × (£2,250 × 12 ÷ 52)` = £2,596.15; B: £2,423.08.\n"
+        card = runner.score_turn(turn, reply, j7)
+        facts = dict((r["check"], r) for r in card["checks"] if r["kind"] == "fact")
+        self.assertEqual(0, card["fabrications"], [(k, v["detail"]) for k, v in facts.items() if v["status"] == "fail"])
+
     def test_the_pasted_profile_becomes_a_real_file_without_its_title_line(self):
         folder = tempfile.mkdtemp()
         try:

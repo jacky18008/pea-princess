@@ -717,7 +717,9 @@
          "£\\s?[0-9][0-9,]*\\s*(?:pcm|per month|/ ?月|每月)",
          "£\\s?[0-9]+(?:\\.[0-9]+)?\\s*(?:/|／|per|每)\\s*(?:sq|平方|ft|呎|m²|m2)",
          "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^。\\n£]{0,40}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
-         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^.。\\n]{0,40}?(?:[0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)"
+         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^.。\\n]{0,40}?(?:[0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)",
+         "(?<=\\d)\\s*[×x]\\s*\\(?\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "\\(\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*[×x]"
         ]
        }
       },
@@ -1436,7 +1438,9 @@
          "£\\s?[0-9][0-9,]*\\s*(?:pcm|per month|/ ?月|每月)",
          "£\\s?[0-9]+(?:\\.[0-9]+)?\\s*(?:/|／|per|每)\\s*(?:sq|平方|ft|呎|m²|m2)",
          "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^。\\n£]{0,40}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
-         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^.。\\n]{0,40}?(?:[0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)"
+         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^.。\\n]{0,40}?(?:[0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)",
+         "(?<=\\d)\\s*[×x]\\s*\\(?\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "\\(\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*[×x]"
         ]
        }
       },
@@ -1596,7 +1600,7 @@
        },
        {
         "label": "names the area-illusion landmine",
-        "regex": "\\bL1\\b"
+        "regex": "(?i)\\bL1\\b|area\\ illusion|floor\\ area|smaller\\ than|sq\\ ft\\ claim|listing\\ area|面積|面積幻覺"
        },
        {
         "label": "explains the gap is the balcony",
@@ -1885,7 +1889,9 @@
          "£\\s?[0-9][0-9,]*\\s*(?:pcm|per month|/ ?月|每月)",
          "£\\s?[0-9]+(?:\\.[0-9]+)?\\s*(?:/|／|per|每)\\s*(?:sq|平方|ft|呎|m²|m2)",
          "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^。\\n£]{0,40}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
-         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^.。\\n]{0,40}?(?:[0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)"
+         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^.。\\n]{0,40}?(?:[0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)",
+         "(?<=\\d)\\s*[×x]\\s*\\(?\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "\\(\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*[×x]"
         ]
        }
       },
@@ -2268,11 +2274,11 @@
        },
        {
         "label": "names the licence-not-tenancy landmine",
-        "regex": "\\bL13\\b"
+        "regex": "(?i)\\bL13\\b|licence|license|not\\ a\\ tenancy|執照|非租約|執照不是租約"
        },
        {
         "label": "names the headline-price landmine",
-        "regex": "\\bL16\\b"
+        "regex": "(?i)\\bL16\\b|headline\\ price|not\\ the\\ price|true\\ price|real\\ price|all\\-in\\ price|標價|標價不是實價"
        },
        {
         "label": "damp caution on the lower-ground one",
@@ -3198,7 +3204,9 @@
          "£\\s?[0-9][0-9,]*\\s*(?:pcm|per month|/ ?月|每月)",
          "£\\s?[0-9]+(?:\\.[0-9]+)?\\s*(?:/|／|per|每)\\s*(?:sq|平方|ft|呎|m²|m2)",
          "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^。\\n£]{0,40}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
-         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^.。\\n]{0,40}?(?:[0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)"
+         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^.。\\n]{0,40}?(?:[0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)",
+         "(?<=\\d)\\s*[×x]\\s*\\(?\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "\\(\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*[×x]"
         ]
        },
        "holding_deposit_gbp": {
@@ -4082,7 +4090,7 @@
        },
        {
         "label": "names the churn landmine",
-        "regex": "\\bL9\\b"
+        "regex": "(?i)\\bL9\\b|churn|short\\-let|short\\ let|airbnb|turnover|transient|短租|流動|短租或流動鄰居"
        },
        {
         "label": "lower-ground damp caution for B, as a caution not a veto",
@@ -4237,7 +4245,9 @@
          "(?m)^[ \\t#*\\-\\d.]*(?:留位金|留位費|留位|保留金|訂金|holding deposit)(?:(?!押金|tenancy deposit|deposit cap|security deposit)[^\\n])*(?:\\n+(?![0-9]+\\.\\s|#|\\|)[^\\n]+)*",
          "£\\s?[0-9]+(?:\\.[0-9]+)?\\s*(?:/|／|per|每)\\s*(?:sq|平方|ft|呎|m²|m2)",
          "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^。\\n£]{0,40}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
-         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^.。\\n]{0,40}?(?:[0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)"
+         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^.。\\n]{0,40}?(?:[0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)",
+         "(?<=\\d)\\s*[×x]\\s*\\(?\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "\\(\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*[×x]"
         ]
        }
       },
@@ -4303,7 +4313,7 @@
        },
        {
         "label": "names the works landmine",
-        "regex": "\\bL5\\b"
+        "regex": "(?i)\\bL5\\b|construction|building\\ works|works\\ during|building\\ site|scaffold|demolition|crane|工地|施工|租期內的工地"
        },
        {
         "label": "keeps the agent on side",
@@ -4502,7 +4512,7 @@
        },
        {
         "label": "names the licence landmine",
-        "regex": "\\bL13\\b"
+        "regex": "(?i)\\bL13\\b|licence|license|not\\ a\\ tenancy|執照|非租約|執照不是租約"
        },
        {
         "label": "a licence deposit need not go into a government scheme",
