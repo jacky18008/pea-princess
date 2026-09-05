@@ -822,6 +822,23 @@ class TestFileChecksAndRegrade(unittest.TestCase):
         self.assertEqual("pass", facts["rent_pcm"]["status"], facts["rent_pcm"]["detail"])
         self.assertEqual(0, card["fabrications"], [(k, v["detail"]) for k, v in facts.items() if v["status"] == "fail"])
 
+    def test_a_derived_rent_ceiling_is_not_the_all_in_ceiling_and_the_ceiling_is_not_a_deposit(self):
+        doc = runner.load_journeys()
+        j1 = doc["journeys"][0]
+        turn3 = j1["turns"][2]
+        reply = "全部加起來一個月最多 £2,000。扣掉帳單估 £210，租金上限為 **£1,790**。\n"
+        card = runner.score_turn(turn3, reply, j1)
+        facts = dict((r["check"], r) for r in card["checks"] if r["kind"] == "fact")
+        self.assertEqual("pass", facts["all_in_ceiling_gbp"]["status"], facts["all_in_ceiling_gbp"]["detail"])
+        self.assertEqual(0, card["fabrications"])
+        turn5 = j1["turns"][4]
+        reply = ("月租 £1,850 pcm。押金上限 5 週 = 1,850 × 12 ÷ 52 × 5 = **£2,134.62**。"
+                 "你的每月上限 £2,000，含水電 £1,850 剛好在內。\n")
+        card = runner.score_turn(turn5, reply, j1)
+        facts = dict((r["check"], r) for r in card["checks"] if r["kind"] == "fact")
+        self.assertEqual("pass", facts["deposit_cap_gbp"]["status"], facts["deposit_cap_gbp"]["detail"])
+        self.assertEqual(0, card["fabrications"], [(k, v["detail"]) for k, v in facts.items() if v["status"] == "fail"])
+
     def test_the_pasted_profile_becomes_a_real_file_without_its_title_line(self):
         folder = tempfile.mkdtemp()
         try:

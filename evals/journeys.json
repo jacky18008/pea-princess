@@ -483,7 +483,11 @@
          "£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)[^。\\n]{0,14}(?:上限|全部|all-?in|以內)"
         ],
         "source": "turn 3 user message",
-        "why": "The ceiling she stated. Any other figure presented as her ceiling is the agent rewriting the user's own budget."
+        "why": "The ceiling she stated. Any other figure presented as her ceiling is the agent rewriting the user's own budget.",
+        "mask_patterns": [
+         "(?:租金|月租)(?:的)?(?:上限|天花板|最多)[^\\n]{0,10}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "(?:rent ceiling|rent cap|max(?:imum)? rent|rent no more than|rent at most)[^\\n]{0,12}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?"
+        ]
        }
       },
       "max_questions": 3,
@@ -727,7 +731,8 @@
          "\\(\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*[×x]",
          "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:/ ?wk|/ ?week|pw\\b|per week|a week|每週|/週)",
          "(?:annual|yearly|a year|per year|年租|全年)[^\\n]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
-         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:a year|per year|pa\\b|p\\.a\\.|/ ?yr|/ ?year)"
+         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:a year|per year|pa\\b|p\\.a\\.|/ ?yr|/ ?year)",
+         "(?:all-?in|全包|總上限|每月上限|月上限|monthly ceiling|ceiling|budget|預算)[^\\n]{0,14}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?"
         ]
        }
       },
@@ -1061,7 +1066,11 @@
          "£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)[^.\\n]{0,16}(?:all-?in|total|budget|a month|pcm)"
         ],
         "source": "turn 1 user message",
-        "why": "Her stated ceiling. Anything else presented as her ceiling is the agent rewriting the user's budget."
+        "why": "Her stated ceiling. Anything else presented as her ceiling is the agent rewriting the user's budget.",
+        "mask_patterns": [
+         "(?:租金|月租)(?:的)?(?:上限|天花板|最多)[^\\n]{0,10}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "(?:rent ceiling|rent cap|max(?:imum)? rent|rent no more than|rent at most)[^\\n]{0,12}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?"
+        ]
        }
       },
       "max_questions": 4,
@@ -1463,7 +1472,8 @@
          "\\(\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*[×x]",
          "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:/ ?wk|/ ?week|pw\\b|per week|a week|每週|/週)",
          "(?:annual|yearly|a year|per year|年租|全年)[^\\n]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
-         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:a year|per year|pa\\b|p\\.a\\.|/ ?yr|/ ?year)"
+         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:a year|per year|pa\\b|p\\.a\\.|/ ?yr|/ ?year)",
+         "(?:all-?in|全包|總上限|每月上限|月上限|monthly ceiling|ceiling|budget|預算)[^\\n]{0,14}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?"
         ]
        }
       },
@@ -1926,7 +1936,8 @@
          "\\(\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*[×x]",
          "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:/ ?wk|/ ?week|pw\\b|per week|a week|每週|/週)",
          "(?:annual|yearly|a year|per year|年租|全年)[^\\n]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
-         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:a year|per year|pa\\b|p\\.a\\.|/ ?yr|/ ?year)"
+         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:a year|per year|pa\\b|p\\.a\\.|/ ?yr|/ ?year)",
+         "(?:all-?in|全包|總上限|每月上限|月上限|monthly ceiling|ceiling|budget|預算)[^\\n]{0,14}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?"
         ]
        }
       },
@@ -3276,7 +3287,8 @@
          "\\(\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*[×x]",
          "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:/ ?wk|/ ?week|pw\\b|per week|a week|每週|/週)",
          "(?:annual|yearly|a year|per year|年租|全年)[^\\n]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
-         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:a year|per year|pa\\b|p\\.a\\.|/ ?yr|/ ?year)"
+         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:a year|per year|pa\\b|p\\.a\\.|/ ?yr|/ ?year)",
+         "(?:all-?in|全包|總上限|每月上限|月上限|monthly ceiling|ceiling|budget|預算)[^\\n]{0,14}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?"
         ]
        },
        "holding_deposit_gbp": {
@@ -4320,7 +4332,8 @@
          "\\(\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*[×x]",
          "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:/ ?wk|/ ?week|pw\\b|per week|a week|每週|/週)",
          "(?:annual|yearly|a year|per year|年租|全年)[^\\n]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
-         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:a year|per year|pa\\b|p\\.a\\.|/ ?yr|/ ?year)"
+         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:a year|per year|pa\\b|p\\.a\\.|/ ?yr|/ ?year)",
+         "(?:all-?in|全包|總上限|每月上限|月上限|monthly ceiling|ceiling|budget|預算)[^\\n]{0,14}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?"
         ]
        }
       },
@@ -5078,7 +5091,9 @@
         "source": "attachment:profile-now",
         "why": "2200 is what the pasted profile says and 2300 is what the user asked for; a diff shows both. Any other ceiling is invented. The rent target (1,900) is masked: restating it next to the ceiling is not a new ceiling.",
         "mask_patterns": [
-         "(?:rent_pcm_target|\\u79df\\u91d1\\u76ee\\u6a19|rent target|target rent|rent stays|the rent itself)[^\\n]{0,30}?\\u00a3?\\s?1[,\\uff0c]?[0-9]{3}"
+         "(?:rent_pcm_target|\\u79df\\u91d1\\u76ee\\u6a19|rent target|target rent|rent stays|the rent itself)[^\\n]{0,30}?\\u00a3?\\s?1[,\\uff0c]?[0-9]{3}",
+         "(?:租金|月租)(?:的)?(?:上限|天花板|最多)[^\\n]{0,10}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "(?:rent ceiling|rent cap|max(?:imum)? rent|rent no more than|rent at most)[^\\n]{0,12}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?"
         ]
        },
        "limits_unchanged": {
@@ -5241,7 +5256,9 @@
         "source": "attachment:profile-now",
         "why": "The applied ceiling is 2300; 2200 may still appear as the old value. The rent target (1,900) is masked: restating it next to the ceiling is not a new ceiling.",
         "mask_patterns": [
-         "(?:rent_pcm_target|\\u79df\\u91d1\\u76ee\\u6a19|rent target|target rent|rent stays|the rent itself)[^\\n]{0,30}?\\u00a3?\\s?1[,\\uff0c]?[0-9]{3}"
+         "(?:rent_pcm_target|\\u79df\\u91d1\\u76ee\\u6a19|rent target|target rent|rent stays|the rent itself)[^\\n]{0,30}?\\u00a3?\\s?1[,\\uff0c]?[0-9]{3}",
+         "(?:租金|月租)(?:的)?(?:上限|天花板|最多)[^\\n]{0,10}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "(?:rent ceiling|rent cap|max(?:imum)? rent|rent no more than|rent at most)[^\\n]{0,12}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?"
         ]
        }
       },
