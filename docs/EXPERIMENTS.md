@@ -83,9 +83,9 @@ lets the default put cheap models on the extraction work.
 ### Journeys: whole conversations on four models (2026-09-05)
 
 The single-turn arms above score one finished report. `evals/journeys.json` scores whole
-conversations (see `docs/JOURNEYS.md`). All nine ran on the two cheaper Codex tiers; the
-settings change also on the strongest Codex tier; four of them on Claude Sonnet through
-Claude Code. One run each, so every number is a small-sample diagnostic ●, not a verdict.
+conversations (see `docs/JOURNEYS.md`). All nine journeys ran on the two cheaper Codex tiers
+and on Claude Sonnet through Claude Code; the settings change also on the strongest Codex
+tier. One run each, so every number is a small-sample diagnostic ●, not a verdict.
 Score / invented numbers; **PASS** = 0.90 or better with no invented number and no tone hit.
 
 | journey | Luna (cheapest) | Terra (middle) | Sol (strongest) | Sonnet |
@@ -93,39 +93,45 @@ Score / invented numbers; **PASS** = 0.90 or better with no invented number and 
 | Change my settings by talking, zh (3 turns) | 0.82 / 0 | **0.94 / 0** | **0.92 / 0** | 0.80 / 0 |
 | Change my settings by talking, en (3 turns) | **0.90 / 0** | **0.94 / 0** | **0.96 / 0** | 0.88 / 0 |
 | From zero: "teach me", zh (7 turns) | 0.78 / 2 | 0.76 / 0 | – | 0.80 / 0 |
-| An area and a budget, en (5 turns) | 0.80 / 0 | 0.84 / 1 | – | – |
+| An area and a budget, en (5 turns) | 0.80 / 0 | 0.84 / 1 | – | 0.77 / 0 |
 | Vet this listing, zh (4 turns) | 0.75 / 2 | 0.72 / 2 | – | 0.77 / 0 |
-| Roast my short stays, en (4 turns) | 0.71 / 4 | 0.78 / 2 | – | – |
-| Offer and referencing, zh (4 turns) | 0.73 / 1 | 0.76 / 0 | – | – |
-| Arrived, damp lower ground, zh (3 turns) | 0.76 / 0 | 0.73 / 0 | – | – |
-| Compare two flats, en (3 turns) | 0.73 / 2 | 0.76 / 0 | – | – |
-| Licence and advance-rent clause, zh (2 turns) | 0.86 / 0 | 0.75 / 0 | – | – |
-| **mean** | 0.78 · 1.1 invented per run | 0.80 · 0.5 | 0.94 · 0 | 0.81 · 0 |
+| Roast my short stays, en (4 turns) | 0.71 / 4 | 0.78 / 2 | – | 0.80 / 0 |
+| Offer and referencing, zh (4 turns) | 0.73 / 0 | 0.76 / 0 | – | 0.72 / 0 |
+| Arrived, damp lower ground, zh (3 turns) | 0.76 / 0 | 0.73 / 0 | – | 0.80 / 0 |
+| Compare two flats, en (3 turns) | 0.73 / 2 | 0.76 / 0 | – | 0.82 / 1 |
+| Licence and advance-rent clause, zh (2 turns) | 0.86 / 0 | 0.75 / 0 | – | 0.86 / 0 |
+| **mean over the ten runs** | 0.78 · 1.0 invented per run | 0.80 · 0.5 | 0.94 · 0 (two runs) | 0.80 · 0.1 |
 
 What it says:
 
 - **Every model edits the settings file correctly.** All four applied the four-field change
   exactly, touched nothing else, and — once the turn-1 file check existed — changed nothing
-  before the user said yes (10 of 10 file checks for Sonnet and the reruns; 7 of 7 on the
-  earlier form). The scores differ only in what is *said*: naming the validator, stating what
-  was left alone, saying what the change costs. A natural-language settings change does not
-  need a strong model; it needs a form.
+  before the user said yes (10 of 10 file checks for Sonnet and the reruns). The scores differ
+  only in what is *said*: naming the validator, stating what was left alone, saying what the
+  change costs. A natural-language settings change does not need a strong model; it needs a
+  form.
 - **Everything else sits at 0.71–0.86 on every tier, and the misses are the same items.**
   The law's date, "never sign on the viewing day", a polite sentence the user can send to
-  the agent, the first EPC assessment year, the expected-value and single-building points
-  in the comparison. Cheap and middle tiers forget the same prose; Sonnet does not do better
-  on the four it ran. That is the case for the fixed form (landed after these runs).
-- **Invented numbers fall with tier**: 1.1 a run on the cheapest, 0.5 in the middle, none on
-  the strongest tier or Sonnet. What remains after calibration is real: a rent ceiling derived
-  with no bills basis, a wrong nightly rate, a per-stay total that is off.
-- **The grader needed nine calibration fixes before these numbers meant anything**: a unified
-  diff is a diff; a restated rent target is not a new ceiling; "reply yes to save" is asking;
-  price per square foot, rent multiples, income multiples and the rent inside a formula are
-  not rents or deposits; the listing's own six-week ask beside the cap is not an invented cap;
-  a comparison table leaks one stay's numbers into another unless each stay is read from its
-  own lines; "non-refundable" contains "refundable". Every fix carries a regression test, and
-  `bench/journeys.py --regrade` re-scored the paid-for runs. Expect more of this on any fresh
-  dataset; the fabrication count is only as good as the masks.
+  the agent, the first EPC assessment year, the expected-value and single-building points in
+  the comparison. Cheap, middle and Sonnet forget the same prose. That is the case for the
+  fixed form (landed after these runs; measured in the sweep below).
+- **Invented numbers fall with tier**: 1.0 a run on the cheapest, 0.5 in the middle, 0.1 for
+  Sonnet, none on the strongest Codex tier (two runs). What remains after calibration is real:
+  the cheapest tier's rent ceiling derived with no bills basis, a wrong nightly rate, a
+  per-stay total that is off; Sonnet's one is a five-week deposit cap written as one month's
+  rent (£2,250 where 5 × 2,250 × 12 ÷ 52 = £2,596).
+- **Sonnet ≈ the middle Codex tier on these journeys**, with fewer invented numbers and a
+  fifth of the wall time per turn; it was not better at remembering the prose.
+- **The grader needed eleven calibration rounds before these numbers meant anything**: a
+  unified diff is a diff; a restated rent target, an annual rent, a weekly rent, a rent
+  multiple, an income multiple, a difference against the ceiling, a price per square foot and
+  the rent inside a formula are not rents or deposits; "reply yes to save" is asking; a
+  landmine named in plain words counts; the listing's own six-week ask beside the cap is not
+  an invented cap; the user's minimum area and a balcony-stripped internal area are not wrong
+  areas; a comparison table leaks one stay's numbers into another unless each stay is read
+  from its own lines; "non-refundable" contains "refundable". Every round carries a
+  regression test, and `bench/journeys.py --regrade` re-scored the paid-for runs each time.
+  Expect the same on any fresh dataset; the fabrication column is only as good as its masks.
 - **Grade the file, not the sentence.** The first run of the cheapest tier answered
   "validator: valid" inside a read-only sandbox where nothing could have run. Shell-mode
   journeys now get a workspace and are graded on the file afterwards.
