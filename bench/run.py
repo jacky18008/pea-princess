@@ -279,12 +279,18 @@ def prepare_workdir(case, agent, evals_path, workdir=None, link=True):
         dst = os.path.join(home, "vet-flat")
         if os.path.lexists(dst):
             (shutil.rmtree if os.path.isdir(dst) and not os.path.islink(dst) else os.unlink)(dst)
+        # VETFLAT_SKILL_DIR pins the whole skill folder for an experiment (for example a
+        # `git archive <commit> skills/vet-flat` export), so rows started hours apart see
+        # the same references even while the repo moves on underneath them.
+        src_dir = os.environ.get("VETFLAT_SKILL_DIR") or SKILL_DIR
+        label = ("skills/vet-flat" if src_dir == SKILL_DIR
+                 else os.path.relpath(src_dir, ROOT) + " (pinned by VETFLAT_SKILL_DIR)")
         if link:
-            os.symlink(SKILL_DIR, dst)
-            plan.append("symlink skills/vet-flat -> %s/vet-flat" % SKILL_HOME[agent])
+            os.symlink(src_dir, dst)
+            plan.append("symlink %s -> %s/vet-flat" % (label, SKILL_HOME[agent]))
         else:
-            shutil.copytree(SKILL_DIR, dst)
-            plan.append("copy skills/vet-flat -> %s/vet-flat" % SKILL_HOME[agent])
+            shutil.copytree(src_dir, dst)
+            plan.append("copy %s -> %s/vet-flat" % (label, SKILL_HOME[agent]))
         override = os.environ.get("VETFLAT_SKILL_MD_OVERRIDE")
         if override and os.path.exists(override):
             shutil.copy(override, os.path.join(dst, "SKILL.md"))
