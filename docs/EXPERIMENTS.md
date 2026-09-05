@@ -149,9 +149,9 @@ for every row. Ten runs per arm ●.
 
 | SKILL.md shape | facts | invented numbers per run | landmine recall | by layer: script / mixed | landmine precision | all-in cost unknown | verdict match | tokens per run | wall |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| router + references (default) | 0.72 | 0.80 | **0.64** [0.40–0.89] | 0.69 / 0.53 | 0.93 | 8 of 10 | 0.60 | 7.7 M | 1,259 s |
-| monolithic 8k | 0.70 | 0.50 | 0.52 [0.20–0.80] | 0.53 / 0.48 | 0.90 | 5 of 10 | 0.60 | 7.5 M | 1,195 s |
-| router, with the fixed form + no-source rule + axis-10 pointer (skill at 06fcf90) | 0.72 | 1.00 | **0.69** [0.60–0.89] | 0.71 / 0.61 | 0.92 | **2 of 10** | 0.60 | 7.8 M | 1,212 s |
+| router + references (default) | 0.72 | 0.40 | **0.64** [0.40–0.89] | 0.69 / 0.53 | 0.93 | 8 of 10 | 0.60 | 7.7 M | 1,259 s |
+| monolithic 8k | 0.70 | 0.20 | 0.52 [0.20–0.80] | 0.53 / 0.48 | 0.90 | 5 of 10 | 0.60 | 7.5 M | 1,195 s |
+| router, with the fixed form + no-source rule + axis-10 pointer (skill at 06fcf90) | 0.73 | **0.00** | **0.69** [0.60–0.89] | 0.71 / 0.61 | 0.92 | **2 of 10** | 0.60 | 7.8 M | 1,212 s |
 
 What it says:
 
@@ -162,26 +162,32 @@ What it says:
   which the router's "read the axis file, run its script" routing should reach more often.
 - **Facts and verdicts are the same.** Fact recall 0.72 against 0.70, verdict match 0.60
   in both arms.
-- **Two costs of the router, both addressed after this sweep.** It invented more numbers
-  (0.8 a run against 0.5), and it marked the all-in cost unknown in eight runs of ten
-  against five: with the bills model living in a reference file rather than in SKILL.md,
-  the agent more often declined to estimate. The axis-10 line now names the constants file
-  and the calculator and says to estimate at grade I; the fixed form and the
-  no-source-no-number rule are the answer to the invented numbers. The next sweep (below,
-  when it lands) measures the skill with those changes against this baseline.
+- **One cost of the router, addressed after this sweep.** It marked the all-in cost unknown
+  in eight runs of ten against five: with the bills model living in a reference file rather
+  than in SKILL.md, the agent more often declined to estimate. The axis-10 line now names the
+  constants file and the calculator and says to estimate at grade I.
+- **Invented numbers, read after the grader's referent guard** (see below): 0.4 a run for
+  the router, 0.2 for the monolith, per-run spread 0–2, within noise.
 - **Tokens**: about 2 % more per run for the router.
 - **The third row is the skill as it stands tonight**, run into the same folder against the
   same baseline ten runs later (2026-09-05 evening, stdin closed, skill pinned). The axis-10
   line did what it was meant to: the all-in cost was estimated at grade I in eight runs of
   ten instead of two. Landmine recall is the highest of the three arms with the tightest
-  range (0.60–0.89), and the fourteen-question form was filled in every report — 20 items
-  found with a quote, 120 honestly `unknown`, which is the right answer for a benchmark run
-  with no user and no pasted page. The invented-number count did **not** fall (1.0 a run
-  against 0.8; the per-run spread is 0–3, so within noise): the extra ones are numbers of the
-  right kind attached to a different referent — an EPC rating "over time" scored against the
-  current rating, a block's first-sale year scored against the earliest new-build year. That is
-  a grader-side referent problem in `bench/grade.py`, the same class as the nine journey
-  calibrations, and the next thing to fix before the fabrication column is trusted.
+  range (0.60–0.89); the fourteen-question form was filled in every report — 20 items found
+  with a quote, 120 honestly `unknown`, the right answer for a benchmark run with no user and
+  no pasted page — and **no invented number remained in any of the ten runs**.
+- **The invented-number column was wrong until the grader learned referents.** The first
+  regrade showed 0.8 / 0.5 / 1.0 a run; eight of the flagged numbers were then read one by one.
+  Seven were numbers of the right kind about a different thing: a superseded 2010 certificate's
+  area beside the current one, a building age that dates the block rather than this flat's
+  certificate, first-*sale prices* scored as new-build *years*, an energy rating series "over
+  time" scored against the current rating, a bus fallback scored as the rail time. One was real
+  (a crime count over the wrong box and months). `bench/grade.py` now carries a referent guard
+  per fact — structure first (unit, axis, `computed_by`, the flat's identity), keywords as the
+  fallback, cancelled by "current / now / rail-only" — lists what it excluded under
+  `referent_excluded` for audit, and never guards a metric slot, which is the report's own
+  answer. Twenty-one tests hold the eight patterns. Fact recall and landmine recall did not
+  move; six fabrications remain across the thirty runs, all real.
 
 Procedure notes. The sweep was interrupted at row 11 when a SKILL.md rule landed mid-run
 (every run copies the skill folder at start, so one arm would have seen a different skill);
