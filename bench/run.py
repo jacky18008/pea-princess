@@ -284,6 +284,10 @@ def prepare_workdir(case, agent, evals_path, workdir=None, link=True):
             plan.append("symlink skills/vet-flat -> %s/vet-flat" % SKILL_HOME[agent])
         else:
             shutil.copytree(SKILL_DIR, dst)
+        override = os.environ.get("VETFLAT_SKILL_MD_OVERRIDE")
+        if override and os.path.exists(override):
+            shutil.copy(override, os.path.join(dst, "SKILL.md"))
+            plan.append("SKILL.md overridden by %s (ablation variant)" % override)
             plan.append("copy skills/vet-flat -> %s/vet-flat" % SKILL_HOME[agent])
     return path, plan
 
@@ -866,6 +870,8 @@ def variants_of(case):
 def run_one(args, case, variant=None, prompt=None):
     agent = args.agent
     config = getattr(args, "config_data", None) or {}
+    if config.get("skill_md_override"):
+        os.environ["VETFLAT_SKILL_MD_OVERRIDE"] = os.path.join(ROOT, config["skill_md_override"]) if not os.path.isabs(config["skill_md_override"]) else config["skill_md_override"]
     conversation = case.get("kind") == "conversation"
     prompt = prompt or case["prompt"]
     label = case["id"] + ("#" + variant if variant else "")

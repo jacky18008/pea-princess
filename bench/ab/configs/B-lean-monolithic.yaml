@@ -1,0 +1,20 @@
+name: B-lean-monolithic
+phase: ablation
+factor: "SKILL.md shape: the 2026-09-05 monolithic 8k SKILL.md instead of the router + references"
+description: "Exactly B-lean, but the workdir's SKILL.md is replaced by the pre-restructure monolithic file, to measure whether moving details into references changed facts, landmines, questions or answers to what-can-this-do."
+agent: claude
+main_model: null
+budget_mode: standard
+skill_md_override: bench/ab/skill-variants/SKILL-monolithic-2026-09-05.md
+allowed_tools:
+  - "Bash(python3:*)"
+  - Read
+  - Write
+  - Agent
+append_system_prompt: >-
+  Use the scripts in scripts/ for every fetchable fact and read only their JSON. Never read a file
+  larger than 40 KB in full; use ranges. Spawn subagents only for reading pasted review or report
+  text, with model sonnet; do judgment yourself. Keep the report JSON as the only large output.
+  This is an unattended benchmark run: there is no user to answer questions, so never stop to ask;
+  when an input is unavailable mark that axis unknown (U) and still write report.json.
+notes: "Added 2026-09-05 with the router restructure; compare against B-lean run on the same day."

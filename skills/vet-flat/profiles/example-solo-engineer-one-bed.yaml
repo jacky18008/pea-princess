@@ -1,0 +1,109 @@
+# Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen — https://github.com/jacky18008/pea-princess — CC BY 4.0
+#
+# EXAMPLE PROFILE — "the solo software engineer, one bed, first UK tenancy"
+# Numbers come from docs/audience-london-engineers-2026.md (ONS ASHE 2025: London software developers
+# median £75,296, women £60,264; ONS private-rent index July 2026: London one-bed £1,752; the common
+# affordability rule: annual salary ≥ 30 × monthly rent). Living alone drives every requirement here:
+# no second income for the referencing test, nobody else at the viewing, nobody home at night.
+
+flat_type: one_bed
+separate_bedroom_required: true
+occupants: 1
+experience: none                     # first tenancy in the UK; explain terms the first time
+budget_mode: standard
+
+min_floor_area_sqft: 420
+max_building_age_years: 25
+
+budget:
+  rent_pcm_target: 1750              # the London one-bed average; band £1,550–£2,050
+  all_in_pcm_ceiling: 2150           # rent + council tax (single-person discount) + energy + water + broadband
+  stretch_ceiling_and_conditions: "Up to 200 more only for a building with a staffed reception and a second rail line within 8 minutes."
+
+bridging:
+  first_weeks: hotel_or_operator
+
+move_in_window:
+  earliest:
+  latest:
+  tolerance_days: 14
+
+commute:
+  destination: "Old Street Underground Station"   # stand-in for an office; replace with yours
+  arrive_by: "09:30"
+  max_door_to_door_min: 40
+  redundancy_min_grade: "B"
+
+floors:
+  reject_ground_floor: false         # a caution, not a veto: run the damp and security checks
+  prefer_floor_band: "2-10"
+
+light:
+  reject_no_sky: true
+  aspect_scores: {N: 2, NE: 3, E: 4, SE: 4, S: 4, SW: 3, W: 3, NW: 2}
+
+quiet_over_light: true
+
+# The three questions this person asks of every flat. The agent answers them at their stage.
+my_questions:
+  - text: "Would I feel fine walking from the station to the door alone at 11 pm? What is on that route?"
+    when: viewing
+    kind: check
+    trigger: "always"
+  - text: "Who exactly am I renting from, and can I verify them before I hand over any money?"
+    when: filter
+    kind: answer
+    trigger: "always"
+  - text: "If this is cheaper than its neighbours, what is the reason?"
+    when: compare
+    kind: answer
+    trigger: "price below the local band by 10% or more"
+
+avoid:
+  - a walk home through unlit or empty stretches after dark (L3)
+  - entry without a working entry phone or a locked front door (L7 management)
+  - main windows facing a main road or a railway (L4)
+  - viewings or payments pushed before the landlord entity is verified (L12, L15)
+  - heat network without a written tariff (L6)
+  - short-let or hotel-style neighbours (L9)
+  - damp or mould signs on a ground or lower-ground flat (L10 damp check)
+  - a headline price that is not the price (L16)
+
+priorities:
+  - safety_on_the_way_home
+  - quiet
+  - commute
+  - price
+
+must_haves:
+  - washing_machine_in_flat
+  - separate_bedroom_door
+  - openable_windows
+  - working_entry_phone_or_concierge
+
+nice_to_haves:
+  - staffed_reception
+  - cooling_or_mechanical_ventilation
+  - supermarket_within_3_min_walk
+  - lift
+  - bike_storage
+
+guarantor_route: "proof of funds only"   # salaried; passes the 30× test alone at this rent
+
+tenancy:
+  max_months_upfront: 1
+  max_deposit_weeks: 5
+  require_deposit_protection: true
+
+self_intro_template: >-
+  I am a software engineer employed full-time in London, looking for a home for one person,
+  non-smoking, no pets, with payslips and a contract for the income check.
+
+story_summary: >-
+  Moving to London for a first job in the UK and renting alone for the first time. Wants a home that
+  feels safe to come back to late, a bedroom that is dark and quiet, and a landlord who can be
+  verified before any money moves. Has read enough scam warnings to refuse to pay before a viewing,
+  and would rather pay a little more for a staffed building than save on a street that feels empty.
+story_taken_on: "2026-09-05"
+
+language: "en"
