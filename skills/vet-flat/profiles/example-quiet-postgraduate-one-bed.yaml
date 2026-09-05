@@ -57,10 +57,18 @@ avoid:                               # in plain words; each maps to a landmine c
   - a headline price that is not the price (L16)
   - advertised floor area that includes the balcony (L1)
 
-# The two questions this person asks of every flat. The agent answers both, explicitly, in every report.
+# The two questions this person asks of every flat. Each has a stage (when), an action (kind) and a trigger.
+#   when: filter (first pass, can kill) | vet (single-flat report) | compare (the shortlist table) | viewing (on the day) | sign (before signing)
+#   kind: answer (the agent answers from evidence) | ask (put to the agent or landlord) | check (verify on site)
 my_questions:
-  - "If this flat is unusually cheap, unusually good or unusually available next to its neighbours, what is the hidden problem? Cheap has a reason."
-  - "If it is pricier than its neighbours, am I buying visible value I actually care about (quiet side, floor, light, management), or just paying more?"
+  - text: "If this flat is unusually cheap, unusually good or unusually available next to its neighbours, what is the hidden problem? Cheap has a reason."
+    when: compare
+    kind: answer
+    trigger: "price below the local band by 10% or more, or one headline feature unusually good"
+  - text: "If it is pricier than its neighbours, am I buying visible value I actually care about (quiet side, floor, light, management), or just paying more?"
+    when: compare
+    kind: answer
+    trigger: "price above the local band"
 
 priorities:
   - quiet
