@@ -153,6 +153,8 @@ What it says:
   sweep will say whether they worked.
 - **Tokens**: the router costs about 9 % more per run, the price of reading reference files.
 
+**Interim (2026-09-05 15:20): rows 11–20 are being rerun.** They were launched from a shell heredoc, and `claude -p` reads anything piped on stdin as prompt material, so every prompt in those rows carried a twelve-line launcher snippet (both arms alike; confirmed by a one-shot test). The table above will be replaced when the clean rows land.
+
 Procedure note: the sweep was interrupted at row 11 when a SKILL.md rule landed mid-run
 (every run copies the skill folder at start, so one arm would have seen a different skill).
 The eleventh row was discarded and rows 11–20 ran from a `git archive` export of the skill
