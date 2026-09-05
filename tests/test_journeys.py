@@ -657,6 +657,14 @@ class TestFileChecksAndRegrade(unittest.TestCase):
         self.assertLess(runner.cjk_share("see https://example.org/a/very/long/path/that/is/not/prose 好"), 1.0)
         self.assertEqual(0.0, runner.cjk_share("```\n中文 in code only\n```"))
 
+    def test_a_busy_provider_is_a_retry_not_a_failed_turn(self):
+        self.assertTrue(runner.transient_error("ERROR: Selected model is at capacity. Please try a different model."))
+        self.assertTrue(runner.transient_error("HTTP 429 Too Many Requests"))
+        self.assertTrue(runner.transient_error("rate_limit_error: overloaded"))
+        self.assertFalse(runner.transient_error("the agent exited 1: SyntaxError in the reply"))
+        self.assertFalse(runner.transient_error(""))
+        self.assertGreaterEqual(runner.MAX_ATTEMPTS, 2)
+
     def test_the_pasted_profile_becomes_a_real_file_without_its_title_line(self):
         folder = tempfile.mkdtemp()
         try:

@@ -129,6 +129,13 @@ SKILL_HOME = {"claude": os.path.join(".claude", "skills"),
               "codex": os.path.join(".agents", "skills")}
 
 PASS_LINE = {"journey_score": 0.90, "fabrications": 0, "critical_failures": 0}
+# A provider saying "at capacity" or "rate limited" is not the model failing the turn.
+# The turn is retried, with a growing pause, before it is written off.
+MAX_ATTEMPTS = 3
+RETRY_WAIT_S = 60
+TRANSIENT = re.compile(r"at capacity|rate.?limit|too many requests|\b429\b|overloaded|"
+                       r"temporarily unavailable|try again later|server error|\b5\d\d\b", re.I)
+
 
 
 # --------------------------------------------------------------- tone check --
@@ -489,6 +496,11 @@ def check_workdir(workdir, spec, agent=None):
                                 "fail" if key in text else "pass",
                                 "still in the file" if key in text else "gone, as required"))
     return rows
+
+
+def transient_error(text):
+    """True when the agent's failure text names a passing provider condition."""
+    return bool(TRANSIENT.search(text or ""))
 
 
 def score_turn(turn, reply, journey, workdir=None, agent=None, file_rows=None):
@@ -1005,14 +1017,24 @@ def play(journey, args, variant_id=None):
             else:
                 cmd = codex_command(transcript(history, user) if history else user,
                                     workdir, args.model, sandbox)
+            attempts = 0
             try:
-                proc = subprocess.Popen(cmd, cwd=workdir, stdout=subprocess.PIPE,
-                                        stderr=subprocess.PIPE)
-                out, err = proc.communicate(timeout=args.timeout)
-                stdout = (out or b"").decode("utf-8", "replace")
-                if proc.returncode != 0:
-                    note = "the agent exited %d: %s" % (
-                        proc.returncode, (err or b"").decode("utf-8", "replace")[-300:])
+                while True:
+                    attempts += 1
+                    proc = subprocess.Popen(cmd, cwd=workdir, stdout=subprocess.PIPE,
+                                            stderr=subprocess.PIPE)
+                    out, err = proc.communicate(timeout=args.timeout)
+                    stdout = (out or b"").decode("utf-8", "replace")
+                    stderr_text = (err or b"").decode("utf-8", "replace")
+                    if (proc.returncode != 0 and attempts < MAX_ATTEMPTS
+                            and transient_error(stderr_text + stdout[-2000:])):
+                        print("  turn %d: the provider is busy, retry %d of %d in %d s"
+                              % (index, attempts, MAX_ATTEMPTS - 1, RETRY_WAIT_S * attempts))
+                        time.sleep(RETRY_WAIT_S * attempts)
+                        continue
+                    if proc.returncode != 0:
+                        note = "the agent exited %d: %s" % (proc.returncode, stderr_text[-300:])
+                    break
                 if agent == "claude":
                     reply, usage = claude_answer(stdout)
                 else:
@@ -1038,6 +1060,7 @@ def play(journey, args, variant_id=None):
         card["note"] = note
         card["wall_time_s"] = wall
         card["usage"] = usage
+        card["retries"] = (attempts - 1) if agent != "api" else 0
         card.move_to_end("turn", last=False)
         turns.append(card)
         history.append(("user", user))
