@@ -2500,7 +2500,10 @@
         ],
         "window": 400,
         "source": "attachment:stay-a-bramblewick",
-        "why": "£78 a night, exactly as the page says."
+        "why": "£78 a night, exactly as the page says.",
+        "line_mask": [
+         "Netherfield|\\bStay B\\b|\\bListing B\\b|\\bOption B\\b|^\\|\\s*B\\s*\\||Quillon|\\bStay C\\b|\\bListing C\\b|\\bOption C\\b|^\\|\\s*C\\s*\\||Halcyon|\\bStay D\\b|\\bListing D\\b|\\bOption D\\b|^\\|\\s*D\\s*\\|"
+        ]
        },
        "stay_a_cleaning_gbp": {
         "value": 65,
@@ -2518,7 +2521,10 @@
         ],
         "window": 400,
         "source": "attachment:stay-a-bramblewick",
-        "why": "£65 cleaning fee, exactly as the page says."
+        "why": "£65 cleaning fee, exactly as the page says.",
+        "line_mask": [
+         "Netherfield|\\bStay B\\b|\\bListing B\\b|\\bOption B\\b|^\\|\\s*B\\s*\\||Quillon|\\bStay C\\b|\\bListing C\\b|\\bOption C\\b|^\\|\\s*C\\s*\\||Halcyon|\\bStay D\\b|\\bListing D\\b|\\bOption D\\b|^\\|\\s*D\\s*\\|"
+        ]
        },
        "stay_a_platform_fee_gbp": {
         "value": 315,
@@ -2536,7 +2542,10 @@
         ],
         "window": 400,
         "source": "attachment:stay-a-bramblewick",
-        "why": "£315 platform service fee, exactly as the page says."
+        "why": "£315 platform service fee, exactly as the page says.",
+        "line_mask": [
+         "Netherfield|\\bStay B\\b|\\bListing B\\b|\\bOption B\\b|^\\|\\s*B\\s*\\||Quillon|\\bStay C\\b|\\bListing C\\b|\\bOption C\\b|^\\|\\s*C\\s*\\||Halcyon|\\bStay D\\b|\\bListing D\\b|\\bOption D\\b|^\\|\\s*D\\s*\\|"
+        ]
        },
        "stay_b_monthly_gbp": {
         "value": 1900,
@@ -2553,7 +2562,10 @@
         ],
         "window": 400,
         "source": "attachment:stay-b-netherfield",
-        "why": "£1,900 a month, exactly as the page says."
+        "why": "£1,900 a month, exactly as the page says.",
+        "line_mask": [
+         "garden\\ studio|Bramblewick|\\bStay A\\b|\\bListing A\\b|\\bOption A\\b|^\\|\\s*A\\s*\\||Quillon|\\bStay C\\b|\\bListing C\\b|\\bOption C\\b|^\\|\\s*C\\s*\\||Halcyon|\\bStay D\\b|\\bListing D\\b|\\bOption D\\b|^\\|\\s*D\\s*\\|"
+        ]
        },
        "stay_c_weekly_gbp": {
         "value": 445,
@@ -2570,7 +2582,10 @@
         ],
         "window": 400,
         "source": "attachment:stay-c-quillon-wharf",
-        "why": "£445 a week, exactly as the page says."
+        "why": "£445 a week, exactly as the page says.",
+        "line_mask": [
+         "garden\\ studio|Bramblewick|\\bStay A\\b|\\bListing A\\b|\\bOption A\\b|^\\|\\s*A\\s*\\||Netherfield|\\bStay B\\b|\\bListing B\\b|\\bOption B\\b|^\\|\\s*B\\s*\\||Halcyon|\\bStay D\\b|\\bListing D\\b|\\bOption D\\b|^\\|\\s*D\\s*\\|"
+        ]
        },
        "stay_c_booking_fee_gbp": {
         "value": 180,
@@ -2587,7 +2602,10 @@
         ],
         "window": 400,
         "source": "attachment:stay-c-quillon-wharf",
-        "why": "£180 non-refundable platform booking fee."
+        "why": "£180 non-refundable platform booking fee.",
+        "line_mask": [
+         "garden\\ studio|Bramblewick|\\bStay A\\b|\\bListing A\\b|\\bOption A\\b|^\\|\\s*A\\s*\\||Netherfield|\\bStay B\\b|\\bListing B\\b|\\bOption B\\b|^\\|\\s*B\\s*\\||Halcyon|\\bStay D\\b|\\bListing D\\b|\\bOption D\\b|^\\|\\s*D\\s*\\|"
+        ]
        },
        "stay_c_deposit_gbp": {
         "value": 500,
@@ -2604,14 +2622,17 @@
         ],
         "window": 400,
         "source": "attachment:stay-c-quillon-wharf",
-        "why": "£500, and the page says it goes to the operator, not the platform."
+        "why": "£500, and the page says it goes to the operator, not the platform.",
+        "line_mask": [
+         "garden\\ studio|Bramblewick|\\bStay A\\b|\\bListing A\\b|\\bOption A\\b|^\\|\\s*A\\s*\\||Netherfield|\\bStay B\\b|\\bListing B\\b|\\bOption B\\b|^\\|\\s*B\\s*\\||Halcyon|\\bStay D\\b|\\bListing D\\b|\\bOption D\\b|^\\|\\s*D\\s*\\|"
+        ]
        },
        "stay_d_flexible_total_gbp": {
         "value": 3240,
         "tolerance": 0.0,
         "required": false,
         "patterns": [
-         "(?:flexible|free cancellation|refundable rate)[^.\\n]{0,40}?£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)"
+         "(?:flexible|free cancellation|(?<!non-)(?<!non )refundable rate)[^.\\n]{0,40}?£\\s?([0-9]{1,3}(?:,[0-9]{3})+|[0-9]{3,6})"
         ],
         "near": [
          "Halcyon",
@@ -2621,14 +2642,17 @@
         ],
         "window": 500,
         "source": "attachment:stay-d-halcyon-row",
-        "why": "£3,240 on the flexible rate for 30 nights, as published."
+        "why": "£3,240 on the flexible rate for 30 nights, as published.",
+        "line_mask": [
+         "garden\\ studio|Bramblewick|\\bStay A\\b|\\bListing A\\b|\\bOption A\\b|^\\|\\s*A\\s*\\||Netherfield|\\bStay B\\b|\\bListing B\\b|\\bOption B\\b|^\\|\\s*B\\s*\\||Quillon|\\bStay C\\b|\\bListing C\\b|\\bOption C\\b|^\\|\\s*C\\s*\\|"
+        ]
        },
        "stay_d_nonrefundable_total_gbp": {
         "value": 2700,
         "tolerance": 0.0,
         "required": false,
         "patterns": [
-         "non-?refundable[^.\\n]{0,40}?£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)"
+         "non-?refundable[^.\\n]{0,40}?£\\s?([0-9]{1,3}(?:,[0-9]{3})+|[0-9]{3,6})"
         ],
         "near": [
          "Halcyon",
@@ -2638,7 +2662,10 @@
         ],
         "window": 500,
         "source": "attachment:stay-d-halcyon-row",
-        "why": "£2,700 on the non-refundable rate for the same 30 nights."
+        "why": "£2,700 on the non-refundable rate for the same 30 nights.",
+        "line_mask": [
+         "garden\\ studio|Bramblewick|\\bStay A\\b|\\bListing A\\b|\\bOption A\\b|^\\|\\s*A\\s*\\||Netherfield|\\bStay B\\b|\\bListing B\\b|\\bOption B\\b|^\\|\\s*B\\s*\\||Quillon|\\bStay C\\b|\\bListing C\\b|\\bOption C\\b|^\\|\\s*C\\s*\\|"
+        ]
        }
       },
       "max_questions": 6,

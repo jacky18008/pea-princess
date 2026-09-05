@@ -778,6 +778,24 @@ class TestFileChecksAndRegrade(unittest.TestCase):
         facts = dict((r["check"], r) for r in card["checks"] if r["kind"] == "fact")
         self.assertEqual(0, card["fabrications"], [(k, v["detail"]) for k, v in facts.items() if v["status"] == "fail"])
 
+    def test_one_stay_does_not_borrow_another_stays_numbers(self):
+        doc = runner.load_journeys()
+        j4 = [j for j in doc["journeys"] if j["id"] == "j4-roast-my-short-stays-en"][0]
+        reply = ("| Stay | 30-night price | Cash exposure |\n|---|---:|---:|\n"
+                 "| A | `30×£78 + £65 + £315 = £2,720` | £2,720 |\n"
+                 "| B | `2×£1,900 = £3,800` rent | £5,700 including £1,900 deposit |\n"
+                 "| C | £2,850 | £500 deposit to the operator |\n"
+                 "| D | flexible £3,240, or £108/night | non-refundable £2,700, or £90/night |\n\n"
+                 "Halcyon Row (Stay D): the flexible rate is £3,240. The non-refundable rate is £2,700, or £90/night.\n"
+                 "The non-refundable price is actually £20 below Bramblewick's stated total.\n"
+                 "Bramblewick garden studio (Stay A): £78 a night.\n"
+                 "Quillon Wharf (Stay C): £500 deposit, paid to the operator.\n")
+        card = runner.score_turn(j4["turns"][0], reply, j4)
+        facts = dict((r["check"], r) for r in card["checks"] if r["kind"] == "fact")
+        self.assertEqual(0, card["fabrications"], [(k, v["detail"]) for k, v in facts.items() if v["status"] == "fail"])
+        for k in ("stay_a_nightly_gbp", "stay_c_deposit_gbp", "stay_d_flexible_total_gbp", "stay_d_nonrefundable_total_gbp"):
+            self.assertEqual("pass", facts[k]["status"], (k, facts[k]["detail"]))
+
     def test_the_pasted_profile_becomes_a_real_file_without_its_title_line(self):
         folder = tempfile.mkdtemp()
         try:
