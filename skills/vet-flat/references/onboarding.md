@@ -10,13 +10,13 @@ Read this when the user asks "what can this do", "how do I start", "what is this
 > I check a London rental flat the way a careful surveyor would, using official and open UK data: the government energy certificate (true size, age, heating), police crime data, planning applications next door, the company behind the landlord or agent, deposit and money-protection rules, price against the local band, light, all-in monthly cost, and the commute with a backup line. You get a plain verdict (PASS / EDGE / CONDITIONAL / KILL) with every finding graded by evidence. I never guess: what I cannot reach, I ask you to paste. I can also sweep a whole area around your destination and compare buildings. You set the rules (budget, size, must-haves, deal-breakers), or if you have no idea yet, I explain the basics first and suggest defaults. Works from a chat box or with a full toolset; the report looks the same either way. You are the princess; I only lift the mattresses. I am a filter, not a replacement for viewing the flat and meeting the agent or landlord: they are partners in this, and only you can feel the pea.
 
 **繁體中文**
-> 我用英國官方與公開資料，像謹慎的驗屋師一樣審查一間倫敦出租公寓：政府能源證書（真實坪數、屋齡、供暖方式）、警方犯罪資料、隔壁的規劃申請案、房東或仲介背後的公司、押金與客戶資金保護規定、價格對照當地行情、採光、每月全部成本、通勤與備援路線。你會得到白話判決（通過／邊緣／有條件／淘汰），每一項發現都標明證據等級。我不猜：拿不到的資料，我會請你貼給我。我也能掃描你目的地周圍整個區域，比較各棟建築。規則由你定（預算、坪數、必要條件、地雷）；完全沒概念也沒關係，我先講基本常識，再建議預設值。在純對話框或有完整工具的環境都能用，報告長得一樣。你才是豌豆公主，我只負責把床墊一層層掀開。我是篩子，不能取代實地看房與見仲介、房東；他們是合作對象，那顆豌豆只有你躺上去才感覺得到。
+> 我用英國官方與公開資料，像謹慎的驗屋師一樣尻洗（台語，roast）一間倫敦出租公寓：政府能源證書（真實坪數、屋齡、供暖方式）、警方犯罪資料、隔壁的規劃申請案、房東或仲介背後的公司、押金與客戶資金保護規定、價格對照當地行情、採光、每月全部成本、通勤與備援路線。你會得到白話判決（通過／邊緣／有條件／淘汰），每一項發現都標明證據等級。我不猜：拿不到的資料，我會請你貼給我。我也能掃描你目的地周圍整個區域，比較各棟建築。規則由你定（預算、坪數、必要條件、地雷）；完全沒概念也沒關係，我先講基本常識，再建議預設值。在純對話框或有完整工具的環境都能用，報告長得一樣。你才是豌豆公主，我只負責把床墊一層層掀開。我是篩子，不能取代實地看房與見仲介、房東；他們是合作對象，那顆豌豆只有你躺上去才感覺得到。
 
 **简体中文**
-> 我用英国官方与公开数据，像谨慎的验房师一样审查一套伦敦出租公寓：政府能源证书（真实面积、楼龄、供暖方式）、警方犯罪数据、隔壁的规划申请、房东或中介背后的公司、押金与客户资金保护规定、价格对照当地行情、采光、每月全部成本、通勤与备用线路。你会得到白话结论（通过／边缘／有条件／淘汰），每一项发现都标明证据等级。我不猜：拿不到的资料，我会请你贴给我。我也能扫描你目的地周围整个区域，比较各栋建筑。规则由你定（预算、面积、必要条件、雷点）；完全没概念也没关系，我先讲基本常识，再建议默认值。在纯对话框或有完整工具的环境都能用，报告长得一样。你才是豌豆公主，我只负责把床垫一层层掀开。我是筛子，不能取代实地看房与见中介、房东；他们是合作对象，那颗豌豆只有你躺上去才感觉得到。
+> 我用英国官方与公开数据，像谨慎的验房师一样尻洗（台语，roast）一套伦敦出租公寓：政府能源证书（真实面积、楼龄、供暖方式）、警方犯罪数据、隔壁的规划申请、房东或中介背后的公司、押金与客户资金保护规定、价格对照当地行情、采光、每月全部成本、通勤与备用线路。你会得到白话结论（通过／边缘／有条件／淘汰），每一项发现都标明证据等级。我不猜：拿不到的资料，我会请你贴给我。我也能扫描你目的地周围整个区域，比较各栋建筑。规则由你定（预算、面积、必要条件、雷点）；完全没概念也没关系，我先讲基本常识，再建议默认值。在纯对话框或有完整工具的环境都能用，报告长得一样。你才是豌豆公主，我只负责把床垫一层层掀开。我是筛子，不能取代实地看房与见中介、房东；他们是合作对象，那颗豌豆只有你躺上去才感觉得到。
 
 Then offer the four starting points, as one line each:
-1. **I have a listing** → paste the link or the page text and I vet it (the 12 checks).
+1. **I have a listing** → paste the link or the page text and I roast it (the 12 checks).
 2. **I have an area or a place I commute to** → I sweep around it and compare buildings.
 3. **I have no idea** → I explain the basics (section 3) and ask six questions (section 2).
 4. **I am about to sign, or I need somewhere for a few weeks first** → the move-in half: bridging stays (`axes/15`), passing the income check (`axes/16`), the first two weeks in the UK (`axes/17`).
@@ -36,7 +36,7 @@ Ask all six in one numbered message. Accept "don't know" for any: then use the d
 | 5 | Deal-breakers: pick from the menu below or add your own | ground floor; windows that cannot see sky; no washing machine | `avoid`, `floors`, `light`, `must_haves` |
 | 6 | How will you pass the landlord's income check? | if unknown, explain the three routes in section 3 and set "don't know yet" | `guarantor_route` |
 
-Optional, only if the user is engaged: floor band, light versus quiet, top three priorities, nice-to-haves.
+Optional, only if the user is engaged: floor band, light versus quiet, top three priorities, nice-to-haves. If they cannot answer those, or answered "don't know" more than twice above, offer the five-minute story session in section 2b instead of asking harder questions.
 
 **Deal-breaker menu** (plain words → what the skill checks):
 
@@ -56,6 +56,105 @@ Optional, only if the user is engaged: floor band, light versus quiet, top three
 | "landlord must be a company / must be protected deposit" | `tenancy.require_deposit_protection: true` | L12 landlord type and money gate |
 | "I need somewhere for a few weeks first" | see `axes/15-bridging-short-lets.md` | L13 licence not tenancy, L16 headline price |
 | "I have no UK guarantor" | `guarantor_route`, see `axes/16-referencing-and-proof-of-funds.md` | L14 money gate, L15 non-refundable fees |
+
+## 2b. Tell me about the places you have lived (optional, 5 minutes)
+
+Offer this once, in the user's language, to anyone who answered "don't know" to more than two of the six questions, who says "I don't know what I want", or who asks for it. Never make it a condition of starting, and never ask a second time if they decline. Most people cannot list their deal-breakers, but everyone can tell you about the flat they hated.
+
+**Say it roughly like this:**
+
+> If you have five minutes, talk instead of typing. Use any dictation tool you already have — the microphone key on your phone keyboard, or the dictation built into your laptop; free dictation apps such as Otter or Notta do the same job, and any of them works, including recording a voice memo and pasting the transcript. Then just talk, and ramble: the best place you have ever lived and what made it good, the worst one and what made it bad, hotels and short stays you loved or hated, even a shop or a café you keep going back to. I will turn it into rules, show you the three sentences I heard, and change nothing in your profile until you say yes.
+
+Any transcript works. Bad punctuation, filler words and repetition are fine and are not worth correcting; a transcript in a different language from the report is fine too.
+
+### What to listen for
+
+| In the stories | What it is telling you |
+|---|---|
+| **What made the good ones good** | light (which way the windows faced, what time of day they mention), quiet, the kitchen (size, cooking properly, a table), the neighbours (who they were, how often they changed), how fast management or the landlord answered, and location habits: what they walked to, how far, and how often |
+| **What made the bad ones bad** | damp, mould and cold; noise and where it came from (road, railway, plant, neighbours, corridor); landlord or agent behaviour; bill shocks and what they were not told in advance; the commute they came to resent, and which part of it they resented |
+| **Money attitudes** | what they regret paying for; what they would happily pay more for and what they call it; what they call a rip-off; whether they overpay to end a search; whether they would rather have space or quiet for the same money |
+| **Hotels, short stays and shops** | the same signals with the housing words stripped out. A hotel remembered for its quiet side street is a quiet preference. A shop they walk fifteen minutes past two nearer ones to reach is a location habit, not a shopping habit. A stay they hated for the shower and the corridor doors is a fabric-and-noise preference. |
+
+**Listen for strength, not just content.** "I would never do that again" is a hard filter; "it was a bit annoying" is a nice-to-have. Repetition is strength: the thing they mention in three different stories is the thing that actually governs them.
+
+### How to distil it (each story element → one field)
+
+| What you heard | Where it goes | Landmine it arms |
+|---|---|---|
+| "Never again" about a place, a floor, a facade, a landlord habit | `avoid` (one plain line per item) | the matching code below |
+| Ground or basement flat remembered for damp, dark or break-ins | `floors.reject_ground_floor: true` | L10 |
+| A floor number they were happy on, or a lift they hated | `floors.prefer_floor_band` (e.g. `"2-8"`) | L10 |
+| Morning sun, evening sun, "the flat was dark", a light well, a wall outside the window | `light.reject_no_sky`, `light.aspect_scores` (raise E/SE for morning, W/SW for evening) | L2 |
+| Noise remembered before light, or "I could not sleep" | `quiet_over_light: true`, and `avoid: main road or railway facade` | L4 |
+| Building works, scaffolding, a crane that arrived after they moved in | `avoid: building works next door during my tenancy` | L5 |
+| A winter bill nobody would quote in advance; heat they could not switch supplier on | `avoid: heating with no written tariff` | L6 |
+| A landlord or manager who did not answer, or who could not be replaced | `avoid: management with no resident route to replace it` | L7 |
+| Corridor that behaved like a hotel; neighbours who changed every week | `avoid: short-let or churn neighbours` | L9 |
+| Summer heat, or cooking smells arriving through the vents | `avoid: no cooling`, `avoid: shared ventilation odours` | L11 |
+| A thing whose absence made daily life worse (laundry in a basement, no parcel handling, no lift) | `must_haves` if they would refuse a flat without it, `nice_to_haves` if they would only grumble | axis 12 |
+| The three things mentioned most, in the order of heat in their voice | `priorities` (exactly three, in order) | — |
+| "I paid more for X and it was worth it" / "I paid more just to stop looking, and I regret it" | `budget.stretch_ceiling_and_conditions`, as one sentence naming the benefit and the cap | — |
+| Anything about the kind of home itself (a studio they outgrew, a bedroom with no door) | `flat_type`, `separate_bedroom_required`, `min_floor_area_sqft` | L1 |
+
+Rules that are not negotiable when you do this:
+
+1. **Never store the stories.** The profile gets the derived preferences and the three-sentence `story_summary`, and nothing else. No addresses, no building names, no landlords, no employers, no flatmates, no dates, no transcript. Do not save the transcript to a file, and do not quote it back in a report.
+2. **Never infer or record ethnicity, nationality, religion, health or immigration status**, and do not use them to weight anything, even when the user volunteers them. If a story is about discrimination the user suffered, say you are sorry it happened, do not write it down, and take only the housing preference out of it (for example: "a landlord you can hold to something in writing" → `avoid: management with no resident route to replace it`).
+3. **Do not diagnose.** "The damp made me ill" becomes `avoid: damp or a history of mould`, never a health note.
+4. **Preferences are not evidence about a flat.** Everything from the stories is graded **S** (self-reported) and shapes the ruler, never a finding.
+5. **Nothing is written until the user says yes.** Show, then write.
+
+### Write it back like this
+
+Three parts, one message:
+
+1. **"What I heard"** — exactly three sentences, second person, no quotes from the transcript, no place names: one sentence on what makes a home good for them, one on what ruins one, one on how they trade money for quality. This is what goes in `story_summary`, with today's date in `story_taken_on`.
+2. **The proposed profile** — only the lines that would change, each with a five-word reason. Never the whole file.
+3. **One question**: "Shall I save these?" Then apply, or amend, and move on to the flats. If they change their mind later, `story_summary` is a normal field they can edit or delete.
+
+### Worked example (fictional)
+
+Six lines of transcript:
+
+> The flat I loved was a second-floor one over a courtyard, morning sun right on the kitchen table, and I never once heard the road.
+> The one I hated was a ground-floor conversion behind a bus stop and by November the whole place smelled of damp.
+> The landlord took three weeks to come out for a leak and then somehow it was my fault.
+> One January the heating bill was two hundred and eighty pounds and nobody would tell me the rate beforehand.
+> I do not mind a small kitchen but I want to cook properly, and I never want to carry laundry down to a basement again.
+> I paid a hundred and twenty more a month for the last place just to stop looking, and I regret it.
+
+What I heard (the three sentences that become `story_summary`):
+
+> You are happiest a few floors up with morning light on the table and a courtyard between you and the traffic. What ruins a flat for you is damp, a landlord who does not turn up, and a bill nobody will quote before you sign. You will pay a little more for quiet and a real floor, but not to end a search early.
+
+Eight changed lines in the preference block of `profile.yaml` (the summary block follows underneath):
+
+```diff
+ avoid:
+   - ground floor
++  - main road, bus stop or railway outside the bedroom window   # "behind a bus stop" → L4
++  - damp, or a history of mould in the flat or the one below    # "smelled of damp" → L10 checks
++  - heating with no written tariff                              # "nobody would tell me the rate" → L6
++  - management with no resident route to replace it             # "three weeks for a leak" → L7
+ priorities:
+   - quiet
+-  - commute
++  - light                                                       # morning sun, named first, twice
+   - price
+ light:
+   aspect_scores:
+-    E: 4
++    E: 5                                                        # "morning sun on the kitchen table"
+ floors:
+-  prefer_floor_band:
++  prefer_floor_band: "2-8"                                      # loved a second floor, hated the ground
+ budget:
+-  stretch_ceiling_and_conditions:
++  stretch_ceiling_and_conditions: "Up to 100 more per month only for a quiet-side flat on the second floor or above; never to end a search."
+```
+
+`must_haves` gains `washing_machine_in_flat` only if it is not already there ("never again" is a hard filter), `story_summary` gets the three sentences above and `story_taken_on` today's date. Nothing else moves: the transcript is not saved, the landlord is not named, and no number came out of the stories that the user did not say out loud.
 
 ## 3. Primer for someone with no idea (ten facts, one screen; cite `references/sources.yaml` ids where numbers appear)
 

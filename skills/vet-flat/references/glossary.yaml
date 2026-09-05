@@ -1275,3 +1275,10 @@ terms:
     plain: "A whole building owned by one company and built only to be rented. Repairs are usually faster, and the rent is usually higher."
     plain-zh-TW: "整棟由一家公司持有、專為出租而蓋的樓。修繕通常比較快，租金通常比較貴。"
     plain-zh-CN: "整栋由一家公司持有、专为出租而盖的楼。修缮通常比较快，租金通常比较贵。"
+  term.roast:
+    en: "roast"
+    zh-TW: "尻洗（台語，roast）"
+    zh-CN: "尻洗（台语，roast）"
+    plain: "A candid, specific, evidence-based critique of a listing or a building before you view it: what is wrong with the flat, never with the people. The Chinese word 尻洗 is Taiwanese Hokkien and marks the author's Taiwanese origin."
+    plain-zh-TW: "看房前對一間房子或一棟樓做嗆辣但中肯、有證據的批評：嫌的是房子，不是人。「尻洗」是台語，標記作者的台灣出身。"
+    plain-zh-CN: "看房前对一套房子或一栋楼做犀利但中肯、有证据的批评：嫌的是房子，不是人。“尻洗”是台语，标记作者的台湾出身。"
