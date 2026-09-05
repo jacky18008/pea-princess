@@ -80,6 +80,49 @@ lets the default put cheap models on the extraction work.
 
 ---
 
+### Journeys: a settings change and a cold start (Codex, 2026-09-05)
+
+The single-turn arms above score one finished report. `evals/journeys.json` scores whole
+conversations (see `docs/JOURNEYS.md`). Two of the nine were run on the three Codex tiers,
+one run each, so treat every number as a small-sample diagnostic ●, not a verdict.
+
+| journey | tier | score | invented numbers | file checks | wall |
+|---|---|---|---|---|---|
+| Change my settings by talking, zh (3 turns) | Luna (cheapest) | 0.82 | 0 | 7 / 7 | 201 s |
+| | Terra (middle) | 0.94 | 0 | 7 / 7 | 389 s |
+| | Sol (strongest) | 0.92 | 0 | 7 / 7 | 251 s |
+| Change my settings by talking, en (3 turns) | Luna | 0.90 | 0 | 7 / 7 | 202 s |
+| | Terra | 0.94 | 0 | 7 / 7 | 334 s |
+| | Sol | 0.96 | 0 | 7 / 7 | 254 s |
+| From zero: "teach me", zh (7 turns) | Luna | 0.79 | 1 | – | 1,125 s |
+| | Terra | 0.76 | 0 | – | 2,104 s |
+
+The pass line is 0.90 with no invented number and no tone hit. "File checks" are the seven
+things `profile.yaml` had to contain, or no longer contain, after the user said yes: the new
+ceiling, the two axes set to deep, the three limits that were not mentioned and had to stay,
+and the old ceiling gone.
+
+What it says:
+
+- **Every tier edits the file correctly.** The cheapest model applied the four-field change
+  exactly, touched nothing else, and ran the validator. The score gap between tiers is
+  entirely in what they *say*: naming the validator, stating what was left alone, saying what
+  the change costs or buys. A natural-language settings change does not need a strong model.
+- **The cold start is where cheap and middle both fall short, and in the same places.** Both
+  skipped the law's date, both forgot "never sign on the viewing day" at the end, neither gave
+  the user a polite sentence to send to the agent, and the middle tier missed eight of the ten
+  primer facts on turn one. The primer is written as prose the model is meant to remember;
+  it is not remembered. The fix under consideration is a fixed form of must-answer items with
+  three states (found with a quote / asked the user / unknown), enforced by the schema.
+- **Grade the file, not the sentence.** The first run of the cheapest tier answered
+  "validator: valid" inside a read-only sandbox where nothing could have run. Shell-mode
+  journeys now get a workspace and are graded on the file afterwards; the turn-1 check that the
+  file still holds the *old* values is the ground truth for "never apply before the yes".
+- **Three grader fixes came out of the first eight runs** (a unified diff is a diff; restating
+  the untouched rent target is not a new ceiling; "reply yes to save" is asking). That is why
+  `bench/journeys.py --regrade` exists: the replies were paid for once and re-scored, not
+  re-run. Two of the eight rows changed by more than 0.05 after calibration.
+
 ## The picture
 
 ![Scatter chart. Left panel: nine Claude Code configurations, landmine recall against cost per run in US dollars on a log axis. A-legacy — raw web pages with one reader per axis — is the highest and by far the most expensive point, at 0.87 recall for $31.40. The B family clusters between 0.38 and 0.71 recall for $1.40 to $11.70, mostly inside a shaded band marking run-to-run noise around the default B-lean. C-twenty is lowest and cheapest at 0.15 recall for $0.67. Right panel: six Codex GPT-5.6 configurations as hollow markers, recall against input tokens per run on a log axis, running from 0.13 recall at 0.36 million tokens up to 0.52 recall at 12.2 million tokens. Colour marks the data path and budget mode.](experiments-recall-vs-cost.svg)
@@ -218,6 +261,12 @@ eight real flats, truth produced by this repo's own fetchers, no private materia
 `bench/README.md`, and it runs out of the box.
 
 ---
+
+```bash
+# the journeys (whole conversations), one tier at a time; --regrade re-scores without re-running
+python3 bench/journeys.py --journey j9-adjust-settings-by-talking --agent codex --model gpt-5.6-luna
+python3 bench/journeys.py --regrade bench/results/journeys-2026-09-05
+```
 
 ## Caveats
 
