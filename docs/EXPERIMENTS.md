@@ -145,6 +145,7 @@ for every row. Ten runs per arm ●.
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | router + references (default) | 0.72 | 0.80 | **0.64** [0.40–0.89] | 0.69 / 0.53 | 0.93 | 8 of 10 | 0.60 | 7.7 M | 1,259 s |
 | monolithic 8k | 0.70 | 0.50 | 0.52 [0.20–0.80] | 0.53 / 0.48 | 0.90 | 5 of 10 | 0.60 | 7.5 M | 1,195 s |
+| router, with the fixed form + no-source rule + axis-10 pointer (skill at 06fcf90) | 0.72 | 1.00 | **0.69** [0.60–0.89] | 0.71 / 0.61 | 0.92 | **2 of 10** | 0.60 | 7.8 M | 1,212 s |
 
 What it says:
 
@@ -163,6 +164,18 @@ What it says:
   no-source-no-number rule are the answer to the invented numbers. The next sweep (below,
   when it lands) measures the skill with those changes against this baseline.
 - **Tokens**: about 2 % more per run for the router.
+- **The third row is the skill as it stands tonight**, run into the same folder against the
+  same baseline ten runs later (2026-09-05 evening, stdin closed, skill pinned). The axis-10
+  line did what it was meant to: the all-in cost was estimated at grade I in eight runs of
+  ten instead of two. Landmine recall is the highest of the three arms with the tightest
+  range (0.60–0.89), and the fourteen-question form was filled in every report — 20 items
+  found with a quote, 120 honestly `unknown`, which is the right answer for a benchmark run
+  with no user and no pasted page. The invented-number count did **not** fall (1.0 a run
+  against 0.8; the per-run spread is 0–3, so within noise): the extra ones are numbers of the
+  right kind attached to a different referent — an EPC rating "over time" scored against the
+  current rating, a block's first-sale year scored against the earliest new-build year. That is
+  a grader-side referent problem in `bench/grade.py`, the same class as the nine journey
+  calibrations, and the next thing to fix before the fabrication column is trusted.
 
 Procedure notes. The sweep was interrupted at row 11 when a SKILL.md rule landed mid-run
 (every run copies the skill folder at start, so one arm would have seen a different skill);
