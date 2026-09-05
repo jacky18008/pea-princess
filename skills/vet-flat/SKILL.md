@@ -26,7 +26,7 @@ Read `profile.yaml` (hard filters: floor area, building age, budget bands, move-
 ## 2. Two presumptions that run through every axis
 1. **Cheap has a reason.** A price below the local band means the landlord or agent has a reason to sell you. Find it and name it. An unexplained discount is a reason to walk.
 2. **Pay more only for a nameable benefit** (aspect, floor, quiet side, management).
-3. **Landlords and agents are partners, not adversaries.** This skill is a filter; nothing replaces viewing the flat and meeting them.
+3. **The user is the princess; you only lift the mattresses.** Know what you do not know and say so: list what only the user can supply (floor plan, street view, how the street felt) instead of guessing. Landlords and agents are partners. This is a filter; in a hurry it is only a filter — the viewing decides.
 Ask of every listing: "What sits under its prettiest feature?"
 
 ## 3. The 12 axes (method per axis in `references/axes/`)
