@@ -138,37 +138,40 @@ On 2026-09-05 SKILL.md was cut from an 8,000-character monolith to a ~7,000-char
 router: a table of intents pointing at reference files, the twelve axes in one line each,
 the rules that never bend, and nothing else. A change to the skeleton needs its own
 measurement, so both shapes ran the same five private flats twice each, interleaved, same
-lean configuration, Claude Code with Sonnet workers. Ten runs per arm ●.
+lean configuration, Claude Code with Sonnet workers, the skill folder pinned to one commit
+for every row. Ten runs per arm ●.
 
-| SKILL.md shape | facts | invented numbers per run | landmine recall | landmine precision | all-in cost unknown | verdict match | tokens per run | wall |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| router + references (default) | 0.73 | 0.80 | **0.64** [0.56–0.80] | 0.93 | 70 % | 0.60 | 7.7 M | 1,096 s |
-| monolithic 8k | 0.72 | 0.40 | 0.48 [0.20–0.60] | 0.88 | 30 % | 0.60 | 7.1 M | 1,033 s |
+| SKILL.md shape | facts | invented numbers per run | landmine recall | by layer: script / mixed | landmine precision | all-in cost unknown | verdict match | tokens per run | wall |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| router + references (default) | 0.72 | 0.80 | **0.64** [0.40–0.89] | 0.69 / 0.53 | 0.93 | 8 of 10 | 0.60 | 7.7 M | 1,259 s |
+| monolithic 8k | 0.70 | 0.50 | 0.52 [0.20–0.80] | 0.53 / 0.48 | 0.90 | 5 of 10 | 0.60 | 7.5 M | 1,195 s |
 
 What it says:
 
-- **The router finds more of the gold landmines**: +0.16, and the two ranges barely
-  overlap (the router's worst run, 0.56, is close to the monolith's best, 0.60). The
-  difference sits in the *mixed* layer (0.58 against 0.38) — landmines a script narrows and
-  prose finishes — which is exactly where "read the axis file before acting" should help.
-- **Facts and verdicts are the same.** Fact recall 0.73 against 0.72, verdict match 0.60
+- **The router finds more of the gold landmines: +0.12.** The ranges overlap, so by the
+  sweep's own rule this is *within noise* on ten runs; the direction was the same in both
+  halves of the sweep (the first five flats and their repeat), and the gain sits in the
+  *script* layer (0.69 against 0.53) — landmines a repository script establishes on its own,
+  which the router's "read the axis file, run its script" routing should reach more often.
+- **Facts and verdicts are the same.** Fact recall 0.72 against 0.70, verdict match 0.60
   in both arms.
-- **Two costs of the router, both fixable.** It invented more numbers (0.8 a run against
-  0.4) and it marked the all-in cost unknown in seven runs of ten against three: with the
-  bills model living in a reference file rather than in SKILL.md, the agent more often
-  declined to estimate. The axis-10 line now names the constants file and the calculator
-  and says to estimate at grade I; the fixed form and the no-source-no-number rule (both
-  landed after this sweep, see above) are the answer to the invented numbers, and the next
-  sweep will say whether they worked.
-- **Tokens**: the router costs about 9 % more per run, the price of reading reference files.
+- **Two costs of the router, both addressed after this sweep.** It invented more numbers
+  (0.8 a run against 0.5), and it marked the all-in cost unknown in eight runs of ten
+  against five: with the bills model living in a reference file rather than in SKILL.md,
+  the agent more often declined to estimate. The axis-10 line now names the constants file
+  and the calculator and says to estimate at grade I; the fixed form and the
+  no-source-no-number rule are the answer to the invented numbers. The next sweep (below,
+  when it lands) measures the skill with those changes against this baseline.
+- **Tokens**: about 2 % more per run for the router.
 
-**Interim (2026-09-05 15:20): rows 11–20 are being rerun.** They were launched from a shell heredoc, and `claude -p` reads anything piped on stdin as prompt material, so every prompt in those rows carried a twelve-line launcher snippet (both arms alike; confirmed by a one-shot test). The table above will be replaced when the clean rows land.
-
-Procedure note: the sweep was interrupted at row 11 when a SKILL.md rule landed mid-run
-(every run copies the skill folder at start, so one arm would have seen a different skill).
-The eleventh row was discarded and rows 11–20 ran from a `git archive` export of the skill
-at the pre-change commit, pinned with `VETFLAT_SKILL_DIR`; rows 1–10 had used the live
-folder before the change. Both arms saw the same folder at every row.
+Procedure notes. The sweep was interrupted at row 11 when a SKILL.md rule landed mid-run
+(every run copies the skill folder at start, so one arm would have seen a different skill);
+the eleventh row was discarded and rows 11–20 ran from a `git archive` export of the skill at
+the pre-change commit, pinned with `VETFLAT_SKILL_DIR`. Those ten rows were then run a second
+time: the first attempt had been launched from a shell heredoc, and `claude -p` reads
+anything piped on stdin as prompt material, so every prompt carried a twelve-line launcher
+snippet (both arms alike; confirmed with a one-shot test). The runners now close stdin on
+every agent launch, and the numbers above are from the clean rows only.
 
 ## The picture
 
