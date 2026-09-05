@@ -65,7 +65,8 @@
   "max_questions": "an integer ceiling on '?' plus '？' in the reply, quoted spans masked out.",
   "min_questions": "optional floor, same counting rule.",
   "ends_with": "a string, or {any_of: [...]}, that must appear in the last `ends_within` characters (default 300).",
-  "language": "'en' or a zh tag; checked by the share of CJK characters in the reply."
+  "language": "'en' or a zh tag; checked by the share of CJK characters in the reply.",
+  "workdir_expect": "file path -> {contains: [...], absent: [...]} (a plain list means contains). Checked in the run's own folder after the turn, so 'applied' is graded on the file, not on the words. Skipped for the api agent, which has no folder. An attachment with a `file` key is written into the folder before its turn, title line dropped."
  },
  "journeys": [
   {
@@ -4756,7 +4757,8 @@
      "attachments": [
       {
        "name": "profile-now",
-       "text": "profile.yaml - my current settings (fictional test data, pasted 2026-09-04)\nflat_type: one_bed\nseparate_bedroom_required: true\noccupants: 1\nexperience: some\nbudget_mode: standard\naxis_depth:          # nothing set: every axis follows budget_mode\nlimits:\n  max_fetches_per_flat: 40\n  max_minutes_per_flat: 20\nmin_floor_area_sqft: 450\nmax_building_age_years: 25\nbudget:\n  rent_pcm_target: 1900\n  all_in_pcm_ceiling: 2200\ncommute:\n  destination: XC2 4QF\n  arrive_by: \"09:00\"\n  max_door_to_door_min: 45\nfloors:\n  reject_ground_floor: true\nmust_haves:\n  - washing_machine_in_flat\nguarantor_route: uk_guarantor\n"
+       "text": "profile.yaml - my current settings (fictional test data, pasted 2026-09-04)\nflat_type: one_bed\nseparate_bedroom_required: true\noccupants: 1\nexperience: some\nbudget_mode: standard\naxis_depth:          # nothing set: every axis follows budget_mode\nlimits:\n  max_fetches_per_flat: 40\n  max_minutes_per_flat: 20\nmin_floor_area_sqft: 450\nmax_building_age_years: 25\nbudget:\n  rent_pcm_target: 1900\n  all_in_pcm_ceiling: 2200\ncommute:\n  destination: XC2 4QF\n  arrive_by: \"09:00\"\n  max_door_to_door_min: 45\nfloors:\n  reject_ground_floor: true\nmust_haves:\n  - washing_machine_in_flat\nguarantor_route: uk_guarantor\n",
+       "file": "profile.yaml"
       }
      ],
      "expect": {
@@ -4775,11 +4777,11 @@
        },
        {
         "label": "the ceiling moves 2200 -> 2300",
-        "regex": "(?i)(all_in_pcm_ceiling|all-?in[^\\n]{0,14}ceiling|\\u4e0a\\u9650)[^\\n]{0,60}?2[,\\uff0c]?200[^\\n]{0,30}?(?:\\u2192|->|=>|\\u6539\\u6210|\\u6539\\u70ba|to)[^\\n]{0,12}?\\u00a3?\\s?2[,\\uff0c]?300"
+        "regex": "(?ims)(?:(all_in_pcm_ceiling|all-?in[^\\n]{0,14}ceiling|\\u4e0a\\u9650)[^\\n]{0,60}?2[,\\uff0c]?200[^\\n]{0,30}?(?:\\u2192|->|=>|\\u6539\\u6210|\\u6539\\u70ba|to)[^\\n]{0,12}?\\u00a3?\\s?2[,\\uff0c]?300|^\\s*-\\s*(?:budget\\.)?all_in_pcm_ceiling\\s*:\\s*\\u00a3?\\s?2[,\\uff0c]?200\\b.*?^\\s*\\+\\s*(?:budget\\.)?all_in_pcm_ceiling\\s*:\\s*\\u00a3?\\s?2[,\\uff0c]?300\\b)"
        },
        {
         "label": "written as a diff",
-        "regex": "(?:\\u2192|->|=>)"
+        "regex": "(?ms)(?:\\u2192|->|=>|(?=.*^\\s*-\\s*[A-Za-z_][\\w.]*\\s*:)(?=.*^\\s*\\+\\s*[A-Za-z_][\\w.]*\\s*:))"
        },
        {
         "label": "asks for a one-word confirmation before applying",
@@ -4883,7 +4885,10 @@
          "(?:all_in_pcm_ceiling|all-?in[^\\n]{0,14}?ceiling|\\u4e0a\\u9650|ceiling)[^\\n]{0,40}?\\u00a3?\\s?([0-9][0-9,]{3,})"
         ],
         "source": "attachment:profile-now",
-        "why": "2200 is what the pasted profile says and 2300 is what the user asked for; a diff shows both. Any other ceiling is invented."
+        "why": "2200 is what the pasted profile says and 2300 is what the user asked for; a diff shows both. Any other ceiling is invented. The rent target (1,900) is masked: restating it next to the ceiling is not a new ceiling.",
+        "mask_patterns": [
+         "(?:rent_pcm_target|\\u79df\\u91d1\\u76ee\\u6a19|rent target|target rent|rent stays|the rent itself)[^\\n]{0,30}?\\u00a3?\\s?1[,\\uff0c]?[0-9]{3}"
+        ]
        },
        "limits_unchanged": {
         "values": [
@@ -4910,8 +4915,7 @@
         "why": "450 sq ft is what the pasted profile says."
        }
       },
-      "max_questions": 3,
-      "min_questions": 1
+      "max_questions": 3
      },
      "judge_notes": "Four field names, four values, one question. Anything longer than a short diff plus a sentence is the wrong shape for this ask."
     },
@@ -5023,10 +5027,28 @@
          "(?:all_in_pcm_ceiling|all-?in[^\\n]{0,14}?ceiling|\\u4e0a\\u9650|ceiling)[^\\n]{0,40}?\\u00a3?\\s?([0-9][0-9,]{3,})"
         ],
         "source": "attachment:profile-now",
-        "why": "The applied ceiling is 2300; 2200 may still appear as the old value."
+        "why": "The applied ceiling is 2300; 2200 may still appear as the old value. The rent target (1,900) is masked: restating it next to the ceiling is not a new ceiling.",
+        "mask_patterns": [
+         "(?:rent_pcm_target|\\u79df\\u91d1\\u76ee\\u6a19|rent target|target rent|rent stays|the rent itself)[^\\n]{0,30}?\\u00a3?\\s?1[,\\uff0c]?[0-9]{3}"
+        ]
        }
       },
-      "max_questions": 2
+      "max_questions": 2,
+      "workdir_expect": {
+       "profile.yaml": {
+        "contains": [
+         "all_in_pcm_ceiling: 2300",
+         "crime: deep",
+         "management: deep",
+         "max_fetches_per_flat: 40",
+         "max_minutes_per_flat: 20",
+         "min_floor_area_sqft: 450"
+        ],
+        "absent": [
+         "all_in_pcm_ceiling: 2200"
+        ]
+       }
+      }
      },
      "judge_notes": "Does it actually show the validator's verdict, or say plainly that without a shell it is re-reading the changed lines instead?"
     },
@@ -5047,7 +5069,15 @@
          "there is no field",
          "not a field",
          "no field for",
-         "檔案裡沒有"
+         "檔案裡沒有",
+         "沒有專門",
+         "沒有專屬",
+         "沒有獨立的欄位",
+         "沒有 EPC 欄位",
+         "no dedicated field",
+         "no specific field",
+         "no EPC field",
+         "not a field of its own"
         ]
        },
        {

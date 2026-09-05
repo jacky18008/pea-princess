@@ -300,7 +300,11 @@ def count_questions(text):
 
 
 def cjk_share(text):
-    body = re.sub(r"\s+", "", text or "")
+    """Share of CJK characters in the prose. Fenced and inline code is left out: a
+    settings diff is field names and values in any language, not the reply's language."""
+    body = re.sub(r"```.*?```", " ", text or "", flags=re.S)
+    body = re.sub(r"`[^`\n]*`", " ", body)
+    body = re.sub(r"\s+", "", body)
     if not body:
         return 0.0
     return len(CJK.findall(body)) / float(len(body))
@@ -443,8 +447,52 @@ def row(name, kind, status, detail, critical=False, why=None):
         ("critical", bool(critical)), ("why", why)])
 
 
-def score_turn(turn, reply, journey):
-    """One turn's scorecard: every check, its status, and the arithmetic on top."""
+def check_workdir(workdir, spec, agent=None):
+    """Rows for ``workdir_expect``: what a file in the run's folder must contain, or
+    must not, after this turn. Graded on the file, not on the words. The api agent
+    has no folder, and a regrade has lost it, so those rows are skipped, not failed."""
+    rows = []
+    for rel, want in spec.items():
+        if isinstance(want, list):
+            want = {"contains": want}
+        contains = list(want.get("contains") or [])
+        absent = list(want.get("absent") or [])
+        if agent == "api" or not workdir:
+            for needle in contains + absent:
+                rows.append(row("%s: %s" % (rel, needle), "file", "skipped",
+                                "no folder to check (api agent, or a regrade)"))
+            continue
+        path = os.path.join(workdir, rel)
+        text = None
+        if os.path.isfile(path):
+            with io.open(path, encoding="utf-8", errors="replace") as fh:
+                text = re.sub(r"[ \t]+", " ", fh.read())
+        for needle in contains:
+            key = re.sub(r"[ \t]+", " ", needle)
+            if text is None:
+                rows.append(row("%s contains %s" % (rel, needle), "file", "fail",
+                                "%s was never written" % rel))
+            else:
+                rows.append(row("%s contains %s" % (rel, needle), "file",
+                                "pass" if key in text else "fail",
+                                "found in the file" if key in text else "not in the file"))
+        for needle in absent:
+            key = re.sub(r"[ \t]+", " ", needle)
+            if text is None:
+                rows.append(row("%s no longer has %s" % (rel, needle), "file", "fail",
+                                "%s was never written" % rel))
+            else:
+                rows.append(row("%s no longer has %s" % (rel, needle), "file",
+                                "fail" if key in text else "pass",
+                                "still in the file" if key in text else "gone, as required"))
+    return rows
+
+
+def score_turn(turn, reply, journey, workdir=None, agent=None, file_rows=None):
+    """One turn's scorecard: every check, its status, and the arithmetic on top.
+
+    ``file_rows`` replays stored file-check rows (a regrade cannot re-read a folder
+    that is gone); otherwise ``workdir_expect`` is checked in ``workdir`` now."""
     exp = turn.get("expect") or {}
     text = reply or ""
     rows = []
@@ -463,6 +511,12 @@ def score_turn(turn, reply, journey):
         status, detail, fabs = check_fact(text, name, spec)
         fabrications += fabs
         rows.append(row(name, "fact", status, detail, why=spec.get("why")))
+
+    spec = exp.get("workdir_expect") or {}
+    if file_rows is not None:
+        rows.extend(file_rows)
+    elif spec:
+        rows.extend(check_workdir(workdir, spec, agent))
 
     if exp.get("max_questions") is not None or exp.get("min_questions") is not None:
         n = count_questions(text)
@@ -591,6 +645,50 @@ def transcript(history, user):
 
 
 # ------------------------------------------------------------------ workdir --
+# What a shell-mode journey may touch inside its own temp folder: the profile it is
+# asked to change and the validator that checks it, nothing that reaches the network.
+# Manual and fetch journeys read only. Without this, "apply the change" can only be
+# graded as words, and a model that says "written, valid" without writing anything
+# scores the same as one that did the work (Codex Luna did exactly that, 2026-09-05).
+CLAUDE_TOOLS_READ = "Read"
+CLAUDE_TOOLS_SHELL = ("Read,Edit,Write,"
+                      "Bash(python3 .claude/skills/vet-flat/scripts/profile_check.py:*),"
+                      "Bash(python3 scripts/profile_check.py:*)")
+
+
+def claude_tools(journey):
+    return CLAUDE_TOOLS_SHELL if journey.get("mode") == "shell" else CLAUDE_TOOLS_READ
+
+
+def codex_sandbox(journey):
+    return "workspace-write" if journey.get("mode") == "shell" else "read-only"
+
+
+def materialise_attachments(turn, workdir, agent):
+    """Attachments that carry ``file`` are also written into the run's folder, so a
+    shell-mode journey edits the real file instead of only talking about it. A
+    leading title line that is not YAML ("profile.yaml - my settings") is dropped.
+    The api agent has no folder, so nothing is written for it."""
+    written = []
+    if agent == "api" or not workdir:
+        return written
+    for att in turn.get("attachments") or []:
+        rel = att.get("file")
+        if not rel:
+            continue
+        lines = (att.get("text") or "").splitlines()
+        while lines and not (":" in lines[0] or lines[0].lstrip().startswith(("#", "-"))):
+            lines.pop(0)
+        path = os.path.join(workdir, rel)
+        folder = os.path.dirname(path)
+        if folder and not os.path.isdir(folder):
+            os.makedirs(folder)
+        with io.open(path, "w", encoding="utf-8") as fh:
+            fh.write("\n".join(lines) + "\n")
+        written.append(rel)
+    return written
+
+
 def prepare_workdir(journey, agent, workdir=None, system=None):
     """A clean folder with the skill where this agent looks for skills."""
     path = os.path.abspath(workdir) if workdir else tempfile.mkdtemp(
@@ -616,7 +714,8 @@ def prepare_workdir(journey, agent, workdir=None, system=None):
 
 
 # ----------------------------------------------------------------- commands --
-def claude_command(prompt, workdir, model, system, session_id=None, resume=None):
+def claude_command(prompt, workdir, model, system, session_id=None, resume=None,
+                   tools=CLAUDE_TOOLS_READ):
     cmd = ["claude", "-p", prompt]
     if resume:
         cmd += ["--resume", resume]
@@ -624,15 +723,15 @@ def claude_command(prompt, workdir, model, system, session_id=None, resume=None)
         cmd += ["--append-system-prompt", system]
         if session_id:
             cmd += ["--session-id", session_id]
-    cmd += ["--allowedTools", "Read", "--output-format", "json",
+    cmd += ["--allowedTools", tools, "--output-format", "json",
             "--setting-sources", "project", "--add-dir", workdir]
     if model:
         cmd += ["--model", model]
     return cmd
 
 
-def codex_command(prompt, workdir, model):
-    cmd = ["codex", "exec", "--cd", workdir, "--sandbox", "read-only",
+def codex_command(prompt, workdir, model, sandbox="read-only"):
+    cmd = ["codex", "exec", "--cd", workdir, "--sandbox", sandbox,
            "--skip-git-repo-check"]
     if model:
         cmd += ["--model", model]
@@ -795,9 +894,24 @@ def claude_answer(stdout):
 
 
 # --------------------------------------------------------------------- play --
+def aggregate(journey, turns, errors):
+    """Journey-level numbers from the turn cards: mean score, fabrications, critical
+    failures, whether it completed, and whether it clears the pass line."""
+    scored = [t for t in turns if t.get("score") is not None]
+    journey_score = round(sum(t["score"] for t in scored) / float(len(scored)), 4) \
+        if scored else None
+    fabrications = sum(t.get("fabrications", 0) for t in turns)
+    critical = [c for t in turns for c in (t.get("critical_failures") or [])]
+    completed = len(scored) == len(journey["turns"]) and not errors
+    meets = bool(completed and fabrications == PASS_LINE["fabrications"] and not critical
+                 and (journey_score or 0) >= PASS_LINE["journey_score"])
+    return journey_score, fabrications, critical, completed, meets
+
+
 def play(journey, args, variant_id=None):
     """Run one journey, turn by turn, and return its record."""
     agent = args.agent
+    tools, sandbox = claude_tools(journey), codex_sandbox(journey)
     label = journey["id"] + ("#" + variant_id if variant_id else "")
     system = system_prompt(journey, args.refs)
     workdir, plan = prepare_workdir(journey, agent, args.workdir,
@@ -827,11 +941,18 @@ def play(journey, args, variant_id=None):
         print("results:  %s" % os.path.join(
             os.path.relpath(args.results or RESULTS, ROOT), "journeys-" + today()))
         print("tone:     %d blocked phrases (en + zh)" % len(TONE_BLOCKLIST))
+        if agent == "claude":
+            print("tools:    %s" % tools)
+        elif agent == "codex":
+            print("sandbox:  %s" % sandbox)
 
     history, turns, errors = [], [], []
     for index, turn in enumerate(journey["turns"], 1):
         user = user_message(turn)
+        written = materialise_attachments(turn, workdir, agent)
         exp = turn.get("expect") or {}
+        if args.dry_run and written:
+            print("          writes %s into the folder from the pasted attachment" % ", ".join(written))
         counts = "%d must, %d must_not, %d facts, %s questions" % (
             len(exp.get("must") or []), len(exp.get("must_not") or []),
             len(exp.get("facts") or {}),
@@ -852,13 +973,13 @@ def play(journey, args, variant_id=None):
                 print("          messages: %s" % " ".join(roles))
             elif agent == "claude":
                 prompt = user if (carry or index == 1) else transcript(history, user)
-                cmd = claude_command(prompt, workdir, args.model, system,
+                cmd = claude_command(prompt, workdir, args.model, system, tools=tools,
                                      session_id=session_id if carry else None,
                                      resume=session_id if (carry and index > 1) else None)
                 print("          cd %s && %s" % (workdir, shell_preview(cmd)))
             else:
                 cmd = codex_command(transcript(history, user) if history else user,
-                                    workdir, args.model)
+                                    workdir, args.model, sandbox)
                 print("          cd %s && %s" % (workdir, shell_preview(cmd)))
             history.append(("user", user))
             history.append(("assistant", "(dry run: the reply would be here)"))
@@ -875,12 +996,12 @@ def play(journey, args, variant_id=None):
         else:
             if agent == "claude":
                 prompt = user if (carry or index == 1) else transcript(history, user)
-                cmd = claude_command(prompt, workdir, args.model, system,
+                cmd = claude_command(prompt, workdir, args.model, system, tools=tools,
                                      session_id=session_id if carry else None,
                                      resume=session_id if (carry and index > 1) else None)
             else:
                 cmd = codex_command(transcript(history, user) if history else user,
-                                    workdir, args.model)
+                                    workdir, args.model, sandbox)
             try:
                 proc = subprocess.Popen(cmd, cwd=workdir, stdout=subprocess.PIPE,
                                         stderr=subprocess.PIPE)
@@ -907,7 +1028,7 @@ def play(journey, args, variant_id=None):
                 ("note", note), ("wall_time_s", wall), ("score", None), ("checks", [])]))
             break
 
-        card = score_turn(turn, reply, journey)
+        card = score_turn(turn, reply, journey, workdir=workdir, agent=agent)
         card["turn"] = index
         card["user"] = turn["user"]
         card["reply"] = reply
@@ -930,12 +1051,8 @@ def play(journey, args, variant_id=None):
             shutil.rmtree(workdir, ignore_errors=True)
         return None
 
+    journey_score, fabrications, critical, completed, meets = aggregate(journey, turns, errors)
     scored = [t for t in turns if t.get("score") is not None]
-    journey_score = round(sum(t["score"] for t in scored) / float(len(scored)), 4) \
-        if scored else None
-    fabrications = sum(t.get("fabrications", 0) for t in turns)
-    critical = [c for t in turns for c in (t.get("critical_failures") or [])]
-    completed = len(scored) == len(journey["turns"]) and not errors
     record = collections.OrderedDict([
         ("journey", label),
         ("journey_id", journey["id"]),
@@ -946,15 +1063,15 @@ def play(journey, args, variant_id=None):
         ("run_at", now()),
         ("mode", journey["mode"]),
         ("language", journey.get("language")),
+        ("tools", tools if agent == "claude" else None),
+        ("sandbox", sandbox if agent == "codex" else None),
         ("turns_expected", len(journey["turns"])),
         ("turns_played", len(scored)),
         ("journey_score", journey_score),
         ("completed", completed),
         ("fabrications", fabrications),
         ("critical_failures", critical),
-        ("meets_pass_line", bool(completed and fabrications == PASS_LINE["fabrications"]
-                                 and not critical
-                                 and (journey_score or 0) >= PASS_LINE["journey_score"])),
+        ("meets_pass_line", meets),
         ("pass_line", collections.OrderedDict(sorted(PASS_LINE.items()))),
         ("errors", errors),
         ("workdir", workdir),
@@ -1008,19 +1125,91 @@ def write_results(record, root=None):
                 rows = json.load(fh)
         except ValueError:
             rows = []
+    rows.append(summary_of(record, raw_path))
+    write_scorecard(folder, rows)
+    return raw_path, jpath
+
+
+def summary_of(record, raw_path):
     summary = collections.OrderedDict(
         (k, v) for k, v in record.items() if k not in ("turn_scores",))
     summary["raw"] = os.path.relpath(raw_path, ROOT)
-    rows.append(summary)
-    with io.open(jpath, "w", encoding="utf-8") as fh:
+    return summary
+
+
+def write_scorecard(folder, rows):
+    day = os.path.basename(os.path.abspath(folder)).replace("journeys-", "") or today()
+    with io.open(os.path.join(folder, "scorecard.json"), "w", encoding="utf-8") as fh:
         fh.write(json.dumps(rows, ensure_ascii=False, indent=1) + "\n")
     with io.open(os.path.join(folder, "scorecard.md"), "w", encoding="utf-8") as fh:
         fh.write("# vet-flat journeys, %s\n\n"
                  "One row per journey per run. The score is the mean of the turn scores; a "
                  "journey passes only if it also completed, invented no numbers and kept its "
                  "tone.\n\n%s%s"
-                 % (today(), MD_HEADER, "".join(md_row(r) for r in rows)))
-    return raw_path, jpath
+                 % (day, MD_HEADER, "".join(md_row(r) for r in rows)))
+
+
+def regrade(folder, journeys_path=None):
+    """Re-score every record under ``folder/raw`` with the current journeys file.
+
+    The replies stay what they were; only the checks are applied again, so a
+    calibration fix in evals/journeys.json reaches runs that were already paid for.
+    File checks are carried over from the stored rows (the folder they looked at is
+    gone). The scorecard is rebuilt in run order and each raw record is rewritten
+    with ``regraded_at``."""
+    doc = load_journeys(journeys_path)
+    by_id = dict((j["id"], j) for j in doc["journeys"])
+    raw_dir = os.path.join(folder, "raw")
+    if not os.path.isdir(raw_dir):
+        print("usage error: no raw/ folder under %s" % folder, file=sys.stderr)
+        return 2
+    rows = []
+    for name in sorted(os.listdir(raw_dir)):
+        if not name.endswith(".json"):
+            continue
+        path = os.path.join(raw_dir, name)
+        with io.open(path, encoding="utf-8") as fh:
+            rec = json.load(fh, object_pairs_hook=collections.OrderedDict)
+        journey = by_id.get(rec.get("journey_id"))
+        if journey is None:
+            print("%s: no journey %r in the file; kept as is" % (name, rec.get("journey_id")))
+            rows.append(summary_of(rec, path))
+            continue
+        variant = None
+        for vid, v in variants_of(journey):
+            if vid == rec.get("variant"):
+                variant = v
+        resolved = resolve(journey, variant)
+        turns = []
+        for old in rec.get("turn_scores") or []:
+            index = old.get("turn") or (len(turns) + 1)
+            if index > len(resolved["turns"]) or (old.get("score") is None and not old.get("reply")):
+                turns.append(old)
+                continue
+            stored = [r for r in (old.get("checks") or []) if r.get("kind") == "file"]
+            card = score_turn(resolved["turns"][index - 1], old.get("reply") or "", resolved,
+                              file_rows=stored or None)
+            for key in ("turn", "user", "reply", "note", "wall_time_s", "usage"):
+                card[key] = old.get(key)
+            card.move_to_end("turn", last=False)
+            turns.append(card)
+        rec["turn_scores"] = turns
+        before = rec.get("journey_score")
+        score, fabs, critical, completed, meets = aggregate(resolved, turns, rec.get("errors") or [])
+        rec["turns_played"] = len([t for t in turns if t.get("score") is not None])
+        rec["journey_score"], rec["fabrications"], rec["critical_failures"] = score, fabs, critical
+        rec["completed"], rec["meets_pass_line"] = completed, meets
+        rec["pass_line"] = collections.OrderedDict(sorted(PASS_LINE.items()))
+        rec["regraded_at"] = now()
+        with io.open(path, "w", encoding="utf-8") as fh:
+            fh.write(json.dumps(rec, ensure_ascii=False, indent=1) + "\n")
+        rows.append(summary_of(rec, path))
+        print("%s: %s -> %s, %d fabrication(s), %s" % (
+            rec.get("journey"), before, score, fabs, "PASS" if meets else "BELOW LINE"))
+    rows.sort(key=lambda r: r.get("run_at") or "")
+    write_scorecard(folder, rows)
+    print("%d record(s) regraded into %s" % (len(rows), os.path.join(folder, "scorecard.md")))
+    return 0
 
 
 # --------------------------------------------------------------------- main --
@@ -1029,7 +1218,10 @@ def build_parser():
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--journey", help="a journey id from evals/journeys.json")
     ap.add_argument("--all", action="store_true", help="every journey, one after another")
-    ap.add_argument("--agent", required=True, choices=AGENTS)
+    ap.add_argument("--agent", choices=AGENTS, help="required unless --regrade is given")
+    ap.add_argument("--regrade", metavar="FOLDER",
+                    help="re-score every raw record under FOLDER/raw with the current "
+                         "journeys file and rebuild its scorecard; nothing is re-run")
     ap.add_argument("--model", help="the model name to pass to the agent")
     ap.add_argument("--dry-run", action="store_true",
                     help="print the plan and the exact command or request for every turn, "
@@ -1055,6 +1247,11 @@ def build_parser():
 
 def main(argv=None):
     args = build_parser().parse_args(argv)
+    if args.regrade:
+        return regrade(args.regrade, args.journeys)
+    if not args.agent:
+        print("usage error: --agent is required (api, claude or codex)", file=sys.stderr)
+        return 2
     if not args.journey and not args.all:
         print("usage error: give --journey <id> or --all", file=sys.stderr)
         return 2

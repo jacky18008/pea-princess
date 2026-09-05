@@ -7,7 +7,7 @@ Read this when the user asks how something works, how to change a setting, how d
 ## The one rule for every setting change
 1. Turn the user's words into a **diff of `profile.yaml`**: `field: old → new`, one line per field, nothing else touched.
 2. Show the diff and ask for a one-word confirmation. Never apply silently, never invent a field, never change a field the user did not mention.
-3. After applying, run `python3 scripts/profile_check.py profile.yaml` (shell mode) and show its verdict; without a shell, re-read the changed lines back to the user.
+3. After applying, run `python3 scripts/profile_check.py profile.yaml` (shell mode) and show its verdict; without a shell, re-read the changed lines back to the user. Never report a validator result you did not see: if you could not run it, say so and print the command for the user.
 4. If a phrase is ambiguous ("dig deeper" with no axis named), ask which axis, offering the list.
 
 ## Phrases → fields

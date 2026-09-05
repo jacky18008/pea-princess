@@ -26,7 +26,9 @@ import io
 import json
 import os
 import re
+import shutil
 import sys
+import tempfile
 import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -587,3 +589,129 @@ class TestDryRun(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestFileChecksAndRegrade(unittest.TestCase):
+    """Shell-mode journeys are graded on the file they were asked to change, and a
+    calibration fix in the dataset can be applied to runs that were already paid for."""
+
+    @classmethod
+    def setUpClass(cls):
+        doc = runner.load_journeys()
+        cls.j9 = [j for j in doc["journeys"] if j["id"] == "j9-adjust-settings-by-talking"][0]
+        cls.zh = runner.resolve(cls.j9, [v for v in cls.j9["variants"] if v["id"] == "zh"][0])
+        cls.j1 = doc["journeys"][0]
+
+    def test_a_unified_diff_is_a_diff_and_the_rent_target_is_not_a_new_ceiling(self):
+        # The shape Codex Luna produced on 2026-09-05: a real diff, no arrows, and the
+        # untouched rent target restated in the sentence after the ceiling.
+        reply = ("建議變更如下，其他設定不動：\n\n```diff\n-budget_mode: standard\n+budget_mode: lite\n\n"
+                 " axis_depth:\n+  crime: deep\n+  management: deep\n\n budget:\n"
+                 "   rent_pcm_target: 1900\n-  all_in_pcm_ceiling: 2200\n+  all_in_pcm_ceiling: 2300\n```\n\n"
+                 "也就是治安、管理使用 deep，其餘軸跟隨 lite；£2,300 視為含帳單與 council tax 的 all-in 上限，"
+                 "租金目標仍是 £1,900。\n\n確認後回覆「確認」，我才會寫入並執行 "
+                 "`python3 scripts/profile_check.py profile.yaml` 驗證。\n")
+        card = runner.score_turn(self.zh["turns"][0], reply, self.zh)
+        by = dict((r["check"], r["status"]) for r in card["checks"])
+        self.assertEqual("pass", by["written as a diff"])
+        self.assertEqual("pass", by["the ceiling moves 2200 -> 2300"])
+        self.assertEqual("pass", by["all_in_pcm_ceiling"])
+        self.assertEqual(0, card["fabrications"], [r for r in card["checks"] if r["kind"] == "fact"])
+        self.assertEqual(1.0, card["score"], [r for r in card["checks"] if r["status"] == "fail"])
+
+    def test_the_file_is_checked_not_the_words(self):
+        spec = self.zh["turns"][1]["expect"]["workdir_expect"]
+        folder = tempfile.mkdtemp()
+        try:
+            path = os.path.join(folder, "profile.yaml")
+            with io.open(path, "w", encoding="utf-8") as fh:
+                fh.write("budget_mode: lite\naxis_depth:\n  crime: deep\n  management: deep\n"
+                         "limits:\n  max_fetches_per_flat: 40\n  max_minutes_per_flat: 20\n"
+                         "min_floor_area_sqft: 450\nbudget:\n  rent_pcm_target: 1900\n"
+                         "  all_in_pcm_ceiling: 2300\n")
+            rows = runner.check_workdir(folder, spec, "codex")
+            self.assertTrue(rows and all(r["status"] == "pass" for r in rows), rows)
+            with io.open(path, "w", encoding="utf-8") as fh:
+                fh.write("budget:\n  all_in_pcm_ceiling: 2200\n")
+            failed = [r["check"] for r in runner.check_workdir(folder, spec, "codex")
+                      if r["status"] == "fail"]
+            self.assertIn("profile.yaml contains all_in_pcm_ceiling: 2300", failed)
+            self.assertIn("profile.yaml no longer has all_in_pcm_ceiling: 2200", failed)
+            self.assertTrue(all(r["status"] == "skipped"
+                                for r in runner.check_workdir(folder, spec, "api")))
+            card = runner.score_turn(self.zh["turns"][1], "x", self.zh, workdir=folder, agent="api")
+            self.assertFalse([r for r in card["checks"] if r["kind"] == "file" and r["status"] != "skipped"])
+            card = runner.score_turn(self.zh["turns"][1], "x", self.zh, workdir=folder, agent="codex")
+            self.assertTrue([r for r in card["checks"] if r["kind"] == "file" and r["status"] == "fail"])
+        finally:
+            shutil.rmtree(folder, ignore_errors=True)
+
+    def test_the_pasted_profile_becomes_a_real_file_without_its_title_line(self):
+        folder = tempfile.mkdtemp()
+        try:
+            self.assertEqual(["profile.yaml"],
+                             runner.materialise_attachments(self.zh["turns"][0], folder, "claude"))
+            with io.open(os.path.join(folder, "profile.yaml"), encoding="utf-8") as fh:
+                text = fh.read()
+            self.assertTrue(text.startswith("flat_type: one_bed"), text[:80])
+            self.assertIn("all_in_pcm_ceiling: 2200", text)
+            self.assertEqual([], runner.materialise_attachments(self.zh["turns"][0], folder, "api"))
+        finally:
+            shutil.rmtree(folder, ignore_errors=True)
+
+    def test_shell_journeys_get_the_validator_and_manual_ones_read_only(self):
+        self.assertEqual("workspace-write", runner.codex_sandbox(self.j9))
+        self.assertEqual("read-only", runner.codex_sandbox(self.j1))
+        self.assertIn("profile_check.py", runner.claude_tools(self.j9))
+        self.assertEqual("Read", runner.claude_tools(self.j1))
+        code, out = dry_run(["--agent", "codex", "--journey", self.j9["id"], "--variant", "zh",
+                             "--dry-run"])
+        self.assertEqual(0, code)
+        self.assertIn("--sandbox workspace-write", out)
+        self.assertNotIn("network_access", out)
+        self.assertIn("writes profile.yaml", out)
+        code, out = dry_run(["--agent", "claude", "--journey", self.j9["id"], "--variant", "zh",
+                             "--dry-run", "--session-mode", "replay"])
+        self.assertEqual(0, code)
+        self.assertIn("profile_check.py", out)
+        for flag in BYPASS_FLAGS:
+            self.assertNotIn(flag, out)
+
+    def test_regrade_rescores_stored_replies_and_keeps_file_rows(self):
+        folder = tempfile.mkdtemp()
+        try:
+            raw = os.path.join(folder, "raw")
+            os.makedirs(raw)
+            good = read_json(GOOD_REPLIES)["replies"]
+            turns = []
+            for index in (1, 2, 3):
+                reply = good["j9-adjust-settings-by-talking#zh|%d" % index]
+                card = runner.score_turn(self.zh["turns"][index - 1], reply, self.zh)
+                card.update(turn=index, reply=reply, user="u", note=None, wall_time_s=1.0, usage=None)
+                turns.append(card)
+            turns[1]["checks"] = ([r for r in turns[1]["checks"] if r["kind"] != "file"] +
+                                  [runner.row("profile.yaml contains crime: deep", "file", "pass",
+                                              "found in the file")])
+            rec = collections.OrderedDict([
+                ("journey", "j9-adjust-settings-by-talking#zh"),
+                ("journey_id", "j9-adjust-settings-by-talking"), ("variant", "zh"),
+                ("title", "t"), ("agent", "claude"), ("model", "m"),
+                ("run_at", "2026-09-05T00:00:00Z"), ("errors", []), ("turn_scores", turns)])
+            name = "claude-j9-adjust-settings-by-talking#zh-1.json"
+            with io.open(os.path.join(raw, name), "w", encoding="utf-8") as fh:
+                fh.write(json.dumps(rec, ensure_ascii=False))
+            with contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(0, runner.regrade(folder))
+            rows = read_json(os.path.join(folder, "scorecard.json"))
+            self.assertEqual(1, len(rows))
+            self.assertEqual(1.0, rows[0]["journey_score"])
+            self.assertTrue(rows[0]["meets_pass_line"])
+            self.assertIn("regraded_at", rows[0])
+            self.assertTrue(os.path.exists(os.path.join(folder, "scorecard.md")))
+            back = read_json(os.path.join(raw, name))
+            files = [(r["check"], r["status"]) for r in back["turn_scores"][1]["checks"]
+                     if r["kind"] == "file"]
+            self.assertEqual([("profile.yaml contains crime: deep", "pass")], files)
+        finally:
+            shutil.rmtree(folder, ignore_errors=True)
+
