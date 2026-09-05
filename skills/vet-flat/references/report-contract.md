@@ -21,7 +21,7 @@ Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen — https://github.com
 11. **What we could not find**, with the search strings and the blocked sources; **sources** with retrieval times; the arithmetic check; **About this report** with the configuration line again and the footer `Generated with vet-flat <version> — <source URL>`.
 
 ## The fourteen fixed questions
-Every flat: found = quote + source · asked = the user said it · unknown = no quote, no number. Gate (ask if missing): F1 deposit weeks (cap 5) · F2 holding deposit (cap 1 wk) · F3 advance rent (cap 1 mo) · F4 tenancy or licence · F5 legal landlord · F6 deposit scheme · F7 redress + client money · F8 borough licence. Listing (ask only if a page was pasted): F9 area + source · F10 EPC letter · F11 bills included · F12 minimum term · F13 break clause · F14 move-in date.
+Every flat: found = quote + source · asked = the user said it · unknown = no quote, no number. Gate (ask if missing): F1 deposit weeks (cap 5) · F2 holding (cap 1 wk) · F3 advance rent (cap 1 mo) · F4 tenancy or licence · F5 legal landlord · F6 deposit scheme · F7 redress + CMP · F8 borough licence. Listing (only if a page was pasted): F9 area + source · F10 EPC letter · F11 bills · F12 minimum term · F13 break clause · F14 move-in.
 
 ## Plain-language rules (every text field)
 - Short sentences. No jargon or abbreviation without a gloss the first time.

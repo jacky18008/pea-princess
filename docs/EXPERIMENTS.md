@@ -123,6 +123,42 @@ What it says:
   `bench/journeys.py --regrade` exists: the replies were paid for once and re-scored, not
   re-run. Two of the eight rows changed by more than 0.05 after calibration.
 
+### Router SKILL.md versus the monolithic one (Claude, 2026-09-05)
+
+On 2026-09-05 SKILL.md was cut from an 8,000-character monolith to a ~7,000-character
+router: a table of intents pointing at reference files, the twelve axes in one line each,
+the rules that never bend, and nothing else. A change to the skeleton needs its own
+measurement, so both shapes ran the same five private flats twice each, interleaved, same
+lean configuration, Claude Code with Sonnet workers. Ten runs per arm ●.
+
+| SKILL.md shape | facts | invented numbers per run | landmine recall | landmine precision | all-in cost unknown | verdict match | tokens per run | wall |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| router + references (default) | 0.73 | 0.80 | **0.64** [0.56–0.80] | 0.93 | 70 % | 0.60 | 7.7 M | 1,096 s |
+| monolithic 8k | 0.72 | 0.40 | 0.48 [0.20–0.60] | 0.88 | 30 % | 0.60 | 7.1 M | 1,033 s |
+
+What it says:
+
+- **The router finds more of the gold landmines**: +0.16, and the two ranges barely
+  overlap (the router's worst run, 0.56, is close to the monolith's best, 0.60). The
+  difference sits in the *mixed* layer (0.58 against 0.38) — landmines a script narrows and
+  prose finishes — which is exactly where "read the axis file before acting" should help.
+- **Facts and verdicts are the same.** Fact recall 0.73 against 0.72, verdict match 0.60
+  in both arms.
+- **Two costs of the router, both fixable.** It invented more numbers (0.8 a run against
+  0.4) and it marked the all-in cost unknown in seven runs of ten against three: with the
+  bills model living in a reference file rather than in SKILL.md, the agent more often
+  declined to estimate. The axis-10 line now names the constants file and the calculator
+  and says to estimate at grade I; the fixed form and the no-source-no-number rule (both
+  landed after this sweep, see above) are the answer to the invented numbers, and the next
+  sweep will say whether they worked.
+- **Tokens**: the router costs about 9 % more per run, the price of reading reference files.
+
+Procedure note: the sweep was interrupted at row 11 when a SKILL.md rule landed mid-run
+(every run copies the skill folder at start, so one arm would have seen a different skill).
+The eleventh row was discarded and rows 11–20 ran from a `git archive` export of the skill
+at the pre-change commit, pinned with `VETFLAT_SKILL_DIR`; rows 1–10 had used the live
+folder before the change. Both arms saw the same folder at every row.
+
 ## The picture
 
 ![Scatter chart. Left panel: nine Claude Code configurations, landmine recall against cost per run in US dollars on a log axis. A-legacy — raw web pages with one reader per axis — is the highest and by far the most expensive point, at 0.87 recall for $31.40. The B family clusters between 0.38 and 0.71 recall for $1.40 to $11.70, mostly inside a shaded band marking run-to-run noise around the default B-lean. C-twenty is lowest and cheapest at 0.15 recall for $0.67. Right panel: six Codex GPT-5.6 configurations as hollow markers, recall against input tokens per run on a log axis, running from 0.13 recall at 0.36 million tokens up to 0.52 recall at 12.2 million tokens. Colour marks the data path and budget mode.](experiments-recall-vs-cost.svg)

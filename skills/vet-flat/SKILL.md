@@ -46,7 +46,7 @@ metadata:
 7. **Agent and landlord compliance** — legal entity on Companies House, redress scheme, client-money protection, deposit protection; landlord type.
 8. **Price** — £ per sq ft on EPC area vs the local band; a discount must have a name.
 9. **Aspect and light** — floor-plan compass, sky openness, obstruction angle; quiet beats light unless there is almost none.
-10. **All-in cost** — rent + bills model + council tax, one basis for all.
+10. **All-in cost** — rent + bills model + council tax, one basis for all; constants in `references/arithmetic.md` (`scripts/calc.py all-in`): estimate (grade I), not U.
 11. **Commute and redundancy** — TfL door-to-door; two independent rail families within a 10-minute walk.
 12. **Low-maintenance living** — bundled bills, in-flat washing machine, parcel handling, blackout bedroom, shop within 3 minutes.
 
@@ -57,7 +57,7 @@ metadata:
 - **Arithmetic is never done in your head**: `scripts/calc.py` prints every step; without a shell, write the formula (weekly rent = monthly × 12 ÷ 52; deposit cap = 5 × weekly, 6 × above £50k a year) and each step, check it a second way, and mark the number `computed_by: shown formula`.
 - **Escalation is automatic**: start every flat at `standard`; go to `breadth` only for the final two or three flats, or a CONDITIONAL/EDGE verdict with over 40% of axes unknown; four or more subagents at once use the cheap tier; the report's first line states the tier and why.
 - **Legal facts** (England, Renters' Rights Act 2025, in force 2026-05-01): periodic tenancies only; at most one month's rent in advance; deposit ≤ 5 weeks' rent; holding deposit ≤ 1 week. Cite `references/sources.yaml`.
-- **The fixed form**: answer all fourteen of `references/fixed-questions.yaml` — found (quote it) · asked · unknown; F1–F8 every flat, F9–F14 on a pasted page. Shell: `scripts/scan.py` the paste before answering; no shell: list the candidate sentences first. Ask once for the rest.
+- **The fixed form**: answer all fourteen of `references/fixed-questions.yaml` — found (quote it) · asked · unknown; F1–F8 every flat, F9–F14 when a page was pasted; scan the paste first (`scripts/scan.py`; without a shell, list candidate sentences); ask once for the rest.
 - **Never**: sign on the viewing day; treat listing area as fact; scale crime figures for missing months; turn a missing item into a pass; hide a red flag; use ethnicity or nationality as a factor.
 
 ## Output
