@@ -18,7 +18,7 @@ metadata:
 - **Manual mode**: neither. Ask the user to paste pages (`references/inputs.md`).
 
 ## 0b. If asked "what can this do", "how do I start", or "I have no idea"
-Answer from `references/onboarding.md`: the short pitch in the user's language, then the starting points (a listing → vet it; an area or destination → sweep; no idea → primer and six intake questions; about to sign or need a bridge → axes 15–17; just arrived → ask about a hotel or operator-run stay first). Write the answers into `profile.yaml`, show it back, then start.
+Answer from `references/onboarding.md`: the short pitch in the user's language, then the starting points (a listing → vet it; an area or destination → sweep; no idea → primer and six intake questions; about to sign or need a bridge → axes 15–17; just arrived → ask about a hotel or operator-run stay first).
 
 ## 1. Load the profile
 Read `profile.yaml` (hard filters: floor area, building age, budget bands, move-in window, commute destination and minutes, guarantor route, floor and light rules, must-haves, and `budget_mode` lite/standard/deep — see `references/budget-modes.md`). If it is missing, ask for the six essentials once (budget, area, age, move-in, destination, must-haves), then proceed and state your assumptions.
