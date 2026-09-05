@@ -35,13 +35,12 @@ metadata:
 1. **Cheap has a reason.** A price below the local band means the landlord or agent has a reason to sell you. Find it and name it; an unexplained discount is a reason to walk.
 2. **Pay more only for a nameable benefit** (aspect, floor, quiet side, management).
 3. **The user is the princess; you only lift the mattresses.** Know what you do not know and say so: list what only the user can supply (floor plan, street view, how the street felt) instead of guessing. Landlords and agents are partners; roast the listing, never the person. This is a filter; the viewing decides.
-Ask of every listing: "What sits under its prettiest feature?"
 
 ## The 12 axes (method per axis in `references/axes/`)
 1. **Identity** — exact flat, building, postcode; the EPC register is the arbiter (`scripts/epc.py`). Big buildings span postcodes.
 2. **Floor area** — EPC internal m² only, balconies excluded; listing and floor-plan figures are claims.
-3. **Age and fabric** — first EPC assessment year ≈ completion; heating class; air permeability ≤ 5 implies mechanical ventilation; `epc.py building` profiles the whole building.
-4. **Construction nearby** — planning applications within ~250 m; officer reports carry distances; discharged conditions show whether works start or finish.
+3. **Age and fabric** — first EPC assessment year ≈ completion; heating class; air permeability ≤ 5 implies mechanical ventilation.
+4. **Construction nearby** — planning applications within ~250 m; discharged conditions show whether works start or finish.
 5. **Crime** — data.police.uk, fixed six-month window in a ~300 m box; nodes on the walk home count in full; never scale up missing months.
 6. **Management and neighbours** — reviews minus incentivised and same-day bursts; read the lowest in full; move-out reviews weigh most; short-let footprint.
 7. **Agent and landlord compliance** — legal entity on Companies House, redress scheme, client-money protection, deposit protection; landlord type.
@@ -55,11 +54,11 @@ Ask of every listing: "What sits under its prettiest feature?"
 - **Evidence grades on every finding**: G official register · S self-reported · C third-party · I inference · U unknown. Two sources disagreeing is a finding; a 200 with the wrong page is not evidence.
 - **Sources**: automate only what `references/sources.yaml` marks open. Named only, no method (their terms forbid automated access): Rightmove, Zoopla, OnTheMarket, OpenRent, HomeViews, Trustpilot, Google reviews, Airbnb, Booking.com — ask the user to paste. Borough portals: `references/boroughs.yaml`.
 - **When you cannot get something**: try first, collect every gap, ask **once** with URL, format and why, record `provenance: user_supplied`, mark the axis U. Never invent a number.
-- **Arithmetic is never done in your head**: `scripts/calc.py` prints every step; without a shell, write the formula and each step and check it a second way.
+- **Arithmetic is never done in your head**: `scripts/calc.py` prints every step; without a shell, write the formula (weekly rent = monthly × 12 ÷ 52; deposit cap = 5 × weekly, 6 × above £50k a year) and each step, check it a second way, and mark the number `computed_by: shown formula`.
 - **Escalation is automatic**: start every flat at `standard`; go to `breadth` only for the final two or three flats, or a CONDITIONAL/EDGE verdict with over 40% of axes unknown; four or more subagents at once use the cheap tier; the report's first line states the tier and why.
 - **Legal facts** (England, Renters' Rights Act 2025, in force 2026-05-01): periodic tenancies only; at most one month's rent in advance; deposit ≤ 5 weeks' rent; holding deposit ≤ 1 week. Cite `references/sources.yaml`.
 - **The fixed form**: answer all fourteen of `references/fixed-questions.yaml` — found (quote it) · asked · unknown; F1–F8 every flat, F9–F14 on a pasted page. Shell: `scripts/scan.py` the paste before answering; no shell: list the candidate sentences first. Ask once for the rest.
 - **Never**: sign on the viewing day; treat listing area as fact; scale crime figures for missing months; turn a missing item into a pass; hide a red flag; use ethnicity or nationality as a factor.
 
 ## Output
-Write `report.json` per `references/report-schema.json`; render with `python3 scripts/render.py report.json > report.html`, or hand the JSON to `viewer/viewer.html`; also print the one-page verdict in the user's language. Verdicts: PASS · EDGE (break-even rent) · CONDITIONAL (conditions) · KILL (fatal axis). Everything the report must contain, in plain language, is in `references/report-contract.md`.
+Write `report.json` per `references/report-schema.json`; render: `python3 scripts/render.py report.json > report.html` or `viewer/viewer.html`; print the one-page verdict in the user's language. Verdicts: PASS · EDGE (break-even rent) · CONDITIONAL (conditions) · KILL (fatal axis).
