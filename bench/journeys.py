@@ -300,10 +300,13 @@ def count_questions(text):
 
 
 def cjk_share(text):
-    """Share of CJK characters in the prose. Fenced and inline code is left out: a
-    settings diff is field names and values in any language, not the reply's language."""
+    """Share of CJK characters in the prose. Fenced and inline code, link targets, URLs
+    and file paths are left out: a settings diff or a path to the file that was written
+    is not the reply's language."""
     body = re.sub(r"```.*?```", " ", text or "", flags=re.S)
     body = re.sub(r"`[^`\n]*`", " ", body)
+    body = re.sub(r"\]\([^)]*\)", "]", body)                 # markdown link targets
+    body = re.sub(r"(?:https?://|/)[^\s)]+", " ", body)        # URLs and absolute paths
     body = re.sub(r"\s+", "", body)
     if not body:
         return 0.0

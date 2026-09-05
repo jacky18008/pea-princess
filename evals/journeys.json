@@ -4806,7 +4806,17 @@
          "no other",
          "unchanged",
          "only these",
-         "只改"
+         "只改",
+         "不變",
+         "沒變",
+         "維持",
+         "保持",
+         "照舊",
+         "不動",
+         "stay as they are",
+         "stays as it is",
+         "left alone",
+         "untouched"
         ]
        },
        {
@@ -4959,7 +4969,17 @@
          "nothing else",
          "no other",
          "unchanged",
-         "only"
+         "only",
+         "不變",
+         "沒變",
+         "維持",
+         "保持",
+         "照舊",
+         "不動",
+         "stay as they are",
+         "stays as it is",
+         "left alone",
+         "untouched"
         ]
        },
        {

@@ -646,6 +646,17 @@ class TestFileChecksAndRegrade(unittest.TestCase):
         finally:
             shutil.rmtree(folder, ignore_errors=True)
 
+    def test_code_paths_and_links_do_not_count_against_the_language(self):
+        reply = ("已更新 [profile.yaml](/private/var/folders/fj/abcdefghijklmnopqrstuvwxyz0123456789/"
+                 "vetflat-journey-j9-adjust-settings-by-talking-8cm8n12k/profile.yaml:5)。\n\n"
+                 "治安、管理改為 `deep`；其餘軸為 `lite`；全包月上限為 £2,300。驗證結果：`valid`。\n")
+        self.assertGreater(runner.cjk_share(reply), 0.2)   # the zh threshold
+        stripped = runner.cjk_share(reply)
+        naive = len(runner.CJK.findall(reply)) / float(len(reply.replace(' ', '')))
+        self.assertGreater(stripped, naive)
+        self.assertLess(runner.cjk_share("see https://example.org/a/very/long/path/that/is/not/prose 好"), 1.0)
+        self.assertEqual(0.0, runner.cjk_share("```\n中文 in code only\n```"))
+
     def test_the_pasted_profile_becomes_a_real_file_without_its_title_line(self):
         folder = tempfile.mkdtemp()
         try:
