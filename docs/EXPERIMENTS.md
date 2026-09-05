@@ -127,6 +127,22 @@ default on this many runs.
 
 ---
 
+## What an upgrade buys (relative change, same 5 flats)
+
+Read this as direction and rough size, not precision: 5 flats, 5–10 runs per arm, and single-model swaps on the Claude side sit inside run-to-run spread. The two robust effects are **budget mode** and **breadth**.
+
+| Upgrade | Landmine recall | Invented numbers per report | Fact recall | Cost per run |
+|---|---|---|---|---|
+| £20 setup (mid model, `lite`) → default (strong judge, `standard`) | 0.15 → 0.57 (**×3.8**) | 2.33 → 0.30 (**−87%**) | 0.40 → 0.70 (+75%) | ×10 ($0.67 → $6.7) |
+| `lite` → `standard`, same main model | 0.38 → 0.57 (+50%) | 2.00 → 0.30 (−85%) | 0.62 → 0.70 (+13%) | ×4.8 |
+| judge model mid-tier → top-tier, `standard` | 0.46 → 0.57–0.71 (+24–54%, within noise) | 0.80 → 0.30–0.60 | about the same | ×2.2 |
+| `standard` → `breadth` (one reader per axis) | 0.57 → 0.87 (+53%) | about the same | about the same | ×4.7, ×2 time, 1 in 5 runs timed out |
+| OpenAI side: Sol `lite` → Sol `standard` | 0.13 → 0.30 (×2.3) | 1.4 → 0.8 | 0.17 → 0.66 (×3.9) | subscription messages |
+| OpenAI side: Luna `lite` → Luna `standard` | 0.16 → 0.46 (×2.9) | about the same | 0.16 → 0.74 (×4.6) | subscription messages |
+| worker model mid-tier → top-tier | +0.06 (within noise) | about the same | about the same | no clear difference |
+
+**Order of upgrades that the data supports:** mode first (`lite` → `standard`), then the judge model, then breadth for the final shortlist; do not spend on worker models.
+
 ## Choose your configuration
 
 | Your goal | Configuration | Expected landmine recall | Cost | Time |

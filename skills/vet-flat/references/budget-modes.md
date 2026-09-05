@@ -76,3 +76,7 @@ Two jobs, two different answers. Vendor names below are examples, not requiremen
 Keep `standard` mode and run **fewer axes**. Do not switch to `lite` with all twelve. Measured: `lite` on the strongest model found fewer landmines (0.38) than `standard` on the weakest (0.46), and `lite` runs invented numbers far more often (2.0–2.3 fabricated numbers per run against 0.3 in `standard`). Depth is what stops the model guessing; breadth is the part you can safely trade away. When you drop axes, say which ones and mark them `U`.
 
 Full tables, method, caveats and the cost/recall chart: `docs/EXPERIMENTS.md` — https://github.com/jacky18008/pea-princess/blob/main/docs/EXPERIMENTS.md
+
+## What an upgrade buys (from `docs/EXPERIMENTS.md`, 5 flats, small sample)
+Going from a £20 setup (mid model, `lite`) to the default (strong judge, `standard`) found about 3.8× as many known landmines (0.15 → 0.57) and cut invented numbers by about 87% (2.3 → 0.3 per report) at roughly 10× the cost per run. `lite` → `standard` alone: +50% landmines, −85% invented numbers. A stronger judge adds a further +0.1–0.15 recall (within noise). Breadth (one reader per axis) adds +0.3 recall at about 5× cost. Worker models make no measurable difference. **Order of upgrades: mode first, then the judge, then breadth; never the workers.**
+
