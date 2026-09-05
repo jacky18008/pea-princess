@@ -10,14 +10,32 @@ Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen — https://github.com
 ## What every report contains
 1. **Verdict card** per candidate: PASS · EDGE (with the break-even rent) · CONDITIONAL (conditions listed) · KILL (the fatal axis named), a one-line headline, and the landmine codes as plain labels.
 2. **Your must-haves versus this flat**: every hard filter from the profile with requirement, observed value, pass / fail / unknown and its evidence grade.
-3. **Your questions, answered**: each entry of the profile's `my_questions`, placed at its stage — filter questions with the hard filters, vet questions under the verdict, compare questions as extra rows of the comparison table, viewing and sign questions in the checklists — with an answer, an evidence grade and whether the trigger fired. Written as `question_answers` on the candidate.
-4. **Side by side** when there is more than one candidate: £ per sq ft on EPC area, crime six-month count, commute minutes and redundancy grade, management organic score and incentivised share, nearest works, landlord type, all-in monthly cost; every number carries what it means and what it is compared with.
-5. **Worst resident reviews**: building, source, date, score, organic or not, a short excerpt, why it matters.
-6. **Landmines** L1–L16 with a plain label and whether they are reversible.
-7. **The 12 checks in detail** with an evidence chip on each finding and an unknowns list.
-8. **Questions and the viewing day**: at most two killer questions drawn from `questions.md`, then the checks only the site can answer.
-9. **What only you can tell**: the axes marked unknown and the things the tool cannot sense (smell, noise at night, light on the day, how the street feels), phrased as a request, not a gap; the report's own asks go in `only_you_can_tell`, and leaving it out asks the four standard ones.
-10. **What we could not find**, with the search strings and the blocked sources; **sources** with retrieval times; the arithmetic check; **About this report** with the configuration line again and the footer `Generated with vet-flat <version> — <source URL>`.
+3. **The questions we always answer**: the fourteen fixed questions of `fixed-questions.yaml`, all of them, in order, with a state each: found (the sentence quoted and the source named), asked (you asked the user, source `user`), unknown (no quote, no number, and the reader is told what it costs not to know). Gate questions F1-F8 for every flat; listing questions F9-F14 whenever a page, an email or a contract was pasted. Written as `fixed_answers` on the candidate.
+4. **Your questions, answered**: each entry of the profile's `my_questions`, placed at its stage — filter questions with the hard filters, vet questions under the verdict, compare questions as extra rows of the comparison table, viewing and sign questions in the checklists — with an answer, an evidence grade and whether the trigger fired. Written as `question_answers` on the candidate.
+5. **Side by side** when there is more than one candidate: £ per sq ft on EPC area, crime six-month count, commute minutes and redundancy grade, management organic score and incentivised share, nearest works, landlord type, all-in monthly cost; every number carries what it means and what it is compared with.
+6. **Worst resident reviews**: building, source, date, score, organic or not, a short excerpt, why it matters.
+7. **Landmines** L1–L16 with a plain label and whether they are reversible.
+8. **The 12 checks in detail** with an evidence chip on each finding and an unknowns list.
+9. **Questions and the viewing day**: at most two killer questions drawn from `questions.md`, then the checks only the site can answer.
+10. **What only you can tell**: the axes marked unknown and the things the tool cannot sense (smell, noise at night, light on the day, how the street feels), phrased as a request, not a gap; the report's own asks go in `only_you_can_tell`, and leaving it out asks the four standard ones.
+11. **What we could not find**, with the search strings and the blocked sources; **sources** with retrieval times; the arithmetic check; **About this report** with the configuration line again and the footer `Generated with vet-flat <version> — <source URL>`.
+
+## The fourteen fixed questions
+All fourteen, every flat. found = quote + source · asked = the user said it · unknown = no quote, no number.
+F1 deposit weeks (cap 5)
+F2 holding deposit (cap 1wk)
+F3 advance rent (cap 1mo)
+F4 tenancy or licence?
+F5 the legal landlord
+F6 deposit scheme
+F7 redress + client money
+F8 borough licence?
+F9 area + its source
+F10 EPC letter
+F11 bills included
+F12 minimum term
+F13 break clause
+F14 move-in date
 
 ## Plain-language rules (every text field)
 - Short sentences. No jargon or abbreviation without a gloss the first time.

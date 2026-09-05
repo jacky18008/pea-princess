@@ -32,6 +32,13 @@ terms:
     plain: "Each thing you said you needed, and whether this flat has it."
     plain-zh-TW: "你說過非有不可的每一項，這戶有沒有。"
     plain-zh-CN: "你说过非有不可的每一项，这户有没有。"
+  section.fixed:
+    en: "The questions we always answer"
+    zh-TW: "每一戶都要答的問題"
+    zh-CN: "每一户都要答的问题"
+    plain: "Fourteen questions asked of every flat, so nothing quietly goes missing."
+    plain-zh-TW: "每一戶都問同樣十四題，才不會有東西悄悄漏掉。"
+    plain-zh-CN: "每一户都问同样十四题，才不会有东西悄悄漏掉。"
   section.comparison:
     en: "Side by side"
     zh-TW: "並排比較"
@@ -506,6 +513,26 @@ terms:
     plain: "Nobody checked, so treat it as a risk, not a pass."
     plain-zh-TW: "沒人查過，所以當成風險，不是通過。"
     plain-zh-CN: "没人查过，所以当成风险，不是通过。"
+  ui.found:
+    en: "Found in writing"
+    zh-TW: "文件上有"
+    zh-CN: "文件上有"
+    plain: "Somebody wrote this down; the sentence it came from is quoted next to it."
+  ui.asked_you:
+    en: "You told us"
+    zh-TW: "你告訴我們的"
+    zh-CN: "你告诉我们的"
+    plain: "Nothing was written down, so we asked you and used your answer."
+  ui.quote:
+    en: "Their words"
+    zh-TW: "原文"
+    zh-CN: "原文"
+    plain: "The sentence this answer came from, copied exactly."
+  ui.fixed_lead:
+    en: "The same fourteen every time: found in writing (with the sentence), told to us by you, or unknown \u2014 nobody has checked yet."
+    zh-TW: "每一戶都答同樣十四題：文件上有（附原文）、你說的，或還不知道；不知道就是沒人查過。"
+    zh-CN: "每一户都答同样十四题：文件上有（附原文）、你说的，或还不知道；不知道就是没人查过。"
+    plain: "Three answers only: it is in writing, you told us, or nobody knows yet."
   ui.building:
     en: "Building"
     zh-TW: "建物"
@@ -980,6 +1007,83 @@ terms:
     zh-TW: "請挑你平常會走的時段，從車站走到大門，說說感覺。"
     zh-CN: "请挑你平常会走的时段，从车站走到大门，说说感觉。"
     plain: "Crime counts do not say if the street is lit and busy."
+
+  # ------------------------------------------ the fourteen questions we always answer
+  # The reader-facing wording of references/fixed-questions.yaml, which holds the machine
+  # side (the scanner patterns, the caps, the `why` line the reader sees when an answer is
+  # unknown). F1-F8 are asked of every flat, F9-F14 whenever a page is pasted. The label is
+  # the whole question, so the gloss is only a hover: like the four requests below it stays
+  # English-only, and viewer.html stays inside its size budget.
+  fixed.F1:
+    en: "How many weeks' rent is the deposit?"
+    zh-TW: "押金是幾週租金？"
+    zh-CN: "押金是几周租金？"
+    plain: "Five weeks' rent is the legal ceiling."
+  fixed.F2:
+    en: "How much is the holding deposit?"
+    zh-TW: "留位押金收多少？"
+    zh-CN: "留位押金收多少？"
+    plain: "The fee to hold the flat. One week's rent is the ceiling."
+  fixed.F3:
+    en: "How much rent is asked up front?"
+    zh-TW: "要先付多少租金？"
+    zh-CN: "要先付多少租金？"
+    plain: "One month is the most anyone may ask for in advance."
+  fixed.F4:
+    en: "Is this a tenancy or a licence?"
+    zh-TW: "這是租約還是使用許可？"
+    zh-CN: "这是租约还是使用许可？"
+    plain: "A tenancy protects you; a licence protects you far less."
+  fixed.F5:
+    en: "Who is the landlord on the contract?"
+    zh-TW: "合約上的房東是誰？"
+    zh-CN: "合同上的房东是谁？"
+    plain: "Who takes your money and signs the contract."
+  fixed.F6:
+    en: "Which scheme will hold the deposit?"
+    zh-TW: "押金放進哪個保管方案？"
+    zh-CN: "押金放进哪个保管方案？"
+    plain: "Deposits must sit in a government-backed scheme within 30 days."
+  fixed.F7:
+    en: "Which complaints scheme and money protection does the agent have?"
+    zh-TW: "仲介的申訴機制和資金保障是什麼？"
+    zh-CN: "中介的申诉机制和资金保障是什么？"
+    plain: "Every agent must belong to one, and must protect your money."
+  fixed.F8:
+    en: "Does this flat need a council licence, and does it have one?"
+    zh-TW: "這一戶需要市府執照嗎？領了沒？"
+    zh-CN: "这一户需要市政执照吗？领了没？"
+    plain: "Some flats must be licensed by the borough."
+  fixed.F9:
+    en: "How big is it indoors, and who says so?"
+    zh-TW: "室內面積多大？誰說的？"
+    zh-CN: "室内面积多大？谁说的？"
+    plain: "The certificate and the advert often give different sizes."
+  fixed.F10:
+    en: "What is the energy rating letter?"
+    zh-TW: "能源等級是哪一級？"
+    zh-CN: "能源等级是哪一级？"
+    plain: "One letter, A to G: the rough cost of keeping it warm."
+  fixed.F11:
+    en: "Which bills are included?"
+    zh-TW: "租金包含哪些帳單？"
+    zh-CN: "租金包含哪些账单？"
+    plain: "What the rent covers, and what you still pay for."
+  fixed.F12:
+    en: "What is the shortest time you can stay?"
+    zh-TW: "最短要住多久？"
+    zh-CN: "最短要住多久？"
+    plain: "How long you are tied in, and so the least you can lose."
+  fixed.F13:
+    en: "Can you leave early, and how?"
+    zh-TW: "可以提前退租嗎？怎麼退？"
+    zh-CN: "可以提前退租吗？怎么退？"
+    plain: "When you may end it early, and on how much notice."
+  fixed.F14:
+    en: "When can you move in?"
+    zh-TW: "最快什麼時候可以入住？"
+    zh-CN: "最快什么时候可以入住？"
+    plain: "The first day the keys are yours."
 
   # ----------------------------------------------------------- domain jargon
   epc:

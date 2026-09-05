@@ -209,6 +209,111 @@
      "evidence_class": "S"
     }
    ],
+   "fixed_answers": [
+    {
+     "id": "F1",
+     "status": "found",
+     "answer": "Five weeks' rent, 2,480, exactly at the cap.",
+     "quote": "Deposit: five weeks' rent, 2,480.",
+     "source": "s-listing-1",
+     "evidence_class": "S"
+    },
+    {
+     "id": "F2",
+     "status": "found",
+     "answer": "One week's rent, 496, off the first month's rent.",
+     "quote": "Holding deposit: one week's rent, 496.",
+     "source": "s-listing-1",
+     "evidence_class": "S"
+    },
+    {
+     "id": "F3",
+     "status": "asked",
+     "answer": "One month up front and no more, the legal maximum.",
+     "source": "user",
+     "evidence_class": "S",
+     "note": "You told us on 3 September; get it in the draft agreement."
+    },
+    {
+     "id": "F4",
+     "status": "found",
+     "answer": "A tenancy, not a licence: assured shorthold.",
+     "quote": "The agreement offered is an assured shorthold tenancy.",
+     "source": "s-listing-1",
+     "evidence_class": "S"
+    },
+    {
+     "id": "F5",
+     "status": "found",
+     "answer": "The building operator, a company on the register since 2014.",
+     "quote": "The landlord is the building operator, which owns the block.",
+     "source": "s-ch-1",
+     "evidence_class": "G"
+    },
+    {
+     "id": "F6",
+     "status": "unknown",
+     "answer": "",
+     "evidence_class": "U"
+    },
+    {
+     "id": "F7",
+     "status": "found",
+     "answer": "In a complaints scheme, with client money protection.",
+     "quote": "Complaints scheme and client money protection, both current.",
+     "source": "s-cmp",
+     "evidence_class": "G"
+    },
+    {
+     "id": "F8",
+     "status": "unknown",
+     "answer": "",
+     "evidence_class": "U"
+    },
+    {
+     "id": "F9",
+     "status": "found",
+     "answer": "571 square feet on the certificate; the advert says 620.",
+     "quote": "Total floor area: 53 square metres.",
+     "source": "s-epc-1",
+     "evidence_class": "G"
+    },
+    {
+     "id": "F10",
+     "status": "found",
+     "answer": "B, what a tight 2019 building should get.",
+     "quote": "Energy rating: B.",
+     "source": "s-epc-1",
+     "evidence_class": "G"
+    },
+    {
+     "id": "F11",
+     "status": "found",
+     "answer": "None. Heat comes from the building system.",
+     "quote": "Heat and hot water come from the estate system.",
+     "source": "s-heat",
+     "evidence_class": "S"
+    },
+    {
+     "id": "F12",
+     "status": "asked",
+     "answer": "Twelve months, said on the phone, nothing in writing.",
+     "source": "user",
+     "evidence_class": "S"
+    },
+    {
+     "id": "F13",
+     "status": "unknown",
+     "answer": "",
+     "evidence_class": "U"
+    },
+    {
+     "id": "F14",
+     "status": "unknown",
+     "answer": "",
+     "evidence_class": "U"
+    }
+   ],
    "axes": [
     {
      "id": 1,
@@ -845,6 +950,110 @@
      "requirement": "Keys between 2026-09-15 and 2026-10-15",
      "observed": "The agent says available from 2026-09-20",
      "pass": true,
+     "evidence_class": "S"
+    }
+   ],
+   "fixed_answers": [
+    {
+     "id": "F1",
+     "status": "found",
+     "answer": "Five weeks' rent, 2,071, the cap for this rent.",
+     "quote": "Deposit: five weeks' rent, 2,071.",
+     "source": "s-listing-2",
+     "evidence_class": "S"
+    },
+    {
+     "id": "F2",
+     "status": "asked",
+     "answer": "One week's rent to reserve it, you were told.",
+     "source": "user",
+     "evidence_class": "S"
+    },
+    {
+     "id": "F3",
+     "status": "asked",
+     "answer": "One month up front, you were told.",
+     "source": "user",
+     "evidence_class": "S"
+    },
+    {
+     "id": "F4",
+     "status": "found",
+     "answer": "A tenancy, not a licence: assured shorthold.",
+     "quote": "An assured shorthold tenancy of twelve months.",
+     "source": "s-listing-2",
+     "evidence_class": "S"
+    },
+    {
+     "id": "F5",
+     "status": "found",
+     "answer": "An individual, letting this one flat through the agent.",
+     "quote": "The landlord is an individual who owns this one flat.",
+     "source": "s-ch-2",
+     "evidence_class": "G"
+    },
+    {
+     "id": "F6",
+     "status": "unknown",
+     "answer": "",
+     "evidence_class": "U"
+    },
+    {
+     "id": "F7",
+     "status": "found",
+     "answer": "In a complaints scheme, with client money protection.",
+     "quote": "Client money protection confirmed; membership current.",
+     "source": "s-cmp",
+     "evidence_class": "G"
+    },
+    {
+     "id": "F8",
+     "status": "unknown",
+     "answer": "",
+     "evidence_class": "U"
+    },
+    {
+     "id": "F9",
+     "status": "found",
+     "answer": "474 square feet on the certificate; the advert says 560.",
+     "quote": "Total floor area: 44 square metres.",
+     "source": "s-epc-2",
+     "evidence_class": "G"
+    },
+    {
+     "id": "F10",
+     "status": "found",
+     "answer": "D, the usual for a 2007 flat with a gas boiler.",
+     "quote": "Energy rating: D.",
+     "source": "s-epc-2",
+     "evidence_class": "G"
+    },
+    {
+     "id": "F11",
+     "status": "found",
+     "answer": "None. A gas boiler in the flat, so you pick the supplier.",
+     "quote": "Gas central heating; bills are the tenant's.",
+     "source": "s-listing-2",
+     "evidence_class": "S"
+    },
+    {
+     "id": "F12",
+     "status": "unknown",
+     "answer": "",
+     "evidence_class": "U"
+    },
+    {
+     "id": "F13",
+     "status": "unknown",
+     "answer": "",
+     "evidence_class": "U"
+    },
+    {
+     "id": "F14",
+     "status": "found",
+     "answer": "1 October 2026, inside the window you asked for.",
+     "quote": "Available from 1 October 2026.",
+     "source": "s-listing-2",
      "evidence_class": "S"
     }
    ],

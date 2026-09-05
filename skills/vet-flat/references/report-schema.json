@@ -386,6 +386,13 @@
             "$ref": "#/definitions/hard_filter"
           }
         },
+        "fixed_answers": {
+          "type": "array",
+          "description": "The fixed form: the fourteen questions of references/fixed-questions.yaml, answered for this flat, one entry per id and all fourteen present. F1-F8 are the gate questions and are answered for every flat, always. F9-F14 are the listing questions: answer them whenever the user pasted a page, an email or a contract. With a shell, run scripts/scan.py over the pasted text first: it hands you the candidate sentences per question, so you quote rather than remember. Ask the user, once and in one message, about everything still unknown. A missing id is a warning here and an error under render.py --strict; the same id twice is an error.",
+          "items": {
+            "$ref": "#/definitions/fixed_answer"
+          }
+        },
         "axes": {
           "type": "array",
           "minItems": 12,
@@ -822,6 +829,120 @@
           ],
           "description": "Where a number in the answer came from: \"scripts/calc.py all-in\", \"scripts/crime.py\", or \"shown formula\" when the working is written into the answer itself.",
           "maxLength": 80
+        }
+      }
+    },
+    "fixed_answer": {
+      "type": "object",
+      "description": "One of the fourteen fixed questions in references/fixed-questions.yaml, answered for this flat. The form is the same for every flat so that nothing quietly goes missing: the wording of each question is glossary.yaml fixed.F1 ... fixed.F14, and there are exactly three states, no fourth. found = it is in writing: quote the sentence you read it in, verbatim, and cite the source id it came from. asked = nothing was written down, so you asked the user and they answered: source is the literal \"user\". unknown = nobody has checked yet: leave the quote out, put no number in the answer, and the renderers print the question's `why` line so the user knows what to go and find. Never turn an unknown into a pass, and never write a quote you cannot point at in the text you were given. Where the law caps the answer (deposit five weeks, holding deposit one week, rent in advance one month) the cap is in thresholds.yaml: say in the answer whether this flat is inside it.",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "status"
+      ],
+      "anyOf": [
+        {
+          "title": "found: a sentence you can point at",
+          "description": "The answer was written down. Quote the sentence and name the source id; \"user\" is not a source for a found item, that is what asked is for.",
+          "properties": {
+            "status": {
+              "const": "found"
+            },
+            "quote": {
+              "minLength": 1
+            },
+            "source": {
+              "not": {
+                "const": "user"
+              }
+            }
+          },
+          "required": [
+            "quote",
+            "source"
+          ]
+        },
+        {
+          "title": "asked: the user answered it",
+          "description": "Nothing was in writing, so you asked and they told you. Say who told you and when in the note if it matters.",
+          "properties": {
+            "status": {
+              "const": "asked"
+            },
+            "source": {
+              "const": "user"
+            }
+          },
+          "required": [
+            "source"
+          ]
+        },
+        {
+          "title": "unknown: nobody has checked yet",
+          "description": "No quote, no number, no guess. This is the state that sends the user to ask the agent or the landlord.",
+          "properties": {
+            "status": {
+              "const": "unknown"
+            },
+            "quote": {
+              "maxLength": 0
+            }
+          }
+        }
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "enum": [
+            "F1",
+            "F2",
+            "F3",
+            "F4",
+            "F5",
+            "F6",
+            "F7",
+            "F8",
+            "F9",
+            "F10",
+            "F11",
+            "F12",
+            "F13",
+            "F14"
+          ],
+          "description": "The question's id, F1 to F14, from references/fixed-questions.yaml. Every candidate carries all fourteen, once each."
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "found",
+            "asked",
+            "unknown"
+          ],
+          "description": "found = read off a document or a page, with the sentence quoted. asked = the user answered it. unknown = still nobody's answer. Three states, no fourth."
+        },
+        "answer": {
+          "type": "string",
+          "description": "The answer in plain words, short: \"five weeks' rent, GBP 2,711, inside the five-week cap\". Empty when the status is unknown; the renderers print the question's `why` line there instead, so the user knows what to go and find.",
+          "maxLength": 300
+        },
+        "quote": {
+          "type": "string",
+          "description": "The sentence the answer came from, copied exactly, no tidying. Required when the status is found; leave it out when the status is unknown. Keep it to the one sentence that carries the answer.",
+          "maxLength": 300
+        },
+        "source": {
+          "type": "string",
+          "description": "The id of the source in the top-level sources list that the quote came from, or the literal \"user\" when the user answered. A found item needs a real source id; \"user\" belongs to an asked item.",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "evidence_class": {
+          "$ref": "#/definitions/evidence_class"
+        },
+        "note": {
+          "type": "string",
+          "description": "Anything the reader needs about how this answer was got: who said it, when, and whether it is still to be confirmed in writing.",
+          "maxLength": 240
         }
       }
     },

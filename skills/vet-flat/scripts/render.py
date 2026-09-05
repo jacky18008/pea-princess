@@ -35,14 +35,16 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 REFS = os.path.join(HERE, "..", "references")
 DEFAULT_SCHEMA = os.path.join(REFS, "report-schema.json")
 DEFAULT_GLOSSARY = os.path.join(REFS, "glossary.yaml")
+DEFAULT_FIXED = os.path.join(REFS, "fixed-questions.yaml")
 
 FOOTER_TEMPLATE = "Generated with vet-flat {version} \u2014 {url}"
 DEFAULT_SOURCE_URL = "https://github.com/jacky18008/pea-princess"
 
-# The eleven sections, in order. (glossary id, html anchor)
+# The twelve sections, in order. (glossary id, html anchor)
 SECTIONS = [
     ("section.verdict", "verdict"),
     ("section.hard_filters", "hard-filters"),
+    ("section.fixed", "fixed"),
     ("section.comparison", "comparison"),
     ("section.worst_reviews", "worst-reviews"),
     ("section.landmines", "landmines"),
@@ -84,6 +86,17 @@ PROFILE_KEYS = [
 # filter with the hard filters, vet under the verdict, compare as rows of the side-by-side
 # table, viewing with the viewing-day checks, sign in its own list before signing.
 QUESTION_STAGES = ["filter", "vet", "compare", "viewing", "sign"]
+
+# Section 3, "The questions we always answer": the fourteen ids of
+# references/fixed-questions.yaml and the three states each one can be in. found is read
+# off a document and carries the sentence; asked is the user's own answer; unknown is
+# nobody's answer yet, and is drawn like a failure because that is what it costs.
+FIXED_IDS = ["F%d" % i for i in range(1, 15)]
+FIXED_STATES = {
+    "found": ("ok", "ui.found"),
+    "asked": ("unk", "ui.asked_you"),
+    "unknown": ("bad", "ui.unknown"),
+}
 
 # Section 8, "What only you can tell": what no register, feed or photo can carry. Asked
 # only when the report named nothing of its own, and always as a request, not a gap.
@@ -190,6 +203,41 @@ class Labels(object):
         return " \u2014 ".join(bits)
 
 
+# --------------------------------------------------- the fourteen questions ---
+def fixed_questions(path=DEFAULT_FIXED):
+    """The fourteen questions by id. scripts/scan.py owns the file and its parser.
+
+    Only the `why` line is used here: it is what the reader sees in the answer cell of an
+    unknown row, so they know what to go and find. A missing or broken file must never stop
+    a report rendering, so this degrades to no questions and the rows still draw.
+    """
+    try:
+        if HERE not in sys.path:
+            sys.path.insert(0, HERE)
+        import scan
+        return scan.load_questions(path)
+    except Exception:                                    # noqa: BLE001 - see the docstring
+        return {}
+
+
+def fixed_order(entry_id):
+    """F2 sorts before F10: the number counts, not the string."""
+    return (FIXED_IDS.index(entry_id), "") if entry_id in FIXED_IDS else (len(FIXED_IDS), entry_id or "")
+
+
+def fixed_rows(cand):
+    """[(index in the JSON, entry)] in question order, so the locators still point home."""
+    rows = [(i, e) for i, e in enumerate(cand.get("fixed_answers") or []) if isinstance(e, dict)]
+    return sorted(rows, key=lambda pair: fixed_order(pair[1].get("id")))
+
+
+def fixed_answer_text(entry, questions):
+    """The answer cell: what was found, or - when nobody knows - what it costs not to know."""
+    if entry.get("status") == "unknown":
+        return (questions.get(entry.get("id")) or {}).get("why") or ""
+    return entry.get("answer") or ""
+
+
 # -------------------------------------------------------------- validation ---
 TYPE_MAP = {
     "object": dict, "array": list, "string": str,
@@ -293,6 +341,59 @@ class Validator(object):
                     self.warn(path, "has an unexpected key '%s'; the renderers ignore it" % name)
 
 
+def check_fixed_answers(cand, path, v):
+    """The fixed form: fourteen ids, once each, and three states with nothing missing.
+
+    A missing id is a warning (an older report still validates, and --strict makes it an
+    error, like every other warning). The same id twice is an error: two answers to one
+    question is not an answer. The state rules are the ones in report-schema.json.
+    """
+    entries = cand.get("fixed_answers")
+    if entries is None:
+        v.warn(path, "has no fixed_answers, so the fourteen questions every flat has to "
+                     "answer are all missing. Fill references/fixed-questions.yaml: F1-F8 "
+                     "always, F9-F14 whenever a page was pasted.")
+        return
+    if not isinstance(entries, list):
+        return
+    seen = []
+    for i, entry in enumerate(entries):
+        if not isinstance(entry, dict):
+            continue
+        here = "%s.fixed_answers[%d]" % (path, i)
+        eid = entry.get("id")
+        if eid in seen:
+            v.err(here, "answers %s a second time; one entry per question" % eid)
+        seen.append(eid)
+        status = entry.get("status")
+        quote = (entry.get("quote") or "").strip()
+        source = (entry.get("source") or "").strip()
+        if status == "found":
+            if not quote:
+                v.err(here, "is 'found' but carries no quote. Copy the sentence you read the "
+                            "answer in, or set the status to 'asked' or 'unknown'.")
+            if not source:
+                v.err(here, "is 'found' but names no source. Cite the id of the page or document "
+                            "the quote came from.")
+            elif source == "user":
+                v.err(here, "is 'found' with source 'user'. What the user told you is 'asked'; "
+                            "'found' means it is in writing somewhere you can cite.")
+        elif status == "asked":
+            if source != "user":
+                v.err(here, "is 'asked' but its source is %r. An asked item is the user's own "
+                            "answer, so the source is the literal \"user\"." % (entry.get("source"),))
+        elif status == "unknown":
+            if quote:
+                v.err(here, "is 'unknown' but carries a quote. If you have the sentence, the "
+                            "status is 'found'.")
+    missing = [fid for fid in FIXED_IDS if fid not in seen]
+    if missing:
+        v.warn(path + ".fixed_answers",
+               "does not answer %s. Every flat answers all fourteen: the gate questions F1-F8 "
+               "always, the listing questions F9-F14 whenever a page was pasted. Say 'unknown' "
+               "rather than leaving one out." % ", ".join(missing))
+
+
 def semantic_checks(data, v):
     """The rules that a schema cannot state, in the words the model needs."""
     candidates = data.get("candidates")
@@ -313,6 +414,7 @@ def semantic_checks(data, v):
             if sorted([a for a in axis_ids if isinstance(a, int)]) != list(range(1, 13)):
                 v.err(path + ".axes",
                       "must be exactly 12 entries with ids 1 to 12, each once. Got ids %s" % (axis_ids,))
+        check_fixed_answers(cand, path, v)
         kq = cand.get("killer_questions")
         if isinstance(kq, list) and len(kq) > 2:
             v.err(path + ".killer_questions",
@@ -501,6 +603,24 @@ def unsourced_numbers(report, schema=None):
                 "message": ("candidates[%d] %s, metrics.%s: no source id and no computed_by note. "
                             "Cite a source from the top-level sources list, or say in computed_by "
                             "how you worked it out." % (i, cid, key)),
+            })
+        for index, entry in enumerate(cand.get("fixed_answers") or []):
+            if not isinstance(entry, dict) or not states_a_number(entry.get("answer")):
+                continue
+            status = entry.get("status")
+            source = (entry.get("source") or "").strip()
+            if status == "asked" or (status == "found" and source and source != "user"):
+                continue
+            out.append({
+                "candidate_id": cid,
+                "loc": ("fixed", index),
+                "label": entry.get("id") or "",
+                "keys": ["quote", "source"],
+                "message": ('candidates[%d] %s, fixed_answers[%d] %s: the answer states a number '
+                            "but the question is not answered from anything. A number needs status "
+                            "'found' with the sentence quoted and a source id, or status 'asked' "
+                            "because the user told you. An unknown carries no number."
+                            % (i, cid, index, entry.get("id") or "?")),
             })
         for index, qa in enumerate(cand.get("question_answers") or []):
             if not isinstance(qa, dict) or not states_a_number(qa.get("answer")):
@@ -1201,6 +1321,7 @@ class HtmlRenderer(object):
         self.out = []
         self.bad = bad_locations(data)      # also fills candidate.arithmetic_check
         self.nosource = unsourced_locations(data, schema)
+        self.fixed = fixed_questions()      # only for the `why` line on an unknown row
 
     def w(self, text=""):
         self.out.append(text)
@@ -1353,6 +1474,35 @@ class HtmlRenderer(object):
                 continue
             self.table(["", L.label("ui.requirement"), L.label("ui.observed"),
                         L.label("ui.result"), L.label("ui.evidence")], rows)
+
+    def s3_fixed(self):
+        """The fixed form: the same fourteen questions, per candidate, three states each."""
+        L = self.L
+        for cand in self.d.get("candidates", []):
+            self.w("<h3>%s</h3>" % esc(candidate_name(cand)))
+            self.w('<p class="sub">%s</p>' % esc(L.label("ui.fixed_lead")))
+            gaps = self.nosource.get(cand.get("id")) or set()
+            rows = []
+            for index, entry in fixed_rows(cand):
+                tid = "fixed." + (entry.get("id") or "")
+                css, state = FIXED_STATES.get(entry.get("status"), FIXED_STATES["unknown"])
+                quote = entry.get("quote") or ""
+                rows.append([
+                    '<td><strong><span class="meaning" title="%s">%s</span></strong></td>' % (
+                        esc(L.plain(tid)), esc(L.label(tid, entry.get("id") or ""))),
+                    '<td class="num"><span class="%s" title="%s">%s</span></td>' % (
+                        css, esc(L.plain(state)), esc(L.label(state))),
+                    "<td>%s%s</td>" % (esc(fixed_answer_text(entry, self.fixed)),
+                                       self.chip_nosource(("fixed", index) in gaps)),
+                    "<td><small>%s</small></td>" % (
+                        ("\u201c%s\u201d" % esc(quote)) if quote else ""),
+                    "<td>%s</td>" % self.chip_evidence(entry.get("evidence_class")),
+                ])
+            if not rows:
+                self.w("<p>%s</p>" % esc(L.label("ui.nothing_listed")))
+                continue
+            self.table(["", L.label("ui.result"), L.label("ui.observed"),
+                        L.label("ui.quote"), L.label("ui.evidence")], rows)
 
     def s3_comparison(self):
         L = self.L
@@ -1732,9 +1882,9 @@ class HtmlRenderer(object):
         self.w("<h1>%s</h1>" % esc(L.label("ui.report_title")))
         self.w("<p class=\"sub\"><strong>%s</strong></p>" % esc(configuration_line(self.d, L)))
         self.w('<p class="sub">%s &middot; %s</p>' % (esc(names), esc(self.d.get("generated_at", ""))))
-        renderers = [self.s1_verdict, self.s2_hard_filters, self.s3_comparison, self.s4_worst_reviews,
-                     self.s5_landmines, self.s6_axes, self.s7_questions, self.s8_only_you,
-                     self.s9_gaps, self.s10_sources, self.s11_about]
+        renderers = [self.s1_verdict, self.s2_hard_filters, self.s3_fixed, self.s3_comparison,
+                     self.s4_worst_reviews, self.s5_landmines, self.s6_axes, self.s7_questions,
+                     self.s8_only_you, self.s9_gaps, self.s10_sources, self.s11_about]
         for i, ((term_id, anchor), fn) in enumerate(zip(SECTIONS, renderers), 1):
             self.section(i, term_id, anchor)
             fn()
@@ -1850,7 +2000,27 @@ def render_markdown(data, L, schema=None):
         o += md_table(["", L.label("ui.requirement"), L.label("ui.observed"),
                        L.label("ui.result"), L.label("ui.evidence")], rows)
 
-    head(3, "section.comparison")
+    head(3, "section.fixed")
+    questions = fixed_questions()
+    for cand in candidates:
+        o.append("")
+        o.append("### %s" % candidate_name(cand))
+        o.append("")
+        o.append("_%s_" % L.label("ui.fixed_lead"))
+        gaps = gaps_by_candidate.get(cand.get("id")) or set()
+        rows = []
+        for index, entry in fixed_rows(cand):
+            tid = "fixed." + (entry.get("id") or "")
+            state = FIXED_STATES.get(entry.get("status"), FIXED_STATES["unknown"])[1]
+            quote = entry.get("quote") or ""
+            rows.append([L.label(tid, entry.get("id") or ""), L.label(state),
+                         fixed_answer_text(entry, questions) + source_flag(gaps, ("fixed", index)),
+                         ("\u201c%s\u201d" % quote) if quote else "",
+                         L.label("evidence." + (entry.get("evidence_class") or "U"))])
+        o += md_table(["", L.label("ui.result"), L.label("ui.observed"),
+                       L.label("ui.quote"), L.label("ui.evidence")], rows)
+
+    head(4, "section.comparison")
     comparison = data.get("comparison") or {}
     if len(candidates) > 1 and comparison:
         by_id = dict((c.get("id"), c) for c in candidates)
@@ -1928,7 +2098,7 @@ def render_markdown(data, L, schema=None):
         o.append("")
         o.append("_%s_" % L.label("ui.nothing_listed"))
 
-    head(4, "section.worst_reviews")
+    head(5, "section.worst_reviews")
     for cand in candidates:
         o.append("")
         o.append("### %s" % candidate_name(cand))
@@ -1945,7 +2115,7 @@ def render_markdown(data, L, schema=None):
             o.append("")
             o.append("_%s_" % L.label("ui.nothing_listed"))
 
-    head(5, "section.landmines")
+    head(6, "section.landmines")
     for cand in candidates:
         o.append("")
         o.append("### %s" % candidate_name(cand))
@@ -1961,7 +2131,7 @@ def render_markdown(data, L, schema=None):
             o.append("")
             o.append("_%s_" % L.label("ui.nothing_listed"))
 
-    head(6, "section.axes")
+    head(7, "section.axes")
     for cand in candidates:
         o.append("")
         o.append("### %s" % candidate_name(cand))
@@ -2008,7 +2178,7 @@ def render_markdown(data, L, schema=None):
         for note in cand.get("provenance_notes") or []:
             o.append("- %s: %s" % (L.label("ui.provenance"), note))
 
-    head(7, "section.questions")
+    head(8, "section.questions")
     for cand in candidates:
         o.append("")
         o.append("### %s" % candidate_name(cand))
@@ -2026,7 +2196,7 @@ def render_markdown(data, L, schema=None):
             o.append("**%s**" % L.label("ui.before_signing"))
             questions_block(cand, "sign")
 
-    head(8, "section.only_you")
+    head(9, "section.only_you")
     for cand in candidates:
         o.append("")
         o.append("### %s" % candidate_name(cand))
@@ -2035,7 +2205,7 @@ def render_markdown(data, L, schema=None):
         for label, text in only_you_asks(cand, L):
             o.append("- **%s**: %s" % (label, text) if label else "- %s" % text)
 
-    head(9, "section.gaps")
+    head(10, "section.gaps")
     rows = [[e.get("what", ""), "; ".join("`%s`" % q for q in e.get("queries_used") or []),
              e.get("where_looked") or "", e.get("next_step") or ""]
             for e in data.get("not_found") or []]
@@ -2051,7 +2221,7 @@ def render_markdown(data, L, schema=None):
         o += md_table([L.label("ui.blocked_source"), L.label("ui.http_status"),
                        L.label("ui.blocked_reason"), L.label("ui.workaround")], rows)
 
-    head(10, "section.sources")
+    head(11, "section.sources")
     rows = [[s.get("id", ""), s.get("name") or "", s.get("url") or "", s.get("retrieved_at", ""),
              L.label("evidence." + (s.get("evidence_class") or "U")),
              " ".join(x for x in (s.get("provenance"), s.get("note")) if x)]
@@ -2059,7 +2229,7 @@ def render_markdown(data, L, schema=None):
     o += md_table(["", L.label("ui.source_name"), L.label("ui.url"), L.label("ui.retrieved_at"),
                    L.label("ui.evidence"), L.label("ui.provenance")], rows)
 
-    head(11, "section.about")
+    head(12, "section.about")
     o.append("")
     o.append(configuration_line(data, L))
     gb = data.get("generated_by") or {}

@@ -25,6 +25,25 @@ class TestSkillMd(unittest.TestCase):
         self.assertLessEqual(len(text), 8000, "the prompt-pack INSTRUCTIONS.md must fit ChatGPT Projects (8,000 chars)")
         self.assertIn("Manual-mode digest", text)
 
+    def test_the_prompt_pack_carries_the_fourteen_fixed_questions(self):
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("build_dist", os.path.join(HERE, "..", "tools", "build_dist.py"))
+        mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+        text = mod.compose_instructions()
+        for i in range(1, 15):
+            self.assertIn("F%d " % i, text, "F%d is missing from the manual-mode digest" % i)
+        for state in ("found", "asked", "unknown"):
+            self.assertIn(state, text, state)
+        self.assertIn("fixed-questions.yaml", text)
+
+    def test_the_fixed_form_is_a_rule_that_never_bends(self):
+        s = read("SKILL.md")
+        block = s[s.index("## Rules that never bend"):s.index("## Output")]
+        self.assertIn("references/fixed-questions.yaml", block)
+        self.assertIn("scripts/scan.py", block)
+        for word in ("found", "asked", "unknown"):
+            self.assertIn(word, block, word)
+
     def test_portable_frontmatter_only(self):
         fm = re.search(r"^---\n(.*?)\n---", read("SKILL.md"), re.S).group(1)
         keys = {line.split(":")[0].strip() for line in fm.splitlines() if line and not line.startswith(" ")}

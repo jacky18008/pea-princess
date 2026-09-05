@@ -1,0 +1,209 @@
+# Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen — https://github.com/jacky18008/pea-princess — CC BY 4.0
+#
+# The fixed form: fourteen questions every flat has to answer, in the same order,
+# every time. Prose gets skipped; a form does not. Each question has exactly three
+# states in the report (report-schema.json, definitions.fixed_answer):
+#   found    the answer is in writing -> quote the sentence and name the source
+#   asked    nothing was written down -> you asked the user and they answered (source: user)
+#   unknown  nobody has checked yet   -> no quote, no number, and the `why` below is
+#            printed to the reader so they know what to go and find
+# Gate questions (F1-F8) are asked of every flat, always. Listing questions (F9-F14)
+# are asked whenever the user pastes a page, an email or a contract.
+# The reader-facing wording of each question is glossary.yaml, `fixed.F1` ... `fixed.F14`,
+# in three languages. It is not here: this file is the machine side.
+#
+# FORMAT (a 60-line standard-library parser reads it: scripts/scan.py)
+#   * two-space indent; a line whose first non-space character is # is a comment
+#   * scalars: "double-quoted" (JSON escapes), 'single-quoted' (literal, for regexes,
+#     '' for a quote), a bare integer, or a bare word of [A-Za-z0-9_.#-]
+#   * a list is `key:` on its own line and `- value` lines indented under it
+# Fields per question:
+#   group           gate | listing
+#   axis            the axis (references/axes/) this belongs to
+#   answer_type     weeks | money | yes_no | text | letter | date
+#   ask_if_missing  always | when_page_pasted
+#   cap             pointer into thresholds.yaml where the law caps the answer (optional)
+#   look_for        case-insensitive regexes, English AND Chinese, that scripts/scan.py
+#                   runs over pasted text to surface candidate sentences. They are
+#                   deliberately loose: a candidate is a sentence to read, not an answer.
+#   why             one short sentence: what the reader loses by not knowing. Both
+#                   renderers print it in the answer cell of an `unknown` row.
+version: "2026-09-05"
+questions:
+
+  # ------------------------------------------------------------ gate: money ---
+  F1:
+    group: gate
+    axis: 7
+    answer_type: weeks
+    ask_if_missing: always
+    cap: "thresholds.yaml#deposit_cap_weeks"
+    why: "Five weeks' rent is the legal ceiling; over that, ask for the difference back."
+    look_for:
+      - 'deposit[^.\n]{0,40}\b(\d+|one|two|three|four|five|six|seven|eight)\s*weeks?'
+      - '\b(\d+|one|two|three|four|five|six|seven|eight)\s*weeks?[^.\n]{0,25}deposit'
+      - 'deposit[^.\n]{0,30}[£$]\s?\d[\d,]*'
+      - '押金[^。\n]{0,20}(\d+|[一二三四五六七八])\s*(週|周|星期)'
+      - '(押金|保證金|保证金)[^。\n]{0,20}[£￥]?\s?\d[\d,]*'
+  F2:
+    group: gate
+    axis: 7
+    answer_type: money
+    ask_if_missing: always
+    cap: "thresholds.yaml#holding_deposit_weeks"
+    why: "One week's rent is the ceiling, and it must come off your first rent."
+    look_for:
+      - 'holding deposit|holding fee|reservation fee|reservation deposit'
+      - 'to secure the (property|flat|apartment)[^.\n]{0,30}[£$]?\s?\d'
+      - '(留位[費费]|保留金|訂金|定金|預訂金|预订金)[^。\n]{0,20}[£￥]?\s?\d[\d,]*'
+  F3:
+    group: gate
+    axis: 7
+    answer_type: money
+    ask_if_missing: always
+    cap: "thresholds.yaml#rent_in_advance_max_months"
+    why: "Since May 2026 nobody may ask for more than one month up front."
+    look_for:
+      - '\b(\d+|one|two|three|six|twelve)\s*months?[^.\n]{0,30}(in advance|up\s?front|upfront)'
+      - '(rent )?(in advance|up\s?front|upfront)[^.\n]{0,30}[£$]?\s?\d'
+      - 'advance (rent|payment)[^.\n]{0,30}[£$]?\s?\d'
+      - '(預付|預繳|预付|预缴|先付)[^。\n]{0,20}(\d+|[一二三六十]+)\s*(個月|个月|月)'
+      - '(半年|一年)租金'
+
+  # ------------------------------------------------------- gate: the paper ---
+  F4:
+    group: gate
+    axis: 7
+    answer_type: text
+    ask_if_missing: always
+    why: "A tenancy carries legal protection; a licence carries far less."
+    look_for:
+      - 'licence agreement|license agreement|\blicensee\b|licence to occupy'
+      - 'assured shorthold tenancy|\bAST\b|tenancy agreement|periodic tenancy|common law tenancy'
+      - '(lodger|excluded occupier|serviced apartment|company let)'
+      - '(租[賃赁]契[約约]|租約|租约|租賃合約|租赁合同)'
+      - '(使用[權权]|授權書|授权书|入住許可|入住许可|分租房客)'
+  F5:
+    group: gate
+    axis: 7
+    answer_type: text
+    ask_if_missing: always
+    why: "Whoever takes your money and signs. A company has a number you can look up."
+    look_for:
+      - '\blandlord\b[^.\n]{0,60}'
+      - '\b(freeholder|head ?lease|superior landlord|management company)\b'
+      - '\b[A-Z][\w&.\- ]{2,40}(Ltd|Limited|LLP|PLC)\b'
+      - 'company (number|no\.?|registration)[^.\n]{0,20}\d{6,8}'
+      - '(房[東东]|出租人|業主|业主|產權人|产权人)[^。\n]{0,30}'
+      - '(公司[編编]號|公司编号|統一編號|统一编号)'
+  F6:
+    group: gate
+    axis: 7
+    answer_type: text
+    ask_if_missing: always
+    cap: "thresholds.yaml#deposit_protection_days"
+    why: "Your deposit must sit in a government-backed scheme within 30 days."
+    look_for:
+      - '\b(DPS|TDS|mydeposits)\b'
+      - 'deposit protection service|tenancy deposit scheme|custodial scheme|insured scheme'
+      - 'deposit[^.\n]{0,40}(protect|registered|scheme|safeguard)'
+      - '(押金)[^。\n]{0,25}(保[護护]|存管|託管|托管|方案|計[畫劃]|计划|登記|登记)'
+  F7:
+    group: gate
+    axis: 7
+    answer_type: text
+    ask_if_missing: always
+    why: "No complaints scheme and no money protection means no agent worth using."
+    look_for:
+      - 'property redress scheme|property ombudsman|\bTPO\b|\bPRS\b|redress scheme'
+      - 'client money protection|\bCMP\b|Propertymark|\bARLA\b|RICS|Safeagent'
+      - '(申[訴诉]|調解|调解|仲裁)[^。\n]{0,20}(機制|机制|方案|計[畫劃]|计划)'
+      - '(客[戶户]資金|客户资金|資金保障|资金保障)'
+  F8:
+    group: gate
+    axis: 7
+    answer_type: yes_no
+    ask_if_missing: always
+    why: "A flat that needs a council licence and has none becomes your problem."
+    look_for:
+      - 'selective licen[cs]|additional licen[cs]|mandatory licen[cs]'
+      - '\bHMO\b|house in multiple occupation|licence number|licensed by the council'
+      - '(borough|council)[^.\n]{0,30}licen[cs]'
+      - '(出租[執执]照|租賃執照|牌照|許可[證证]|许可证)'
+      - '(分租|多人共住|雅房|合租)[^。\n]{0,20}([執执]照|登記|登记)'
+
+  # ------------------------------------------------ listing: what it is ---
+  F9:
+    group: listing
+    axis: 2
+    answer_type: text
+    ask_if_missing: when_page_pasted
+    why: "The certificate and the advert often disagree; the certificate wins."
+    look_for:
+      - '\b\d{2,4}(\.\d+)?\s*(sq\.?\s?(ft|feet)|sqft|ft2|ft²|square feet)'
+      - '\b\d{2,3}(\.\d+)?\s*(sq\.?\s?m|sqm|m2|m²|square met(re|er)s?)'
+      - '(floor area|internal area|gross internal|total area)[^.\n]{0,30}\d'
+      - '(面積|面积|室內坪數|室内面积)[^。\n]{0,25}\d'
+      - '\d{2,4}\s*(平方[呎米公尺]|平米|坪)'
+  F10:
+    group: listing
+    axis: 3
+    answer_type: letter
+    ask_if_missing: when_page_pasted
+    why: "One letter, A to G: the cheapest early warning about the winter bill."
+    look_for:
+      - '\bEPC\b[^.\n]{0,30}\b[A-G]\b'
+      - 'energy (performance|efficiency|rating)[^.\n]{0,30}\b[A-G]\b'
+      - 'current (rating|energy) (rating )?[A-G]\b'
+      - '(能源|能效)[^。\n]{0,20}[A-G]\b'
+  F11:
+    group: listing
+    axis: 10
+    answer_type: text
+    ask_if_missing: when_page_pasted
+    why: "What the rent covers, and whether the heat is a price you cannot shop for."
+    look_for:
+      - 'bills? (are |is )?includ|all bills|inclusive of (bills|water|heating)'
+      - 'includ(es|ing|ed)[^.\n]{0,50}(water|electric|gas|heating|broadband|wi-?fi|internet|council tax)'
+      - 'heat network|communal heating|district heating|heat interface'
+      - '(含|包含|不含)[^。\n]{0,25}(水|電|电|瓦斯|燃氣|燃气|暖氣|暖气|網[路络]|网络|寬頻|宽带|市政稅|市政税|管理費|管理费)'
+      - '(集中供暖|中央供暖|社區供熱|社区供热)'
+
+  # ------------------------------------------------ listing: the timeline ---
+  F12:
+    group: listing
+    axis: 7
+    answer_type: text
+    ask_if_missing: when_page_pasted
+    why: "How long you are tied in, and so the least you can lose."
+    look_for:
+      - 'minimum (term|tenancy|let|stay|contract|period)'
+      - '\b(\d+|six|twelve)\s*months?[^.\n]{0,25}(minimum|term|contract|tenancy|let|fixed)'
+      - 'fixed term[^.\n]{0,25}\d'
+      - '(最短|最少|至少)[^。\n]{0,15}(\d+|[一二三六十]+)\s*(個月|个月|月|年)'
+      - '(起租|一年起|半年起|一年約|一年约)'
+  F13:
+    group: listing
+    axis: 7
+    answer_type: text
+    ask_if_missing: when_page_pasted
+    why: "Whether you can end it early, from when, and on how much notice."
+    look_for:
+      - 'break clause|break option|early termination|terminate early|end the tenancy early'
+      - '\b(\d+|one|two|three)\s*months?[^.\n]{0,25}(notice|written notice)'
+      - 'notice period[^.\n]{0,25}\d?'
+      - '(解約|解约|提前(終止|终止|退租|解約|解约))'
+      - '(\d+|[一二三])\s*(個月|个月)[^。\n]{0,15}(通知|預告|预告)'
+  F14:
+    group: listing
+    axis: 15
+    answer_type: date
+    ask_if_missing: when_page_pasted
+    why: "The first day the keys are yours, and whether you need a bridge stay."
+    look_for:
+      - 'available (from|on|immediately)[^.\n]{0,30}'
+      - 'move[- ]in[^.\n]{0,30}(date|from|on)?'
+      - '\b\d{1,2}(st|nd|rd|th)?\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\b'
+      - '\b\d{4}-\d{2}-\d{2}\b'
+      - '(可入住|入住日|起租日|可遷入|可迁入|交屋)[^。\n]{0,20}'
+      - '\d{1,2}\s*月\s*\d{1,2}\s*[日號号]'

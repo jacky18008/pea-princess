@@ -22,11 +22,13 @@ VIEWER_DIR = os.path.join(ROOT, "viewer")
 sys.path.insert(0, SCRIPTS)
 sys.path.insert(0, VIEWER_DIR)
 import render  # noqa: E402
+import scan  # noqa: E402
 import build_viewer  # noqa: E402
 
 SAMPLE = os.path.join(HERE, "fixtures", "report-sample.json")
 SCHEMA = os.path.join(REFS, "report-schema.json")
 GLOSSARY = os.path.join(REFS, "glossary.yaml")
+FIXED_QUESTIONS = os.path.join(REFS, "fixed-questions.yaml")
 VIEWER = os.path.join(VIEWER_DIR, "viewer.html")
 PROFILE = os.path.join(ROOT, "skills", "vet-flat", "profile.template.yaml")
 
@@ -35,6 +37,7 @@ FOOTER = "Generated with vet-flat 1.0.0-draft \u2014 https://github.com/jacky180
 SECTION_TITLES_EN = [
     "Verdict",
     "Your must-haves versus this flat",
+    "The questions we always answer",
     "Side by side",
     "Worst resident reviews",
     "Landmines",
@@ -127,6 +130,11 @@ def unsourced_answer_sample():
         "answer": "About 6 of the 41 flats, going by what neighbours say.",
         "evidence_class": "C"})
     return data
+
+
+def esc_label(text):
+    """The label as the HTML renderer writes it (apostrophes are escaped)."""
+    return render.esc(text)
 
 
 def write_temp(report):
@@ -275,7 +283,7 @@ class TestHtmlOutput(unittest.TestCase):
         self.assertTrue(self.html.startswith("<!doctype html>"))
         self.assertIn("</html>", self.html)
 
-    def test_all_eleven_section_headings(self):
+    def test_all_twelve_section_headings(self):
         for i, title in enumerate(SECTION_TITLES_EN, 1):
             self.assertIn(">%d. %s</h2>" % (i, title), self.html,
                           "section %d (%s) is missing from the HTML" % (i, title))
@@ -340,7 +348,7 @@ class TestMarkdownOutput(unittest.TestCase):
     def test_exit_code(self):
         self.assertEqual(0, self.code, self.err)
 
-    def test_same_eleven_sections_in_the_same_order(self):
+    def test_same_twelve_sections_in_the_same_order(self):
         found = [line for line in self.md.splitlines() if line.startswith("## ")]
         self.assertEqual(["## %d. %s" % (i, t) for i, t in enumerate(SECTION_TITLES_EN, 1)], found)
 
@@ -360,9 +368,9 @@ class TestViewer(unittest.TestCase):
 
     def test_size_budget(self):
         size = len(self.html.encode("utf-8"))
-        # 140 KB since the report grew the two sections the contract asks for: the user's own
-        # questions answered at their stage, and "What only you can tell".
-        self.assertEqual(build_viewer.SIZE_LIMIT, 140 * 1024, "the budget is 140 KB")
+        # 152 KB since the fixed form: fourteen questions per candidate in the example
+        # report, their wording in three languages, and the `why` line under an unknown.
+        self.assertEqual(build_viewer.SIZE_LIMIT, 152 * 1024, "the budget is 152 KB")
         self.assertLess(size, build_viewer.SIZE_LIMIT,
                         "viewer.html is %.1f KB, the budget is %.0f KB"
                         % (size / 1024.0, build_viewer.SIZE_LIMIT / 1024.0))
@@ -867,14 +875,14 @@ class TestQuestionAnswersOutput(unittest.TestCase):
         self.assertIn(Q_COMPARE, comparison)
         # one row for the question, one cell per candidate, so the text appears once
         self.assertEqual(1, comparison.count(Q_COMPARE))
-        self.assertIn(Q_COMPARE, section_md(self.md, "3. Side by side"))
+        self.assertIn(Q_COMPARE, section_md(self.md, "4. Side by side"))
 
     def test_the_viewing_and_signing_questions_sit_in_the_checklists(self):
         questions = section_html(self.html, "questions")
         self.assertIn(Q_VIEWING, questions)
         self.assertIn(Q_SIGN, questions)
         self.assertIn("Before you sign", questions)
-        md = section_md(self.md, "7. Questions to ask")
+        md = section_md(self.md, "8. Questions to ask")
         self.assertIn(Q_VIEWING, md)
         self.assertIn(Q_SIGN, md)
         self.assertIn("**Before you sign**", md)
@@ -911,10 +919,10 @@ class TestOnlyYouCanTell(unittest.TestCase):
 
     def test_the_section_is_between_the_questions_and_the_gaps(self):
         self.assertEqual(0, self.plain_code, self.plain_err)
-        self.assertIn('<h2 id="only-you">8. What only you can tell</h2>', self.plain_html)
+        self.assertIn('<h2 id="only-you">9. What only you can tell</h2>', self.plain_html)
         self.assertLess(self.plain_html.index('id="questions"'), self.plain_html.index('id="only-you"'))
         self.assertLess(self.plain_html.index('id="only-you"'), self.plain_html.index('id="gaps"'))
-        self.assertEqual(("section.only_you", "only-you"), render.SECTIONS[7])
+        self.assertEqual(("section.only_you", "only-you"), render.SECTIONS[8])
 
     def test_it_opens_with_a_request_not_a_gap(self):
         block = section_html(self.plain_html, "only-you")
@@ -928,13 +936,13 @@ class TestOnlyYouCanTell(unittest.TestCase):
             self.assertIn("<strong>%s</strong>" % label, block)
         self.assertNotIn("<strong>Crime</strong>", block)   # graded official, not unknown
         for label in ("Construction nearby", "Aspect and light"):
-            self.assertIn("**%s**" % label, section_md(self.md, "8. What only you can tell"))
+            self.assertIn("**%s**" % label, section_md(self.md, "9. What only you can tell"))
 
     def test_it_shows_what_the_report_asked_for(self):
         block = section_html(self.plain_html, "only-you")
         self.assertIn("the ventilation is shared", block)
         self.assertIn("reached for the light", block)
-        self.assertIn("the ventilation is shared", section_md(self.md, "8. What only you can tell"))
+        self.assertIn("the ventilation is shared", section_md(self.md, "9. What only you can tell"))
 
     def test_a_candidate_that_asked_for_nothing_gets_the_four_standard_requests(self):
         L = render.Labels(render.load_glossary(GLOSSARY), "en")
@@ -943,7 +951,7 @@ class TestOnlyYouCanTell(unittest.TestCase):
         self.assertEqual(4, len(render.ONLY_YOU_DEFAULTS))
         for term_id in render.ONLY_YOU_DEFAULTS:
             self.assertIn(L.label(term_id), second, term_id)
-            self.assertIn(L.label(term_id), section_md(self.md, "8. What only you can tell"))
+            self.assertIn(L.label(term_id), section_md(self.md, "9. What only you can tell"))
 
     def test_the_requests_read_the_same_in_chinese(self):
         code, zh, err = run_cli(SAMPLE, "--lang", "zh-TW")
@@ -963,7 +971,7 @@ class TestViewerDrawsBothSections(unittest.TestCase):
                        "ui.your_questions", "ui.before_signing", "ui.trigger_fired",
                        "ui.trigger_not_fired", "ui.no_trigger", "ui.unknown_axes_request",
                        '["section.only_you","only-you"]',
-                       "var RENDERERS=[s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11]"):
+                       "var RENDERERS=[s1,s2,s2f,s3,s4,s5,s6,s7,s8,s9,s10,s11]"):
             self.assertIn(needle, self.viewer.replace(", ", ","), needle)
 
     def test_it_carries_the_four_standard_requests_in_three_languages(self):
@@ -1046,7 +1054,7 @@ class TestEscalationLadder(unittest.TestCase):
         self.assertEqual(2, html.count(line), html.count("Configuration:"))
         title = html.index("</h1>")
         self.assertLess(html.index(line), html.index("&middot;", title))
-        self.assertLess(html.index("11. About this report"), html.rindex(line))
+        self.assertLess(html.index("12. About this report"), html.rindex(line))
 
     def test_the_markdown_prints_it_in_both_places(self):
         code, md, err = run_cli(SAMPLE, "--md")
@@ -1055,7 +1063,7 @@ class TestEscalationLadder(unittest.TestCase):
         self.assertTrue(lines[0].startswith("# "), lines[0])
         self.assertTrue(lines[2].startswith("Configuration: breadth \u2014 "), lines[:4])
         self.assertEqual(2, md.count("Configuration: breadth \u2014 "), md.count("Configuration"))
-        after = md[md.index("## 11. About this report"):]
+        after = md[md.index("## 12. About this report"):]
         self.assertIn("Configuration: breadth \u2014 ", after)
 
     def test_the_viewer_prints_the_same_line(self):
@@ -1093,6 +1101,281 @@ class TestProfileTemplate(unittest.TestCase):
             stripped = line.strip()
             if stripped.startswith("min_floor_area_sqft") or stripped.startswith("destination"):
                 self.assertTrue(stripped.endswith(":"), "%r should be blank in the template" % line)
+
+
+
+# ------------------------------------------------- the fixed form: fourteen questions
+def fixed_entry(cand, fid):
+    for entry in cand["fixed_answers"]:
+        if entry["id"] == fid:
+            return entry
+    raise AssertionError("the sample does not answer %s" % fid)
+
+
+class TestFixedQuestionsFile(unittest.TestCase):
+    """references/fixed-questions.yaml: the machine side of the form."""
+
+    def setUp(self):
+        self.questions = scan.load_questions(FIXED_QUESTIONS)
+        self.terms = render.load_glossary(GLOSSARY)
+
+    def test_fourteen_questions_with_the_fields_the_form_needs(self):
+        self.assertEqual(render.FIXED_IDS, sorted(self.questions, key=scan.sort_key))
+        for fid, item in self.questions.items():
+            self.assertIn(item.get("group"), ("gate", "listing"), fid)
+            self.assertIn(item.get("answer_type"),
+                          ("weeks", "money", "yes_no", "text", "letter", "date"), fid)
+            self.assertIn(item.get("ask_if_missing"), ("always", "when_page_pasted"), fid)
+            self.assertTrue(item.get("why"), "%s has no why line" % fid)
+            self.assertTrue(item.get("look_for"), "%s has nothing to look for" % fid)
+
+    def test_the_gate_is_asked_of_every_flat_and_the_listing_only_on_a_paste(self):
+        gate = [f for f, i in self.questions.items() if i["group"] == "gate"]
+        listing = [f for f, i in self.questions.items() if i["group"] == "listing"]
+        self.assertEqual(render.FIXED_IDS[:8], sorted(gate, key=scan.sort_key))
+        self.assertEqual(render.FIXED_IDS[8:], sorted(listing, key=scan.sort_key))
+        for fid in gate:
+            self.assertEqual("always", self.questions[fid]["ask_if_missing"], fid)
+        for fid in listing:
+            self.assertEqual("when_page_pasted", self.questions[fid]["ask_if_missing"], fid)
+
+    def test_every_cap_points_at_a_real_threshold(self):
+        thresholds = read(os.path.join(REFS, "thresholds.yaml"))
+        capped = [f for f, i in self.questions.items() if i.get("cap")]
+        self.assertTrue(set(["F1", "F2", "F3"]) <= set(capped), capped)
+        for fid in capped:
+            pointer = self.questions[fid]["cap"]
+            self.assertTrue(pointer.startswith("thresholds.yaml#"), pointer)
+            key = pointer.split("#", 1)[1]
+            self.assertIn("\n%s:" % key, thresholds, "%s points at a missing threshold" % fid)
+
+    def test_the_patterns_are_bilingual_and_compile(self):
+        for fid, item in self.questions.items():
+            patterns = item["look_for"]
+            self.assertTrue(any(not any(ord(ch) > 0x2E00 for ch in p) for p in patterns),
+                            "%s has no English pattern" % fid)
+            self.assertTrue(any(any(ord(ch) > 0x2E00 for ch in p) for p in patterns),
+                            "%s has no Chinese pattern" % fid)
+            self.assertEqual(len(patterns), len(item["patterns"]))
+
+    def test_the_wording_is_in_the_glossary_in_three_languages(self):
+        for fid in render.FIXED_IDS:
+            entry = self.terms.get("fixed." + fid)
+            self.assertTrue(entry, "glossary.yaml has no fixed.%s" % fid)
+            for lang in ("en", "zh-TW", "zh-CN"):
+                self.assertTrue(entry.get(lang), "fixed.%s has no %s label" % (fid, lang))
+            self.assertTrue(entry.get("plain"), "fixed.%s has no plain gloss" % fid)
+        for term_id in ("section.fixed", "ui.found", "ui.asked_you", "ui.unknown", "ui.quote",
+                        "ui.fixed_lead"):
+            self.assertIn(term_id, self.terms)
+            for lang in ("en", "zh-TW", "zh-CN"):
+                self.assertTrue(self.terms[term_id].get(lang), "%s has no %s" % (term_id, lang))
+
+
+class TestFixedAnswersSchema(unittest.TestCase):
+    """Three states and no fourth, fourteen ids, once each."""
+
+    def setUp(self):
+        self.schema = load_schema()
+        self.data = load_sample()
+
+    def test_the_example_answers_all_fourteen_for_every_candidate(self):
+        for cand in self.data["candidates"]:
+            ids = [e["id"] for e in cand["fixed_answers"]]
+            self.assertEqual(render.FIXED_IDS, sorted(ids, key=scan.sort_key))
+            self.assertEqual(sorted(ids), sorted(set(ids)))
+        errors, warnings = render.validate(self.data, self.schema)
+        self.assertEqual([], errors)
+        self.assertEqual([], warnings)
+
+    def test_a_valid_found_answer_is_accepted(self):
+        entry = fixed_entry(self.data["candidates"][0], "F1")
+        self.assertEqual("found", entry["status"])
+        self.assertTrue(entry["quote"])
+        self.assertNotEqual("user", entry["source"])
+        errors, _warnings = render.validate(self.data, self.schema)
+        self.assertEqual([], errors)
+
+    def test_a_found_answer_with_no_quote_is_rejected(self):
+        fixed_entry(self.data["candidates"][0], "F1").pop("quote")
+        errors, _warnings = render.validate(self.data, self.schema)
+        self.assertTrue(any("carries no quote" in e for e in errors), errors)
+
+    def test_a_found_answer_sourced_to_the_user_is_rejected(self):
+        fixed_entry(self.data["candidates"][0], "F1")["source"] = "user"
+        errors, _warnings = render.validate(self.data, self.schema)
+        self.assertTrue(any("'found' with source 'user'" in e for e in errors), errors)
+
+    def test_an_asked_answer_with_a_source_that_is_not_the_user_is_rejected(self):
+        fixed_entry(self.data["candidates"][0], "F3")["source"] = "s-listing-1"
+        errors, _warnings = render.validate(self.data, self.schema)
+        self.assertTrue(any("is 'asked' but its source is" in e for e in errors), errors)
+
+    def test_an_unknown_answer_that_carries_a_quote_is_rejected(self):
+        fixed_entry(self.data["candidates"][0], "F6")["quote"] = "The deposit is protected."
+        errors, _warnings = render.validate(self.data, self.schema)
+        self.assertTrue(any("'unknown' but carries a quote" in e for e in errors), errors)
+
+    def test_a_repeated_id_is_an_error(self):
+        cand = self.data["candidates"][0]
+        cand["fixed_answers"].append(dict(fixed_entry(cand, "F1")))
+        errors, _warnings = render.validate(self.data, self.schema)
+        self.assertTrue(any("a second time" in e for e in errors), errors)
+
+    def test_a_missing_id_warns_by_default_and_fails_strict(self):
+        cand = self.data["candidates"][0]
+        cand["fixed_answers"] = [e for e in cand["fixed_answers"] if e["id"] != "F8"]
+        errors, warnings = render.validate(self.data, self.schema)
+        self.assertEqual([], errors)
+        self.assertTrue(any("does not answer F8" in w for w in warnings), warnings)
+        path = write_temp(self.data)
+        try:
+            self.assertEqual(0, run_cli(path, "--validate-only")[0])
+            self.assertEqual(1, run_cli(path, "--validate-only", "--strict")[0])
+        finally:
+            os.unlink(path)
+
+    def test_no_fixed_answers_at_all_warns_rather_than_breaking_an_older_report(self):
+        self.data["candidates"][0].pop("fixed_answers")
+        errors, warnings = render.validate(self.data, self.schema)
+        self.assertEqual([], errors)
+        self.assertTrue(any("has no fixed_answers" in w for w in warnings), warnings)
+
+    def test_an_unknown_that_states_a_number_is_flagged_and_fails_strict(self):
+        entry = fixed_entry(self.data["candidates"][0], "F6")
+        entry["answer"] = "Probably one of the 3 schemes, nobody said which."
+        gaps = render.unsourced_numbers(self.data, self.schema)
+        self.assertEqual([("fixed", 5)], [g["loc"] for g in gaps])
+        self.assertIn("F6", gaps[0]["message"])
+        path = write_temp(self.data)
+        try:
+            self.assertEqual(0, run_cli(path, "--validate-only")[0])
+            self.assertEqual(1, run_cli(path, "--validate-only", "--strict")[0])
+        finally:
+            os.unlink(path)
+
+    def test_a_found_answer_with_a_source_and_an_asked_answer_state_numbers_freely(self):
+        self.assertEqual([], render.unsourced_numbers(self.data, self.schema))
+        found = fixed_entry(self.data["candidates"][0], "F1")
+        self.assertTrue(render.states_a_number(found["answer"]))
+        asked = fixed_entry(self.data["candidates"][0], "F3")
+        self.assertEqual("user", asked["source"])
+
+
+class TestFixedAnswersOutput(unittest.TestCase):
+    """Section 3 in both renderers, from the same JSON."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.code, cls.html, cls.err = run_cli(SAMPLE)
+        cls.md_code, cls.md, cls.md_err = run_cli(SAMPLE, "--md")
+        cls.questions = scan.load_questions(FIXED_QUESTIONS)
+
+    def test_the_section_sits_right_after_the_hard_filters(self):
+        self.assertEqual(0, self.code, self.err)
+        self.assertIn('<h2 id="fixed">3. The questions we always answer</h2>', self.html)
+        self.assertLess(self.html.index('id="hard-filters"'), self.html.index('id="fixed"'))
+        self.assertLess(self.html.index('id="fixed"'), self.html.index('id="comparison"'))
+        self.assertEqual(("section.fixed", "fixed"), render.SECTIONS[2])
+
+    def test_every_question_is_a_row_with_its_own_wording(self):
+        block = section_html(self.html, "fixed")
+        L = render.Labels(render.load_glossary(GLOSSARY), "en")
+        for fid in render.FIXED_IDS:
+            self.assertIn(esc_label(L.label("fixed." + fid)), block, fid)
+
+    def test_the_three_states_draw_the_three_chips(self):
+        block = section_html(self.html, "fixed")
+        self.assertIn('<span class="ok" title="Somebody wrote this down', block)
+        self.assertIn('<span class="unk" title="Nothing was written down', block)
+        self.assertIn('<span class="bad" title="Nobody checked', block)
+
+    def test_a_found_answer_shows_the_sentence_it_came_from(self):
+        block = section_html(self.html, "fixed")
+        self.assertIn("\u201c%s\u201d" % render.esc("Deposit: five weeks' rent, 2,480."), block)
+
+    def test_an_unknown_row_tells_the_reader_what_to_go_and_find(self):
+        block = section_html(self.html, "fixed")
+        self.assertIn(self.questions["F6"]["why"], block)
+        self.assertIn(self.questions["F8"]["why"], block)
+
+    def test_the_markdown_mirrors_it(self):
+        self.assertEqual(0, self.md_code, self.md_err)
+        block = section_md(self.md, "3. The questions we always answer")
+        L = render.Labels(render.load_glossary(GLOSSARY), "en")
+        for fid in render.FIXED_IDS:
+            self.assertIn(L.label("fixed." + fid), block, fid)
+        for state in ("Found in writing", "You told us", "Not known"):
+            self.assertIn(state, block, state)
+        self.assertIn("Deposit: five weeks' rent, 2,480.", block)
+        self.assertIn(self.questions["F6"]["why"], block)
+
+    def test_the_reader_sees_the_questions_in_their_own_language(self):
+        code, zh, err = run_cli(SAMPLE, "--lang", "zh-TW")
+        self.assertEqual(0, code, err)
+        L = render.Labels(render.load_glossary(GLOSSARY), "zh-TW")
+        self.assertIn(L.label("section.fixed"), zh)
+        self.assertIn(L.label("fixed.F1"), zh)
+        self.assertIn(L.label("ui.found"), zh)
+        self.assertIn(L.label("ui.fixed_lead"), zh)
+
+    def test_an_unsourced_number_in_an_answer_gets_the_visible_chip(self):
+        data = load_sample()
+        for entry in data["candidates"][0]["fixed_answers"]:
+            if entry["id"] == "F8":
+                entry["answer"] = "There are 2 licensing schemes in this borough, nobody said which."
+        path = write_temp(data)
+        try:
+            code, html, err = run_cli(path)
+            self.assertEqual(0, code, err)
+            self.assertIn("no source", section_html(html, "fixed"))
+            self.assertIn("WARNING  no source", err)
+        finally:
+            os.unlink(path)
+
+
+class TestViewerDrawsTheFixedForm(unittest.TestCase):
+    def setUp(self):
+        self.viewer = read(VIEWER)
+
+    def test_it_carries_the_same_pieces(self):
+        for needle in ("function s2f(", "function fixedRows(", "function noSrcFixed(",
+                       "var FIXED_STATES=", '["section.fixed","fixed"]', "var FIXED = {",
+                       "ui.found", "ui.asked_you", "ui.quote", "ui.fixed_lead"):
+            self.assertIn(needle, self.viewer.replace(", ", ","), needle)
+
+    def test_it_inlines_the_why_lines_and_nothing_the_scanner_needs(self):
+        start = self.viewer.index("/*BEGIN:FIXED*/")
+        block = self.viewer[start:self.viewer.index("/*END:FIXED*/")]
+        payload = json.loads(block[block.index("{"):block.rindex("}") + 1])
+        self.assertEqual(build_viewer.layout_questions(scan.load_questions(FIXED_QUESTIONS)), payload)
+        self.assertEqual(render.FIXED_IDS, sorted(payload, key=scan.sort_key))
+        for fid, item in payload.items():
+            self.assertTrue(item["why"], fid)
+            self.assertNotIn("look_for", item)
+            self.assertNotIn("patterns", item)
+
+    def test_the_questions_are_inlined_in_three_languages(self):
+        start = self.viewer.index("/*BEGIN:GLOSSARY*/")
+        block = self.viewer[start:self.viewer.index("/*END:GLOSSARY*/")]
+        payload = json.loads(block[block.index("{"):block.rindex("}") + 1])
+        for fid in render.FIXED_IDS:
+            for lang in ("en", "zh-TW", "zh-CN"):
+                self.assertTrue(payload["fixed." + fid].get(lang), "fixed.%s %s" % (fid, lang))
+
+    def test_the_example_it_ships_answers_all_fourteen(self):
+        start = self.viewer.index("/*BEGIN:SAMPLE*/")
+        block = self.viewer[start:self.viewer.index("/*END:SAMPLE*/")]
+        payload = json.loads(block[block.index("{"):block.rindex("}") + 1])
+        for cand in payload["candidates"]:
+            self.assertEqual(render.FIXED_IDS,
+                             sorted([e["id"] for e in cand["fixed_answers"]], key=scan.sort_key))
+        states = set(e["status"] for c in payload["candidates"] for e in c["fixed_answers"])
+        self.assertEqual(set(["found", "asked", "unknown"]), states)
+
+    def test_the_build_step_is_up_to_date_and_inside_the_budget(self):
+        self.assertEqual(0, build_viewer.main(["--check"]))
+        self.assertLess(len(self.viewer.encode("utf-8")), build_viewer.SIZE_LIMIT)
 
 
 if __name__ == "__main__":

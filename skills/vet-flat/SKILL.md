@@ -58,6 +58,7 @@ Ask of every listing: "What sits under its prettiest feature?"
 - **Arithmetic is never done in your head**: `scripts/calc.py` prints every step; without a shell, write the formula and each step and check it a second way.
 - **Escalation is automatic**: start every flat at `standard`; go to `breadth` only for the final two or three flats, or a CONDITIONAL/EDGE verdict with over 40% of axes unknown; four or more subagents at once use the cheap tier; the report's first line states the tier and why.
 - **Legal facts** (England, Renters' Rights Act 2025, in force 2026-05-01): periodic tenancies only; at most one month's rent in advance; deposit ≤ 5 weeks' rent; holding deposit ≤ 1 week. Cite `references/sources.yaml`.
+- **The fixed form**: answer all fourteen of `references/fixed-questions.yaml` — found (quote it) · asked · unknown; F1–F8 every flat, F9–F14 on a pasted page. Shell: `scripts/scan.py` the paste before answering; no shell: list the candidate sentences first. Ask once for the rest.
 - **Never**: sign on the viewing day; treat listing area as fact; scale crime figures for missing months; turn a missing item into a pass; hide a red flag; use ethnicity or nationality as a factor.
 
 ## Output

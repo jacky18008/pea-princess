@@ -18,6 +18,9 @@ Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen — https://github.com
 5. **Paste what it asks for** — a page's text, a floor-plan picture, a street-view screenshot — once, from a list it gives you with links.
 6. **Read the report.** The first line says which configuration it used. Every number says where it came from. "Unknown" means it does not know, and it tells you how to find out.
 
+### The fourteen questions it always answers
+Every flat gets the same fourteen questions: the deposit, the money asked up front, who the landlord on the contract actually is, which scheme will hold your deposit, the floor area, the energy letter, what the bills cover, how long you are tied in, when you can move in. Each one comes back in one of three ways — **found in writing**, with the sentence it was read in quoted next to it; **you told us**, because it asked you; or **not known**, which means nobody has checked yet, never that it is fine. It asks you once, in one message, about everything still not known.
+
 ### Changing anything
 Say it. "Raise my all-in ceiling to 2,300." "Dig deeper on crime and management, keep the rest light." "I hate noise." "I always ask whether a cheap flat is cheap for a reason." The assistant shows you exactly what will change, waits for your yes, then applies it. It never changes a setting silently.
 
@@ -45,6 +48,9 @@ Say it. "Raise my all-in ceiling to 2,300." "Dig deeper on crime and management,
 5. **貼它要的東西**：頁面文字、戶型圖、街景截圖。它會一次列清單、附網址，只問一次。
 6. **看報告**。第一行寫用了哪一級設定；每個數字都寫出處；「未知」就是它不知道，並告訴你怎麼查。
 
+### 每一戶都會回答的十四題
+每一戶都問同樣十四題：押金幾週、要先付多少、合約上的房東到底是誰、押金放進哪個保管方案、室內面積、能源等級、帳單包含什麼、最短要住多久、什麼時候可以入住。每一題只有三種答案：**文件上有**（旁邊附上那句原文）、**你告訴我們的**（它問了你），或**還不知道**——「還不知道」是沒人查過，不是沒問題。剩下還不知道的，它會一次問你，只問一次。
+
 ### 想改什麼，用說的
 「把含帳單上限改成 2,300。」「治安跟管理挖深一點，其他維持輕量。」「我怕吵。」「我每次都會問：便宜是不是有原因。」助理會先把「哪一項從什麼改成什麼」列給你看，等你說好才改，絕不偷偷改。
 
@@ -58,3 +64,5 @@ Say it. "Raise my all-in ceiling to 2,300." "Dig deeper on crime and management,
 
 ## 简体中文（摘要）
 每件事都是打一句话完成：不用写代码、不用改设置文件。安装是贴一行字或上传 zip；然后打「这能干嘛？」开始。想改设置就用说的，助理会先列出改动、等你说好才改。它是筛子，房子要亲自去看；看房当天不签约。
+
+每一户都答同样十四题（押金、先付多少、房东是谁、面积、账单、最短租期、入住日……）：文件上有（附原文）、你告诉它的，或还不知道；「还不知道」是没人查过，不是没问题，它会一次问你。

@@ -28,6 +28,7 @@ ROOT = os.path.dirname(HERE)
 VIEWER = os.path.join(HERE, "viewer.html")
 GLOSSARY = os.path.join(ROOT, "skills", "vet-flat", "references", "glossary.yaml")
 SAMPLE = os.path.join(ROOT, "tests", "fixtures", "report-sample.json")
+QUESTIONS = os.path.join(ROOT, "skills", "vet-flat", "references", "fixed-questions.yaml")
 SCRIPTS = os.path.join(ROOT, "skills", "vet-flat", "scripts")
 
 # 140 KB: the layout, the glossary, the example report, the arithmetic check that
@@ -35,7 +36,9 @@ SCRIPTS = os.path.join(ROOT, "skills", "vet-flat", "scripts")
 # scripts/seed.py. Raised from 130 KB for the two contract sections the report owed
 # the reader: the user's own questions answered at their stage, and "What only you
 # can tell". Still one file a phone can open.
-SIZE_LIMIT = 140 * 1024
+# 152 KB since the fixed form: fourteen questions per candidate in the example, their
+# wording in three languages, and the `why` line the reader sees when one is unknown.
+SIZE_LIMIT = 152 * 1024
 
 # viewer.html has to stay one small self-contained file, so it carries only the
 # glossary entries the layout actually looks up: the section titles, the verdict
@@ -44,15 +47,26 @@ SIZE_LIMIT = 140 * 1024
 # fall back to. The domain jargon entries (EPC, heat network, Right to
 # Manage...) stay in glossary.yaml for the skill and for human readers; no
 # renderer resolves them, so inlining them would add weight and no behaviour.
-LAYOUT_PREFIXES = ("section", "verdict", "evidence", "axis", "landmine", "ui", "only_you")
+LAYOUT_PREFIXES = ("section", "verdict", "evidence", "axis", "landmine", "ui", "only_you", "fixed")
+
+# The fixed questions the same way: viewer.html draws one thing from them, the `why` line
+# under an unknown answer, so the scanner's regexes, the caps and the groups stay in
+# references/fixed-questions.yaml, where scripts/scan.py reads them.
+QUESTION_FIELDS = ("why",)
 
 
 def layout_terms(terms):
     return dict((k, v) for k, v in terms.items()
                 if k.split(".")[0] in LAYOUT_PREFIXES)
 
+
+def layout_questions(questions):
+    return dict((qid, dict((k, v) for k, v in item.items() if k in QUESTION_FIELDS))
+                for qid, item in questions.items())
+
 sys.path.insert(0, SCRIPTS)
 import render  # noqa: E402  (same mini-YAML parser as the shell renderer)
+import scan  # noqa: E402    (owns references/fixed-questions.yaml and its parser)
 
 
 def js_literal(name, obj):
@@ -72,11 +86,13 @@ def replace_block(source, name, body):
 
 def build():
     terms = render.load_glossary(GLOSSARY)
+    questions = layout_questions(scan.load_questions(QUESTIONS))
     with io.open(SAMPLE, encoding="utf-8") as fh:
         sample = json.load(fh)
     with io.open(VIEWER, encoding="utf-8") as fh:
         source = fh.read()
     source = replace_block(source, "GLOSSARY", js_literal("GLOSSARY", layout_terms(terms)))
+    source = replace_block(source, "FIXED", js_literal("FIXED", questions))
     source = replace_block(source, "SAMPLE", js_literal("SAMPLE", sample))
     return source, len(layout_terms(terms)), len(sample.get("candidates", []))
 

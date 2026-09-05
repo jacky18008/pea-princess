@@ -23,6 +23,7 @@ LIMIT = 8000
 
 DIGEST_SOURCES = [  # in priority order; short, high-value sections first
     ("references/inputs.md", "## Rules for asking", "## What to ask for"),
+    ("references/report-contract.md", "## The fourteen fixed questions", "## Plain-language rules"),
     ("references/arithmetic.md", "## Without a shell", "## Constants"),
     ("references/report-contract.md", "## Plain-language rules", "## Never"),
     ("references/report-contract.md", "## What every report contains", "## Plain-language rules"),
