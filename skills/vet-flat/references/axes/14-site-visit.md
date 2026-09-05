@@ -53,6 +53,9 @@ Record the whole sentence, condition included: "as long as there are no drunks a
 9. A compass reading at each window, plus a photograph of any site works visible from it.
 10. Whether the one named reason to go out (axis 12) is genuinely there and genuinely open.
 
+## Before the visit: street imagery
+Read the street from the pavement before you stand on it — see `18-street-view.md`. It settles which elevation the flat is on, what trades at ground level under the windows, how exposed a ground or lower-ground window is, whether the street is mid-build, and how many storeys the building opposite has. Everything it produces is class C and carries a capture date that is usually years old, so each item comes to the visit as a question in `viewing_day_checks[]`, never as an answer. It cannot replace the visit and it never grants a pass.
+
 ## Rules for the visit itself
 - **Never sign on the viewing day.** A holding payment buys a night to sleep on it and a morning to check the scoresheet.
 - Get in writing, before leaving home: the tariff or bills position, the deposit scheme and amount, the guarantor position, the appliance list, and the availability date.

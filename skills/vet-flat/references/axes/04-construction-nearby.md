@@ -20,6 +20,7 @@ For any development begun after about 2010, the first question is: is the scheme
 4. `python3 scripts/planning.py stages --ref "<application reference>"` — decision date, conditions, and which conditions have been discharged.
 5. `python3 scripts/planning.py planit --postcode "<pc>" --radius-km 0.3` — a second index, queried by postcode and radius (a free-text site-name search there matches only the description field and will return nothing).
 6. `python3 scripts/roads.py near --lat <lat> --lng <lng> --radius 200` — distance to the nearest major road, railway, tunnel mouth and late-night food or market use.
+7. Before the visit: street imagery, see `18-street-view.md`. `python3 scripts/streetview.py check --lat <lat> --lng <lng>`, then `fetch` if the user has a key. Hoarding, scaffolding, a crane, a site cabin or a wheel wash in the frame is a lead — and site hoarding usually carries the developer's name and often the planning reference, which goes straight into step 4. Read the capture date first: imagery years old may show a hoarding where a finished building now stands, or an empty site where a tower now stands. Class C, dated, and a lead to confirm, never a finding on its own.
 
 ## Method in fetch mode
 The London-wide planning index answers over plain GET. Borough portals are all robots-disallowed, so treat them as manual. Council committee pages are fetchable, but only if you assert on the page title containing "Agenda for" — a stale meeting id returns a plausible-looking page with HTTP 200.

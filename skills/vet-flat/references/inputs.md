@@ -38,6 +38,7 @@ normal. Do not guess, do not fabricate, do not silently skip the axis.** Ask.
 | Commute | `scripts/commute.py` (TfL, open) | Confirm the exact destination address and arrival time | — | Text |
 | Heat network supplier & tariff | Heat Trust members page (open) | The Welcome Pack tariff page | Landlord / agent | PDF or photo |
 | Redress and client-money protection | Client Money Protect search (open) | Agent's CMP certificate and redress-scheme membership number | Ask the agent in writing | Photo / PDF |
+| Street-level imagery (before the visit) | `scripts/streetview.py check` (free, needs `GOOGLE_MAPS_KEY`), then `fetch` for up to four views; `scripts/streetview.py mapillary` if there is no Google key | Screenshots of the street outside, and the capture date printed in the corner. Say which headings you want: **at the building**, **along the street each way**, and **across the road from the flat** | google.com/maps → drop the pegman on the street outside; or mapillary.com/app | Image upload (jpg/png) plus the date. Method: `axes/18-street-view.md` |
 | Anything on site (smell, noise, light, lift log, phone signal) | (never available remotely) | The viewing-day checklist answers | The viewing | Text / photos |
 
 ## Optional keys and logins (never required)
@@ -48,6 +49,8 @@ them automatically; otherwise the free HTML routes are used.
 |---|---|---|---|
 | `COMPANIES_HOUSE_KEY` | Companies House REST API | developer.company-information.service.gov.uk (free) | JSON instead of HTML, higher rate limit |
 | `TFL_APP_KEY` | TfL Unified API | api-portal.tfl.gov.uk (free) | Higher quota |
+| `GOOGLE_MAPS_KEY` | Google Street View Static API | console.cloud.google.com → enable Street View Static API → API key, then restrict it (needs a billing account; 10,000 free image calls a month, the coverage/date check is always free) | Street imagery and its capture date without asking the user to screenshot anything |
+| `MAPILLARY_TOKEN` | Mapillary Graph API v4 | mapillary.com/dashboard/developers (free) | Free CC BY-SA street imagery, sometimes newer than Street View, no billing account |
 | (download) | EPC open data CSV | get-energy-performance-data.communities.gov.uk (free GOV.UK One Login) | Bulk building data without page fetches |
 
 ## Template for the ask (copy, fill, send once)

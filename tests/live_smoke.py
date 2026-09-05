@@ -485,6 +485,70 @@ class LiveSweep(unittest.TestCase):
         self.assertFalse(os.path.exists(os.path.join(out, "buildings.json")))
 
 
+# --------------------------------------------------------- streetview.py ----
+@unittest.skipUnless(LIVE, WHY)
+class LiveStreetView(unittest.TestCase):
+    """Only the FREE calls run live. `fetch` is deliberately never exercised
+    here: every image is a billable call on somebody's own Google account, and a
+    test suite is not allowed to spend the user's money. The paid path is
+    covered offline in tests/test_streetview.py with a stubbed downloader."""
+
+    def setUp(self):
+        import streetview
+        self.sv = streetview
+
+    def test_metadata_is_free_and_dated_or_says_it_has_no_key(self):
+        out = self.sv.check(LAT, LNG)
+        if out.get("access") == "manual":            # no key on this machine: still a pass
+            self.assertIn("GOOGLE_MAPS_KEY", out["note"])
+            self.assertTrue(out["how_to_get_a_key"])
+            self.assertIn("key=REDACTED", out["source_url"])
+            return
+        self.assertTrue(out["ok"], out["note"])
+        self.assertIn(out["status"], ("OK", "ZERO_RESULTS"))
+        self.assertNotIn("key=", out["source_url"].replace("key=REDACTED", ""))
+        if out["status"] == "OK":
+            self.assertTrue(out["pano_id"])
+            self.assertRegex(out["date"] or "", r"^\d{4}(-\d{2})?$")
+            self.assertIsNotNone(out["location"])
+            self.assertLessEqual(out["camera_distance_m"], 60)
+
+    def test_fetch_refuses_without_a_key_and_writes_nothing(self):
+        import shutil
+        import tempfile
+        if self.sv.google_key():
+            self.skipTest("a key is present; the refusal path is tested offline")
+        tmp = tempfile.mkdtemp(prefix="vetflat-sv-")
+        target = os.path.join(tmp, "sv")
+        try:
+            man, code = self.sv.fetch_images(LAT, LNG, target)
+            self.assertEqual(code, 2)
+            self.assertFalse(os.path.exists(target))
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+    def test_mapillary_answers_or_says_it_has_no_token(self):
+        out = self.sv.mapillary(LAT, LNG, radius=60, limit=5)
+        self.assertEqual(out["licence"], "CC BY-SA 4.0")
+        if out.get("access") == "manual":
+            self.assertIn("MAPILLARY_TOKEN", out["note"])
+            return
+        self.assertTrue(out["ok"], out["note"])
+        self.assertLess(out["bbox"]["north"] - out["bbox"]["south"], 0.01)
+        for im in out["images"]:
+            self.assertTrue(im["id"])
+            self.assertLessEqual(im["distance_m"], 400)
+            self.assertIn("mapillary.com", im["page_url"])
+        if not out["images"]:
+            self.assertIn("not_found", out)
+
+    def test_brief_needs_no_network_at_all(self):
+        b = self.sv.brief()
+        self.assertTrue(b["ok"])
+        self.assertEqual(b["evidence_class"], "C")
+        self.assertEqual(len(b["routes"]), 3)
+        self.assertIn("ethnicity", b["text"].lower())
+
 
 if __name__ == "__main__":
     unittest.main()

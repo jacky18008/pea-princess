@@ -124,3 +124,58 @@ def post_json(url, payload, **kw):
     headers = kw.pop("headers", {}) or {}
     headers["Content-Type"] = "application/json"
     return fetch(url, method="POST", data=json.dumps(payload), headers=headers, **kw)
+
+
+def fetch_binary(url, dest_path, ua=BROWSER_UA, headers=None, timeout=30, min_gap=1.2,
+                 expect_content_type=None, verbose=False):
+    """Download a URL straight to dest_path. For bytes that must not be decoded.
+
+    fetch() reads the body as UTF-8 with errors="replace", which silently
+    destroys binary content, so images come through here instead. There is no
+    on-disk cache: some image licences forbid keeping a copy (see
+    scripts/streetview.py), so the CALLER decides where the bytes live and for
+    how long. Returns the usual envelope minus `body`, plus `path` and `bytes`.
+
+    expect_content_type: optional prefix, e.g. "image/". A 200 whose
+    Content-Type does not start with it is ok=False — several hosts answer a
+    missing image with an HTML error page and a 200.
+    """
+    headers = dict(headers or {})
+    headers.setdefault("Accept-Encoding", "identity")
+    d = os.path.dirname(os.path.abspath(dest_path))
+    if d:
+        os.makedirs(d, exist_ok=True)
+    _throttle(url, min_gap)
+    cmd = ["curl", "-sS", "-L", "-m", str(timeout), "-A", ua, "-o", dest_path,
+           "-w", "%{http_code}\t%{content_type}\t%{url_effective}"]
+    for k, v in headers.items():
+        cmd += ["-H", f"{k}: {v}"]
+    cmd.append(url)
+    if verbose:
+        print("  $ " + " ".join(cmd[:12]) + " ...", file=sys.stderr)
+    base = dict(url=url, final_url=None, status=0, content_type=None, path=dest_path,
+                bytes=0, retrieved_at=now_iso(), from_cache=False, ok=False, note="")
+    try:
+        out = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout + 5)
+    except subprocess.TimeoutExpired:
+        base["note"] = "curl timeout"
+        return base
+    if out.returncode != 0:
+        base["note"] = f"curl error {out.returncode}: {out.stderr.strip()[:200]}"
+        return base
+    parts = (out.stdout or "").split("\t")
+    base["status"] = int(parts[0]) if parts and parts[0].isdigit() else 0
+    base["content_type"] = parts[1] if len(parts) > 1 else None
+    base["final_url"] = parts[2] if len(parts) > 2 else None
+    base["bytes"] = os.path.getsize(dest_path) if os.path.exists(dest_path) else 0
+    base["ok"] = 200 <= base["status"] < 300
+    if not base["ok"]:
+        base["note"] = f"http {base['status']}"
+    elif expect_content_type and not (base["content_type"] or "").startswith(expect_content_type):
+        base["ok"] = False
+        base["note"] = ("expected content-type %s, got %s — a 200 with the wrong body"
+                        % (expect_content_type, base["content_type"]))
+    if not base["ok"] and os.path.exists(dest_path):
+        os.remove(dest_path)          # never leave a half-written or error-page "image" behind
+        base["bytes"] = 0
+    return base

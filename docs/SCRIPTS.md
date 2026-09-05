@@ -758,3 +758,111 @@ python3 bench/release_gate.py bench/results/<date>                      # the pr
 
 ### The configuration line (which rung of the escalation ladder ran)
 `generated_by.tier` (`lite` | `standard` | `breadth` | `manual`) and `generated_by.escalation_reason` are optional fields that say how much machine was behind the report. Both renderers print `Configuration: <tier> — <reason or "default">; workers: <cheap|strong>; judge: <model_name>` as the first line under the title and again in *About this report*; a report with no tier prints `not stated`. The workers half follows from the tier — `standard`, `breadth` and `lite` run cheap workers with a strong judge, `manual` runs none — and the ladder itself, including the triggers and the fan-out rule, is in `references/budget-modes.md`.
+
+## `streetview.py` — street-level imagery (your own key; free routes too)
+
+```
+streetview.py check     --lat 51.5045 --lng -0.0865 [--radius 50] [--outdoor]
+streetview.py fetch     --lat <road lat> --lng <road lng> --out sv/ \
+                        [--toward-lat <building lat> --toward-lng <building lng>] \
+                        [--headings 0,90,180,270] [--fov 90] [--pitch 0] \
+                        [--size 640x640] [--used-this-month 0]
+streetview.py mapillary --lat 51.5045 --lng -0.0865 [--radius 60] [--limit 10]
+streetview.py brief
+```
+
+The closest thing to a viewing before the viewing: which elevation the flat is
+on, what trades at ground level under the windows, how exposed a ground-floor
+window is, whether the street is mid-build, and how many storeys the building
+opposite has. Method and the full read-the-picture checklist:
+`references/axes/18-street-view.md`. Everything this script returns is
+**evidence class C** and carries a **capture date that is usually years old** —
+quote the date in every finding.
+
+**Three routes, in order.** (1) Google Street View Static API with the *user's
+own* `GOOGLE_MAPS_KEY`; (2) Mapillary with the user's own free
+`MAPILLARY_TOKEN`; (3) no key at all — `brief` prints the checklist and the four
+screenshots to ask the user for. Keys are read from a plain `KEY=VALUE` `.env`
+next to the script or from the environment, same as `commute.py` and
+`company.py`. Nothing here ever uses a shared key.
+
+**`check` is free and always runs first.** It calls the metadata endpoint, which
+Google prices at nothing: *"Street View Static API metadata requests are
+available at no charge. No quota is consumed when you request metadata."* It
+returns `status`, `pano_id`, `date` (the capture date) and `location` (where the
+camera actually stands), plus the distance and bearing from your point to the
+camera and the heading that would point the camera back at your building. With
+no key it exits **0** with `access: manual` and prints how to make a key and how
+to take the screenshots by hand — a missing key is not an error.
+
+**`fetch` needs a key and refuses without one (exit 2, and it does not even
+create the output directory).** It calls `check` first, pins every image to the
+returned `pano_id` so all four views come from one standing position, downloads
+up to four JPEGs into `--out`, and writes `manifest.json` beside them. Give it
+the **road** point in `--lat/--lng` and the **building** in `--toward-lat/-lng`:
+the heading is computed from the first toward the second and the other three
+views sit 90° apart, so one run gives you the building, the street both ways,
+and whatever faces the flat across the road. `--headings` overrides that.
+`size` is capped at the documented 640×640, `fov` at 120, `pitch` at ±90.
+A `ZERO_RESULTS` panorama downloads nothing and bills nothing.
+
+**Every URL in the manifest is key-redacted** (`key=REDACTED`, likewise
+`access_token` and `signature`) because a manifest is exactly the kind of file
+that gets pasted into a chat. Images are downloaded through the new
+`_fetch.fetch_binary()`, which streams to disk without UTF-8 decoding and
+**never caches** — Google's terms forbid caching Google Maps Content, with one
+exception: the panorama ID, which may be stored indefinitely. Keep `pano_id`,
+the capture date and your written finding; delete the JPEGs when the run ends
+unless the user chose to keep them.
+
+**Cost, verified 2026-09-05** on
+<https://developers.google.com/maps/billing-and-pricing/pricing>. Since
+2025-03-01 the old $200 credit is gone and each SKU carries its own free monthly
+allowance. `Static Street View` (SKU 9BD0-A2EE-44C3): **10,000 free calls a
+month**, then **$7.00 / 1,000** (0–100k), $5.60 / 1,000 (100k–500k), $4.20 /
+1,000 (500k+). `Street View Metadata` (SKU 3168-48A9-5C8C): free, unlimited.
+Four views per flat is four calls — free until the 2,500th flat of the month,
+about **$0.028** after that. `cost_estimate` in the manifest shows the split;
+pass `--used-this-month` with your real month-to-date count to make it truthful.
+The key still needs a Google Cloud project with a billing account attached, even
+inside the free allowance, so `sources.yaml` marks the image SKU `paid`.
+
+**`mapillary` is the free fallback** (CC BY-SA 4.0, token from
+mapillary.com/dashboard/developers). The token rides in an
+`Authorization: OAuth` header so it never enters a URL. Mapillary's `/images`
+endpoint wants a bbox smaller than 0.01 degrees square and its radius search
+caps at 50 m, so the script builds a bbox and caps `--radius` at 300 m. Results
+come back nearest-first with `captured_at`, `compass_angle_deg`, the contributor
+and a thumbnail URL (signed, and it expires — open it now). No token exits 0
+with `access: manual`.
+
+**Never scrape.** Do not lift Street View images off maps.google.com with a
+fetch tool: Maps Platform ToS 3.2.3(a) *No Scraping* names bulk-downloading
+Street View images, and the API exists so you do not have to. Attribution when
+an image appears in a report: Google's wordmark stays on the image and the
+[Street View policies](https://developers.google.com/maps/documentation/streetview/policies)
+apply; a Mapillary image needs the contributor credit, the Mapillary logo and a
+link back.
+
+```console
+$ streetview.py check --lat 51.5045 --lng -0.0865
+{ "ok": true, "evidence_class": "C", "status": "OK", "pano_id": "…",
+  "date": "2023-07", "location": {"lat": 51.50448, "lng": -0.08661},
+  "camera_distance_m": 8, "camera_direction": "WSW",
+  "heading_from_camera_to_point_deg": 73.7,
+  "billing": {"free": true, "sku": "Street View Metadata (SKU 3168-48A9-5C8C)"} }
+
+$ streetview.py fetch --lat 51.5045 --lng -0.0865 --toward-lat 51.5047 \
+                      --toward-lng -0.0862 --out sv/
+{ "ok": true, "evidence_class": "C", "pano_id": "…", "capture_date": "2023-07",
+  "toward_heading_deg": 43.0, "toward_direction": "NE",
+  "headings_deg": [43.0, 133.0, 223.0, 313.0],
+  "images": [{"file": "streetview-h043.jpg", "heading_deg": 43.0, "direction": "NE",
+              "url": "https://maps.googleapis.com/maps/api/streetview?size=640x640&pano=…&key=REDACTED",
+              "shows": "the target (the building), from the camera point"}, …],
+  "cost_estimate": {"image_calls": 4, "billable_image_calls": 0, "estimated_usd": 0.0} }
+```
+
+Tests: `tests/test_streetview.py` (no network — headings, URL building, key
+redaction in the manifest, no-key behaviour, the cost arithmetic against the
+verified constants, and the brief).
