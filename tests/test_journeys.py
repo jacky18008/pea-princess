@@ -753,6 +753,18 @@ class TestFileChecksAndRegrade(unittest.TestCase):
         self.assertEqual("pass", facts["listing_rent_pcm"]["status"], facts["listing_rent_pcm"]["detail"])
         self.assertEqual(0, card["fabrications"], [(k, v["detail"]) for k, v in facts.items() if v["status"] == "fail"])
 
+    def test_both_caps_in_one_sentence_and_an_income_multiple(self):
+        doc = runner.load_journeys()
+        j5 = [j for j in doc["journeys"] if j["id"] == "j5-offer-and-referencing-zh"][0]
+        reply = ("月租 £2,150。仲介要求年收入 36 倍月租，即 **£77,400**。\n"
+                 "holding deposit 上限約 **£496.15**，租賃押金上限約 **£2,480.77**（2150 × 12 ÷ 52 × 5）。\n")
+        card = runner.score_turn(j5["turns"][0], reply, j5)
+        facts = dict((r["check"], r) for r in card["checks"] if r["kind"] == "fact")
+        self.assertEqual("pass", facts["holding_deposit_gbp"]["status"], facts["holding_deposit_gbp"]["detail"])
+        self.assertEqual("pass", facts["deposit_cap_gbp"]["status"], facts["deposit_cap_gbp"]["detail"])
+        self.assertEqual("pass", facts["rent_pcm"]["status"], facts["rent_pcm"]["detail"])
+        self.assertEqual(0, card["fabrications"], [(k, v["detail"]) for k, v in facts.items() if v["status"] == "fail"])
+
     def test_the_pasted_profile_becomes_a_real_file_without_its_title_line(self):
         folder = tempfile.mkdtemp()
         try:
