@@ -14,7 +14,15 @@ def read(*parts):
 class TestSkillMd(unittest.TestCase):
     def test_under_prompt_pack_limit(self):
         s = read("SKILL.md")
-        self.assertLess(len(s), 8000, "SKILL.md must stay under 8,000 characters (ChatGPT Projects limit)")
+        self.assertLess(len(s), 10000, "SKILL.md is a router; keep it under 10,000 characters")
+
+    def test_prompt_pack_instructions_fit(self):
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("build_dist", os.path.join(HERE, "..", "tools", "build_dist.py"))
+        mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+        text = mod.compose_instructions()
+        self.assertLessEqual(len(text), 8000, "the prompt-pack INSTRUCTIONS.md must fit ChatGPT Projects (8,000 chars)")
+        self.assertIn("Manual-mode digest", text)
 
     def test_portable_frontmatter_only(self):
         fm = re.search(r"^---\n(.*?)\n---", read("SKILL.md"), re.S).group(1)
@@ -23,9 +31,10 @@ class TestSkillMd(unittest.TestCase):
 
     def test_capability_answer_section(self):
         s = read("SKILL.md")
-        self.assertIn('what can this do', s)
+        self.assertIn("what this does", s)
         self.assertIn("references/onboarding.md", s)
         self.assertIn("Never", s)
+        self.assertIn("Route by intent", s)
 
 
 class TestOnboarding(unittest.TestCase):

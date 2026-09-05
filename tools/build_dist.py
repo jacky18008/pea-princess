@@ -21,6 +21,41 @@ DIST = os.path.join(ROOT, "dist")
 LIMIT = 8000
 
 
+DIGEST_SOURCES = [
+    ("references/report-contract.md", "## What every report contains", "## Plain-language rules"),
+    ("references/report-contract.md", "## Plain-language rules", "## Never"),
+    ("references/inputs.md", "## Rules for asking", "## What to ask for"),
+    ("references/arithmetic.md", "## Without a shell", "## Constants"),
+]
+
+
+def _section(text, start, end):
+    i = text.find(start)
+    if i < 0:
+        return ""
+    j = text.find(end, i + len(start))
+    return text[i:j if j > 0 else len(text)].strip() + "\n"
+
+
+def compose_instructions(limit=LIMIT):
+    """SKILL.md body plus a manual-mode digest of the key references, trimmed from the end to fit."""
+    skill_md = open(os.path.join(SKILL, "SKILL.md"), encoding="utf-8").read()
+    body = re.sub(r"^---\n.*?\n---\n", "", skill_md, count=1, flags=re.S).strip() + "\n"
+    parts = []
+    for rel, start, end in DIGEST_SOURCES:
+        path = os.path.join(SKILL, rel)
+        if os.path.exists(path):
+            sec = _section(open(path, encoding="utf-8").read(), start, end)
+            if sec:
+                parts.append(sec)
+    header = "\n---\n# Manual-mode digest (from the references; the full files are attached)\n\n"
+    out = body + header + "\n".join(parts)
+    while len(out) > limit and parts:
+        parts.pop()
+        out = body + header + "\n".join(parts) if parts else body
+    return out
+
+
 def main():
     if os.path.isdir(DIST):
         shutil.rmtree(DIST)
@@ -41,8 +76,7 @@ def main():
     # 2) prompt pack
     pack = os.path.join(DIST, "prompt-pack")
     os.makedirs(pack)
-    skill_md = open(os.path.join(SKILL, "SKILL.md"), encoding="utf-8").read()
-    body = re.sub(r"^---\n.*?\n---\n", "", skill_md, count=1, flags=re.S).strip() + "\n"
+    body = compose_instructions()
     if len(body) > LIMIT:
         print(f"ERROR: INSTRUCTIONS.md is {len(body)} chars; limit {LIMIT}", file=sys.stderr)
         sys.exit(1)
