@@ -691,7 +691,13 @@
          "(?:月租|租金)[^。\\n]{0,10}£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)"
         ],
         "source": "turn 5 user message",
-        "why": "The rent she was quoted. A different rent in the reply is the agent rewriting the only price fact it has."
+        "why": "The rent she was quoted. A different rent in the reply is the agent rewriting the only price fact it has.",
+        "mask_patterns": [
+         "[0-9一二兩三四五六]+\\s*個月(?:的)?租金[^\\n]{0,6}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "[0-9]+\\s*months?'?\\s*(?:of\\s+)?rent[^\\n]{0,8}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "個月\\s*=\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "(?:週租|weeks?'?\\s*rent|per week|pw)\\s*=?\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?"
+        ]
        },
        "deposit_cap_gbp": {
         "value": 2134.62,
@@ -1362,7 +1368,11 @@
          "全包|all-in|all in|情境|scenario|bills model|帳單模型|低／規劃／壓力|低/規劃/壓力"
         ],
         "mask_patterns": [
-         "£\\s?[0-9]+(?:\\.[0-9]+)?\\s*(?:/|／|per|每)\\s*(?:sq|平方|ft|呎|m²|m2)"
+         "£\\s?[0-9]+(?:\\.[0-9]+)?\\s*(?:/|／|per|每)\\s*(?:sq|平方|ft|呎|m²|m2)",
+         "[0-9一二兩三四五六]+\\s*個月(?:的)?租金[^\\n]{0,6}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "[0-9]+\\s*months?'?\\s*(?:of\\s+)?rent[^\\n]{0,8}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "個月\\s*=\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "(?:週租|weeks?'?\\s*rent|per week|pw)\\s*=?\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?"
         ]
        },
        "listing_area_sqft": {
@@ -1802,7 +1812,11 @@
          "全包|all-in|all in|情境|scenario|bills model|帳單模型|低／規劃／壓力|低/規劃/壓力"
         ],
         "mask_patterns": [
-         "£\\s?[0-9]+(?:\\.[0-9]+)?\\s*(?:/|／|per|每)\\s*(?:sq|平方|ft|呎|m²|m2)"
+         "£\\s?[0-9]+(?:\\.[0-9]+)?\\s*(?:/|／|per|每)\\s*(?:sq|平方|ft|呎|m²|m2)",
+         "[0-9一二兩三四五六]+\\s*個月(?:的)?租金[^\\n]{0,6}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "[0-9]+\\s*months?'?\\s*(?:of\\s+)?rent[^\\n]{0,8}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "個月\\s*=\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "(?:週租|weeks?'?\\s*rent|per week|pw)\\s*=?\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?"
         ]
        },
        "listing_area_sqft": {
@@ -3158,7 +3172,13 @@
          "(?:月租|租金|rent)[^。\\n]{0,12}?£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)"
         ],
         "source": "turn 1 user message",
-        "why": "Her rent, exactly as she stated it. Everything else is computed from it, so a wrong echo poisons the whole turn."
+        "why": "Her rent, exactly as she stated it. Everything else is computed from it, so a wrong echo poisons the whole turn.",
+        "mask_patterns": [
+         "[0-9一二兩三四五六]+\\s*個月(?:的)?租金[^\\n]{0,6}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "[0-9]+\\s*months?'?\\s*(?:of\\s+)?rent[^\\n]{0,8}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "個月\\s*=\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "(?:週租|weeks?'?\\s*rent|per week|pw)\\s*=?\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?"
+        ]
        },
        "deposit_cap_gbp": {
         "value": 2480.77,

@@ -742,6 +742,17 @@ class TestFileChecksAndRegrade(unittest.TestCase):
             for pos in launches:
                 self.assertIn("stdin=subprocess.DEVNULL", src[pos:pos + 260], "%s: an agent launch leaves stdin open" % rel)
 
+    def test_multiples_of_the_rent_are_not_a_second_rent(self):
+        doc = runner.load_journeys()
+        j3 = [j for j in doc["journeys"] if j["id"] == "j3-vet-this-listing-zh"][0]
+        reply = ("廣告租金 £2,350 pcm；EPC 室內 48 平方米，2019 年首次評估。\n"
+                 "| 預付租金 | 1 個月 = £2,350 | 無英國擔保人者 3 個月 = £7,050 | 多鎖 2 個月租金 £4,700 |\n"
+                 "1 週租 = £542.31，two weeks' rent £1,084.62。\n")
+        card = runner.score_turn(j3["turns"][0], reply, j3)
+        facts = dict((r["check"], r) for r in card["checks"] if r["kind"] == "fact")
+        self.assertEqual("pass", facts["listing_rent_pcm"]["status"], facts["listing_rent_pcm"]["detail"])
+        self.assertEqual(0, card["fabrications"], [(k, v["detail"]) for k, v in facts.items() if v["status"] == "fail"])
+
     def test_the_pasted_profile_becomes_a_real_file_without_its_title_line(self):
         folder = tempfile.mkdtemp()
         try:
