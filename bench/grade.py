@@ -28,7 +28,8 @@ fact_recall             correct facts / gradeable facts. A fact is gradeable whe
 fabrications            how many facts were reported with a value that contradicts
                         the truth beyond its tolerance. A count, not a rate. The
                         pass line is zero. A missing fact is NOT a fabrication;
-                        an invented one is.
+                        an invented one is. Neither is a number of the right KIND
+                        about a different THING - see THE REFERENT GUARD below.
 citations               of the facts we found a value for, the share whose carrier
                         (the metric, the labelled number, or its axis) cites at
                         least one source id that resolves to an entry in the
@@ -84,6 +85,31 @@ Order of search, first hit wins:
       string, and for the SIC codes.
 
 Keyword sets per fact are in FACT_RULES below and are printed by ``--explain``.
+
+THE REFERENT GUARD
+==================
+A label rule finds a number of the right KIND. It cannot tell whether that number
+is about the right THING. A report that says the area on the replaced 2010
+certificate was 441 sq ft, that the bus takes 49 minutes if the trains stop, that a
+flat first sold for GBP 228,000, or that the building is 16 years old is not
+claiming that the flat is 441 sq ft, that the train takes 49 minutes, that a sale
+happened in the year 228,000, or that its certificate was first written in 2010.
+Scored naively, all four read as fabrications.
+
+So before a matched number is graded, REFERENT_RULES asks whether it is about the
+fact at hand, and skips it when it plainly is not: a superseded certificate, a
+run of dated readings rather than the reading in force, a journey "if" something
+else happens, a price where a year is wanted, the building where the flat is
+wanted, another flat's number. Where the report's own structure settles it - the
+unit, the axis a number sits under, the working in ``computed_by``, the flat named
+in ``identity`` - that decides, and the label keywords are the fallback. Every skip
+is listed on the card under ``referent_excluded`` with the rule and the evidence, so
+the guard can be audited rather than trusted, and ``--explain`` prints the rules.
+
+What the guard never does is excuse a wrong value. A number with the same referent
+and a different value is a fabrication exactly as before; no rule reads the truth
+to decide whether a value is right. A skipped number leaves the fact MISSING, which
+costs recall - so a report cannot buy a pass by mislabelling its numbers.
 
 HOW EACH FACT IS COMPARED
 =========================
@@ -392,12 +418,303 @@ def report_year(report):
     return datetime.datetime.utcnow().year
 
 
+# ----------------------------------------------------------- referent guard --
+# A number can be of the right KIND and about the wrong THING: the area on a
+# certificate that has since been replaced, the bus you would take IF the trains
+# stopped, the PRICE a flat sold for rather than the YEAR it sold, the age of the
+# building rather than the date on this flat's certificate. None of those is a
+# fabrication - the report is answering a different question, usually openly and
+# usefully - so they are skipped by the fact search and listed on the card under
+# ``referent_excluded``, with the rule and the evidence, for a maintainer to audit.
+#
+# Two rules keep the guard honest:
+#
+#   * The report's own structure decides wherever it speaks: the unit (money is
+#     never a year), the axis a number sits under, the flat named in ``identity``,
+#     the working shown in ``computed_by``. Label keywords are the fallback, and a
+#     rule may read any field of the number, the names of its sources included.
+#   * A number with the SAME referent and a different value is STILL a fabrication.
+#     Nothing here excludes a number for being wrong, only for being about
+#     something else. No rule reads the truth to decide whether a value is right.
+#
+# The metric slots (``candidates[0].metrics.*``) are never guarded. The schema
+# gives one metric key per fact, so a value sitting in it is the report's own answer
+# to that fact and cannot be about something else: a crime count in
+# ``crime_6mo_count`` counted over a wider box than the method asks for is a wrong
+# count, not a different question.
+
+# The label says this reading has been superseded.
+HISTORICAL_WORDS = ["as built", "as designed", "design stage", "previous", "previously",
+                    "earlier", "superseded", "expired", "lapsed", "historic", "historical",
+                    "over time", "then and now", "when new", "originally", "at the time",
+                    "no longer", "used to", "back then", "old certificate", "former",
+                    "since replaced", "withdrawn", "history"]
+# ... unless it also says this is the reading in force now.
+CURRENT_WORDS = ["current", "latest", "most recent", "in force", "today", "now",
+                 "as it stands"]
+# A journey that is not the one the profile asks for: the fallback, the diversion,
+# the strike plan, the weekend.
+FALLBACK_WORDS = ["if", "fallback", "fall back", "back up", "backup", "alternative",
+                  "alternate", "second best", "diversion", "diverted", "detour", "strike",
+                  "strikes", "disruption", "disrupted", "engineering work", "replacement",
+                  "night", "weekend", "worst case", "contingency", "plan b", "without",
+                  "instead", "when the trains", "when the tube", "when the line"]
+# ... unless the label names the very journey the fact asks for.
+PRIMARY_JOURNEY_WORDS = ["door to door", "rail only", "train only", "trains only", "tube only"]
+# Money. A price is never a year.
+MONEY_WORDS = ["gbp", "pound", "pounds", "sterling", "price", "prices", "sale price",
+               "sold for", "paid"]
+# The certificate register, as opposed to the price register or the planning register.
+CERTIFICATE_WORDS = ["assessment", "assessments", "assessed", "certificate", "certificates",
+                     "epc", "energy"]
+# The landlord's registered number is not a date. FACT_RULES matches labels by plain
+# substring, so "age" is inside "management" and a company row can match a year rule.
+COMPANY_WORDS = ["company", "companies house", "landlord", "agent", "managing agent",
+                 "management", "freeholder", "leaseholder", "entity", "director",
+                 "registered office", "registration"]
+# The age of the building is not the date on the flat's certificate.
+BUILDING_AGE_WORDS = ["building age", "age of the building", "building's age", "block age",
+                      "age of the block", "development age", "age of the development",
+                      "age of the scheme", "how old the building is"]
+# Something measured over the whole building rather than inside this flat ...
+BUILDING_WORDS = ["building", "block", "development", "estate", "scheme", "communal",
+                  "whole building", "site"]
+# ... unless the label says it is the flat's.
+FLAT_WORDS = ["flat", "apartment", "unit", "home", "dwelling", "property"]
+
+FLAT_ID = re.compile(r"\b(?:flat|apartment|apt|unit)\s+([0-9]+[a-z]?)\b")
+
+# Per fact: the referents this fact is NOT about. A rule triggers either on keywords
+# (any_of, in fields) or on a named test method of ReferentGuard, for the referents
+# keywords alone cannot see. Either way keep_any, in keep_fields, cancels it: the
+# report has said this IS the number the fact asks for.
+REFERENT_RULES = collections.OrderedDict([
+    ("epc.floor_area_m2", [
+        dict(rule="a superseded certificate",
+             fields=("label",), any_of=HISTORICAL_WORDS,
+             keep_fields=("label", "computed_by"), keep_any=CURRENT_WORDS,
+             why="this area is on a certificate the report itself marks as replaced"),
+        dict(rule="the building, not the flat",
+             fields=("label",), any_of=BUILDING_WORDS,
+             keep_fields=("label",), keep_any=FLAT_WORDS,
+             why="the area is measured over the building, not inside this flat"),
+        dict(rule="another flat", test="another_flat",
+             why="the label names a different flat"),
+    ]),
+    ("epc.energy_rating", [
+        dict(rule="a superseded certificate",
+             fields=("label",), any_of=HISTORICAL_WORDS,
+             keep_fields=("label", "computed_by"), keep_any=CURRENT_WORDS,
+             why="this rating is on a certificate the report itself marks as replaced"),
+        dict(rule="a series, not a rating", test="series_value",
+             keep_fields=("label", "computed_by"), keep_any=CURRENT_WORDS,
+             why="the value is a run of dated readings, not the rating in force"),
+        dict(rule="another flat", test="another_flat",
+             why="the label names a different flat"),
+    ]),
+    ("epc.first_assessment_year", [
+        dict(rule="the building's age, not the certificate's date",
+             test="building_age_not_certificate",
+             why="the number dates the building rather than this flat's certificate"),
+        dict(rule="the landlord, not the certificate",
+             fields=("label", "axis_name"), any_of=COMPANY_WORDS,
+             keep_fields=("label",), keep_any=CERTIFICATE_WORDS,
+             why="the number belongs to a company, not to a certificate"),
+        dict(rule="a price, not a year", test="money_not_a_year",
+             why="the number is money, and money is never a year"),
+        dict(rule="a series, not a year", test="series_value",
+             keep_fields=("label", "computed_by"), keep_any=CURRENT_WORDS,
+             why="the value is a run of dated readings, not one assessment year"),
+        dict(rule="another flat", test="another_flat",
+             why="the label names a different flat"),
+    ]),
+    ("commute.all_min", [
+        dict(rule="a fallback journey",
+             fields=("label",), any_of=FALLBACK_WORDS,
+             keep_fields=("label",), keep_any=PRIMARY_JOURNEY_WORDS,
+             why="this is the journey under some other condition, not the one the "
+                 "profile asks for"),
+    ]),
+    ("commute.rail_min", [
+        dict(rule="a fallback journey",
+             fields=("label",), any_of=FALLBACK_WORDS,
+             keep_fields=("label",), keep_any=PRIMARY_JOURNEY_WORDS,
+             why="this is the journey under some other condition, not the primary "
+                 "rail time"),
+    ]),
+    ("landregistry.earliest_new_build_year", [
+        dict(rule="a price, not a year", test="money_not_a_year",
+             why="the number is a sale price in pounds, not the year of a sale"),
+        dict(rule="another flat", test="another_flat",
+             why="the label names a different flat"),
+    ]),
+])
+
+
+def phrase_in(text, phrase):
+    """Whole-word containment, on text that has already been through norm()."""
+    if not text:
+        return False
+    return (" " + text + " ").find(" " + norm(phrase) + " ") >= 0
+
+
+def any_phrase(ctx, fields, words):
+    """The first (field, phrase) that hits, or None."""
+    for field in fields or ():
+        for word in words or ():
+            if phrase_in(ctx.get(field), word):
+                return (field, word)
+    return None
+
+
+def cite(hit):
+    return '"%s" in the %s' % (hit[1], hit[0].replace("_", " "))
+
+
+def flat_id(text):
+    m = FLAT_ID.search(norm(text))
+    return m.group(1) if m else None
+
+
+def as_year(value):
+    num = as_number(value)
+    return int(num) if num is not None and 1800 <= num <= 2200 else None
+
+
+class ReferentGuard(object):
+    """Is this number of the right kind about the right thing?
+
+    Built once per report. ``check`` returns a reason to skip a number, or None to
+    grade it, and every skip is remembered in ``excluded`` for the scorecard.
+    """
+
+    def __init__(self, report, facts):
+        self.report = report or {}
+        self.facts = facts or {}
+        self.year = report_year(self.report)
+        cands = self.report.get("candidates") or []
+        cand = cands[0] if cands and isinstance(cands[0], dict) else {}
+        self.subject_flat = flat_id((cand.get("identity") or {}).get("flat"))
+        self.names = {}
+        for src in (self.report.get("sources") or []):
+            if isinstance(src, dict) and src.get("id"):
+                self.names[src["id"]] = src.get("name") or ""
+        self.excluded = []
+
+    def context(self, axis, num):
+        """Everything a rule may read about one number, normalised."""
+        srcs = num.get("sources") or (axis or {}).get("sources") or []
+        return {
+            "label": norm(num.get("label")),
+            "unit": norm(num.get("unit")),
+            "value": norm(num.get("value")),
+            "meaning": norm(num.get("meaning")),
+            "compared_to": norm(num.get("compared_to")),
+            "computed_by": norm(num.get("computed_by")),
+            "source_names": norm(" ".join(self.names.get(s, "") for s in srcs
+                                          if isinstance(s, str))),
+            "axis_name": norm((axis or {}).get("name")),
+        }
+
+    def check(self, fact, axis, num, where):
+        """A reason to skip this number, or None. Skips are recorded."""
+        rules = REFERENT_RULES.get(fact) or []
+        if not rules or not isinstance(num, dict):
+            return None
+        ctx = self.context(axis, num)
+        for spec in rules:
+            if spec.get("test"):
+                evidence = getattr(self, spec["test"])(ctx, num)
+            else:
+                hit = any_phrase(ctx, spec.get("fields"), spec.get("any_of"))
+                evidence = cite(hit) if hit else None
+            if not evidence:
+                continue
+            if any_phrase(ctx, spec.get("keep_fields"), spec.get("keep_any")):
+                continue                     # the report says this IS the wanted one
+            reason = "%s: %s (%s)" % (spec["rule"], spec["why"], evidence)
+            self.excluded.append(collections.OrderedDict([
+                ("fact", fact), ("where", where), ("label", num.get("label")),
+                ("value", num.get("value")), ("unit", num.get("unit")),
+                ("rule", spec["rule"]), ("reason", reason)]))
+            return reason
+        return None
+
+    # ------------------------------------------------- tests a rule can name --
+    def implied_year(self, num):
+        """The year this number states, whether written as a year or as an age."""
+        value = as_number(num.get("value"))
+        if value is None:
+            return None
+        return int(value) if value >= 1900 else self.year - int(value)
+
+    def money_not_a_year(self, ctx, num):
+        hit = any_phrase(ctx, ("unit", "label"), MONEY_WORDS)
+        if not hit:
+            return None
+        value = as_number(num.get("value"))
+        if value is not None and 1900 <= value <= self.year + 1:
+            return None          # a year quoted under a money label is still a year
+        return "%s, and the value is not a year" % cite(hit)
+
+    def series_value(self, ctx, num):
+        raw = str(num.get("value") if num.get("value") is not None else "")
+        years = re.findall(r"\b(?:19|20)\d{2}\b", raw)
+        grades = re.findall(r"\b[A-G]\b", raw.upper())
+        readings = max(len(years), len(grades))
+        if readings < 2:
+            return None
+        return "the value carries %d readings, not one" % readings
+
+    def building_age_not_certificate(self, ctx, num):
+        """The age of the building is not always the date on the flat's certificate.
+
+        Dating a building from its first certificate is the normal, graded case: for
+        most blocks the two coincide, the report means the one when it writes the
+        other, and nothing here interferes. The two part company when a flat is
+        re-certified long after it was built - The Printworks sold new in 2010 and
+        this flat's certificate was first written in 2022 - and a report that says
+        "building age: 16 years" is then plainly dating the building, which is what
+        the Land Registry fact next door is for.
+
+        So this fires only when the register's own two dates disagree AND the number
+        lands on the building's completion rather than on the certificate. The truth
+        is read to tell two referents apart, never to decide whether a value is
+        right: a building-age number that lands on neither date is graded and counts
+        as a fabrication exactly as before.
+        """
+        hit = any_phrase(ctx, ("label",), BUILDING_AGE_WORDS)
+        if not hit:
+            return None
+        built = as_year((self.facts.get("landregistry") or {}).get("earliest_new_build_year"))
+        assessed = as_year((self.facts.get("epc") or {}).get("first_assessment_year"))
+        year = self.implied_year(num)
+        if (built is None or assessed is None or year is None
+                or abs(built - assessed) <= 1
+                or abs(year - built) > 1 or abs(year - assessed) <= 1):
+            return None
+        return ("%s: the building sold new in %d and the certificate was first assessed "
+                "in %d, and this number dates the building" % (cite(hit), built, assessed))
+
+    def another_flat(self, ctx, num):
+        named = flat_id(ctx["label"])
+        if self.subject_flat and named and named != self.subject_flat:
+            return "the label names flat %s, and this case is flat %s" % (
+                named, self.subject_flat)
+        return None
+
+
 # ------------------------------------------------------------- finding a fact --
 Found = collections.namedtuple("Found", "value unit where sources axis_id explicit_null")
 
 
-def find_in_numbers(cand, rule):
-    """Search axes[].numbers[] by label, canonical axis first, then the rest."""
+def find_in_numbers(cand, rule, guard=None, fact=None):
+    """Search axes[].numbers[] by label, canonical axis first, then the rest.
+
+    A ``guard`` skips numbers whose label matches but whose referent is something
+    else; without one, every label match is graded, which is how the finders behave
+    when called on their own.
+    """
     axes = [a for a in (cand.get("axes") or []) if isinstance(a, dict)]
     ordered = ([a for a in axes if a.get("id") == rule.get("axis")] +
                [a for a in axes if a.get("id") != rule.get("axis")])
@@ -408,6 +725,8 @@ def find_in_numbers(cand, rule):
                 continue
             where = "candidates[0].axes[id=%s].numbers[%d] (%s)" % (
                 axis.get("id"), i, num.get("label"))
+            if guard is not None and guard.check(fact, axis, num, where):
+                continue
             srcs = num.get("sources") or axis.get("sources") or []
             if num.get("value") is None:
                 null_hit = null_hit or Found(None, num.get("unit"), where, srcs,
@@ -485,10 +804,10 @@ def read_letter(raw, letters):
     return m.group(1).upper() + suffix
 
 
-def find_letter(cand, rule):
+def find_letter(cand, rule, guard=None, fact=None):
     """A single letter grade, from a labelled number first, then the axis finding text."""
     letters = rule.get("letters", "")
-    hit = find_in_numbers(cand, rule)
+    hit = find_in_numbers(cand, rule, guard, fact)
     if hit and hit.value is not None:
         letter = read_letter(hit.value, letters)
         if letter:
@@ -513,8 +832,12 @@ def find_letter(cand, rule):
     return hit if (hit is not None and hit.value is None) else None
 
 
-def find_fact(cand, fact, rule, truth):
-    """Return a Found for this fact, or None when the report says nothing about it."""
+def find_fact(cand, fact, rule, truth, guard=None):
+    """Return a Found for this fact, or None when the report says nothing about it.
+
+    ``guard`` is a ReferentGuard: a number of the right kind about a different thing
+    is skipped here rather than graded as a wrong value.
+    """
     kind = rule["kind"]
     if rule.get("metric"):
         hit = find_in_metric(cand, rule["metric"])
@@ -525,11 +848,11 @@ def find_fact(cand, fact, rule, truth):
         metric_null = None
 
     if kind in ("area", "year", "count", "minutes"):
-        hit = find_in_numbers(cand, rule)
+        hit = find_in_numbers(cand, rule, guard, fact)
         return hit or metric_null
 
     if kind == "letter":
-        return find_letter(cand, rule) or metric_null
+        return find_letter(cand, rule, guard, fact) or metric_null
 
     if kind == "heating":
         axis = axis_by_id(cand, 3)
@@ -1451,6 +1774,7 @@ def grade(report, case, profile_path=None):
     cand = cands[0] if cands and isinstance(cands[0], dict) else {}
     index = source_index(report)
     profile = read_profile(profile_path)
+    guard = ReferentGuard(report, facts)
 
     rows, correct, found_n, cited_n, fabrications, honest, dishonest = [], 0, 0, 0, 0, 0, 0
     stable_total, stable_correct = 0, 0
@@ -1459,7 +1783,7 @@ def grade(report, case, profile_path=None):
         truth = truth_for(fact, facts)
         if truth is None:
             continue
-        found = find_fact(cand, fact, rule, truth)
+        found = find_fact(cand, fact, rule, truth, guard)
         if truth is ABSENT:
             if found is not None and found.value is not None:
                 status = "wrong"
@@ -1569,10 +1893,12 @@ def grade(report, case, profile_path=None):
             ("hard_filters_checked", len(hard)), ("hard_filters_consistent", hard_ok),
             ("killer_questions", kq_total), ("killer_questions_grounded", kq_ok),
             ("gates_open", gates_open_n), ("gates_covered", gates_ok),
-            ("gates_expected", gates_expected)])),
+            ("gates_expected", gates_expected),
+            ("referent_excluded", len(guard.excluded))])),
         ("pass_line", collections.OrderedDict(sorted(PASS_LINE.items()))),
         ("meets_pass_line", meets),
         ("facts", rows),
+        ("referent_excluded", guard.excluded),
         ("hard_filters", hard),
         ("killer_questions", kq_rows),
         ("killer_questions_note", kq_note),
@@ -1623,6 +1949,23 @@ def explain():
     lines.append("Heating classes are decided by these keywords, in this priority order:")
     for cls, words in HEATING_KEYWORDS.items():
         lines.append("    %-24s %s" % (cls, ", ".join(words)))
+    lines.append("")
+    lines.append("The referent guard. A matched number is SKIPPED, not graded, when one of")
+    lines.append("these says it is about something else. Skips are listed on the card under")
+    lines.append("referent_excluded. The metric slots are never guarded.")
+    for fact, rules in REFERENT_RULES.items():
+        lines.append("%s" % fact)
+        for spec in rules:
+            lines.append("    %-38s %s" % (spec["rule"], spec["why"]))
+            if spec.get("test"):
+                lines.append("        decided by: %s()" % spec["test"])
+            else:
+                lines.append("        any of: %s" % ", ".join(spec.get("any_of") or []))
+                lines.append("        in: %s" % ", ".join(spec.get("fields") or ()))
+            if spec.get("keep_any"):
+                lines.append("        unless %s says: %s"
+                             % (", ".join(spec.get("keep_fields") or ()),
+                                ", ".join(spec["keep_any"])))
     return "\n".join(lines)
 
 

@@ -291,6 +291,339 @@ class TestMissingFacts(GradeBase):
         self.assertEqual(["True", "unknown"], age["expected_pass"])
 
 
+# ------------------------------------------------------------ referent guard --
+# A number can be of the right KIND and about the wrong THING. These cases are
+# synthetic fragments on invented addresses: none of the tonight's-sweep reports is
+# needed to reproduce any of them.
+GUARD_FACTS = {
+    "epc": {
+        "certificate_id": "0000-0000-0000-0000-0000",
+        "register_address": "Flat 12 Tolliver House 4 Rennick Walk X1 2YZ",
+        "floor_area_m2": 53.0,
+        "floor_area_sqft": 571,
+        "first_assessment_year": 2022,
+        "heating_class": "community_heat_network",
+        "floor_position": "mid",
+        "energy_rating": "C",
+        "retrieved_at": "2026-09-03T11:00:00Z",
+        "command": "python3 skills/vet-flat/scripts/epc.py cert 0000-0000-0000-0000-0000 --history",
+    },
+    "crime": {
+        "box_half_m": 150,
+        "months": ["2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06"],
+        "total": 74,
+        "tolerance_pct": 15,
+        "retrieved_at": "2026-09-03T11:00:00Z",
+        "command": "python3 skills/vet-flat/scripts/crime.py box --lat 51.0 --lng 0.0",
+    },
+    "commute": {
+        "destination": "SW1A 2AA",
+        "all_min": 34,
+        "rail_min": 33,
+        "tolerance_min": 8,
+        "redundancy_grade": "A",
+        "retrieved_at": "2026-09-03T11:00:00Z",
+        "command": "python3 skills/vet-flat/scripts/commute.py journey --from X1 2YZ --to SW1A 2AA",
+    },
+    "landregistry": {
+        "postcode": "X1 2YZ",
+        "earliest_new_build_year": 2010,
+        "retrieved_at": "2026-09-03T11:00:00Z",
+        "command": "python3 skills/vet-flat/scripts/landregistry.py price-paid --postcode 'X1 2YZ'",
+    },
+}
+
+GUARD_CASE = {
+    "id": "synthetic-referent",
+    "address": "Flat 12, Tolliver House, 4 Rennick Walk",
+    "borough": "Test",
+    "prompt": "Vet this flat: Flat 12, Tolliver House.",
+    "files": ["cases/synthetic-referent/profile.yaml"],
+    "expected_facts": GUARD_FACTS,
+}
+
+
+def number(label, value, unit, sources=("s-epc-1",), **extra):
+    row = {"label": label, "value": value, "unit": unit,
+           "meaning": "Synthetic fragment for the referent guard.",
+           "compared_to": "Nothing; this fragment exists to be graded.",
+           "evidence_class": "G", "sources": list(sources)}
+    row.update(extra)
+    return row
+
+
+class TestReferentGuard(GradeBase):
+    """A number of the right kind about a different thing is not a fabrication.
+
+    Each pattern is tested twice: excluded when the referent differs, and still
+    counted when it is the same referent carrying a wrong value.
+    """
+
+    def report(self, facts=None):
+        rep = copy.deepcopy(self.sample)
+        cand = rep["candidates"][0]
+        cand["identity"]["display_name"] = "Flat 12, Tolliver House"
+        cand["identity"]["address"] = "Flat 12, Tolliver House, 4 Rennick Walk, London"
+        cand["identity"]["postcode"] = "X1 2YZ"
+        cand["identity"]["flat"] = "Flat 12"
+        # The sample dates the building; against this case's truth (built 2010,
+        # first certificate 2022) that is a different referent, so the baseline
+        # carries no fabrication of its own.
+        self.axis(rep, 3)["numbers"][0] = number("Building age", 16, "years")
+        return rep
+
+    def case(self, **facts):
+        case = copy.deepcopy(GUARD_CASE)
+        for block, values in facts.items():
+            case["expected_facts"][block].update(values)
+        return case
+
+    def axis(self, report, axis_id):
+        for axis in report["candidates"][0]["axes"]:
+            if axis["id"] == axis_id:
+                return axis
+        self.fail("the sample has no axis %s" % axis_id)
+
+    def graded(self, report, case=None):
+        return grader.grade(report, case or copy.deepcopy(GUARD_CASE), self.profile)
+
+    def excluded_for(self, card, fact):
+        return [row for row in card["referent_excluded"] if row["fact"] == fact]
+
+    # ---------------------------------------- a rating in an over-time series --
+    def test_a_rating_over_time_is_not_the_rating_now(self):
+        rep = self.report()
+        self.axis(rep, 3)["numbers"].append(
+            number("Energy rating over time", "B 82 in 2019, C 79 in 2026", "band and score"))
+        card = self.graded(rep)
+        row = self.fact(card, "epc.energy_rating")
+        self.assertEqual("missing", row["status"])
+        skipped = self.excluded_for(card, "epc.energy_rating")
+        self.assertEqual(1, len(skipped), card["referent_excluded"])
+        self.assertIn("over time", skipped[0]["reason"])
+        self.assertEqual(0, card["scores"]["fabrications"])
+
+    def test_the_rating_now_is_still_graded_and_a_wrong_one_is_a_fabrication(self):
+        rep = self.report()
+        self.axis(rep, 3)["numbers"].append(
+            number("Energy rating, current certificate", "B", "rating A to G"))
+        card = self.graded(rep)
+        row = self.fact(card, "epc.energy_rating")
+        self.assertEqual("wrong", row["status"])          # the truth is C
+        self.assertEqual([], self.excluded_for(card, "epc.energy_rating"))
+        self.assertEqual(1, card["scores"]["fabrications"])
+
+    def test_a_series_that_says_it_leads_with_today_is_graded(self):
+        """'Energy rating now, and before' names its own order, so it is read."""
+        rep = self.report()
+        self.axis(rep, 3)["numbers"].append(
+            number("Energy rating now, and before", "C (79), down from B (82) in 2019",
+                   "band and score"))
+        card = self.graded(rep)
+        self.assertEqual("correct", self.fact(card, "epc.energy_rating")["status"])
+        self.assertEqual([], self.excluded_for(card, "epc.energy_rating"))
+
+    # ------------------------------------------- an area on a dead certificate --
+    def test_a_superseded_certificate_area_is_skipped_for_the_current_one(self):
+        rep = self.report()
+        self.axis(rep, 2)["numbers"] = [
+            number("Certified area, 2010 as-built certificate", 441, "square feet"),
+            number("Certified area, current certificate", 571, "square feet")]
+        card = self.graded(rep)
+        row = self.fact(card, "epc.floor_area_m2")
+        self.assertEqual("correct", row["status"])
+        self.assertEqual(571, row["reported"])
+        skipped = self.excluded_for(card, "epc.floor_area_m2")
+        self.assertEqual([441], [s["value"] for s in skipped])
+        self.assertIn("as built", skipped[0]["reason"])
+
+    def test_a_wrong_area_on_the_current_certificate_is_still_a_fabrication(self):
+        rep = self.report()
+        self.axis(rep, 2)["numbers"] = [
+            number("Certified area, 2010 as-built certificate", 441, "square feet"),
+            number("Certified area, current certificate", 700, "square feet")]
+        card = self.graded(rep)
+        row = self.fact(card, "epc.floor_area_m2")
+        self.assertEqual("wrong", row["status"])
+        self.assertEqual(700, row["reported"])
+        self.assertEqual(1, card["scores"]["fabrications"])
+
+    def test_an_area_measured_over_the_building_is_not_the_flats(self):
+        rep = self.report()
+        self.axis(rep, 2)["numbers"] = [
+            number("Smallest certified area in the building", 431, "square feet")]
+        card = self.graded(rep)
+        self.assertEqual("missing", self.fact(card, "epc.floor_area_m2")["status"])
+        self.assertIn("building", self.excluded_for(card, "epc.floor_area_m2")[0]["reason"])
+
+    def test_another_flats_area_is_not_this_flats(self):
+        rep = self.report()
+        self.axis(rep, 2)["numbers"] = [
+            number("Certified area of Flat 15, one floor up", 903, "square feet"),
+            number("Certified indoor area", 571, "square feet")]
+        card = self.graded(rep)
+        self.assertEqual("correct", self.fact(card, "epc.floor_area_m2")["status"])
+        skipped = self.excluded_for(card, "epc.floor_area_m2")
+        self.assertEqual([903], [s["value"] for s in skipped])
+        self.assertIn("flat 15", skipped[0]["reason"])
+
+    # --------------------------------------------------- a fallback journey ---
+    def test_the_journey_if_the_trains_stop_is_not_the_rail_time(self):
+        rep = self.report()
+        self.axis(rep, 11)["numbers"] += [
+            number("Journey if the trains stop", 49, "minutes", sources=("s-tfl",)),
+            number("Rail-only journey", 33, "minutes", sources=("s-tfl",))]
+        card = self.graded(rep)
+        row = self.fact(card, "commute.rail_min")
+        self.assertEqual("correct", row["status"])
+        self.assertEqual(33, row["reported"])
+        skipped = self.excluded_for(card, "commute.rail_min")
+        self.assertEqual([49], [s["value"] for s in skipped])
+        self.assertIn("fallback journey", skipped[0]["rule"])
+
+    def test_a_wrong_rail_time_is_still_a_fabrication(self):
+        rep = self.report()
+        self.axis(rep, 11)["numbers"] += [
+            number("Journey if the trains stop", 49, "minutes", sources=("s-tfl",)),
+            number("Rail-only journey", 55, "minutes", sources=("s-tfl",))]
+        card = self.graded(rep)
+        row = self.fact(card, "commute.rail_min")
+        self.assertEqual("wrong", row["status"])
+        self.assertEqual(55, row["reported"])
+        self.assertEqual(1, card["scores"]["fabrications"])
+
+    def test_the_rail_leg_called_the_fallback_is_still_the_rail_leg(self):
+        """A bus commute makes the train the back-up; the label still names it."""
+        rep = self.report()
+        self.axis(rep, 11)["numbers"].append(
+            number("Rail-only fallback", 33, "minutes", sources=("s-tfl",)))
+        card = self.graded(rep)
+        self.assertEqual("correct", self.fact(card, "commute.rail_min")["status"])
+        self.assertEqual([], self.excluded_for(card, "commute.rail_min"))
+
+    # ------------------------------------------- a sale price is not a year ---
+    def test_a_first_sale_price_is_not_the_new_build_year(self):
+        rep = self.report()
+        self.axis(rep, 8)["numbers"] += [
+            number("First sale price of this exact flat", 239000, "GBP",
+                   sources=("s-plan-1",)),
+            number("Earliest new-build sale year", 2010, "year", sources=("s-plan-1",))]
+        card = self.graded(rep)
+        row = self.fact(card, "landregistry.earliest_new_build_year")
+        self.assertEqual("correct", row["status"])
+        self.assertEqual(2010, row["reported"])
+        skipped = self.excluded_for(card, "landregistry.earliest_new_build_year")
+        self.assertEqual([239000], [s["value"] for s in skipped])
+        self.assertIn("not a year", skipped[0]["reason"])
+
+    def test_a_price_range_under_a_first_sale_label_is_skipped(self):
+        rep = self.report()
+        self.axis(rep, 8)["numbers"].append(
+            number("First sale prices in the building", "282,270 to 570,000", "GBP",
+                   sources=("s-plan-1",)))
+        card = self.graded(rep)
+        self.assertEqual("missing",
+                         self.fact(card, "landregistry.earliest_new_build_year")["status"])
+        self.assertEqual(0, card["scores"]["fabrications"])
+
+    def test_a_wrong_new_build_year_is_still_a_fabrication(self):
+        rep = self.report()
+        self.axis(rep, 8)["numbers"] += [
+            number("First sale price of this exact flat", 239000, "GBP",
+                   sources=("s-plan-1",)),
+            number("Earliest new-build sale year", 2009, "year", sources=("s-plan-1",))]
+        card = self.graded(rep)
+        row = self.fact(card, "landregistry.earliest_new_build_year")
+        self.assertEqual("wrong", row["status"])
+        self.assertEqual(1, card["scores"]["fabrications"])
+
+    # ------------------------ the building's age against the certificate's date --
+    def test_a_building_age_that_dates_the_building_is_not_the_assessment_year(self):
+        """Built 2010, certificate first written 2022: 16 years dates the building."""
+        rep = self.report()
+        self.axis(rep, 3)["numbers"][0] = number("Building age", 16, "years",
+                                                 computed_by="2026 minus 2010")
+        card = self.graded(rep)
+        row = self.fact(card, "epc.first_assessment_year")
+        self.assertEqual("missing", row["status"])
+        skipped = [s for s in self.excluded_for(card, "epc.first_assessment_year")
+                   if s["value"] == 16]
+        self.assertEqual(1, len(skipped), card["referent_excluded"])
+        self.assertIn("2010", skipped[0]["reason"])
+        self.assertIn("2022", skipped[0]["reason"])
+        self.assertEqual(0, card["scores"]["fabrications"])
+
+    def test_a_building_age_that_dates_neither_is_graded_and_counted(self):
+        rep = self.report()
+        self.axis(rep, 3)["numbers"][0] = number("Building age", 7, "years")
+        card = self.graded(rep)
+        row = self.fact(card, "epc.first_assessment_year")
+        self.assertEqual("wrong", row["status"])          # 2019: neither 2010 nor 2022
+        self.assertEqual(7, row["reported"])
+        self.assertEqual([], self.excluded_for(card, "epc.first_assessment_year"))
+        self.assertEqual(1, card["scores"]["fabrications"])
+
+    def test_a_building_age_is_the_assessment_year_when_the_two_dates_agree(self):
+        """The usual case: the block was certified when it was finished. Untouched."""
+        rep = self.report()
+        self.axis(rep, 3)["numbers"][0] = number("Building age", 16, "years")
+        card = self.graded(rep, self.case(epc={"first_assessment_year": 2010}))
+        self.assertEqual("correct", self.fact(card, "epc.first_assessment_year")["status"])
+        self.assertEqual([], self.excluded_for(card, "epc.first_assessment_year"))
+
+    def test_the_landlords_company_number_is_not_an_assessment_year(self):
+        """'age' is inside 'management', so a company row can match the year rule."""
+        rep = self.report()
+        self.axis(rep, 3)["numbers"] = []
+        self.axis(rep, 6)["numbers"].append(
+            number("Management company and number", "Rennick Walk Management Ltd, 05919132",
+                   None, sources=("s-ch-1",)))
+        card = self.graded(rep)
+        self.assertEqual("missing", self.fact(card, "epc.first_assessment_year")["status"])
+        skipped = [s for s in self.excluded_for(card, "epc.first_assessment_year")
+                   if "05919132" in str(s["value"])]
+        self.assertEqual(1, len(skipped), card["referent_excluded"])
+        self.assertIn("company", skipped[0]["reason"])
+
+    # ------------------------------------------------------- the audit trail --
+    def test_the_metric_slots_are_never_guarded(self):
+        """The schema gives one metric key per fact, so a value there is the answer."""
+        rep = self.report()
+        rep["candidates"][0]["metrics"]["crime_6mo_count"]["value"] = 1000
+        for num in self.axis(rep, 5)["numbers"]:
+            num["label"] = "Recorded crimes over time"
+        card = self.graded(rep)
+        row = self.fact(card, "crime.total")
+        self.assertEqual("wrong", row["status"])
+        self.assertEqual("candidates[0].metrics.crime_6mo_count", row["where"])
+        self.assertEqual([], self.excluded_for(card, "crime.total"))
+
+    def test_every_exclusion_is_written_down_with_its_reason(self):
+        rep = self.report()
+        self.axis(rep, 2)["numbers"] = [
+            number("Certified area, 2010 as-built certificate", 441, "square feet")]
+        card = self.graded(rep)
+        row = card["referent_excluded"][0]
+        self.assertEqual(["fact", "where", "label", "value", "unit", "rule", "reason"],
+                         list(row.keys()))
+        self.assertEqual("epc.floor_area_m2", row["fact"])
+        self.assertIn("axes[id=2].numbers[0]", row["where"])
+        self.assertEqual(len(card["referent_excluded"]), card["counts"]["referent_excluded"])
+
+    def test_a_clean_report_excludes_nothing_and_the_summary_is_unchanged(self):
+        card = self.card_for(copy.deepcopy(self.sample))
+        self.assertEqual([], card["referent_excluded"])
+        self.assertEqual(0, card["counts"]["referent_excluded"])
+        self.assertIn("0 fabrications", card["summary"])
+        self.assertTrue(card["summary"].startswith(SYNTHETIC_CASE["id"] + ":"))
+
+    def test_the_rules_are_printed_by_explain(self):
+        text = grader.explain()
+        self.assertIn("referent_excluded", text)
+        self.assertIn("a fallback journey", text)
+        self.assertIn("a price, not a year", text)
+
+
 # ----------------------------------------------------------------- the suite --
 class TestEvalSuite(unittest.TestCase):
     @classmethod
