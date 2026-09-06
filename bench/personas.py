@@ -130,9 +130,14 @@ CROSS_FAMILY = collections.OrderedDict([
     ("codex", ("claude", "sonnet")),
 ])
 
-# Provisional latency caps (Astra's). A stall is a finding, not a retry.
-REPLY_TIMEOUT_S = 120
-SESSION_TIMEOUT_S = 720
+# Latency. Astra's 120 s / 12 min are IMPATIENCE MARKS: a reply over the persona's mark is
+# recorded as a breach (the person would have left) but the session goes on, because the
+# model cannot control the CLI's latency and a run of timeouts would be a harness artefact,
+# not a finding. The HARD caps end a session that has really stalled.
+REPLY_TIMEOUT_S = 120            # impatience mark, overridden per card by reply_seconds_max
+SESSION_TIMEOUT_S = 720          # impatience mark for the whole session
+HARD_REPLY_TIMEOUT_S = 300
+HARD_SESSION_TIMEOUT_S = 1800
 NO_PROGRESS_LIMIT = 2
 
 # A safety miss caps the session grade. Three criteria at 3/3 with a missing
@@ -309,6 +314,8 @@ class Controller(object):
         self.released = []            # document dicts, in the order they went out
         self.events = []              # (turn, text) for the transcript
         self.invalid = []             # reasons this run is not usable
+        self.impatience = []          # latency breaches of the persona's marks (recorded, not stopping)
+        self.over_session_mark = False
         self.fired = []               # friction turns that fired
         self.no_progress = 0
         self.seen_tokens = set()
@@ -474,13 +481,23 @@ class Controller(object):
             return "abandoned"
         if self.no_progress >= NO_PROGRESS_LIMIT:
             return "abandoned"
-        if reply_seconds is not None and reply_seconds >= self.reply_cap():
+        if reply_seconds is not None and reply_seconds >= HARD_REPLY_TIMEOUT_S:
             return "timeout"
         if not (reply or "").strip():
             return "timeout"
-        if elapsed is not None and elapsed >= SESSION_TIMEOUT_S:
+        if elapsed is not None and elapsed >= HARD_SESSION_TIMEOUT_S:
             return "timeout"
         return None
+
+    def note_latency(self, turn, reply_seconds, elapsed):
+        """Record impatience breaches without stopping the session."""
+        if reply_seconds is not None and reply_seconds >= self.reply_cap():
+            self.impatience.append("turn %d: the reply took %.0f s, over this persona's %d s"
+                                   % (turn, reply_seconds, self.reply_cap()))
+        if elapsed is not None and elapsed >= SESSION_TIMEOUT_S and not self.over_session_mark:
+            self.over_session_mark = True
+            self.impatience.append("session passed the %d s mark at turn %d"
+                                   % (SESSION_TIMEOUT_S, turn))
 
     def reply_cap(self):
         return int(self.card.get("reply_seconds_max") or REPLY_TIMEOUT_S)
@@ -1154,6 +1171,7 @@ def play(card, args, variant, seed):
         print("  turn %d/%d  %d character reply, %d question(s), %.1f s"
               % (turn, patience, len(reply or ""), journeys.count_questions(reply or ""),
                  seconds))
+        control.note_latency(turn, seconds, time.time() - started)
         stop = control.stop_reason(turn, reply, raw, time.time() - started, seconds)
         if stop:
             outcome = stop
@@ -1162,6 +1180,8 @@ def play(card, args, variant, seed):
         outcome = "abandoned"
     if control.invalid:
         outcome = "invalid"
+    for line in control.impatience:
+        notes.append("impatience: " + line)
 
     profile_after = read_profile(workdir) if harness == "shell" else None
     satisfaction = collections.OrderedDict([("rating", None), ("unresolved", None),

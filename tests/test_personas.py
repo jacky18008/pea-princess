@@ -366,7 +366,7 @@ class TestController(unittest.TestCase):
         self.assertEqual("timeout", control.stop_reason(2, "", "ok", 10, 5))
         self.assertEqual("timeout", control.stop_reason(2, "r", "ok", 10, 999))
         self.assertEqual("timeout",
-                         control.stop_reason(2, "r", "ok", runner.SESSION_TIMEOUT_S + 1, 5))
+                         control.stop_reason(2, "r", "ok", runner.HARD_SESSION_TIMEOUT_S + 1, 5))
         self.assertIsNone(control.stop_reason(2, "a reply", "ok", 10, 5))
 
     def test_two_exchanges_without_progress_stop_the_session(self):
