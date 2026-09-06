@@ -1074,7 +1074,7 @@ The rules, each with its own id in the output:
 | Rule | What it catches |
 |---|---|
 | `quote_in_source` | a quote that is not in the source, comparing with whitespace normalised and case ignored. Re-wrapping is fine; re-wording is not |
-| `source_resolves` | a source id in no `sources[]` entry, or a `pasted:<name>` with no file behind it |
+| `source_resolves` | a source id that resolves nowhere: not a `pasted:<name>` with a file behind it, not an entry in the report's `sources[]`, and not one of the ids `references/sources.yaml` documents. An item computed by `calc.py` needs no source |
 | `quote_missing` | a found item with no sentence to point at |
 | `unit_present` | a number with no unit. 54 is not an area |
 | `referent:*` | the number is about something else — the building not the flat, a replaced certificate, another flat, a sale price where a year is wanted, the strike-day journey. Shared with `bench/grade.py` through `scripts/referents.py`, and a test asserts the two agree |

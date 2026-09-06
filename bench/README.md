@@ -655,9 +655,20 @@ depth, so depth and role split are crossed rather than confounded. The table and
 questions each arm is meant to answer are in `docs/EXPERIMENTS.md` under **"Role
 pipeline (to be measured)"**, and it has no numbers in it yet on purpose.
 
+Everything that passes between the roles is kept next to the event streams under
+`raw/`: `plan-scaffold`, `plan`, one `evidence-<group>` per executor, the merged
+`evidence` (and `evidence-round2` after a replan), `verify-table` and
+`verify-deterministic` for each verifier pass, `verified` for each pass, and the two
+files the integrator was handed. The working directory is a temp folder that does not
+survive the run, so anything not copied there is gone, and the first pilot could only be
+diagnosed by re-deriving the evidence out of Codex event streams.
+
 The scorecard row is the ordinary one plus a `roles` field — per role the model, the
-wall time, the tokens and the tool list it was launched with — a `pipeline` block with
-the counts, and `information_sufficiency` when a gold file was given.
+wall time, the tokens and the tool list it was launched with, plus what that role
+produced (items, of which got, unknown, with a quote, with a source, and never tried
+for) or verified (pass / fail / unknown and which rule did the failing) — a `pipeline`
+block with the same summaries for the run as a whole, the artefacts kept, and
+`information_sufficiency` when a gold file was given.
 
 `bench/run.py` refuses a config with a `pipeline:` block instead of running it as one
 agent: doing that would produce a row that looks like an arm and is a different

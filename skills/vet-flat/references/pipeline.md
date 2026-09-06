@@ -87,6 +87,8 @@ One executor per axis group, in parallel. Each writes items and nothing else:
 
 - **`claim` names the thing, not the source.** "certified internal floor area of *this flat*", not "the EPC number". The referent check reads this field: a claim that says which thing it is about is a claim that can be checked.
 - **`quote` is verbatim.** Copy it; do not retype it, do not tidy it, do not join two sentences. For a script result, quote the line of its JSON: `"total": 199`.
+- **Save what you quoted.** Write each script's JSON output to `sources/<name>.json` before you quote it, and cite it as `pasted:<name>`. A quote nobody can open is a quote nobody can check, and the verifier will not take your word for it. Where the fact came from a register page rather than a script, the source id from `sources.yaml` is also accepted.
+- **The scripts are inside the skill folder**, not beside your working directory: run `<skill>/scripts/epc.py`, never a bare `scripts/epc.py`. The plan the harness hands you already has the full path in it.
 - **`unit` always.** 54 is not an area.
 - **No verdicts. No scores. No comparisons with the profile.** "54 m² is below the 45 m² floor" is two jobs at once and one of them is not yours.
 - **No arithmetic in your head.** The only sum you may report is a `scripts/calc.py` call, written into `computed_by` with its output. Anything you worked out yourself belongs to nobody.
@@ -125,8 +127,10 @@ does not belong in `verified.json`.
 On each flagged item, decide one of three things and say why in one sentence:
 
 - **pass** — you looked, and it stands.
-- **fail** — and the reason a reader could act on.
-- **unknown** — the check could not be run, or the executor could not get it.
+- **fail** — and the reason a reader could act on. When you are agreeing with a `verify.py` failure, **quote its reason back** in your own `reason` and name its rule id in `rules`. A fail with no reason reads as an opinion and gets dropped.
+- **unknown** — the executor could not get it, or you looked and still cannot tell.
+
+**Unknown is not the default.** An item `verify.py` passed stays passed unless you have a reason to say otherwise. Marking a whole file unknown is not caution; it is an empty report, and the integrator will faithfully print it as one.
 
 Check these by hand, because they are where reports go wrong:
 

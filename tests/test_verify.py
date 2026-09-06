@@ -281,6 +281,44 @@ class ThingsAModelWritingTheEvidenceGetsWrong(unittest.TestCase):
                       "a different pair is still worth saying")
 
 
+class SourcesTheSkillItselfDocuments(unittest.TestCase):
+    """The first pilot's executors cited `postcodes_io_lookup` - a real source, and the
+    only name that register has. verify.py resolved it nowhere and returned `unknown` for
+    every item, so nothing was ever checked and the report came out empty."""
+
+    def test_a_sources_yaml_id_resolves(self):
+        self.assertIn("postcodes_io_lookup", V.known_source_ids())
+        ev = copy.deepcopy(load("evidence-good.json"))
+        target = item(ev, "e-crime")
+        target["source"] = "postcodes_io_lookup"
+        verdict = state(run(ev), "e-crime")
+        self.assertEqual(verdict["state"], "pass")
+        self.assertNotIn("source_resolves", verdict["rules"])
+
+    def test_an_id_in_no_register_at_all_still_fails(self):
+        ev = copy.deepcopy(load("evidence-good.json"))
+        item(ev, "e-crime")["source"] = "made-up-register"
+        self.assertIn("source_resolves", state(run(ev), "e-crime")["rules"])
+
+    def test_a_quote_nobody_can_open_is_a_pass_that_is_counted_not_an_unknown(self):
+        """A whole file of `unknown` is what emptied the first pilot's report. With no
+        text held, the item is not failed and not blanked - it passes, and its id is in
+        quotes_unchecked so the scorecard can say how much was never read."""
+        ev = copy.deepcopy(load("evidence-good.json"))
+        item(ev, "e-crime")["source"] = "postcodes_io_lookup"
+        result = V.verify(ev, None, {}, "lite")
+        states = set(v["state"] for v in result["items"])
+        self.assertIn("pass", states, "not everything may come back unknown")
+        self.assertIn("e-crime", result["counts"]["quotes_unchecked"])
+
+    def test_a_calc_item_needs_no_source_and_no_quote(self):
+        ev = copy.deepcopy(load("evidence-good.json"))
+        ev["items"].append({"id": "e-calc", "axis": 10, "claim": "all-in monthly cost",
+                            "status": "ok", "value": 2575, "unit": "GBP per month",
+                            "computed_by": "scripts/calc.py all-in --rent-pcm 2400 -> 2575"})
+        self.assertEqual(state(run(ev), "e-calc")["state"], "pass")
+
+
 class InformationSufficiency(unittest.TestCase):
     """Deterministic, no model, no tokens: was the fact even in the evidence?"""
 

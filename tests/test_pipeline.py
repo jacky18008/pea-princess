@@ -318,6 +318,24 @@ class TheDryRun(unittest.TestCase):
     def test_the_first_line_of_every_role_prompt_is_shown(self):
         self.assertEqual(self.out.count("    prompt: "), len(self.commands()))
 
+    def test_the_executor_prompt_carries_a_worked_item_and_the_real_script_path(self):
+        executors = [c for c in self.commands() if "Executors" in c]
+        self.assertTrue(executors)
+        one = executors[0]
+        self.assertIn("ONE WORKED ITEM", one)
+        self.assertIn("certified internal floor area of this flat", one)
+        self.assertIn("pasted:epc-cert", one)
+        self.assertIn("SAVE EVERY SCRIPT", one)
+        self.assertIn(".claude/skills/vet-flat/scripts/", one,
+                      "a bare scripts/ path does not exist in the working directory")
+
+    def test_the_verifier_prompt_says_unknown_is_not_the_default(self):
+        verifier = [c for c in self.commands() if "Verifier" in c]
+        self.assertTrue(verifier)
+        self.assertIn("UNKNOWN IS NOT THE DEFAULT", verifier[0])
+        self.assertIn("A FAIL MUST CARRY ITS REASON", verifier[0])
+        self.assertIn("quote its reason back", verifier[0])
+
     def test_the_deterministic_steps_are_announced(self):
         self.assertIn("scripts/plan.py wrote plan.scaffold.json and the first "
                       "plan.json", self.out)
@@ -376,6 +394,62 @@ class TheDryRun(unittest.TestCase):
         self.assertNotIn("information-sufficiency probe", self.out)
         out = self.dry("--gold", os.path.join(FIX, "gold-tiny.json"))
         self.assertIn("information-sufficiency probe", out)
+
+
+class ThePlanPointsAtScriptsThatExist(unittest.TestCase):
+    """The first pilot's executors ran `scripts/epc.py` and got 'no such file': the
+    scaffold's paths are relative to the skill, and the executors run in the workdir."""
+
+    def test_retarget_rewrites_every_call(self):
+        plan = P.scaffold("standard", values={"postcode": "XE1 9AA"})
+        PL.retarget(plan, ".claude/skills/vet-flat")
+        calls = [c["cmd"] for a in plan["axes"] for c in a["scripts"]]
+        self.assertTrue(calls)
+        for cmd in calls:
+            self.assertTrue(cmd.startswith(".claude/skills/vet-flat/scripts/"), cmd)
+
+    def test_a_retargeted_plan_still_passes_the_scaffold_check(self):
+        plan = P.scaffold("standard", values={"postcode": "XE1 9AA"})
+        PL.retarget(plan, ".agents/skills/vet-flat")
+        self.assertTrue(P.check(plan, "standard")["ok"],
+                        "the check compares a call's shape, not where the file lives")
+
+    def test_the_codex_home_is_used_for_codex(self):
+        plan = P.scaffold("lite")
+        PL.retarget(plan, PL.skill_rel("codex"))
+        self.assertIn(".agents/skills/vet-flat/scripts/geo.py",
+                      [c["cmd"] for a in plan["axes"] for c in a["scripts"]][0])
+
+
+class TheSummariesInTheRow(unittest.TestCase):
+    def test_evidence_summary_counts_what_was_got_and_what_nobody_tried_for(self):
+        doc = {"items": [
+            {"id": "a", "status": "ok", "quote": "q", "source": "s"},
+            {"id": "b", "status": "ok"},
+            {"id": "c", "status": "unknown", "tried": ["looked"]},
+            {"id": "d", "status": "unknown", "tried": []}]}
+        got = PL.evidence_summary(doc)
+        self.assertEqual((got["items"], got["ok"], got["unknown"]), (4, 2, 2))
+        self.assertEqual((got["with_quote"], got["with_source"]), (1, 1))
+        self.assertEqual(got["untried"], 1)
+
+    def test_verify_summary_names_the_rule_that_failed_each_item(self):
+        doc = {"items": [{"id": "a", "state": "pass"},
+                         {"id": "b", "state": "fail", "rules": ["quote_in_source"]},
+                         {"id": "c", "state": "fail",
+                          "rules": ["quote_in_source", "unit_present"]},
+                         {"id": "d", "state": "unknown"}],
+               "counts": {"quotes_unchecked": ["a"], "fixed_form_missing": ["F9"]}}
+        got = PL.verify_summary(doc)
+        self.assertEqual((got["pass"], got["fail"], got["unknown"]), (1, 2, 1))
+        self.assertEqual(got["failed_by_rule"],
+                         {"quote_in_source": 2, "unit_present": 1})
+        self.assertEqual(got["quotes_unchecked"], 1)
+        self.assertEqual(got["fixed_form_missing"], ["F9"])
+
+    def test_a_fail_with_no_rule_is_still_counted(self):
+        got = PL.verify_summary({"items": [{"id": "a", "state": "fail"}]})
+        self.assertEqual(got["failed_by_rule"], {"(no rule named)": 1})
 
 
 class TheRowItRecords(unittest.TestCase):
@@ -500,7 +574,21 @@ class TheRowItRecords(unittest.TestCase):
         self.assertEqual(by_id["e1"]["checked_by"], "verify.py")
         self.assertEqual(merged["sufficiency"], {"sufficiency": 0.5})
         self.assertTrue(any("not in the evidence" in n for n in notes), notes)
-        self.assertTrue(any("changed 1 of 3" in n for n in notes), notes)
+        self.assertTrue(any("spoke about 1 of 3 verdicts and moved 1 of them" in n
+                            for n in notes), notes)
+
+    def test_a_verifier_that_echoes_the_file_back_is_not_recorded_as_changing_it(self):
+        """The first pilot's note said 'changed 62 of 62' because the model restated the
+        whole file. Restating is not changing, and the note has to tell them apart."""
+        deterministic = {"items": [{"id": "e1", "state": "unknown", "reason": "x",
+                                    "rules": [], "checked_by": "verify.py"},
+                                   {"id": "e2", "state": "pass", "reason": None,
+                                    "rules": [], "checked_by": "verify.py"}]}
+        echo = {"items": [{"id": "e1", "state": "unknown"}, {"id": "e2", "state": "pass"}]}
+        notes = []
+        PL.merge_verdicts(deterministic, echo, notes)
+        self.assertTrue(any("spoke about 2 of 2 verdicts and moved 0 of them" in n
+                            for n in notes), notes)
 
     def test_a_verifier_that_says_nothing_leaves_the_deterministic_result_standing(self):
         deterministic = {"items": [{"id": "e1", "state": "fail", "reason": "x",
@@ -550,6 +638,17 @@ class TheReferenceDocument(unittest.TestCase):
 
     def test_the_replan_is_capped_at_one_round(self):
         self.assertIn("One round only", self.text)
+
+    def test_it_tells_the_executors_to_save_what_they_quote(self):
+        self.assertIn("Save what you quoted", self.text)
+        self.assertIn("sources/<name>.json", self.text)
+        self.assertIn("A quote nobody can open is a quote nobody can check", self.text)
+        self.assertIn("never a bare `scripts/epc.py`", self.text)
+
+    def test_it_tells_the_verifier_that_unknown_is_not_the_default(self):
+        self.assertIn("Unknown is not the default", self.text)
+        self.assertIn("quote its reason back", self.text)
+        self.assertIn("name its rule id in `rules`", self.text)
 
     def test_it_tells_the_verifier_to_write_the_whole_file(self):
         self.assertIn("Write the whole file, not just your part", self.text)

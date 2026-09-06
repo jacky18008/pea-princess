@@ -77,6 +77,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 REFS = os.path.join(HERE, "..", "references")
 DEFAULT_QUESTIONS = os.path.join(REFS, "fixed-questions.yaml")
 DEFAULT_THRESHOLDS = os.path.join(REFS, "thresholds.yaml")
+DEFAULT_SOURCES_YAML = os.path.join(REFS, "sources.yaml")
 
 sys.path.insert(0, HERE)
 import referents  # noqa: E402  the referent word lists, shared with bench/grade.py
@@ -149,6 +150,24 @@ def load_sources(folder):
     return out
 
 
+SOURCE_ID = re.compile(r"^\s*-\s*id:\s*(\S+)\s*$", re.M)
+
+
+def known_source_ids(path=None):
+    """The source ids references/sources.yaml documents.
+
+    An executor that ran scripts/geo.py cites `postcodes_io_lookup`, which is a real
+    source and the only name that register has. Without this the id resolves nowhere and
+    a correct item is failed for it - which is exactly what happened on the first pilot.
+    """
+    path = path or DEFAULT_SOURCES_YAML
+    try:
+        with io.open(path, encoding="utf-8") as fh:
+            return set(SOURCE_ID.findall(fh.read()))
+    except (IOError, OSError):
+        return set()
+
+
 def report_source_ids(report):
     """{id: url} from a report's top-level sources[]."""
     out = {}
@@ -169,7 +188,8 @@ def source_text(item, pasted, report_texts):
 
 
 # --------------------------------------------------------------- item checks ---
-def check_item(item, pasted, source_ids, report_texts, flat=None, strict=False):
+def check_item(item, pasted, source_ids, report_texts, flat=None, strict=False,
+               known=None):
     """(state, reason, [rule ids]) for one evidence item."""
     rules, reasons = [], []
     status = item.get("status") or ("unknown" if item.get("value") is None else "ok")
@@ -181,22 +201,21 @@ def check_item(item, pasted, source_ids, report_texts, flat=None, strict=False):
                             "at rather than one somebody could not fill"), ["untried_unknown"]
         return "unknown", (item.get("note") or "the executor could not get it"), []
 
-    if not pasted and not source_ids:
-        return "unknown", ("no source text and no sources list were given, so nothing about "
-                           "this item could be checked"), []
-
     source = (item.get("source") or "").strip()
-    if not source:
+    if not source and not (item.get("computed_by") or "").strip():
         rules.append("source_resolves")
-        reasons.append("no source id")
+        reasons.append("no source id and no computed_by")
     elif source.startswith("pasted:"):
         if source[len("pasted:"):] not in pasted:
             rules.append("source_resolves")
             reasons.append("no pasted file named %r" % source[len("pasted:"):])
-    elif source_ids and source not in source_ids:
+    elif source and source in (known or ()):
+        pass                       # a documented source in references/sources.yaml
+    elif source and source_ids and source not in source_ids:
         rules.append("source_resolves")
-        reasons.append("source id %r is in no sources[] entry" % source)
-    elif source_ids and not source_ids.get(source):
+        reasons.append("source id %r is in no sources[] entry and in no sources.yaml entry"
+                       % source)
+    elif source and source_ids and not source_ids.get(source):
         rules.append("source_resolves")
         reasons.append("source id %r has no url" % source)
 
@@ -206,7 +225,8 @@ def check_item(item, pasted, source_ids, report_texts, flat=None, strict=False):
         if flatten(quote) not in flatten(text):
             rules.append("quote_in_source")
             reasons.append("the quote is not in the source, even ignoring whitespace")
-    elif not quote and "source_resolves" not in rules:
+    elif not quote and not (item.get("computed_by") or "").strip() \
+            and "source_resolves" not in rules:
         rules.append("quote_missing")
         reasons.append("a found item needs the sentence it was read in")
 
@@ -594,17 +614,19 @@ def evidence_from_report(report, case=None):
 # ------------------------------------------------------------------- assembly --
 def verify(evidence, report=None, pasted=None, tier="standard", strict=False,
            thresholds=None, questions_path=None, rent_pcm=None, gold=None, gold_id=None,
-           case=None):
+           case=None, sources_yaml=None):
     items = [i for i in (evidence.get("items") or []) if isinstance(i, dict)]
     pasted = pasted or {}
     source_ids = report_source_ids(report)
     flat = evidence.get("flat")
     thresholds = thresholds if thresholds is not None else load_thresholds()
+    known = known_source_ids(sources_yaml)
 
     unique_ids(items)
     verdicts = collections.OrderedDict()
     for item in items:
-        state, reason, rules = check_item(item, pasted, source_ids, {}, flat, strict)
+        state, reason, rules = check_item(item, pasted, source_ids, {}, flat, strict,
+                                          known)
         verdicts[item.get("id")] = collections.OrderedDict([
             ("id", item.get("id")), ("state", state), ("reason", reason),
             ("rules", rules), ("checked_by", "verify.py")])

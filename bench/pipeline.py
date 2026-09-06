@@ -139,6 +139,8 @@ def role_tools(role, agent="claude"):
     skill = skill_rel(agent).replace(os.sep, "/")
     return [tool.format(skill=skill) for tool in ROLE_TOOLS[key]]
 
+KEPT = []            # every intermediate file this process persisted, for the row
+
 SKILL_HOME = {"claude": os.path.join(".claude", "skills"),
               "codex": os.path.join(".agents", "skills")}
 
@@ -305,23 +307,38 @@ PROMPTS = {
                 "Print ONE JSON object matching {skill}/references/plan-schema.json and "
                 "nothing else: no prose before it, no code fence around it."),
     "executors": (COMMON + "\n\nYou are the executor for the axis group '{group}' "
-                  "(axes {axes}). Read plan.json and work only your own axes. Run the "
-                  "script calls it lists, fill the placeholders from profile.yaml and from "
-                  "what earlier calls returned, and read any file in sources/ your axes "
-                  "need. Write NO verdicts, NO scores and NO arithmetic of your own: the "
-                  "only sums allowed are scripts/calc.py calls, recorded in computed_by "
-                  "with their output. Every found item carries the sentence you read it in, "
+                  "(axes {axes}). Read plan.json and work only your own axes. THE SCRIPTS "
+                  "ARE AT {skill}/scripts/ - run them from there, and note that a bare "
+                  "`scripts/...` path does not exist in this directory. Fill the "
+                  "placeholders from profile.yaml and from what earlier calls returned.\n"
+                  "SAVE EVERY SCRIPT'S OUTPUT: write the JSON a script printed to "
+                  "sources/<name>.json before you quote it, and cite it as "
+                  "\"pasted:<name>\". A quote nobody can open is a quote nobody can check.\n"
+                  "Write NO verdicts, NO scores and NO arithmetic of your own: the only "
+                  "sums allowed are scripts/calc.py calls, recorded in computed_by with "
+                  "their output. Every found item carries the line you read it in, "
                   "verbatim. Anything you cannot get is an item with status unknown and a "
-                  "`tried` list saying what you actually attempted.{extra}\n"
+                  "`tried` list saying what you actually attempted - and an item you did "
+                  "not even try for is worse than one you did.\n"
+                  "ONE WORKED ITEM, exactly the shape yours must have:\n{example}\n"
+                  "{extra}"
                   "Print ONE JSON object matching {skill}/references/evidence-schema.json "
                   "holding only your group's items, and nothing else."),
     "verifier": (COMMON + "\n\nscripts/verify.py has already run every check that has one "
                  "answer. Its table is in verify-table.txt and its JSON in "
                  "verified.deterministic.json. Read ONLY the items it flagged, and the "
-                 "sources those items cite. You may re-run scripts/verify.py and "
-                 "scripts/calc.py; you may not fetch anything new. For each flagged item "
-                 "decide pass, fail with a reason, or unknown, and list at most one round "
-                 "of things worth going back for. You may not invent an item.\n"
+                 "sources those items cite (they are files in sources/). You may re-run "
+                 "scripts/verify.py and scripts/calc.py; you may not fetch anything new.\n"
+                 "UNKNOWN IS NOT THE DEFAULT. An item verify.py passed stays passed unless "
+                 "you have a reason to say otherwise; write unknown only where the evidence "
+                 "itself says nobody could get the fact, or where you looked and still "
+                 "cannot tell. Marking a whole file unknown is not caution, it is an empty "
+                 "report.\n"
+                 "A FAIL MUST CARRY ITS REASON. When you agree with a verify.py failure, "
+                 "quote its reason back in your own `reason` field and name the rule id in "
+                 "`rules`; a fail with no reason will be read as an opinion and dropped.\n"
+                 "Then list at most one round of things worth going back for. You may "
+                 "re-judge evidence; you may not invent an item.\n"
                  "Print ONE JSON object matching {skill}/references/verified-schema.json "
                  "and nothing else."),
     "integrator": (COMMON + "\n\nRead verified.json and evidence.json. WRITE report.json in "
@@ -337,6 +354,21 @@ PROMPTS = {
                  "{skill}; read its SKILL.md first."),
 }
 
+EXAMPLE_ITEM = json.dumps(collections.OrderedDict([
+    ("id", "e-area"), ("axis", 2),
+    ("claim", "certified internal floor area of this flat"),
+    ("status", "ok"), ("value", 54.0), ("unit", "m2"),
+    ("source", "pasted:epc-cert"),
+    ("quote", "\"total_floor_area_m2\": 54.0"),
+    ("fetched_at", "2026-09-06T09:00:00Z"),
+    ("script", "scripts/epc.py cert 0000-0000-0000-0000-0000")]), ensure_ascii=False)
+EXAMPLE_UNKNOWN = json.dumps(collections.OrderedDict([
+    ("id", "e-reviews"), ("axis", 6),
+    ("claim", "organic management review score for the building"),
+    ("status", "unknown"),
+    ("tried", ["review sites forbid automated access, so no script can get this",
+               "sources/ holds no pasted reviews"])]), ensure_ascii=False)
+
 REPLAN_EXTRA = ("\nThis is the ONE replan round. The verifier asked for these and nothing "
                 "else:\n{asks}\nWork only those, and print only the items they produce.")
 
@@ -349,7 +381,8 @@ def role_prompt(role, config, case, prompt, group=None, axes=None, extra="",
                  "integrator": "Integrator", "baseline": "Integrator"}[role],
         prompt=prompt, mode=config.get("budget_mode") or "standard",
         tier=config.get("budget_mode") or "standard",
-        group=group or "", axes=", ".join(str(a) for a in (axes or [])), extra=extra)
+        group=group or "", axes=", ".join(str(a) for a in (axes or [])), extra=extra,
+        example="  " + EXAMPLE_ITEM + "\n  " + EXAMPLE_UNKNOWN)
 
 
 # ------------------------------------------------------------------ commands --
@@ -489,6 +522,19 @@ def write_json(path, payload):
     return path
 
 
+def retarget(plan, skill):
+    """Point every planned call at the skill where this agent actually installs it."""
+    prefix = skill.replace(os.sep, "/") + "/"
+    for axis in plan.get("axes") or []:
+        for call in (axis or {}).get("scripts") or []:
+            cmd = call.get("cmd") or ""
+            if cmd.startswith("scripts/"):
+                call["cmd"] = prefix + cmd
+            else:
+                call["cmd"] = re.sub(r"(?<![\w./])scripts/", prefix, cmd)
+    return plan
+
+
 def groups_of(plan):
     """[(group, [axis ids])] in plan order, so executors split the work the plan did."""
     out = collections.OrderedDict()
@@ -545,6 +591,7 @@ def run_pipeline(args, case, config):
     config = collections.OrderedDict(config)
     config["budget_mode"] = mode          # the prompts state the mode this run is in
     args.arm = arm                        # every raw file this run writes carries it
+    del KEPT[:]                       # one list per run, not per process
     workdir, plan_lines = prepare_workdir(case, config, args.cases, args.workdir)
     applied = runner.apply_budget_mode(workdir, mode)
     if applied:
@@ -553,7 +600,14 @@ def run_pipeline(args, case, config):
     prompt = case["prompt"]
     scaffold = planner_tool.scaffold(mode if mode in planner_tool.MODES else "standard",
                                      tier=mode, case=case["id"])
+    # The scaffold writes "scripts/epc.py ...", which is right relative to the skill and
+    # wrong from the working directory the executors run in. On the first pilot four
+    # executors burned a call on "can't open file scripts/epc.py" and two never found the
+    # scripts at all, so the paths are resolved here, once, for everybody.
+    retarget(scaffold, skill_rel(config.get("agent") or "claude"))
     write_json(os.path.join(workdir, "plan.scaffold.json"), scaffold)
+    if not args.dry_run:
+        keep(args, arm, case, "plan-scaffold", scaffold)
     # plan.json starts as the scaffold, so an arm with no planner - or a planner that
     # never starts - still leaves the executors something real to work from.
     write_json(os.path.join(workdir, "plan.json"), scaffold)
@@ -588,6 +642,20 @@ def run_pipeline(args, case, config):
                                             evidence_doc, roles, notes, again=True)
             continue
 
+        if role == "integrator":
+            if verified_doc is None:
+                # P1 has no verifier, and the integrator is still told to read
+                # verified.json. Run the deterministic half so the file it is pointed at
+                # exists and says something true, rather than nothing at all.
+                tier = mode
+                verified_doc = deterministic_verify(args, workdir, evidence_doc or {}, tier)
+                write_json(os.path.join(workdir, "verified.json"), verified_doc)
+                keep(args, arm, case, "verified", verified_doc)
+                notes.append("no verifier in this arm; scripts/verify.py alone produced "
+                             "verified.json (%s)"
+                             % json.dumps(verify_summary(verified_doc)["failed_by_rule"]))
+            keep(args, arm, case, "integrator-input-evidence", evidence_doc or {})
+            keep(args, arm, case, "integrator-input-verified", verified_doc or {})
         command = build_role_command(role, conf, config, case, workdir,
                                      role_prompt(role, config, case, prompt,
                                                  agent=conf["agent"]))
@@ -604,7 +672,9 @@ def run_pipeline(args, case, config):
             answered = answer_object(conf["agent"], stdout,
                                      answer_file(workdir, role))
             plan_doc = keep_the_plan_honest(answered, scaffold, mode, notes)
+            retarget(plan_doc, skill_rel(conf["agent"]))
             write_json(os.path.join(workdir, "plan.json"), plan_doc)
+            keep(args, arm, case, "plan", plan_doc)
         elif role == "baseline":
             report, _path = runner.find_report(workdir, last_text(conf["agent"], workdir,
                                                                   role, stdout))
@@ -666,6 +736,7 @@ def keep_the_plan_honest(answered, scaffold, mode, notes):
         return scaffold
     result = planner_tool.check(answered, mode if mode in planner_tool.MODES else "standard",
                                tier=mode)
+    # call_shape ignores values but not the script's own path, so compare like with like.
     if result["ok"]:
         return answered
     notes.append("the planner's plan dropped something required (%d axes, %d calls, %d "
@@ -720,8 +791,12 @@ def run_executor_rounds(args, case, config, conf, workdir, prompt, plan_doc, rol
             if not os.path.isdir(folder):
                 os.makedirs(folder, exist_ok=True)
             write_json(os.path.join(folder, "%s.json" % group), doc)
+            keep(args, config["name"], case,
+                 "evidence-%s%s" % (group, "-2" if replan else ""), doc)
+            roles[-1]["produced"] = evidence_summary(doc)
         else:
             notes.append("executor %s printed no usable evidence object" % group)
+            roles[-1]["produced"] = evidence_summary(None)
 
     if replan and evidence:
         merged = merge_evidence([("round0", evidence)] + collected, case["id"],
@@ -729,6 +804,7 @@ def run_executor_rounds(args, case, config, conf, workdir, prompt, plan_doc, rol
     else:
         merged = merge_evidence(collected, case["id"])
     write_json(os.path.join(workdir, "evidence.json"), merged)
+    keep(args, config["name"], case, "evidence%s" % ("-round2" if replan else ""), merged)
     return plan_doc, merged, 1 if replan else 0
 
 
@@ -757,10 +833,14 @@ def run_verifier(args, case, config, conf, workdir, prompt, evidence_doc, roles,
                  again=False):
     """verify.py first, then the model on the flagged items only."""
     tier = args.budget_mode or config.get("budget_mode") or "standard"
+    round_tag = "-2" if again else ""
     deterministic = deterministic_verify(args, workdir, evidence_doc or {}, tier)
     write_json(os.path.join(workdir, "verified.deterministic.json"), deterministic)
+    table_text = verifier_tool.table(deterministic)
     with io.open(os.path.join(workdir, "verify-table.txt"), "w", encoding="utf-8") as fh:
-        fh.write(verifier_tool.table(deterministic) + "\n")
+        fh.write(table_text + "\n")
+    keep(args, config["name"], case, "verify-deterministic" + round_tag, deterministic)
+    keep(args, config["name"], case, "verify-table" + round_tag, table_text + "\n")
 
     command = build_role_command("verifier", conf, config, case, workdir,
                                  role_prompt("verifier", config, case, prompt,
@@ -782,6 +862,9 @@ def run_verifier(args, case, config, conf, workdir, prompt, evidence_doc, roles,
                      "stands on its own")
         verified = deterministic
     write_json(os.path.join(workdir, "verified.json"), verified)
+    keep(args, config["name"], case, "verified" + round_tag, verified)
+    roles[-1]["verified"] = verify_summary(verified)
+    roles[-1]["deterministic"] = verify_summary(deterministic)
     return verified
 
 
@@ -799,7 +882,7 @@ def merge_verdicts(deterministic, answered, notes):
     """
     merged = collections.OrderedDict(
         (v.get("id"), collections.OrderedDict(v)) for v in deterministic.get("items") or [])
-    changed, invented = 0, []
+    changed, spoke, invented = 0, 0, []
     for verdict in answered.get("items") or []:
         if not isinstance(verdict, dict):
             continue
@@ -808,20 +891,80 @@ def merge_verdicts(deterministic, answered, notes):
             invented.append(str(ident))
             continue
         if verdict.get("state") in ("pass", "fail", "unknown"):
+            if merged[ident].get("state") != verdict["state"]:
+                changed += 1          # only a state that MOVED has changed
             merged[ident]["state"] = verdict["state"]
             merged[ident]["reason"] = verdict.get("reason") or merged[ident].get("reason")
             merged[ident]["rules"] = verdict.get("rules") or merged[ident].get("rules") or []
             merged[ident]["checked_by"] = "verifier"
-            changed += 1
+            spoke += 1
     if invented:
         notes.append("the verifier named %d item(s) that are not in the evidence (%s); "
                      "dropped" % (len(invented), ", ".join(invented[:5])))
-    notes.append("the verifier changed %d of %d verdicts" % (changed, len(merged)))
+    notes.append("the verifier spoke about %d of %d verdicts and moved %d of them"
+                 % (spoke, len(merged), changed))
     out = collections.OrderedDict(deterministic)
     out["items"] = list(merged.values())
     if answered.get("replan"):
         out["replan"] = [r for r in answered["replan"] if isinstance(r, dict)]
     return out
+
+
+def keep(args, arm, case, name, payload):
+    """Persist one intermediate file into raw/, next to the roles' event streams.
+
+    The first pilot kept only the event streams, so answering "what did the executors
+    actually write, and what did verify.py say about it" meant re-deriving both from
+    JSONL. The workdir is a temp directory that does not survive the run, so anything
+    not copied here is gone.
+    """
+    day = args.day or datetime.datetime.utcnow().strftime("%Y-%m-%d")
+    folder = os.path.join(args.results or runner.RESULTS, day, "raw")
+    if not os.path.isdir(folder):
+        os.makedirs(folder, exist_ok=True)
+    stem = runner.raw_name("%s-%s" % (getattr(args, "arm", None) or arm, name),
+                           case["id"], args.run)
+    path = os.path.join(folder, stem if isinstance(payload, str)
+                        else stem)
+    if isinstance(payload, str):
+        path = path[:-len(".json")] + ".txt"
+    with io.open(path, "w", encoding="utf-8") as fh:
+        fh.write(payload if isinstance(payload, str)
+                 else json.dumps(payload, ensure_ascii=False, indent=1) + "\n")
+    KEPT.append(os.path.basename(path))
+    return path
+
+
+def evidence_summary(doc):
+    """items produced, how many were actually got, how many nobody even tried for."""
+    items = [i for i in (doc or {}).get("items") or [] if isinstance(i, dict)]
+    ok = [i for i in items if (i.get("status") or "ok") != "unknown"]
+    return collections.OrderedDict([
+        ("items", len(items)), ("ok", len(ok)),
+        ("unknown", len(items) - len(ok)),
+        ("with_quote", sum(1 for i in ok if i.get("quote"))),
+        ("with_source", sum(1 for i in ok if i.get("source"))),
+        ("untried", sum(1 for i in items
+                        if (i.get("status") == "unknown") and not (i.get("tried") or [])))])
+
+
+def verify_summary(doc):
+    """pass / fail / unknown, and which rules did the failing."""
+    items = [v for v in (doc or {}).get("items") or [] if isinstance(v, dict)]
+    rules = collections.Counter()
+    for verdict in items:
+        if verdict.get("state") == "fail":
+            for rule in verdict.get("rules") or ["(no rule named)"]:
+                rules[rule] += 1
+    counts = (doc or {}).get("counts") or {}
+    return collections.OrderedDict([
+        ("items", len(items)),
+        ("pass", sum(1 for v in items if v.get("state") == "pass")),
+        ("fail", sum(1 for v in items if v.get("state") == "fail")),
+        ("unknown", sum(1 for v in items if v.get("state") == "unknown")),
+        ("failed_by_rule", collections.OrderedDict(sorted(rules.items()))),
+        ("quotes_unchecked", len(counts.get("quotes_unchecked") or [])),
+        ("fixed_form_missing", list(counts.get("fixed_form_missing") or []))])
 
 
 def write_raw(args, arm, case, role, stdout):
@@ -839,6 +982,7 @@ def write_raw(args, arm, case, role, stdout):
 # -------------------------------------------------------------------- output --
 def finish(args, case, config, arm, mode, workdir, roles, notes, wall, worst,
            evidence_doc, verified_doc, rounds_used):
+    kept_names = list(KEPT)
     day = args.day or datetime.datetime.utcnow().strftime("%Y-%m-%d")
     when = datetime.datetime.strptime(day, "%Y-%m-%d")
     report, path = runner.find_report(workdir, "")
@@ -875,6 +1019,16 @@ def finish(args, case, config, arm, mode, workdir, roles, notes, wall, worst,
         ("arm", arm), ("budget_mode", mode),
         ("roles_run", [r["role"] for r in roles]),
         ("replan_rounds_used", rounds_used),
+        ("evidence", evidence_summary(evidence_doc)),
+        ("verified", verify_summary(verified_doc)),
+        ("per_role", [collections.OrderedDict(
+            [("role", r["role"]), ("group", r.get("group"))]
+            + ([("produced", r["produced"])] if r.get("produced") else [])
+            + ([("verified", r["verified"])] if r.get("verified") else [])
+            + ([("deterministic", r["deterministic"])] if r.get("deterministic") else []))
+            for r in roles]),
+        ("artefacts_kept", sorted(set(kept_names))),
+        # kept for the arms already in bench/results: the old flat keys still read.
         ("evidence_items", len(evidence_doc.get("items") or [])),
         ("verified_pass", sum(1 for v in verified_doc.get("items") or []
                               if v.get("state") == "pass")),
