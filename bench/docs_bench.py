@@ -56,6 +56,17 @@ USAGE
                       --model gpt-5.6-luna --run 3
   bench/docs_bench.py --menu-probe --cases bench/private/docs
   bench/docs_bench.py --regrade bench/results/docs-2026-09-06 --cases bench/private/docs
+  bench/docs_bench.py --retry-failed bench/results/docs-2026-09-07 \
+                      --cases bench/private/docs --dry-run
+
+WHEN THE PROVIDER REFUSES
+A row that never reached the model is not a row the model failed. Every launch goes
+through bench/launch.py, which retries a busy provider with a growing pause and, if it
+still will not serve, hands back the captured tails. That row is written with
+`outcome: provider_error` and a null `summary`: it shows as NOT RUN, it is left out of
+every mean, and `--retry-failed FOLDER` runs exactly those rows again and replaces them
+where they stand. Ten of the twenty-six rows in the 2026-09-07 pilot died that way and
+were averaged in as 0 facts.
 
 The private test bed is described in evals/docs/README.md; it is never committed. The
 public fixtures under tests/fixtures/docs_bench/ have the same shape and are what the

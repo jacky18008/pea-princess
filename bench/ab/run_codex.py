@@ -63,15 +63,14 @@ sys.path.insert(0, BENCH)
 sys.path.insert(0, os.path.join(SKILL_DIR, "scripts"))
 import run as runner  # noqa: E402
 import grade as grader  # noqa: E402
+import launch  # noqa: E402  the one launcher owns both CLIs' token parsing
 
 AGENTS_MD_TAIL = ("Write report.json in this directory following "
                   ".agents/skills/vet-flat/references/report-schema.json. "
                   "The skill is installed at .agents/skills/vet-flat; read its SKILL.md first. "
                   "Write exactly one report.json and nothing else large.")
 
-TOKEN_KEYS = ("input_tokens", "output_tokens", "cached_input_tokens",
-              "reasoning_output_tokens", "total_tokens", "prompt_tokens",
-              "completion_tokens", "cache_read_input_tokens")
+TOKEN_KEYS = launch.TOKEN_KEYS
 
 
 def prepare_workdir(case, cases_path, config, workdir=None):
@@ -135,53 +134,16 @@ def build_command(config, case, workdir, model=None, prompt=None, out=None):
 
 
 def usage_from_events(stdout):
-    """Token counts out of the --json event stream, whatever the version calls them."""
-    totals = collections.OrderedDict()
-    shapes = []
-    for line in (stdout or "").splitlines():
-        line = line.strip()
-        if not line.startswith("{"):
-            continue
-        try:
-            event = json.loads(line)
-        except ValueError:
-            continue
-        for holder in walk_usage(event):
-            keys = tuple(sorted(k for k in holder if isinstance(holder[k], int)))
-            if keys and keys not in shapes:
-                shapes.append(keys)
-            for key in TOKEN_KEYS:
-                if isinstance(holder.get(key), int):
-                    totals[key] = holder[key]      # last one wins: Codex reports cumulative
-    if not totals:
-        return None
-    if "total_tokens" not in totals:
-        total = sum(v for k, v in totals.items()
-                    if k in ("input_tokens", "output_tokens", "reasoning_output_tokens"))
-        if total:
-            totals["total_tokens"] = total
-    totals["usage_shapes_seen"] = ["+".join(s) for s in shapes]
-    return totals
+    """Token counts out of the --json event stream, whatever the version calls them.
+
+    A thin wrapper over bench/launch.py, which owns both CLIs' token parsing now.
+    bench/pipeline.py calls this name."""
+    return launch.usage_from_events(stdout)
 
 
 def walk_usage(node):
     """Every dict under a key that looks like a usage block."""
-    out = []
-    if isinstance(node, dict):
-        for key, value in node.items():
-            if isinstance(value, dict) and ("usage" in key or "token" in key):
-                out.append(value)
-                for k2, v2 in value.items():
-                    if isinstance(v2, dict):
-                        out.append(v2)
-            elif isinstance(value, (dict, list)):
-                out.extend(walk_usage(value))
-        if any(k in node for k in TOKEN_KEYS):
-            out.append(node)
-    elif isinstance(node, list):
-        for item in node:
-            out.extend(walk_usage(item))
-    return out
+    return launch.walk_usage(node)
 
 
 def last_message(workdir, stdout):

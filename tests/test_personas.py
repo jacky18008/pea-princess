@@ -44,6 +44,7 @@ sys.path.insert(0, BENCH)
 import journeys as journeys_module  # noqa: E402
 sys.path.insert(0, HERE)
 import personas as runner  # noqa: E402
+import launch  # noqa: E402  the shared launcher the runner now goes through
 import journeys as journey_runner  # noqa: E402
 from test_journeys import BANNED_STRINGS, BANNED_POSTCODES, BYPASS_FLAGS  # noqa: E402
 
@@ -755,12 +756,16 @@ class TestDryRun(unittest.TestCase):
                 self.assertNotIn(flag, out, "%s command carries %s" % (agent, flag))
 
     def test_every_launch_closes_stdin_in_the_source(self):
-        source = read_text(os.path.join(BENCH, "personas.py"))
+        # The launch itself moved to bench/launch.py, which every runner shares. The
+        # rule did not move: stdin is closed, for every actor, at every launch.
+        source = read_text(os.path.join(BENCH, "launch.py"))
         launches = [m.start() for m in re.finditer(r"subprocess\.(?:Popen|run|call)\(", source)]
         self.assertTrue(launches, "no launch found at all")
         for position in launches:
             self.assertIn("stdin=subprocess.DEVNULL", source[position:position + 300],
                           "a launch leaves stdin open")
+        self.assertNotIn("subprocess.Popen", read_text(os.path.join(BENCH, "personas.py")),
+                         "the persona runner starts a process of its own again")
 
     def test_usage_errors(self):
         self.assertEqual(2, dry_run(["--dry-run"])[0])
@@ -856,6 +861,152 @@ class TestTranscriptAndRegrade(unittest.TestCase):
             shutil.rmtree(folder, ignore_errors=True)
 
 
+class TestWhenTheProviderRefuses(unittest.TestCase):
+    """The 2026-09-06 pilot lost P3-baseline-s1 to "turn 2 agent: exited 1: " and wrote
+    it down as a timeout with grade 0.33. A provider error is none of the assistant's
+    doing: no grade, out of the table, and re-runnable."""
+
+    def row(self, session, outcome, notes=(), grade=0.9):
+        return collections.OrderedDict([
+            ("session", session), ("persona", session.split("-")[0]),
+            ("name", "n"), ("cluster", "budget"), ("variant", "baseline"), ("seed", 1),
+            ("run_at", "2026-09-06T00:00:00Z"), ("harness", "chat"), ("agent", "claude"),
+            ("model", None), ("outcome", outcome),
+            ("grade", None if outcome == "provider_error" else grade),
+            ("capped_by", []), ("criteria_met", 3), ("turns", 2),
+            ("turns_to_first_value", 1), ("safety_failed", []), ("invented_numbers", 0),
+            ("asks_total", 4), ("asks_repeats", 0), ("settings_failed", []),
+            ("satisfaction", 4), ("wall_time_s", 30.0), ("usage", None),
+            ("notes", list(notes))])
+
+    def test_a_provider_error_is_listed_apart_from_the_timeouts(self):
+        folder = tempfile.mkdtemp()
+        try:
+            os.makedirs(os.path.join(folder, "cards"))
+            rows = [self.row("C1-baseline-s1", "completed"),
+                    self.row("C6-baseline-s1", "timeout"),
+                    self.row("P3-baseline-s1", "provider_error",
+                             ["turn 2 agent: exited 1: ; attempts 3; exit 1; "
+                              "stdout tail: (empty); stderr tail: (empty)"])]
+            runner.write_scorecard(folder, rows)
+            board = read_text(os.path.join(folder, "scorecard.md"))
+            table, refused = board.split("## Provider errors")
+            # A timeout is still a session the persona had: it stays in the table.
+            self.assertIn("| C6-baseline-s1 |", table)
+            self.assertIn("| timeout |", table)
+            # A provider error is not, and it never shows a grade next to the others.
+            self.assertNotIn("| P3-baseline-s1 |", table)
+            self.assertIn("P3-baseline-s1", refused)
+            self.assertIn("stderr tail: (empty)", refused)
+            self.assertIn("--retry-failed", refused)
+            # Nothing is lost: the json keeps every row, outcome and all.
+            stored = json.loads(read_text(os.path.join(folder, "scorecard.json")))
+            self.assertEqual(3, len(stored))
+            self.assertEqual("provider_error", stored[2]["outcome"])
+            self.assertIsNone(stored[2]["grade"])
+        finally:
+            shutil.rmtree(folder, ignore_errors=True)
+
+    def test_the_helper_really_reaches_the_shared_launcher(self):
+        # The runner's own launch() is a wrapper around bench/launch.py. Calling it for
+        # real once catches what a monkeypatched fake never would - the module being
+        # shadowed by the helper that wraps it, for one.
+        folder = tempfile.mkdtemp()
+        try:
+            res = runner.launch(
+                [sys.executable, "-c", "import sys; sys.stderr.write('usage limit "
+                                       "reached'); sys.exit(1)"],
+                folder, 30, "codex", label="turn 1 agent", attempts=2, waits=(0, 0),
+                sleep=lambda _s: None, echo=lambda _line: None)
+            self.assertIsInstance(res, launch.LaunchResult)
+            self.assertTrue(res.provider_error)
+            self.assertIn("usage limit reached", res.stderr_tail)
+        finally:
+            shutil.rmtree(folder, ignore_errors=True)
+
+    def test_an_old_card_is_recognised_by_its_note_alone(self):
+        # The pilot card has no outcome for this: only "turn 2 agent: exited 1: ".
+        self.assertTrue(runner.provider_error_row(
+            {"outcome": "timeout", "notes": ["turn 2 agent: exited 1: "]}))
+        self.assertFalse(runner.provider_error_row(
+            {"outcome": "timeout", "notes": ["impatience: turn 2: the reply took 365 s"]}))
+        self.assertTrue(runner.provider_error_row({"outcome": "provider_error"}))
+
+    def test_a_refused_session_carries_no_grade_at_all(self):
+        card = collections.OrderedDict([
+            ("criteria", [{"score": 3}, {"score": 3}, {"score": 3}]), ("safety", []),
+            ("tone_and_protected", []), ("invented_numbers", []),
+            ("outcome", "provider_error")])
+        graded = runner.apply_grade(card)
+        self.assertIsNone(graded["grade"], "a provider error was given a grade")
+        self.assertIn("provider error", graded["capped_by"])
+
+    def test_retry_failed_names_only_the_refused_sessions(self):
+        folder = tempfile.mkdtemp()
+        try:
+            root = os.path.join(folder, "personas-2026-09-06")
+            os.makedirs(os.path.join(root, "cards"))
+            os.makedirs(os.path.join(root, "transcripts"))
+            cards = {
+                "C1-baseline-s1": self.row("C1-baseline-s1", "completed"),
+                "C6-baseline-s1": self.row("C6-baseline-s1", "timeout"),
+                "P3-baseline-s1": self.row("P3-baseline-s1", "timeout",
+                                           ["turn 2 agent: exited 1: "]),
+                "P4-probe-s1": self.row("P4-probe-s1", "provider_error",
+                                        ["turn 1 agent: exited 1: "]),
+            }
+            for name, card in cards.items():
+                card["variant"] = "probe" if "probe" in name else "baseline"
+                with io.open(os.path.join(root, "cards", name + ".json"), "w",
+                             encoding="utf-8") as fh:
+                    fh.write(json.dumps(card, ensure_ascii=False))
+                with io.open(os.path.join(root, "transcripts", name + ".md"), "w",
+                             encoding="utf-8") as fh:
+                    fh.write("# %s\n" % name)
+            runner.write_scorecard(root, list(cards.values()))
+
+            picked = [os.path.basename(p) for p, _r in runner.failed_sessions(root)]
+            self.assertEqual(["P3-baseline-s1.json", "P4-probe-s1.json"], picked)
+
+            buf = io.StringIO()
+            with contextlib.redirect_stdout(buf):
+                code = runner.main(["--retry-failed", root, "--dry-run"])
+            out = buf.getvalue()
+            self.assertEqual(0, code)
+            self.assertIn("would re-run 2 session(s)", out)
+            self.assertIn("P3-baseline-s1", out)
+            self.assertIn("P4-probe-s1", out)
+            self.assertNotIn("C1-baseline-s1", out)
+            # A dry run plays nothing and moves nothing.
+            self.assertFalse(os.path.isdir(os.path.join(root, "superseded")))
+            self.assertTrue(os.path.exists(os.path.join(root, "cards",
+                                                        "P3-baseline-s1.json")))
+
+            # The move itself: the refused card and its transcript leave the folder and
+            # the refused row leaves the scorecard.
+            record = json.loads(read_text(os.path.join(root, "cards",
+                                                       "P3-baseline-s1.json")))
+            moved = runner.supersede(root, record,
+                                     os.path.join(root, "cards", "P3-baseline-s1.json"))
+            self.assertEqual(2, len(moved), moved)
+            self.assertFalse(os.path.exists(os.path.join(root, "cards",
+                                                         "P3-baseline-s1.json")))
+            left = json.loads(read_text(os.path.join(root, "scorecard.json")))
+            self.assertNotIn("P3-baseline-s1", [r["session"] for r in left])
+            self.assertIn("C1-baseline-s1", [r["session"] for r in left])
+        finally:
+            shutil.rmtree(folder, ignore_errors=True)
+
+    def test_retry_failed_on_a_folder_with_no_cards_is_a_usage_error(self):
+        folder = tempfile.mkdtemp()
+        try:
+            buf = io.StringIO()
+            with contextlib.redirect_stdout(buf):
+                self.assertEqual(2, runner.main(["--retry-failed", folder, "--dry-run"]))
+        finally:
+            shutil.rmtree(folder, ignore_errors=True)
+
+
 class TestOneWholeSessionWithoutAModel(unittest.TestCase):
     """play() end to end with the launcher replaced, so the wiring is checked for real:
     the persona is given the conversation so far, the agent is given the expanded paste,
@@ -877,12 +1028,13 @@ class TestOneWholeSessionWithoutAModel(unittest.TestCase):
             "whole page with the address on it.",
         ]
 
-        def fake_launch(cmd, workdir, timeout, family="claude"):
+        def fake_launch(cmd, workdir, timeout, family="claude", label=None):
             prompt = cmd[2] if cmd[0] == "claude" else cmd[-1]
             self.calls.append((workdir, prompt))
             if workdir.endswith("_persona"):
-                return persona_says.pop(0), None, None, 1.0
-            return agent_says.pop(0), {"input_tokens": 5, "output_tokens": 7}, None, 2.0
+                return launch.LaunchResult(text=persona_says.pop(0), seconds=1.0)
+            return launch.LaunchResult(text=agent_says.pop(0), seconds=2.0,
+                                       usage={"input_tokens": 5, "output_tokens": 7})
         runner.launch = fake_launch
 
     def tearDown(self):
@@ -931,6 +1083,60 @@ class TestOneWholeSessionWithoutAModel(unittest.TestCase):
         for row in record["safety"]:
             self.assertEqual("pass", row["status"], row["line"])
         self.assertIsNone(record["grade"], "rules-only leaves the criteria unscored")
+
+
+class TestASessionTheProviderRefused(unittest.TestCase):
+    """play() end to end with the launcher refusing the agent's second turn - the shape
+    that cost the pilot P3-baseline-s1."""
+
+    def setUp(self):
+        self.real_launch = runner.launch
+        agent_says = ["Six questions, once: budget, area, date, must-haves, deposit, "
+                      "paperwork. Next step: paste your offer letter."]
+
+        def fake_launch(cmd, workdir, timeout, family="claude", label=None):
+            if workdir.endswith("_persona"):
+                return launch.LaunchResult(text="Here it is.\n[[PASTE: offer letter]]",
+                                           seconds=1.0)
+            if agent_says:
+                return launch.LaunchResult(text=agent_says.pop(0), seconds=2.0)
+            return launch.LaunchResult(
+                text="", note="exited 1: ", seconds=365.0, attempts=3,
+                provider_error=True, stdout_tail="", stderr_tail="", exit_code=1)
+        runner.launch = fake_launch
+
+    def tearDown(self):
+        runner.launch = self.real_launch
+
+    def test_the_session_stops_with_no_grade_and_says_why(self):
+        class Args(object):
+            agent = "chat"
+            persona_agent = "auto"
+            persona_model = None
+            judge_model = None
+            model = None
+            dry_run = False
+            rules_only = False
+            session_mode = "replay"
+            timeout = 60
+            workdir = None
+            keep = False
+        doc = runner.load_personas()
+        card = runner.variant_of(runner.card_by_id(doc, "C1"), False)
+        with contextlib.redirect_stdout(io.StringIO()):
+            record = runner.play(card, Args(), "baseline", 1)
+        self.assertEqual("provider_error", record["outcome"],
+                         "a refused launch was written down as a timeout again")
+        self.assertIsNone(record["grade"])
+        self.assertIn("provider error", record["capped_by"])
+        note = " ".join(record["notes"])
+        self.assertIn("turn 2 agent: exited 1", note)
+        self.assertIn("stderr tail: (empty)", note)
+        self.assertIn("attempts 3", note)
+        self.assertIsNone(record["judge_summary"], "a refused session was sent to a judge")
+        self.assertIsNone(record["satisfaction"]["rating"],
+                          "a refused session was asked how satisfied it was")
+        self.assertTrue(runner.provider_error_row(runner.summary_of(record)))
 
 
 if __name__ == "__main__":

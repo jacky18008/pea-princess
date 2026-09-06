@@ -33,6 +33,7 @@ SKILL = os.path.join(ROOT, "skills", "vet-flat")
 sys.path.insert(0, BENCH)
 import docs_bench  # noqa: E402
 import docs_grade  # noqa: E402
+import launch  # noqa: E402  the shared launcher every runner goes through
 
 CASES = ("A1", "V1")
 
@@ -1068,6 +1069,202 @@ class TestResultsAndRegrade(unittest.TestCase):
                 self.assertEqual(2, docs_bench.regrade(root, BED))
         finally:
             shutil.rmtree(root, ignore_errors=True)
+
+
+class TestWhenTheProviderRefuses(unittest.TestCase):
+    """The 2026-09-07 pilot: ten of twenty-six rows carry "the agent exited 1: ; no
+    answers array in the reply", each graded 0 facts. R2's mean read 0.11 when the three
+    rows that actually ran scored 0.45. A refused row is not a zero."""
+
+    def graded(self, arm, case_id="A1"):
+        gold, doc = load(case_id)
+        grade = docs_grade.grade_session(gold, [correct_answer(q) for q in gold["questions"]],
+                                         doc)
+        return collections.OrderedDict([
+            ("row", docs_bench.row_name(arm, "claude", "sonnet", case_id, 1)),
+            ("arm", arm), ("agent", "claude"), ("model", "sonnet"), ("tier", "cheap"),
+            ("case", case_id), ("run", 1), ("run_at", "2026-09-07T00:00:00Z"),
+            ("discipline_enforced", True), ("wall_time_s", 12.5), ("usage", None),
+            ("total_tokens", 4242), ("commands", {}), ("commands_seen", []),
+            ("discipline_violations", []), ("attempts", 1), ("exit_code", 0),
+            ("note", None), ("outcome", "completed"), ("valid", True),
+            ("summary", grade["summary"]),
+            ("questions_graded", grade["questions_graded"]),
+            ("answers", [correct_answer(q) for q in gold["questions"]])])
+
+    def refused(self, arm, case_id="V1", note=None):
+        row = self.graded(arm, case_id)
+        row["row"] = docs_bench.row_name(arm, "claude", "sonnet", case_id, 1)
+        row["outcome"] = "provider_error"
+        row["valid"] = False
+        row["invalid_reason"] = "provider error: exited 1: "
+        row["attempts"], row["exit_code"] = 3, 1
+        row["note"] = note or ("the agent exited 1: ; attempts 3; exit 1; "
+                               "stdout tail: (empty); stderr tail: (empty)")
+        row["stdout_tail"], row["stderr_tail"] = "", ""
+        row["summary"] = None
+        row["questions_graded"] = []
+        row["answers"] = []
+        return row
+
+    def test_a_refused_row_is_out_of_every_mean(self):
+        rows = [self.graded("R2", "A1"), self.refused("R2", "V1")]
+        table = docs_bench.arm_table(rows)
+        line = [l for l in table.splitlines() if l.startswith("| R2")][0]
+        self.assertIn("| 1 | 1 |", line, "the refused row was averaged in: " + line)
+        # One valid row, all answers correct: the mean is that row and nothing else.
+        self.assertIn("1.000", line)
+        self.assertNotIn("0.500", line, "a refused row was counted as a zero")
+        self.assertFalse(docs_bench.is_valid(rows[1]))
+        self.assertTrue(docs_bench.is_valid(rows[0]))
+
+    def test_a_refused_row_is_written_with_a_null_summary_and_shown_apart(self):
+        root = tempfile.mkdtemp(prefix="docsbench-refused-")
+        try:
+            docs_bench.write_results(self.graded("R2", "A1"), root, "2026-09-07")
+            docs_bench.write_results(self.refused("R2", "V1"), root, "2026-09-07")
+            folder = os.path.join(root, "docs-2026-09-07")
+            rows = json.loads(read(os.path.join(folder, "scorecard.json")))
+            refused = [r for r in rows if r["outcome"] == "provider_error"][0]
+            self.assertIsNone(refused["summary"], "a refused row kept a scorecard")
+            self.assertEqual(3, refused["attempts"])
+            self.assertIn("stderr tail: (empty)", refused["note"])
+            card = read(os.path.join(folder, "scorecard.md"))
+            self.assertIn("NOT RUN", card)
+            body = card.split("## Every row")[1]
+            self.assertNotIn("| 0.00 |", body, "a refused row printed a zero")
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
+    def test_retry_failed_selects_the_refused_rows_only(self):
+        root = tempfile.mkdtemp(prefix="docsbench-retry-")
+        try:
+            docs_bench.write_results(self.graded("R1", "A1"), root, "2026-09-07")
+            docs_bench.write_results(self.refused("R2", "V1"), root, "2026-09-07")
+            # The pilot's own shape: no outcome at all, only the note.
+            pilot = self.graded("R2", "A1")
+            pilot["note"] = "the agent exited 1: ; no answers array in the reply"
+            pilot.pop("outcome")
+            pilot["summary"]["fact_recall"] = 0.0
+            docs_bench.write_results(pilot, root, "2026-09-07")
+            folder = os.path.join(root, "docs-2026-09-07")
+
+            picked = [r["row"] for _p, r in docs_bench.failed_rows(folder)]
+            self.assertEqual(2, len(picked), picked)
+            self.assertNotIn("docs-R1-claude-sonnet-A1-1", picked)
+
+            with quiet() as out:
+                code = docs_bench.main(["--cases", BED, "--retry-failed", folder,
+                                        "--dry-run"])
+            printed = out.getvalue()
+            self.assertEqual(0, code)
+            self.assertIn("would re-run 2 row(s)", printed)
+            self.assertIn("docs-R2-claude-sonnet-V1-1", printed)
+            self.assertIn("no answers array", printed)
+            self.assertNotIn("docs-R1-claude-sonnet-A1-1", printed)
+            # A dry run replaces nothing.
+            self.assertEqual(3, len(os.listdir(os.path.join(folder, "raw"))))
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
+    def test_a_retry_replaces_the_row_where_it_stands(self):
+        root = tempfile.mkdtemp(prefix="docsbench-retry2-")
+        try:
+            raw_path, _answers = docs_bench.write_results(self.refused("R1", "A1"), root,
+                                                          "2026-09-07")
+            folder = os.path.join(root, "docs-2026-09-07")
+            fresh = self.graded("R1", "A1")
+            fresh["row"] = json.loads(read(raw_path))["row"]
+            docs_bench.replace_scorecard_row(folder, raw_path, fresh)
+            rows = json.loads(read(os.path.join(folder, "scorecard.json")))
+            self.assertEqual(1, len(rows), "the retry was appended beside the failure")
+            self.assertEqual("completed", rows[0]["outcome"])
+            self.assertEqual(1.0, rows[0]["summary"]["fact_recall"])
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
+    def test_retry_failed_on_a_folder_with_no_raw_is_a_usage_error(self):
+        empty = tempfile.mkdtemp(prefix="docsbench-retry3-")
+        try:
+            with quiet():
+                self.assertEqual(2, docs_bench.main(["--cases", BED, "--retry-failed",
+                                                     empty, "--dry-run"]))
+        finally:
+            shutil.rmtree(empty, ignore_errors=True)
+
+    def test_a_row_runs_end_to_end_through_the_shared_launcher(self):
+        # No model, but a real subprocess: the command is replaced by a script that
+        # answers the way `claude -p --output-format json` does. This is the only test
+        # that proves the runner's launch path actually parses a reply.
+        gold, _doc = load("A1")
+        answers = [correct_answer(q) for q in gold["questions"]]
+        envelope = json.dumps({"type": "result",
+                               "result": "Here:\n```json\n%s\n```" % json.dumps(answers),
+                               "usage": {"input_tokens": 40, "output_tokens": 9}})
+        real = docs_bench.build_command
+        try:
+            docs_bench.build_command = lambda *a, **k: [
+                sys.executable, "-c", "import sys; sys.stdout.write(%r)" % envelope]
+
+            class Args(object):
+                dry_run = False
+                lang = "en"
+                timeout = 60
+                keep = False
+            row = collections.OrderedDict([("arm", "R1"), ("agent", "claude"),
+                                           ("model", "sonnet"), ("tier", "cheap"),
+                                           ("case", "A1"), ("run", 1)])
+            with quiet():
+                record, problem = docs_bench.run_row(row, BED, Args(), {})
+        finally:
+            docs_bench.build_command = real
+        self.assertIsNone(problem)
+        self.assertEqual("completed", record["outcome"])
+        self.assertEqual(1, record["attempts"])
+        self.assertEqual(0, record["exit_code"])
+        self.assertEqual(1.0, record["summary"]["fact_recall"])
+        self.assertEqual(49, record["usage"]["total_tokens"])
+        self.assertTrue(docs_bench.is_valid(record))
+
+    def test_a_refused_launch_leaves_the_row_with_no_summary(self):
+        refused = launch.LaunchResult(
+            text="", note="exited 1: ", seconds=180.0, attempts=3, provider_error=True,
+            stdout_tail="", stderr_tail="", exit_code=1)
+        real = docs_bench.launch.run
+        try:
+            docs_bench.launch.run = lambda *a, **k: refused
+
+            class Args(object):
+                dry_run = False
+                lang = "en"
+                timeout = 60
+                keep = False
+            row = collections.OrderedDict([("arm", "R1"), ("agent", "claude"),
+                                           ("model", "sonnet"), ("tier", "cheap"),
+                                           ("case", "A1"), ("run", 1)])
+            with quiet():
+                record, problem = docs_bench.run_row(row, BED, Args(), {})
+        finally:
+            docs_bench.launch.run = real
+        self.assertIsNone(problem)
+        self.assertEqual("provider_error", record["outcome"])
+        self.assertIsNone(record["summary"], "a refused row was graded anyway")
+        self.assertEqual([], record["answers"])
+        self.assertEqual(3, record["attempts"])
+        self.assertIn("the agent exited 1", record["note"])
+        self.assertIn("stderr tail: (empty)", record["note"])
+        self.assertFalse(docs_bench.is_valid(record))
+        self.assertTrue(docs_bench.is_provider_error(record))
+
+    def test_the_runner_starts_no_agent_of_its_own(self):
+        # Every model call goes through bench/launch.py: the retries, the tails and the
+        # provider_error outcome cannot be had in one runner and missed in the next.
+        source = read(os.path.join(ROOT, "bench", "docs_bench.py"))
+        self.assertNotIn("subprocess.Popen(command", source)
+        self.assertIn("launch.run(command, workdir", source)
+        for flag in ("--dangerously-skip-permissions", "--yolo", "--full-auto",
+                     "danger-full-access"):
+            self.assertNotIn(flag, source)
 
 
 class TestTheCli(unittest.TestCase):

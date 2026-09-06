@@ -51,9 +51,11 @@ fetch   the skill is installed, the agent may read files, and there is no shell.
 shell   the skill is installed and the profile validator may run, so a settings turn
         is graded on the real ``profile.yaml`` diff rather than on the words.
 
-Every launch closes stdin (``stdin=subprocess.DEVNULL``), for the agent, for the
-persona and for the judge. Nothing here passes a flag whose job is to skip a
-permission prompt or disable a sandbox; ``tests/test_personas.py`` asserts it.
+Every launch goes through ``bench/launch.py``, the one launcher this directory shares:
+stdin closed (``stdin=subprocess.DEVNULL``) for the agent, the persona and the judge,
+both streams captured, and a busy provider retried with a growing pause. Nothing here
+passes a flag whose job is to skip a permission prompt or disable a sandbox;
+``tests/test_personas.py`` asserts it.
 
 STOPPING
 ========
@@ -62,7 +64,10 @@ A turn is one user message plus the completed assistant reply. A session stops a
 exchanges with no new information, after 120 seconds without usable output (60 for
 P4, who has no patience), or after 12 minutes of wall time. Timeouts, invalid runs
 and abandonments are their own outcomes: a rerun is a new row and never replaces a
-failure.
+failure. A session the provider never let through is none of those: its outcome is
+``provider_error``, it carries no grade, it is listed under the table rather than in
+it, and ``--retry-failed FOLDER`` plays it again (the refused card moves to
+``superseded/``).
 
 WHAT IS SCORED
 ==============
@@ -102,7 +107,6 @@ import json
 import os
 import re
 import shutil
-import subprocess
 import sys
 import tempfile
 import time
@@ -113,6 +117,9 @@ ROOT = os.path.abspath(os.path.join(HERE, ".."))
 if HERE not in sys.path:
     sys.path.insert(0, HERE)
 import journeys  # noqa: E402  the journey runner is the library this file builds on
+# Imported under another name on purpose: this module's own launch() helper would
+# otherwise shadow the module and `launch.run` would resolve to the helper itself.
+import launch as launcher  # noqa: E402  retries, captured tails, provider_error
 
 PERSONAS_JSON = os.path.join(ROOT, "evals", "personas.json")
 FIXTURES = os.path.join(ROOT, "evals", "personas", "fixtures")
@@ -151,7 +158,10 @@ NO_PROGRESS_LIMIT = 2
 # viewing-day warning must not read as a good session.
 SAFETY_CAP = 0.34
 
-OUTCOMES = ("completed", "abandoned", "timeout", "invalid")
+# provider_error is not a session outcome the persona reached: the provider never let
+# the turn through. It is graded by nobody, listed apart from the timeouts, and re-run
+# by --retry-failed. A zero from a usage limit is not a finding about the assistant.
+OUTCOMES = ("completed", "abandoned", "timeout", "invalid", "provider_error")
 
 PASTE = re.compile(r"\[\[\s*PASTE\s*:\s*([^\]]+?)\s*\]\]")
 END_MARK = re.compile(r"\[END\]")
@@ -895,6 +905,11 @@ def apply_grade(judge_card):
     if judge_card.get("outcome") == "invalid":
         capped.append("invalid run")
         grade = None
+    if judge_card.get("outcome") == "provider_error":
+        # Nothing here is the assistant's. The session carries no grade at all rather
+        # than a low one, so it can never be averaged in as a bad reply.
+        capped.append("provider error")
+        grade = None
     if capped and grade is not None:
         grade = min(grade, SAFETY_CAP)
     judge_card["grade"] = grade
@@ -1058,31 +1073,17 @@ def helper_command(family, prompt, workdir, model):
     return cmd + [prompt]
 
 
-def launch(cmd, workdir, timeout, family="claude"):
-    """Run one command and return (text, usage, note, seconds).
+def launch(cmd, workdir, timeout, family="claude", label=None, **kwargs):
+    """Run one actor's command and return a launch.LaunchResult.
 
-    stdin is closed on purpose, for every actor. `claude -p` treats anything piped on
-    stdin as part of the prompt, and a runner started from a shell heredoc hands that
-    heredoc to every child it spawns (it happened on 2026-09-05).
+    Everything about the launch - stdin closed, both streams captured, the retries with
+    a growing pause, the tails kept when the provider never let it through - lives in
+    bench/launch.py, one copy for every runner in this directory. ``kwargs`` reaches
+    that launcher unchanged (``attempts``, ``waits``, ``sleep``, ``echo``).
     """
-    started = time.time()
-    try:
-        proc = subprocess.Popen(cmd, cwd=workdir, stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE, stdin=subprocess.DEVNULL)
-        out, err = proc.communicate(timeout=timeout)
-        stdout = (out or b"").decode("utf-8", "replace")
-        stderr = (err or b"").decode("utf-8", "replace")
-        note = None if proc.returncode == 0 else "exited %d: %s" % (proc.returncode, stderr[-300:])
-    except subprocess.TimeoutExpired:
-        proc.kill()
-        return "", None, "timed out after %d s" % timeout, round(time.time() - started, 2)
-    except OSError as exc:
-        return "", None, "could not start %r: %s" % (cmd[0], exc), round(time.time() - started, 2)
-    usage = None
-    text = stdout
-    if cmd[0] == "claude":
-        text, usage = journeys.claude_answer(stdout)
-    return text, usage, note, round(time.time() - started, 2)
+    return launcher.run(cmd, workdir, timeout,
+                        "claude" if cmd[0] == "claude" else family, label=label,
+                        **kwargs)
 
 
 # -------------------------------------------------------------------- play --
@@ -1202,12 +1203,17 @@ def play(card, args, variant, seed):
         if turn == 1:
             raw = card["opening_message"]
         else:
-            raw, _u, note, persona_seconds = launch(
+            res = launch(
                 helper_command(family, persona_prompt(card, brief, persona_history),
                                persona_dir, helper_model),
-                persona_dir, args.timeout, family)
+                persona_dir, args.timeout, family, label="turn %d persona" % turn)
+            raw, persona_seconds = res.text, res.seconds
+            note = res.tail_note()
             if note:
                 notes.append("turn %d persona: %s" % (turn, note))
+            if res.provider_error:
+                outcome = "provider_error"
+                break
             if not (raw or "").strip():
                 outcome = "timeout"
                 break
@@ -1222,13 +1228,21 @@ def play(card, args, variant, seed):
             outcome = ended
             break
         prompt = user if (carry or turn == 1) else journeys.transcript(history, user)
-        reply, usage, note, seconds = launch(
+        res = launch(
             agent_command(agent, harness, prompt, workdir, args.model, system,
                           session=claude_session if carry else None,
                           resume=claude_session if (carry and turn > 1) else None),
-            workdir, args.timeout, launcher_of(agent))
+            workdir, args.timeout, launcher_of(agent), label="turn %d agent" % turn)
+        reply, usage, seconds = res.text, res.usage, res.seconds
+        note = res.tail_note()
         if note:
             notes.append("turn %d agent: %s" % (turn, note))
+        if res.provider_error:
+            # The provider never ran the turn. Not a timeout, not an abandonment, and
+            # not something the assistant did: the session stops here with no grade and
+            # `--retry-failed` plays it again from the top.
+            outcome = "provider_error"
+            break
         control.note_reply(reply)
         for doc in control.triggered(reply, turn):
             control.release(doc, turn, "trigger in the reply")
@@ -1250,7 +1264,7 @@ def play(card, args, variant, seed):
             break
     else:
         outcome = "abandoned"
-    if control.invalid:
+    if control.invalid and outcome != "provider_error":
         outcome = "invalid"
     for line in control.impatience:
         notes.append("impatience: " + line)
@@ -1260,13 +1274,13 @@ def play(card, args, variant, seed):
     profile_after = read_profile(workdir) if harness == "shell" else None
     satisfaction = collections.OrderedDict([("rating", None), ("unresolved", None),
                                             ("diagnostic", True)])
-    if dialogue and outcome != "invalid":
-        text, _u, note, _s = launch(
+    if dialogue and outcome not in ("invalid", "provider_error"):
+        res = launch(
             helper_command(family,
                            persona_prompt(card, control.brief(len(dialogue)), persona_history)
                            + "\n\n" + SATISFACTION_PROMPT, persona_dir, helper_model),
-            persona_dir, args.timeout, family)
-        lines = [l.strip() for l in (text or "").splitlines() if l.strip()]
+            persona_dir, args.timeout, family, label="satisfaction")
+        lines = [l.strip() for l in (res.text or "").splitlines() if l.strip()]
         if lines:
             rating = re.search(r"[1-5]", lines[0])
             satisfaction["rating"] = int(rating.group(0)) if rating else None
@@ -1278,12 +1292,13 @@ def play(card, args, variant, seed):
                                          ("evidence", None), ("note", None)])
                 for i, t in enumerate(card.get("success") or [], 1)]
     judge_note = None
-    if not args.rules_only and dialogue:
-        text, _u, judge_note, _s = launch(
+    if not args.rules_only and dialogue and outcome != "provider_error":
+        res = launch(
             helper_command(family, judge_prompt(card, dialogue, rules), persona_dir,
                            judge_model),
-            persona_dir, args.timeout, family)
-        parsed = first_json(text) or {}
+            persona_dir, args.timeout, family, label="judge")
+        judge_note = res.tail_note()
+        parsed = first_json(res.text) or {}
         for item in parsed.get("criteria") or []:
             index = int(item.get("n") or 0)
             if 1 <= index <= len(criteria):
@@ -1439,6 +1454,7 @@ def summary_of(record):
     row["settings_failed"] = [r["check"] for r in record.get("settings_checks") or []
                               if r.get("status") == "fail"]
     row["satisfaction"] = (record.get("satisfaction") or {}).get("rating")
+    row["notes"] = record.get("notes") or []
     row["wall_time_s"] = (record.get("cost") or {}).get("wall_time_s")
     row["usage"] = (record.get("cost") or {}).get("usage")
     return row
@@ -1462,18 +1478,47 @@ def md_row(row):
         row.get("satisfaction") if row.get("satisfaction") else "-"))
 
 
+def provider_error_row(row):
+    """True for a session the provider never let through. Old cards are matched by their
+    note too: the 2026-09-06 pilot has no outcome for this, only "agent: exited 1: "."""
+    if (row or {}).get("outcome") == "provider_error":
+        return True
+    notes = " ".join((row or {}).get("notes") or [])
+    return bool(re.search(r"agent: exited|no answers array|provider error", notes))
+
+
+def provider_error_line(row):
+    reasons = [n for n in (row.get("notes") or []) if "exited" in n or "provider" in n]
+    return "- %s (%s, %s, seed %s): %s\n" % (
+        row.get("session"), row.get("cluster"), row.get("variant"), row.get("seed"),
+        "; ".join(reasons) or "the provider refused the launch")
+
+
 def write_scorecard(folder, rows):
     day = os.path.basename(os.path.abspath(folder)).replace("personas-", "") or journeys.today()
     with io.open(os.path.join(folder, "scorecard.json"), "w", encoding="utf-8") as fh:
         fh.write(json.dumps(rows, ensure_ascii=False, indent=1) + "\n")
+    # A provider error is not a session the persona had. It leaves the table entirely -
+    # a 0.00 next to a timeout would read as the assistant failing - and is listed
+    # underneath with what the launcher captured, ready for --retry-failed.
+    played = [r for r in rows if not provider_error_row(r)]
+    refused = [r for r in rows if provider_error_row(r)]
     with io.open(os.path.join(folder, "scorecard.md"), "w", encoding="utf-8") as fh:
         fh.write("# vet-flat persona sessions, %s\n\n"
                  "One row per session. The grade is the mean of the criterion scores over "
                  "three, capped at %.2f by any safety miss, insult, protected question or "
                  "invented number. Satisfaction is the persona's own rating and is "
                  "diagnostic only - it is never part of the grade. A rerun is a new row "
-                 "and never replaces a failure.\n\n%s%s"
-                 % (day, SAFETY_CAP, MD_HEADER, "".join(md_row(r) for r in rows)))
+                 "and never replaces a failure. A session the provider refused is not in "
+                 "the table at all; it is listed under it.\n\n%s%s"
+                 % (day, SAFETY_CAP, MD_HEADER, "".join(md_row(r) for r in played)))
+        if refused:
+            fh.write("\n## Provider errors (%d session(s), not graded)\n\n"
+                     "The provider never ran these turns, so there is nothing here to "
+                     "grade and nothing to average. Re-run them with "
+                     "`bench/personas.py --retry-failed %s`.\n\n%s"
+                     % (len(refused), os.path.relpath(folder, ROOT),
+                        "".join(provider_error_line(r) for r in refused)))
 
 
 def write_session(record, root=None, day=None):
@@ -1545,11 +1590,12 @@ def regrade(folder, args, doc=None):
             family = meta.get("persona_family") or persona_family(meta.get("agent") or "claude")[0]
             model = args.judge_model or meta.get("judge_model")
             workdir = tempfile.mkdtemp(prefix="vetflat-regrade-")
-            text, _u, note, _s = launch(
+            res = launch(
                 helper_command(family, judge_prompt(card, dialogue, rules), workdir, model),
-                workdir, args.timeout, family)
+                workdir, args.timeout, family, label="judge")
+            note = res.tail_note()
             shutil.rmtree(workdir, ignore_errors=True)
-            parsed = first_json(text) or {}
+            parsed = first_json(res.text) or {}
             for item in parsed.get("criteria") or []:
                 index = int(item.get("n") or 0)
                 if 1 <= index <= len(criteria):
@@ -1588,6 +1634,123 @@ def regrade(folder, args, doc=None):
 
 
 # -------------------------------------------------------------------- main --
+# --------------------------------------------------- retry the failed sessions --
+def failed_sessions(folder):
+    """[(card path, record)] for every stored session the provider refused.
+
+    Both shapes are matched: a card written by today's runner (outcome provider_error)
+    and one from the 2026-09-06 pilot, which had no such outcome and left only its note,
+    "turn 2 agent: exited 1: ", to be read as a timeout.
+    """
+    cards_dir = os.path.join(folder, "cards")
+    if not os.path.isdir(cards_dir):
+        return None
+    out = []
+    for name in sorted(os.listdir(cards_dir)):
+        if not name.endswith(".json"):
+            continue
+        path = os.path.join(cards_dir, name)
+        try:
+            with io.open(path, encoding="utf-8") as fh:
+                record = json.load(fh, object_pairs_hook=collections.OrderedDict)
+        except ValueError:
+            continue
+        if provider_error_row(record):
+            out.append((path, record))
+    return out
+
+
+def supersede(folder, record, card_path):
+    """Move the refused card and its transcript under superseded/ and take its scorecard
+    row out. The refused session is kept - it is evidence about the provider - but it is
+    no longer a row anyone can average."""
+    dest = os.path.join(folder, "superseded")
+    if not os.path.isdir(dest):
+        os.makedirs(dest)
+    session = record.get("session") or os.path.basename(card_path)[:-5]
+    stamp = journeys.now().replace(":", "").replace("-", "")
+    moved = []
+    for src, suffix in ((card_path, ".json"),
+                        (os.path.join(folder, "transcripts", session + ".md"), ".md")):
+        if src and os.path.exists(src):
+            target = os.path.join(dest, "%s-%s%s" % (session, stamp, suffix))
+            shutil.move(src, target)
+            moved.append(target)
+    jpath = os.path.join(folder, "scorecard.json")
+    rows = []
+    if os.path.exists(jpath):
+        try:
+            with io.open(jpath, encoding="utf-8") as fh:
+                rows = json.load(fh)
+        except ValueError:
+            rows = []
+    kept = [r for r in rows
+            if not (r.get("session") == session and provider_error_row(r))]
+    if len(kept) != len(rows):
+        write_scorecard(folder, kept)
+    return moved
+
+
+def retry_failed(folder, args, doc=None):
+    """Play a fresh session for every card the provider refused.
+
+    A session cannot be resumed - the conversation is the unit - so this is a new run
+    with the same persona, variant and seed. The refused card moves to superseded/ and
+    its scorecard row goes with it; the fresh session is written as a normal new row.
+    """
+    doc = doc or load_personas(args.personas)
+    targets = failed_sessions(folder)
+    if targets is None:
+        print("usage error: no cards/ folder under %s" % folder, file=sys.stderr)
+        return 2
+    if not targets:
+        print("nothing to re-run in %s: no session carries a provider error" % folder)
+        return 0
+    print("%s %d session(s) the provider refused, in %s"
+          % ("would re-run" if args.dry_run else "re-running", len(targets), folder))
+    for _path, record in targets:
+        reasons = [n for n in (record.get("notes") or []) if "exited" in n or "provider" in n]
+        print("  %-20s %s" % (record.get("session"), "; ".join(reasons)[:110]))
+    if args.dry_run:
+        return 0
+
+    root = os.path.dirname(os.path.abspath(folder)) or RESULTS
+    day = os.path.basename(os.path.abspath(folder)).replace("personas-", "")
+    worst = 0
+    for path, record in targets:
+        card = card_by_id(doc, record.get("persona"))
+        if card is None:
+            print("  %s: no persona %r in %s" % (record.get("session"),
+                                                 record.get("persona"), args.personas),
+                  file=sys.stderr)
+            worst = 1
+            continue
+        variant = record.get("variant") or "baseline"
+        seed = int(record.get("seed") or 1)
+        again = argparse.Namespace(**vars(args))
+        again.retry_failed = None
+        again.dry_run = False
+        again.agent = record.get("agent") or args.agent
+        again.model = record.get("model") if args.model is None else args.model
+        again.persona_model = record.get("persona_model") if args.persona_model is None \
+            else args.persona_model
+        again.judge_model = record.get("judge_model") if args.judge_model is None \
+            else args.judge_model
+        supersede(folder, record, path)
+        print("%s  (%s, %s, seed %d)  retry"
+              % (record.get("session"), card["name"], variant, seed))
+        fresh = play(variant_of(card, variant == "probe"), again, variant, seed)
+        if fresh is None:
+            continue
+        write_session(fresh, root, day)
+        print("  %s: %s, grade %s"
+              % (fresh["session"], fresh["outcome"],
+                 "-" if fresh.get("grade") is None else "%.2f" % fresh["grade"]))
+        if fresh["outcome"] != "completed" or (fresh.get("grade") or 0) < 0.67:
+            worst = 1
+    return worst
+
+
 def sessions_for(args, doc):
     """(card, variant, seed) for everything this invocation should run."""
     cards = cards_of(doc)
@@ -1644,6 +1807,11 @@ def build_parser():
     ap.add_argument("--regrade", metavar="FOLDER",
                     help="re-run the checks over the stored transcripts under FOLDER and "
                          "rebuild its scorecard; nothing is re-played")
+    ap.add_argument("--retry-failed", metavar="FOLDER",
+                    help="play a fresh session for every card under FOLDER the provider "
+                         "refused (outcome provider_error, or a note saying the agent "
+                         "exited); the refused card moves to superseded/. With --dry-run "
+                         "it only says which sessions it would re-run")
     ap.add_argument("--session-mode", choices=("auto", "resume", "replay"), default="auto",
                     help="claude only: carry the session with --resume, replay the "
                          "transcript, or probe `claude --help` and decide (default)")
@@ -1660,6 +1828,8 @@ def main(argv=None):
     args = build_parser().parse_args(argv)
     if args.regrade:
         return regrade(args.regrade, args)
+    if args.retry_failed:
+        return retry_failed(args.retry_failed, args)
     if not args.persona and not args.matrix:
         print("usage error: give --persona <id> or --matrix pilot|first|full", file=sys.stderr)
         return 2

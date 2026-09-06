@@ -78,6 +78,12 @@ codex   ``codex exec`` per turn with the transcript replayed, in a read-only
         system prompt is delivered as ``AGENTS.md`` in the working directory,
         because ``codex exec`` has no append-system-prompt flag.
 
+Every launch goes through ``bench/launch.py``, the one launcher this directory
+shares: stdin closed, both streams captured, and a busy provider retried with a
+growing pause. When it still will not serve, the turn's note carries the exit code
+and the last 600 characters of each stream and the card says ``provider_error``:
+a turn the provider never ran must not read like a model that answered nothing.
+
 Nothing here passes a flag whose job is to skip a permission prompt or disable a
 sandbox. ``tests/test_journeys.py`` asserts it.
 
@@ -117,6 +123,10 @@ import uuid
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, ".."))
+if HERE not in sys.path:
+    sys.path.insert(0, HERE)
+import launch  # noqa: E402  the one launcher: retries, captured tails, provider_error
+
 SKILL_DIR = os.path.join(ROOT, "skills", "vet-flat")
 JOURNEYS_JSON = os.path.join(ROOT, "evals", "journeys.json")
 RESULTS = os.path.join(HERE, "results")
@@ -130,11 +140,13 @@ SKILL_HOME = {"claude": os.path.join(".claude", "skills"),
 
 PASS_LINE = {"journey_score": 0.90, "fabrications": 0, "critical_failures": 0}
 # A provider saying "at capacity" or "rate limited" is not the model failing the turn.
-# The turn is retried, with a growing pause, before it is written off.
-MAX_ATTEMPTS = 3
-RETRY_WAIT_S = 60
-TRANSIENT = re.compile(r"at capacity|rate.?limit|too many requests|\b429\b|overloaded|"
-                       r"temporarily unavailable|try again later|server error|\b5\d\d\b", re.I)
+# The turn is retried, with a growing pause, before it is written off. The retry itself
+# lives in bench/launch.py now, with every other runner's; these names stay so that
+# anything importing them keeps working.
+MAX_ATTEMPTS = launch.MAX_ATTEMPTS
+RETRY_WAITS = launch.RETRY_WAITS
+RETRY_WAIT_S = launch.RETRY_WAITS[0]
+TRANSIENT = launch.TRANSIENT
 
 
 
@@ -503,8 +515,10 @@ def check_workdir(workdir, spec, agent=None):
 
 
 def transient_error(text):
-    """True when the agent's failure text names a passing provider condition."""
-    return bool(TRANSIENT.search(text or ""))
+    """True when the agent's failure text names a passing provider condition.
+
+    A thin wrapper over bench/launch.py, which owns the pattern for every runner."""
+    return launch.transient_error(text)
 
 
 def score_turn(turn, reply, journey, workdir=None, agent=None, file_rows=None):
@@ -867,61 +881,20 @@ def api_reply(messages, model, timeout):
     return text, body.get("usage"), note
 
 
-USAGE_KEYS = ("input_tokens", "output_tokens", "cache_read_input_tokens",
-              "cache_creation_input_tokens")
+# The two CLIs' token parsers live in bench/launch.py, one copy for every runner.
+# These names stay: bench/personas.py, bench/docs_bench.py and bench/pipeline.py call
+# journeys.claude_answer(), and a rename would be a change to three files for nothing.
+USAGE_KEYS = launch.USAGE_KEYS
 
 
 def claude_usage(obj):
     """Tokens and cost from a --output-format json envelope; None when absent."""
-    if not isinstance(obj, dict):
-        return None
-    usage = obj.get("usage") or {}
-    out = collections.OrderedDict()
-    for key in USAGE_KEYS:
-        if key in usage:
-            out[key] = usage[key]
-    for key in ("total_cost_usd", "duration_ms", "num_turns"):
-        if key in obj:
-            out[key] = obj[key]
-    total = sum(v for v in (out.get(k) for k in USAGE_KEYS) if isinstance(v, (int, float)))
-    if total:
-        out["total_tokens"] = total
-    return out or None
+    return launch.claude_usage(obj)
 
 
 def claude_answer(stdout):
-    """(final message, usage). Claude Code wraps the message in .result with
-    --output-format json and puts the token counts beside it."""
-    try:
-        start = stdout.index("{")
-    except (ValueError, AttributeError):
-        return stdout or "", None
-    depth, in_string, escape = 0, False, False
-    for i in range(start, len(stdout)):
-        ch = stdout[i]
-        if in_string:
-            if escape:
-                escape = False
-            elif ch == "\\":
-                escape = True
-            elif ch == '"':
-                in_string = False
-            continue
-        if ch == '"':
-            in_string = True
-        elif ch == "{":
-            depth += 1
-        elif ch == "}":
-            depth -= 1
-            if depth == 0:
-                try:
-                    obj = json.loads(stdout[start:i + 1])
-                except ValueError:
-                    return stdout, None
-                if isinstance(obj, dict) and isinstance(obj.get("result"), str):
-                    return obj["result"], claude_usage(obj)
-                return stdout, claude_usage(obj)
-    return stdout, None
+    """(final message, usage) out of `claude -p --output-format json` stdout."""
+    return launch.claude_answer(stdout)
 
 
 # --------------------------------------------------------------------- play --
@@ -1018,6 +991,7 @@ def play(journey, args, variant_id=None):
 
         started = time.time()
         reply, usage, note = "", None, None
+        attempts, provider_error = 1, False
         if agent == "api":
             messages = [{"role": "system", "content": system}]
             for role, content in history:
@@ -1033,43 +1007,31 @@ def play(journey, args, variant_id=None):
             else:
                 cmd = codex_command(transcript(history, user) if history else user,
                                     workdir, args.model, sandbox)
-            attempts = 0
-            try:
-                while True:
-                    attempts += 1
-                    # stdin is closed on purpose: `claude -p` treats anything piped on stdin as part of the
-                    # prompt, and a runner launched from a shell heredoc hands that heredoc to every child.
-                    # On 2026-09-05 four journey runs and ten sweep rows carried a launcher script that way.
-                    proc = subprocess.Popen(cmd, cwd=workdir, stdout=subprocess.PIPE,
-                                            stderr=subprocess.PIPE, stdin=subprocess.DEVNULL)
-                    out, err = proc.communicate(timeout=args.timeout)
-                    stdout = (out or b"").decode("utf-8", "replace")
-                    stderr_text = (err or b"").decode("utf-8", "replace")
-                    if (proc.returncode != 0 and attempts < MAX_ATTEMPTS
-                            and transient_error(stderr_text + stdout[-2000:])):
-                        print("  turn %d: the provider is busy, retry %d of %d in %d s"
-                              % (index, attempts, MAX_ATTEMPTS - 1, RETRY_WAIT_S * attempts))
-                        time.sleep(RETRY_WAIT_S * attempts)
-                        continue
-                    if proc.returncode != 0:
-                        note = "the agent exited %d: %s" % (proc.returncode, stderr_text[-300:])
-                    break
-                if agent == "claude":
-                    reply, usage = claude_answer(stdout)
-                else:
-                    reply = stdout
-            except subprocess.TimeoutExpired:
-                proc.kill()
-                reply, note = "", "timed out after %d s" % args.timeout
-            except OSError as exc:
-                reply, note = "", "could not start %r: %s" % (cmd[0], exc)
+            # One launcher for every runner: stdin closed, both streams captured, the
+            # busy-provider retries with a growing pause, and the tails kept when the
+            # provider never let the turn through at all.
+            res = launch.run(cmd, workdir, args.timeout, agent,
+                             attempts=MAX_ATTEMPTS, waits=RETRY_WAITS,
+                             label="turn %d" % index)
+            reply, usage = res.text, res.usage
+            attempts = res.attempts
+            provider_error = res.provider_error
+            # The note the card always carried, plus the tails: a row that reads
+            # "the agent exited 1: " with nothing behind it cannot be diagnosed later.
+            note = res.tail_note("the agent " if (res.note or "").startswith("exited") else "")
         wall = round(time.time() - started, 2)
 
         if not (reply or "").strip():
-            errors.append("turn %d: %s" % (index, note or "no reply"))
+            # A provider error is said out loud here. The turn is unscored either way,
+            # but "the model wrote nothing" and "the provider never ran it" are not the
+            # same finding, and only one of them is about the model.
+            errors.append("turn %d: %s%s" % (index, "provider error; " if provider_error
+                                             else "", note or "no reply"))
             turns.append(collections.OrderedDict([
                 ("turn", index), ("user", turn["user"]), ("reply", reply or ""),
-                ("note", note), ("wall_time_s", wall), ("score", None), ("checks", [])]))
+                ("note", note), ("wall_time_s", wall), ("score", None), ("checks", []),
+                ("retries", (attempts - 1) if agent != "api" else 0),
+                ("provider_error", provider_error)]))
             break
 
         card = score_turn(turn, reply, journey, workdir=workdir, agent=agent)
@@ -1080,6 +1042,7 @@ def play(journey, args, variant_id=None):
         card["wall_time_s"] = wall
         card["usage"] = usage
         card["retries"] = (attempts - 1) if agent != "api" else 0
+        card["provider_error"] = provider_error
         card.move_to_end("turn", last=False)
         turns.append(card)
         history.append(("user", user))

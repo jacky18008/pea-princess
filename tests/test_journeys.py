@@ -41,6 +41,7 @@ SKILL_DIR = os.path.join(ROOT, "skills", "vet-flat")
 
 sys.path.insert(0, BENCH)
 import journeys as runner  # noqa: E402
+import launch  # noqa: E402  the shared launcher every runner goes through
 
 # Anything shaped like a UK postcode. Everything the dataset uses starts with X,
 # which no real postcode area does, so a hit outside the declared list is a leak.
@@ -735,12 +736,58 @@ class TestFileChecksAndRegrade(unittest.TestCase):
     def test_every_agent_launch_closes_stdin(self):
         # claude -p reads piped stdin as prompt material; a runner started from a heredoc
         # would feed that heredoc to the model (it happened on 2026-09-05).
-        for rel in ("bench/journeys.py", "bench/run.py", "bench/ab/run_codex.py"):
+        for rel in ("bench/launch.py", "bench/run.py", "bench/ab/run_codex.py"):
             src = read_text(os.path.join(ROOT, rel))
-            launches = [m.start() for m in re.finditer(r"subprocess\.Popen\((?:cmd|command), cwd=workdir", src)]
+            launches = [m.start() for m in re.finditer(
+                r"subprocess\.Popen\((?:cmd|command), cwd=", src)]
             self.assertTrue(launches, rel)
             for pos in launches:
-                self.assertIn("stdin=subprocess.DEVNULL", src[pos:pos + 260], "%s: an agent launch leaves stdin open" % rel)
+                self.assertIn("stdin=subprocess.DEVNULL", src[pos:pos + 300], "%s: an agent launch leaves stdin open" % rel)
+
+    def test_a_provider_error_turn_keeps_the_tails_it_was_given(self):
+        """The docs pilot's failure, played through a journey: the CLI exits 1 and says
+        nothing. The turn is unscored either way, but the card has to say the provider
+        refused it and carry what came back, or nobody can tell it from a bad flag."""
+        refused = launch.LaunchResult(
+            text="", note="exited 1: ", seconds=365.0, attempts=3, provider_error=True,
+            stdout_tail="", stderr_tail="", exit_code=1)
+        journey = [j for j in runner.load_journeys()["journeys"]
+                   if j["id"] == "j8-licence-and-advance-clause-zh"][0]
+
+        class Args(object):
+            agent = "claude"
+            refs = None
+            model = None
+            workdir = None
+            dry_run = False
+            keep = False
+            session_mode = "replay"
+            timeout = 60
+            results = None
+        real = runner.launch.run
+        try:
+            runner.launch.run = lambda *a, **k: refused
+            with contextlib.redirect_stdout(io.StringIO()):
+                record = runner.play(journey, Args(), "zh")
+        finally:
+            runner.launch.run = real
+        turn = record["turn_scores"][0]
+        self.assertTrue(turn["provider_error"])
+        self.assertIsNone(turn["score"], "a refused turn must never be scored")
+        self.assertEqual(2, turn["retries"])
+        self.assertIn("the agent exited 1", turn["note"])
+        self.assertIn("stdout tail: (empty)", turn["note"])
+        self.assertIn("stderr tail: (empty)", turn["note"])
+        self.assertIn("provider error", record["errors"][0])
+        self.assertIsNone(record["journey_score"])
+
+    def test_the_journey_runner_starts_no_agent_of_its_own(self):
+        # Every model call goes through bench/launch.py, so the retries, the captured
+        # tails and the provider_error outcome cannot be had in one runner and missed
+        # in the next.
+        src = read_text(os.path.join(ROOT, "bench/journeys.py"))
+        self.assertNotIn("subprocess.Popen(cmd, cwd=workdir", src)
+        self.assertIn("launch.run(cmd, workdir", src)
 
     def test_multiples_of_the_rent_are_not_a_second_rent(self):
         doc = runner.load_journeys()
