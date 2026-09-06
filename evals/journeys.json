@@ -275,7 +275,8 @@
          "deposit[^.\\n]{0,40}?([0-9]+|one|two|three|four|five|six)\\s*weeks?"
         ],
         "line_mask": [
-         "listing|廣告|刊登|仲介要求|advert|asks for|asked for"
+         "listing|廣告|刊登|仲介要求|advert|asks for|asked for",
+         "\\|\\s*F2\\b|holding deposit\\s*\\||留位[金費]?\\s*\\|"
         ],
         "source": "skills/vet-flat/SKILL.md legal facts",
         "why": "The legal cap is five weeks' rent. A bigger number told to a tenant is money she should not hand over.",
@@ -706,11 +707,11 @@
          "(?:年收入|年薪|annual income|income|salary|earn)[^\\n]{0,24}£\\s?[0-9][0-9,]*",
          "(?:annual|yearly|a year|per year|年租|全年)[^\\n]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:a year|per year|pa\\b|p\\.a\\.|/ ?yr|/ ?year)",
-         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:under|over|below|above|short of|more than|less than|cheaper|dearer|higher|lower|difference)\\b",
+         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:一個月|pcm|per month|a month|/ ?month|/ ?mo|/ ?月|每月)?\\s*\\**\\s*(?:under|over|below|above|short of|more than|less than|cheaper|dearer|higher|lower|difference)\\b",
          "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:/ ?wk|/ ?week|pw\\b|per week|a week|每週|/週)",
          "(?:一週|每週|單週|週|weekly|a week's|one week's|per-week)\\s*(?:的)?(?:租金|rent)[^\\n]{0,10}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "[0-9一二兩三四五六]+\\s*個月\\s*[=＝＝:：]\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
-         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:一個月|pcm|per month|a month|/ ?月|每月)?\\s*(?:全包|all-?in|含水電|含帳單|inclusive|上限|ceiling|budget|預算)",
+         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:一個月|pcm|per month|a month|/ ?month|/ ?mo|/ ?月|每月)?\\s*(?:全包|all-?in|含水電|含帳單|inclusive|上限|ceiling|budget|預算)",
          "(?:全包|all-?in|預算|budget|上限|ceiling|總共|in total)[^\\n]{0,8}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?"
         ]
        },
@@ -741,7 +742,12 @@
          "(?:年收入|年薪|annual income|income|salary|earn)[^\\n]{0,24}£\\s?[0-9][0-9,]*",
          "£?\\s?50[,，]?000(?:\\.00)?\\b",
          "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^\\n|]*?(?=\\|)",
-         "(?m)^\\s*[-*•]\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*$"
+         "(?m)^\\s*[-*•]\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*$",
+         "(?:餘額|balance|savings|存款|門檻|threshold|requirement)[^\\n]{0,24}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "[×x]\\s*[0-9]+\\s*=\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?"
+        ],
+        "line_mask": [
+         "\\|\\s*F2\\b|holding deposit\\s*\\||留位[金費]?\\s*\\|"
         ]
        }
       },
@@ -1405,11 +1411,11 @@
          "(?:年收入|年薪|annual income|income|salary|earn)[^\\n]{0,24}£\\s?[0-9][0-9,]*",
          "(?:annual|yearly|a year|per year|年租|全年)[^\\n]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:a year|per year|pa\\b|p\\.a\\.|/ ?yr|/ ?year)",
-         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:under|over|below|above|short of|more than|less than|cheaper|dearer|higher|lower|difference)\\b",
+         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:一個月|pcm|per month|a month|/ ?month|/ ?mo|/ ?月|每月)?\\s*\\**\\s*(?:under|over|below|above|short of|more than|less than|cheaper|dearer|higher|lower|difference)\\b",
          "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:/ ?wk|/ ?week|pw\\b|per week|a week|每週|/週)",
          "(?:一週|每週|單週|週|weekly|a week's|one week's|per-week)\\s*(?:的)?(?:租金|rent)[^\\n]{0,10}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "[0-9一二兩三四五六]+\\s*個月\\s*[=＝＝:：]\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
-         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:一個月|pcm|per month|a month|/ ?月|每月)?\\s*(?:全包|all-?in|含水電|含帳單|inclusive|上限|ceiling|budget|預算)",
+         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:一個月|pcm|per month|a month|/ ?month|/ ?mo|/ ?月|每月)?\\s*(?:全包|all-?in|含水電|含帳單|inclusive|上限|ceiling|budget|預算)",
          "(?:全包|all-?in|預算|budget|上限|ceiling|總共|in total)[^\\n]{0,8}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?"
         ]
        },
@@ -1439,7 +1445,8 @@
          "([0-9]+|one|two|three|four|five|six|一|兩|二|三|四|五|六)\\s*(?:週|周|星期|weeks?)[^.。\\n]{0,20}?(?:is the cap|is the legal|maximum|上限|為上限|是上限)"
         ],
         "line_mask": [
-         "listing|廣告|刊登|仲介要求|advert|asks for|asked for"
+         "listing|廣告|刊登|仲介要求|advert|asks for|asked for",
+         "\\|\\s*F2\\b|holding deposit\\s*\\||留位[金費]?\\s*\\|"
         ],
         "source": "skills/vet-flat/SKILL.md legal facts",
         "why": "Five weeks is the cap; the advertised six weeks is the listing's ask, so only a CAP sentence is read here.",
@@ -1491,7 +1498,12 @@
          "(?:年收入|年薪|annual income|income|salary|earn)[^\\n]{0,24}£\\s?[0-9][0-9,]*",
          "£?\\s?50[,，]?000(?:\\.00)?\\b",
          "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^\\n|]*?(?=\\|)",
-         "(?m)^\\s*[-*•]\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*$"
+         "(?m)^\\s*[-*•]\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*$",
+         "(?:餘額|balance|savings|存款|門檻|threshold|requirement)[^\\n]{0,24}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "[×x]\\s*[0-9]+\\s*=\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?"
+        ],
+        "line_mask": [
+         "\\|\\s*F2\\b|holding deposit\\s*\\||留位[金費]?\\s*\\|"
         ]
        }
       },
@@ -1876,11 +1888,11 @@
          "(?:年收入|年薪|annual income|income|salary|earn)[^\\n]{0,24}£\\s?[0-9][0-9,]*",
          "(?:annual|yearly|a year|per year|年租|全年)[^\\n]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:a year|per year|pa\\b|p\\.a\\.|/ ?yr|/ ?year)",
-         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:under|over|below|above|short of|more than|less than|cheaper|dearer|higher|lower|difference)\\b",
+         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:一個月|pcm|per month|a month|/ ?month|/ ?mo|/ ?月|每月)?\\s*\\**\\s*(?:under|over|below|above|short of|more than|less than|cheaper|dearer|higher|lower|difference)\\b",
          "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:/ ?wk|/ ?week|pw\\b|per week|a week|每週|/週)",
          "(?:一週|每週|單週|週|weekly|a week's|one week's|per-week)\\s*(?:的)?(?:租金|rent)[^\\n]{0,10}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "[0-9一二兩三四五六]+\\s*個月\\s*[=＝＝:：]\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
-         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:一個月|pcm|per month|a month|/ ?月|每月)?\\s*(?:全包|all-?in|含水電|含帳單|inclusive|上限|ceiling|budget|預算)",
+         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:一個月|pcm|per month|a month|/ ?month|/ ?mo|/ ?月|每月)?\\s*(?:全包|all-?in|含水電|含帳單|inclusive|上限|ceiling|budget|預算)",
          "(?:全包|all-?in|預算|budget|上限|ceiling|總共|in total)[^\\n]{0,8}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?"
         ]
        },
@@ -1919,7 +1931,8 @@
          "([0-9]+|one|two|three|four|five|six|一|兩|二|三|四|五|六)\\s*(?:週|周|星期|weeks?)[^.。\\n]{0,20}?(?:is the cap|is the legal|maximum|上限|為上限|是上限)"
         ],
         "line_mask": [
-         "listing|廣告|刊登|仲介要求|advert|asks for|asked for"
+         "listing|廣告|刊登|仲介要求|advert|asks for|asked for",
+         "\\|\\s*F2\\b|holding deposit\\s*\\||留位[金費]?\\s*\\|"
         ],
         "source": "skills/vet-flat/SKILL.md legal facts",
         "why": "Five weeks is the cap; the listing's six weeks is the ask, so only a CAP sentence is read here. Six is the listing's own ask and sits in the pasted material; a reply that quotes it beside the cap is not inventing a number.",
@@ -1964,7 +1977,12 @@
          "(?:年收入|年薪|annual income|income|salary|earn)[^\\n]{0,24}£\\s?[0-9][0-9,]*",
          "£?\\s?50[,，]?000(?:\\.00)?\\b",
          "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^\\n|]*?(?=\\|)",
-         "(?m)^\\s*[-*•]\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*$"
+         "(?m)^\\s*[-*•]\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*$",
+         "(?:餘額|balance|savings|存款|門檻|threshold|requirement)[^\\n]{0,24}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "[×x]\\s*[0-9]+\\s*=\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?"
+        ],
+        "line_mask": [
+         "\\|\\s*F2\\b|holding deposit\\s*\\||留位[金費]?\\s*\\|"
         ]
        }
       },
@@ -3298,11 +3316,11 @@
          "(?:年收入|年薪|annual income|income|salary|earn)[^\\n]{0,24}£\\s?[0-9][0-9,]*",
          "(?:annual|yearly|a year|per year|年租|全年)[^\\n]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:a year|per year|pa\\b|p\\.a\\.|/ ?yr|/ ?year)",
-         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:under|over|below|above|short of|more than|less than|cheaper|dearer|higher|lower|difference)\\b",
+         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:一個月|pcm|per month|a month|/ ?month|/ ?mo|/ ?月|每月)?\\s*\\**\\s*(?:under|over|below|above|short of|more than|less than|cheaper|dearer|higher|lower|difference)\\b",
          "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:/ ?wk|/ ?week|pw\\b|per week|a week|每週|/週)",
          "(?:一週|每週|單週|週|weekly|a week's|one week's|per-week)\\s*(?:的)?(?:租金|rent)[^\\n]{0,10}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "[0-9一二兩三四五六]+\\s*個月\\s*[=＝＝:：]\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
-         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:一個月|pcm|per month|a month|/ ?月|每月)?\\s*(?:全包|all-?in|含水電|含帳單|inclusive|上限|ceiling|budget|預算)",
+         "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:一個月|pcm|per month|a month|/ ?month|/ ?mo|/ ?月|每月)?\\s*(?:全包|all-?in|含水電|含帳單|inclusive|上限|ceiling|budget|預算)",
          "(?:全包|all-?in|預算|budget|上限|ceiling|總共|in total)[^\\n]{0,8}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?"
         ]
        },
@@ -3333,7 +3351,12 @@
          "(?:年收入|年薪|annual income|income|salary|earn)[^\\n]{0,24}£\\s?[0-9][0-9,]*",
          "£?\\s?50[,，]?000(?:\\.00)?\\b",
          "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^\\n|]*?(?=\\|)",
-         "(?m)^\\s*[-*•]\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*$"
+         "(?m)^\\s*[-*•]\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*$",
+         "(?:餘額|balance|savings|存款|門檻|threshold|requirement)[^\\n]{0,24}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "[×x]\\s*[0-9]+\\s*=\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?"
+        ],
+        "line_mask": [
+         "\\|\\s*F2\\b|holding deposit\\s*\\||留位[金費]?\\s*\\|"
         ]
        },
        "holding_deposit_gbp": {
@@ -3355,7 +3378,8 @@
          "([0-9]+|one|two|three|four|five|six|一|兩|二|三|四|五|六)\\s*(?:週|周|星期|weeks?)[^.。\\n]{0,20}?(?:is the cap|is the legal|maximum|上限|為上限|是上限)"
         ],
         "line_mask": [
-         "listing|廣告|刊登|仲介要求|advert|asks for|asked for"
+         "listing|廣告|刊登|仲介要求|advert|asks for|asked for",
+         "\\|\\s*F2\\b|holding deposit\\s*\\||留位[金費]?\\s*\\|"
         ],
         "source": "skills/vet-flat/SKILL.md legal facts",
         "why": "Five weeks is the statutory cap.",
@@ -4387,7 +4411,12 @@
          "(?:月租|年租|租金|rent|annual)[^\\n]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "£\\s?50,?000",
          "£\\s?[0-9][0-9,]*\\s*(?:pcm|per month|/ ?月|每月)",
-         "(?m)^\\s*[-*•]\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*$"
+         "(?m)^\\s*[-*•]\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*$",
+         "(?:餘額|balance|savings|存款|門檻|threshold|requirement)[^\\n]{0,24}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "[×x]\\s*[0-9]+\\s*=\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?"
+        ],
+        "line_mask": [
+         "\\|\\s*F2\\b|holding deposit\\s*\\||留位[金費]?\\s*\\|"
         ]
        }
       },
@@ -4814,7 +4843,8 @@
          "([0-9]+|one|two|three|four|five|six|一|兩|二|三|四|五|六)\\s*(?:週|周|星期|weeks?)[^.。\\n]{0,20}?(?:is the cap|is the legal|maximum|上限|為上限|是上限)"
         ],
         "line_mask": [
-         "listing|廣告|刊登|仲介要求|advert|asks for|asked for"
+         "listing|廣告|刊登|仲介要求|advert|asks for|asked for",
+         "\\|\\s*F2\\b|holding deposit\\s*\\||留位[金費]?\\s*\\|"
         ],
         "source": "skills/vet-flat/SKILL.md legal facts",
         "why": "Five weeks is the ceiling. The clause's six weeks is the ask. Six is what the pasted clause asks for; quoting it beside the cap is not inventing a number.",

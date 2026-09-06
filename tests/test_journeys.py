@@ -923,6 +923,27 @@ class TestFileChecksAndRegrade(unittest.TestCase):
         self.assertEqual("pass", facts["deposit_cap_gbp"]["status"], facts["deposit_cap_gbp"]["detail"])
         self.assertEqual(0, card["fabrications"])
 
+    def test_form_rows_balance_thresholds_and_units_before_a_direction_word(self):
+        doc = runner.load_journeys(); by = dict((j["id"], j) for j in doc["journeys"])
+        j3 = by["j3-vet-this-listing-zh"]
+        reply = ("廣告租金 £2,350 pcm，EPC 48 平方米，2019 年首次評估。押金法定上限 5 週 = £2,711.54。\n"
+                 "| 題目 | 結果 |\n|---|---|\n| F1 押金 | 已找到：`Deposit: 6 weeks' rent.`；超過 5 週上限。 |\n"
+                 "| F2 Holding deposit | 已找到：`Holding deposit: 2 weeks' rent.`；超過 1 週上限。 |\n")
+        card = runner.score_turn(j3["turns"][0], reply, j3)
+        self.assertEqual(0, card["fabrications"], [r["detail"] for r in card["checks"] if r["kind"] == "fact" and r["status"] == "fail"])
+        j5 = by["j5-offer-and-referencing-zh"]
+        reply = ("月租 £2,150。押金上限 5 週 = £2,480.77；常見存款門檻：`£2,150 × 36 = £77,400`。"
+                 "holding deposit 一週。近三個月最低餘額是否高於 **£77,400**？\n")
+        card = runner.score_turn(j5["turns"][0], reply, j5)
+        self.assertEqual(0, card["fabrications"], [r["detail"] for r in card["checks"] if r["kind"] == "fact" and r["status"] == "fail"])
+        j2 = by["j2-area-and-budget-en"]
+        reply = ("The listing asks £2,050 pcm. | £2,200/month all-in | Rent £2,050; bills not included |\n"
+                 "£2,050 rent leaves only **£150/month** below your £2,200 all-in cap. Rent in advance: at most one month.\n")
+        card = runner.score_turn(j2["turns"][3], reply, j2)
+        facts = dict((r["check"], r) for r in card["checks"] if r["kind"] == "fact")
+        self.assertEqual("pass", facts["listing_rent_pcm"]["status"], facts["listing_rent_pcm"]["detail"])
+        self.assertEqual(0, card["fabrications"], [(k, v["detail"]) for k, v in facts.items() if v["status"] == "fail"])
+
     def test_the_pasted_profile_becomes_a_real_file_without_its_title_line(self):
         folder = tempfile.mkdtemp()
         try:
