@@ -128,9 +128,16 @@ ROLE_TOOLS = collections.OrderedDict([
 
 
 def role_tools(role, agent="claude"):
-    """The tool list for a role, with the skill path this agent installs into."""
+    """The tool list for a role, with the skill path this agent installs into.
+
+    The label may carry a group ("executors[money]") or a round ("verifier-again"),
+    because that is what the scorecard rows are named; strip both before looking up.
+    """
+    key = role.split("[")[0]
+    if key.endswith("-again"):
+        key = key[:-len("-again")]
     skill = skill_rel(agent).replace(os.sep, "/")
-    return [tool.format(skill=skill) for tool in ROLE_TOOLS[role.split("[")[0]]]
+    return [tool.format(skill=skill) for tool in ROLE_TOOLS[key]]
 
 SKILL_HOME = {"claude": os.path.join(".claude", "skills"),
               "codex": os.path.join(".agents", "skills")}
@@ -608,8 +615,14 @@ def run_pipeline(args, case, config):
             else:
                 evidence_doc = verifier_tool.evidence_from_report(report, case["id"])
                 write_json(os.path.join(workdir, "evidence.json"), evidence_doc)
-                notes.append("evidence derived from the baseline report: %d items"
-                             % len(evidence_doc["items"]))
+                # Move it out of the way. Left where it is, a silent integrator would
+                # end with the BASELINE's report being found and graded under this arm -
+                # an ablation quietly scoring its own control.
+                moved = set_aside(workdir, _path)
+                notes.append("evidence derived from the baseline report: %d items%s"
+                             % (len(evidence_doc["items"]),
+                                "; the baseline report was moved to %s" % moved
+                                if moved else ""))
 
     if evidence_doc is None:
         evidence_doc = collections.OrderedDict([("schema", verifier_tool.EVIDENCE_SCHEMA),
@@ -622,6 +635,18 @@ def run_pipeline(args, case, config):
     wall = time.time() - started
     return finish(args, case, config, arm, mode, workdir, roles, notes, wall, worst,
                   evidence_doc, verified_doc, rounds_used)
+
+
+def set_aside(workdir, path):
+    """Move the baseline's report out of the way and return its new name."""
+    if not path or not os.path.exists(path):
+        return None
+    target = os.path.join(workdir, "report.baseline.json")
+    try:
+        shutil.move(path, target)
+    except (IOError, OSError):
+        return None
+    return os.path.basename(target)
 
 
 def role_row(role, conf, wall, usage, note, command, group=None):
@@ -685,7 +710,8 @@ def run_executor_rounds(args, case, config, conf, workdir, prompt, plan_doc, rol
         roles.append(role_row("executors", conf, wall, usage, note, command, group))
         if note:
             notes.append("executor %s: %s" % (group, note))
-        write_raw(args, config["name"], case, "executor-" + group, stdout)
+        write_raw(args, config["name"], case,
+                  "executor-%s%s" % (group, "-2" if replan else ""), stdout)
         doc = answer_object(conf["agent"], stdout,
                             answer_file(workdir, "executors", group))
         if isinstance(doc, dict):
@@ -834,8 +860,12 @@ def finish(args, case, config, arm, mode, workdir, roles, notes, wall, worst,
         notes.append("no report.json in the working directory")
         worst = 1
     else:
-        card = grader.grade(report, case, grader.case_profile_path(args.cases, case))
-        card["report"] = path
+        try:
+            card = grader.grade(report, case, grader.case_profile_path(args.cases, case))
+            card["report"] = path
+        except Exception as exc:      # a malformed report is a result, not a crash
+            notes.append("the report could not be graded: %s" % exc)
+            card, worst = None, 1
 
     row = runner.make_row("pipeline", pipeline_model(roles), case, card, wall, usage,
                           workdir, "; ".join(r["command"] or "" for r in roles),

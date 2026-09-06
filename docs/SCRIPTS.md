@@ -1084,6 +1084,11 @@ The rules, each with its own id in the output:
 | `fixed_form` | a fixed question the tier owes an answer to and nobody answered |
 | `untried_unknown` | under `--strict`: an unknown with an empty `tried` list, which is a gap nobody looked at rather than one somebody could not fill |
 
+`evidence.json` is written by a model, so the schema violations to expect are a missing
+id and a repeated one. Both are renamed in place before anything is keyed by id: two
+items sharing one would collapse into a single verdict, and a failure would simply
+disappear.
+
 Run with neither `--sources` nor `--report` and there is nothing to check a quote or a
 source id against, so every item comes back `unknown` rather than quietly passing. Where
 a source resolves but no text is held for it, the quote cannot be checked; the item is

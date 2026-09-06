@@ -158,10 +158,13 @@ def problems(claim, text, flat=None, value=None):
         if rule.guard == "year_value" and looks_like_a_year(value):
             continue
         out.append({"rule": rule.id, "why": rule.why, "matched": matched})
-    named = FLAT_ID.search(normalise(text))
-    if flat and named and named.group(1).lower() != str(flat).strip().lower():
+    # EVERY flat the text names, not just the first: an energy-register search result
+    # lists the neighbours, and taking the first would condemn a correct number for
+    # flat 301 because flat 201 happens to be printed above it.
+    named = FLAT_ID.findall(normalise(text))
+    if flat and named and str(flat).strip().lower() not in [n.lower() for n in named]:
         out.append({"rule": "another_flat",
                     "why": "the evidence names flat %s, and the report is about flat %s"
-                           % (named.group(1), flat),
-                    "matched": named.group(0).strip()})
+                           % (", ".join(named[:3]), flat),
+                    "matched": "flat " + named[0]})
     return out

@@ -256,6 +256,12 @@ def rent_pcm_from(items, given=None):
             continue
         if " week " in unit or " weeks " in unit or " weekly " in claim:
             continue
+        # A yearly figure read as a monthly one multiplies the annual rent by twelve and
+        # flips the deposit branch, so a CORRECT five-week cap starts failing.
+        if (" year " in unit or " annum " in unit or " yearly " in unit
+                or " annual " in claim or " yearly " in claim or " per year " in claim
+                or " per annum " in claim):
+            continue
         return number, "evidence item %s" % item.get("id")
     return None, None
 
@@ -595,6 +601,7 @@ def verify(evidence, report=None, pasted=None, tier="standard", strict=False,
     flat = evidence.get("flat")
     thresholds = thresholds if thresholds is not None else load_thresholds()
 
+    unique_ids(items)
     verdicts = collections.OrderedDict()
     for item in items:
         state, reason, rules = check_item(item, pasted, source_ids, {}, flat, strict)
@@ -652,6 +659,26 @@ def verify(evidence, report=None, pasted=None, tier="standard", strict=False,
     return out
 
 
+def unique_ids(items):
+    """Give every item an id nobody else has, in place, before anything is keyed by it.
+
+    evidence.json is written by a model, so a missing or repeated id is the schema
+    violation to expect - and the verdicts are a map from id, so two items sharing one
+    would collapse into a single verdict and a failure would simply disappear. Renaming
+    happens before the verdict loop so the cap and contradiction checks see the same ids.
+    """
+    seen = set()
+    for n, item in enumerate(items, 1):
+        ident = item.get("id")
+        if not ident or ident in seen:
+            ident = "item-%d" % n
+            while ident in seen:
+                ident += "x"
+            item["id"] = ident
+        seen.add(ident)
+    return items
+
+
 def axis_of(items, item_id):
     for item in items:
         if item.get("id") == item_id:
@@ -672,10 +699,9 @@ def mark_fail(verdicts, ids, rule, reason):
         verdict["state"] = "fail"
         if rule not in verdict["rules"]:
             verdict["rules"] = list(verdict["rules"]) + [rule]
-        parts = [x for x in (verdict.get("reason") or "").split("; ") if x]
-        if reason not in parts:
-            parts.append(reason)
-        verdict["reason"] = "; ".join(parts)
+        current = verdict.get("reason") or ""
+        if reason and reason not in current:
+            verdict["reason"] = "; ".join(x for x in (current, reason) if x)
 
 
 def failed(result):

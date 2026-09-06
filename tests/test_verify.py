@@ -237,6 +237,50 @@ class WrongEvidenceMustTrigger(unittest.TestCase):
                         "there is no second round")
 
 
+class ThingsAModelWritingTheEvidenceGetsWrong(unittest.TestCase):
+    """evidence.json is written by a model, so the schema violations to expect are
+    missing ids, repeated ids, and a rent quoted per year."""
+
+    def test_two_items_sharing_an_id_do_not_collapse_into_one_verdict(self):
+        ev = copy.deepcopy(load("evidence-good.json"))
+        item(ev, "e-crime")["source"] = "made-up-register"
+        item(ev, "e-crime")["id"] = "e-area"          # the same id as the good item
+        result = run(ev)
+        self.assertEqual(len(result["items"]), len(ev["items"]),
+                         "one verdict per item, or a failure disappears")
+        self.assertTrue(V.failed(result), "the unresolvable source must still fail")
+
+    def test_an_item_with_no_id_gets_one(self):
+        ev = copy.deepcopy(load("evidence-good.json"))
+        del item(ev, "e-area")["id"]
+        result = run(ev)
+        self.assertEqual(len(result["items"]), len(ev["items"]))
+        self.assertTrue(all(v["id"] for v in result["items"]))
+
+    def test_a_rent_quoted_per_year_does_not_flip_the_deposit_branch(self):
+        ev = copy.deepcopy(load("evidence-good.json"))
+        ev["items"].insert(0, {"id": "e-rent-year", "axis": 8, "claim": "annual rent",
+                               "status": "ok", "value": 24000, "unit": "GBP per year",
+                               "source": "pasted:listing",
+                               "quote": "Rent: £2,000 per calendar month."})
+        item(ev, "e-f1")["claim"] = "F1 legal deposit cap for this tenancy"
+        result = run(ev)
+        self.assertEqual(result["counts"]["legal_caps"]["rent_pcm"], 2000.0,
+                         "the monthly rent is the one the caps run on")
+        self.assertEqual(state(result, "e-f1")["state"], "pass")
+
+    def test_the_same_contradiction_is_said_once_however_many_pairs_produce_it(self):
+        """One area item can be in three pairs at once, and two of those can render the
+        identical sentence. Saying it twice in one line helps nobody - but two pairs that
+        really are different still both get said."""
+        result = run(load("evidence-bad.json"), tier="standard")
+        reason = state(result, "b-referent")["reason"]
+        self.assertEqual(reason.count("pasted:epc-cert says 54.0 and pasted:epc-cert "
+                                      "says 910.0"), 1)
+        self.assertIn("pasted:epc-cert says 910.0 and pasted:listing says 62.0", reason,
+                      "a different pair is still worth saying")
+
+
 class InformationSufficiency(unittest.TestCase):
     """Deterministic, no model, no tokens: was the fact even in the evidence?"""
 
@@ -316,6 +360,14 @@ class TheSharedReferentRules(unittest.TestCase):
                      "COMPANY_WORDS", "BUILDING_AGE_WORDS", "BUILDING_WORDS", "FLAT_WORDS"):
             self.assertIs(getattr(grade, name), getattr(referents, name), name)
         self.assertIs(grade.FLAT_ID, referents.FLAT_ID)
+
+    def test_a_register_row_that_lists_the_neighbours_does_not_condemn_this_flat(self):
+        """An energy-register search prints every flat at the postcode. Taking the first
+        one it names would fail a correct number for flat 301 because 201 is above it."""
+        text = "flat 201 48 m2, flat 301 54 m2, flat 401 61 m2"
+        self.assertEqual(referents.problems("certified floor area", text, flat="301"), [])
+        wrong = referents.problems("certified floor area", text, flat="507")
+        self.assertEqual([p["rule"] for p in wrong], ["another_flat"])
 
     def test_they_agree_on_shared_fixtures(self):
         import grade

@@ -390,6 +390,56 @@ class TheRowItRecords(unittest.TestCase):
         self.assertEqual(row["total_tokens"], 15)
         self.assertEqual(row["allowed_tools"], ["Read", "Bash(python3:*)"])
 
+    def test_the_replan_round_can_be_labelled_without_a_lookup_error(self):
+        """The second verifier pass is recorded as `verifier-again`, and the row builder
+        asks for that label's tool list. A KeyError there would lose the whole run after
+        every executor and verifier token had already been spent."""
+        self.assertEqual(PL.role_tools("verifier-again", "claude"),
+                         PL.role_tools("verifier", "claude"))
+        row = PL.role_row("verifier-again", {"agent": "claude", "model": "opus"},
+                          1.0, None, None, ["claude", "-p", "x"])
+        self.assertEqual(row["role"], "verifier-again")
+        self.assertIn("Read", row["allowed_tools"])
+        self.assertEqual(PL.role_tools("executors[money]", "claude"),
+                         PL.role_tools("executors", "claude"))
+
+    def test_the_replan_round_writes_its_own_raw_files(self):
+        """Round 0 and round 1 must not land on the same filename, or the first round's
+        transcript is gone."""
+        import run as runner
+        first = runner.raw_name("P2-claude-executor-money", "case", 1)
+        second = runner.raw_name("P2-claude-executor-money-2", "case", 1)
+        self.assertNotEqual(first, second)
+        source = read(os.path.join(ROOT, "bench", "pipeline.py"))
+        self.assertIn('"executor-%s%s" % (group, "-2" if replan else "")', source)
+
+    def test_the_baseline_report_is_moved_out_of_the_way(self):
+        """P3 derives its evidence from the single agent's report. Left where it is, a
+        silent integrator would end with that same file being graded under the pipeline
+        arm - an ablation scoring its own control."""
+        import tempfile
+        folder = tempfile.mkdtemp(prefix="vetflat-test-")
+        try:
+            path = os.path.join(folder, "report.json")
+            with io.open(path, "w", encoding="utf-8") as fh:
+                fh.write('{"candidates": []}')
+            moved = PL.set_aside(folder, path)
+            self.assertEqual(moved, "report.baseline.json")
+            self.assertFalse(os.path.exists(path))
+            import run as runner
+            self.assertEqual(runner.find_report(folder, "")[0], None,
+                             "nothing is left for finish() to grade by accident")
+        finally:
+            import shutil
+            shutil.rmtree(folder, ignore_errors=True)
+
+    def test_a_report_that_cannot_be_graded_is_a_note_and_not_a_crash(self):
+        source = read(os.path.join(ROOT, "bench", "pipeline.py"))
+        block = source[source.index("card = grader.grade("):]
+        self.assertIn("except Exception as exc", block[:400],
+                      "one malformed report must not take the rest of the sweep with it")
+        self.assertIn("the report could not be graded", block[:400])
+
     def test_the_tokens_of_every_role_add_up(self):
         roles = [{"tokens": {"input_tokens": 100, "output_tokens": 10}},
                  {"tokens": {"input_tokens": 200, "output_tokens": 20,
