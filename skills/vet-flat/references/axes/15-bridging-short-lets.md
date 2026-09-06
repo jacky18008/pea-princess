@@ -6,6 +6,10 @@ Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen — https://github.com
 Most people arrive before the flat they actually want is free. The bridge is the gap. This axis prices the gap honestly, buys the right product for it, and stops the gap from making the long-let decision worse than it needs to be.
 A bridge is a tent, not a home. It is vetted on three things only: clean, quiet enough to sleep, able to receive post. Do not run the full axis set on it.
 
+## Two rules that come before any listing
+1. **Book the bridge first.** Before you vet a single flat, have somewhere to sleep booked for at least the first two weeks — a hotel or an operator-run serviced stay; a private short let only after you have seen it or verified it live. Whether the very first nights are a hotel is a personal choice; arriving without a booking is not. Say this to the user before anything else when they have not landed yet.
+2. **Signing is not moving in.** A found flat, an accepted offer, even a signed agreement is not keys. Referencing, the deposit going into a scheme, the previous tenant's move-out and the start date you agreed can put weeks between "we found it" and "we sleep there". The maintainer's own gap ran 45 days in one stretch (London, 2026) ●. Plan the bridge for the gap between signing and move-in, not for "a few nights on arrival", and price it with the year-total rule below.
+
 ## The one arithmetic rule that changes every ranking
 A bridge is **not an extra cost**. During the bridge you are not paying the long-let rent. Compare whole years, not monthly averages:
 
@@ -92,6 +96,7 @@ Confirm the grade from the **written description of your unit**, not the buildin
 5. Insist on viewing before paying. If an in-person viewing is genuinely hard, a **live video walkthrough** is acceptable for a bridge: have them pan the window (street or courtyard), the kitchen, the washing machine.
 
 ## Seams and dates
+- Budget the bridge in weeks, not nights: from arrival to the day the keys are actually released. Four to seven weeks is ordinary when you arrive in term-start season; the maintainer's was 45 days. Book a flexible second block rather than gamble on a short first one.
 - Split the bridge into at most **two blocks**, and put the seam on a weekend, before term starts. Never move during induction or teaching week.
 - Ask the current short-let host whether you can simply extend. It is free to ask and it is the only zero-move option.
 - If handover falls on a Monday, ask whether keys can be released on the preceding Saturday. Two fewer bridge nights is a real saving.
