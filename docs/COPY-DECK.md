@@ -35,12 +35,12 @@ On a phone
 | docs/USING.md — the plain-words walkthrough | 42 | `docs/USING.md` |
 | docs/INSTALL.md — install page | 9 | `docs/INSTALL.md` |
 | docs/EXPERIMENTS.md — which configuration to run | 7 | `docs/EXPERIMENTS.md` |
-| onboarding.md — what the skill says to a new user | 27 | `skills/vet-flat/references/onboarding.md` |
+| onboarding.md — what the skill says to a new user | 28 | `skills/vet-flat/references/onboarding.md` |
 | sharing.md — social posts and the card description | 6 | `skills/vet-flat/references/sharing.md` |
 | inputs.md — the one message that asks the user for what is missing | 1 | `skills/vet-flat/references/inputs.md` |
 | profiles/ — the sentences a profile carries | 14 | `skills/vet-flat/profiles/*.yaml` |
 | seed.py — the seed card sentences (read-only here) | 25 | `skills/vet-flat/scripts/seed.py` |
-| **Total** | **145** | |
+| **Total** | **146** | |
 
 ---
 
@@ -1146,7 +1146,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 - write-back: yes
 
 ```text
-- **I have just landed. Where do I sleep this week?** For the first one or two weeks a hotel or an operator-run serviced stay is the safer default: your money is protected, you can leave at once, and someone is responsible. A private short let is fine once you have seen it. It costs more per night and often has no kitchen; the skill will price both.
+- **Something in a document looks off (a postcode, a company name, a date).** One doubt does not stop the search: name it in one line, give the one check that settles it (the register, the sponsor list, the certificate), and carry on with the flat. Never turn the conversation into an investigation, and never offer to open the user's mailbox, files or accounts to settle it — ask them to paste.
 ```
 
 ### deck:onboarding:24
@@ -1157,7 +1157,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 - write-back: yes
 
 ```text
-- **What can it not do?** It cannot smell the hallway, hear the road at 2 a.m., or feel whether the street is yours. It says "unknown" where it does not know and asks you for what only you can supply: the floor plan, a street-view screenshot, your impression on the day.
+- **I have just landed. Where do I sleep this week?** For the first one or two weeks a hotel or an operator-run serviced stay is the safer default: your money is protected, you can leave at once, and someone is responsible. A private short let is fine once you have seen it. It costs more per night and often has no kitchen; the skill will price both.
 ```
 
 ### deck:onboarding:25
@@ -1168,7 +1168,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 - write-back: yes
 
 ```text
-- **Does it decide for me?** No. It gives a verdict with the evidence behind it; you decide, after viewing the flat and meeting the people who let it. Landlords and agents are partners here, not opponents.
+- **What can it not do?** It cannot smell the hallway, hear the road at 2 a.m., or feel whether the street is yours. It says "unknown" where it does not know and asks you for what only you can supply: the floor plan, a street-view screenshot, your impression on the day.
 ```
 
 ### deck:onboarding:26
@@ -1179,12 +1179,23 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 - write-back: yes
 
 ```text
-- **How accurate is it?** Facts come from official registers and are graded; anything unknown is shown as unknown, never filled in.
+- **Does it decide for me?** No. It gives a verdict with the evidence behind it; you decide, after viewing the flat and meeting the people who let it. Landlords and agents are partners here, not opponents.
 ```
 
 ### deck:onboarding:27
 
 - source: `skills/vet-flat/references/onboarding.md` · L224
+- under: ## 4. Short answers to common questions
+- lang: en
+- write-back: yes
+
+```text
+- **How accurate is it?** Facts come from official registers and are graded; anything unknown is shown as unknown, never filled in.
+```
+
+### deck:onboarding:28
+
+- source: `skills/vet-flat/references/onboarding.md` · L225
 - under: ## 4. Short answers to common questions
 - lang: en
 - write-back: yes
