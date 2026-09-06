@@ -839,6 +839,22 @@ class TestFileChecksAndRegrade(unittest.TestCase):
         self.assertEqual("pass", facts["deposit_cap_gbp"]["status"], facts["deposit_cap_gbp"]["detail"])
         self.assertEqual(0, card["fabrications"], [(k, v["detail"]) for k, v in facts.items() if v["status"] == "fail"])
 
+    def test_a_batch_can_pin_its_results_day(self):
+        # A batch that crosses midnight must not scatter its rows over two folders.
+        folder = tempfile.mkdtemp()
+        try:
+            rec = collections.OrderedDict([("journey", "j9-adjust-settings-by-talking#zh"), ("journey_id", "j9-adjust-settings-by-talking"),
+                                           ("variant", "zh"), ("agent", "claude"), ("model", "m"), ("run_at", "2026-09-05T23:59:00Z"),
+                                           ("journey_score", 1.0), ("fabrications", 0), ("critical_failures", []), ("meets_pass_line", True),
+                                           ("completed", True), ("turns_played", 3), ("turns_expected", 3), ("errors", []), ("turn_scores", [])])
+            raw_path, jpath = runner.write_results(rec, folder, "2026-09-05")
+            self.assertIn(os.path.join(folder, "journeys-2026-09-05"), jpath)
+            self.assertEqual(os.path.join(folder, "journeys-2026-09-05"), runner.results_dir(folder, "2026-09-05"))
+            code, out = dry_run(["--agent", "api", "--model", "m", "--journey", "j9-adjust-settings-by-talking", "--variant", "zh", "--dry-run", "--day", "2026-09-05"])
+            self.assertEqual(0, code)
+        finally:
+            shutil.rmtree(folder, ignore_errors=True)
+
     def test_the_pasted_profile_becomes_a_real_file_without_its_title_line(self):
         folder = tempfile.mkdtemp()
         try:

@@ -1135,8 +1135,8 @@ def results_dir(root=None, day=None):
     return os.path.join(root or RESULTS, "journeys-" + (day or today()))
 
 
-def write_results(record, root=None):
-    folder = results_dir(root)
+def write_results(record, root=None, day=None):
+    folder = results_dir(root, day)
     raw = os.path.join(folder, "raw")
     if not os.path.isdir(raw):
         os.makedirs(raw)
@@ -1262,6 +1262,8 @@ def build_parser():
     ap.add_argument("--journeys", default=JOURNEYS_JSON, help="the journey file")
     ap.add_argument("--results", help="results root; default bench/results. The "
                                       "journeys-<date> folder is created inside it")
+    ap.add_argument("--day", help="date label of the results folder (journeys-<day>); default today. A batch "
+                         "that crosses midnight must pass it, or its later rows land in the next day's folder")
     ap.add_argument("--refs", choices=("needed", "all", "none"), default="needed",
                     help="which reference files travel in the system prompt: the ones the "
                          "journey declares (default), every reference, or none")
@@ -1315,7 +1317,7 @@ def main(argv=None):
             record = play(resolved, args, variant_id)
             if record is None:
                 continue
-            write_results(record, args.results)
+            write_results(record, args.results, args.day)
             print("  %s: score %s, %d fabrication(s), %s -> %s"
                   % (label,
                      ("%.2f" % record["journey_score"])
