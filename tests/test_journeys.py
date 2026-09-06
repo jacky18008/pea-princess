@@ -883,6 +883,30 @@ class TestFileChecksAndRegrade(unittest.TestCase):
         facts = dict((r["check"], r) for r in card["checks"] if r["kind"] == "fact")
         self.assertEqual(0, card["fabrications"], [(k, v["detail"]) for k, v in facts.items() if v["status"] == "fail"])
 
+    def test_cheapest_tier_shapes_bullets_cells_and_a_weekly_rent_are_not_fabrications(self):
+        doc = runner.load_journeys(); by = dict((j["id"], j) for j in doc["journeys"])
+        j1 = by["j1-from-zero-zh"]
+        reply = "押金上限 5 週 = £2,134.62（1,850 × 12 ÷ 52 × 5）。你的每月總預算：\n\n- £2,000\n- 含水電\n"
+        card = runner.score_turn(j1["turns"][4], reply, j1)
+        facts = dict((r["check"], r) for r in card["checks"] if r["kind"] == "fact")
+        self.assertEqual("pass", facts["deposit_cap_gbp"]["status"], facts["deposit_cap_gbp"]["detail"])
+        self.assertEqual(0, card["fabrications"])
+        j4 = by["j4-roast-my-short-stays-en"]
+        reply = ("| D | £3,240 flexible / £2,700 non-refundable | £150 card pre-authorisation |\n"
+                 "Halcyon Row (Stay D): flexible rate £3,240; non-refundable rate £2,700.\n"
+                 "The flexible rate is £3,240, or £108/night. The non-refundable rate is £2,700, or £90/night.\n"
+                 "Bramblewick garden studio (Stay A): £78 a night.\n")
+        card = runner.score_turn(j4["turns"][0], reply, j4)
+        facts = dict((r["check"], r) for r in card["checks"] if r["kind"] == "fact")
+        self.assertEqual(0, card["fabrications"], [(k, v["detail"]) for k, v in facts.items() if v["status"] == "fail"])
+        self.assertEqual("pass", facts["stay_a_nightly_gbp"]["status"], facts["stay_a_nightly_gbp"]["detail"])
+        j7 = by["j7-compare-two-flats-en"]
+        reply = "Using the current rents: A: weekly rent £519.23; five-week deposit cap £2,596.15; B: weekly rent £484.62; five-week deposit cap £2,423.08.\n"
+        card = runner.score_turn(j7["turns"][0], reply, j7)
+        facts = dict((r["check"], r) for r in card["checks"] if r["kind"] == "fact")
+        self.assertEqual("pass", facts["deposit_caps_gbp"]["status"], facts["deposit_caps_gbp"]["detail"])
+        self.assertEqual(0, card["fabrications"], [(k, v["detail"]) for k, v in facts.items() if v["status"] == "fail"])
+
     def test_the_pasted_profile_becomes_a_real_file_without_its_title_line(self):
         folder = tempfile.mkdtemp()
         try:

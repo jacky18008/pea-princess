@@ -716,7 +716,7 @@
         "tolerance": 1.5,
         "required": false,
         "patterns": [
-         "(?:押金|deposit)[\\s\\S]{0,160}?£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)"
+         "(?:押金|deposit)(?:(?!\\|)[\\s\\S]){0,160}?£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)"
         ],
         "source": "computed from the rent in turn 5",
         "why": "Five weeks of GBP 1,850 pcm: 1850 x 12 / 52 x 5 = 2134.62. Stated differently, the arithmetic was done in the model's head and got it wrong.",
@@ -737,7 +737,8 @@
          "(?:倍|times|x)\\s*(?:的)?(?:月租|租金|rent)[^\\n]{0,10}£\\s?[0-9][0-9,]*",
          "(?:年收入|年薪|annual income|income|salary|earn)[^\\n]{0,24}£\\s?[0-9][0-9,]*",
          "£?\\s?50[,，]?000(?:\\.00)?\\b",
-         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^\\n|]*?(?=\\|)"
+         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^\\n|]*?(?=\\|)",
+         "(?m)^\\s*[-*•]\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*$"
         ]
        }
       },
@@ -1462,7 +1463,7 @@
         "tolerance": 1.5,
         "required": false,
         "patterns": [
-         "(?:deposit|押金)[\\s\\S]{0,160}?£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)"
+         "(?:deposit|押金)(?:(?!\\|)[\\s\\S]){0,160}?£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)"
         ],
         "source": "computed from the advertised rent",
         "why": "Five weeks of GBP 2,050 pcm: 2050 x 12 / 52 x 5 = 2365.38. The advertised six weeks, 2838.46, is allowed because the listing asks for it and a good reply prices both.",
@@ -1483,7 +1484,8 @@
          "(?:倍|times|x)\\s*(?:的)?(?:月租|租金|rent)[^\\n]{0,10}£\\s?[0-9][0-9,]*",
          "(?:年收入|年薪|annual income|income|salary|earn)[^\\n]{0,24}£\\s?[0-9][0-9,]*",
          "£?\\s?50[,，]?000(?:\\.00)?\\b",
-         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^\\n|]*?(?=\\|)"
+         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^\\n|]*?(?=\\|)",
+         "(?m)^\\s*[-*•]\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*$"
         ]
        }
       },
@@ -1931,7 +1933,7 @@
         "tolerance": 1.5,
         "required": false,
         "patterns": [
-         "(?:押金|deposit)[\\s\\S]{0,160}?£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)"
+         "(?:押金|deposit)(?:(?!\\|)[\\s\\S]){0,160}?£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)"
         ],
         "source": "computed from the advertised rent",
         "why": "Five weeks of GBP 2,350 pcm: 2350 x 12 / 52 x 5 = 2711.54. The advertised six weeks, 3253.85, is allowed because the listing asks for it and a good reply prices both.",
@@ -1952,7 +1954,8 @@
          "(?:倍|times|x)\\s*(?:的)?(?:月租|租金|rent)[^\\n]{0,10}£\\s?[0-9][0-9,]*",
          "(?:年收入|年薪|annual income|income|salary|earn)[^\\n]{0,24}£\\s?[0-9][0-9,]*",
          "£?\\s?50[,，]?000(?:\\.00)?\\b",
-         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^\\n|]*?(?=\\|)"
+         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^\\n|]*?(?=\\|)",
+         "(?m)^\\s*[-*•]\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*$"
         ]
        }
       },
@@ -2563,7 +2566,8 @@
         "source": "attachment:stay-a-bramblewick",
         "why": "£78 a night, exactly as the page says.",
         "line_mask": [
-         "Netherfield|\\bStay B\\b|\\bListing B\\b|\\bOption B\\b|^\\|\\s*B\\s*\\||Quillon|\\bStay C\\b|\\bListing C\\b|\\bOption C\\b|^\\|\\s*C\\s*\\||Halcyon|\\bStay D\\b|\\bListing D\\b|\\bOption D\\b|^\\|\\s*D\\s*\\|"
+         "Netherfield|\\bStay B\\b|\\bListing B\\b|\\bOption B\\b|^\\|\\s*B\\s*\\||Quillon|\\bStay C\\b|\\bListing C\\b|\\bOption C\\b|^\\|\\s*C\\s*\\||Halcyon|\\bStay D\\b|\\bListing D\\b|\\bOption D\\b|^\\|\\s*D\\s*\\|",
+         "flexible|non-?refundable"
         ],
         "mask_patterns": [
          "\\(\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:/|per|a)\\s*night[^)\\n]{0,24}\\)"
@@ -2587,7 +2591,8 @@
         "source": "attachment:stay-a-bramblewick",
         "why": "£65 cleaning fee, exactly as the page says.",
         "line_mask": [
-         "Netherfield|\\bStay B\\b|\\bListing B\\b|\\bOption B\\b|^\\|\\s*B\\s*\\||Quillon|\\bStay C\\b|\\bListing C\\b|\\bOption C\\b|^\\|\\s*C\\s*\\||Halcyon|\\bStay D\\b|\\bListing D\\b|\\bOption D\\b|^\\|\\s*D\\s*\\|"
+         "Netherfield|\\bStay B\\b|\\bListing B\\b|\\bOption B\\b|^\\|\\s*B\\s*\\||Quillon|\\bStay C\\b|\\bListing C\\b|\\bOption C\\b|^\\|\\s*C\\s*\\||Halcyon|\\bStay D\\b|\\bListing D\\b|\\bOption D\\b|^\\|\\s*D\\s*\\|",
+         "flexible|non-?refundable"
         ]
        },
        "stay_a_platform_fee_gbp": {
@@ -2608,7 +2613,8 @@
         "source": "attachment:stay-a-bramblewick",
         "why": "£315 platform service fee, exactly as the page says.",
         "line_mask": [
-         "Netherfield|\\bStay B\\b|\\bListing B\\b|\\bOption B\\b|^\\|\\s*B\\s*\\||Quillon|\\bStay C\\b|\\bListing C\\b|\\bOption C\\b|^\\|\\s*C\\s*\\||Halcyon|\\bStay D\\b|\\bListing D\\b|\\bOption D\\b|^\\|\\s*D\\s*\\|"
+         "Netherfield|\\bStay B\\b|\\bListing B\\b|\\bOption B\\b|^\\|\\s*B\\s*\\||Quillon|\\bStay C\\b|\\bListing C\\b|\\bOption C\\b|^\\|\\s*C\\s*\\||Halcyon|\\bStay D\\b|\\bListing D\\b|\\bOption D\\b|^\\|\\s*D\\s*\\|",
+         "flexible|non-?refundable"
         ]
        },
        "stay_b_monthly_gbp": {
@@ -2628,7 +2634,8 @@
         "source": "attachment:stay-b-netherfield",
         "why": "£1,900 a month, exactly as the page says.",
         "line_mask": [
-         "garden\\ studio|Bramblewick|\\bStay A\\b|\\bListing A\\b|\\bOption A\\b|^\\|\\s*A\\s*\\||Quillon|\\bStay C\\b|\\bListing C\\b|\\bOption C\\b|^\\|\\s*C\\s*\\||Halcyon|\\bStay D\\b|\\bListing D\\b|\\bOption D\\b|^\\|\\s*D\\s*\\|"
+         "garden\\ studio|Bramblewick|\\bStay A\\b|\\bListing A\\b|\\bOption A\\b|^\\|\\s*A\\s*\\||Quillon|\\bStay C\\b|\\bListing C\\b|\\bOption C\\b|^\\|\\s*C\\s*\\||Halcyon|\\bStay D\\b|\\bListing D\\b|\\bOption D\\b|^\\|\\s*D\\s*\\|",
+         "flexible|non-?refundable"
         ]
        },
        "stay_c_weekly_gbp": {
@@ -2648,7 +2655,8 @@
         "source": "attachment:stay-c-quillon-wharf",
         "why": "£445 a week, exactly as the page says.",
         "line_mask": [
-         "garden\\ studio|Bramblewick|\\bStay A\\b|\\bListing A\\b|\\bOption A\\b|^\\|\\s*A\\s*\\||Netherfield|\\bStay B\\b|\\bListing B\\b|\\bOption B\\b|^\\|\\s*B\\s*\\||Halcyon|\\bStay D\\b|\\bListing D\\b|\\bOption D\\b|^\\|\\s*D\\s*\\|"
+         "garden\\ studio|Bramblewick|\\bStay A\\b|\\bListing A\\b|\\bOption A\\b|^\\|\\s*A\\s*\\||Netherfield|\\bStay B\\b|\\bListing B\\b|\\bOption B\\b|^\\|\\s*B\\s*\\||Halcyon|\\bStay D\\b|\\bListing D\\b|\\bOption D\\b|^\\|\\s*D\\s*\\|",
+         "flexible|non-?refundable"
         ]
        },
        "stay_c_booking_fee_gbp": {
@@ -2668,7 +2676,8 @@
         "source": "attachment:stay-c-quillon-wharf",
         "why": "£180 non-refundable platform booking fee.",
         "line_mask": [
-         "garden\\ studio|Bramblewick|\\bStay A\\b|\\bListing A\\b|\\bOption A\\b|^\\|\\s*A\\s*\\||Netherfield|\\bStay B\\b|\\bListing B\\b|\\bOption B\\b|^\\|\\s*B\\s*\\||Halcyon|\\bStay D\\b|\\bListing D\\b|\\bOption D\\b|^\\|\\s*D\\s*\\|"
+         "garden\\ studio|Bramblewick|\\bStay A\\b|\\bListing A\\b|\\bOption A\\b|^\\|\\s*A\\s*\\||Netherfield|\\bStay B\\b|\\bListing B\\b|\\bOption B\\b|^\\|\\s*B\\s*\\||Halcyon|\\bStay D\\b|\\bListing D\\b|\\bOption D\\b|^\\|\\s*D\\s*\\|",
+         "flexible|non-?refundable"
         ]
        },
        "stay_c_deposit_gbp": {
@@ -2688,7 +2697,8 @@
         "source": "attachment:stay-c-quillon-wharf",
         "why": "£500, and the page says it goes to the operator, not the platform.",
         "line_mask": [
-         "garden\\ studio|Bramblewick|\\bStay A\\b|\\bListing A\\b|\\bOption A\\b|^\\|\\s*A\\s*\\||Netherfield|\\bStay B\\b|\\bListing B\\b|\\bOption B\\b|^\\|\\s*B\\s*\\||Halcyon|\\bStay D\\b|\\bListing D\\b|\\bOption D\\b|^\\|\\s*D\\s*\\|"
+         "garden\\ studio|Bramblewick|\\bStay A\\b|\\bListing A\\b|\\bOption A\\b|^\\|\\s*A\\s*\\||Netherfield|\\bStay B\\b|\\bListing B\\b|\\bOption B\\b|^\\|\\s*B\\s*\\||Halcyon|\\bStay D\\b|\\bListing D\\b|\\bOption D\\b|^\\|\\s*D\\s*\\|",
+         "flexible|non-?refundable"
         ]
        },
        "stay_d_flexible_total_gbp": {
@@ -2696,7 +2706,7 @@
         "tolerance": 0.0,
         "required": false,
         "patterns": [
-         "(?:flexible|free cancellation|(?<!non-)(?<!non )refundable rate)[^.\\n]{0,40}?£\\s?([0-9]{1,3}(?:,[0-9]{3})+|[0-9]{3,6})"
+         "(?:flexible|free cancellation|(?<!non-)(?<!non )refundable rate)(?:(?! or |, |; |／|/|\\|)[^.\\n]){0,40}?£\\s?([0-9]{1,3}(?:,[0-9]{3})+|[0-9]{3,6})"
         ],
         "near": [
          "Halcyon",
@@ -2716,7 +2726,7 @@
         "tolerance": 0.0,
         "required": false,
         "patterns": [
-         "non-?refundable(?:(?! or |, |; |／|/)[^.\\n]){0,40}?£\\s?([0-9]{1,3}(?:,[0-9]{3})+|[0-9]{3,6})"
+         "non-?refundable(?:(?! or |, |; |／|/|\\|)[^.\\n]){0,40}?£\\s?([0-9]{1,3}(?:,[0-9]{3})+|[0-9]{3,6})"
         ],
         "near": [
          "Halcyon",
@@ -3290,7 +3300,7 @@
         "tolerance": 1.5,
         "required": true,
         "patterns": [
-         "(?:押金|deposit)[\\s\\S]{0,160}?£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)"
+         "(?:押金|deposit)(?:(?!\\|)[\\s\\S]){0,160}?£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)"
         ],
         "source": "computed from the rent in turn 1",
         "why": "Five weeks of GBP 2,150 pcm: 2150 x 12 / 52 x 5 = 2480.77.",
@@ -3311,7 +3321,8 @@
          "(?:倍|times|x)\\s*(?:的)?(?:月租|租金|rent)[^\\n]{0,10}£\\s?[0-9][0-9,]*",
          "(?:年收入|年薪|annual income|income|salary|earn)[^\\n]{0,24}£\\s?[0-9][0-9,]*",
          "£?\\s?50[,，]?000(?:\\.00)?\\b",
-         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^\\n|]*?(?=\\|)"
+         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^\\n|]*?(?=\\|)",
+         "(?m)^\\s*[-*•]\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*$"
         ]
        },
        "holding_deposit_gbp": {
@@ -4342,7 +4353,7 @@
         "tolerance": 1.5,
         "required": false,
         "patterns": [
-         "(?:deposit|押金)[\\s\\S]{0,160}?£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)"
+         "(?:deposit|押金)(?:(?!\\|)[\\s\\S]){0,160}?£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)"
         ],
         "source": "computed from the two advertised rents",
         "why": "Five weeks of each rent: 2250 x 12 / 52 x 5 = 2596.15 and 2100 x 12 / 52 x 5 = 2423.08.",
@@ -4360,7 +4371,11 @@
          "(?:倍|times|x)\\s*(?:的)?(?:月租|租金|rent)[^\\n]{0,10}£\\s?[0-9][0-9,]*",
          "(?:年收入|年薪|annual income|income|salary|earn)[^\\n]{0,24}£\\s?[0-9][0-9,]*",
          "£?\\s?50[,，]?000(?:\\.00)?\\b",
-         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^\\n|]*?(?=\\|)"
+         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^\\n|]*?(?=\\|)",
+         "(?:月租|年租|租金|rent|annual)[^\\n]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "£\\s?50,?000",
+         "£\\s?[0-9][0-9,]*\\s*(?:pcm|per month|/ ?月|每月)",
+         "(?m)^\\s*[-*•]\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*$"
         ]
        }
       },
