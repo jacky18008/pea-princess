@@ -14,7 +14,7 @@ Most of the raw material is on resident-review sites whose terms forbid automate
 - **U** — the building has no natural review sample at all.
 
 ## Method in shell mode
-Nothing here fetches a review site. Scripts do the work around them:
+Nothing here fetches a review site. `scripts/reviews.py` reads the pages the user pastes - see the review surgery below, which is where this axis's real work happens - and these scripts do the work around them:
 1. `python3 scripts/company.py search "<managing agent or landlord>"` → `profile <company number>` → `filings <company number>` — activity codes, charges, accounts, officers.
 2. `python3 scripts/company.py address-search "<building postcode>"` — companies registered at the building. A building with no resident-owned management or right-to-manage company means residents structurally cannot change the managing agent; that absence is an official-register finding.
 3. `python3 scripts/redress.py rogue --name "<landlord or agent>"` — the London enforcement checker (absence only means no borough reported one).
@@ -27,6 +27,8 @@ Company and enforcement registers are fetchable. Review sites are not — see `i
 Ask the user for the full review pages for the named building, all pages, oldest first, pasted as text, plus the site's stated total number of reviews. Then run the review surgery below on what they paste.
 
 ### Review surgery (this is the axis's real method)
+**Shell mode.** The surgery is a script, so run it rather than doing it from memory. `python3 scripts/reviews.py stats <the pasted pages>` splits them into reviews and prints the count against the site's stated total, the rating histogram, the mean, the organic mean with the incentivised reviews removed, the organic mean with review-drive days removed as well, the same-day and same-month bursts, the move-out reviews and a mentions table - every figure with what it means in one clause. Then `python3 scripts/reviews.py lowest <the pages> --n 5` prints those five whole, with their line spans, and you read them in the original wording; `mentions --topic damp|noise|management|short_let` does the same for one theme, and a zero there is a finding to record, not a clean bill. The organic mean with its sample size, the incentivised share and the burst flags go into `numbers[]` carrying `computed_by: reviews.py`. It fetches nothing; if no page could be parsed it exits 1 rather than inventing a score. Without a shell, do every step below by hand and say in the finding that the counting was done by hand.
+
 1. Take everything, not a sample; check the count against the site's stated total.
 2. Remove reviews the site itself marks as incentivised or invited.
 3. Remove same-day bursts: `review_burst_same_day_min` or more reviews on one date is a review-drive day, even when none of them are marked incentivised. In one building 55% of all reviews fell on 25 such days.

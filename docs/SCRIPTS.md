@@ -1201,3 +1201,76 @@ so a test that reaches the network fails loudly. Fixtures in
 on purpose: a module of that name in `scripts/` shadows the standard library's for
 every process that puts the directory on `sys.path`, and `datetime.strptime` dies
 on it. `tests/test_landing.py` guards the whole directory against that.
+
+## `reviews.py` — pasted resident-review pages (no network)
+
+```
+reviews.py parse    pasted/*.txt [--plain]
+reviews.py stats    pasted/*.txt [--lowest 5] [--plain]
+reviews.py lowest   pasted/*.txt [--n 5] [--plain]
+reviews.py mentions pasted/*.txt --topic damp|mould|noise|management|repairs|short_let|security|heat_network|bills
+reviews.py --selftest
+```
+
+Axis 6's review surgery, as a script instead of prose. The reading pilot is why:
+BM25 search over paragraphs (`find.py`) put the answer in its top five on only
+22–33% of the three review cases — how many reviews are there, which are the
+lowest, are they clustered in time, which mention move-out or an incentive, what
+is the average without the incentivised ones — while doing fine on contracts.
+Those are counting questions, not search questions, so they get a counter.
+
+It **fetches nothing**: review sites forbid automated access, so the user pastes
+the pages and this reads what they pasted. Nothing in `references/sources.yaml`
+changes; review sites stay named-only.
+
+`parse` splits the pages into reviews and gives each one `{id, rating, date,
+resident_status, incentivised, incentive_marker, mentions, text, line_start,
+line_end}`. It reads four rating shapes — `This is rated 4.00 out of 5.00.`,
+star glyphs, `4/5`, `Rating, 5 stars`, plus `評分：4 分` — and four date shapes —
+`Jul 2019` (kept as the partial `2019-07`), `14 July 2026`, `2026-03-12`,
+`2026年3月12日`. A review is split at its rating line: a rating line carrying its
+own date is a whole header on its own, otherwise the header is the run of up to
+six short lines above it, stopping at the first finished sentence, which is the
+card above still talking. A page-level average (`This development is rated 4.29
+out of 5.00.`) is not a review and is not counted. Incentive and move-out markers
+are read in English and Chinese (`in exchange for`, `voucher`, `prize draw`,
+`incentivised`, `邀評`, `換取`, `禮券`; `moved out`, `I left`, `gave notice`,
+`搬走`, `前住戶`) — and `since I moved in` is a current resident, not a move-out.
+
+`stats` is the surgery: the count against the site's own `Viewing 1-5 out of 17`
+header, the rating histogram, the mean, the **organic mean** with the incentivised
+reviews removed, the organic mean with review-drive days removed as well (the only
+score axis 6 lets into a verdict), the incentivised and move-out shares, the
+**bursts** (3 or more reviews on one date; 5 or more in one month at one rating),
+the date span, per-month counts, the move-out reviews, a mentions table and the
+lowest N. Every figure is repeated in `numbers[]` as `{label, value, unit,
+meaning}`, so the meaning clause can be copied into the report verbatim and the
+report's numbers carry `computed_by: reviews.py`.
+
+`lowest` and `mentions` print the reviews **whole**, with their line spans, because
+a rating is a sorting key and never a finding: the agent reads and quotes the
+original wording. A topic nobody raised counts zero, and the script says a zero is
+a finding to record rather than a clean bill.
+
+```console
+$ reviews.py stats --plain pasted/glassmoor.txt
+10 reviews parsed, of the site's 10 total
+  organic mean                     2.88     the same average with the reviews the site marks as
+                                            incentivised removed, over 8 reviews
+  organic mean without drive days  2.17     and with review-drive days removed too, over 6 reviews
+  incentivised share               0.2      how much of the sample was bought ...
+  ! 3 reviews on 2026-02-04 (mean 5.0) - a review-drive day
+  mentions: bills 0, damp 2, heat_network 0, management 2, mould 1, noise 1, ...
+  move-out reviews, they weigh most:
+    #1   1.00   2026-08-02 former         pasted/glassmoor.txt:5-8
+```
+
+Exit 0 with output, 1 when no review could be parsed (it says so rather than
+inventing a score), 2 on a usage error.
+
+Tests: `tests/test_reviews.py` — 43 offline tests over four invented page shapes in
+`tests/fixtures/reviews/` (star glyphs, `rated X out of 5.00` with a `Viewing`
+header, `Rating, N stars` with resident tags, and a Traditional Chinese page), the
+41-review page in `tests/fixtures/find/`, and — skipped cleanly when that directory
+is absent — the three de-identified real shapes under `bench/private/docs/cases/`,
+checked against the review counts their own gold answers state.
