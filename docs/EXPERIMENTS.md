@@ -92,15 +92,15 @@ numbers; **PASS** = 0.90 or better with no invented number and no tone hit.
 |---|---:|---:|---:|---:|
 | Change my settings by talking, zh (3 turns) | 0.82 / 0 | **0.94 / 0** | **0.92 / 0** | 0.80 / 0 |
 | Change my settings by talking, en (3 turns) | **0.90 / 0** | **0.94 / 0** | **0.96 / 0** | 0.88 / 0 |
-| From zero: "teach me", zh (7 turns) | 0.78 / 2 | 0.76 / 0 | 0.75 / 0 | 0.80 / 0 |
-| An area and a budget, en (5 turns) | 0.80 / 0 | 0.84 / 1 | 0.77 / 0 | 0.77 / 0 |
-| Vet this listing, zh (4 turns) | 0.75 / 2 | 0.73 / 1 | 0.79 / 0 | 0.77 / 0 |
-| Roast my short stays, en (4 turns) | 0.71 / 4 | 0.78 / 2 | 0.75 / 0 | 0.80 / 0 |
-| Offer and referencing, zh (4 turns) | 0.73 / 0 | 0.76 / 0 | 0.71 / 1 | 0.72 / 0 |
+| From zero: "teach me", zh (7 turns) | 0.78 / 1 | 0.76 / 0 | 0.75 / 0 | 0.80 / 0 |
+| An area and a budget, en (5 turns) | 0.80 / 0 | 0.84 / 0 | 0.77 / 0 | 0.77 / 0 |
+| Vet this listing, zh (4 turns) | 0.75 / 0 | 0.73 / 0 | 0.79 / 0 | 0.77 / 0 |
+| Roast my short stays, en (4 turns) | 0.71 / 0 | 0.78 / 1 | 0.75 / 0 | 0.80 / 0 |
+| Offer and referencing, zh (4 turns) | 0.73 / 0 | 0.76 / 0 | 0.71 / 0 | 0.72 / 0 |
 | Arrived, damp lower ground, zh (3 turns) | 0.76 / 0 | 0.73 / 0 | 0.86 / 0 | 0.80 / 0 |
-| Compare two flats, en (3 turns) | 0.73 / 1 | 0.76 / 0 | 0.85 / 0 | 0.82 / 1 |
+| Compare two flats, en (3 turns) | 0.73 / 0 | 0.76 / 0 | 0.85 / 0 | 0.82 / 0 |
 | Licence and advance-rent clause, zh (2 turns) | 0.86 / 0 | 0.75 / 0 | 0.77 / 0 | 0.86 / 0 |
-| **mean over the ten runs** | 0.78 · 0.9 invented per run | 0.80 · 0.4 | 0.81 · 0.1 | 0.80 · 0.1 |
+| **mean over the ten runs** | 0.79 · 0.1 invented per run | 0.80 · 0.1 | 0.81 · 0.0 | 0.80 · 0.0 |
 
 What it says:
 
@@ -115,15 +115,20 @@ What it says:
   the comparison. The strongest Codex tier is not better at this than the cheapest: 0.81
   against 0.78. Nobody remembers the prose. That is the case for the fixed form (landed after
   these runs; measured in the sweep below).
-- **What an upgrade buys is fewer invented numbers, not more remembered rules**: 0.9 a run
-  on the cheapest tier, 0.4 in the middle, 0.1 on the strongest tier and on Sonnet. What
-  remains after calibration is real: the cheapest tier's rent ceiling derived with no bills
-  basis, a wrong nightly rate, a per-stay total that is off; Sonnet's one is a five-week
-  deposit cap written as one month's rent.
+- **Invented numbers, read after sixteen calibration rounds: almost none on any tier.**
+  0.1 a run on the two cheaper Codex tiers, none on the strongest tier or Sonnet. The two
+  that remain are borderline: the cheapest tier's "rent up to £1,795, only if the bills have a
+  written cap", a ceiling it derived from the user's £2,000 without saying what it assumed for
+  bills, and the middle tier's £1,900 deposit that belongs to the neighbouring stay in a
+  paragraph that names neither. The first regrade had said 1.1 / 0.5 / 0.7 / 0.2; every step of
+  that fall was a grader fix, not a model change. The honest reading: on conversations of this
+  kind, tier buys speed, terseness and the odd extra reasoning point, not fewer invented
+  numbers — the models mostly do not invent, they compute, and a mask-based count mistakes
+  computation for invention.
 - **The strongest tier is slow.** Its from-zero journey was scored twice: the first attempt
   waited 25 minutes on one short turn and was written off; the rerun completed with a
   40-minute limit. For an interactive tool that matters as much as the score.
-- **The grader needed thirteen calibration rounds before these numbers meant anything**: a
+- **The grader needed sixteen calibration rounds before these numbers meant anything**: a
   unified diff is a diff; a restated rent target, an annual rent, a weekly rent, a rent
   multiple, an income multiple, a difference against the ceiling, a price per square foot,
   the rent inside a formula and the £50,000 threshold are not rents or deposits; "reply yes to
@@ -132,7 +137,7 @@ What it says:
   internal area are not wrong areas; a comparison table leaks one stay's numbers into another
   unless each stay is read from its own lines; "non-refundable" contains "refundable"; a
   strong model's effective per-night cost in parentheses, its full-width "3 個月＝£7,050" and
-  its per-flat holding maxima in a table cell are all arithmetic, not invention. The richer a
+  its per-flat holding maxima in a table cell are all arithmetic, not invention; a savings threshold, an all-in budget "per month", a holding-deposit row of the fixed form and a difference stated with its unit are the last four. The richer a
   model's reply, the more numbers of the right kind it states about other things, so the
   false-positive rate of a mask-based fabrication count *grows with model quality*. Every
   round carries a regression test and `bench/journeys.py --regrade` re-scored the paid-for
