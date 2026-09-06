@@ -7,11 +7,12 @@ regexes, on cheap and strong models — is graded against a **private** corpus, 
 and never published. Every case is a real page saved during the maintainer's own London flat search,
 de-identified: invented building, street, company and reviewer names, X-prefixed postcodes, rewritten
 references, emails and URLs. Rents, dates, unit counts and distances stay verbatim because the answers
-depend on them, which leaves the corpus re-identifiable — so it stays out of git.
+depend on them, leaving the corpus re-identifiable — so it stays out of git.
 
 **Case types.** `reviews` (incentivised reviews, same-month bursts, organic averages) · `terms` (minimum
 stay, cancellation, fees, licence-vs-tenancy) · `planning` (what is approved, distances, construction
-period, conditions) · `listing` (deposit/term/bills inside 100 KB+ of boilerplate) · `agreement` (clauses).
+period, conditions) · `listing` (deposit/term/bills in 100 KB+ of boilerplate) · `agreement` (clauses) ·
+`shortlet` (a platform listing against what arrival really looked like).
 
 **Gold schema** — one `gold.json` per case, so the grader stays deterministic:
 ```
