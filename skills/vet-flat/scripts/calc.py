@@ -19,7 +19,6 @@ Usage:
   calc.py pct-diff --a 2400 --b 2200
 """
 import argparse
-import calendar
 import datetime as dt
 import json
 import sys
@@ -135,9 +134,17 @@ def guarantor_product(a):
     out("guarantor-product", vars(a), "oneoff: rent × months; annual: weekly_rent × weeks × years + setup", steps, res)
 
 
+def days_in_month(d):
+    """Length of d's month. Deliberately not the stdlib `calendar` module: this
+    directory now has a calendar.py of its own, and sys.path[0] is this directory
+    when the script runs, so `import calendar` here would import that one."""
+    first_next = dt.date(d.year + (d.month == 12), d.month % 12 + 1, 1)
+    return (first_next - dt.timedelta(days=1)).day
+
+
 def pro_rata(a):
     d = dt.date.fromisoformat(a.move_in)
-    days = calendar.monthrange(d.year, d.month)[1]
+    days = days_in_month(d)
     remaining = days - d.day + 1
     first = a.rent_pcm * remaining / days
     out("pro-rata", vars(a), "first month = rent_pcm × remaining_days ÷ days_in_month",

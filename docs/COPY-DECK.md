@@ -32,7 +32,7 @@ On a phone
 | Surface | Blocks | Source |
 |---|---|---|
 | README — the front page | 14 | `README.md` |
-| docs/USING.md — the plain-words walkthrough | 39 | `docs/USING.md` |
+| docs/USING.md — the plain-words walkthrough | 42 | `docs/USING.md` |
 | docs/INSTALL.md — install page | 9 | `docs/INSTALL.md` |
 | docs/EXPERIMENTS.md — which configuration to run | 7 | `docs/EXPERIMENTS.md` |
 | onboarding.md — what the skill says to a new user | 27 | `skills/vet-flat/references/onboarding.md` |
@@ -40,7 +40,7 @@ On a phone
 | inputs.md — the one message that asks the user for what is missing | 1 | `skills/vet-flat/references/inputs.md` |
 | profiles/ — the sentences a profile carries | 14 | `skills/vet-flat/profiles/*.yaml` |
 | seed.py — the seed card sentences (read-only here) | 25 | `skills/vet-flat/scripts/seed.py` |
-| **Total** | **142** | |
+| **Total** | **145** | |
 
 ---
 
@@ -354,6 +354,17 @@ How many it answers follows how deep you asked it to look: a quick check answers
 ### deck:using:14
 
 - source: `docs/USING.md` · L27
+- under: ### Before you land
+- lang: en
+- write-back: yes
+
+```text
+If you are flying in, do one thing before you look at a single flat: book somewhere to sleep for the first two weeks — a hotel or an operator-run serviced stay, where the money is protected and you can walk out the same day. Then plan about six weeks, not six nights, because signing is not moving in: after the signature come the tenant checks, the deposit going into a government scheme and the last tenant moving out, and four to seven weeks from landing to keys is ordinary in September (the author's own gap was 45 days). Tell it four things — the day you land, the day you have to be functioning here, the day you hope for keys, and what a week of the bridge costs — and it writes the week-by-week plan, marking the weeks that run into term start, a bank holiday, a planned line closure or a big local event.
+```
+
+### deck:using:15
+
+- source: `docs/USING.md` · L30
 - under: ### Changing anything
 - lang: en
 - write-back: yes
@@ -362,9 +373,9 @@ How many it answers follows how deep you asked it to look: a quick check answers
 Say it. "Raise my all-in ceiling to 2,300." "Dig deeper on crime and management, keep the rest light." "I hate noise." "I always ask whether a cheap flat is cheap for a reason." The assistant shows you exactly what will change, waits for your yes, then applies it. It never changes a setting silently.
 ```
 
-### deck:using:15
+### deck:using:16
 
-- source: `docs/USING.md` · L30
+- source: `docs/USING.md` · L33
 - under: ### Sharing
 - lang: en
 - write-back: yes
@@ -373,9 +384,9 @@ Say it. "Raise my all-in ceiling to 2,300." "Dig deeper on crime and management,
 "Share my seed" gives you a short code and a three-sentence card to post; a friend pastes the code into their own assistant and starts with your preferences and your questions.
 ```
 
-### deck:using:16
+### deck:using:17
 
-- source: `docs/USING.md` · L33
+- source: `docs/USING.md` · L36
 - under: ### The only three rules to remember
 - lang: en
 - write-back: yes
@@ -384,9 +395,9 @@ Say it. "Raise my all-in ceiling to 2,300." "Dig deeper on crime and management,
 - It is a filter. Go and see the flat; talk to the agent and the landlord. You are the princess; it only lifts the mattresses.
 ```
 
-### deck:using:17
+### deck:using:18
 
-- source: `docs/USING.md` · L34
+- source: `docs/USING.md` · L37
 - under: ### The only three rules to remember
 - lang: en
 - write-back: yes
@@ -395,9 +406,9 @@ Say it. "Raise my all-in ceiling to 2,300." "Dig deeper on crime and management,
 - It will say "unknown" and ask you rather than guess. Give it what only you have.
 ```
 
-### deck:using:18
+### deck:using:19
 
-- source: `docs/USING.md` · L35
+- source: `docs/USING.md` · L38
 - under: ### The only three rules to remember
 - lang: en
 - write-back: yes
@@ -406,9 +417,9 @@ Say it. "Raise my all-in ceiling to 2,300." "Dig deeper on crime and management,
 - Never sign on the viewing day.
 ```
 
-### deck:using:19
+### deck:using:20
 
-- source: `docs/USING.md` · L39
+- source: `docs/USING.md` · L42
 - under: ## 繁體中文
 - lang: zh-TW
 - write-back: yes
@@ -417,9 +428,9 @@ Say it. "Raise my all-in ceiling to 2,300." "Dig deeper on crime and management,
 **豌豆公主的每一件事都是「打一句話」完成的。** 不用寫程式、不用手改設定檔、不需要任何程式概念。安裝說明裡的「終端機」「Codex」「Claude Code」，其實就是一個打字框：你打句子給助理，助理順便幫你跑查核。如果你完全不想看到終端機，就用聊天軟體（Claude、ChatGPT 等都能上傳同一個 skill），只是慢一點而已。
 ```
 
-### deck:using:20
+### deck:using:21
 
-- source: `docs/USING.md` · L42
+- source: `docs/USING.md` · L45
 - under: ### 五分鐘從頭到尾
 - lang: zh-TW
 - write-back: yes
@@ -428,9 +439,9 @@ Say it. "Raise my all-in ceiling to 2,300." "Dig deeper on crime and management,
 1. **安裝**（擇一）：把安裝說明給的一行字貼進助理的打字框；或在聊天軟體的 Skills 頁上傳 zip。完成。
 ```
 
-### deck:using:21
+### deck:using:22
 
-- source: `docs/USING.md` · L43
+- source: `docs/USING.md` · L46
 - under: ### 五分鐘從頭到尾
 - lang: zh-TW
 - write-back: yes
@@ -439,9 +450,9 @@ Say it. "Raise my all-in ceiling to 2,300." "Dig deeper on crime and management,
 2. **打**：「這能幹嘛？」你會得到短短的回答和三個開始方式。
 ```
 
-### deck:using:22
+### deck:using:23
 
-- source: `docs/USING.md` · L44
+- source: `docs/USING.md` · L47
 - under: ### 五分鐘從頭到尾
 - lang: zh-TW
 - write-back: yes
@@ -450,9 +461,9 @@ Say it. "Raise my all-in ceiling to 2,300." "Dig deeper on crime and management,
 3. **打其中一句**：
 ```
 
-### deck:using:23
+### deck:using:24
 
-- source: `docs/USING.md` · L45
+- source: `docs/USING.md` · L48
 - under: ### 五分鐘從頭到尾
 - lang: zh-TW
 - write-back: yes
@@ -461,9 +472,9 @@ Say it. "Raise my all-in ceiling to 2,300." "Dig deeper on crime and management,
    - 「我 10 月要去倫敦，從零開始，教教我。」
 ```
 
-### deck:using:24
+### deck:using:25
 
-- source: `docs/USING.md` · L46
+- source: `docs/USING.md` · L49
 - under: ### 五分鐘從頭到尾
 - lang: zh-TW
 - write-back: yes
@@ -472,9 +483,9 @@ Say it. "Raise my all-in ceiling to 2,300." "Dig deeper on crime and management,
    - 「我想在東倫敦找一房，含帳單 2,200，11 月 1 日入住。」
 ```
 
-### deck:using:25
+### deck:using:26
 
-- source: `docs/USING.md` · L47
+- source: `docs/USING.md` · L50
 - under: ### 五分鐘從頭到尾
 - lang: zh-TW
 - write-back: yes
@@ -483,9 +494,9 @@ Say it. "Raise my all-in ceiling to 2,300." "Dig deeper on crime and management,
    - 「幫我尻洗（台語，roast）這個房源：」然後貼上房源文字。
 ```
 
-### deck:using:26
+### deck:using:27
 
-- source: `docs/USING.md` · L48
+- source: `docs/USING.md` · L51
 - under: ### 五分鐘從頭到尾
 - lang: zh-TW
 - write-back: yes
@@ -494,9 +505,9 @@ Say it. "Raise my all-in ceiling to 2,300." "Dig deeper on crime and management,
    - 「這是四間短租，幫我尻洗。」然後貼上。
 ```
 
-### deck:using:27
+### deck:using:28
 
-- source: `docs/USING.md` · L49
+- source: `docs/USING.md` · L52
 - under: ### 五分鐘從頭到尾
 - lang: zh-TW
 - write-back: yes
@@ -505,9 +516,9 @@ Say it. "Raise my all-in ceiling to 2,300." "Dig deeper on crime and management,
 4. **回答它問的六個問題**（預算、坪數、日期、目的地、地雷、收入審核）。「不知道」也是好答案，它會建議預設值。
 ```
 
-### deck:using:28
+### deck:using:29
 
-- source: `docs/USING.md` · L50
+- source: `docs/USING.md` · L53
 - under: ### 五分鐘從頭到尾
 - lang: zh-TW
 - write-back: yes
@@ -516,9 +527,9 @@ Say it. "Raise my all-in ceiling to 2,300." "Dig deeper on crime and management,
 5. **貼它要的東西**：頁面文字、戶型圖、街景截圖。它會一次列清單、附網址，只問一次。
 ```
 
-### deck:using:29
+### deck:using:30
 
-- source: `docs/USING.md` · L51
+- source: `docs/USING.md` · L54
 - under: ### 五分鐘從頭到尾
 - lang: zh-TW
 - write-back: yes
@@ -527,9 +538,9 @@ Say it. "Raise my all-in ceiling to 2,300." "Dig deeper on crime and management,
 6. **看報告**。第一行寫用了哪一級設定；每個數字都寫出處；「未知」就是它不知道，並告訴你怎麼查。
 ```
 
-### deck:using:30
+### deck:using:31
 
-- source: `docs/USING.md` · L54
+- source: `docs/USING.md` · L57
 - under: ### 每一戶都會回答的問題
 - lang: zh-TW
 - write-back: yes
@@ -538,9 +549,9 @@ Say it. "Raise my all-in ceiling to 2,300." "Dig deeper on crime and management,
 每一戶都問同一份問題、同樣的順序：押金幾週、要先付多少、合約上的房東到底是誰、押金放進哪個保管方案、室內面積、能源等級、帳單包含什麼、最短要住多久、什麼時候可以入住。每一題只有三種答案：**文件上有**（旁邊附上那句原文）、**你告訴我們的**（它問了你），或**還不知道**——「還不知道」是沒人查過，不是沒問題。剩下還不知道的，它會一次問你，只問一次。
 ```
 
-### deck:using:31
+### deck:using:32
 
-- source: `docs/USING.md` · L56
+- source: `docs/USING.md` · L59
 - under: ### 每一戶都會回答的問題
 - lang: zh-TW
 - write-back: yes
@@ -549,9 +560,20 @@ Say it. "Raise my all-in ceiling to 2,300." "Dig deeper on crime and management,
 答幾題看你要它查多深：快查答八題（錢和文件那八題），一般答十四題，深查答十八題——多問市政稅是哪一級、要不要住在英國的擔保人、他們的租客審核要你證明什麼、屋裡附哪些家具。你不用選。真要選的話就說「只問把關的八題」或「全部十八題都要」；這兩個開關放在設定檔的**進階**區，剛開始用的人不會被問到。
 ```
 
-### deck:using:32
+### deck:using:33
 
-- source: `docs/USING.md` · L59
+- source: `docs/USING.md` · L62
+- under: ### 還沒落地就先做這件事
+- lang: zh-TW
+- write-back: yes
+
+```text
+如果你是飛過去的，在看任何一間房子之前先做一件事：把前兩週的床先訂好——旅館或有營運商在管的服務式公寓，錢有保障、想走當天就能走。然後用「六週」而不是「六晚」來抓時間，因為簽約不等於入住：簽完之後還有租客審核、押金進政府保管方案、上一位房客搬走，從落地到拿鑰匙四到七週在九月很常見（作者自己那次是 45 天）。把四件事告訴它——哪天落地、哪天一定要能正常過日子、希望哪天拿鑰匙、短租一週多少錢——它就會寫出一週一列的計畫，並標出哪幾週會撞上開學、國定假日、事先公告的路線停駛，或附近場館的大型活動。
+```
+
+### deck:using:34
+
+- source: `docs/USING.md` · L65
 - under: ### 想改什麼，用說的
 - lang: zh-TW
 - write-back: yes
@@ -560,9 +582,9 @@ Say it. "Raise my all-in ceiling to 2,300." "Dig deeper on crime and management,
 「把含帳單上限改成 2,300。」「治安跟管理挖深一點，其他維持輕量。」「我怕吵。」「我每次都會問：便宜是不是有原因。」助理會先把「哪一項從什麼改成什麼」列給你看，等你說好才改，絕不偷偷改。
 ```
 
-### deck:using:33
+### deck:using:35
 
-- source: `docs/USING.md` · L62
+- source: `docs/USING.md` · L68
 - under: ### 分享
 - lang: zh-TW
 - write-back: yes
@@ -571,9 +593,9 @@ Say it. "Raise my all-in ceiling to 2,300." "Dig deeper on crime and management,
 「分享我的設定檔」會給你一段短碼和三句話的卡片；朋友把短碼貼進自己的助理，就從你的偏好和你的問題開始。
 ```
 
-### deck:using:34
+### deck:using:36
 
-- source: `docs/USING.md` · L65
+- source: `docs/USING.md` · L71
 - under: ### 只要記得三件事
 - lang: zh-TW
 - write-back: yes
@@ -582,9 +604,9 @@ Say it. "Raise my all-in ceiling to 2,300." "Dig deeper on crime and management,
 - 它是篩子。房子要親自去看、要跟仲介和房東聊。你才是豌豆公主，它只負責掀床墊。
 ```
 
-### deck:using:35
+### deck:using:37
 
-- source: `docs/USING.md` · L66
+- source: `docs/USING.md` · L72
 - under: ### 只要記得三件事
 - lang: zh-TW
 - write-back: yes
@@ -593,9 +615,9 @@ Say it. "Raise my all-in ceiling to 2,300." "Dig deeper on crime and management,
 - 它會說「不知道」然後問你，不會亂編。把只有你有的東西給它。
 ```
 
-### deck:using:36
+### deck:using:38
 
-- source: `docs/USING.md` · L67
+- source: `docs/USING.md` · L73
 - under: ### 只要記得三件事
 - lang: zh-TW
 - write-back: yes
@@ -604,9 +626,9 @@ Say it. "Raise my all-in ceiling to 2,300." "Dig deeper on crime and management,
 - 看房當天不簽約。
 ```
 
-### deck:using:37
+### deck:using:39
 
-- source: `docs/USING.md` · L70
+- source: `docs/USING.md` · L76
 - under: ## 简体中文（摘要）
 - lang: zh-CN
 - write-back: yes
@@ -615,9 +637,9 @@ Say it. "Raise my all-in ceiling to 2,300." "Dig deeper on crime and management,
 每件事都是打一句话完成：不用写代码、不用改设置文件。安装是贴一行字或上传 zip；然后打「这能干嘛？」开始。想改设置就用说的，助理会先列出改动、等你说好才改。它是筛子，房子要亲自去看；看房当天不签约。
 ```
 
-### deck:using:38
+### deck:using:40
 
-- source: `docs/USING.md` · L72
+- source: `docs/USING.md` · L78
 - under: ## 简体中文（摘要）
 - lang: zh-CN
 - write-back: yes
@@ -626,9 +648,20 @@ Say it. "Raise my all-in ceiling to 2,300." "Dig deeper on crime and management,
 每一户都答同一份问题（押金、先付多少、房东是谁、面积、账单、最短租期、入住日……）：文件上有（附原文）、你告诉它的，或还不知道；「还不知道」是没人查过，不是没问题，它会一次问你。
 ```
 
-### deck:using:39
+### deck:using:41
 
-- source: `docs/USING.md` · L74
+- source: `docs/USING.md` · L80
+- under: ## 简体中文（摘要）
+- lang: zh-CN
+- write-back: yes
+
+```text
+还没落地就先做一件事：把前两周的床先订好（旅馆或有运营商在管的服务式公寓，钱有保障、想走当天就能走），再用「六周」而不是「六晚」抓时间——签约不等于入住，签完还有租客审核、押金进政府保管方案、上一位房客搬走，从落地到拿钥匙四到七周在九月很常见（作者自己那次是 45 天）。告诉它四件事：哪天落地、哪天一定要能正常生活、希望哪天拿钥匙、短租一周多少钱，它就写出一周一列的计划，并标出哪几周会撞上开学、国定假日、事先公告的线路停驶或附近场馆的大型活动。
+```
+
+### deck:using:42
+
+- source: `docs/USING.md` · L82
 - under: ## 简体中文（摘要）
 - lang: zh-CN
 - write-back: yes
@@ -777,7 +810,7 @@ something else, and so you can see what that choice costs you.
 
 ### deck:experiments:3
 
-- source: `docs/EXPERIMENTS.md` · L223-L230
+- source: `docs/EXPERIMENTS.md` · L297-L304
 - under: ## What it means
 - lang: en
 - write-back: yes
@@ -795,7 +828,7 @@ something else, and so you can see what that choice costs you.
 
 ### deck:experiments:4
 
-- source: `docs/EXPERIMENTS.md` · L231-L236
+- source: `docs/EXPERIMENTS.md` · L305-L310
 - under: ## What it means
 - lang: en
 - write-back: yes
@@ -811,7 +844,7 @@ something else, and so you can see what that choice costs you.
 
 ### deck:experiments:5
 
-- source: `docs/EXPERIMENTS.md` · L237-L243
+- source: `docs/EXPERIMENTS.md` · L311-L317
 - under: ## What it means
 - lang: en
 - write-back: yes
@@ -828,7 +861,7 @@ something else, and so you can see what that choice costs you.
 
 ### deck:experiments:6
 
-- source: `docs/EXPERIMENTS.md` · L244-L248
+- source: `docs/EXPERIMENTS.md` · L318-L322
 - under: ## What it means
 - lang: en
 - write-back: yes
@@ -843,7 +876,7 @@ something else, and so you can see what that choice costs you.
 
 ### deck:experiments:7
 
-- source: `docs/EXPERIMENTS.md` · L249-L254
+- source: `docs/EXPERIMENTS.md` · L323-L328
 - under: ## What it means
 - lang: en
 - write-back: yes
@@ -1102,7 +1135,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 - write-back: yes
 
 ```text
-- **I have not landed yet. What first?** Book the bridge before you vet anything: a hotel or an operator-run serviced stay for the first two weeks, and plan for the gap between signing and keys — weeks, not nights (the maintainer's ran 45 days). Then start the search.
+- **I have not landed yet. What first?** Book the bridge before you vet anything: a hotel or an operator-run serviced stay for the first two weeks, and plan for the gap between signing and keys — weeks, not nights (the maintainer's ran 45 days). Then start the search. Then give me four things — the day you land, the day you have to be functioning here, the day you hope for keys (or "no idea"), and what a week of the bridge costs — and I will write the week-by-week plan for the first six weeks, marking which weeks run into term start, a bank holiday, a planned line closure or a local event.
 ```
 
 ### deck:onboarding:23

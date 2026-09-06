@@ -10,6 +10,18 @@ A bridge is a tent, not a home. It is vetted on three things only: clean, quiet 
 1. **Book the bridge first.** Before you vet a single flat, have somewhere to sleep booked for at least the first two weeks — a hotel or an operator-run serviced stay; a private short let only after you have seen it or verified it live. Whether the very first nights are a hotel is a personal choice; arriving without a booking is not. Say this to the user before anything else when they have not landed yet.
 2. **Signing is not moving in.** A found flat, an accepted offer, even a signed agreement is not keys. Referencing, the deposit going into a scheme, the previous tenant's move-out and the start date you agreed can put weeks between "we found it" and "we sleep there". The maintainer's own gap ran 45 days in one stretch (London, 2026) ●. Plan the bridge for the gap between signing and move-in, not for "a few nights on arrival", and price it with the year-total rule below.
 
+## The first six weeks (`scripts/calendar.py`)
+
+The two rules above are a plan, so write it down as one. `scripts/calendar.py plan --arrive <date> --start <date> [--keys-by <date> | --gap-weeks N] [--areas "Deptford, Lewisham"] [--budget-all-in N] [--bridge-weekly N]` prints a week-by-week table from the day you land to the day the keys are actually released: where you sleep that week (hotel or operator for the first two, a private short let only after you have seen it), what you do that week, what the week collides with, and the twelve-month total on the year-total basis above — computed by `calc.py`, not by anyone's head. When nobody knows the key date it plans the long end of four to seven weeks and says why. In a chat box with no shell, ask the four dates and write the same table by hand.
+
+What it reads: bank holidays from GOV.UK (the days agents, referencing companies, councils and deposit schemes are shut), planned closures from the TfL line-status feed for the modes your areas actually use, `references/term-dates.yaml` for the ten London universities, and `references/london-events.yaml` for the recurring citywide occasions and the venues.
+
+**Structural is not the same as a venue event, and the difference decides what you do about it.**
+- **Structural** is university term start. Every September, without exception, and it tightens **long lets and short lets at the same time**, across the whole city. This is the real cause of the September squeeze. You cannot dodge it by moving borough; you dodge it by arriving with the bridge already booked, or by being one of the people signing in late October when the crowd has gone.
+- **Venue** is a show at ExCeL, a concert or a match at Wembley, the O2, London Stadium, Twickenham or Olympia. It runs on that venue's own schedule, not on any yearly cycle, and it moves prices only around that venue — the tool works to a check band of about 8 km and a price band of about 2 km. You dodge it by looking at the venue's own calendar for your dates and moving your seam by a day, or by staying two miles further out. Wimbledon is July and has nothing to do with a September arrival.
+
+**Never put a percentage on any of this.** We have not measured the uplift, in this repo or anywhere we can cite. The only honest sentence is "known to push local prices up; magnitude not measured here". A report that says "expect thirty per cent more" has invented a number, and the reader will plan around it.
+
 ## The one arithmetic rule that changes every ranking
 A bridge is **not an extra cost**. During the bridge you are not paying the long-let rent. Compare whole years, not monthly averages:
 

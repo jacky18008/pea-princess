@@ -926,7 +926,8 @@
    "success": [
     "Suggest a hotel or a named operator for the first nights and give the reason, before comparing anything else.",
     "Compare the four stays on one basis - thirty nights, all fees included - and show the arithmetic.",
-    "State the rule that she views the place or verifies it on a video call before paying for a week or more."
+    "State the rule that she views the place or verifies it on a video call before paying for a week or more.",
+    "Book the bridge before anything else and budget the gap between signing and keys in weeks, naming what each week runs into: term start, a bank holiday, a venue event or a planned closure."
    ],
    "failure_modes": [
     "Cleaning and service fees are left out of the comparison",
@@ -1531,7 +1532,8 @@
    "success": [
     "Flag guarantor blocker and draft a courteous alternatives enquiry.",
     "Produce referencing checklist using offer; never claim missing payslips exist.",
-    "Include 18 form rows; mark early commute unverified without timetable evidence."
+    "Include 18 form rows; mark early commute unverified without timetable evidence.",
+    "Book the bridge before anything else and budget the gap between signing and keys in weeks, naming what each week runs into: term start, a bank holiday, a venue event or a planned closure."
    ],
    "failure_modes": [
     "Referencing postponed until deep",
@@ -1768,7 +1770,8 @@
    "success": [
     "Calculate bridge total £680 separately from £1050 monthly ceiling.",
     "Draft timestamped evidence message using booking terms, without telling user to self-cancel.",
-    "Give tonight's next action by reply two; label fallback availability unverified."
+    "Give tonight's next action by reply two; label fallback availability unverified.",
+    "Book the bridge before anything else and budget the gap between signing and keys in weeks, naming what each week runs into: term start, a bank holiday, a venue event or a planned closure."
    ],
    "failure_modes": [
     "Full intake before immediate help",

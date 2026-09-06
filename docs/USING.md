@@ -23,6 +23,9 @@ Every flat gets the same questions, in the same order: the deposit, the money as
 
 How many it answers follows how deep you asked it to look: a quick check answers the eight about money and paperwork, the normal one answers fourteen, and a deep check answers eighteen — adding the council tax band, whether they want a guarantor who lives in the UK, what their tenant checks will ask you to prove, and what furniture comes with the flat. You do not have to choose. If you ever want to, say "only ask me the eight that matter" or "answer all eighteen"; those two live in an **Advanced** part of your settings file that nobody is asked about when they start.
 
+### Before you land
+If you are flying in, do one thing before you look at a single flat: book somewhere to sleep for the first two weeks — a hotel or an operator-run serviced stay, where the money is protected and you can walk out the same day. Then plan about six weeks, not six nights, because signing is not moving in: after the signature come the tenant checks, the deposit going into a government scheme and the last tenant moving out, and four to seven weeks from landing to keys is ordinary in September (the author's own gap was 45 days). Tell it four things — the day you land, the day you have to be functioning here, the day you hope for keys, and what a week of the bridge costs — and it writes the week-by-week plan, marking the weeks that run into term start, a bank holiday, a planned line closure or a big local event.
+
 ### Changing anything
 Say it. "Raise my all-in ceiling to 2,300." "Dig deeper on crime and management, keep the rest light." "I hate noise." "I always ask whether a cheap flat is cheap for a reason." The assistant shows you exactly what will change, waits for your yes, then applies it. It never changes a setting silently.
 
@@ -55,6 +58,9 @@ Say it. "Raise my all-in ceiling to 2,300." "Dig deeper on crime and management,
 
 答幾題看你要它查多深：快查答八題（錢和文件那八題），一般答十四題，深查答十八題——多問市政稅是哪一級、要不要住在英國的擔保人、他們的租客審核要你證明什麼、屋裡附哪些家具。你不用選。真要選的話就說「只問把關的八題」或「全部十八題都要」；這兩個開關放在設定檔的**進階**區，剛開始用的人不會被問到。
 
+### 還沒落地就先做這件事
+如果你是飛過去的，在看任何一間房子之前先做一件事：把前兩週的床先訂好——旅館或有營運商在管的服務式公寓，錢有保障、想走當天就能走。然後用「六週」而不是「六晚」來抓時間，因為簽約不等於入住：簽完之後還有租客審核、押金進政府保管方案、上一位房客搬走，從落地到拿鑰匙四到七週在九月很常見（作者自己那次是 45 天）。把四件事告訴它——哪天落地、哪天一定要能正常過日子、希望哪天拿鑰匙、短租一週多少錢——它就會寫出一週一列的計畫，並標出哪幾週會撞上開學、國定假日、事先公告的路線停駛，或附近場館的大型活動。
+
 ### 想改什麼，用說的
 「把含帳單上限改成 2,300。」「治安跟管理挖深一點，其他維持輕量。」「我怕吵。」「我每次都會問：便宜是不是有原因。」助理會先把「哪一項從什麼改成什麼」列給你看，等你說好才改，絕不偷偷改。
 
@@ -70,5 +76,7 @@ Say it. "Raise my all-in ceiling to 2,300." "Dig deeper on crime and management,
 每件事都是打一句话完成：不用写代码、不用改设置文件。安装是贴一行字或上传 zip；然后打「这能干嘛？」开始。想改设置就用说的，助理会先列出改动、等你说好才改。它是筛子，房子要亲自去看；看房当天不签约。
 
 每一户都答同一份问题（押金、先付多少、房东是谁、面积、账单、最短租期、入住日……）：文件上有（附原文）、你告诉它的，或还不知道；「还不知道」是没人查过，不是没问题，它会一次问你。
+
+还没落地就先做一件事：把前两周的床先订好（旅馆或有运营商在管的服务式公寓，钱有保障、想走当天就能走），再用「六周」而不是「六晚」抓时间——签约不等于入住，签完还有租客审核、押金进政府保管方案、上一位房客搬走，从落地到拿钥匙四到七周在九月很常见（作者自己那次是 45 天）。告诉它四件事：哪天落地、哪天一定要能正常生活、希望哪天拿钥匙、短租一周多少钱，它就写出一周一列的计划，并标出哪几周会撞上开学、国定假日、事先公告的线路停驶或附近场馆的大型活动。
 
 答几题看查多深：快查八题、一般十四题、深查十八题（多问市政税等级、要不要英国担保人、租客审核要你证明什么、附哪些家具）。想自己决定就说「只问把关的八题」或「全部十八题都要」，开关在设置档的**进阶**区，新手不会被问到。

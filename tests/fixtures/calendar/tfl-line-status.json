@@ -1,0 +1,423 @@
+[
+ {
+  "$type": "Tfl.Api.Presentation.Entities.Line, Tfl.Api.Presentation.Entities",
+  "id": "circle",
+  "name": "Circle",
+  "modeName": "tube",
+  "disruptions": [],
+  "created": "2026-09-02T16:45:16.75Z",
+  "modified": "2026-09-02T16:45:16.75Z",
+  "lineStatuses": [
+   {
+    "$type": "Tfl.Api.Presentation.Entities.LineStatus, Tfl.Api.Presentation.Entities",
+    "id": 0,
+    "lineId": "circle",
+    "statusSeverity": 5,
+    "statusSeverityDescription": "Part Closure",
+    "created": "0001-01-01T00:00:00",
+    "validityPeriods": [
+     {
+      "$type": "Tfl.Api.Presentation.Entities.ValidityPeriod, Tfl.Api.Presentation.Entities",
+      "fromDate": "2026-09-12T03:30:00Z",
+      "toDate": "2026-09-14T00:29:00Z",
+      "isNow": false
+     }
+    ],
+    "reason": "CIRCLE LINE: Saturday 12 and Sunday 13 September, no service between Edgware Road and Aldgate (via Victoria)",
+    "disruption": {
+     "$type": "Tfl.Api.Presentation.Entities.Disruption, Tfl.Api.Presentation.Entities",
+     "category": "PlannedWork",
+     "categoryDescription": "PlannedWork",
+     "description": "CIRCLE LINE: Saturday 12 and Sunday 13 September, no service between Edgware Road and Aldgate (via Victoria)",
+     "created": "2026-08-28T17:58:00Z",
+     "affectedRoutes": [],
+     "affectedStops": [],
+     "closureText": "partClosure"
+    }
+   }
+  ],
+  "routeSections": [],
+  "serviceTypes": [
+   {
+    "$type": "Tfl.Api.Presentation.Entities.LineServiceTypeInfo, Tfl.Api.Presentation.Entities",
+    "name": "Regular",
+    "uri": "/Line/Route?ids=Circle&serviceTypes=Regular"
+   }
+  ],
+  "crowding": {}
+ },
+ {
+  "$type": "Tfl.Api.Presentation.Entities.Line, Tfl.Api.Presentation.Entities",
+  "id": "district",
+  "name": "District",
+  "modeName": "tube",
+  "disruptions": [],
+  "created": "2026-09-02T16:45:16.75Z",
+  "modified": "2026-09-02T16:45:16.75Z",
+  "lineStatuses": [
+   {
+    "$type": "Tfl.Api.Presentation.Entities.LineStatus, Tfl.Api.Presentation.Entities",
+    "id": 0,
+    "lineId": "district",
+    "statusSeverity": 5,
+    "statusSeverityDescription": "Part Closure",
+    "created": "0001-01-01T00:00:00",
+    "validityPeriods": [
+     {
+      "$type": "Tfl.Api.Presentation.Entities.ValidityPeriod, Tfl.Api.Presentation.Entities",
+      "fromDate": "2026-09-12T03:30:00Z",
+      "toDate": "2026-09-14T00:29:00Z",
+      "isNow": false
+     }
+    ],
+    "reason": "DISTRICT LINE: Saturday 12 and Sunday 13 September, no service between Tower Hill / Edgware Road and Ealing Broadway / Kensington (Olympia) / Richmond / Wimbledon. Use MILDMAY LINE services between Gunnersbury and Richmond on Saturday. Replacement buses operate. If travelling to Chelsea vs Hull City AFC at Stamford Bridge on Saturday, please use PICCADILLY LINE services at Earls Court.",
+    "disruption": {
+     "$type": "Tfl.Api.Presentation.Entities.Disruption, Tfl.Api.Presentation.Entities",
+     "category": "PlannedWork",
+     "categoryDescription": "PlannedWork",
+     "description": "DISTRICT LINE: Saturday 12 and Sunday 13 September, no service between Tower Hill / Edgware Road and Ealing Broadway / Kensington (Olympia) / Richmond / Wimbledon. Use MILDMAY LINE services between Gunnersbury and Richmond on Saturday. Replacement buses operate. If travelling to Chelsea vs Hull City AFC at Stamford Bridge on Saturday, please use PICCADILLY LINE services at Earls Court.",
+     "created": "2026-08-28T18:10:00Z",
+     "affectedRoutes": [],
+     "affectedStops": [],
+     "closureText": "partClosure",
+     "additionalInfo": "Replacement buses operate:Service DL1: Hammersmith - Ravenscourt Park - Stamford Brook - Turnham Green (Chiswick High Road) - Chiswick Park - Gunnersbury - Acton Town;Service DL3 (Saturday early morning and late evening only): Turnham Green Station - Chiswick Park - Gunnersbury - Kew Gardens (Royal Botanic Gardens) - Richmond;Service DL3 (Sunday): Willesden Junction - Acton Central - South Acton (Acton Lane) - Turnham Green Station - Chiswick Park - Gunnersbury - Kew Gardens (Royal Botanic Gardens) - Richmond;Service DL4: Hammersmith - Putney Bridge - East Putney (Upper Richmond Road) - Southfields - Wimbledon Park - Wimbledon;Service DL5: Earls Court - West Brompton - Fulham Broadway - Parsons Green - Putney Bridge - Putney National Rail station - Tibbetts Corner (for Southfields) - Wimbledon;"
+    }
+   }
+  ],
+  "routeSections": [],
+  "serviceTypes": [
+   {
+    "$type": "Tfl.Api.Presentation.Entities.LineServiceTypeInfo, Tfl.Api.Presentation.Entities",
+    "name": "Regular",
+    "uri": "/Line/Route?ids=District&serviceTypes=Regular"
+   }
+  ],
+  "crowding": {}
+ },
+ {
+  "$type": "Tfl.Api.Presentation.Entities.Line, Tfl.Api.Presentation.Entities",
+  "id": "waterloo-city",
+  "name": "Waterloo & City",
+  "modeName": "tube",
+  "disruptions": [],
+  "created": "2026-09-02T16:45:16.767Z",
+  "modified": "2026-09-02T16:45:16.767Z",
+  "lineStatuses": [
+   {
+    "$type": "Tfl.Api.Presentation.Entities.LineStatus, Tfl.Api.Presentation.Entities",
+    "id": 0,
+    "lineId": "waterloo-city",
+    "statusSeverity": 4,
+    "statusSeverityDescription": "Planned Closure",
+    "created": "0001-01-01T00:00:00",
+    "validityPeriods": [
+     {
+      "$type": "Tfl.Api.Presentation.Entities.ValidityPeriod, Tfl.Api.Presentation.Entities",
+      "fromDate": "2026-09-12T03:15:00Z",
+      "toDate": "2026-09-12T22:59:00Z",
+      "isNow": false
+     },
+     {
+      "$type": "Tfl.Api.Presentation.Entities.ValidityPeriod, Tfl.Api.Presentation.Entities",
+      "fromDate": "2026-09-12T23:00:00Z",
+      "toDate": "2026-09-13T00:15:00Z",
+      "isNow": false
+     }
+    ],
+    "reason": "Waterloo & City line: service operates 06:00 until 00:30, Monday to Friday only. There is no service on Saturdays, Sundays and on bank/public holidays.",
+    "disruption": {
+     "$type": "Tfl.Api.Presentation.Entities.Disruption, Tfl.Api.Presentation.Entities",
+     "category": "Information",
+     "categoryDescription": "Information",
+     "description": "Waterloo & City line: service operates 06:00 until 00:30, Monday to Friday only. There is no service on Saturdays, Sundays and on bank/public holidays.",
+     "created": "2026-01-04T01:21:00Z",
+     "affectedRoutes": [],
+     "affectedStops": [],
+     "closureText": "plannedClosure"
+    }
+   }
+  ],
+  "routeSections": [],
+  "serviceTypes": [
+   {
+    "$type": "Tfl.Api.Presentation.Entities.LineServiceTypeInfo, Tfl.Api.Presentation.Entities",
+    "name": "Regular",
+    "uri": "/Line/Route?ids=Waterloo & City&serviceTypes=Regular"
+   }
+  ],
+  "crowding": {}
+ },
+ {
+  "$type": "Tfl.Api.Presentation.Entities.Line, Tfl.Api.Presentation.Entities",
+  "id": "avanti-west-coast",
+  "name": "Avanti West Coast",
+  "modeName": "national-rail",
+  "disruptions": [],
+  "created": "2026-09-02T16:45:16.767Z",
+  "modified": "2026-09-02T16:45:16.767Z",
+  "lineStatuses": [
+   {
+    "$type": "Tfl.Api.Presentation.Entities.LineStatus, Tfl.Api.Presentation.Entities",
+    "id": 0,
+    "lineId": "avanti-west-coast",
+    "statusSeverity": 10,
+    "statusSeverityDescription": "Good Service",
+    "created": "0001-01-01T00:00:00",
+    "validityPeriods": []
+   }
+  ],
+  "routeSections": [],
+  "serviceTypes": [
+   {
+    "$type": "Tfl.Api.Presentation.Entities.LineServiceTypeInfo, Tfl.Api.Presentation.Entities",
+    "name": "Regular",
+    "uri": "/Line/Route?ids=Avanti West Coast&serviceTypes=Regular"
+   }
+  ],
+  "crowding": {}
+ },
+ {
+  "$type": "Tfl.Api.Presentation.Entities.Line, Tfl.Api.Presentation.Entities",
+  "id": "bakerloo",
+  "name": "Bakerloo",
+  "modeName": "tube",
+  "disruptions": [],
+  "created": "2026-09-02T16:45:16.75Z",
+  "modified": "2026-09-02T16:45:16.75Z",
+  "lineStatuses": [
+   {
+    "$type": "Tfl.Api.Presentation.Entities.LineStatus, Tfl.Api.Presentation.Entities",
+    "id": 0,
+    "lineId": "bakerloo",
+    "statusSeverity": 10,
+    "statusSeverityDescription": "Good Service",
+    "created": "0001-01-01T00:00:00",
+    "validityPeriods": []
+   }
+  ],
+  "routeSections": [],
+  "serviceTypes": [
+   {
+    "$type": "Tfl.Api.Presentation.Entities.LineServiceTypeInfo, Tfl.Api.Presentation.Entities",
+    "name": "Regular",
+    "uri": "/Line/Route?ids=Bakerloo&serviceTypes=Regular"
+   }
+  ],
+  "crowding": {}
+ },
+ {
+  "$type": "Tfl.Api.Presentation.Entities.Line, Tfl.Api.Presentation.Entities",
+  "id": "c2c",
+  "name": "c2c",
+  "modeName": "national-rail",
+  "disruptions": [],
+  "created": "2026-09-02T16:45:16.75Z",
+  "modified": "2026-09-02T16:45:16.75Z",
+  "lineStatuses": [
+   {
+    "$type": "Tfl.Api.Presentation.Entities.LineStatus, Tfl.Api.Presentation.Entities",
+    "id": 0,
+    "lineId": "c2c",
+    "statusSeverity": 10,
+    "statusSeverityDescription": "Good Service",
+    "created": "0001-01-01T00:00:00",
+    "validityPeriods": []
+   }
+  ],
+  "routeSections": [],
+  "serviceTypes": [
+   {
+    "$type": "Tfl.Api.Presentation.Entities.LineServiceTypeInfo, Tfl.Api.Presentation.Entities",
+    "name": "Regular",
+    "uri": "/Line/Route?ids=c2c&serviceTypes=Regular"
+   }
+  ],
+  "crowding": {}
+ },
+ {
+  "$type": "Tfl.Api.Presentation.Entities.Line, Tfl.Api.Presentation.Entities",
+  "id": "central",
+  "name": "Central",
+  "modeName": "tube",
+  "disruptions": [],
+  "created": "2026-09-02T16:45:16.767Z",
+  "modified": "2026-09-02T16:45:16.767Z",
+  "lineStatuses": [
+   {
+    "$type": "Tfl.Api.Presentation.Entities.LineStatus, Tfl.Api.Presentation.Entities",
+    "id": 0,
+    "lineId": "central",
+    "statusSeverity": 10,
+    "statusSeverityDescription": "Good Service",
+    "created": "0001-01-01T00:00:00",
+    "validityPeriods": []
+   }
+  ],
+  "routeSections": [],
+  "serviceTypes": [
+   {
+    "$type": "Tfl.Api.Presentation.Entities.LineServiceTypeInfo, Tfl.Api.Presentation.Entities",
+    "name": "Regular",
+    "uri": "/Line/Route?ids=Central&serviceTypes=Regular"
+   }
+  ],
+  "crowding": {}
+ },
+ {
+  "$type": "Tfl.Api.Presentation.Entities.Line, Tfl.Api.Presentation.Entities",
+  "id": "dlr",
+  "name": "DLR",
+  "modeName": "dlr",
+  "disruptions": [],
+  "created": "2026-09-02T16:45:16.767Z",
+  "modified": "2026-09-02T16:45:16.767Z",
+  "lineStatuses": [
+   {
+    "$type": "Tfl.Api.Presentation.Entities.LineStatus, Tfl.Api.Presentation.Entities",
+    "id": 0,
+    "lineId": "dlr",
+    "statusSeverity": 10,
+    "statusSeverityDescription": "Good Service",
+    "created": "0001-01-01T00:00:00",
+    "validityPeriods": []
+   }
+  ],
+  "routeSections": [],
+  "serviceTypes": [
+   {
+    "$type": "Tfl.Api.Presentation.Entities.LineServiceTypeInfo, Tfl.Api.Presentation.Entities",
+    "name": "Regular",
+    "uri": "/Line/Route?ids=DLR&serviceTypes=Regular"
+   }
+  ],
+  "crowding": {}
+ },
+ {
+  "$type": "Tfl.Api.Presentation.Entities.Line, Tfl.Api.Presentation.Entities",
+  "id": "elizabeth",
+  "name": "Elizabeth line",
+  "modeName": "elizabeth-line",
+  "disruptions": [],
+  "created": "2026-09-02T16:45:16.767Z",
+  "modified": "2026-09-02T16:45:16.767Z",
+  "lineStatuses": [
+   {
+    "$type": "Tfl.Api.Presentation.Entities.LineStatus, Tfl.Api.Presentation.Entities",
+    "id": 0,
+    "lineId": "elizabeth",
+    "statusSeverity": 10,
+    "statusSeverityDescription": "Good Service",
+    "created": "0001-01-01T00:00:00",
+    "validityPeriods": []
+   }
+  ],
+  "routeSections": [],
+  "serviceTypes": [
+   {
+    "$type": "Tfl.Api.Presentation.Entities.LineServiceTypeInfo, Tfl.Api.Presentation.Entities",
+    "name": "Regular",
+    "uri": "/Line/Route?ids=Elizabeth line&serviceTypes=Regular"
+   }
+  ],
+  "crowding": {}
+ },
+ {
+  "$type": "Tfl.Api.Presentation.Entities.Line, Tfl.Api.Presentation.Entities",
+  "id": "liberty",
+  "name": "Liberty",
+  "modeName": "overground",
+  "disruptions": [],
+  "created": "2026-09-02T16:45:16.767Z",
+  "modified": "2026-09-02T16:45:16.767Z",
+  "lineStatuses": [
+   {
+    "$type": "Tfl.Api.Presentation.Entities.LineStatus, Tfl.Api.Presentation.Entities",
+    "id": 0,
+    "lineId": "liberty",
+    "statusSeverity": 10,
+    "statusSeverityDescription": "Good Service",
+    "created": "0001-01-01T00:00:00",
+    "validityPeriods": []
+   }
+  ],
+  "routeSections": [],
+  "serviceTypes": [
+   {
+    "$type": "Tfl.Api.Presentation.Entities.LineServiceTypeInfo, Tfl.Api.Presentation.Entities",
+    "name": "Regular",
+    "uri": "/Line/Route?ids=Liberty&serviceTypes=Regular"
+   }
+  ],
+  "crowding": {}
+ },
+ {
+  "$type": "Tfl.Api.Presentation.Entities.Line, Tfl.Api.Presentation.Entities",
+  "id": "lioness",
+  "name": "Lioness",
+  "modeName": "overground",
+  "disruptions": [],
+  "created": "2026-09-02T16:45:16.767Z",
+  "modified": "2026-09-02T16:45:16.767Z",
+  "lineStatuses": [
+   {
+    "$type": "Tfl.Api.Presentation.Entities.LineStatus, Tfl.Api.Presentation.Entities",
+    "id": 0,
+    "lineId": "lioness",
+    "statusSeverity": 10,
+    "statusSeverityDescription": "Good Service",
+    "created": "0001-01-01T00:00:00",
+    "validityPeriods": []
+   }
+  ],
+  "routeSections": [],
+  "serviceTypes": [
+   {
+    "$type": "Tfl.Api.Presentation.Entities.LineServiceTypeInfo, Tfl.Api.Presentation.Entities",
+    "name": "Regular",
+    "uri": "/Line/Route?ids=Lioness&serviceTypes=Regular"
+   }
+  ],
+  "crowding": {}
+ },
+ {
+  "$type": "Tfl.Api.Presentation.Entities.Line, Tfl.Api.Presentation.Entities",
+  "id": "suffragette",
+  "name": "Suffragette",
+  "modeName": "overground",
+  "disruptions": [],
+  "created": "2026-09-02T16:45:16.75Z",
+  "modified": "2026-09-02T16:45:16.75Z",
+  "lineStatuses": [
+   {
+    "$type": "Tfl.Api.Presentation.Entities.LineStatus, Tfl.Api.Presentation.Entities",
+    "id": 0,
+    "lineId": "suffragette",
+    "statusSeverity": 4,
+    "statusSeverityDescription": "Planned Closure",
+    "reason": "SUFFRAGETTE LINE: Saturday 17 and Sunday 18 October, no service between Barking Riverside and Gospel Oak.",
+    "created": "0001-01-01T00:00:00",
+    "validityPeriods": [
+     {
+      "$type": "Tfl.Api.Presentation.Entities.ValidityPeriod, Tfl.Api.Presentation.Entities",
+      "fromDate": "2026-10-17T03:30:00Z",
+      "toDate": "2026-10-19T00:29:00Z",
+      "isNow": false
+     }
+    ],
+    "disruption": {
+     "$type": "Tfl.Api.Presentation.Entities.Disruption, Tfl.Api.Presentation.Entities",
+     "category": "PlannedWork",
+     "categoryDescription": "PlannedWork",
+     "description": "SUFFRAGETTE LINE: Saturday 17 and Sunday 18 October, no service between Barking Riverside and Gospel Oak.",
+     "created": "2026-08-28T17:58:00Z",
+     "affectedRoutes": [],
+     "affectedStops": [],
+     "closureText": "plannedClosure"
+    }
+   }
+  ],
+  "routeSections": [],
+  "serviceTypes": [],
+  "crowding": {}
+ }
+]

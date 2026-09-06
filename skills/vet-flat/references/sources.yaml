@@ -219,6 +219,37 @@ sources:
     last_tested: 2026-09-03
     note: "The radius form with stop types returns the nearest stations and their modes, which is what the redundancy grade is built from."
 
+  - id: tfl_line_status_range
+    name: "Transport for London Unified API, line status by mode over a date range"
+    url: "https://api.tfl.gov.uk/Line/Mode/tube,dlr,overground,elizabeth-line,national-rail/Status?startDate=2026-09-12&endDate=2026-09-13&detail=true"
+    official: true
+    access: open
+    method: GET
+    needs_key: false
+    robots_note: "No robots.txt is served."
+    tos_note: "Open data; free key optional and only for quota."
+    content_assertion: '"lineStatuses"'
+    used_by_scripts: [calendar.py]
+    used_for: [planned_closures, moving_day, bridge_seam, commute_risk]
+    last_tested: 2026-09-06
+    note: "The date range on this path form is honoured: the same weekend closures come back from the per-line /Line/{ids}/Status/{from}/to/{to} route. Severity 10 is Good Service and is not a finding; a planned closure carries category PlannedWork and a validity period. The path form with modes and a date range (/Line/Mode/tube/Status/2026-09-19/to/2026-09-21) is a 404 — use the query parameters."
+
+  # -------------------------------------------------------------- calendar --
+  - id: govuk_bank_holidays
+    name: "GOV.UK bank holidays (all three divisions)"
+    url: "https://www.gov.uk/bank-holidays.json"
+    official: true
+    access: open
+    method: GET
+    needs_key: false
+    robots_note: "Nothing in the GOV.UK robots file disallows this path."
+    tos_note: "Open Government Licence."
+    content_assertion: '"england-and-wales"'
+    used_by_scripts: [calendar.py]
+    used_for: [bridge_seam, moving_day, signing_delay, referencing_delay]
+    last_tested: 2026-09-06
+    note: "Three divisions: england-and-wales, scotland, northern-ireland. Take england-and-wales for London. A bank holiday is not a housing fact by itself; it is a day agents, referencing companies, councils and deposit schemes are shut, so a signature or a key handover cannot land on it. It also fixes the Notting Hill Carnival weekend, which is the Sunday and Monday of the August bank holiday."
+
   # -------------------------------------------------------------- planning --
   - id: gla_planning_datahub_post
     name: "London-wide planning application index (search, POST)"

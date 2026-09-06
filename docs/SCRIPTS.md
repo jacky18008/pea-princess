@@ -1119,3 +1119,82 @@ legal caps from rent 2000.0 (evidence item e-rent): deposit 5 weeks = 2307.69, h
 
 Tests: `tests/test_verify.py` — every rule has a pair, correct evidence that must not
 trigger it and wrong evidence that must, one mutation at a time from the same clean base.
+
+## `calendar.py` — the landing calendar and the first-weeks plan (open, no key)
+
+```
+calendar.py holidays --from 2026-09-16 --to 2026-11-04 [--division england-and-wales]
+calendar.py closures --from 2026-09-12 --to 2026-09-13 [--lines tube,dlr,overground,elizabeth-line,national-rail]
+calendar.py terms    --year 2026 [--uni kcl,ucl]
+calendar.py events   --from 2026-09-16 --to 2026-11-04 [--near "Deptford, Lewisham"] [--paste events.txt]
+calendar.py plan     --arrive 2026-09-16 --start 2026-10-01 [--keys-by 2026-11-04 | --gap-weeks 6]
+                     [--areas "Deptford, Lewisham"] [--budget-all-in 1900] [--bridge-weekly 550]
+```
+
+Global flags: `--plain` for the table a person reads, `--offline` to read
+`tests/fixtures/calendar` and fetch nothing, `--today YYYY-MM-DD` to pin the run
+date, `--verbose` for the curl commands on stderr.
+
+`holidays` reads the GOV.UK bank-holidays JSON and returns the days inside your
+window for one division (england-and-wales by default). A bank holiday is not a
+housing fact on its own: it is a day agents, referencing companies, councils and
+deposit schemes are shut, so a signature or a key handover cannot land on it.
+
+`closures` asks the TfL Unified API for line status across a **date range** —
+`/Line/Mode/{modes}/Status?startDate&endDate&detail=true`, which honours the range;
+the path form with modes and dates is a 404. Good Service (severity 10) is dropped;
+what is left is filtered on whether its validity periods actually overlap your dates.
+`--lines` is a mode filter, not a line filter. No key is needed at this volume.
+
+`terms` reads `references/term-dates.yaml`, a hand-curated file: welcome week,
+teaching start and the autumn term for ten London universities, each with the
+university's own URL and the day a human read it. A row that could not be read on
+the university's own page is marked `estimated: true` and says in plain words how
+coarse it is (**UCL** and **Birkbeck** are the two estimated rows today). The tool
+warns when a `checked_on` is more than 300 days old, because next year's dates are
+published in the spring and an older reading is looking at last year's page.
+
+`events` reads `references/london-events.yaml`. Two kinds of thing live there and
+the difference is the point. **Structural** is university term start: every
+September, it tightens long lets **and** short lets together, across the whole city,
+and it is the real cause of the September squeeze. **Venue** is a show at ExCeL, a
+concert or a match at Wembley, the O2, London Stadium, Twickenham or Olympia — on
+that venue's own schedule, no yearly cycle, and it moves prices only around that
+venue. Venue calendars are never scraped: the tool names the calendar and the window
+and you open it, or you paste the page and `--paste` reads the dates out of it.
+`--near` takes area names or postcode districts and lists the venues within about
+8 km (the price band is tighter, about 2 km). **No percentage is ever printed**: we
+have not measured any uplift, so the sentence is always "known to push local prices
+up; magnitude not measured here", and `tests/test_calendar.py` asserts there is not
+a single per-cent sign in the events file.
+
+`plan` is the one people actually run. It writes the week-by-week bridge from the day
+you land to the day the keys are released: where you sleep that week (hotel or
+operator-run stay for the first two, per `axes/15`), what you do that week, what the
+week collides with, and the twelve-month total — which it gets by calling
+`calc.py bridge`, never by doing the arithmetic itself. With no key date it plans the
+long end of four to seven weeks and says why (the maintainer's own gap ran 45 days).
+`--areas` picks both the venues worth checking and the rail modes whose closure feed
+is worth reading; an area it cannot place is said out loud, not guessed.
+
+```console
+$ calendar.py --offline --plain plan --arrive 2026-09-16 --start 2026-10-01 \
+      --areas "Deptford, Lewisham" --budget-all-in 1900 --bridge-weekly 550
+The first weeks: land 2026-09-16, be functioning by 2026-10-01, keys about 2026-11-04
+
+The two rules, before any listing:
+ 1. Book the bridge first — somewhere to sleep for at least the first two weeks ...
+ 3. The gap: 49 days, about 7.0 weeks. nobody told me when the keys come, so I planned
+    the long end of the ordinary band ... [source: references/axes/15-... · as_of 2026-09-06]
+ 4. Week 1, 2026-09-16 to 2026-09-22 — sleep: hotel or operator-run serviced stay.
+      ! [structural] term start lands in this week — Goldsmiths welcome week 2026-09-18; ...
+      ! [citywide] London Fashion Week, 2026-09-11 to 2026-09-24 ...
+11. Twelve-month total 23572.0 pounds = bridge 3850.0 plus tenancy 19722.0 ...
+```
+
+Every numbered line of the plain output ends with its source and an `as_of` date;
+`tests/test_calendar.py` asserts that for all five subcommands.
+
+Tests: `tests/test_calendar.py` — offline only, with `fetch` replaced by a landmine
+so a test that reaches the network fails loudly. Fixtures in
+`tests/fixtures/calendar/` are real responses, trimmed.

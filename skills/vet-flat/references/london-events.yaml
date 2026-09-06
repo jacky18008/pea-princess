@@ -1,0 +1,557 @@
+# Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen — https://github.com/jacky18008/pea-princess — CC BY 4.0
+#
+# Curated demand spikes for London accommodation, read by scripts/calendar.py.
+# Nothing here is scraped. Venue calendars change every week and their terms
+# forbid crawling, so this file names the calendar and the tool tells you to open it.
+#
+# The one rule this file exists to protect
+#   We have never measured how much any of these moves a price. So no entry
+#   claims an uplift, and the word "typical" describes a WINDOW, never a price.
+#   If you ever want to write a number here, measure it first, then cite it.
+#
+# The distinction that matters
+#   structural  university term start. Every September, without exception, and it
+#               tightens long lets AND short lets at the same time. This is the real
+#               cause of the September squeeze; it is not an "event".
+#   citywide    a recurring occasion on the city's calendar (Carnival, the Marathon,
+#               Fashion Week, New Year, Pride). Dates move year to year; the window
+#               is typical, not fixed.
+#   venue       a show, concert or match at one building. On the venue's own schedule,
+#               not on any yearly cycle, and it pushes prices up only around that
+#               venue. Never assume one is on; never assume one is not.
+#
+# Field guide
+#   kind            structural | citywide | venue
+#   window_from     typical start, as MM-DD (the window, not a claim about this year)
+#   window_to       typical end, as MM-DD
+#   moveable        true when the actual dates move year to year and must be checked
+#   anchor          a rule that fixes the date exactly, when one exists
+#                   (last_monday_august = the August bank holiday weekend)
+#   affects         who feels it, in plain words
+#   check           what to open to confirm this year's dates
+#   district        the postcode district it sits in, for the --near filter
+#   lat / lng       the venue point (postcodes.io, from the venue's own postcode)
+#   radius_note     how far the price effect is thought to reach. Direction only.
+#
+# The areas block at the foot is a small gazetteer: district centres from
+# postcodes.io outcodes, plus the rail modes that actually serve the district.
+# It decides which venue calendars to open and which closure feed to read.
+# It is not a location claim about anything and must never be quoted as one.
+
+version: "2026-09-06"
+checked_on: 2026-09-06
+gazetteer_source: "https://api.postcodes.io/outcodes/SE8"
+
+rules:
+  no_magnitude: "Say 'known to push local prices up; magnitude not measured here'. Never a number, never a multiplier, never a range."
+  structural_is_the_cause: "University term start is the structural squeeze. It hits long lets and short lets together, every September. A venue event is local and occasional. Do not describe them as the same thing."
+  wimbledon_is_july: "Wimbledon is late June to mid-July and is irrelevant to a September arrival. It is in this file because SW19 residents ask."
+  venues_are_not_scraped: "The tool names the calendar and the window. You open it."
+
+price_radius_km: 2
+price_radius_note: "Prices are thought to move within about 2 km of a venue. Beyond that a big night at it is usually not what moved your quote. Magnitude not measured here."
+check_band_km: 8
+check_band_note: "The tool tells you to open a venue's calendar when it is within about 8 km of your areas, which is wider than the price band on purpose: a bridge stay two or three stops away is still competing with the same crowd."
+
+spikes:
+
+  - id: term_start
+    name: "University term start"
+    kind: structural
+    window_text: "mid-September to early October, every year"
+    window_from: "09-07"
+    window_to: "10-11"
+    moveable: false
+    anchor: null
+    affects: "the whole city, long lets and short lets at the same time"
+    why: "Tens of thousands of students arrive inside three weeks and need a bed in both markets at once. This is the real cause of the September squeeze; everything else that month is a local top-up."
+    check: "references/term-dates.yaml, then the university's own term-dates page"
+    source: "references/term-dates.yaml"
+    note: "Known to tighten supply and push prices up; magnitude not measured here."
+
+  - id: notting_hill_carnival
+    name: "Notting Hill Carnival"
+    kind: citywide
+    window_text: "the August bank holiday weekend: the Sunday and the Monday"
+    window_from: "08-23"
+    window_to: "09-01"
+    moveable: true
+    anchor: last_monday_august
+    affects: "west and central London hardest; hotel demand across the city"
+    why: "One of the largest street events in Europe, on a weekend when the whole country already has a day off."
+    check: "https://nhcarnival.org"
+    source: "https://www.gov.uk/bank-holidays"
+    note: "The date is fixed by the bank holiday, so the tool computes it. Known to push prices up; magnitude not measured here."
+
+  - id: london_marathon
+    name: "London Marathon"
+    kind: citywide
+    window_text: "late April, a Sunday"
+    window_from: "04-19"
+    window_to: "04-28"
+    moveable: true
+    anchor: null
+    affects: "hotels along the route: Greenwich, Docklands, the City, Westminster"
+    why: "Tens of thousands of runners and their families book beds near the start and the finish, months ahead."
+    check: "https://www.tcslondonmarathon.com"
+    source: "https://www.tcslondonmarathon.com"
+    note: "Known to push prices up near the route; magnitude not measured here."
+
+  - id: london_fashion_week
+    name: "London Fashion Week"
+    kind: citywide
+    window_text: "mid-September, and again in February"
+    window_from: "09-11"
+    window_to: "09-24"
+    moveable: true
+    anchor: null
+    affects: "central London hotels, and it lands inside the term-start window"
+    why: "An international trade audience arrives in central London in the same fortnight the students do. The two stack."
+    check: "https://londonfashionweek.co.uk"
+    source: "https://londonfashionweek.co.uk"
+    note: "Known to push central prices up; magnitude not measured here. Its real cost to you is that it sits on top of term start."
+
+  - id: new_year
+    name: "New Year in London"
+    kind: citywide
+    window_text: "27 December to 2 January"
+    window_from: "12-27"
+    window_to: "01-02"
+    moveable: false
+    anchor: null
+    affects: "central London, and everything on the river"
+    why: "A fixed international peak, and the week when agents, referencing companies and councils are shut."
+    check: "https://www.london.gov.uk"
+    source: "https://www.gov.uk/bank-holidays"
+    note: "Also the week a signing stalls: offices are closed. Known to push prices up; magnitude not measured here."
+
+  - id: pride_in_london
+    name: "Pride in London"
+    kind: citywide
+    window_text: "late June or early July, a Saturday"
+    window_from: "06-24"
+    window_to: "07-08"
+    moveable: true
+    anchor: null
+    affects: "central London for the weekend"
+    why: "A very large one-day parade through the middle of the city."
+    check: "https://prideinlondon.org"
+    source: "https://prideinlondon.org"
+    note: "Known to push central prices up for the weekend; magnitude not measured here."
+
+  - id: wimbledon
+    name: "The Championships, Wimbledon"
+    kind: citywide
+    window_text: "late June to mid-July, a fortnight"
+    window_from: "06-24"
+    window_to: "07-16"
+    moveable: true
+    anchor: null
+    affects: "SW19 and nearby"
+    district: SW19
+    why: "A fortnight of daily crowds into one suburb, with a short-let market that reprices around it."
+    check: "https://www.wimbledon.com"
+    source: "https://www.wimbledon.com"
+    note: "July, not September. It has nothing to do with a September arrival. Known to push SW19 prices up in its fortnight; magnitude not measured here."
+
+venues:
+
+  - id: excel
+    name: "ExCeL London"
+    kind: venue
+    district: E16
+    lat: 51.508134
+    lng: 0.028673
+    borough: Newham
+    check: "the venue's own events calendar"
+    calendar: "https://www.excel.london/whats-on"
+    radius_note: "prices move within about 2 km of the venue"
+    note: "Large trade shows and conferences, several a month, on no yearly cycle. A big one fills every bed in the Royal Docks and Canning Town."
+    source: "https://www.excel.london/whats-on"
+
+  - id: the_o2
+    name: "The O2"
+    kind: venue
+    district: SE10
+    lat: 51.502194
+    lng: 0.002819
+    borough: Greenwich
+    check: "the venue's own events calendar"
+    calendar: "https://www.theo2.co.uk/events"
+    radius_note: "prices move within about 2 km of the venue"
+    note: "Concerts most nights of the week. North Greenwich, Greenwich and the Jubilee line corridor feel it."
+    source: "https://www.theo2.co.uk/events"
+
+  - id: wembley_stadium
+    name: "Wembley Stadium"
+    kind: venue
+    district: HA9
+    lat: 51.556694
+    lng: -0.279643
+    borough: Brent
+    check: "the venue's own events calendar"
+    calendar: "https://www.wembleystadium.com/events"
+    radius_note: "prices move within about 2 km of the venue"
+    note: "Matches and stadium concerts. A concert night and a match day are the two things that empty Wembley of cheap beds."
+    source: "https://www.wembleystadium.com/events"
+
+  - id: wembley_arena
+    name: "OVO Arena Wembley"
+    kind: venue
+    district: HA9
+    lat: 51.558134
+    lng: -0.28282
+    borough: Brent
+    check: "the venue's own events calendar"
+    calendar: "https://www.ovoarena.co.uk/events"
+    radius_note: "prices move within about 2 km of the venue"
+    note: "The arena next to the stadium, on its own schedule. Two calendars, one postcode district."
+    source: "https://www.ovoarena.co.uk/events"
+
+  - id: london_stadium
+    name: "London Stadium"
+    kind: venue
+    district: E20
+    lat: 51.538636
+    lng: -0.016404
+    borough: Newham
+    check: "the venue's own events calendar"
+    calendar: "https://www.londonstadium.com/events"
+    radius_note: "prices move within about 2 km of the venue"
+    note: "Football through the season, concerts and athletics in summer. Stratford and the Olympic Park feel it."
+    source: "https://www.londonstadium.com/events"
+
+  - id: twickenham
+    name: "Twickenham Stadium (Allianz Stadium)"
+    kind: venue
+    district: TW2
+    lat: 51.455086
+    lng: -0.340076
+    borough: "Richmond upon Thames"
+    check: "the venue's own events calendar"
+    calendar: "https://www.allianzstadium.com/events"
+    radius_note: "prices move within about 2 km of the venue"
+    note: "Rugby internationals and stadium concerts, in far south-west London. Irrelevant to a stay anywhere east or south-east."
+    source: "https://www.allianzstadium.com/events"
+
+  - id: olympia
+    name: "Olympia London"
+    kind: venue
+    district: W14
+    lat: 51.502433
+    lng: -0.216402
+    borough: "Hammersmith and Fulham"
+    check: "the venue's own events calendar"
+    calendar: "https://olympia.london/whats-on"
+    radius_note: "prices move within about 2 km of the venue"
+    note: "Exhibitions and consumer shows in west London. The point is the same as ExCeL: a trade audience arriving for three days."
+    source: "https://olympia.london/whats-on"
+
+  - id: emirates
+    name: "Emirates Stadium"
+    kind: venue
+    district: N5
+    lat: 51.556669
+    lng: -0.106345
+    borough: Islington
+    check: "the venue's own events calendar"
+    calendar: "https://www.arsenal.com/fixtures"
+    radius_note: "prices move within about 2 km of the venue"
+    note: "Home fixtures through the season, midweek as well as weekends. Holloway, Highbury and Finsbury Park feel it."
+    source: "https://www.arsenal.com/fixtures"
+
+  - id: tottenham
+    name: "Tottenham Hotspur Stadium"
+    kind: venue
+    district: N17
+    lat: 51.605745
+    lng: -0.066367
+    borough: Haringey
+    check: "the venue's own events calendar"
+    calendar: "https://www.tottenhamhotspur.com/fixtures"
+    radius_note: "prices move within about 2 km of the venue"
+    note: "Football, plus American football and concerts. Tottenham and Seven Sisters feel it."
+    source: "https://www.tottenhamhotspur.com/fixtures"
+
+# ---------------------------------------------------------------- areas ----
+# District centres from the postcodes.io outcode endpoint, fetched 2026-09-06.
+# `names` is curated: the everyday names people type. `modes` is curated too —
+# the rail modes that actually serve the district, used only to choose which
+# closure feed to read. Neither is exhaustive and neither is a location claim.
+
+areas:
+  - district: SE1
+    lat: 51.49916
+    lng: -0.09145
+    names: [London Bridge, Borough, Southwark, Waterloo, Bankside, Bermondsey Street]
+    modes: [tube, national-rail]
+  - district: SE5
+    lat: 51.47391
+    lng: -0.09146
+    names: [Camberwell]
+    modes: [national-rail]
+  - district: SE8
+    lat: 51.482
+    lng: -0.02962
+    names: [Deptford]
+    modes: [national-rail, overground]
+  - district: SE10
+    lat: 51.48487
+    lng: 0.00069
+    names: [Greenwich, North Greenwich]
+    modes: [tube, dlr, national-rail]
+  - district: SE13
+    lat: 51.45964
+    lng: -0.00967
+    names: [Lewisham]
+    modes: [dlr, national-rail]
+  - district: SE14
+    lat: 51.47595
+    lng: -0.04227
+    names: [New Cross, New Cross Gate]
+    modes: [overground, national-rail]
+  - district: SE15
+    lat: 51.47283
+    lng: -0.06557
+    names: [Peckham, Nunhead]
+    modes: [overground, national-rail]
+  - district: SE16
+    lat: 51.49657
+    lng: -0.05317
+    names: [Rotherhithe, Canada Water, Surrey Quays]
+    modes: [tube, overground]
+  - district: SE17
+    lat: 51.48832
+    lng: -0.0934
+    names: [Elephant and Castle, Walworth]
+    modes: [tube, national-rail]
+  - district: SE18
+    lat: 51.48448
+    lng: 0.07235
+    names: [Woolwich, Plumstead]
+    modes: [elizabeth-line, dlr, national-rail]
+  - district: SE22
+    lat: 51.45444
+    lng: -0.07238
+    names: [East Dulwich]
+    modes: [national-rail]
+  - district: SE23
+    lat: 51.44149
+    lng: -0.04911
+    names: [Forest Hill]
+    modes: [overground, national-rail]
+  - district: E1
+    lat: 51.51738
+    lng: -0.05938
+    names: [Whitechapel, Aldgate East, Stepney, Shadwell]
+    modes: [tube, elizabeth-line, overground]
+  - district: E2
+    lat: 51.52964
+    lng: -0.06262
+    names: [Bethnal Green]
+    modes: [tube, overground]
+  - district: E3
+    lat: 51.5281
+    lng: -0.02482
+    names: [Bow, Mile End]
+    modes: [tube, dlr, overground]
+  - district: E8
+    lat: 51.54378
+    lng: -0.06609
+    names: [Hackney, Dalston, London Fields]
+    modes: [overground]
+  - district: E9
+    lat: 51.54399
+    lng: -0.04176
+    names: [Homerton, Hackney Wick]
+    modes: [overground]
+  - district: E11
+    lat: 51.56869
+    lng: 0.01356
+    names: [Leytonstone, Leyton]
+    modes: [tube, overground]
+  - district: E14
+    lat: 51.50616
+    lng: -0.01816
+    names: [Canary Wharf, Poplar, Isle of Dogs, Limehouse]
+    modes: [tube, dlr, elizabeth-line]
+  - district: E15
+    lat: 51.54021
+    lng: 0.00314
+    names: [Stratford, West Ham]
+    modes: [tube, dlr, elizabeth-line, overground, national-rail]
+  - district: E16
+    lat: 51.5103
+    lng: 0.03015
+    names: [Canning Town, Custom House, Royal Docks, Silvertown]
+    modes: [dlr, elizabeth-line, tube]
+  - district: E17
+    lat: 51.58696
+    lng: -0.02084
+    names: [Walthamstow]
+    modes: [tube, overground]
+  - district: E20
+    lat: 51.54631
+    lng: -0.01062
+    names: [Olympic Park, East Village]
+    modes: [tube, dlr, elizabeth-line, overground, national-rail]
+  - district: N1
+    lat: 51.53777
+    lng: -0.09698
+    names: [Islington, Angel, Hoxton]
+    modes: [tube, overground, national-rail]
+  - district: N4
+    lat: 51.57011
+    lng: -0.10375
+    names: [Finsbury Park, Stroud Green]
+    modes: [tube, national-rail]
+  - district: N5
+    lat: 51.5539
+    lng: -0.09854
+    names: [Highbury]
+    modes: [tube, overground, national-rail]
+  - district: N7
+    lat: 51.55334
+    lng: -0.11829
+    names: [Holloway, Caledonian Road]
+    modes: [tube, overground]
+  - district: N16
+    lat: 51.56252
+    lng: -0.07663
+    names: [Stoke Newington]
+    modes: [overground]
+  - district: N17
+    lat: 51.59772
+    lng: -0.07124
+    names: [Tottenham, Seven Sisters]
+    modes: [overground, national-rail]
+  - district: NW1
+    lat: 51.53341
+    lng: -0.14385
+    names: [Camden Town, Kings Cross, Euston, Regents Park]
+    modes: [tube, overground, national-rail]
+  - district: NW3
+    lat: 51.55235
+    lng: -0.17254
+    names: [Hampstead, Belsize Park]
+    modes: [tube, overground]
+  - district: NW5
+    lat: 51.55173
+    lng: -0.14511
+    names: [Kentish Town, Tufnell Park]
+    modes: [tube, national-rail]
+  - district: NW6
+    lat: 51.54219
+    lng: -0.19623
+    names: [Kilburn, West Hampstead, Queens Park]
+    modes: [tube, overground, national-rail]
+  - district: NW10
+    lat: 51.54118
+    lng: -0.24817
+    names: [Willesden, Harlesden, Park Royal]
+    modes: [tube, overground, national-rail]
+  - district: HA9
+    lat: 51.56063
+    lng: -0.28509
+    names: [Wembley, Wembley Park]
+    modes: [tube, national-rail]
+  - district: W1
+    lat: 51.51785
+    lng: -0.13745
+    names: [Fitzrovia, Soho, Marylebone, Mayfair]
+    modes: [tube, elizabeth-line]
+  - district: W2
+    lat: 51.51522
+    lng: -0.18519
+    names: [Paddington, Bayswater]
+    modes: [tube, elizabeth-line, national-rail]
+  - district: W6
+    lat: 51.49256
+    lng: -0.22844
+    names: [Hammersmith]
+    modes: [tube]
+  - district: W12
+    lat: 51.50839
+    lng: -0.23976
+    names: [Shepherds Bush, White City]
+    modes: [tube, overground]
+  - district: W14
+    lat: 51.49469
+    lng: -0.21025
+    names: [West Kensington, Olympia, Barons Court]
+    modes: [tube, overground]
+  - district: WC1
+    lat: 51.52357
+    lng: -0.1324
+    names: [Bloomsbury, Russell Square, Holborn]
+    modes: [tube]
+  - district: WC2
+    lat: 51.51161
+    lng: -0.11623
+    names: [Covent Garden, Strand, Aldwych]
+    modes: [tube, national-rail]
+  - district: EC1
+    lat: 51.52503
+    lng: -0.0913
+    names: [Clerkenwell, Farringdon, Barbican, Old Street]
+    modes: [tube, elizabeth-line, national-rail]
+  - district: EC2
+    lat: 51.51807
+    lng: -0.082
+    names: [Shoreditch, Liverpool Street, Moorgate]
+    modes: [tube, elizabeth-line, overground, national-rail]
+  - district: SW1
+    lat: 51.49574
+    lng: -0.14472
+    names: [Westminster, Victoria, Pimlico]
+    modes: [tube, national-rail]
+  - district: SW4
+    lat: 51.46098
+    lng: -0.13647
+    names: [Clapham, Clapham Common]
+    modes: [tube, national-rail]
+  - district: SW6
+    lat: 51.47657
+    lng: -0.20098
+    names: [Fulham, Parsons Green]
+    modes: [tube]
+  - district: SW8
+    lat: 51.47679
+    lng: -0.13197
+    names: [Vauxhall, Nine Elms, South Lambeth]
+    modes: [tube, national-rail]
+  - district: SW9
+    lat: 51.46936
+    lng: -0.11388
+    names: [Brixton, Stockwell]
+    modes: [tube, national-rail]
+  - district: SW11
+    lat: 51.46875
+    lng: -0.16284
+    names: [Battersea, Clapham Junction]
+    modes: [tube, overground, national-rail]
+  - district: SW19
+    lat: 51.42417
+    lng: -0.20281
+    names: [Wimbledon, Southfields]
+    modes: [tube, national-rail]
+  - district: TW1
+    lat: 51.45102
+    lng: -0.32538
+    names: [Twickenham, St Margarets]
+    modes: [national-rail]
+  - district: TW2
+    lat: 51.44632
+    lng: -0.35454
+    names: [Whitton, Twickenham Stadium]
+    modes: [national-rail]
+  - district: IG1
+    lat: 51.55946
+    lng: 0.07343
+    names: [Ilford]
+    modes: [elizabeth-line, national-rail]
+  - district: CR0
+    lat: 51.37325
+    lng: -0.07795
+    names: [Croydon, East Croydon]
+    modes: [national-rail, tram]

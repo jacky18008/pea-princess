@@ -1,0 +1,174 @@
+# Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen — https://github.com/jacky18008/pea-princess — CC BY 4.0
+#
+# Curated: 2026/27 autumn dates for ten London universities, read by scripts/calendar.py.
+# This is the file behind the one structural fact in the London rental year — term
+# start tightens long lets AND short lets, every September, across the whole city.
+#
+# Why it is curated and not fetched
+#   Every one of these pages is a different shape, three of them sit behind a bot
+#   wall, and two publish the real dates in a spreadsheet. There is no feed. So a
+#   human reads the page, writes the date down with the URL and the date it was
+#   read, and the tool warns when that reading goes stale.
+#
+# The rule this file exists to protect
+#   A date that was not seen on the university's own page is marked
+#   `estimated: true` and carries a coarse phrase in `estimate_note`
+#   ("late September 2026"). Never invent precision. An honest "late September"
+#   plans a bridge stay perfectly well; a wrong Monday does not.
+#
+# Field guide
+#   id                short key for --uni
+#   name              the institution's own name
+#   welcome_from      first day of welcome / induction / orientation, ISO
+#   welcome_to        last day of it, ISO
+#   teaching_starts   the day teaching actually starts, ISO. This is the date that
+#                     matters for housing: it is the deadline students move for.
+#   term_start        the formal term or semester start, ISO (often earlier)
+#   term_end          the end of autumn teaching, ISO
+#   estimated         true when any date above could not be read on the
+#                     university's own page
+#   estimate_note     what is estimated and how coarse it is
+#   source            the university's own page
+#   checked_on        the day a human read that page
+#   note              anything that would mislead a reader who only saw the dates
+#
+# Staleness: calendar.py warns when checked_on is more than 300 days old. Term
+# dates for the following year are usually published in the spring, so a reading
+# older than that is looking at last year's page.
+
+version: "2026-09-06"
+academic_year: "2026/27"
+staleness_days: 300
+scope: "Autumn 2026 only. Second and third terms are out of scope: the housing squeeze is a September event."
+
+universities:
+
+  - id: kcl
+    name: "King's College London"
+    welcome_from: 2026-09-14
+    welcome_to: 2026-09-25
+    teaching_starts: 2026-09-28
+    term_start: 2026-09-28
+    term_end: 2026-12-11
+    estimated: false
+    estimate_note: ""
+    source: "https://self-service.kcl.ac.uk/article/KA-01913/en-us"
+    checked_on: 2026-09-06
+    note: "Two welcome weeks: the first largely online, the second on campus with faculty induction. King's runs semesters, and the 2026/27 calendar was restructured, so a page you saved last year is not this year's."
+
+  - id: ucl
+    name: "University College London"
+    welcome_from: 2026-09-28
+    welcome_to: 2026-10-02
+    teaching_starts: 2026-10-05
+    term_start: 2026-09-28
+    term_end: 2026-12-18
+    estimated: true
+    estimate_note: "UCL answers every automated request with a block page, so none of these dates was read on UCL's own page. Term 1 as late September to mid-December is high confidence; the welcome week and the 5 October teaching start are not confirmed. Treat the whole entry as late September to early October and check it yourself."
+    source: "https://www.ucl.ac.uk/study/current-students/life-ucl/term-dates-and-closures"
+    checked_on: 2026-09-06
+    note: "Open the page in a browser and confirm before you plan a move around it. UCL teaches a week after its term opens, which is unusual and matters: the beds go on the term date, not the teaching date."
+
+  - id: lse
+    name: "London School of Economics and Political Science"
+    welcome_from: 2026-09-18
+    welcome_to: 2026-09-25
+    teaching_starts: 2026-09-28
+    term_start: 2026-09-28
+    term_end: 2026-12-11
+    estimated: false
+    estimate_note: ""
+    source: "https://info.lse.ac.uk/current-students/term-dates"
+    checked_on: 2026-09-06
+    note: "LSE has renamed its terms Autumn, Winter and Spring. If a landlord or a housemate says Michaelmas, they are quoting an old calendar."
+
+  - id: imperial
+    name: "Imperial College London"
+    welcome_from: 2026-09-25
+    welcome_to: 2026-09-30
+    teaching_starts: 2026-09-28
+    term_start: 2026-09-26
+    term_end: 2026-12-11
+    estimated: false
+    estimate_note: ""
+    source: "https://www.imperial.ac.uk/admin-services/registry/term-dates/"
+    checked_on: 2026-09-06
+    note: "Departments vary more than at most: Aeronautics starts on the 28 September Monday, and the Business School starts in late August. Check your own department before you book anything."
+
+  - id: qmul
+    name: "Queen Mary University of London"
+    welcome_from: 2026-09-14
+    welcome_to: 2026-09-18
+    teaching_starts: 2026-09-21
+    term_start: 2026-09-21
+    term_end: 2026-12-11
+    estimated: false
+    estimate_note: ""
+    source: "https://www.qmul.ac.uk/about/calendar/"
+    checked_on: 2026-09-06
+    note: "One of the two earliest in this file. A Queen Mary arrival is competing for east London beds a full fortnight before the UCL crowd."
+
+  - id: citystgeorges
+    name: "City St George's, University of London"
+    welcome_from: 2026-09-28
+    welcome_to: 2026-10-02
+    teaching_starts: 2026-10-05
+    term_start: 2026-08-31
+    term_end: 2026-12-18
+    estimated: false
+    estimate_note: ""
+    source: "https://www.citystgeorges.ac.uk/about/vision-and-strategy/academic-excellence/education/academic-year-and-term-dates"
+    checked_on: 2026-09-06
+    note: "The 31 August term start is an administrative wrapper, not a date anyone turns up for. Health and medicine at the Tooting campus run two to three weeks earlier than the headline; if that is your course, use the Student Hub term-dates page instead."
+
+  - id: westminster
+    name: "University of Westminster"
+    welcome_from: 2026-09-14
+    welcome_to: 2026-09-18
+    teaching_starts: 2026-09-21
+    term_start: 2026-09-21
+    term_end: 2026-12-11
+    estimated: false
+    estimate_note: ""
+    source: "https://www.westminster.ac.uk/current-students/guides-and-policies/academic-matters/term-dates"
+    checked_on: 2026-09-06
+    note: "Date for date the same as Queen Mary. Two large universities moving on the same Monday is what a structural squeeze looks like."
+
+  - id: goldsmiths
+    name: "Goldsmiths, University of London"
+    welcome_from: 2026-09-18
+    welcome_to: 2026-09-25
+    teaching_starts: 2026-09-21
+    term_start: 2026-09-21
+    term_end: 2026-12-11
+    estimated: false
+    estimate_note: ""
+    source: "https://www.gold.ac.uk/term-dates/"
+    checked_on: 2026-09-06
+    note: "Welcome week deliberately overlaps the first teaching week. New Cross, Deptford and Lewisham feel this one directly; programme-level exceptions are on the term-variations page."
+
+  - id: soas
+    name: "SOAS University of London"
+    welcome_from: 2026-09-21
+    welcome_to: 2026-09-25
+    teaching_starts: 2026-09-28
+    term_start: 2026-09-28
+    term_end: 2027-01-17
+    estimated: false
+    estimate_note: ""
+    source: "https://www.soas.ac.uk/academic-calendar"
+    checked_on: 2026-09-06
+    note: "SOAS has moved to semesters. Semester 1 runs past Christmas to mid-January and carries its own assessment block, so the December break is not the end of the term. The teaching break is from mid-December."
+
+  - id: birkbeck
+    name: "Birkbeck, University of London"
+    welcome_from: null
+    welcome_to: null
+    teaching_starts: 2026-10-05
+    term_start: 2026-10-05
+    term_end: 2026-12-18
+    estimated: true
+    estimate_note: "Term dates were read on Birkbeck's own page and are firm. There is no welcome week: Birkbeck runs orientation as a rolling series with no published block, so the welcome dates are left empty. Coarse estimate: orientation clusters in late September and the first days of October 2026."
+    source: "https://www.bbk.ac.uk/about-us/term-dates"
+    checked_on: 2026-09-06
+    note: "The latest start in this file, and evening teaching, so a Birkbeck arrival has an extra fortnight of search that the others do not. Beware pages describing a 23 September to 13 October welcome: that is the 2024 calendar and it is still circulating."
