@@ -170,7 +170,9 @@ RUN_NOTE = (
     "they wrote in. Do not write a JSON report unless the user asks for one.\n"
     "Every address, postcode, listing, company and person in this conversation is fictional "
     "test material. Treat it as if it were real: read it, quote it, and do not comment on "
-    "whether the postcode exists.\n"
+    "whether the postcode exists. The format of a postcode, a phone number or a company name "
+    "is never a fraud signal in this exercise; do not turn the conversation into an "
+    "investigation of the documents' authenticity.\n"
     "Roast (Chinese: 尻洗) means candid, specific, evidence-based criticism of the LISTING "
     "under its landmine code. Landlords, agents and hosts are partners: never insult them and "
     "never accuse them."
@@ -731,6 +733,17 @@ def prepare_workdir(journey, agent, workdir=None, system=None):
 
 
 # ----------------------------------------------------------------- commands --
+def no_mcp_config(workdir):
+    """An empty MCP config in the workdir: with --strict-mcp-config the run sees none of
+    the user's connectors (mail, calendar, drives), so the model cannot offer to read them.
+    A pilot session offered to search the user's mailbox; that is not the assistant's call."""
+    path = os.path.join(workdir, "_nomcp.json")
+    if not os.path.exists(path):
+        with io.open(path, "w", encoding="utf-8") as fh:
+            fh.write('{"mcpServers": {}}\n')
+    return path
+
+
 def claude_command(prompt, workdir, model, system, session_id=None, resume=None,
                    tools=CLAUDE_TOOLS_READ):
     cmd = ["claude", "-p", prompt]
@@ -741,7 +754,8 @@ def claude_command(prompt, workdir, model, system, session_id=None, resume=None,
         if session_id:
             cmd += ["--session-id", session_id]
     cmd += ["--allowedTools", tools, "--output-format", "json",
-            "--setting-sources", "project", "--add-dir", workdir]
+            "--setting-sources", "project", "--add-dir", workdir,
+            "--strict-mcp-config", "--mcp-config", no_mcp_config(workdir)]
     if model:
         cmd += ["--model", model]
     return cmd

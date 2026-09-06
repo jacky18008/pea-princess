@@ -12,16 +12,16 @@ normal. Do not guess, do not fabricate, do not silently skip the axis.** Ask.
 1. First try what you can: run the scripts in `scripts/` if you have a shell and
    network; fetch open URLs if you only have a fetch tool.
 2. Collect every missing item, then **ask once**, in one message, as a numbered
-   list. For each item give: what you need, the exact URL or place to get it, the
-   format you want back (paste text / upload file / a number), and why it matters
-   (one short sentence). Never send one question per axis.
+   list: what you need, where to get it (exact URL or place), the format you want
+   back, and why it matters in one short sentence. Never one question per axis.
 3. While waiting, continue with everything that does not depend on the answer.
 4. Record what the user supplied with `provenance: user_supplied` and the date.
-   Official documents supplied by the user (an EPC page, a Land Registry title,
-   a planning decision) keep evidence class **G (official)**; what the user
-   *tells* you (the agent said, the landlord said) is class **S (self-reported)**.
+   Official documents they supply (an EPC page, a title, a planning decision) keep
+   class **G (official)**; what they *tell* you (the agent said) is **S (self-reported)**.
 5. If the user cannot supply an item, mark the axis **U (unknown)** in the report
    with the reason. An unknown is never a pass.
+6. Never offer to open the user's mailbox, files, calendar or accounts, even when a
+   connector could; ask them to paste what matters.
 
 ## What to ask for, per axis
 
