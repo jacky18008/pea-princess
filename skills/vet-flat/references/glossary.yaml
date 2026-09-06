@@ -36,9 +36,9 @@ terms:
     en: "The questions we always answer"
     zh-TW: "每一戶都要答的問題"
     zh-CN: "每一户都要答的问题"
-    plain: "Fourteen questions asked of every flat, so nothing quietly goes missing."
-    plain-zh-TW: "每一戶都問同樣十四題，才不會有東西悄悄漏掉。"
-    plain-zh-CN: "每一户都问同样十四题，才不会有东西悄悄漏掉。"
+    plain: "The same questions asked of every flat, so nothing quietly goes missing."
+    plain-zh-TW: "每一戶都問同一份問題，才不會有東西悄悄漏掉。"
+    plain-zh-CN: "每一户都问同一份问题，才不会有东西悄悄漏掉。"
   section.comparison:
     en: "Side by side"
     zh-TW: "並排比較"
@@ -529,10 +529,38 @@ terms:
     zh-CN: "原文"
     plain: "The sentence this answer came from, copied exactly."
   ui.fixed_lead:
-    en: "The same fourteen every time: found in writing (with the sentence), told to us by you, or unknown \u2014 nobody has checked yet."
-    zh-TW: "每一戶都答同樣十四題：文件上有（附原文）、你說的，或還不知道；不知道就是沒人查過。"
-    zh-CN: "每一户都答同样十四题：文件上有（附原文）、你说的，或还不知道；不知道就是没人查过。"
+    en: "The same questions every time: found in writing (with the sentence), told to us by you, or unknown \u2014 nobody has checked yet."
+    zh-TW: "每一戶都答同一份問題：文件上有（附原文）、你說的，或還不知道；不知道就是沒人查過。"
+    zh-CN: "每一户都答同一份问题：文件上有（附原文）、你说的，或还不知道；不知道就是没人查过。"
     plain: "Three answers only: it is in writing, you told us, or nobody knows yet."
+  ui.fixed_tiers:
+    en: "Lite mode answers the eight gate questions; standard fourteen; deep eighteen."
+    zh-TW: "輕量模式答把關的八題，標準答十四題，深度答十八題。"
+    zh-CN: "轻量模式答把关的八题，标准答十四题，深度答十八题。"
+    plain: "How deep the check went decides how many of these questions it had to answer."
+    plain-zh-TW: "查得多深，決定這份報告要答幾題。"
+    plain-zh-CN: "查得多深，决定这份报告要答几题。"
+  ui.fixed_gate:
+    en: "The gate \u2014 asked of every flat"
+    zh-TW: "把關題 \u2014 每一戶都問"
+    zh-CN: "把关题 \u2014 每一户都问"
+    plain: "The money and the paperwork. These eight are asked whatever else happens."
+    plain-zh-TW: "錢和文件。這八題不管怎樣都問。"
+    plain-zh-CN: "钱和文件。这八题不管怎样都问。"
+  ui.fixed_listing:
+    en: "The listing \u2014 asked once you paste a page"
+    zh-TW: "頁面題 \u2014 你貼了頁面才問"
+    zh-CN: "页面题 \u2014 你贴了页面才问"
+    plain: "What the advert, the email or the contract says about the flat itself."
+    plain-zh-TW: "廣告、信件或合約上寫的這一戶本身。"
+    plain-zh-CN: "广告、邮件或合同上写的这一户本身。"
+  ui.fixed_extended:
+    en: "The extras \u2014 asked in a deep check"
+    zh-TW: "加做題 \u2014 深度檢查才問"
+    zh-CN: "加做题 \u2014 深度检查才问"
+    plain: "Four more a deep check has time for: the tax band, the guarantor, the paperwork they want, and what is in the flat."
+    plain-zh-TW: "深度檢查才有時間多問的四題：稅級、擔保人、要交的文件，還有屋裡有什麼。"
+    plain-zh-CN: "深度检查才有时间多问的四题：税级、担保人、要交的文件，还有屋里有什么。"
   ui.building:
     en: "Building"
     zh-TW: "建物"
@@ -1008,12 +1036,14 @@ terms:
     zh-CN: "请挑你平常会走的时段，从车站走到大门，说说感觉。"
     plain: "Crime counts do not say if the street is lit and busy."
 
-  # ------------------------------------------ the fourteen questions we always answer
+  # ----------------------------------------------- the questions we always answer
   # The reader-facing wording of references/fixed-questions.yaml, which holds the machine
   # side (the scanner patterns, the caps, the `why` line the reader sees when an answer is
-  # unknown). F1-F8 are asked of every flat, F9-F14 whenever a page is pasted. The label is
-  # the whole question, so the gloss is only a hover: like the four requests below it stays
-  # English-only, and viewer.html stays inside its size budget.
+  # unknown). F1-F8 are asked of every flat; F9-F14 whenever a page is pasted; F15-F18 only
+  # in a deep check. How many a run has to answer is the `tiers` block of that file, never
+  # a number written here. The label is the whole question, so the gloss is only a hover:
+  # like the four requests below it stays English-only, and viewer.html stays inside its
+  # size budget.
   fixed.F1:
     en: "How many weeks' rent is the deposit?"
     zh-TW: "押金是幾週租金？"
@@ -1084,6 +1114,26 @@ terms:
     zh-TW: "最快什麼時候可以入住？"
     zh-CN: "最快什么时候可以入住？"
     plain: "The first day the keys are yours."
+  fixed.F15:
+    en: "Which council tax band is it, and what does that cost a year?"
+    zh-TW: "市政稅是哪一級？一年要繳多少？"
+    zh-CN: "市政税是哪一级？一年要缴多少？"
+    plain: "A letter from A to H that sets the council tax bill you pay on top of the rent."
+  fixed.F16:
+    en: "Do they need a UK guarantor, and what do they take instead?"
+    zh-TW: "需要英國擔保人嗎？不然可以用什麼代替？"
+    zh-CN: "需要英国担保人吗？不然可以用什么代替？"
+    plain: "Paying more rent up front is not an alternative: one month is the legal maximum."
+  fixed.F17:
+    en: "What do you have to prove to pass their checks?"
+    zh-TW: "要通過租客審核，你得證明什麼？"
+    zh-CN: "要通过租客审核，你得证明什么？"
+    plain: "The income they want, the months of bank statements, and what a student or a newcomer needs instead."
+  fixed.F18:
+    en: "Is it furnished, and is a check-in list made?"
+    zh-TW: "有附家具嗎？入住時會不會點交清單？"
+    zh-CN: "有附家具吗？入住时会不会点交清单？"
+    plain: "What is already there, and the list that protects your deposit when you leave."
 
   # ----------------------------------------------------------- domain jargon
   epc:

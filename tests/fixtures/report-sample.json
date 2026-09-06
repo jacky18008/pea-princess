@@ -17,6 +17,7 @@
   "max_building_age_years": 25,
   "all_in_pcm_ceiling": 2600,
   "rent_pcm_target": 2100,
+  "budget_mode": "standard",
   "move_in_earliest": "2026-09-15",
   "move_in_latest": "2026-10-15",
   "commute_destination": "the user's place of work, given in profile.yaml",
@@ -309,6 +310,38 @@
     },
     {
      "id": "F14",
+     "status": "unknown",
+     "answer": "",
+     "evidence_class": "U"
+    },
+    {
+     "id": "F15",
+     "status": "found",
+     "answer": "Band C, 148 a month spread over the year, and it is already inside the 2,528 all-in figure above.",
+     "quote": "Council tax band: C.",
+     "source": "s-ctax",
+     "evidence_class": "G"
+    },
+    {
+     "id": "F16",
+     "status": "found",
+     "answer": "A guarantor who lives in the UK, or six months' rent up front. They may not ask for the six months: one month is the legal maximum since 1 May 2026. Offer the rent guarantee insurance instead and get the answer in writing.",
+     "quote": "A UK-based guarantor is required, or six months' rent in advance.",
+     "source": "s-listing-1",
+     "evidence_class": "S",
+     "note": "The advance-rent half of that sentence is outside the cap in thresholds.yaml. Raise it before you pay anything."
+    },
+    {
+     "id": "F17",
+     "status": "found",
+     "answer": "Yearly income of thirty times the monthly rent, so 64,500 on this flat, plus three months of bank statements. A student will not clear that on income alone and needs the guarantor or the insurance.",
+     "quote": "Referencing: annual income of 30 times the monthly rent, plus three months of bank statements.",
+     "source": "s-listing-1",
+     "evidence_class": "S",
+     "note": "30 x 2,150 = 64,500 a year."
+    },
+    {
+     "id": "F18",
      "status": "unknown",
      "answer": "",
      "evidence_class": "U"

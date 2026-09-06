@@ -368,9 +368,10 @@ class TestViewer(unittest.TestCase):
 
     def test_size_budget(self):
         size = len(self.html.encode("utf-8"))
-        # 152 KB since the fixed form: fourteen questions per candidate in the example
-        # report, their wording in three languages, and the `why` line under an unknown.
-        self.assertEqual(build_viewer.SIZE_LIMIT, 152 * 1024, "the budget is 152 KB")
+        # 160 KB since the fixed form went to three tiers: eighteen questions in the
+        # example report, their wording in three languages, the `why` line under an
+        # unknown, and the group label above each block of rows.
+        self.assertEqual(build_viewer.SIZE_LIMIT, 160 * 1024, "the budget is 160 KB")
         self.assertLess(size, build_viewer.SIZE_LIMIT,
                         "viewer.html is %.1f KB, the budget is %.0f KB"
                         % (size / 1024.0, build_viewer.SIZE_LIMIT / 1024.0))
@@ -1119,25 +1120,55 @@ class TestFixedQuestionsFile(unittest.TestCase):
         self.questions = scan.load_questions(FIXED_QUESTIONS)
         self.terms = render.load_glossary(GLOSSARY)
 
-    def test_fourteen_questions_with_the_fields_the_form_needs(self):
+    def test_eighteen_questions_with_the_fields_the_form_needs(self):
         self.assertEqual(render.FIXED_IDS, sorted(self.questions, key=scan.sort_key))
+        self.assertEqual(18, len(render.FIXED_IDS))
         for fid, item in self.questions.items():
-            self.assertIn(item.get("group"), ("gate", "listing"), fid)
+            self.assertIn(item.get("group"), ("gate", "listing", "extended"), fid)
             self.assertIn(item.get("answer_type"),
                           ("weeks", "money", "yes_no", "text", "letter", "date"), fid)
             self.assertIn(item.get("ask_if_missing"), ("always", "when_page_pasted"), fid)
             self.assertTrue(item.get("why"), "%s has no why line" % fid)
             self.assertTrue(item.get("look_for"), "%s has nothing to look for" % fid)
 
-    def test_the_gate_is_asked_of_every_flat_and_the_listing_only_on_a_paste(self):
-        gate = [f for f, i in self.questions.items() if i["group"] == "gate"]
-        listing = [f for f, i in self.questions.items() if i["group"] == "listing"]
-        self.assertEqual(render.FIXED_IDS[:8], sorted(gate, key=scan.sort_key))
-        self.assertEqual(render.FIXED_IDS[8:], sorted(listing, key=scan.sort_key))
-        for fid in gate:
+    def test_the_gate_is_asked_of_every_flat_and_the_rest_only_on_a_paste(self):
+        by_group = {}
+        for fid, item in self.questions.items():
+            by_group.setdefault(item["group"], []).append(fid)
+        self.assertEqual(render.FIXED_IDS[:8], sorted(by_group["gate"], key=scan.sort_key))
+        self.assertEqual(render.FIXED_IDS[8:14], sorted(by_group["listing"], key=scan.sort_key))
+        self.assertEqual(render.FIXED_IDS[14:], sorted(by_group["extended"], key=scan.sort_key))
+        for fid in by_group["gate"]:
             self.assertEqual("always", self.questions[fid]["ask_if_missing"], fid)
-        for fid in listing:
+        for fid in by_group["listing"] + by_group["extended"]:
             self.assertEqual("when_page_pasted", self.questions[fid]["ask_if_missing"], fid)
+
+    def test_the_groups_the_renderers_draw_are_the_groups_the_file_uses(self):
+        self.assertEqual(["gate", "listing", "extended"], [g for g, _l in render.FIXED_GROUPS])
+        for _group, label in render.FIXED_GROUPS:
+            entry = self.terms.get(label)
+            self.assertTrue(entry, "glossary.yaml has no %s" % label)
+            for lang in ("en", "zh-TW", "zh-CN"):
+                self.assertTrue(entry.get(lang), "%s has no %s" % (label, lang))
+        for lang in ("en", "zh-TW", "zh-CN"):
+            self.assertTrue(self.terms["ui.fixed_tiers"].get(lang), lang)
+
+    def test_the_council_tax_band_points_at_the_register_and_ships_no_fetcher(self):
+        # The VOA band search is open and scriptable, but nobody has written that script,
+        # so the question carries a hint for a human, not a promise the skill cannot keep.
+        self.assertEqual("VOA council tax band search", self.questions["F15"]["source_hint"])
+        sources = read(os.path.join(REFS, "sources.yaml"))
+        self.assertIn("voa_council_tax_band", sources)
+        for name in sorted(os.listdir(SCRIPTS)):
+            if name.endswith(".py"):
+                text = read(os.path.join(SCRIPTS, name))
+                self.assertNotIn("check-council-tax-band", text, name)
+
+    def test_the_guarantor_question_points_at_the_advance_rent_cap(self):
+        # "Pay six months up front instead" is not a lawful alternative to a guarantor.
+        self.assertEqual("thresholds.yaml#rent_in_advance_max_months",
+                         self.questions["F16"]["cap"])
+        self.assertIn("one month", self.questions["F16"]["why"])
 
     def test_every_cap_points_at_a_real_threshold(self):
         thresholds = read(os.path.join(REFS, "thresholds.yaml"))
@@ -1179,10 +1210,16 @@ class TestFixedAnswersSchema(unittest.TestCase):
         self.schema = load_schema()
         self.data = load_sample()
 
-    def test_the_example_answers_all_fourteen_for_every_candidate(self):
-        for cand in self.data["candidates"]:
-            ids = [e["id"] for e in cand["fixed_answers"]]
-            self.assertEqual(render.FIXED_IDS, sorted(ids, key=scan.sort_key))
+    def test_the_example_answers_its_tier_and_one_candidate_goes_further(self):
+        # The example runs at standard, so both candidates owe the fourteen; the leading
+        # one carries the extended four as well, which the form welcomes.
+        self.assertEqual("standard", render.active_tier(self.data))
+        active = render.active_fixed_ids(self.data)
+        self.assertEqual(render.FIXED_IDS[:14], active)
+        first, second = [[e["id"] for e in c["fixed_answers"]] for c in self.data["candidates"]]
+        self.assertEqual(render.FIXED_IDS, sorted(first, key=scan.sort_key))
+        self.assertEqual(active, sorted(second, key=scan.sort_key))
+        for ids in (first, second):
             self.assertEqual(sorted(ids), sorted(set(ids)))
         errors, warnings = render.validate(self.data, self.schema)
         self.assertEqual([], errors)
@@ -1262,6 +1299,92 @@ class TestFixedAnswersSchema(unittest.TestCase):
         self.assertEqual("user", asked["source"])
 
 
+class TestTheActiveTier(unittest.TestCase):
+    """How many questions a given report owes an answer to, and who decides."""
+
+    def setUp(self):
+        self.schema = load_schema()
+        self.data = load_sample()
+
+    def _set(self, budget_mode=None, tier=None, questions=None):
+        snap = self.data["profile_snapshot"]
+        snap.pop("budget_mode", None)
+        snap.pop("advanced", None)
+        if budget_mode:
+            snap["budget_mode"] = budget_mode
+        if tier:
+            self.data["generated_by"]["tier"] = tier
+        if questions:
+            snap["advanced"] = {"fixed_form": {"questions": questions}}
+
+    def _strict(self):
+        path = write_temp(self.data)
+        try:
+            return run_cli(path, "--validate-only")[0], run_cli(path, "--validate-only", "--strict")[0]
+        finally:
+            os.unlink(path)
+
+    def _drop(self, fid):
+        for cand in self.data["candidates"]:
+            cand["fixed_answers"] = [e for e in cand["fixed_answers"] if e["id"] != fid]
+
+    def test_the_budget_mode_decides_and_beats_the_tier_the_run_finished_at(self):
+        self._set(budget_mode="lite", tier="breadth")
+        self.assertEqual(render.FIXED_IDS[:8], render.active_fixed_ids(self.data))
+        self._set(budget_mode="deep", tier="lite")
+        self.assertEqual(render.FIXED_IDS, render.active_fixed_ids(self.data))
+
+    def test_without_a_budget_mode_the_tier_the_run_recorded_decides(self):
+        self._set(tier="lite")
+        self.assertEqual("lite", render.active_tier(self.data))
+        self.assertEqual(render.FIXED_IDS[:8], render.active_fixed_ids(self.data))
+
+    def test_with_neither_it_is_the_fourteen(self):
+        self._set()
+        self.data["generated_by"].pop("tier", None)
+        self.assertEqual("standard", render.active_tier(self.data))
+        self.assertEqual(render.FIXED_IDS[:14], render.active_fixed_ids(self.data))
+
+    def test_the_users_own_setting_beats_everything_and_auto_means_follow_the_mode(self):
+        self._set(budget_mode="lite", tier="lite", questions="full")
+        self.assertEqual(render.FIXED_IDS, render.active_fixed_ids(self.data))
+        self._set(budget_mode="lite", tier="breadth", questions="auto")
+        self.assertEqual(render.FIXED_IDS[:8], render.active_fixed_ids(self.data))
+
+    def test_a_standard_report_missing_a_gate_question_fails_strict(self):
+        self._set(budget_mode="standard")
+        self._drop("F3")
+        errors, warnings = render.validate(self.data, self.schema)
+        self.assertEqual([], errors)
+        self.assertTrue(any("does not answer F3" in w for w in warnings), warnings)
+        self.assertEqual((0, 1), self._strict())
+
+    def test_a_standard_report_owes_nothing_from_the_extended_four(self):
+        self._set(budget_mode="standard")
+        self._drop("F15")
+        self._drop("F16")
+        self._drop("F17")
+        self._drop("F18")
+        errors, warnings = render.validate(self.data, self.schema)
+        self.assertEqual([], errors)
+        self.assertEqual([], warnings)
+        self.assertEqual((0, 0), self._strict())
+
+    def test_a_deep_report_missing_one_of_the_extended_four_fails_strict(self):
+        self._set(budget_mode="deep")
+        self._drop("F15")
+        errors, warnings = render.validate(self.data, self.schema)
+        self.assertEqual([], errors)
+        self.assertTrue(any("does not answer F15" in w for w in warnings), warnings)
+        self.assertEqual((0, 1), self._strict())
+
+    def test_answering_more_than_the_tier_asks_for_is_never_a_complaint(self):
+        self._set(budget_mode="lite")
+        errors, warnings = render.validate(self.data, self.schema)
+        self.assertEqual([], errors)
+        self.assertEqual([], warnings)
+
+
 class TestFixedAnswersOutput(unittest.TestCase):
     """Section 3 in both renderers, from the same JSON."""
 
@@ -1310,6 +1433,31 @@ class TestFixedAnswersOutput(unittest.TestCase):
         self.assertIn("Deposit: five weeks' rent, 2,480.", block)
         self.assertIn(self.questions["F6"]["why"], block)
 
+    def test_the_rows_are_drawn_in_their_three_groups_under_a_label(self):
+        block = section_html(self.html, "fixed")
+        L = render.Labels(render.load_glossary(GLOSSARY), "en")
+        seen = [L.label(label) for _group, label in render.FIXED_GROUPS]
+        at = [block.index(esc_label(label)) for label in seen]
+        self.assertEqual(at, sorted(at), "gate, then listing, then the extras: %s" % at)
+        # The second candidate stops at the fourteen, so it draws two groups, not three.
+        self.assertEqual(2, block.count(esc_label(seen[2])) + 1,
+                         "only the leading candidate carries the extended four")
+        self.assertIn(esc_label(L.label("ui.fixed_tiers")), block)
+
+    def test_an_extended_question_the_report_carries_is_never_hidden(self):
+        block = section_html(self.html, "fixed")
+        L = render.Labels(render.load_glossary(GLOSSARY), "en")
+        for fid in ("F15", "F16", "F17"):
+            self.assertIn(esc_label(L.label("fixed." + fid)), block, fid)
+        self.assertIn(self.questions["F18"]["why"], block)
+
+    def test_the_markdown_draws_the_same_groups_and_the_same_note(self):
+        block = section_md(self.md, "3. The questions we always answer")
+        L = render.Labels(render.load_glossary(GLOSSARY), "en")
+        for _group, label in render.FIXED_GROUPS:
+            self.assertIn("**%s**" % L.label(label), block, label)
+        self.assertIn(L.label("ui.fixed_tiers"), block)
+
     def test_the_reader_sees_the_questions_in_their_own_language(self):
         code, zh, err = run_cli(SAMPLE, "--lang", "zh-TW")
         self.assertEqual(0, code, err)
@@ -1340,6 +1488,8 @@ class TestViewerDrawsTheFixedForm(unittest.TestCase):
 
     def test_it_carries_the_same_pieces(self):
         for needle in ("function s2f(", "function fixedRows(", "function noSrcFixed(",
+                       "function fixedGroupRows(", "var FIXED_GROUPS=",
+                       "ui.fixed_tiers", "ui.fixed_gate", "ui.fixed_listing", "ui.fixed_extended",
                        "var FIXED_STATES=", '["section.fixed","fixed"]', "var FIXED = {",
                        "ui.found", "ui.asked_you", "ui.quote", "ui.fixed_lead"):
             self.assertIn(needle, self.viewer.replace(", ", ","), needle)
@@ -1352,6 +1502,7 @@ class TestViewerDrawsTheFixedForm(unittest.TestCase):
         self.assertEqual(render.FIXED_IDS, sorted(payload, key=scan.sort_key))
         for fid, item in payload.items():
             self.assertTrue(item["why"], fid)
+            self.assertIn(item["group"], ("gate", "listing", "extended"), fid)
             self.assertNotIn("look_for", item)
             self.assertNotIn("patterns", item)
 
@@ -1363,13 +1514,17 @@ class TestViewerDrawsTheFixedForm(unittest.TestCase):
             for lang in ("en", "zh-TW", "zh-CN"):
                 self.assertTrue(payload["fixed." + fid].get(lang), "fixed.%s %s" % (fid, lang))
 
-    def test_the_example_it_ships_answers_all_fourteen(self):
+    def test_the_example_it_ships_answers_its_tier(self):
         start = self.viewer.index("/*BEGIN:SAMPLE*/")
         block = self.viewer[start:self.viewer.index("/*END:SAMPLE*/")]
         payload = json.loads(block[block.index("{"):block.rindex("}") + 1])
+        active = render.active_fixed_ids(payload)
         for cand in payload["candidates"]:
-            self.assertEqual(render.FIXED_IDS,
-                             sorted([e["id"] for e in cand["fixed_answers"]], key=scan.sort_key))
+            ids = sorted([e["id"] for e in cand["fixed_answers"]], key=scan.sort_key)
+            self.assertTrue(set(active) <= set(ids), cand.get("id"))
+        self.assertEqual(render.FIXED_IDS,
+                         sorted([e["id"] for e in payload["candidates"][0]["fixed_answers"]],
+                                key=scan.sort_key))
         states = set(e["status"] for c in payload["candidates"] for e in c["fixed_answers"])
         self.assertEqual(set(["found", "asked", "unknown"]), states)
 

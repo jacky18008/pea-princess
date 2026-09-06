@@ -87,11 +87,18 @@ PROFILE_KEYS = [
 # table, viewing with the viewing-day checks, sign in its own list before signing.
 QUESTION_STAGES = ["filter", "vet", "compare", "viewing", "sign"]
 
-# Section 3, "The questions we always answer": the fourteen ids of
+# Section 3, "The questions we always answer": the eighteen ids of
 # references/fixed-questions.yaml and the three states each one can be in. found is read
 # off a document and carries the sentence; asked is the user's own answer; unknown is
 # nobody's answer yet, and is drawn like a failure because that is what it costs.
-FIXED_IDS = ["F%d" % i for i in range(1, 15)]
+# How many of them a given report has to answer is NOT a number written here: it is the
+# `tiers` block of references/fixed-questions.yaml, resolved by active_fixed_ids() below.
+FIXED_IDS = ["F%d" % i for i in range(1, 19)]
+
+# The three groups, in the order the section draws them, and the label above each.
+FIXED_GROUPS = [("gate", "ui.fixed_gate"),
+                ("listing", "ui.fixed_listing"),
+                ("extended", "ui.fixed_extended")]
 FIXED_STATES = {
     "found": ("ok", "ui.found"),
     "asked": ("unk", "ui.asked_you"),
@@ -203,9 +210,9 @@ class Labels(object):
         return " \u2014 ".join(bits)
 
 
-# --------------------------------------------------- the fourteen questions ---
+# ------------------------------------------------------- the fixed form ---
 def fixed_questions(path=DEFAULT_FIXED):
-    """The fourteen questions by id. scripts/scan.py owns the file and its parser.
+    """The fixed questions by id. scripts/scan.py owns the file and its parser.
 
     Only the `why` line is used here: it is what the reader sees in the answer cell of an
     unknown row, so they know what to go and find. A missing or broken file must never stop
@@ -220,6 +227,65 @@ def fixed_questions(path=DEFAULT_FIXED):
         return {}
 
 
+def fixed_tiers(path=DEFAULT_FIXED):
+    """{tier name: [group, ...]} from references/fixed-questions.yaml, or {} if unreadable.
+
+    Same rule as fixed_questions(): a broken or missing file must never stop a report
+    rendering, so this degrades to no tiers and the caller falls back to all eighteen.
+    """
+    try:
+        if HERE not in sys.path:
+            sys.path.insert(0, HERE)
+        import scan
+        return scan.load_tiers(path)
+    except Exception:                                    # noqa: BLE001 - see the docstring
+        return {}
+
+
+def active_tier(data):
+    """Which tier's questions this report owes an answer to, as a name.
+
+    In order: the user's own override in the profile snapshot (advanced.fixed_form.questions,
+    when it is anything but `auto`), then their budget_mode, then the tier the run actually
+    finished at, then `standard`. The user's setting beats the run because the fixed form is
+    a promise made to the reader, not a side effect of how far the escalation ladder went.
+    """
+    snapshot = data.get("profile_snapshot")
+    snapshot = snapshot if isinstance(snapshot, dict) else {}
+    advanced = snapshot.get("advanced")
+    fixed_form = advanced.get("fixed_form") if isinstance(advanced, dict) else None
+    if isinstance(fixed_form, dict):
+        chosen = fixed_form.get("questions")
+        if chosen and chosen != "auto":
+            return chosen
+    mode = snapshot.get("budget_mode")
+    if mode:
+        return mode
+    gb = data.get("generated_by")
+    tier = gb.get("tier") if isinstance(gb, dict) else None
+    return tier or "standard"
+
+
+def active_fixed_ids(data, questions=None, tiers=None):
+    """The ids this report has to answer, in question order.
+
+    Everything about "how many" comes from references/fixed-questions.yaml, so raising a
+    tier is one edit in one file. If that file cannot be read the answer is all eighteen:
+    asking for too much is a warning the user can read, dropping a question silently is not.
+    """
+    questions = fixed_questions() if questions is None else questions
+    tiers = fixed_tiers() if tiers is None else tiers
+    if not questions or not tiers:
+        return list(FIXED_IDS)
+    try:
+        if HERE not in sys.path:
+            sys.path.insert(0, HERE)
+        import scan
+        return scan.ids_for_tier(questions, tiers, active_tier(data))
+    except Exception:                                    # noqa: BLE001
+        return list(FIXED_IDS)
+
+
 def fixed_order(entry_id):
     """F2 sorts before F10: the number counts, not the string."""
     return (FIXED_IDS.index(entry_id), "") if entry_id in FIXED_IDS else (len(FIXED_IDS), entry_id or "")
@@ -229,6 +295,29 @@ def fixed_rows(cand):
     """[(index in the JSON, entry)] in question order, so the locators still point home."""
     rows = [(i, e) for i, e in enumerate(cand.get("fixed_answers") or []) if isinstance(e, dict)]
     return sorted(rows, key=lambda pair: fixed_order(pair[1].get("id")))
+
+
+def fixed_group_rows(cand, questions):
+    """[(label term id, [(index, entry), ...])] - the candidate's answers, in group order.
+
+    Rows are what the candidate actually carries, never a filter on the active tier: an
+    answer from a deeper run still belongs to the reader, and a missing one is already a
+    warning (an error under --strict), not something to hide. Groups with no rows are
+    dropped, and anything whose group is unknown is drawn last, under no label.
+    """
+    rows = fixed_rows(cand)
+    out = []
+    placed = set()
+    for group, label in FIXED_GROUPS:
+        got = [(i, e) for i, e in rows
+               if (questions.get(e.get("id")) or {}).get("group") == group]
+        placed.update(i for i, _e in got)
+        if got:
+            out.append((label, got))
+    left = [(i, e) for i, e in rows if i not in placed]
+    if left:
+        out.append((None, left))
+    return out
 
 
 def fixed_answer_text(entry, questions):
@@ -341,18 +430,23 @@ class Validator(object):
                     self.warn(path, "has an unexpected key '%s'; the renderers ignore it" % name)
 
 
-def check_fixed_answers(cand, path, v):
-    """The fixed form: fourteen ids, once each, and three states with nothing missing.
+def check_fixed_answers(cand, path, v, active=None):
+    """The fixed form: every id of the active tier, once each, three states, nothing missing.
 
-    A missing id is a warning (an older report still validates, and --strict makes it an
-    error, like every other warning). The same id twice is an error: two answers to one
-    question is not an answer. The state rules are the ones in report-schema.json.
+    `active` is the list of ids this report owes an answer to (active_fixed_ids). A missing
+    one is a warning (an older report still validates, and --strict makes it an error, like
+    every other warning); an id from a deeper tier than this run is welcome and never
+    reported. The same id twice is an error: two answers to one question is not an answer.
+    The state rules are the ones in report-schema.json.
     """
+    active = list(FIXED_IDS) if active is None else active
     entries = cand.get("fixed_answers")
     if entries is None:
-        v.warn(path, "has no fixed_answers, so the fourteen questions every flat has to "
-                     "answer are all missing. Fill references/fixed-questions.yaml: F1-F8 "
-                     "always, F9-F14 whenever a page was pasted.")
+        v.warn(path, "has no fixed_answers, so the %d questions this report has to answer "
+                     "are all missing. Fill references/fixed-questions.yaml: the gate "
+                     "questions F1-F8 always, the listing questions F9-F14 whenever a page "
+                     "was pasted, and the extended four F15-F18 in a deep check."
+                     % len(active))
         return
     if not isinstance(entries, list):
         return
@@ -386,12 +480,13 @@ def check_fixed_answers(cand, path, v):
             if quote:
                 v.err(here, "is 'unknown' but carries a quote. If you have the sentence, the "
                             "status is 'found'.")
-    missing = [fid for fid in FIXED_IDS if fid not in seen]
+    missing = [fid for fid in active if fid not in seen]
     if missing:
         v.warn(path + ".fixed_answers",
-               "does not answer %s. Every flat answers all fourteen: the gate questions F1-F8 "
-               "always, the listing questions F9-F14 whenever a page was pasted. Say 'unknown' "
-               "rather than leaving one out." % ", ".join(missing))
+               "does not answer %s. This report runs at %d questions (references/"
+               "fixed-questions.yaml, the `tiers` block): say 'unknown' rather than leaving "
+               "one out. Answering more than the tier asks for is fine."
+               % (", ".join(missing), len(active)))
 
 
 def semantic_checks(data, v):
@@ -399,6 +494,7 @@ def semantic_checks(data, v):
     candidates = data.get("candidates")
     if not isinstance(candidates, list):
         return
+    active = active_fixed_ids(data)
     ids = []
     for i, cand in enumerate(candidates):
         if not isinstance(cand, dict):
@@ -414,7 +510,7 @@ def semantic_checks(data, v):
             if sorted([a for a in axis_ids if isinstance(a, int)]) != list(range(1, 13)):
                 v.err(path + ".axes",
                       "must be exactly 12 entries with ids 1 to 12, each once. Got ids %s" % (axis_ids,))
-        check_fixed_answers(cand, path, v)
+        check_fixed_answers(cand, path, v, active)
         kq = cand.get("killer_questions")
         if isinstance(kq, list) and len(kq) > 2:
             v.err(path + ".killer_questions",
@@ -1476,33 +1572,44 @@ class HtmlRenderer(object):
                         L.label("ui.result"), L.label("ui.evidence")], rows)
 
     def s3_fixed(self):
-        """The fixed form: the same fourteen questions, per candidate, three states each."""
+        """The fixed form, per candidate: the questions this run answers, three states each.
+
+        Drawn in its three groups - the gate every flat gets, the listing questions a
+        pasted page answers, the four extras a deep check has time for - so a reader who
+        sees eight rather than eighteen can see which group is missing and why.
+        """
         L = self.L
         for cand in self.d.get("candidates", []):
             self.w("<h3>%s</h3>" % esc(candidate_name(cand)))
             self.w('<p class="sub">%s</p>' % esc(L.label("ui.fixed_lead")))
+            self.w('<p class="sub">%s</p>' % esc(L.label("ui.fixed_tiers")))
             gaps = self.nosource.get(cand.get("id")) or set()
-            rows = []
-            for index, entry in fixed_rows(cand):
-                tid = "fixed." + (entry.get("id") or "")
-                css, state = FIXED_STATES.get(entry.get("status"), FIXED_STATES["unknown"])
-                quote = entry.get("quote") or ""
-                rows.append([
-                    '<td><strong><span class="meaning" title="%s">%s</span></strong></td>' % (
-                        esc(L.plain(tid)), esc(L.label(tid, entry.get("id") or ""))),
-                    '<td class="num"><span class="%s" title="%s">%s</span></td>' % (
-                        css, esc(L.plain(state)), esc(L.label(state))),
-                    "<td>%s%s</td>" % (esc(fixed_answer_text(entry, self.fixed)),
-                                       self.chip_nosource(("fixed", index) in gaps)),
-                    "<td><small>%s</small></td>" % (
-                        ("\u201c%s\u201d" % esc(quote)) if quote else ""),
-                    "<td>%s</td>" % self.chip_evidence(entry.get("evidence_class")),
-                ])
-            if not rows:
+            groups = fixed_group_rows(cand, self.fixed)
+            if not groups:
                 self.w("<p>%s</p>" % esc(L.label("ui.nothing_listed")))
                 continue
-            self.table(["", L.label("ui.result"), L.label("ui.observed"),
-                        L.label("ui.quote"), L.label("ui.evidence")], rows)
+            for label, entries in groups:
+                rows = []
+                for index, entry in entries:
+                    tid = "fixed." + (entry.get("id") or "")
+                    css, state = FIXED_STATES.get(entry.get("status"), FIXED_STATES["unknown"])
+                    quote = entry.get("quote") or ""
+                    rows.append([
+                        '<td><strong><span class="meaning" title="%s">%s</span></strong></td>' % (
+                            esc(L.plain(tid)), esc(L.label(tid, entry.get("id") or ""))),
+                        '<td class="num"><span class="%s" title="%s">%s</span></td>' % (
+                            css, esc(L.plain(state)), esc(L.label(state))),
+                        "<td>%s%s</td>" % (esc(fixed_answer_text(entry, self.fixed)),
+                                           self.chip_nosource(("fixed", index) in gaps)),
+                        "<td><small>%s</small></td>" % (
+                            ("\u201c%s\u201d" % esc(quote)) if quote else ""),
+                        "<td>%s</td>" % self.chip_evidence(entry.get("evidence_class")),
+                    ])
+                if label:
+                    self.w('<p class="sub"><strong title="%s">%s</strong></p>'
+                           % (esc(L.plain(label)), esc(L.label(label))))
+                self.table(["", L.label("ui.result"), L.label("ui.observed"),
+                            L.label("ui.quote"), L.label("ui.evidence")], rows)
 
     def s3_comparison(self):
         L = self.L
@@ -2007,18 +2114,24 @@ def render_markdown(data, L, schema=None):
         o.append("### %s" % candidate_name(cand))
         o.append("")
         o.append("_%s_" % L.label("ui.fixed_lead"))
+        o.append("")
+        o.append("_%s_" % L.label("ui.fixed_tiers"))
         gaps = gaps_by_candidate.get(cand.get("id")) or set()
-        rows = []
-        for index, entry in fixed_rows(cand):
-            tid = "fixed." + (entry.get("id") or "")
-            state = FIXED_STATES.get(entry.get("status"), FIXED_STATES["unknown"])[1]
-            quote = entry.get("quote") or ""
-            rows.append([L.label(tid, entry.get("id") or ""), L.label(state),
-                         fixed_answer_text(entry, questions) + source_flag(gaps, ("fixed", index)),
-                         ("\u201c%s\u201d" % quote) if quote else "",
-                         L.label("evidence." + (entry.get("evidence_class") or "U"))])
-        o += md_table(["", L.label("ui.result"), L.label("ui.observed"),
-                       L.label("ui.quote"), L.label("ui.evidence")], rows)
+        for label, entries in fixed_group_rows(cand, questions):
+            rows = []
+            for index, entry in entries:
+                tid = "fixed." + (entry.get("id") or "")
+                state = FIXED_STATES.get(entry.get("status"), FIXED_STATES["unknown"])[1]
+                quote = entry.get("quote") or ""
+                rows.append([L.label(tid, entry.get("id") or ""), L.label(state),
+                             fixed_answer_text(entry, questions) + source_flag(gaps, ("fixed", index)),
+                             ("\u201c%s\u201d" % quote) if quote else "",
+                             L.label("evidence." + (entry.get("evidence_class") or "U"))])
+            if label:
+                o.append("")
+                o.append("**%s**" % L.label(label))
+            o += md_table(["", L.label("ui.result"), L.label("ui.observed"),
+                           L.label("ui.quote"), L.label("ui.evidence")], rows)
 
     head(4, "section.comparison")
     comparison = data.get("comparison") or {}

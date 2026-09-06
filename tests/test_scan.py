@@ -25,7 +25,10 @@ import scan  # noqa: E402
 
 QUESTIONS = os.path.join(REFS, "fixed-questions.yaml")
 LISTING = os.path.join(HERE, "fixtures", "pasted-listing.txt")
-IDS = ["F%d" % i for i in range(1, 15)]
+IDS = ["F%d" % i for i in range(1, 19)]
+GATE = IDS[:8]
+LISTING_IDS = IDS[8:14]
+EXTENDED = IDS[14:]
 
 
 def read(path):
@@ -77,7 +80,7 @@ class TestTheQuestionsFile(unittest.TestCase):
     def setUp(self):
         self.questions = scan.load_questions(QUESTIONS)
 
-    def test_fourteen_questions_with_compiled_patterns(self):
+    def test_eighteen_questions_with_compiled_patterns(self):
         self.assertEqual(IDS, sorted(self.questions, key=scan.sort_key))
         for fid, item in self.questions.items():
             self.assertEqual(fid, item["id"])
@@ -88,6 +91,51 @@ class TestTheQuestionsFile(unittest.TestCase):
         self.assertIn("Part of Pea Princess (vet-flat)", text.splitlines()[0])
         for word in ("found", "asked", "unknown", "scripts/scan.py"):
             self.assertIn(word, text)
+
+
+class TestTheTiersBlock(unittest.TestCase):
+    """The one place the mapping from how deep a run goes to how many questions lives."""
+
+    def setUp(self):
+        self.questions = scan.load_questions(QUESTIONS)
+        self.tiers = scan.load_tiers(QUESTIONS)
+
+    def test_every_question_is_in_exactly_one_group(self):
+        groups = {}
+        for fid, item in self.questions.items():
+            groups.setdefault(item.get("group"), []).append(fid)
+        self.assertEqual(["extended", "gate", "listing"], sorted(groups))
+        self.assertEqual(GATE, sorted(groups["gate"], key=scan.sort_key))
+        self.assertEqual(LISTING_IDS, sorted(groups["listing"], key=scan.sort_key))
+        self.assertEqual(EXTENDED, sorted(groups["extended"], key=scan.sort_key))
+
+    def test_every_group_a_tier_names_is_a_real_group(self):
+        real = set(item.get("group") for item in self.questions.values())
+        for name, groups in self.tiers.items():
+            self.assertTrue(set(groups) <= real, "%s names %s" % (name, groups))
+
+    def test_the_budget_modes_and_the_recorded_tiers_all_resolve(self):
+        # profile.yaml budget_mode, generated_by.tier, and the words the user may write
+        # in advanced.fixed_form.questions - every one of them has to be in the block.
+        for name in ("lite", "standard", "deep", "breadth", "manual", "gate", "full"):
+            self.assertIn(name, self.tiers, name)
+
+    def test_eight_fourteen_eighteen(self):
+        ids = lambda name: scan.ids_for_tier(self.questions, self.tiers, name)
+        self.assertEqual(GATE, ids("lite"))
+        self.assertEqual(GATE, ids("gate"))
+        self.assertEqual(GATE + LISTING_IDS, ids("standard"))
+        self.assertEqual(GATE + LISTING_IDS, ids("manual"))
+        for name in ("deep", "breadth", "full"):
+            self.assertEqual(IDS, ids(name), name)
+
+    def test_a_tier_nobody_recognises_answers_the_fourteen(self):
+        self.assertEqual(GATE + LISTING_IDS,
+                         scan.ids_for_tier(self.questions, self.tiers, "no-such-tier"))
+
+    def test_a_file_with_no_tiers_block_is_an_error_not_a_silent_zero(self):
+        with self.assertRaises(scan.QuestionsError):
+            scan.load_tiers(LISTING)
 
 
 class TestScanningAPastedPage(unittest.TestCase):
@@ -105,7 +153,7 @@ class TestScanningAPastedPage(unittest.TestCase):
     def test_every_question_is_reported_in_order(self):
         self.assertEqual(IDS, [item["id"] for item in self.result["items"]])
 
-    def test_it_finds_candidates_for_at_least_ten_of_the_fourteen(self):
+    def test_it_finds_candidates_for_at_least_ten_of_them(self):
         answered = [fid for fid in IDS if self.by_id[fid]["candidates"]]
         self.assertGreaterEqual(len(answered), 10, "only found %s" % answered)
 
@@ -139,7 +187,7 @@ class TestScanningAPastedPage(unittest.TestCase):
             self.assertIn(fid, scan.silent_line(self.result))
         self.assertIn("ask the user", scan.silent_line(self.result))
 
-    def test_a_page_that_answers_nothing_is_silent_on_all_fourteen(self):
+    def test_a_page_that_answers_nothing_is_silent_on_every_question(self):
         result = scan.scan("A flat. It is nice. Come and see it.\n", self.questions, "x.txt")
         self.assertEqual(IDS, result["summary"]["silent"])
         self.assertEqual(0, result["summary"]["found_candidates"])
@@ -175,7 +223,8 @@ class TestTheCommandLine(unittest.TestCase):
         payload = json.loads(out)
         self.assertTrue(payload["ok"])
         self.assertEqual("pasted-listing.txt", payload["source"])
-        self.assertEqual(14, len(payload["items"]))
+        self.assertEqual(18, len(payload["items"]))
+        self.assertEqual("full", payload["tier"])
         self.assertIn("no sentence found for", err)
         for fid in payload["summary"]["silent"]:
             self.assertIn(fid, err)
@@ -189,6 +238,22 @@ class TestTheCommandLine(unittest.TestCase):
         payload = json.loads(out.decode("utf-8"))
         self.assertEqual("stdin", payload["source"])
         self.assertGreater(payload["summary"]["found_candidates"], 10)
+
+    def test_the_gate_tier_looks_for_the_gate_and_names_only_gate_misses(self):
+        code, out, err = run_cli(LISTING, "--tier", "gate", "--table")
+        self.assertEqual(0, code, err)
+        silent = err.split("no sentence found for ")[1].split(" \u2014")[0]
+        self.assertTrue(set(silent.split(", ")) <= set(GATE), silent)
+        for fid in LISTING_IDS + EXTENDED:
+            self.assertNotIn("\n" + fid + " ", out, "%s is not a gate question" % fid)
+        code, out, _err = run_cli(LISTING, "--tier", "gate")
+        self.assertEqual(GATE, [item["id"] for item in json.loads(out)["items"]])
+
+    def test_an_unknown_tier_exits_two_and_lists_the_real_ones(self):
+        code, _out, err = run_cli(LISTING, "--tier", "enormous")
+        self.assertEqual(2, code)
+        self.assertIn("Unknown tier", err)
+        self.assertIn("standard", err)
 
     def test_the_table_is_readable_and_names_the_silent_ones(self):
         code, out, err = run_cli(LISTING, "--table")

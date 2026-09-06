@@ -18,16 +18,15 @@ metadata:
 
 | The user… | Read |
 |---|---|
-| asks what this does, how to start, has no idea, or has just arrived | `references/onboarding.md` |
+| asks what this does, how to start, or has just arrived | `references/onboarding.md` |
 | gives a listing or an address → vet it | `references/axes/01`–`12` |
-| wants candidates around an area or a commute destination | `references/axes/00-area-sweep.md` (shell: `scripts/sweep.py`) |
+| wants candidates around an area or a commute | `references/axes/00-area-sweep.md` (shell: `scripts/sweep.py`) |
 | wants a shortlist roasted (尻洗) or two flats compared | `references/axes/13-adversarial-review.md`, then the report contract |
-| is about to sign, needs a bridge stay, or asks about referencing or first weeks | `references/axes/15`–`17` |
-| is going to a viewing, or has just been to one | `references/axes/14-site-visit.md`, `18-street-view.md` |
-| asks about depth, cost, budget mode or which model | `references/budget-modes.md` (escalation ladder) |
-| wants to share or import a profile seed, or tells stories about past homes | `references/sharing.md` (`scripts/seed.py`) |
-| asks how this works or wants to change any setting by talking | `references/how-to-use.md` (show the diff, confirm, run `scripts/profile_check.py`) |
-| is a student weighing halls or student blocks against a private flat, or asks what rent is normal | `references/student-housing.md` |
+| is about to sign, needs a bridge stay, or asks about referencing | `references/axes/15`–`17` |
+| is going to a viewing, or has just been | `references/axes/14-site-visit.md`, `18-street-view.md` |
+| asks about depth, cost or which model | `references/budget-modes.md` (escalation ladder) |
+| asks how this works, changes a setting by talking, shares a seed, or tells stories about past homes | `references/how-to-use.md` (diff, confirm, `scripts/profile_check.py`), `references/sharing.md` (`scripts/seed.py`) |
+| is a student weighing halls against a private flat, or asks what rent is normal | `references/student-housing.md` |
 | needs any number computed | `references/arithmetic.md` (`scripts/calc.py`) |
 | the report itself | `references/report-contract.md` + `references/report-schema.json` |
 
@@ -57,7 +56,7 @@ metadata:
 - **Arithmetic is never done in your head**: `scripts/calc.py` prints every step; without a shell, write the formula (weekly rent = monthly × 12 ÷ 52; deposit cap = 5 × weekly, 6 × above £50k a year) and each step, check it a second way, and mark the number `computed_by: shown formula`.
 - **Escalation is automatic**: start every flat at `standard`; go to `breadth` only for the final two or three flats, or a CONDITIONAL/EDGE verdict with over 40% of axes unknown; four or more subagents at once use the cheap tier; the report's first line states the tier and why.
 - **Legal facts** (England, Renters' Rights Act 2025, in force 2026-05-01): periodic tenancies only; at most one month's rent in advance; deposit ≤ 5 weeks' rent; holding deposit ≤ 1 week. Cite `references/sources.yaml`.
-- **The fixed form**: answer all fourteen of `references/fixed-questions.yaml` — found (quote it) · asked · unknown; F1–F8 every flat, F9–F14 when a page was pasted; scan the paste first (`scripts/scan.py`; without a shell, list candidate sentences); ask once for the rest.
+- **The fixed form** (`references/fixed-questions.yaml`): found (quote it) · asked · unknown; eight / fourteen / eighteen by budget mode, and the profile's `advanced.fixed_form` overrides; F1–F8 every flat, the rest when a page was pasted; scan the paste first (`scripts/scan.py`; without a shell, list candidate sentences); ask once for the rest.
 - **Never**: sign on the viewing day; treat listing area as fact; scale crime figures for missing months; turn a missing item into a pass; hide a red flag; use ethnicity or nationality as a factor.
 
 ## Output

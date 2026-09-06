@@ -254,3 +254,19 @@ self_intro_template: >-
 # Language for the report: a BCP-47 tag such as en, zh-TW, zh-CN, ja, ko, fr.
 # The findings are written in this language; the layout labels are translated by the renderer.
 language: "en"
+
+# ------------------------------------------------------------ advanced settings
+# OPTIONAL, and the defaults below are right for almost everyone: they are what the skill
+# already does if this block is absent. Delete the whole thing and nothing changes. It is
+# here for the two people who want to argue with the form, not for a new user: nothing in
+# it is asked during onboarding.
+#
+# The fixed form is the set of questions every flat has to answer, in the same order, every
+# time (references/fixed-questions.yaml). There are three groups: the eight gate questions
+# about money and paperwork, six more that a pasted listing or contract answers, and four
+# extras a deep check has time for (council tax band, guarantor, what their tenant checks
+# want from you, and what furniture comes with the flat).
+advanced:
+  fixed_form:
+    questions: auto      # auto | gate | standard | full — auto follows budget_mode (lite 8, standard 14, deep 18)
+    ask_if_missing: gate # gate | all | none — which unanswered questions the agent asks you about, once, in one message

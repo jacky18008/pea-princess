@@ -26,6 +26,24 @@ Read this when the user asks how something works, how to change a setting, how d
 | "I always ask X" | append to `my_questions` with `when`/`kind` (classify: compare / filter / viewing / sign) | see `onboarding.md` |
 | "stop asking me about Y" | remove Y from `must_haves` or `avoid` | show the diff |
 | "start over" | offer `profiles/` examples or the six intake questions | never delete the old profile without a yes |
+| 「只問把關的八題」 / "just the eight that matter" | `advanced.fixed_form.questions: gate` | the fixed form drops to the money-and-paperwork eight |
+| "all 18 questions, always" / 「全部 18 題都要」 | `advanced.fixed_form.questions: full` | adds council tax band, guarantor, their tenant checks, furniture and inventory |
+| "ask me about everything" / 「不知道的都問我」 | `advanced.fixed_form.ask_if_missing: all` | still one message, one time; it just holds more questions |
+| "don't ask, just mark unknown" / 「別問我，不知道就寫不知道」 | `advanced.fixed_form.ask_if_missing: none` | say out loud that an unknown is a risk, never a pass |
+
+The last four live under `advanced:` at the bottom of `profile.yaml`, and the defaults there are
+right for almost everyone: the number of questions follows `budget_mode` on its own (lite eight,
+standard fourteen, deep eighteen). Never raise them in onboarding — offer them only when the user
+asks to be asked less, or asks for more.
+
+## Which questions get answered
+Every flat answers the same form (`references/fixed-questions.yaml`). How many depends on the depth:
+**lite** the eight gate questions (deposit, money up front, the contract, the landlord, the schemes,
+the licence) · **standard** those plus six the listing answers (size, energy letter, bills, minimum
+term, break clause, move-in) · **deep** all eighteen, adding the council tax band, whether a UK
+guarantor is needed, what their tenant checks want from you, and what furniture and inventory come
+with it. `advanced.fixed_form` overrides that, and the mapping itself lives in one place: the
+`tiers` block of `references/fixed-questions.yaml`.
 
 ## Depth in plain words
 - **lite**: the scripts for the fetchable facts and nothing else; fast; more invented numbers if the model is weak, so every number must show a source.

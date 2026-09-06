@@ -39,6 +39,39 @@ class TestProfileCheck(unittest.TestCase):
         joined = " ".join(res["errors"])
         self.assertIn("above the all-in ceiling", joined); self.assertIn("vibes", joined)
 
+    def test_the_template_including_its_advanced_block_is_valid(self):
+        tpl = os.path.join(ROOT, "skills", "vet-flat", "profile.template.yaml")
+        p = subprocess.run([sys.executable, CHECK, tpl], capture_output=True, text=True)
+        self.assertEqual(p.returncode, 0, p.stdout)
+        with open(tpl, encoding="utf-8") as fh:
+            text = fh.read()
+        self.assertIn("advanced:", text)
+        self.assertIn("questions: auto", text)
+        self.assertIn("ask_if_missing: gate", text)
+
+    def test_the_advanced_block_accepts_every_documented_value(self):
+        for questions in ("auto", "gate", "standard", "full"):
+            for ask in ("gate", "all", "none"):
+                code, res = run("advanced:\n  fixed_form:\n    questions: %s\n    ask_if_missing: %s\n"
+                                % (questions, ask))
+                self.assertEqual(code, 0, res["errors"])
+
+    def test_a_bad_value_in_the_advanced_block_is_named(self):
+        code, res = run("advanced:\n  fixed_form:\n    questions: everything\n    ask_if_missing: sometimes\n")
+        self.assertEqual(code, 1)
+        joined = " ".join(res["errors"])
+        self.assertIn("advanced.fixed_form.questions", joined)
+        self.assertIn("advanced.fixed_form.ask_if_missing", joined)
+        self.assertIn("full", joined)
+
+    def test_an_invented_key_under_advanced_is_refused(self):
+        code, res = run("advanced:\n  fixed_form:\n    questions: gate\n    how_many: 9\n")
+        self.assertEqual(code, 1)
+        self.assertTrue(any("how_many" in e for e in res["errors"]), res["errors"])
+        code, res = run("advanced:\n  turbo_mode:\n    on: true\n")
+        self.assertEqual(code, 1)
+        self.assertTrue(any("turbo_mode" in e for e in res["errors"]), res["errors"])
+
     def test_forbidden_content(self):
         code, res = run("story_summary: prefers a landlord of a certain nationality\n")
         self.assertEqual(code, 1)

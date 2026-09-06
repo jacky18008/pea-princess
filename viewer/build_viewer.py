@@ -38,7 +38,10 @@ SCRIPTS = os.path.join(ROOT, "skills", "vet-flat", "scripts")
 # can tell". Still one file a phone can open.
 # 152 KB since the fixed form: fourteen questions per candidate in the example, their
 # wording in three languages, and the `why` line the reader sees when one is unknown.
-SIZE_LIMIT = 152 * 1024
+# 160 KB since the form went to three tiers: four more questions (council tax band,
+# guarantor, referencing, inventory) with their wording in three languages, and the
+# group labels the section now draws above each block of rows.
+SIZE_LIMIT = 160 * 1024
 
 # viewer.html has to stay one small self-contained file, so it carries only the
 # glossary entries the layout actually looks up: the section titles, the verdict
@@ -49,10 +52,11 @@ SIZE_LIMIT = 152 * 1024
 # renderer resolves them, so inlining them would add weight and no behaviour.
 LAYOUT_PREFIXES = ("section", "verdict", "evidence", "axis", "landmine", "ui", "only_you", "fixed")
 
-# The fixed questions the same way: viewer.html draws one thing from them, the `why` line
-# under an unknown answer, so the scanner's regexes, the caps and the groups stay in
-# references/fixed-questions.yaml, where scripts/scan.py reads them.
-QUESTION_FIELDS = ("why",)
+# The fixed questions the same way: viewer.html draws two things from them, the `why` line
+# under an unknown answer and the `group` that decides which block a row sits in, so the
+# scanner's regexes, the caps and the tiers stay in references/fixed-questions.yaml, where
+# scripts/scan.py reads them.
+QUESTION_FIELDS = ("why", "group")
 
 
 def layout_terms(terms):

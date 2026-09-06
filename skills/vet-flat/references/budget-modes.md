@@ -2,7 +2,7 @@ Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen — https://github.com
 
 # Budget modes: the same checks at three depths
 
-People on a £20-a-month plan share usage caps and smaller sandboxes; people with no tools at all paste pages by hand. The skill must still give them the basic functions: hard filters, a verdict, and the two killer questions. `profile.yaml: budget_mode` selects the depth. Default `standard`. The agent states the mode on the first line of the report and lists what was skipped. Depth also moves on its own during a run: see "The escalation ladder" below.
+People on a £20-a-month plan share usage caps and smaller sandboxes; people with no tools at all paste pages by hand. The skill must still give them the basic functions: hard filters, a verdict, and the two killer questions. `profile.yaml: budget_mode` selects the depth. Default `standard`. It also selects how many of the fixed questions every flat has to answer — eight, fourteen or eighteen — and `advanced.fixed_form.questions` in the profile overrides that; the mapping itself lives in the `tiers` block of `references/fixed-questions.yaml`. The agent states the mode on the first line of the report and lists what was skipped. Depth also moves on its own during a run: see "The escalation ladder" below.
 
 | | `lite` | `standard` | `deep` |
 |---|---|---|---|
@@ -15,6 +15,7 @@ People on a £20-a-month plan share usage caps and smaller sandboxes; people wit
 | Planning | skip (state it) | `planning.py near --radius 250 --limit 20` | + `stages` on tall schemes, `roads.py near` |
 | Reviews | ask the user for the lowest reviews only | full paste, incentivised and burst filters | + Trustpilot/press, cross-building matrix |
 | Report | verdict card, hard filters, 2 questions, 12 axes with U where skipped | full | full + comparison |
+| The fixed form (`fixed-questions.yaml`) | the 8 gate questions, F1–F8 | + the 6 listing questions, F9–F14 | + the extended 4, F15–F18: council tax band, guarantor, referencing, furnishing and inventory |
 | Area sweep | not offered; suggest `standard` | `sweep.py --radius 600 --max-buildings 6` | run several `--radius 1000` sweeps on different anchors (one per neighbourhood) with `--max-buildings 8` each; a single 3,200 m sweep trips the map service's rate limit and needs the filter caps raised |
 
 ## The escalation ladder (automatic)

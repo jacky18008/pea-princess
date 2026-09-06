@@ -953,11 +953,12 @@ stages, the journey lines, and the blanks an imported profile leaves).
 scan.py listing.txt
 cat listing.txt | scan.py -
 scan.py listing.txt --table
+scan.py listing.txt --tier gate
 scan.py listing.txt --questions path/to/fixed-questions.yaml
 ```
 
 Reads pasted text — a listing, an agent's email, a draft contract — and hands back
-the **candidate sentences** for each of the fourteen fixed questions in
+the **candidate sentences** for each of the eighteen fixed questions in
 `references/fixed-questions.yaml`, with line numbers. It is the answer to models
 skipping things in 40 KB of paste: the script does the reading, the model fills the
 form from quotes it can point at.
@@ -970,7 +971,14 @@ kept per question, deduped, each cut to the 300-character quote limit of
 
 The ids with **no** candidate are the point: they are printed to stderr as one plain
 line, because that is the list the model turns into questions for the user — gate
-questions F1–F8 always, listing questions F9–F14 whenever a page was pasted.
+questions F1–F8 always, listing questions F9–F14 and the extended F15–F18 whenever a
+page was pasted.
+
+`--tier` narrows both the looking and that list: `gate` the eight, `standard` the
+fourteen, `full` all eighteen. It defaults to `full` because reading is cheap; the
+tier only decides how many the *report* must answer, and that is `render.py`'s job.
+Any name in the file's `tiers` block works, and an unknown one exits 2 rather than
+quietly scanning for nothing.
 
 ```console
 $ scan.py listing.txt --table
@@ -984,17 +992,21 @@ F3   gate     -     (nothing found - ask the user)
 ...
 
 $ scan.py listing.txt
-{ "ok": true, "source": "listing.txt", "lines": 38,
+{ "ok": true, "source": "listing.txt", "lines": 38, "tier": "full",
   "items": [{"id": "F1", "group": "gate", "ask_if_missing": "always",
              "candidates": [{"line_no": 16, "text": "Deposit: five weeks' rent (£2,711)."}]}, ...],
   "summary": {"found_candidates": 30, "silent": ["F3", "F6", "F8"]} }
 ```
 
-The question file is also the machine side of the report's fixed form: `group`,
-`axis`, `answer_type`, `ask_if_missing`, a `cap` pointing into `thresholds.yaml`
-where the law caps the answer, and the `why` line both renderers print when an answer
-is unknown. The reader-facing wording lives in `glossary.yaml` as `fixed.F1` …
-`fixed.F14`, in three languages.
+The question file is also the machine side of the report's fixed form: `group`
+(`gate`, `listing` or `extended`), `axis`, `answer_type`, `ask_if_missing`, a `cap`
+pointing into `thresholds.yaml` where the law caps the answer, an optional
+`source_hint` naming where a human would go and look, and the `why` line both
+renderers print when an answer is unknown. Its `tiers` block is the one place the
+mapping from depth to how many questions lives — lite eight, standard fourteen, deep
+eighteen — and `scan.py`, `render.py` and the viewer all read it from there. The
+reader-facing wording lives in `glossary.yaml` as `fixed.F1` … `fixed.F18`, in three
+languages.
 
 Tests: `tests/test_scan.py` (no network — the parser, the bilingual patterns against
 `tests/fixtures/pasted-listing.txt`, the five-candidate cap, the silent-id line on

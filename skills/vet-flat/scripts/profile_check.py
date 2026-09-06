@@ -23,13 +23,18 @@ ENUMS = {
     "guarantor_route": None,  # free text
     "commute.redundancy_min_grade": {"A", "B", "B-", "C"},
     "bridging.first_weeks": {"hotel_or_operator", "private_short_let", "undecided"},
+    "advanced.fixed_form.questions": {"auto", "gate", "standard", "full"},
+    "advanced.fixed_form.ask_if_missing": {"gate", "all", "none"},
     "language": None,
 }
+# The optional Advanced block: every key it may hold, and nothing else. A typo here is
+# silence, not an error message, so the validator names it instead.
+ADVANCED = {"fixed_form": {"questions", "ask_if_missing"}}
 KNOWN_TOP = {"flat_type", "separate_bedroom_required", "occupants", "experience", "budget_mode", "axis_depth",
              "limits", "avoid", "priorities", "min_room_area_m2", "min_floor_area_sqft", "max_building_age_years",
              "budget", "bridging", "move_in_window", "commute", "floors", "light", "quiet_over_light",
              "must_haves", "nice_to_haves", "guarantor_route", "tenancy", "self_intro_template",
-             "story_summary", "story_taken_on", "language", "my_questions", "models"}
+             "story_summary", "story_taken_on", "language", "my_questions", "models", "advanced"}
 RANGES = {"min_floor_area_sqft": (150, 3000), "min_room_area_m2": (6, 60), "max_building_age_years": (0, 300),
           "budget.rent_pcm_target": (300, 20000), "budget.all_in_pcm_ceiling": (300, 25000),
           "commute.max_door_to_door_min": (5, 180), "occupants": (1, 12),
@@ -150,6 +155,21 @@ def check(profile):
         v = get(profile, key)
         if isinstance(v, (int, float)) and not (lo <= v <= hi):
             errors.append(f"'{key}' = {v} is outside the sensible range {lo}–{hi}")
+    adv = profile.get("advanced")
+    if adv is not None:
+        if not isinstance(adv, dict):
+            errors.append("'advanced' must be a block of settings, not a single value")
+        else:
+            for key, value in adv.items():
+                if key not in ADVANCED:
+                    errors.append(f"advanced: unknown setting '{key}'; known: {', '.join(sorted(ADVANCED))}")
+                elif not isinstance(value, dict):
+                    errors.append(f"advanced.{key} must be a block of settings, not a single value")
+                else:
+                    for sub in value:
+                        if sub not in ADVANCED[key]:
+                            errors.append(f"advanced.{key}: unknown setting '{sub}'; "
+                                          f"known: {', '.join(sorted(ADVANCED[key]))}")
     ad = profile.get("axis_depth") or {}
     if isinstance(ad, dict):
         for axis, depth in ad.items():

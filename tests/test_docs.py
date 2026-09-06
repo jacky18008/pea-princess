@@ -25,16 +25,27 @@ class TestSkillMd(unittest.TestCase):
         self.assertLessEqual(len(text), 8000, "the prompt-pack INSTRUCTIONS.md must fit ChatGPT Projects (8,000 chars)")
         self.assertIn("Manual-mode digest", text)
 
-    def test_the_prompt_pack_carries_the_fourteen_fixed_questions(self):
+    def test_the_prompt_pack_carries_the_eighteen_fixed_questions(self):
         import importlib.util
         spec = importlib.util.spec_from_file_location("build_dist", os.path.join(HERE, "..", "tools", "build_dist.py"))
         mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
         text = mod.compose_instructions()
-        for i in range(1, 15):
+        for i in range(1, 19):
             self.assertIn("F%d " % i, text, "F%d is missing from the manual-mode digest" % i)
         for state in ("found", "asked", "unknown"):
             self.assertIn(state, text, state)
         self.assertIn("fixed-questions.yaml", text)
+        # The three tiers and the knob that overrides them travel with the pack too.
+        for needle in ("lite 8", "standard 14", "deep 18", "advanced.fixed_form"):
+            self.assertIn(needle, text, needle)
+        # Never at the cost of the digest that tells a model how to ask for what it lacks.
+        self.assertIn("## Rules for asking", text)
+
+    def test_the_fixed_form_digest_stays_compact(self):
+        s = read("references", "report-contract.md")
+        block = s[s.index("## The fixed form"):s.index("## Plain-language rules")].strip()
+        self.assertLessEqual(len(block) + 1, 560,
+                             "the digest is copied into the prompt pack; keep it under 560 chars")
 
     def test_the_fixed_form_is_a_rule_that_never_bends(self):
         s = read("SKILL.md")
@@ -42,6 +53,9 @@ class TestSkillMd(unittest.TestCase):
         self.assertIn("references/fixed-questions.yaml", block)
         self.assertIn("scripts/scan.py", block)
         for word in ("found", "asked", "unknown"):
+            self.assertIn(word, block, word)
+        # Eight, fourteen or eighteen by depth, and the user's own setting wins.
+        for word in ("eight", "fourteen", "eighteen", "budget mode", "advanced.fixed_form"):
             self.assertIn(word, block, word)
 
     def test_portable_frontmatter_only(self):

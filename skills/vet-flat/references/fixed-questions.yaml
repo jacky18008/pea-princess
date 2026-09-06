@@ -1,15 +1,21 @@
 # Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen — https://github.com/jacky18008/pea-princess — CC BY 4.0
 #
-# The fixed form: fourteen questions every flat has to answer, in the same order,
-# every time. Prose gets skipped; a form does not. Each question has exactly three
-# states in the report (report-schema.json, definitions.fixed_answer):
+# The fixed form: the questions every flat has to answer, in the same order, every
+# time. Prose gets skipped; a form does not. Each question has exactly three states
+# in the report (report-schema.json, definitions.fixed_answer):
 #   found    the answer is in writing -> quote the sentence and name the source
 #   asked    nothing was written down -> you asked the user and they answered (source: user)
 #   unknown  nobody has checked yet   -> no quote, no number, and the `why` below is
 #            printed to the reader so they know what to go and find
-# Gate questions (F1-F8) are asked of every flat, always. Listing questions (F9-F14)
-# are asked whenever the user pastes a page, an email or a contract.
-# The reader-facing wording of each question is glossary.yaml, `fixed.F1` ... `fixed.F14`,
+# There are three groups, and how many you answer follows how deep the run goes:
+#   gate      F1-F8   the money and the paper. Every flat, always, whatever the mode.
+#   listing   F9-F14  what the advert and the contract say. Whenever a page was pasted.
+#   extended  F15-F18 the four a deep check has time for: the council tax band, the
+#                     guarantor, what referencing wants, and what is in the flat.
+# The `tiers` block below is the ONLY place that mapping lives, so scripts/scan.py,
+# scripts/render.py and viewer/viewer.html all read the same answer. The user can
+# override it in profile.yaml under `advanced.fixed_form.questions`.
+# The reader-facing wording of each question is glossary.yaml, `fixed.F1` ... `fixed.F18`,
 # in three languages. It is not here: this file is the machine side.
 #
 # FORMAT (a 60-line standard-library parser reads it: scripts/scan.py)
@@ -18,17 +24,50 @@
 #     '' for a quote), a bare integer, or a bare word of [A-Za-z0-9_.#-]
 #   * a list is `key:` on its own line and `- value` lines indented under it
 # Fields per question:
-#   group           gate | listing
+#   group           gate | listing | extended
 #   axis            the axis (references/axes/) this belongs to
 #   answer_type     weeks | money | yes_no | text | letter | date
 #   ask_if_missing  always | when_page_pasted
 #   cap             pointer into thresholds.yaml where the law caps the answer (optional)
+#   source_hint     where to go and look when nothing was pasted (optional). A hint for a
+#                   human or a model, never a fetcher: no script reads it.
 #   look_for        case-insensitive regexes, English AND Chinese, that scripts/scan.py
 #                   runs over pasted text to surface candidate sentences. They are
 #                   deliberately loose: a candidate is a sentence to read, not an answer.
 #   why             one short sentence: what the reader loses by not knowing. Both
 #                   renderers print it in the answer cell of an `unknown` row.
 version: "2026-09-05"
+
+# How many of the questions are answered, by how deep the run goes. Read this, never
+# hard-code the count. The keys are the budget modes of profile.yaml (lite, standard,
+# deep), the tiers a report can record in generated_by.tier (lite, standard, breadth,
+# manual), and the three words the user may write in profile.yaml under
+# `advanced.fixed_form.questions` (gate, standard, full; `auto` means follow the mode).
+# manual mode has no shell but usually has a pasted page, so it answers the fourteen.
+tiers:
+  lite:
+    - gate
+  gate:
+    - gate
+  standard:
+    - gate
+    - listing
+  manual:
+    - gate
+    - listing
+  deep:
+    - gate
+    - listing
+    - extended
+  breadth:
+    - gate
+    - listing
+    - extended
+  full:
+    - gate
+    - listing
+    - extended
+
 questions:
 
   # ------------------------------------------------------------ gate: money ---
@@ -207,3 +246,54 @@ questions:
       - '\b\d{4}-\d{2}-\d{2}\b'
       - '(可入住|入住日|起租日|可遷入|可迁入|交屋)[^。\n]{0,20}'
       - '\d{1,2}\s*月\s*\d{1,2}\s*[日號号]'
+
+  # ------------------------------------------- extended: the deep-check four ---
+  F15:
+    group: extended
+    axis: 10
+    answer_type: letter
+    ask_if_missing: when_page_pasted
+    source_hint: "VOA council tax band search"
+    why: "The band, A to H, sets the council tax bill you pay on top of the rent."
+    look_for:
+      - 'council tax[^.\n]{0,30}\bband\b[^.\n]{0,10}[A-H]\b'
+      - '\bband\s*[A-H]\b[^.\n]{0,30}council tax'
+      - 'council tax[^.\n]{0,40}[£$]\s?\d[\d,]*'
+      - '(市政稅|市政税|地方稅|地方税|議會稅|议会税)[^。\n]{0,25}([A-H]|[£￥]?\s?\d)'
+  F16:
+    group: extended
+    axis: 16
+    answer_type: text
+    ask_if_missing: when_page_pasted
+    cap: "thresholds.yaml#rent_in_advance_max_months"
+    why: "If they want a UK guarantor, find the alternative now; more rent up front is not one, because one month is the legal maximum."
+    look_for:
+      - '\bguarantor\b[^.\n]{0,60}'
+      - '\bUK[- ]?(based|resident|homeowner)\b[^.\n]{0,30}guarantor'
+      - 'rent guarantee insurance|guarantor service|guarantor scheme'
+      - '(no|without|instead of)[^.\n]{0,20}guarantor'
+      - '(擔保人|担保人|保證人|保证人|連帶保證|连带保证)[^。\n]{0,25}'
+  F17:
+    group: extended
+    axis: 16
+    answer_type: text
+    ask_if_missing: when_page_pasted
+    why: "The income they want you to prove, and the papers they want it on, decide whether you can even apply."
+    look_for:
+      - 'referencing|reference check|credit check|affordability (check|assessment)'
+      - '\b\d{2}\s*(x|times)\s*(the )?(monthly )?rent'
+      - 'annual (income|salary)[^.\n]{0,30}[£$]?\s?\d'
+      - '\b(one|two|three|six|1|2|3|6)\s*months?[^.\n]{0,30}(bank )?statements?'
+      - 'proof of (funds|income|earnings|address)'
+      - '(收入證明|收入证明|財力證明|财力证明|銀行對帳單|银行对账单|徵信|征信|租客審核|租客审核)'
+  F18:
+    group: extended
+    axis: 12
+    answer_type: text
+    ask_if_missing: when_page_pasted
+    why: "What is already in the flat, and whether a check-in list is made that protects your deposit when you leave."
+    look_for:
+      - '\b(fully |part(ly|ially)? |un)?furnished\b'
+      - '\binventory\b|check[- ]?in report|schedule of condition'
+      - 'white goods|appliances (are )?includ|comes with[^.\n]{0,40}(bed|sofa|desk|wardrobe|fridge)'
+      - '(附家具|含家具|全配|空屋|家具清單|家具清单|點交|点交|入住清單|入住清单|財產清冊|财产清册)'

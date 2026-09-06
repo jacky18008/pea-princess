@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Pre-scan pasted text for the fourteen fixed questions, and say which ones it is silent on.
+"""Pre-scan pasted text for the fixed questions, and say which ones it is silent on.
 
 A model that reads 40 KB of a pasted listing skips things. This script does the reading:
 it runs the `look_for` patterns in `references/fixed-questions.yaml` over the text and
@@ -20,10 +20,15 @@ Usage:
   scan.py listing.txt                    > candidates.json
   cat listing.txt | scan.py -            > candidates.json
   scan.py listing.txt --table            # the same thing as a plain table
+  scan.py listing.txt --tier gate        # only the eight the gate asks (default: full)
   scan.py listing.txt --questions PATH   # a different fixed-questions.yaml
 
+The tiers are the `tiers` block of references/fixed-questions.yaml: gate = the eight,
+standard = the fourteen, full = all eighteen. Scanning defaults to full because reading
+is cheap: the report decides how many it has to ANSWER, this decides what to look for.
+
 Output (one JSON object on stdout):
-  {"ok": true, "source": "listing.txt", "lines": 84,
+  {"ok": true, "source": "listing.txt", "lines": 84, "tier": "full",
    "items": [{"id": "F1", "group": "gate", "ask_if_missing": "always",
               "candidates": [{"line_no": 12, "text": "Deposit: five weeks' rent."}]}, ...],
    "summary": {"found_candidates": 11, "silent": ["F3", "F8"]}}
@@ -45,6 +50,13 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 REFS = os.path.join(HERE, "..", "references")
 DEFAULT_QUESTIONS = os.path.join(REFS, "fixed-questions.yaml")
+
+# Scanning is cheap, so it looks for everything by default; the tier decides which
+# questions must be ANSWERED, and that is the report's business (scripts/render.py).
+DEFAULT_TIER = "full"
+# A tier name nobody recognises answers the fourteen rather than none: a report that
+# says nothing about its depth is a standard one.
+FALLBACK_TIER = "standard"
 
 MAX_CANDIDATES = 5          # per question: enough to choose from, few enough to read
 MAX_TEXT = 300              # the quote limit in report-schema.json
@@ -129,10 +141,46 @@ def parse_questions(text):
     return root
 
 
+def load_document(path=DEFAULT_QUESTIONS):
+    """The whole file as plain data: `tiers` and `questions`."""
+    with io.open(path, encoding="utf-8") as fh:
+        return parse_questions(fh.read())
+
+
+def load_tiers(path=DEFAULT_QUESTIONS):
+    """{tier name: [group, ...]} from the file's `tiers` block.
+
+    This is the ONE place the mapping from how deep a run goes to how many questions it
+    answers is written down. Everything else - this scanner, scripts/render.py, the
+    viewer - reads it from here, so raising a tier is one edit in one file.
+    """
+    tiers = load_document(path).get("tiers")
+    if not isinstance(tiers, dict):
+        raise QuestionsError("%s has no 'tiers' map" % path)
+    out = {}
+    for name, groups in tiers.items():
+        if not isinstance(groups, list) or not groups:
+            raise QuestionsError("%s: tier %s is not a list of groups" % (path, name))
+        out[name] = list(groups)
+    return out
+
+
+def ids_for_tier(questions, tiers, tier=DEFAULT_TIER):
+    """The ids a run at this tier has to answer, in question order.
+
+    An unrecognised tier falls back to `standard`; if even that is missing the caller
+    gets every question, because a broken tiers block must never silently drop a question.
+    """
+    groups = tiers.get(tier) or tiers.get(FALLBACK_TIER)
+    ordered = sorted(questions, key=sort_key)
+    if not groups:
+        return ordered
+    return [qid for qid in ordered if questions[qid].get("group") in groups]
+
+
 def load_questions(path=DEFAULT_QUESTIONS):
     """{id: fields} in file order, with the regexes already compiled under `patterns`."""
-    with io.open(path, encoding="utf-8") as fh:
-        doc = parse_questions(fh.read())
+    doc = load_document(path)
     questions = doc.get("questions")
     if not isinstance(questions, dict):
         raise QuestionsError("%s has no 'questions' map" % path)
@@ -182,11 +230,11 @@ def excerpt(text, match):
     return cut.strip()[:MAX_TEXT]
 
 
-def scan_text(text, questions):
+def scan_text(text, questions, ids=None):
     """[{id, group, ask_if_missing, candidates: [{line_no, text}]}] in question order."""
     lines = text.splitlines()
     items = []
-    for qid in sorted(questions, key=sort_key):
+    for qid in (ids if ids is not None else sorted(questions, key=sort_key)):
         item = questions[qid]
         found = []
         seen = set()
@@ -222,13 +270,14 @@ def sort_key(qid):
     return (int(digits) if digits else 0, qid)
 
 
-def scan(text, questions, source="stdin"):
-    items = scan_text(text, questions)
+def scan(text, questions, source="stdin", tier=DEFAULT_TIER, ids=None):
+    items = scan_text(text, questions, ids)
     silent = [item["id"] for item in items if not item["candidates"]]
     return {
         "ok": True,
         "source": source,
         "lines": len(text.splitlines()),
+        "tier": tier,
         "items": items,
         "summary": {
             "found_candidates": sum(len(item["candidates"]) for item in items),
@@ -268,8 +317,11 @@ def table(result):
 
 def build_parser():
     p = argparse.ArgumentParser(
-        description="Find the candidate sentences for the fourteen fixed questions in pasted text.")
+        description="Find the candidate sentences for the fixed questions in pasted text.")
     p.add_argument("text", help="path to a text file, or - to read stdin")
+    p.add_argument("--tier", default=DEFAULT_TIER,
+                   help="which questions to look for: gate (8), standard (14) or full (18, "
+                        "the default). Any tier name in the file's `tiers` block works.")
     p.add_argument("--questions", default=DEFAULT_QUESTIONS,
                    help="path to references/fixed-questions.yaml")
     p.add_argument("--table", action="store_true", help="print a plain table instead of JSON")
@@ -280,9 +332,15 @@ def main(argv=None):
     args = build_parser().parse_args(argv)
     try:
         questions = load_questions(args.questions)
+        tiers = load_tiers(args.questions)
     except (IOError, OSError, QuestionsError) as exc:
         sys.stderr.write("Cannot read the questions at %s: %s\n" % (args.questions, exc))
         return 1
+    if args.tier not in tiers:
+        sys.stderr.write("Unknown tier %r. The file offers: %s\n"
+                         % (args.tier, ", ".join(sorted(tiers))))
+        return 2
+    ids = ids_for_tier(questions, tiers, args.tier)
     if args.text == "-":
         source = "stdin"
         stream = getattr(sys.stdin, "buffer", sys.stdin)
@@ -295,7 +353,7 @@ def main(argv=None):
         except (IOError, OSError) as exc:
             sys.stderr.write("Cannot read the text: %s\n" % exc)
             return 1
-    result = scan(text, questions, source)
+    result = scan(text, questions, source, args.tier, ids)
     sys.stderr.write(silent_line(result) + "\n")
     if args.table:
         sys.stdout.write(table(result) + "\n")

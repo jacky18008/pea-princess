@@ -337,7 +337,7 @@
             "string",
             "null"
           ],
-          "description": "Write how the user plans to satisfy the landlord's income test, in plain words: a UK guarantor, rent guarantee insurance, paying more months up front, or none needed.",
+          "description": "Write how the user plans to satisfy the landlord's income test, in plain words: a UK guarantor, rent guarantee insurance, an overseas guarantor, proof of funds only, or none needed. Paying more rent up front is not one of them: since 2026-05-01 nobody may ask for more than one month in advance.",
           "maxLength": 160
         },
         "notes": {
@@ -347,6 +347,52 @@
           ],
           "description": "Say here which of these filters the user gave you and which you assumed. An assumed filter that is never flagged is how a report quietly lies.",
           "maxLength": 600
+        },
+        "budget_mode": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "lite",
+            "standard",
+            "deep",
+            null
+          ],
+          "description": "Write the user's budget_mode from profile.yaml. It decides how many of the fixed questions this report has to answer: lite eight, standard fourteen, deep eighteen (references/fixed-questions.yaml, the `tiers` block). Leave it out and the renderers fall back to generated_by.tier, and then to standard."
+        },
+        "advanced": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "The optional Advanced settings block of profile.yaml, copied as it was used. Only include what you actually applied.",
+          "properties": {
+            "fixed_form": {
+              "type": "object",
+              "additionalProperties": false,
+              "description": "The user's override of the fixed form. It beats budget_mode and generated_by.tier.",
+              "properties": {
+                "questions": {
+                  "type": "string",
+                  "enum": [
+                    "auto",
+                    "gate",
+                    "standard",
+                    "full"
+                  ],
+                  "description": "How many questions this report had to answer: auto = follow the budget mode, gate = the eight, standard = the fourteen, full = all eighteen."
+                },
+                "ask_if_missing": {
+                  "type": "string",
+                  "enum": [
+                    "gate",
+                    "all",
+                    "none"
+                  ],
+                  "description": "Which unanswered questions were put to the user: gate = the eight gate ones only (the default), all = every unanswered question, none = ask nothing and mark them unknown."
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -388,7 +434,7 @@
         },
         "fixed_answers": {
           "type": "array",
-          "description": "The fixed form: the fourteen questions of references/fixed-questions.yaml, answered for this flat, one entry per id and all fourteen present. F1-F8 are the gate questions and are answered for every flat, always. F9-F14 are the listing questions: answer them whenever the user pasted a page, an email or a contract. With a shell, run scripts/scan.py over the pasted text first: it hands you the candidate sentences per question, so you quote rather than remember. Ask the user, once and in one message, about everything still unknown. A missing id is a warning here and an error under render.py --strict; the same id twice is an error.",
+          "description": "The fixed form of references/fixed-questions.yaml, answered for this flat, one entry per id, no id twice. How many you answer follows how deep the run goes, and that mapping is the `tiers` block of that file, never a number you remember: lite answers the eight gate questions F1-F8; standard answers those plus the six listing questions F9-F14; deep and breadth answer all eighteen, adding the extended four F15-F18 (council tax band, guarantor, referencing, furnishing and inventory). The user may override it in profile.yaml under advanced.fixed_form.questions. F1-F8 are asked of the user when nothing is written down; F9-F18 are answered whenever the user pasted a page, an email or a contract. With a shell, run scripts/scan.py over the pasted text first: it hands you the candidate sentences per question, so you quote rather than remember. Ask the user, once and in one message, about everything still unknown. A missing id of the tier this report ran at is a warning here and an error under render.py --strict; an id from a deeper tier is welcome, never a problem.",
           "items": {
             "$ref": "#/definitions/fixed_answer"
           }
@@ -834,7 +880,7 @@
     },
     "fixed_answer": {
       "type": "object",
-      "description": "One of the fourteen fixed questions in references/fixed-questions.yaml, answered for this flat. The form is the same for every flat so that nothing quietly goes missing: the wording of each question is glossary.yaml fixed.F1 ... fixed.F14, and there are exactly three states, no fourth. found = it is in writing: quote the sentence you read it in, verbatim, and cite the source id it came from. asked = nothing was written down, so you asked the user and they answered: source is the literal \"user\". unknown = nobody has checked yet: leave the quote out, put no number in the answer, and the renderers print the question's `why` line so the user knows what to go and find. Never turn an unknown into a pass, and never write a quote you cannot point at in the text you were given. Where the law caps the answer (deposit five weeks, holding deposit one week, rent in advance one month) the cap is in thresholds.yaml: say in the answer whether this flat is inside it.",
+      "description": "One of the fixed questions in references/fixed-questions.yaml, answered for this flat. The form is the same for every flat so that nothing quietly goes missing: the wording of each question is glossary.yaml fixed.F1 ... fixed.F18, and there are exactly three states, no fourth. found = it is in writing: quote the sentence you read it in, verbatim, and cite the source id it came from. asked = nothing was written down, so you asked the user and they answered: source is the literal \"user\". unknown = nobody has checked yet: leave the quote out, put no number in the answer, and the renderers print the question's `why` line so the user knows what to go and find. Never turn an unknown into a pass, and never write a quote you cannot point at in the text you were given. Where the law caps the answer (deposit five weeks, holding deposit one week, rent in advance one month) the cap is in thresholds.yaml: say in the answer whether this flat is inside it.",
       "additionalProperties": false,
       "required": [
         "id",
@@ -907,9 +953,13 @@
             "F11",
             "F12",
             "F13",
-            "F14"
+            "F14",
+            "F15",
+            "F16",
+            "F17",
+            "F18"
           ],
-          "description": "The question's id, F1 to F14, from references/fixed-questions.yaml. Every candidate carries all fourteen, once each."
+          "description": "The question's id, F1 to F18, from references/fixed-questions.yaml. Every candidate carries every id of the tier the run finished at - eight, fourteen or eighteen - once each."
         },
         "status": {
           "type": "string",
