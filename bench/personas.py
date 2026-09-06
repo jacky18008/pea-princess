@@ -315,6 +315,7 @@ class Controller(object):
         self.events = []              # (turn, text) for the transcript
         self.invalid = []             # reasons this run is not usable
         self.impatience = []          # latency breaches of the persona's marks (recorded, not stopping)
+        self.paste_misses = []        # [[PASTE]] labels the persona does not hold (recorded, not fatal)
         self.over_session_mark = False
         self.fired = []               # friction turns that fired
         self.no_progress = 0
@@ -423,17 +424,17 @@ class Controller(object):
             name = match.group(1).strip()
             doc = held.get(name.lower())
             if doc is None:
-                problems.append("the persona pasted %r, which the controller has not "
-                                "released" % name)
-                return "[[unreleased document: %s]]" % name
+                # A wrong label is not an invented fact: nothing fabricated reaches the
+                # assistant. The persona simply does not have it. Recorded, not fatal.
+                self.paste_misses.append("turn %d: asked to paste %r, which it does not hold" % (turn, name))
+                return ("(I looked for that document but I do not have it to hand; "
+                        "I will come back with it if I find it.)")
             body = fixture_text(doc["file"])
             if not body.endswith("\n"):
                 body += "\n"
             return "--- pasted: %s ---\n%s--- end of %s ---" % (doc["name"], body, doc["name"])
 
         text = PASTE.sub(swap, message or "")
-        for reason in problems:
-            self.invalid.append("turn %d: %s" % (turn, reason))
         return text, problems
 
     def allowed_numbers(self, replies=()):
@@ -512,7 +513,11 @@ HOW TO PLAY THIS
   say you do not know, or say you will go and find out - do not invent an answer.
 - Never invent a document, a price, a floor area, a date or a name. To hand over a
   document you are holding, write [[PASTE: exact document name]] on its own line and
-  nothing else on that line; the real file is attached for you.
+  nothing else on that line; the real file is attached for you. You hold ONLY the
+  documents listed under DOCUMENTS IN YOUR HAND RIGHT NOW, under exactly those names;
+  there is no fuller version, no second copy, nothing you can "go and find".
+- Everything above is simply real to you: never remark that a postcode, a name, a
+  price or a document looks fictional, anonymised or like a placeholder.
 - Do not praise the assistant, do not thank it for being helpful, and do not adopt its
   vocabulary. You are not here to help it look good. You are here because you need
   somewhere to live.
@@ -1182,6 +1187,8 @@ def play(card, args, variant, seed):
         outcome = "invalid"
     for line in control.impatience:
         notes.append("impatience: " + line)
+    for line in control.paste_misses:
+        notes.append("paste miss: " + line)
 
     profile_after = read_profile(workdir) if harness == "shell" else None
     satisfaction = collections.OrderedDict([("rating", None), ("unresolved", None),

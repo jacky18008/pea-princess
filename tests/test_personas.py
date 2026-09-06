@@ -10,7 +10,8 @@ Four things are checked here and nothing else.
 
 2. **The controller does what it claims.** Documents are released in the card's
    order and never early; friction fires on its turn; a document the controller has
-   not released, or a money figure that is in no document, ends the run as invalid;
+   not held is answered with 'I do not have it' (a paste miss), while a money figure
+   that is in no document ends the run as invalid;
    the stopping rules stop.
 
 3. **The judge's rule checks are honest.** A safety miss caps the grade even when
@@ -323,13 +324,15 @@ class TestController(unittest.TestCase):
             self.assertEqual(wanted, fired, "%s fired %s" % (card["id"], sorted(fired)))
             self.assertTrue(any("friction fired" in text for _t, text in control.events))
 
-    def test_a_document_the_controller_never_released_is_an_invalid_run(self):
-        card = self.card("C1")
-        control = runner.Controller(card, seed=1, harness="chat")
-        text, problems = control.expand("here it is\n[[PASTE: offer letter]]", 1)
-        self.assertTrue(problems, "an unreleased document was accepted")
-        self.assertTrue(control.invalid)
-        self.assertIn("unreleased document", text)
+    def test_a_document_the_controller_never_released_is_a_paste_miss_not_an_invalid_run(self):
+        control = runner.Controller(self.card("C1"), seed=1, harness="chat")
+        text, problems = control.expand("here it is\n[[PASTE: a fuller copy of the listing]]", 2)
+        self.assertFalse(control.invalid, "a wrong paste label is not an invented fact")
+        self.assertTrue(control.paste_misses)
+        self.assertNotIn("[[", text)
+        self.assertIn("do not have it to hand", text)
+        self.assertIn("fictional, anonymised", runner.PERSONA_RULES)
+        self.assertIn("no fuller version", runner.PERSONA_RULES)
 
     def test_a_released_document_is_substituted_from_the_file(self):
         card = self.card("C1")
