@@ -1,0 +1,151 @@
+{
+ "id": "A1",
+ "type": "agreement",
+ "file": "cases/A1/doc.txt",
+ "title": "Invented assured shorthold tenancy agreement, 27 clauses",
+ "chars": 15114,
+ "lines": 249,
+ "questions": [
+  {
+   "qid": "A1-q1",
+   "kind": "fixed",
+   "fixed_id": "F1",
+   "question": "How many weeks' rent is the deposit?",
+   "question_zh": "押金是幾週租金？",
+   "answer": {
+    "value": 5,
+    "unit": "weeks"
+   },
+   "spans": [
+    {
+     "line_start": 55,
+     "line_end": 55,
+     "quote": "The deposit is £2,128.85, being five weeks' rent."
+    }
+   ],
+   "forbidden": [
+    "\\b(?:one|1)\\s*weeks?\\b",
+    "\\b(?:six|6)\\s*weeks?\\b"
+   ],
+   "confidence": "high",
+   "note": "Clause 6.1 says the HOLDING deposit is one week's rent; a model that answers one week has read the wrong clause."
+  },
+  {
+   "qid": "A1-q2",
+   "kind": "fixed",
+   "fixed_id": "F4",
+   "question": "Is this a tenancy or a licence?",
+   "question_zh": "這是租約還是使用許可？",
+   "answer": {
+    "text": "licence"
+   },
+   "spans": [
+    {
+     "line_start": 21,
+     "line_end": 23,
+     "quote": "a licence to occupy and does not create an assured shorthold tenancy"
+    }
+   ],
+   "forbidden": [
+    "^(?:it is )?(?:an? )?(?:assured shorthold )?tenancy\\b"
+   ],
+   "confidence": "high",
+   "note": "The title line says ASSURED SHORTHOLD TENANCY AGREEMENT and clause 2.3 contradicts it. The answer is in clause 2.3, not the heading."
+  },
+  {
+   "qid": "A1-q3",
+   "kind": "free",
+   "fixed_id": null,
+   "question": "How much notice must the tenant give to end the agreement early, and from what point in the term may that notice be given?",
+   "question_zh": "提前退租要提前多久通知？從第幾個月起才能發？",
+   "answer": {
+    "text": "two months' written notice, on or after the sixth month of the term",
+    "must_contain": [
+     "two months",
+     "sixth month"
+    ]
+   },
+   "spans": [
+    {
+     "line_start": 76,
+     "line_end": 77,
+     "quote": "On or after the sixth month of the Term either party may end this agreement by giving"
+    }
+   ],
+   "forbidden": [
+    "\\b(?:one|1)\\s*month'?s?\\s*(?:written\\s*)?notice\\b",
+    "\\b(?:two|2)\\s*weeks?\\b"
+   ],
+   "confidence": "high",
+   "note": "Clause 22.40 also carries a one month's notice, for house rules. Different clause, different subject."
+  },
+  {
+   "qid": "A1-q4",
+   "kind": "fixed",
+   "fixed_id": "F10",
+   "question": "What is the energy rating letter?",
+   "question_zh": "能源等級是哪一級？",
+   "answer": {
+    "value": "C",
+    "unit": null
+   },
+   "spans": [
+    {
+     "line_start": 95,
+     "line_end": 96,
+     "quote": "shows a current rating of C"
+    }
+   ],
+   "forbidden": [
+    "^b\\b",
+    "\\brating (?:is )?b\\b",
+    "\\bband b\\b"
+   ],
+   "confidence": "high",
+   "note": "The potential rating is B. The question asks for the current one."
+  },
+  {
+   "qid": "A1-q5",
+   "kind": "free",
+   "fixed_id": null,
+   "question": "Does the flat come with a parking space, and if so what does it cost?",
+   "question_zh": "這戶有附停車位嗎？要多少錢？",
+   "answer": {
+    "absent": true
+   },
+   "spans": [],
+   "forbidden": [
+    "£\\s?\\d",
+    "\\byes\\b",
+    "\\bincluded\\b",
+    "\\ballocated (?:parking|bay|space)\\b"
+   ],
+   "confidence": "high",
+   "note": "Clause 22.51 mentions a bay allotted to another flat. That is a near miss grep will surface: the agreement never says this flat has one, or a price."
+  },
+  {
+   "qid": "A1-q6",
+   "kind": "free",
+   "fixed_id": null,
+   "question": "How much is the pet deposit or the pet rent?",
+   "question_zh": "養寵物要加收多少押金或租金？",
+   "answer": {
+    "absent": true
+   },
+   "spans": [
+    {
+     "line_start": 146,
+     "line_end": 147,
+     "quote": "No pet is kept at the Property without the Landlord's written consent"
+    }
+   ],
+   "forbidden": [
+    "£\\s?\\d",
+    "\\bper (?:month|week)\\b",
+    "\\b\\d+\\s*weeks?\\b"
+   ],
+   "confidence": "high",
+   "note": "Clause 20.1 permits a cat or a small dog with written consent and is silent about money. That clause IS the evidence for the no, so it is a gold span: a model that says absent and quotes it has shown its work."
+  }
+ ]
+}

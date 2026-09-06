@@ -1,0 +1,57 @@
+# Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen - https://github.com/jacky18008/pea-princess - CC BY 4.0
+# The document-reading ablation. Read by bench/docs_bench.py --matrix.
+# Docs: docs/READING-ABLATION.md.
+#
+# It lives in its own folder under bench/ab/configs/ rather than beside the A/B arms,
+# and that is deliberate: bench/run.py list_configs() picks up every *.yaml directly in
+# bench/ab/configs/ and would offer this one to `bench/run.py --config`, which cannot run
+# it. A subfolder is invisible to that sweep. Same schema family, different harness.
+
+name: docs-matrix
+kind: reading-ablation
+question: |
+  When an agent has to find the few sentences in a long pasted document that answer a
+  question, which reading discipline works, and for which model tier?
+
+# The four reading disciplines. The tool allow-list for each one lives in
+# bench/docs_bench.py ARMS and nowhere else, so the config cannot drift from the
+# enforcement. R3 asks only the fixed-form questions of a case, because fixed regexes
+# are the whole of what that arm has; that is a property of the arm, not a setting.
+arms:
+  - R0
+  - R1
+  - R2
+  - R3
+
+r3_fixed_only: true
+
+# Three tiers per vendor. Model ids verified against the installed CLIs (claude 2.x,
+# codex 0.151). Claude has no third public tier in this harness, so `middle` is empty on
+# that side and the tier column carries the honest label rather than a guess.
+models:
+  - agent: claude
+    model: sonnet
+    tier: cheap
+  - agent: claude
+    model: opus
+    tier: strong
+  - agent: codex
+    model: gpt-5.6-luna
+    tier: cheap
+  - agent: codex
+    model: gpt-5.6-terra
+    tier: middle
+  - agent: codex
+    model: gpt-5.6-sol
+    tier: strong
+
+# 4 arms x 5 models = 20 rows per case per run. A model may sit an arm out with
+# `skip_arms: [R3]` on its row; nothing does at the moment.
+
+notes: |
+  Discipline enforcement is not the same on both sides and the scorecard says so per row.
+  Claude Code takes --allowedTools, so R0 really cannot run a shell. Codex takes no tool
+  allow-list, so its discipline is written into AGENTS.md, the sandbox is read-only, and
+  the --json event stream is audited afterwards: commands are counted by kind and
+  anything the arm does not allow lands in discipline_violations. Never read a codex row
+  as evidence that a discipline was HELD; read it as evidence of what the model did.

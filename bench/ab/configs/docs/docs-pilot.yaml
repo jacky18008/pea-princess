@@ -1,0 +1,31 @@
+# Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen - https://github.com/jacky18008/pea-princess - CC BY 4.0
+# The pilot for the document-reading ablation. Read by
+#   bench/docs_bench.py --matrix --matrix-config bench/ab/configs/docs/docs-pilot.yaml
+# Same schema as docs-matrix.yaml, cut down to the smallest thing worth paying for.
+# Not an A/B arm: see the note at the top of docs-matrix.yaml for why it sits in this
+# subfolder and not beside B-lean.yaml.
+
+name: docs-pilot
+kind: reading-ablation
+question: |
+  Does the harness hold together end to end, and is the gap between grep and find.py
+  visible at all on the cheapest model before the full matrix is paid for?
+
+# R1 against R2 on one cheap model is the whole hypothesis in one comparison: if the
+# thick view buys a cheap model nothing here, the full matrix is unlikely to find it.
+arms:
+  - R1
+  - R2
+
+r3_fixed_only: true
+
+models:
+  - agent: claude
+    model: sonnet
+    tier: cheap
+
+notes: |
+  Two rows per case. Run it on one case first (--case), read the answers file, and only
+  then let it loose on the bed. If the pilot's fact_recall is identical across the two
+  arms on every case, say so and stop: a null result on the pilot is a finding, and it
+  is a cheaper one than the matrix.

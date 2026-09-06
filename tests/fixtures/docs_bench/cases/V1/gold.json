@@ -1,0 +1,165 @@
+{
+ "id": "V1",
+ "type": "reviews",
+ "file": "cases/V1/doc.txt",
+ "title": "Invented resident review page, 41 reviews, English and Chinese",
+ "chars": 7077,
+ "lines": 150,
+ "questions": [
+  {
+   "qid": "V1-q1",
+   "kind": "free",
+   "fixed_id": null,
+   "question": "Which reviewers say their review was written in exchange for a reward? Name them.",
+   "question_zh": "哪幾篇評論自己說是拿了好處才寫的？請列名。",
+   "answer": {
+    "list": [
+     "Chloe D.",
+     "Danny K.",
+     "Katya B."
+    ]
+   },
+   "spans": [
+    {
+     "line_start": 29,
+     "line_end": 31,
+     "quote": "Reviewed in exchange for a £25 shopping voucher from the on-site team."
+    },
+    {
+     "line_start": 41,
+     "line_end": 43,
+     "quote": "Written in exchange for entry into a prize draw run by the leasing office."
+    },
+    {
+     "line_start": 88,
+     "line_end": 89,
+     "quote": "Reviewed in exchange for a voucher."
+    }
+   ],
+   "forbidden": [
+    "\\bowen s\\b",
+    "\\bravi c\\b",
+    "\\bamelia j\\b"
+   ],
+   "confidence": "high",
+   "note": "Three of the six five-star reviews disclose an incentive. The other five-star reviewers do not, and naming one is a fabrication."
+  },
+  {
+   "qid": "V1-q2",
+   "kind": "free",
+   "fixed_id": null,
+   "question": "What is the heat network standing charge per week, in pounds, according to the reviews?",
+   "question_zh": "依評論所述，集中供暖的固定費每週幾鎊？",
+   "answer": {
+    "value": 14.8,
+    "unit": "GBP"
+   },
+   "spans": [
+    {
+     "line_start": 65,
+     "line_end": 67,
+     "quote": "the standing charge is £14.80 a"
+    }
+   ],
+   "forbidden": [
+    "\\b25\\b",
+    "\\bper (?:month|year)\\b",
+    "\\ba month\\b"
+   ],
+   "confidence": "high",
+   "note": "Ade O. names the charge without a figure at lines 16-18; Ben L. carries the number. The £25 in the page is a shopping voucher."
+  },
+  {
+   "qid": "V1-q3",
+   "kind": "free",
+   "fixed_id": null,
+   "question": "Is there a Chinese-language review that mentions damp or mould? Quote the sentence.",
+   "question_zh": "有中文評論提到潮濕或發霉嗎？把那一句引出來。",
+   "answer": {
+    "text": "臥室牆角一到冬天就潮濕，窗邊發霉擦不完",
+    "must_contain": [
+     "潮濕",
+     "發霉"
+    ]
+   },
+   "spans": [
+    {
+     "line_start": 85,
+     "line_end": 86,
+     "quote": "臥室牆角一到冬天就潮濕，窗邊發霉擦不完"
+    }
+   ],
+   "forbidden": [
+    "陳志豪",
+    "集中供暖"
+   ],
+   "confidence": "high",
+   "note": "The other Chinese review (陳志豪) is about heating cost and sound insulation, not damp."
+  },
+  {
+   "qid": "V1-q4",
+   "kind": "free",
+   "fixed_id": null,
+   "question": "What rent increase at renewal does a reviewer report, as a percentage?",
+   "question_zh": "有評論提到續約時租金漲了百分之幾嗎？",
+   "answer": {
+    "value": 12,
+    "unit": "percent"
+   },
+   "spans": [
+    {
+     "line_start": 79,
+     "line_end": 80,
+     "quote": "Twelve per cent, take it or leave it."
+    }
+   ],
+   "forbidden": [
+    "\\b78\\b",
+    "\\bseventy eight\\b"
+   ],
+   "confidence": "high",
+   "note": "Dev S. reports a hygrometer reading of seventy eight per cent. That is humidity, not rent."
+  },
+  {
+   "qid": "V1-q5",
+   "kind": "free",
+   "fixed_id": null,
+   "question": "Do any reviews say how many pounds the deposit was?",
+   "question_zh": "有評論講出押金到底多少錢嗎？",
+   "answer": {
+    "absent": true
+   },
+   "spans": [
+    {
+     "line_start": 20,
+     "line_end": 23,
+     "quote": "My deposit came back in full"
+    }
+   ],
+   "forbidden": [
+    "£\\s?\\d",
+    "\\b\\d{3,}\\b"
+   ],
+   "confidence": "high",
+   "note": "Two reviews talk about the deposit coming back (lines 22 and 62) and neither gives an amount. The nearer of the two is the gold span: quoting it while answering absent is the right behaviour."
+  },
+  {
+   "qid": "V1-q6",
+   "kind": "free",
+   "fixed_id": null,
+   "question": "Do any reviews give the gym's opening hours?",
+   "question_zh": "有評論寫出健身房的開放時間嗎？",
+   "answer": {
+    "absent": true
+   },
+   "spans": [],
+   "forbidden": [
+    "\\d\\s*(?:am|pm)\\b",
+    "\\d{1,2}[:.]\\d{2}",
+    "\\bopens? at\\b"
+   ],
+   "confidence": "high",
+   "note": "The gym is named at lines 42, 70 and 140 and never with an hour."
+  }
+ ]
+}
