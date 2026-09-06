@@ -17,7 +17,7 @@ period, conditions) · `listing` (deposit/term/bills inside 100 KB+ of boilerpla
 ```
 {"id", "type", "file", "chars", "lines", "questions": [
   {"qid", "kind": "fixed|free", "fixed_id": "F1..F18"|null, "question", "question_zh",
-   "answer": {"value","unit"} | {"text"} | {"list"} | {"absent": true},
+   "answer": {"value","unit"} | {"text"} | {"list", "min_hits"?} | {"absent": true},
    "spans": [{"line_start","line_end","quote"}], "confidence": "high|medium", "note",
    "forbidden": ["regex a WRONG answer would match"]}]}
 ```
