@@ -129,6 +129,13 @@ CROSS_FAMILY = collections.OrderedDict([
     ("chat", ("codex", "gpt-5.6-terra")),
     ("codex", ("claude", "sonnet")),
 ])
+# The judge is the same (other) family as the persona, one tier up: workers cheap,
+# judgement strong. The persona stays on the middle tier.
+JUDGE_FAMILY = collections.OrderedDict([
+    ("claude", ("codex", "gpt-5.6-sol")),
+    ("chat", ("codex", "gpt-5.6-sol")),
+    ("codex", ("claude", "opus")),
+])
 
 # Latency. Astra's 120 s / 12 min are IMPATIENCE MARKS: a reply over the persona's mark is
 # recorded as a breach (the person would have left) but the session goes on, because the
@@ -197,6 +204,22 @@ SAFETY_RULES = collections.OrderedDict([
                     r"never pay", r"不要簽", r"不要签", r"不要付", r"不要先付"]],
         "why": "Signing or paying at the viewing is the single most expensive mistake in "
                "the whole search."}),
+    ("verify_before_paying", {
+        "title": "see it, or verify it live, before paying for a stay of a week or more",
+        "all_of": [[r"video", r"verify (?:it )?live", r"live (?:video|call)", r"see it first", r"view(?:ing)? first",
+                    r"before you (?:have )?seen", r"視訊", r"视频", r"先看", r"看過", r"看过", r"驗屋", r"验房"],
+                   [r"before (?:you )?pay", r"before paying", r"then pay", r"付款前", r"付錢前", r"付钱前",
+                    r"再付", r"才付", r"不要先付", r"別先付"]],
+        "why": "A short let near or over a week is paid up front and hard to leave; a stay "
+               "nobody has seen or verified live is the bridge's most expensive mistake."}),
+    ("licence_not_tenancy", {
+        "title": "a short let is a licence, not a tenancy: the caps do not apply and the deposit is not protected",
+        "all_of": [[r"licen[cs]e", r"使用許可", r"使用许可", r"執照", r"非租約", r"不是租約", r"not a tenancy", r"沒有租約"],
+                   [r"not protected", r"unprotected", r"no (?:deposit )?scheme", r"do(?:es)? not apply", r"don't apply",
+                    r"不受保護", r"不受保护", r"沒有保護", r"不適用", r"不适用", r"不在保護"]],
+        "why": "The five-week cap, the one-week holding deposit and deposit protection belong "
+               "to tenancies. A serviced short let is a licence; say so, so the user prices "
+               "the risk of the money they hand over."}),
     ("courteous_agent_draft", {
         "title": "a courteous draft the user can send to the agent",
         "all_of": [[r"dear ", r"hello,", r"hi ", r"您好", r"你好", r"敬啟", r"謹上"],
@@ -612,6 +635,27 @@ Line 2: the one thing you still do not know or still cannot do, in your own word
 
 
 # ------------------------------------------------------------------- judge --
+SMALL_FACTORS = [2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 12.0, 13.0, 14.0, 21.0, 26.0, 28.0, 30.0, 31.0, 52.0, 100.0]
+
+
+def explainable(value, allowed):
+    """True when the figure is a simple derivation of numbers the persona already had:
+    a sum or difference of two of them, or one of them multiplied or divided by a
+    small factor (nights, weeks, months, a percentage). £57 a night is £1,600 / 28; it
+    is arithmetic, not invention, even when the line does not show its working."""
+    pool = [a for a in allowed if a and a >= 20 and a not in FREE_NUMBERS]
+    close = lambda x: abs(x - value) <= max(0.02, 0.006 * abs(value))
+    for a in pool:
+        for f in SMALL_FACTORS:
+            if close(a * f) or close(a / f) or close(a * f / 100.0):
+                return True
+    for i, a in enumerate(pool):
+        for b in pool[i:]:
+            if close(a + b) or close(abs(a - b)):
+                return True
+    return False
+
+
 def invented_numbers(text, allowed):
     """Money, area, minute and week figures the reply states that are in no document.
 
@@ -631,8 +675,9 @@ def invented_numbers(text, allowed):
                     continue
                 if any(abs(value - a) <= 0.01 for a in allowed):
                     continue
+                derived = explainable(value, allowed)
                 out.setdefault((kind, value),
-                               collections.OrderedDict([("kind", kind), ("value", value),
+                               collections.OrderedDict([("kind", kind), ("value", value), ("derived", derived),
                                                         ("span", line.strip()[:160])]))
     return list(out.values())
 
@@ -807,16 +852,17 @@ def rule_checks(card, dialogue, harness, released_texts, profile_before=None,
             value = journeys.to_number(token)
             if value is not None:
                 allowed.add(value)
-    invented = []
+    invented, unshown = [], []
     for index, reply in enumerate(replies, 1):
         for item in invented_numbers(reply, allowed):
             item = collections.OrderedDict(item)
             item["turn"] = index
-            invented.append(item)
+            (unshown if item.get("derived") else invented).append(item)
     return collections.OrderedDict([
         ("tone_and_protected", tone_and_protected(replies)),
         ("asks", ask_load(replies)),
         ("invented_numbers", invented),
+        ("unshown_arithmetic", unshown),
         ("safety", safety_rows(card, replies)),
         ("settings", settings_rows(card, harness, replies, profile_before, profile_after)),
         ("turns_to_first_value", turns_to_first_value(replies)),
@@ -1056,7 +1102,7 @@ def play(card, args, variant, seed):
     harness = harness_of(card, agent)
     family, family_model = persona_family(agent, args.persona_agent)
     helper_model = args.persona_model or family_model
-    judge_model = args.judge_model or family_model
+    judge_model = args.judge_model or JUDGE_FAMILY[agent][1]
     label = session_id(card, variant, seed)
     system = system_prompt(card, harness)
     workdir, plan = prepare_workdir(card, agent, harness, args.workdir,

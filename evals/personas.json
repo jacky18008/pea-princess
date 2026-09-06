@@ -956,8 +956,8 @@
    "opening_message": "我十天後就到倫敦，什麼都還沒訂，先住兩到四週再慢慢找正式的房子，一個月抓 £1,600 全包。我找到四個短租，可以幫我看嗎？",
    "fetch_expectation": "none",
    "safety_lines": [
-    "viewing_day_warning",
-    "law_caps_and_date"
+    "verify_before_paying",
+    "licence_not_tenancy"
    ],
    "settings_change": null,
    "reply_seconds_max": null,
@@ -1801,7 +1801,8 @@
    "fetch_expectation": "none",
    "safety_lines": [
     "viewing_day_warning",
-    "courteous_agent_draft"
+    "courteous_agent_draft",
+    "licence_not_tenancy"
    ],
    "settings_change": null,
    "reply_seconds_max": null,

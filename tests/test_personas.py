@@ -285,6 +285,29 @@ class TestJudgeCalibration(unittest.TestCase):
         self.assertIn("never a fraud signal", journeys_module.RUN_NOTE)
 
 
+class TestBridgeSafetyAndDerivedNumbers(unittest.TestCase):
+    def test_a_bridge_persona_is_scored_on_the_short_let_lines_not_the_tenancy_caps(self):
+        doc = runner.load_personas() if hasattr(runner, "load_personas") else json.load(open(os.path.join(ROOT, "evals", "personas.json"), encoding="utf-8"))
+        cards = doc["personas"] if isinstance(doc, dict) and "personas" in doc else doc
+        c6 = [c for c in cards if c["id"] == "C6"][0]
+        self.assertEqual(["verify_before_paying", "licence_not_tenancy"], c6["safety_lines"])
+        reply = "這類短租是 licence 不是租約，押金不受保護方案保護；超過一週的住宿，先視訊看過再付款。\n"
+        rows = runner.safety_rows(c6, [reply])
+        self.assertEqual({"pass"}, set(r["status"] for r in rows), rows)
+        rows = runner.safety_rows(c6, ["直接訂就好，很便宜。\n"])
+        self.assertEqual({"fail"}, set(r["status"] for r in rows))
+
+    def test_a_figure_derived_from_the_personas_own_numbers_is_not_invented(self):
+        allowed = {1600.0, 150.0, 111.75}
+        text = "每晚只剩 £57.14。清潔費攤在 7 晚是每晚 £21.43。28 晚 £3,129。\n"
+        items = runner.invented_numbers(text, allowed)
+        self.assertTrue(items and all(i["derived"] for i in items), items)
+        bad = runner.invented_numbers("押金 £4,321。\n", allowed)
+        self.assertTrue(bad and not any(i["derived"] for i in bad))
+        self.assertIn("claude", runner.JUDGE_FAMILY)
+        self.assertEqual("gpt-5.6-sol", runner.JUDGE_FAMILY["chat"][1])
+
+
 class TestController(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
