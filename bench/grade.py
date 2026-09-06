@@ -208,6 +208,7 @@ SCHEMA_PATH = os.path.join(REFS, "report-schema.json")
 
 sys.path.insert(0, SCRIPTS)
 import render  # noqa: E402  the repository's own schema checker
+import referents  # noqa: E402  the shared referent word lists (skills/vet-flat/scripts)
 
 class Absent(object):
     """The register was read and it states nothing. Not the same as 'we did not look'.
@@ -443,46 +444,33 @@ def report_year(report):
 # ``crime_6mo_count`` counted over a wider box than the method asks for is a wrong
 # count, not a different question.
 
+# The word lists below are shared with the skill's own verifier and live in
+# skills/vet-flat/scripts/referents.py, so the grader and scripts/verify.py can never
+# drift apart. tests/test_verify.py asserts they agree.
 # The label says this reading has been superseded.
-HISTORICAL_WORDS = ["as built", "as designed", "design stage", "previous", "previously",
-                    "earlier", "superseded", "expired", "lapsed", "historic", "historical",
-                    "over time", "then and now", "when new", "originally", "at the time",
-                    "no longer", "used to", "back then", "old certificate", "former",
-                    "since replaced", "withdrawn", "history"]
+HISTORICAL_WORDS = referents.HISTORICAL_WORDS
 # ... unless it also says this is the reading in force now.
-CURRENT_WORDS = ["current", "latest", "most recent", "in force", "today", "now",
-                 "as it stands"]
+CURRENT_WORDS = referents.CURRENT_WORDS
 # A journey that is not the one the profile asks for: the fallback, the diversion,
 # the strike plan, the weekend.
-FALLBACK_WORDS = ["if", "fallback", "fall back", "back up", "backup", "alternative",
-                  "alternate", "second best", "diversion", "diverted", "detour", "strike",
-                  "strikes", "disruption", "disrupted", "engineering work", "replacement",
-                  "night", "weekend", "worst case", "contingency", "plan b", "without",
-                  "instead", "when the trains", "when the tube", "when the line"]
+FALLBACK_WORDS = referents.FALLBACK_WORDS
 # ... unless the label names the very journey the fact asks for.
-PRIMARY_JOURNEY_WORDS = ["door to door", "rail only", "train only", "trains only", "tube only"]
+PRIMARY_JOURNEY_WORDS = referents.PRIMARY_JOURNEY_WORDS
 # Money. A price is never a year.
-MONEY_WORDS = ["gbp", "pound", "pounds", "sterling", "price", "prices", "sale price",
-               "sold for", "paid"]
+MONEY_WORDS = referents.MONEY_WORDS
 # The certificate register, as opposed to the price register or the planning register.
-CERTIFICATE_WORDS = ["assessment", "assessments", "assessed", "certificate", "certificates",
-                     "epc", "energy"]
+CERTIFICATE_WORDS = referents.CERTIFICATE_WORDS
 # The landlord's registered number is not a date. FACT_RULES matches labels by plain
 # substring, so "age" is inside "management" and a company row can match a year rule.
-COMPANY_WORDS = ["company", "companies house", "landlord", "agent", "managing agent",
-                 "management", "freeholder", "leaseholder", "entity", "director",
-                 "registered office", "registration"]
+COMPANY_WORDS = referents.COMPANY_WORDS
 # The age of the building is not the date on the flat's certificate.
-BUILDING_AGE_WORDS = ["building age", "age of the building", "building's age", "block age",
-                      "age of the block", "development age", "age of the development",
-                      "age of the scheme", "how old the building is"]
+BUILDING_AGE_WORDS = referents.BUILDING_AGE_WORDS
 # Something measured over the whole building rather than inside this flat ...
-BUILDING_WORDS = ["building", "block", "development", "estate", "scheme", "communal",
-                  "whole building", "site"]
+BUILDING_WORDS = referents.BUILDING_WORDS
 # ... unless the label says it is the flat's.
-FLAT_WORDS = ["flat", "apartment", "unit", "home", "dwelling", "property"]
+FLAT_WORDS = referents.FLAT_WORDS
 
-FLAT_ID = re.compile(r"\b(?:flat|apartment|apt|unit)\s+([0-9]+[a-z]?)\b")
+FLAT_ID = referents.FLAT_ID
 
 # Per fact: the referents this fact is NOT about. A rule triggers either on keywords
 # (any_of, in fields) or on a named test method of ReferentGuard, for the referents

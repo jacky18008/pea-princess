@@ -1,0 +1,27 @@
+{
+ "description": "A tiny fictional gold set for the information-sufficiency probe. No real flat.",
+ "facts": [
+  {
+   "id": "g-area",
+   "claim": "the certified area is 54 m2",
+   "value": 54.0,
+   "unit": "m2",
+   "tolerance_pct": 1
+  },
+  {
+   "id": "g-rating",
+   "claim": "the energy rating is B",
+   "all_of": [
+    "Energy rating: B"
+   ]
+  },
+  {
+   "id": "g-heat",
+   "claim": "the heating is a communal heat network",
+   "any_of": [
+    "community heat network",
+    "communal heat network"
+   ]
+  }
+ ]
+}

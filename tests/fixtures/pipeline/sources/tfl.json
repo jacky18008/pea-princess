@@ -1,0 +1,5 @@
+{"source_url": "https://api.tfl.gov.uk/Journey/JourneyResults",
+ "retrieved_at": "2026-09-06T09:05:00Z",
+ "query": {"from": "XE1 9AA", "to": "XW1 1AA", "arrive": "09:00"},
+ "fastest_min": 27,
+ "rail_only_min": 29}

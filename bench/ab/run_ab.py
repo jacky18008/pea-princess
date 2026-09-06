@@ -58,6 +58,7 @@ import run as runner  # noqa: E402
 
 RUN_PY = os.path.join(BENCH, "run.py")
 RUN_CODEX_PY = os.path.join(HERE, "run_codex.py")
+PIPELINE_PY = os.path.join(BENCH, "pipeline.py")
 GRADE_AB_PY = os.path.join(HERE, "grade_ab.py")
 DEFAULT_CASES = os.path.join(ROOT, "evals", "evals.json")
 PRIVATE_CASES = os.path.join(BENCH, "private", "cases_private.json")
@@ -90,8 +91,13 @@ def pick_configs(names, phase, config_dir=None):
     return every
 
 
+def arm_name(cfg, budget_mode=None):
+    """The name the scorecard and the raw files use, which a --budget-mode sweep renames."""
+    return cfg["name"] + ("-" + budget_mode if budget_mode else "")
+
+
 def plan(configs, cases, runs, agent_override, cases_path, results_root=None, day=None,
-         resume=True):
+         resume=True, budget_mode=None):
     """[(run_index, config, case, command, skipped)] in interleaved order."""
     day = day or datetime.datetime.utcnow().strftime("%Y-%m-%d")
     steps = []
@@ -100,19 +106,32 @@ def plan(configs, cases, runs, agent_override, cases_path, results_root=None, da
             for cfg in configs:
                 agent = agent_override or cfg.get("agent") or "claude"
                 label = case["id"]
-                skipped = resume and runner.raw_exists(cfg["name"], label, run_index,
-                                                       day=day, results_root=results_root)
+                skipped = resume and runner.raw_exists(arm_name(cfg, budget_mode), label,
+                                                       run_index, day=day,
+                                                       results_root=results_root)
                 steps.append(collections.OrderedDict([
-                    ("run", run_index), ("config", cfg["name"]), ("case", label),
-                    ("agent", agent), ("skipped", skipped),
+                    ("run", run_index), ("config", arm_name(cfg, budget_mode)),
+                    ("case", label),
+                    ("agent", "pipeline" if cfg.get("pipeline") else agent),
+                    ("skipped", skipped),
                     ("command", command_for(cfg, case, agent, run_index, cases_path,
-                                            results_root)),
+                                            results_root, budget_mode)),
                 ]))
     return steps
 
 
-def command_for(cfg, case, agent, run_index, cases_path, results_root=None):
+def command_for(cfg, case, agent, run_index, cases_path, results_root=None,
+                budget_mode=None):
     extra = ["--results", results_root] if results_root else []
+    if cfg.get("pipeline"):
+        # A `pipeline:` block means four model calls, not one; bench/run.py refuses these
+        # on purpose rather than running them as a single agent.
+        cmd = [sys.executable, PIPELINE_PY,
+               "--config", cfg.get("path") or cfg["name"],
+               "--cases", cases_path,
+               "--case", case["id"],
+               "--run", str(run_index)] + extra
+        return cmd + (["--budget-mode", budget_mode] if budget_mode else [])
     if agent == "codex":
         return [sys.executable, RUN_CODEX_PY,
                 "--config", cfg.get("path") or cfg["name"],
@@ -132,8 +151,12 @@ def build_parser():
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--configs", help="comma-separated config names or paths, in the order "
                                       "they should be interleaved")
-    ap.add_argument("--phase", choices=("core", "ablation", "all"),
+    ap.add_argument("--phase", choices=("core", "ablation", "pipeline", "all"),
                     help="run every config with this phase instead of naming them")
+    ap.add_argument("--budget-mode", dest="budget_mode",
+                    choices=("lite", "standard", "deep"),
+                    help="role-pipeline arms only: override every arm's budget mode and "
+                         "name each one <config>-<mode> in the scorecard")
     ap.add_argument("--cases", default=DEFAULT_CASES,
                     help="a cases file in the evals/evals.json shape; the A/B suite uses "
                          "bench/private/cases_private.json")
@@ -209,7 +232,8 @@ def main(argv=None):
     results_root = args.results or runner.RESULTS
     day = datetime.datetime.utcnow().strftime("%Y-%m-%d")
     steps = plan(configs, cases, args.runs, args.agent, args.cases,
-                 results_root=results_root, day=day, resume=not args.no_resume)
+                 results_root=results_root, day=day, resume=not args.no_resume,
+                 budget_mode=args.budget_mode)
 
     if args.dry_run:
         print("configs:  %s" % ", ".join("%s [%s]" % (c["name"], c.get("phase"))

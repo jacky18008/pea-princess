@@ -1,0 +1,249 @@
+{
+ "schema": "vet-flat/plan/1",
+ "case": "x-demo",
+ "budget_mode": "standard",
+ "tier": "standard",
+ "axes": [
+  {
+   "id": 1,
+   "name": "identity",
+   "group": "identity-area",
+   "required": true,
+   "scripts": [
+    {
+     "cmd": "scripts/geo.py lookup \"XE1 9AA\"",
+     "why": "coordinates, borough and ward; every other axis keys off these",
+     "required": true
+    },
+    {
+     "cmd": "scripts/epc.py search --postcode \"XE1 9AA\"",
+     "why": "the flats the register holds at this postcode, to pick the right one",
+     "required": true
+    }
+   ],
+   "sources": [
+    "postcodes_io_lookup",
+    "epc_register_search"
+   ],
+   "paste_requests": []
+  },
+  {
+   "id": 2,
+   "name": "floor area",
+   "group": "identity-area",
+   "required": true,
+   "scripts": [
+    {
+     "cmd": "scripts/epc.py cert <certificate_id>",
+     "why": "certified internal area, from the certificate for THIS flat",
+     "required": true
+    }
+   ],
+   "sources": [
+    "epc_register_certificate"
+   ],
+   "paste_requests": [
+    "The floor plan, if the advert has one: the advertised area is a claim and the certificate is the arbiter."
+   ]
+  },
+  {
+   "id": 3,
+   "name": "age and fabric",
+   "group": "fabric",
+   "required": true,
+   "scripts": [],
+   "sources": [
+    "epc_register_certificate",
+    "companies_house_profile"
+   ],
+   "paste_requests": []
+  },
+  {
+   "id": 4,
+   "name": "construction nearby",
+   "group": "neighbourhood",
+   "required": true,
+   "scripts": [
+    {
+     "cmd": "scripts/planning.py near --lat <lat> --lng <lng> --radius 250 --limit 20",
+     "why": "applications within 250 m; a discharged condition means work starts",
+     "required": true
+    }
+   ],
+   "sources": [
+    "planning_london_datahub"
+   ],
+   "paste_requests": []
+  },
+  {
+   "id": 5,
+   "name": "crime",
+   "group": "neighbourhood",
+   "required": true,
+   "scripts": [
+    {
+     "cmd": "scripts/crime.py box --lat <lat> --lng <lng> --months 3 --no-sensitivity",
+     "why": "the standard box, short window, no sensitivity sweep",
+     "required": true
+    },
+    {
+     "cmd": "scripts/crime.py box --lat <lat> --lng <lng> --months 6 --no-sensitivity",
+     "why": "the standard box over the fixed six-month window",
+     "required": true
+    }
+   ],
+   "sources": [
+    "police_uk_street_crime"
+   ],
+   "paste_requests": []
+  },
+  {
+   "id": 6,
+   "name": "management and neighbours",
+   "group": "people",
+   "required": true,
+   "scripts": [],
+   "sources": [],
+   "paste_requests": [
+    "The resident reviews for this building, lowest first, with their dates. Review sites forbid automated access, so they have to be pasted."
+   ]
+  },
+  {
+   "id": 7,
+   "name": "agent and landlord compliance",
+   "group": "people",
+   "required": true,
+   "scripts": [
+    {
+     "cmd": "scripts/company.py profile <company_number>",
+     "why": "the legal entity behind the agent or the landlord",
+     "required": true
+    },
+    {
+     "cmd": "scripts/calc.py deposit --rent-pcm <rent_pcm>",
+     "why": "the deposit cap, with the right branch, computed not guessed",
+     "required": true
+    },
+    {
+     "cmd": "scripts/company.py search --name \"<agent_name>\"",
+     "why": "same-name shells and dissolved companies",
+     "required": true
+    },
+    {
+     "cmd": "scripts/redress.py cmp --agent \"<agent_name>\"",
+     "why": "client money protection",
+     "required": true
+    }
+   ],
+   "sources": [
+    "companies_house_profile",
+    "companies_house_search"
+   ],
+   "paste_requests": [
+    "The tenancy agreement or the offer email, for the deposit, the holding deposit and the rent in advance."
+   ]
+  },
+  {
+   "id": 8,
+   "name": "price",
+   "group": "money",
+   "required": true,
+   "scripts": [
+    {
+     "cmd": "scripts/calc.py price-per-sqft --rent-pcm <rent_pcm> --area-m2 <area_m2>",
+     "why": "pounds per square foot on the certified area, not the advertised one",
+     "required": true
+    }
+   ],
+   "sources": [
+    "land_registry_price_paid"
+   ],
+   "paste_requests": []
+  },
+  {
+   "id": 9,
+   "name": "aspect and light",
+   "group": "place",
+   "required": true,
+   "scripts": [],
+   "sources": [],
+   "paste_requests": [
+    "A photo out of the window, or the compass on the floor plan."
+   ]
+  },
+  {
+   "id": 10,
+   "name": "all-in cost",
+   "group": "money",
+   "required": true,
+   "scripts": [
+    {
+     "cmd": "scripts/calc.py all-in --rent-pcm <rent_pcm> --bills-low <bills_low> --bills-planning <bills_planning> --bills-stress <bills_stress>",
+     "why": "rent plus bills plus council tax, one basis for every candidate",
+     "required": true
+    }
+   ],
+   "sources": [],
+   "paste_requests": []
+  },
+  {
+   "id": 11,
+   "name": "commute and redundancy",
+   "group": "commute",
+   "required": true,
+   "scripts": [
+    {
+     "cmd": "scripts/commute.py journey --from \"XE1 9AA\" --to \"XW1 1AA\"",
+     "why": "door to door, at the arrival time the profile asks for",
+     "required": true
+    },
+    {
+     "cmd": "scripts/commute.py redundancy --lat <lat> --lng <lng>",
+     "why": "a second independent rail family within a ten-minute walk",
+     "required": true
+    }
+   ],
+   "sources": [
+    "tfl_journey_planner"
+   ],
+   "paste_requests": []
+  },
+  {
+   "id": 12,
+   "name": "low-maintenance living",
+   "group": "place",
+   "required": true,
+   "scripts": [],
+   "sources": [
+    "postcodes_io_nearest"
+   ],
+   "paste_requests": [
+    "What the advert says about bills, the washing machine and parcels."
+   ]
+  }
+ ],
+ "fixed_form_ids": [
+  "F1",
+  "F2",
+  "F3",
+  "F4",
+  "F5",
+  "F6",
+  "F7",
+  "F8",
+  "F9",
+  "F10",
+  "F11",
+  "F12",
+  "F13",
+  "F14"
+ ],
+ "user_questions": [
+  "The floor plan, if the advert has one: the advertised area is a claim and the certificate is the arbiter.",
+  "The resident reviews for this building, lowest first, with their dates. Review sites forbid automated access, so they have to be pasted.",
+  "The tenancy agreement or the offer email, for the deposit, the holding deposit and the rent in advance.",
+  "A photo out of the window, or the compass on the floor plan.",
+  "What the advert says about bills, the washing machine and parcels."
+ ],
+ "notes": null
+}

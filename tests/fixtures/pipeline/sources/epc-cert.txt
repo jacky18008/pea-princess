@@ -1,0 +1,6 @@
+ENERGY CERTIFICATE, FLAT 301, 12 EXAMPLE STREET, LONDON XE1 9AA
+Certificate number: 0000-0000-0000-0000-0000
+Total floor area: 54 square metres.
+Energy rating: B with a score of 84.
+Date of assessment: 2022-03-04.
+Main heating: community heat network.

@@ -1011,3 +1011,106 @@ languages.
 Tests: `tests/test_scan.py` (no network — the parser, the bilingual patterns against
 `tests/fixtures/pasted-listing.txt`, the five-candidate cap, the silent-id line on
 stderr, and the JSON shape).
+
+## `plan.py` — the plan scaffold for the role pipeline (no network, no key)
+
+```
+plan.py --mode standard --postcode "SE1 9SG" --flat 301        > plan.json
+plan.py --profile profile.yaml --case shortlist-2              > plan.json
+plan.py --mode lite --table
+plan.py --check plan.json --mode standard
+```
+
+The deterministic floor under the **planner** role of
+`references/pipeline.md`. It prints a `plan.json` (`references/plan-schema.json`): the
+axes this depth works, the script calls for each as argument templates, the sources
+allowed, the paste requests only the user can answer, and the fixed-question ids the
+tier owes an answer to. It reads no page and fetches nothing.
+
+Which axes belong to which depth follows `references/budget-modes.md` — `lite` works
+eight of the twelve and names the four it leaves unknown; `standard` and `deep` work all
+twelve, `deep` with more calls on each. A deeper mode only ever **adds**: the `standard`
+call list starts with the whole `lite` one. The fixed-question ids come from the `tiers`
+block of `references/fixed-questions.yaml` and are never counted in code.
+
+`--check` is the honesty mechanism. A planner may add axes, calls, paste requests and
+questions; it may not drop anything the scaffold marked required. `--check` recomputes
+the scaffold and compares the *shape* of each call — script, subcommand and long flags,
+never the values — so a template with its `<postcode>` filled in still matches. Exit 1
+means something required went missing, and it names what.
+
+```console
+$ plan.py --mode lite --postcode "SE1 9SG" --table
+plan: lite mode, lite tier, 8 axes, 8 fixed questions
+axis name                         group          calls
+1    identity                     identity-area  2
+       scripts/geo.py lookup "SE1 9SG"
+       scripts/epc.py search --postcode "SE1 9SG"
+...
+fixed form: F1, F2, F3, F4, F5, F6, F7, F8
+note: Axes not worked at this depth, and unknown in the report: construction nearby, ...
+```
+
+Tests: `tests/test_pipeline.py` (the three depths, the deeper-only-adds rule, the
+placeholder filling, and `--check` catching a dropped axis, a dropped call and a dropped
+fixed question).
+
+## `verify.py` — the deterministic verifier (no network, no key)
+
+```
+verify.py evidence.json --sources pasted/ --report report.json --tier standard --table
+verify.py evidence.json --strict
+verify.py --from-report report.json                > evidence.json
+verify.py evidence.json --gold gold.json --gold-id CASE     # bench only
+```
+
+The deterministic half of the **verifier** role. It reads `evidence.json`
+(`references/evidence-schema.json`), applies every rule that has one answer, and writes
+`references/verified-schema.json` with `pass` / `fail(reason)` / `unknown` per item plus
+a `replan` list of at most one round. Exit 1 when anything failed.
+
+The rules, each with its own id in the output:
+
+| Rule | What it catches |
+|---|---|
+| `quote_in_source` | a quote that is not in the source, comparing with whitespace normalised and case ignored. Re-wrapping is fine; re-wording is not |
+| `source_resolves` | a source id in no `sources[]` entry, or a `pasted:<name>` with no file behind it |
+| `quote_missing` | a found item with no sentence to point at |
+| `unit_present` | a number with no unit. 54 is not an area |
+| `referent:*` | the number is about something else — the building not the flat, a replaced certificate, another flat, a sale price where a year is wanted, the strike-day journey. Shared with `bench/grade.py` through `scripts/referents.py`, and a test asserts the two agree |
+| `deposit_cap_branch` | a legal cap quoted with the wrong branch. The deposit cap is five weeks under £50,000 a year and six at or above it, and the branch is what people get wrong, because it turns on an annual figure nobody computes. Recomputed from the rent the evidence itself carries |
+| `deposit_over_cap`, `holding_deposit_cap`, `rent_in_advance_cap` | an amount over the cap |
+| `contradiction:*` | two items claiming the same thing and disagreeing — the advert's area against the certificate's, the advert's letter against the register's |
+| `fixed_form` | a fixed question the tier owes an answer to and nobody answered |
+| `untried_unknown` | under `--strict`: an unknown with an empty `tried` list, which is a gap nobody looked at rather than one somebody could not fill |
+
+Run with neither `--sources` nor `--report` and there is nothing to check a quote or a
+source id against, so every item comes back `unknown` rather than quietly passing. Where
+a source resolves but no text is held for it, the quote cannot be checked; the item is
+not failed for that, and its id goes in `counts.quotes_unchecked`, because a run whose
+passes were never read is a different thing from one whose passes were.
+
+`--from-report` derives evidence items from a finished `report.json` — every labelled
+number, every metric, every fixed answer — so a single-agent run can be verified without
+being re-run. Most of those carry no quote and so come back unverified, which is the
+point rather than a defect.
+
+`--gold` is **benchmark only**: the information-sufficiency probe. For each known-good
+fact it asks, deterministically and at no token cost, whether that fact was derivable
+from the evidence payload at all. It separates two failures that look identical in a
+score and need opposite fixes: the fact was never fetched, or it was fetched and the
+report did not use it. It reads either a `{"facts": [...]}` file or a gold set with
+`gold_landmines`, where the needles are a landmine's numbers and it reports itself as
+the coarse proxy it is.
+
+```console
+$ verify.py evidence.json --sources pasted/ --tier lite --table
+verify: 14 items - 13 pass, 0 fail, 1 unknown
+item           state    why
+e-area         pass
+e-reviews      unknown  unknown until the user pastes the reviews
+legal caps from rent 2000.0 (evidence item e-rent): deposit 5 weeks = 2307.69, holding 461.54, advance 1 month(s)
+```
+
+Tests: `tests/test_verify.py` — every rule has a pair, correct evidence that must not
+trigger it and wrong evidence that must, one mutation at a time from the same clean base.

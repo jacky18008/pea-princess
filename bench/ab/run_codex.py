@@ -113,7 +113,13 @@ def prepare_workdir(case, cases_path, config, workdir=None):
     return path, plan
 
 
-def build_command(config, case, workdir, model=None, prompt=None):
+def build_command(config, case, workdir, model=None, prompt=None, out=None):
+    """`out` names the file Codex writes its last message to; default <workdir>/last.txt.
+
+    bench/pipeline.py passes one per role: its executors run at the same time in the same
+    working directory, and a shared last.txt would have them overwrite each other's
+    answers.
+    """
     model = model or config.get("main_model")
     cmd = ["codex", "exec"]
     if model:
@@ -122,7 +128,7 @@ def build_command(config, case, workdir, model=None, prompt=None):
             "--skip-git-repo-check",
             "-s", "workspace-write",
             "-c", "sandbox_workspace_write.network_access=true",
-            "-o", os.path.join(workdir, "last.txt"),
+            "-o", out or os.path.join(workdir, "last.txt"),
             "--json",
             prompt or case["prompt"]]
     return cmd

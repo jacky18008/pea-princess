@@ -148,7 +148,7 @@ class ConfigLoading(unittest.TestCase):
                          "codex-D-luna-standard"):
             self.assertIn(expected, names)
         for cfg in configs:
-            self.assertIn(cfg["phase"], ("core", "ablation"), cfg["name"])
+            self.assertIn(cfg["phase"], ("core", "ablation", "pipeline"), cfg["name"])
             self.assertIn(cfg["agent"], ("claude", "codex"), cfg["name"])
             self.assertIn(cfg["budget_mode"], ("standard", "lite"), cfg["name"])
             self.assertTrue(cfg.get("factor"), cfg["name"])
@@ -1077,11 +1077,13 @@ class RunAbDryRun(unittest.TestCase):
     def test_phase_selection(self):
         core = [c["name"] for c in run_ab.pick_configs(None, "core")]
         ablation = [c["name"] for c in run_ab.pick_configs(None, "ablation")]
+        pipeline = [c["name"] for c in run_ab.pick_configs(None, "pipeline")]
         every = [c["name"] for c in run_ab.pick_configs(None, "all")]
         self.assertIn("B-lean", core)
         self.assertNotIn("B-raw", core)
         self.assertIn("B-raw", ablation)
-        self.assertEqual(sorted(core + ablation), sorted(every))
+        self.assertIn("P2-claude", pipeline)
+        self.assertEqual(sorted(core + ablation + pipeline), sorted(every))
 
     def test_named_configs_keep_the_order_they_were_given(self):
         got = [c["name"] for c in run_ab.pick_configs(["C-twenty", "A-legacy"], None)]

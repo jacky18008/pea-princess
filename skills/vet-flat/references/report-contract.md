@@ -33,3 +33,6 @@ found = quote+source · asked = user said it · unknown = no quote, no number. H
 
 ## Never
 Sign on the viewing day. Treat listing area as fact. Scale crime figures for missing months. Turn a missing item into a pass. Hide a red flag. Use ethnicity or nationality as a factor.
+
+## When four roles wrote it
+A report can be produced by one agent or by the role pipeline in `pipeline.md` — planner, executors, verifier, integrator. The contract above is the same either way, with two additions. The configuration line names the pipeline: `Configuration: <tier> — <reason>; pipeline: planner/executor/verifier`. And the integrator may use verified items only: an evidence item that the verifier did not pass is **unknown** in the report, with the line saying what it costs not to know it, never quietly dropped and never softened into a maybe. Numbers cite the evidence item ids in `sources` and `computed_by`, so any figure walks back to the sentence it was read in.

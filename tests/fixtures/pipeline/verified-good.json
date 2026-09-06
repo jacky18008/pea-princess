@@ -1,0 +1,130 @@
+{
+ "schema": "vet-flat/verified/1",
+ "case": "x-demo",
+ "checked_at": "2026-09-06T20:54:56Z",
+ "items": [
+  {
+   "id": "e-area",
+   "state": "pass",
+   "reason": null,
+   "rules": [],
+   "checked_by": "verify.py"
+  },
+  {
+   "id": "e-rating",
+   "state": "pass",
+   "reason": null,
+   "rules": [],
+   "checked_by": "verify.py"
+  },
+  {
+   "id": "e-rent",
+   "state": "pass",
+   "reason": null,
+   "rules": [],
+   "checked_by": "verify.py"
+  },
+  {
+   "id": "e-crime",
+   "state": "pass",
+   "reason": null,
+   "rules": [],
+   "checked_by": "verify.py"
+  },
+  {
+   "id": "e-commute",
+   "state": "pass",
+   "reason": null,
+   "rules": [],
+   "checked_by": "verify.py"
+  },
+  {
+   "id": "e-f1",
+   "state": "pass",
+   "reason": null,
+   "rules": [],
+   "checked_by": "verify.py"
+  },
+  {
+   "id": "e-f2",
+   "state": "pass",
+   "reason": null,
+   "rules": [],
+   "checked_by": "verify.py"
+  },
+  {
+   "id": "e-f3",
+   "state": "pass",
+   "reason": null,
+   "rules": [],
+   "checked_by": "verify.py"
+  },
+  {
+   "id": "e-f4",
+   "state": "pass",
+   "reason": null,
+   "rules": [],
+   "checked_by": "verify.py"
+  },
+  {
+   "id": "e-f5",
+   "state": "pass",
+   "reason": null,
+   "rules": [],
+   "checked_by": "verify.py"
+  },
+  {
+   "id": "e-f6",
+   "state": "pass",
+   "reason": null,
+   "rules": [],
+   "checked_by": "verify.py"
+  },
+  {
+   "id": "e-f7",
+   "state": "pass",
+   "reason": null,
+   "rules": [],
+   "checked_by": "verify.py"
+  },
+  {
+   "id": "e-f8",
+   "state": "pass",
+   "reason": null,
+   "rules": [],
+   "checked_by": "verify.py"
+  },
+  {
+   "id": "e-reviews",
+   "state": "unknown",
+   "reason": "unknown until the user pastes the reviews",
+   "rules": [],
+   "checked_by": "verify.py"
+  }
+ ],
+ "replan": [],
+ "counts": {
+  "items": 14,
+  "pass": 13,
+  "fail": 0,
+  "unknown": 1,
+  "quotes_unchecked": [],
+  "fixed_form_tier": "lite",
+  "fixed_form_wanted": 8,
+  "fixed_form_missing": [],
+  "contradictions": 0,
+  "cap_failures": 0,
+  "legal_caps": {
+   "rent_pcm": 2000.0,
+   "rent_pcm_from": "evidence item e-rent",
+   "weekly_rent": 461.54,
+   "annual_rent": 24000.0,
+   "branch_threshold_gbp": 50000.0,
+   "deposit_cap_weeks": 5.0,
+   "deposit_cap_gbp": 2307.69,
+   "holding_deposit_cap_weeks": 1.0,
+   "holding_deposit_cap_gbp": 461.54,
+   "rent_in_advance_max_months": 1.0
+  }
+ }
+}

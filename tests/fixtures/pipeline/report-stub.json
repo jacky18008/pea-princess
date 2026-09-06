@@ -1,0 +1,66 @@
+{
+ "sources": [
+  {
+   "id": "police-uk",
+   "url": "https://data.police.uk/api/crimes-street/all-crime",
+   "retrieved_at": "2026-09-06T09:00:00Z",
+   "evidence_class": "G"
+  },
+  {
+   "id": "tfl",
+   "url": "https://api.tfl.gov.uk/Journey/JourneyResults",
+   "retrieved_at": "2026-09-06T09:00:00Z",
+   "evidence_class": "G"
+  },
+  {
+   "id": "pasted:listing",
+   "url": "a page the user pasted",
+   "retrieved_at": "2026-09-06T09:00:00Z",
+   "evidence_class": "S"
+  },
+  {
+   "id": "pasted:epc-cert",
+   "url": "a page the user pasted",
+   "retrieved_at": "2026-09-06T09:00:00Z",
+   "evidence_class": "G"
+  }
+ ],
+ "candidates": [
+  {
+   "fixed_answers": [
+    {
+     "id": "F1",
+     "status": "unknown"
+    },
+    {
+     "id": "F2",
+     "status": "unknown"
+    },
+    {
+     "id": "F3",
+     "status": "unknown"
+    },
+    {
+     "id": "F4",
+     "status": "unknown"
+    },
+    {
+     "id": "F5",
+     "status": "unknown"
+    },
+    {
+     "id": "F6",
+     "status": "unknown"
+    },
+    {
+     "id": "F7",
+     "status": "unknown"
+    },
+    {
+     "id": "F8",
+     "status": "unknown"
+    }
+   ]
+  }
+ ]
+}

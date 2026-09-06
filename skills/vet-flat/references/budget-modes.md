@@ -41,6 +41,8 @@ buys roughly 0.55–0.70 landmine recall up to about 0.85, and costs about five 
 twice the wall time (`docs/EXPERIMENTS.md`). That is worth paying on the last two or three flats and
 wasted on a flat a hard filter kills in one line.
 
+**Splitting the roles.** Depth is one dial; who does the work is another. `references/pipeline.md` runs the same checks as four separate roles — a cheap planner that decides what to fetch and never reads a page, cheap executors that collect evidence and write no verdicts, a strong verifier that runs `scripts/verify.py` and reads only what it flagged, and an integrator that may use verified items only. Use it when the judging model is not the strongest you have, when the flat is on the final shortlist, or when the mode is `deep`. It costs more calls and more wall time; what it buys on this task is still being measured (`docs/EXPERIMENTS.md`, "Role pipeline (to be measured)"), so do not quote a number for it yet.
+
 **Fan-out rule.** Whenever four or more subagents run at once, they use the cheap tier, whatever the
 budget says. Fan-out, not depth, is what empties a subscription window: four parallel readers on the
 strongest model burn more in a minute than a whole `standard` run.

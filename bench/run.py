@@ -131,25 +131,37 @@ CONFIG_KEYS = ("name", "agent", "phase", "factor", "description", "main_model", 
                "budget_mode", "allowed_tools", "append_system_prompt", "notes")
 
 
-def load_config(path):
+def config_path(path):
+    """The bare name, the name with .yaml, or a path - whichever exists."""
+    if not os.path.isabs(path) and not os.path.exists(path):
+        for guess in (os.path.join(CONFIG_DIR, path),
+                      os.path.join(CONFIG_DIR, path + ".yaml")):
+            if os.path.exists(guess):
+                return guess
+    return path
+
+
+def load_config(path, lines=None):
     """A deliberately small YAML reader for bench/ab/configs/*.yaml.
 
     It understands exactly what those files use: `key: scalar`, `key: null`,
     `key: |` literal blocks, and `key:` followed by `  - item` lists. Anything
     else raises, so a config that needs real YAML fails loudly instead of being
     silently half-read. Standard library only, per docs/CONVENTIONS.md.
+
+    `lines` lets a caller hand in the file's lines with a block already taken out.
+    bench/pipeline.py uses it: its `pipeline:` block is a nested map, which this
+    reader deliberately does not understand, so it lifts that block out first and
+    parses it itself rather than teaching this one to half-read it.
     """
-    if not os.path.isabs(path) and not os.path.exists(path):
-        for guess in (os.path.join(CONFIG_DIR, path),
-                      os.path.join(CONFIG_DIR, path + ".yaml")):
-            if os.path.exists(guess):
-                path = guess
-                break
-    with io.open(path, encoding="utf-8") as fh:
-        lines = fh.read().splitlines()
+    path = config_path(path)
+    if lines is None:
+        with io.open(path, encoding="utf-8") as fh:
+            lines = fh.read().splitlines()
 
     cfg = collections.OrderedDict()
     key, block, block_indent, listing = None, None, None, None
+    skipping = False
     for raw in lines + [""]:
         line = raw.rstrip("\n")
         stripped = line.strip()
@@ -169,12 +181,24 @@ def load_config(path):
             cfg[key] = listing
             listing, key = None, None
 
+        # `pipeline:` is a nested map, which this reader does not understand. Rather than
+        # half-read it into junk keys, skip the whole block and record that it was there;
+        # a config with one belongs to bench/pipeline.py, and main() says so.
+        if skipping:
+            if not stripped or indented:
+                continue
+            skipping = False
+
         if not stripped or stripped.startswith("#"):
             continue
         if ":" not in line:
             raise ValueError("bench config line is not key: value: %r" % line)
         key, _, value = line.partition(":")
         key, value = key.strip(), value.strip()
+        if key == "pipeline" and value == "":
+            cfg["pipeline"] = True
+            skipping, key = True, None
+            continue
         if value in ("|", ">", ">-", "|-"):
             block, block_indent = [], 2
         elif value == "":
@@ -1008,6 +1032,13 @@ def main(argv=None):
     if getattr(args, "cases", None):
         args.evals = args.cases
     args.config_data = load_config(args.config) if getattr(args, "config", None) else None
+    if args.config_data and args.config_data.get("pipeline"):
+        print("usage error: %s carries a `pipeline:` block, so it is a role-pipeline arm "
+              "and running it here would quietly run it as one agent instead. Use "
+              "bench/pipeline.py --config %s." % (args.config_data.get("name"),
+                                                  args.config_data.get("name")),
+              file=sys.stderr)
+        return 2
     if args.config_data and args.agent != "claude":
         if args.config_data.get("append_system_prompt"):
             print("usage error: only the claude agent takes --append-system-prompt, so this "

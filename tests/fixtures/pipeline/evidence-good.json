@@ -1,0 +1,162 @@
+{
+ "schema": "vet-flat/evidence/1",
+ "case": "x-demo",
+ "flat": "301",
+ "group": null,
+ "items": [
+  {
+   "id": "e-area",
+   "axis": 2,
+   "claim": "certified internal floor area of this flat",
+   "status": "ok",
+   "value": 54.0,
+   "unit": "m2",
+   "source": "pasted:epc-cert",
+   "quote": "Total floor area: 54 square metres.",
+   "fetched_at": "2026-09-06T09:00:00Z",
+   "script": "scripts/epc.py cert 0000-0000-0000-0000-0000"
+  },
+  {
+   "id": "e-rating",
+   "axis": 3,
+   "claim": "current energy rating on the certificate in force",
+   "status": "ok",
+   "value": "B",
+   "unit": "EPC letter",
+   "source": "pasted:epc-cert",
+   "quote": "Energy rating: B with a score of 84.",
+   "fetched_at": "2026-09-06T09:00:00Z",
+   "script": "scripts/epc.py cert 0000-0000-0000-0000-0000"
+  },
+  {
+   "id": "e-rent",
+   "axis": 8,
+   "claim": "advertised monthly rent",
+   "status": "ok",
+   "value": 2000,
+   "unit": "GBP per month",
+   "source": "pasted:listing",
+   "quote": "Rent: £2,000 per calendar month.",
+   "fetched_at": "2026-09-06T09:00:00Z"
+  },
+  {
+   "id": "e-crime",
+   "axis": 5,
+   "claim": "police recorded crimes in the standard box over the six-month window",
+   "status": "ok",
+   "value": 199,
+   "unit": "crimes per six months",
+   "source": "police-uk",
+   "quote": "\"total\": 199",
+   "fetched_at": "2026-09-06T09:00:00Z",
+   "script": "scripts/crime.py box --lat 51.5 --lng -0.1 --months 6 --no-sensitivity"
+  },
+  {
+   "id": "e-commute",
+   "axis": 11,
+   "claim": "door to door journey time to the destination",
+   "status": "ok",
+   "value": 27,
+   "unit": "minutes",
+   "source": "tfl",
+   "quote": "\"fastest_min\": 27",
+   "fetched_at": "2026-09-06T09:00:00Z",
+   "script": "scripts/commute.py journey --from \"XE1 9AA\" --to \"XW1 1AA\""
+  },
+  {
+   "id": "e-f1",
+   "axis": 7,
+   "claim": "F1 tenancy deposit asked for this flat",
+   "status": "ok",
+   "value": 5,
+   "unit": "weeks of rent",
+   "source": "pasted:listing",
+   "quote": "Deposit: five weeks' rent.",
+   "fetched_at": "2026-09-06T09:00:00Z",
+   "computed_by": "scripts/calc.py deposit --rent-pcm 2000 -> cap 5 weeks = 2307.69"
+  },
+  {
+   "id": "e-f2",
+   "axis": 7,
+   "claim": "F2 holding deposit",
+   "status": "ok",
+   "value": 1,
+   "unit": "weeks of rent",
+   "source": "pasted:listing",
+   "quote": "Holding deposit: one week's rent, taken off the first month.",
+   "fetched_at": "2026-09-06T09:00:00Z"
+  },
+  {
+   "id": "e-f3",
+   "axis": 7,
+   "claim": "F3 rent in advance",
+   "status": "ok",
+   "value": 1,
+   "unit": "months",
+   "source": "pasted:listing",
+   "quote": "Rent in advance: one month.",
+   "fetched_at": "2026-09-06T09:00:00Z"
+  },
+  {
+   "id": "e-f4",
+   "axis": 7,
+   "claim": "F4 what kind of tenancy this is",
+   "status": "ok",
+   "value": "assured periodic tenancy",
+   "source": "pasted:listing",
+   "quote": "The tenancy is an assured periodic tenancy.",
+   "fetched_at": "2026-09-06T09:00:00Z"
+  },
+  {
+   "id": "e-f5",
+   "axis": 7,
+   "claim": "F5 who the landlord is",
+   "status": "ok",
+   "value": "a private individual",
+   "source": "pasted:listing",
+   "quote": "The landlord is a private individual, not a company.",
+   "fetched_at": "2026-09-06T09:00:00Z"
+  },
+  {
+   "id": "e-f6",
+   "axis": 7,
+   "claim": "F6 which scheme protects the deposit",
+   "status": "ok",
+   "value": "Tenancy Deposit Scheme",
+   "source": "pasted:listing",
+   "quote": "The deposit is protected with the Tenancy Deposit Scheme.",
+   "fetched_at": "2026-09-06T09:00:00Z"
+  },
+  {
+   "id": "e-f7",
+   "axis": 7,
+   "claim": "F7 redress scheme and client money protection",
+   "status": "ok",
+   "value": "The Property Ombudsman",
+   "source": "pasted:listing",
+   "quote": "The agent belongs to The Property Ombudsman and holds client money protection.",
+   "fetched_at": "2026-09-06T09:00:00Z"
+  },
+  {
+   "id": "e-f8",
+   "axis": 7,
+   "claim": "F8 whether the council licences this address",
+   "status": "ok",
+   "value": "no licence required",
+   "source": "pasted:listing",
+   "quote": "No selective licence is required for this address.",
+   "fetched_at": "2026-09-06T09:00:00Z"
+  },
+  {
+   "id": "e-reviews",
+   "axis": 6,
+   "claim": "organic management review score for the building",
+   "status": "unknown",
+   "tried": [
+    "asked the user once for the lowest reviews with their dates; nothing pasted yet",
+    "review sites forbid automated access, so no script can get this"
+   ],
+   "note": "unknown until the user pastes the reviews"
+  }
+ ]
+}

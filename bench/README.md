@@ -597,3 +597,68 @@ written out for the OpenAI side.
 `--allowedTools` list, a main model and a `budget_mode`, and `--cases <file>` swaps the
 case file. Every run's stdout is kept verbatim at
 `bench/results/<date>/raw/<config>-<case>-<run>.json`.
+
+---
+
+## The role pipeline ablation (`bench/pipeline.py`)
+
+Everything above hands one agent the skill and the case and reads the report it writes.
+`bench/pipeline.py` hands **four separate model calls one role each** — planner,
+executors, verifier, integrator — with one file passing between them, and grades the
+result with the same `bench/grade.py`, into the same scorecard. That is the only honest
+way to ask whether splitting the roles is worth anything: same cases, same grader, one
+factor changed.
+
+The roles, what they may touch, and what they hand on:
+
+| Role | Tools it is launched with | Output |
+|---|---|---|
+| planner | `Read` | prints `plan.json` — what to fetch, what to ask. It never reads a page and never decides which fields survive |
+| executors (one per axis group, in parallel) | `Read`, `Bash(python3:*)` | print `evidence.json` items: a claim, a value, a unit, a source, a verbatim quote. No verdicts, no arithmetic that is not a recorded `calc.py` call |
+| verifier | `Read`, `Bash(verify.py)`, `Bash(calc.py)` | prints `verified.json`. `scripts/verify.py` runs FIRST and the model reads only what it flagged |
+| integrator | `Read`, `Write` | writes `report.json` from verified items only; anything else is unknown |
+
+Only the integrator may write a file. Every other role prints one JSON object and the
+harness saves it, so a role cannot leave itself notes between steps. The method the
+roles follow is `skills/vet-flat/references/pipeline.md`, which ships with the skill:
+this harness runs the roles as separate processes, and an agent with subagents — or one
+context running the roles as phases — follows the same page.
+
+Two deterministic steps hold it honest. `scripts/plan.py` writes the scaffold the
+planner starts from, and `plan.py --check` replaces a plan that dropped something
+required (recorded in the row, never hidden). `scripts/verify.py` does every check that
+has one answer before the verifier model sees anything, and with `--gold` it also runs
+the **information-sufficiency probe**: deterministically, at no token cost, was each
+known-good fact even derivable from the evidence the executors collected? A fact missing
+from the evidence is a planner or executor failure; a fact in the evidence and missing
+from the report is an integrator failure. They look identical in a recall score.
+
+```bash
+# every command and the first line of every role prompt; runs nothing
+python3 bench/pipeline.py --config P2-claude --cases bench/private/cases_private.json \
+    --case v2-buck --run 1 --dry-run
+
+# one arm, one case, with the sufficiency probe
+python3 bench/pipeline.py --config P2-claude --cases bench/private/cases_private.json \
+    --case v2-buck --run 1 --gold bench/private/gold.json
+
+# the whole family, interleaved and resumable, like every other sweep here
+python3 bench/ab/run_ab.py --phase pipeline --cases bench/private/cases_private.json \
+    --case-ids v2-buck,s09,c01,e01,s10 --runs 3
+python3 bench/ab/run_ab.py --phase pipeline --cases bench/private/cases_private.json \
+    --case-ids v2-buck,s09,c01,e01,s10 --runs 2 --budget-mode lite
+```
+
+The arms are `P1`, `P2` and `P3` on each vendor, plus the existing `B-lean` as `P0`;
+`--budget-mode lite|deep` renames an arm `<config>-<mode>` and reruns it at another
+depth, so depth and role split are crossed rather than confounded. The table and the
+questions each arm is meant to answer are in `docs/EXPERIMENTS.md` under **"Role
+pipeline (to be measured)"**, and it has no numbers in it yet on purpose.
+
+The scorecard row is the ordinary one plus a `roles` field — per role the model, the
+wall time, the tokens and the tool list it was launched with — a `pipeline` block with
+the counts, and `information_sufficiency` when a gold file was given.
+
+`bench/run.py` refuses a config with a `pipeline:` block instead of running it as one
+agent: doing that would produce a row that looks like an arm and is a different
+experiment.

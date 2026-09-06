@@ -208,6 +208,80 @@ anything piped on stdin as prompt material, so every prompt carried a twelve-lin
 snippet (both arms alike; confirmed with a one-shot test). The runners now close stdin on
 every agent launch, and the numbers above are from the clean rows only.
 
+### Role pipeline (to be measured)
+
+**Nothing in this section has a number yet.** The arms are defined, the harness runs, the
+grader is the same one every other table on this page used. What is missing is the runs.
+Until they exist, do not quote this design as a recommendation anywhere, including in
+`references/pipeline.md`, which says the same thing about itself.
+
+The idea comes from a different domain — a regulated-document question-answering system
+the maintainer built in July 2026, where role separation, an information-sufficiency
+probe and a capped replan were measured on that task. **Those findings do not transfer.**
+That system answered questions from one structured corpus; this one reads eleven public
+registers about a physical building, and its failure mode is a number that is the right
+kind about the wrong thing. Patterns were taken; conclusions were not. Every claim below
+has to be earned again on these five flats.
+
+| Arm | Planner | Executors | Verifier | Integrator | Replan | What it isolates |
+|---|---|---|---|---|---|---|
+| `P0` = `B-lean` | — | — | — | one agent does everything | — | the baseline already on this page |
+| `P1-claude` | Sonnet | Sonnet × 3 parallel | — | Opus (default) | 0 | the SPLIT on its own, with nothing checking the evidence |
+| `P2-claude` | Sonnet | Sonnet × 3 parallel | Opus | Opus (default) | 1 | the whole pipeline |
+| `P3-claude` | — | — | Opus | Opus (default) | 0 | the CHECK on its own: `B-lean` runs, then evidence is derived from its report and anything unverified is rewritten as unknown |
+| `P1-codex` | Luna | Luna × 3 parallel | — | Terra | 0 | the same split on the other vendor |
+| `P2-codex` | Luna | Luna × 3 parallel | Terra | Terra | 1 | the same pipeline on the other vendor |
+| `P3-codex` | — | — | Terra | Terra | 0 | the same check on the other vendor |
+
+Each arm also runs in `lite` and `deep`, from `--budget-mode`, which names the arm
+`<config>-lite` / `<config>-deep` in the scorecard. Depth and role split are separate
+dials and the sweep crosses them, because the cheap answer — "just run `deep`" — has to
+be allowed to win.
+
+**The questions these arms are meant to answer**
+
+1. **Does splitting the roles buy anything at all?** `P1 − P0`. If it is zero, the rest of
+   the design is machinery for its own sake.
+2. **Is the checking the part that works?** `P3 − P0` against `P2 − P0`. If `P3` gets most
+   of `P2`'s gain at a fraction of its cost, the recommendation is a verifier pass on a
+   single-agent run, not a pipeline.
+3. **What does the split cost?** Tokens and wall time per run, per role, from the `roles`
+   field of the scorecard row. Four to ten model calls where there was one.
+4. **When a fact is missing, whose failure is it?** The information-sufficiency probe
+   (`verify.py --gold`, deterministic, no tokens) says whether the fact was in the
+   evidence at all. Missing from the evidence is a planner or executor failure; present
+   and unused is an integrator failure. They look identical in a recall score and need
+   opposite fixes. This is the number most likely to be worth more than the headline.
+5. **Does the replan round earn its call?** `P2` with `replan_rounds: 1` against the same
+   arm at `0`. One round is the cap on purpose; an uncapped loop spends the whole budget
+   on the one fact that was never available.
+6. **Does `verify.py` fire on things that are actually wrong?** Its rule ids are on every
+   row. A verifier that flags nothing on a bad report is worse than none, and so is one
+   that flags everything.
+7. **Does the discipline hold?** Every role is launched with its own `--allowedTools`, so a
+   planner that read a page or an executor that wrote a verdict is a harness bug, not a
+   model choice — but the evidence files should be read for verdict-shaped sentences
+   anyway, the way the earlier project audited its access logs.
+
+**How to run it**
+
+```bash
+# see every command, run nothing
+bench/pipeline.py --config P2-claude --cases <cases.json> --case <id> --run 1 --dry-run
+
+# one arm, one case, with the sufficiency probe
+bench/pipeline.py --config P2-claude --cases <cases.json> --case <id> --run 1 \
+    --gold <gold.json>
+
+# the whole family, interleaved, resumable
+bench/ab/run_ab.py --phase pipeline --cases <cases.json> --case-ids <a,b,c,d,e> --runs 3
+bench/ab/run_ab.py --phase pipeline --cases <cases.json> --case-ids <a,b,c,d,e> --runs 2 \
+    --budget-mode lite
+```
+
+`bench/run.py` refuses a config with a `pipeline:` block rather than running it as one
+agent, which would look like an arm and be a different experiment.
+
 ## The picture
 
 ![Scatter chart. Left panel: nine Claude Code configurations, landmine recall against cost per run in US dollars on a log axis. A-legacy — raw web pages with one reader per axis — is the highest and by far the most expensive point, at 0.87 recall for $31.40. The B family clusters between 0.38 and 0.71 recall for $1.40 to $11.70, mostly inside a shaded band marking run-to-run noise around the default B-lean. C-twenty is lowest and cheapest at 0.15 recall for $0.67. Right panel: six Codex GPT-5.6 configurations as hollow markers, recall against input tokens per run on a log axis, running from 0.13 recall at 0.36 million tokens up to 0.52 recall at 12.2 million tokens. Colour marks the data path and budget mode.](experiments-recall-vs-cost.svg)

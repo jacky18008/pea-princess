@@ -1,0 +1,94 @@
+{
+ "schema": "vet-flat/evidence/1",
+ "case": "x-demo",
+ "flat": "301",
+ "group": null,
+ "items": [
+  {
+   "id": "b-quote",
+   "axis": 2,
+   "claim": "certified internal floor area of this flat",
+   "status": "ok",
+   "value": 54.0,
+   "unit": "m2",
+   "source": "pasted:epc-cert",
+   "quote": "The certificate gives the internal area as fifty-four square metres.",
+   "fetched_at": "2026-09-06T09:00:00Z"
+  },
+  {
+   "id": "b-source",
+   "axis": 5,
+   "claim": "police recorded crimes over the six-month window",
+   "status": "ok",
+   "value": 199,
+   "unit": "crimes per six months",
+   "source": "made-up-register",
+   "quote": "\"total\": 199",
+   "fetched_at": "2026-09-06T09:00:00Z"
+  },
+  {
+   "id": "b-unit",
+   "axis": 2,
+   "claim": "area of the flat on the certificate",
+   "status": "ok",
+   "value": 54.0,
+   "source": "pasted:epc-cert",
+   "quote": "Total floor area: 54 square metres.",
+   "fetched_at": "2026-09-06T09:00:00Z"
+  },
+  {
+   "id": "b-referent",
+   "axis": 2,
+   "claim": "certified internal floor area",
+   "status": "ok",
+   "value": 910.0,
+   "unit": "m2",
+   "source": "pasted:epc-cert",
+   "quote": "Total floor area: 54 square metres.",
+   "fetched_at": "2026-09-06T09:00:00Z",
+   "note": "this is the communal floor area over the whole block"
+  },
+  {
+   "id": "b-rent",
+   "axis": 8,
+   "claim": "advertised monthly rent",
+   "status": "ok",
+   "value": 5000,
+   "unit": "GBP per month",
+   "source": "pasted:listing",
+   "quote": "Rent: £2,000 per calendar month.",
+   "fetched_at": "2026-09-06T09:00:00Z",
+   "note": "the rent was renegotiated upwards after the advert"
+  },
+  {
+   "id": "b-deposit-branch",
+   "axis": 7,
+   "claim": "F1 legal deposit cap for this tenancy",
+   "status": "ok",
+   "value": 5,
+   "unit": "weeks of rent",
+   "source": "pasted:listing",
+   "quote": "Deposit: five weeks' rent.",
+   "fetched_at": "2026-09-06T09:00:00Z"
+  },
+  {
+   "id": "b-area-listing",
+   "axis": 2,
+   "claim": "advertised floor area from the listing",
+   "status": "ok",
+   "value": 62.0,
+   "unit": "m2",
+   "source": "pasted:listing",
+   "quote": "Advertised floor area: 62 square metres, including the balcony.",
+   "fetched_at": "2026-09-06T09:00:00Z"
+  },
+  {
+   "id": "b-untried",
+   "axis": 6,
+   "claim": "organic management review score",
+   "status": "unknown",
+   "tried": [],
+   "note": "nobody looked"
+  }
+ ]
+}

@@ -1,0 +1,41 @@
+# Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen - https://github.com/jacky18008/pea-princess - CC BY 4.0
+# A/B harness config. The `pipeline:` block is read by bench/pipeline.py; everything
+# above it is the same schema bench/run.py reads.
+
+name: P2-codex
+agent: codex
+phase: pipeline
+factor: "role pipeline on OpenAI: P1 plus a verifier and one replan round"
+description: |
+  The Codex twin of P2. Luna plans and executes, Terra verifies and integrates, with one
+  replan round. The verifier reads only what scripts/verify.py flagged.
+main_model: gpt-5.6-terra
+worker_model: gpt-5.6-luna
+budget_mode: standard
+allowed_tools: null
+append_system_prompt: |
+  Use the scripts in scripts/ for every fetchable fact and read only their JSON. Never read a
+  file larger than 40 KB in full; use ranges. Do your own role and nothing else: the roles are
+  described in .agents/skills/vet-flat/references/pipeline.md, and the tool list named in
+  AGENTS.md is the whole of what this role may do.
+  This is an unattended benchmark run: there is no user to answer questions, so never stop to ask; when an input is unavailable mark that axis unknown (U) and still write report.json.
+notes: |
+  Codex takes no --allowedTools, so allowed_tools is null and the sandbox does the scoping:
+  -s workspace-write with sandbox_workspace_write.network_access=true. Each role gets its
+  tool list in AGENTS.md, which Codex reads on start. Model ids verified against the
+  installed CLI (codex 0.151): gpt-5.6-sol, gpt-5.6-terra, gpt-5.6-luna.
+pipeline:
+  planner:
+    agent: codex
+    model: gpt-5.6-luna
+  executors:
+    agent: codex
+    model: gpt-5.6-luna
+    parallel: 3
+  verifier:
+    agent: codex
+    model: gpt-5.6-terra
+  integrator:
+    agent: codex
+    model: gpt-5.6-terra
+  replan_rounds: 1
