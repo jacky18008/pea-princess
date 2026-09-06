@@ -1,0 +1,365 @@
+# Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen — https://github.com/jacky18008/pea-princess — CC BY 4.0
+#
+# The bilingual synonym map scripts/find.py expands a question with, so that asking in
+# English finds a Chinese page and asking in Chinese finds an English contract.
+#
+# HOW IT IS USED
+#   The question is tokenised. A group fires when any of its terms appears in the
+#   question as a run of adjacent tokens. Every term of a group that fires is then added
+#   to the query at weight 0.6, while the words the user actually typed keep weight 1.0 —
+#   so a synonym can add a hit but never outrank a literal match on equal evidence.
+#   Groups are symmetric: any term finds every other term in the same group.
+#
+# FORMAT (the same tiny reader as fixed-questions.yaml: scripts/scan.py, parse_questions)
+#   * two-space indent; a line whose first non-space character is # is a comment
+#   * `groups:` then one bare-word group name per entry, then `- "term"` lines
+#   * every term is a double-quoted string, lower case, no regexes, no inline comments
+#   * a term may be several words ("holding deposit"); it fires on adjacent tokens
+#
+# EXTENDING IT: add a term to the group it belongs to, or add a group. Nothing else
+# changes. Keep groups tight — a group that means two things drags in the wrong page.
+version: "2026-09-06"
+
+groups:
+
+  # ----------------------------------------------------------------- money ---
+  deposit:
+    - "deposit"
+    - "security deposit"
+    - "tenancy deposit"
+    - "押金"
+    - "保證金"
+    - "保证金"
+  holding_deposit:
+    - "holding deposit"
+    - "holding fee"
+    - "reservation fee"
+    - "reservation deposit"
+    - "留位金"
+    - "留位費"
+    - "訂金"
+    - "定金"
+  deposit_protection:
+    - "deposit protection"
+    - "tenancy deposit scheme"
+    - "custodial scheme"
+    - "insured scheme"
+    - "dps"
+    - "tds"
+    - "mydeposits"
+    - "押金保護"
+    - "存管"
+    - "託管"
+  rent_in_advance:
+    - "rent in advance"
+    - "in advance"
+    - "up front"
+    - "upfront"
+    - "advance rent"
+    - "預付"
+    - "预付"
+    - "先付"
+  rent_increase:
+    - "rent increase"
+    - "rent review"
+    - "section 13"
+    - "漲租"
+    - "涨租"
+    - "租金調整"
+  bills:
+    - "bills included"
+    - "all bills"
+    - "inclusive of bills"
+    - "utilities"
+    - "service charge"
+    - "含帳單"
+    - "包水電"
+    - "管理費"
+  council_tax:
+    - "council tax"
+    - "council tax band"
+    - "市政稅"
+    - "市政税"
+    - "議會稅"
+
+  # ------------------------------------------------------------- the paper ---
+  break_clause:
+    - "break clause"
+    - "break option"
+    - "early termination"
+    - "terminate early"
+    - "release clause"
+    - "提前退租"
+    - "提前終止"
+    - "解約"
+    - "解约"
+  notice_period:
+    - "notice period"
+    - "written notice"
+    - "notice to quit"
+    - "通知期"
+    - "預告期"
+    - "書面通知"
+  minimum_term:
+    - "minimum term"
+    - "fixed term"
+    - "minimum tenancy"
+    - "initial term"
+    - "最短租期"
+    - "最少租期"
+    - "固定期"
+  tenancy:
+    - "tenancy"
+    - "tenancy agreement"
+    - "assured shorthold tenancy"
+    - "ast"
+    - "租約"
+    - "租约"
+    - "租賃合約"
+  licence:
+    - "licence"
+    - "license"
+    - "licence to occupy"
+    - "licensee"
+    - "使用許可"
+    - "入住許可"
+    - "非租約"
+  landlord:
+    - "landlord"
+    - "lessor"
+    - "freeholder"
+    - "superior landlord"
+    - "房東"
+    - "房东"
+    - "出租人"
+    - "業主"
+  agent:
+    - "agent"
+    - "letting agent"
+    - "estate agent"
+    - "managing agent"
+    - "仲介"
+    - "中介"
+    - "房仲"
+  guarantor:
+    - "guarantor"
+    - "rent guarantee"
+    - "guarantor service"
+    - "擔保人"
+    - "担保人"
+    - "保證人"
+  referencing:
+    - "referencing"
+    - "reference check"
+    - "credit check"
+    - "affordability check"
+    - "proof of income"
+    - "審核"
+    - "徵信"
+    - "收入證明"
+  redress:
+    - "redress scheme"
+    - "property ombudsman"
+    - "tpo"
+    - "client money protection"
+    - "cmp"
+    - "propertymark"
+    - "申訴機制"
+    - "調解"
+  hmo:
+    - "hmo"
+    - "house in multiple occupation"
+    - "selective licensing"
+    - "additional licensing"
+    - "出租執照"
+    - "分租執照"
+
+  # ------------------------------------------------------------- the flat ---
+  furnished:
+    - "furnished"
+    - "unfurnished"
+    - "part furnished"
+    - "inventory"
+    - "schedule of condition"
+    - "white goods"
+    - "家具"
+    - "家具清單"
+    - "點交"
+  damp:
+    - "damp"
+    - "mould"
+    - "mold"
+    - "mildew"
+    - "condensation"
+    - "潮濕"
+    - "潮湿"
+    - "發霉"
+    - "发霉"
+    - "結露"
+  noise:
+    - "noise"
+    - "noisy"
+    - "soundproofing"
+    - "sound insulation"
+    - "吵"
+    - "噪音"
+    - "隔音"
+  heat_network:
+    - "heat network"
+    - "communal heating"
+    - "district heating"
+    - "heat interface unit"
+    - "熱網"
+    - "热网"
+    - "集中供暖"
+  epc:
+    - "epc"
+    - "energy certificate"
+    - "energy performance certificate"
+    - "energy rating"
+    - "能源證書"
+    - "能源证书"
+    - "能效等級"
+  light:
+    - "natural light"
+    - "daylight"
+    - "dual aspect"
+    - "north facing"
+    - "採光"
+    - "采光"
+    - "朝向"
+  lift:
+    - "lift"
+    - "elevator"
+    - "walk up"
+    - "stairs only"
+    - "電梯"
+    - "电梯"
+  pets:
+    - "pets"
+    - "pet friendly"
+    - "no pets"
+    - "寵物"
+    - "宠物"
+  smoking:
+    - "smoking"
+    - "no smoking"
+    - "吸菸"
+    - "抽菸"
+  parking:
+    - "parking"
+    - "bike storage"
+    - "cycle store"
+    - "停車"
+    - "車位"
+
+  # ------------------------------------------------------- the neighbours ---
+  move_out:
+    - "move out"
+    - "moved out"
+    - "moving out"
+    - "left the building"
+    - "gave notice"
+    - "搬走"
+    - "搬離"
+    - "退租"
+  incentivised:
+    - "incentivised"
+    - "incentivized"
+    - "incentive"
+    - "voucher"
+    - "gift card"
+    - "in exchange for"
+    - "邀評"
+    - "有償評價"
+  management:
+    - "management company"
+    - "concierge"
+    - "maintenance"
+    - "repairs"
+    - "物業"
+    - "管理處"
+    - "維修"
+  security:
+    - "burglary"
+    - "break in"
+    - "anti social"
+    - "安全"
+    - "治安"
+    - "竊盜"
+  works:
+    - "works"
+    - "construction"
+    - "scaffold"
+    - "scaffolding"
+    - "building site"
+    - "demolition"
+    - "工地"
+    - "施工"
+    - "鷹架"
+  planning:
+    - "planning permission"
+    - "planning application"
+    - "officer report"
+    - "consultation"
+    - "規劃許可"
+    - "都市計畫"
+  flood:
+    - "flood risk"
+    - "flooding"
+    - "淹水"
+    - "水患"
+  commute:
+    - "commute"
+    - "underground"
+    - "tube station"
+    - "bus stop"
+    - "walking distance"
+    - "通勤"
+    - "地鐵"
+    - "車站"
+  student:
+    - "student"
+    - "university"
+    - "campus"
+    - "term time"
+    - "學生"
+    - "校區"
+
+  # ------------------------------------------------------------- the units ---
+  sqft:
+    - "sq ft"
+    - "sqft"
+    - "square feet"
+    - "ft2"
+    - "平方呎"
+  sqm:
+    - "sqm"
+    - "sq m"
+    - "m2"
+    - "square metres"
+    - "square meters"
+    - "平方米"
+    - "平方公尺"
+    - "坪"
+  pcm:
+    - "pcm"
+    - "per month"
+    - "per calendar month"
+    - "monthly"
+    - "每月"
+    - "月租"
+  pw:
+    - "pw"
+    - "per week"
+    - "weekly"
+    - "每週"
+    - "每周"
+    - "週租"
+  availability:
+    - "available from"
+    - "move in date"
+    - "ready to occupy"
+    - "可入住"
+    - "起租日"
+    - "交屋"
