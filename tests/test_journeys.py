@@ -855,6 +855,34 @@ class TestFileChecksAndRegrade(unittest.TestCase):
         finally:
             shutil.rmtree(folder, ignore_errors=True)
 
+    def test_richer_replies_from_a_strong_model_do_not_read_as_fabrications(self):
+        # Shapes from the Codex Sol runs, 2026-09-06.
+        doc = runner.load_journeys()
+        by = dict((j["id"], j) for j in doc["journeys"])
+        j3 = by["j3-vet-this-listing-zh"]
+        card = runner.score_turn(j3["turns"][0], "廣告租金 £2,350 pcm；預付租金 | 3 個月＝£7,050。EPC 48 平方米，2019 年首次評估。\n", j3)
+        self.assertEqual(0, card["fabrications"], [r["detail"] for r in card["checks"] if r["kind"] == "fact" and r["status"] == "fail"])
+        j4 = by["j4-roast-my-short-stays-en"]
+        reply = ("Bramblewick garden studio (Stay A): £78 a night; 30 nights £2,720 (£90.67/night all in).\n"
+                 "Halcyon Row (Stay D): £2,700 non-refundable or £3,240 flexible. Non-refundable: £2,700 for the 30 nights.\n")
+        card = runner.score_turn(j4["turns"][0], reply, j4)
+        facts = dict((r["check"], r) for r in card["checks"] if r["kind"] == "fact")
+        self.assertEqual(0, card["fabrications"], [(k, v["detail"]) for k, v in facts.items() if v["status"] == "fail"])
+        self.assertEqual("pass", facts["stay_d_nonrefundable_total_gbp"]["status"], facts["stay_d_nonrefundable_total_gbp"]["detail"])
+        j5 = by["j5-offer-and-referencing-zh"]
+        reply = "月租 £2,150。押金上限 5 週 = £2,480.77；仲介要年收入 36 倍月租 £77,400，年租低於 £50,000。\n"
+        card = runner.score_turn(j5["turns"][0], reply, j5)
+        facts = dict((r["check"], r) for r in card["checks"] if r["kind"] == "fact")
+        self.assertEqual(0, card["fabrications"], [(k, v["detail"]) for k, v in facts.items() if v["status"] == "fail"])
+        self.assertEqual("pass", facts["deposit_cap_gbp"]["status"], facts["deposit_cap_gbp"]["detail"])
+        j7 = by["j7-compare-two-flats-en"]
+        reply = ("| F1 Deposit | Calculated maximum: A £2,596.15; B £2,423.08. |\n"
+                 "| F2 Holding deposit | Found, self-reported: one week. Calculated maximum: A £519.23; B £484.62. |\n"
+                 "Both rents are under £50,000 a year.\n")
+        card = runner.score_turn(j7["turns"][0], reply, j7)
+        facts = dict((r["check"], r) for r in card["checks"] if r["kind"] == "fact")
+        self.assertEqual(0, card["fabrications"], [(k, v["detail"]) for k, v in facts.items() if v["status"] == "fail"])
+
     def test_the_pasted_profile_becomes_a_real_file_without_its_title_line(self):
         folder = tempfile.mkdtemp()
         try:
