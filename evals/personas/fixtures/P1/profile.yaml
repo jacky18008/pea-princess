@@ -1,0 +1,19 @@
+# vet-flat profile - Rivan, saved 2026-08-30
+budget_mode: standard
+household:
+  adults: 2
+hard_filters:
+  rent_pcm_max: 2800
+  bedrooms_min: 2
+  commute_minutes_max: 40
+destinations:
+  - label: office-rivan
+    postcode: XA4 4AB
+    arrive_by: "09:30"
+  - label: office-partner
+    postcode: XA5 5AC
+    arrive_by: "09:30"
+advanced:
+  fixed_form:
+    questions: auto
+    ask_if_missing: gate

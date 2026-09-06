@@ -1,0 +1,7 @@
+Quayling Stays - booking terms (extract, version 2026-04-01)
+2.1 A stay of fewer than six months is a licence to occupy. It is not an assured
+    shorthold tenancy and the deposit protection rules for tenancies do not apply.
+2.4 The service fee is calculated on the nightly total before the cleaning fee and
+    is shown at the payment step, not on the listing page.
+5.2 Money paid to hold a stay is refundable only where the stay is cancelled by
+    the operator.

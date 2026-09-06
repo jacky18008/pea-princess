@@ -1,0 +1,7 @@
+vet-flat preference seed, exported 2025-09-01 (old)
+version: 1
+preferences:
+  - quiet_over_light: true
+  - min_indoor_sqm: 40
+  - cycle_commute_minutes_max: 35
+note: exported from a search in a different city.

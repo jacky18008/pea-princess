@@ -31,7 +31,7 @@ On a phone
 
 | Surface | Blocks | Source |
 |---|---|---|
-| README — the front page | 13 | `README.md` |
+| README — the front page | 14 | `README.md` |
 | docs/USING.md — the plain-words walkthrough | 39 | `docs/USING.md` |
 | docs/INSTALL.md — install page | 9 | `docs/INSTALL.md` |
 | docs/EXPERIMENTS.md — which configuration to run | 7 | `docs/EXPERIMENTS.md` |
@@ -40,7 +40,7 @@ On a phone
 | inputs.md — the one message that asks the user for what is missing | 1 | `skills/vet-flat/references/inputs.md` |
 | profiles/ — the sentences a profile carries | 14 | `skills/vet-flat/profiles/*.yaml` |
 | seed.py — the seed card sentences (read-only here) | 25 | `skills/vet-flat/scripts/seed.py` |
-| **Total** | **141** | |
+| **Total** | **142** | |
 
 ---
 
@@ -171,7 +171,18 @@ Ask **"What can this do?"** (or 這能幹嘛？). The answer comes from `skills/
 
 ### deck:readme:12
 
-- source: `README.md` · L64
+- source: `README.md` · L58
+- under: ## Benchmark (facts must be right on every model; verdicts may differ)
+- lang: en
+- write-back: yes
+
+```text
+**Whole conversations, not one answer:** `docs/JOURNEYS.md` scores nine scripted multi-turn journeys, and `docs/PERSONAS.md` goes one step further — sixteen fictional people played by a model, with a deterministic controller holding their documents so nothing can be invented, a judge that has to quote its evidence, and a paired probe per person that moves exactly one setting. `python3 bench/personas.py --matrix pilot --dry-run` prints the whole plan without calling a model.
+```
+
+### deck:readme:13
+
+- source: `README.md` · L66
 - under: ## Sources you will not find here
 - lang: en
 - write-back: yes
@@ -180,9 +191,9 @@ Ask **"What can this do?"** (or 這能幹嘛？). The answer comes from `skills/
 Rightmove, Zoopla, OnTheMarket, OpenRent, HomeViews, Trustpilot, Airbnb, Booking.com are listed by name only. Their terms forbid automated access, so this project gives no method for them; the skill asks you to paste the page.
 ```
 
-### deck:readme:13
+### deck:readme:14
 
-- source: `README.md` · L67
+- source: `README.md` · L69
 - under: ## Licence and attribution (proposed)
 - lang: en
 - write-back: yes

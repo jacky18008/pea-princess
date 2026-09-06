@@ -1,0 +1,7 @@
+FIVE OFFER LETTERS (first lines only, one per employee)
+E1  A. Duro    Aurora Grid Ltd, start 2026-11-02, salary £48,000
+E2  B. Selm    Aurora Grid Ltd, start 2026-11-04, salary £52,000
+E3  C. Nwene   Aurora Grid Ltd, start 2026-11-06, salary £57,000
+E4  D. Rask    Aurora Grid Ltd, start 2026-11-09, salary £61,000
+E5  E. Tolo    Aurora Grid Ltd, start 2026-11-10, salary £66,000
+All five letters dated 2026-08-25.

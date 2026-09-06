@@ -1,0 +1,8 @@
+LISTING BUNDLE - mixed, not yet matched to employees. Saved 2026-09-02.
+
+L1  Saltram House, XH8 8HH        one bed, £2,150 pcm, bills not stated, private kitchen
+L2  Pinfold House, XH8 8HH        studio,  £1,980 pcm, bills £140 pcm written, kitchenette
+L3  Bellwood Rise, XH8 8HH        one bed, £2,380 pcm, bills included, private kitchen
+L4  Thornmere Court, XH8 8HH      one bed, £2,540 pcm, bills not stated, private kitchen
+L5  Corvin House, XH8 8HH         studio,  £2,760 pcm, bills included, kitchen shared with one flat
+L6  Marlin Reach, XH8 8HH         one bed, £2,690 pcm, bills £200 pcm written, private kitchen

@@ -1,0 +1,14 @@
+# vet-flat profile - A-che, saved 2026-09-04
+budget_mode: deep
+hard_filters:
+  rent_pcm_max: 2200
+  floor_min: 2
+  floor_max: 10
+destinations:
+  - label: office
+    postcode: XK2 8KC
+    arrive_by: "10:00"
+advanced:
+  fixed_form:
+    questions: full
+    ask_if_missing: all

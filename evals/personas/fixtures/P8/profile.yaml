@@ -1,0 +1,17 @@
+# vet-flat profile - relocation cohort, saved 2026-09-01
+budget_mode: deep
+cohort:
+  E1:
+    rent_pcm_max: 2000
+  E2:
+    rent_pcm_max: 2200
+  E3:
+    rent_pcm_max: 2400
+  E4:
+    rent_pcm_max: 2600
+  E5:
+    rent_pcm_max: 2800
+advanced:
+  fixed_form:
+    questions: full
+    ask_if_missing: gate

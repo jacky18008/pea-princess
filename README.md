@@ -55,6 +55,8 @@ Ask **"What can this do?"** (or 這能幹嘛？). The answer comes from `skills/
 
 **Which configuration to run:** `docs/EXPERIMENTS.md` compares fifteen setups on five real flats against a human-built gold set of landmines, with a cost-versus-recall chart. The default it argues for is a cheap model for the extraction workers and the strongest model you have for the judgment — the tables are there so you can pick something else.
 
+**Whole conversations, not one answer:** `docs/JOURNEYS.md` scores nine scripted multi-turn journeys, and `docs/PERSONAS.md` goes one step further — sixteen fictional people played by a model, with a deterministic controller holding their documents so nothing can be invented, a judge that has to quote its evidence, and a paired probe per person that moves exactly one setting. `python3 bench/personas.py --matrix pilot --dry-run` prints the whole plan without calling a model.
+
 ## Tests
 ```bash
 python3 -m unittest tests/test_epc.py

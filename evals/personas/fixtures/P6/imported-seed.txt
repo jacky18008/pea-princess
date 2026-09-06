@@ -1,0 +1,9 @@
+vet-flat preference seed, exported 2026-06-11
+version: 2
+role: software engineer, works from home four days a week
+preferences:
+  - separate_bedroom: true
+  - desk_space_min_sqm: 4
+  - secure_cycle_storage: true
+  - budget_mode: standard
+note: exported from the previous search; contains no financial documents.

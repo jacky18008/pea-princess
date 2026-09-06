@@ -1,0 +1,14 @@
+RELOCATION COHORT - autumn intake (five employees, five separate homes)
+Prepared by N Kivaro, 2026-09-01. Anchor area XH8 8HH.
+Astra's brief calls these employees C1-C5; they are written E1-E5 here so they
+cannot be confused with a persona id.
+
+id  employee        move-in      all-in ceiling  destination  private kitchen
+E1  A. Duro         2026-11-01   £2,000 pcm      XH1 1HA      required
+E2  B. Selm         2026-11-03   £2,200 pcm      XH2 2HB      required
+E3  C. Nwene        2026-11-05   £2,400 pcm      XH3 3HC      required
+E4  D. Rask         2026-11-07   £2,600 pcm      XH4 4HD      required
+E5  E. Tolo         2026-11-09   £2,800 pcm      XH5 5HE      required
+
+Cohort ceiling total: £12,000 pcm.
+No employee may see another employee's documents.

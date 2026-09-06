@@ -128,6 +128,30 @@ python3 bench/journeys.py --journey j1-from-zero-zh --agent api --model NAME --d
 python3 bench/journeys.py --all --agent claude
 ```
 
+### The sixteen personas
+
+A journey is a script, so it can never ask the question the author did not think of.
+`evals/personas.json` and `bench/personas.py` hand the user's side to a model instead:
+sixteen cards — eight Chinese-speaking and edge cases, eight international and
+tech-setup cases — each with real document files, a disclosure schedule, unknowns,
+patience, two scheduled frictions and things this person would never say. Three actors
+are kept apart: a deterministic **controller** owns the documents and the facts (a
+persona that pastes a document it was never given, or states a price that is in no
+file, ends the run as `invalid`); a **persona** model owns only the wording and never
+sees the rubric or the target settings; a **judge** runs the same rule checks as the
+journey suite and then quotes a span for every criterion it scores. The persona and
+the judge always come from the other family from the agent under test. Each card runs
+as a baseline and as a paired probe that moves exactly one setting, over three
+controller seeds. A safety miss caps the session grade, and satisfaction is recorded
+as commentary, never as a score. Every address is fictional and nothing can be
+fetched, which is the point: the honest answer is "unknown, and here is how to find
+out". Full documentation: **[`docs/PERSONAS.md`](../docs/PERSONAS.md)**.
+
+```bash
+python3 bench/personas.py --persona C1 --dry-run
+python3 bench/personas.py --matrix pilot          # six sessions
+```
+
 ---
 
 ## How truth is produced
