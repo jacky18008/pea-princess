@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The landing calendar: what is happening in London between you landing and your keys.
+"""Landing: what is happening in London between the day you land and the day you get keys.
 
 Two rules come before any listing, and this tool is built to serve them
 (`references/axes/15-bridging-short-lets.md`):
@@ -25,14 +25,14 @@ The magnitude rule, everywhere in this tool: these things are known to push loca
 prices up. We have not measured by how much, so no number is ever printed for it.
 
 Usage:
-  calendar.py holidays --from 2026-09-16 --to 2026-11-04 [--division england-and-wales]
-  calendar.py closures --from 2026-09-16 --to 2026-09-30 [--lines tube,dlr,overground,elizabeth-line,national-rail]
-  calendar.py terms --year 2026 [--uni kcl,ucl]
-  calendar.py events --from 2026-09-16 --to 2026-11-04 [--near "Deptford, Lewisham"] [--paste events.txt]
-  calendar.py plan --arrive 2026-09-16 --start 2026-10-01 [--keys-by 2026-11-04 | --gap-weeks 6]
+  landing.py holidays --from 2026-09-16 --to 2026-11-04 [--division england-and-wales]
+  landing.py closures --from 2026-09-16 --to 2026-09-30 [--lines tube,dlr,overground,elizabeth-line,national-rail]
+  landing.py terms --year 2026 [--uni kcl,ucl]
+  landing.py events --from 2026-09-16 --to 2026-11-04 [--near "Deptford, Lewisham"] [--paste events.txt]
+  landing.py plan --arrive 2026-09-16 --start 2026-10-01 [--keys-by 2026-11-04 | --gap-weeks 6]
                    [--areas "Deptford, Lewisham"] [--budget-all-in 1900] [--bridge-weekly 550]
 
-Add --plain for the table a person reads, --offline to read tests/fixtures/calendar,
+Add --plain for the table a person reads, --offline to read tests/fixtures/landing,
 --verbose to see the curl commands on stderr. One JSON object on stdout by default.
 Exit 0 on success, 2 on a usage error, 1 when a fetch failed.
 """
@@ -50,39 +50,9 @@ sys.path.insert(0, HERE)
 from _fetch import fetch  # noqa: E402
 
 
-def _adopt_stdlib_calendar():
-    """This file is called calendar.py and sits on sys.path for every script here.
-
-    So `import calendar` anywhere in the process finds THIS module instead of the
-    standard library's — including the lazy import inside datetime.strptime, email
-    and http.cookiejar, which then die on `calendar.day_abbr`. Rather than break
-    them, adopt the standard library's public surface: every name it defines that
-    this module does not is copied in. Ours always wins on a clash.
-
-    If this file is ever renamed, delete this function.
-    """
-    import importlib.util
-    import sysconfig
-    path = os.path.join(sysconfig.get_paths()["stdlib"], "calendar.py")
-    if not os.path.exists(path):                       # a frozen or trimmed stdlib
-        return
-    spec = importlib.util.spec_from_file_location("_vetflat_stdlib_calendar", path)
-    module = importlib.util.module_from_spec(spec)
-    try:
-        spec.loader.exec_module(module)
-    except Exception:                                                  # noqa: BLE001
-        return
-    here = globals()
-    for name in dir(module):
-        if not name.startswith("__"):
-            here.setdefault(name, getattr(module, name))
-
-
-_adopt_stdlib_calendar()
-
 REFERENCES = os.path.join(os.path.dirname(HERE), "references")
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(HERE)))
-FIXTURES = os.path.join(ROOT, "tests", "fixtures", "calendar")
+FIXTURES = os.path.join(ROOT, "tests", "fixtures", "landing")
 TERM_DATES_YAML = os.path.join(REFERENCES, "term-dates.yaml")
 EVENTS_YAML = os.path.join(REFERENCES, "london-events.yaml")
 AXIS_15 = "references/axes/15-bridging-short-lets.md"
@@ -108,7 +78,7 @@ EARTH_KM = 6371.0088
 
 
 def die(msg, code=2):
-    sys.stderr.write("calendar.py: %s\n" % msg)
+    sys.stderr.write("landing.py: %s\n" % msg)
     raise SystemExit(code)
 
 
@@ -1148,7 +1118,7 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--plain", action="store_true", help="the table a person reads")
-    ap.add_argument("--offline", action="store_true", help="read tests/fixtures/calendar, fetch nothing")
+    ap.add_argument("--offline", action="store_true", help="read tests/fixtures/landing, fetch nothing")
     ap.add_argument("--fixtures", help="where the offline fixtures live")
     ap.add_argument("--today", help="pin today, for reproducible output")
     ap.add_argument("--verbose", action="store_true")

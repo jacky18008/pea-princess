@@ -1120,19 +1120,19 @@ legal caps from rent 2000.0 (evidence item e-rent): deposit 5 weeks = 2307.69, h
 Tests: `tests/test_verify.py` — every rule has a pair, correct evidence that must not
 trigger it and wrong evidence that must, one mutation at a time from the same clean base.
 
-## `calendar.py` — the landing calendar and the first-weeks plan (open, no key)
+## `landing.py` — the landing calendar and the first-weeks plan (open, no key)
 
 ```
-calendar.py holidays --from 2026-09-16 --to 2026-11-04 [--division england-and-wales]
-calendar.py closures --from 2026-09-12 --to 2026-09-13 [--lines tube,dlr,overground,elizabeth-line,national-rail]
-calendar.py terms    --year 2026 [--uni kcl,ucl]
-calendar.py events   --from 2026-09-16 --to 2026-11-04 [--near "Deptford, Lewisham"] [--paste events.txt]
-calendar.py plan     --arrive 2026-09-16 --start 2026-10-01 [--keys-by 2026-11-04 | --gap-weeks 6]
+landing.py holidays --from 2026-09-16 --to 2026-11-04 [--division england-and-wales]
+landing.py closures --from 2026-09-12 --to 2026-09-13 [--lines tube,dlr,overground,elizabeth-line,national-rail]
+landing.py terms    --year 2026 [--uni kcl,ucl]
+landing.py events   --from 2026-09-16 --to 2026-11-04 [--near "Deptford, Lewisham"] [--paste events.txt]
+landing.py plan     --arrive 2026-09-16 --start 2026-10-01 [--keys-by 2026-11-04 | --gap-weeks 6]
                      [--areas "Deptford, Lewisham"] [--budget-all-in 1900] [--bridge-weekly 550]
 ```
 
 Global flags: `--plain` for the table a person reads, `--offline` to read
-`tests/fixtures/calendar` and fetch nothing, `--today YYYY-MM-DD` to pin the run
+`tests/fixtures/landing` and fetch nothing, `--today YYYY-MM-DD` to pin the run
 date, `--verbose` for the curl commands on stderr.
 
 `holidays` reads the GOV.UK bank-holidays JSON and returns the days inside your
@@ -1165,7 +1165,7 @@ and you open it, or you paste the page and `--paste` reads the dates out of it.
 `--near` takes area names or postcode districts and lists the venues within about
 8 km (the price band is tighter, about 2 km). **No percentage is ever printed**: we
 have not measured any uplift, so the sentence is always "known to push local prices
-up; magnitude not measured here", and `tests/test_calendar.py` asserts there is not
+up; magnitude not measured here", and `tests/test_landing.py` asserts there is not
 a single per-cent sign in the events file.
 
 `plan` is the one people actually run. It writes the week-by-week bridge from the day
@@ -1178,7 +1178,7 @@ long end of four to seven weeks and says why (the maintainer's own gap ran 45 da
 is worth reading; an area it cannot place is said out loud, not guessed.
 
 ```console
-$ calendar.py --offline --plain plan --arrive 2026-09-16 --start 2026-10-01 \
+$ landing.py --offline --plain plan --arrive 2026-09-16 --start 2026-10-01 \
       --areas "Deptford, Lewisham" --budget-all-in 1900 --bridge-weekly 550
 The first weeks: land 2026-09-16, be functioning by 2026-10-01, keys about 2026-11-04
 
@@ -1193,8 +1193,11 @@ The two rules, before any listing:
 ```
 
 Every numbered line of the plain output ends with its source and an `as_of` date;
-`tests/test_calendar.py` asserts that for all five subcommands.
+`tests/test_landing.py` asserts that for all five subcommands.
 
-Tests: `tests/test_calendar.py` — offline only, with `fetch` replaced by a landmine
+Tests: `tests/test_landing.py` — offline only, with `fetch` replaced by a landmine
 so a test that reaches the network fails loudly. Fixtures in
-`tests/fixtures/calendar/` are real responses, trimmed.
+`tests/fixtures/landing/` are real responses, trimmed. The name is not `calendar.py`
+on purpose: a module of that name in `scripts/` shadows the standard library's for
+every process that puts the directory on `sys.path`, and `datetime.strptime` dies
+on it. `tests/test_landing.py` guards the whole directory against that.

@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
-"""Offline tests for scripts/calendar.py — the landing calendar and the first-weeks plan.
+"""Offline tests for scripts/landing.py — the landing calendar and the first-weeks plan.
 
-Everything here reads tests/fixtures/calendar or the two curated reference files.
+Everything here reads tests/fixtures/landing or the two curated reference files.
 Nothing touches the network: `fetch` is replaced with a landmine in setUp, so a
 test that reaches for it fails loudly instead of going quiet on a plane.
 
-The module is loaded by path, deliberately. It is called calendar.py, and a plain
-`import calendar` inside a test process would shadow the standard library module
-for every other test in the same run.
+Nothing in scripts/ may be named after a standard-library module: a file called
+calendar.py there shadows the real one for every process that puts the directory on
+sys.path, and datetime.strptime dies on it. There is a guard for that below.
 
-Run: python3 -m unittest tests.test_calendar -q
+Run: python3 -m unittest tests.test_landing -q
 """
 import datetime as dt
 import importlib.util
@@ -25,13 +25,13 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, ".."))
 SCRIPTS = os.path.join(ROOT, "skills", "vet-flat", "scripts")
 REFERENCES = os.path.join(ROOT, "skills", "vet-flat", "references")
-FIX = os.path.join(HERE, "fixtures", "calendar")
+FIX = os.path.join(HERE, "fixtures", "landing")
 CALC = os.path.join(SCRIPTS, "calc.py")
 EVENTS_YAML = os.path.join(REFERENCES, "london-events.yaml")
 TERM_DATES_YAML = os.path.join(REFERENCES, "term-dates.yaml")
 
-_spec = importlib.util.spec_from_file_location("vetflat_calendar",
-                                               os.path.join(SCRIPTS, "calendar.py"))
+_spec = importlib.util.spec_from_file_location("vetflat_landing",
+                                               os.path.join(SCRIPTS, "landing.py"))
 cal = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(cal)
 
@@ -408,27 +408,35 @@ class TestPlainOutput(NoNetwork):
             self.assert_every_numbered_line_is_sourced(cal.plain(doc))
 
 
-class TestItDoesNotShadowTheStandardLibrary(unittest.TestCase):
-    """This file is called calendar.py, so `import calendar` in any process with the
-    scripts directory on sys.path finds it — including the lazy import inside
-    datetime.strptime and email.utils. It has to carry the standard library's surface."""
+class TestNothingShadowsTheStandardLibrary(unittest.TestCase):
+    """Why this file is landing.py and not calendar.py.
 
-    def test_the_stdlib_surface_survives_the_name_clash(self):
-        out = subprocess.run(
-            [sys.executable, "-c",
-             "import sys, datetime\n"
-             "sys.path.insert(0, %r)\n" % SCRIPTS +
-             "import calendar\n"
-             "assert calendar.__file__.endswith('scripts/calendar.py'), calendar.__file__\n"
-             "assert list(calendar.day_abbr)[0] == 'Mon'\n"
-             "assert calendar.monthrange(2026, 2) == (6, 28)\n"
-             "assert datetime.datetime.strptime('2026-09-16T08:30', '%Y-%m-%dT%H:%M').hour == 8\n"
-             "import email.utils; email.utils.formatdate(0)\n"
-             "assert hasattr(calendar, 'parse_closures') and hasattr(calendar, 'plan')\n"
-             "print('ok')"],
-            capture_output=True, text=True)
-        self.assertEqual(out.returncode, 0, out.stderr[-600:])
-        self.assertIn("ok", out.stdout)
+    Every script here runs with its own directory as sys.path[0], and several tests
+    put it on sys.path too. A module named after a standard-library one therefore
+    shadows the real thing for the whole process — a calendar.py here took out
+    datetime.strptime, which imports the standard calendar lazily. The rule is
+    simply: do not use those names.
+    """
+
+    def stdlib_module_names(self):
+        import sysconfig
+        stdlib = sysconfig.get_paths()["stdlib"]
+        names = set(sys.builtin_module_names)
+        for entry in os.listdir(stdlib):
+            if entry.endswith(".py"):
+                names.add(entry[:-3])
+            elif os.path.isdir(os.path.join(stdlib, entry)) and not entry.startswith("_"):
+                if os.path.exists(os.path.join(stdlib, entry, "__init__.py")):
+                    names.add(entry)
+        return names
+
+    def test_no_script_is_named_after_a_standard_library_module(self):
+        reserved = self.stdlib_module_names()
+        clashes = sorted(name[:-3] for name in os.listdir(SCRIPTS)
+                         if name.endswith(".py") and name[:-3] in reserved)
+        self.assertEqual(clashes, [],
+                         "these scripts shadow the standard library for every process "
+                         "that puts scripts/ on sys.path: %s" % ", ".join(clashes))
 
     def test_calc_py_no_longer_needs_the_stdlib_module_of_that_name(self):
         out = subprocess.run([sys.executable, CALC, "pro-rata", "--rent-pcm", "2400",
@@ -441,7 +449,7 @@ class TestCli(unittest.TestCase):
     """The command line itself, in a subprocess, offline. No fetch is possible."""
 
     def run_cli(self, *args):
-        return subprocess.run([sys.executable, os.path.join(SCRIPTS, "calendar.py")] + list(args),
+        return subprocess.run([sys.executable, os.path.join(SCRIPTS, "landing.py")] + list(args),
                               capture_output=True, text=True)
 
     def test_offline_plan_prints_one_json_object_and_exits_zero(self):

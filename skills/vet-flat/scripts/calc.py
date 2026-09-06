@@ -135,9 +135,13 @@ def guarantor_product(a):
 
 
 def days_in_month(d):
-    """Length of d's month. Deliberately not the stdlib `calendar` module: this
-    directory now has a calendar.py of its own, and sys.path[0] is this directory
-    when the script runs, so `import calendar` here would import that one."""
+    """Length of d's month, without importing the stdlib `calendar` module.
+
+    Every script here runs with this directory as sys.path[0], so a file named
+    after a standard-library module would shadow the real one process-wide. Nothing
+    here is called calendar.py (the landing tool is `landing.py`, and
+    tests/test_landing.py guards the directory), but one fewer name to collide with
+    is one fewer way to break datetime.strptime by accident."""
     first_next = dt.date(d.year + (d.month == 12), d.month % 12 + 1, 1)
     return (first_next - dt.timedelta(days=1)).day
 

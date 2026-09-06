@@ -1,6 +1,6 @@
 # Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen — https://github.com/jacky18008/pea-princess — CC BY 4.0
 #
-# Curated: 2026/27 autumn dates for ten London universities, read by scripts/calendar.py.
+# Curated: 2026/27 autumn dates for ten London universities, read by scripts/landing.py.
 # This is the file behind the one structural fact in the London rental year — term
 # start tightens long lets AND short lets, every September, across the whole city.
 #
@@ -32,7 +32,7 @@
 #   checked_on        the day a human read that page
 #   note              anything that would mislead a reader who only saw the dates
 #
-# Staleness: calendar.py warns when checked_on is more than 300 days old. Term
+# Staleness: landing.py warns when checked_on is more than 300 days old. Term
 # dates for the following year are usually published in the spring, so a reading
 # older than that is looking at last year's page.
 

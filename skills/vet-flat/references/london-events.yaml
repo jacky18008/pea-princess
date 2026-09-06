@@ -1,6 +1,6 @@
 # Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen — https://github.com/jacky18008/pea-princess — CC BY 4.0
 #
-# Curated demand spikes for London accommodation, read by scripts/calendar.py.
+# Curated demand spikes for London accommodation, read by scripts/landing.py.
 # Nothing here is scraped. Venue calendars change every week and their terms
 # forbid crawling, so this file names the calendar and the tool tells you to open it.
 #
