@@ -84,6 +84,7 @@ if HERE not in sys.path:
 
 import docs_grade  # noqa: E402
 import journeys  # noqa: E402  - shell(), shell_preview(), claude_command(), claude_answer()
+import launch  # noqa: E402  the one launcher: retries, captured tails, provider_error
 
 RESULTS = os.path.join(HERE, "results")
 DEFAULT_CASES = os.path.join(HERE, "private", "docs")
@@ -150,8 +151,9 @@ ARMS = collections.OrderedDict([
     ("R2", collections.OrderedDict([
         ("label", "find.py"),
         ("tools", "Read,Bash(python3 .claude/skills/vet-flat/scripts/find.py:*),"
+                  "Bash(python3 .claude/skills/vet-flat/scripts/reviews.py:*),"
                   "Bash(grep:*),Bash(rg:*)"),
-        ("shell", ("find", "grep", "read_range", "inspect")),
+        ("shell", ("find", "reviews", "grep", "read_range", "inspect")),
         ("needs_skill", True),
         ("fixed_only", False),
         ("how", "find"),
@@ -162,7 +164,13 @@ ARMS = collections.OrderedDict([
          "never an answer: the ranker counts words, it does not understand the document, "
          "and the top hit can be the wrong clause. Read the paragraph with Read before you "
          "quote it. `grep -n` stays available as a fallback if the ranker gives you "
-         "nothing useful. Do not read the document end to end."),
+         "nothing useful. Do not read the document end to end.\n"
+         "If the document is a review page AND `reviews.py` exists in that same scripts "
+         "folder, `python3 {reviewer} doc.txt` parses it: how many reviews, their "
+         "ratings and dates, which are marked moved-out or incentivised, the lowest few, "
+         "same-day clusters and the average with the incentivised ones taken out. Check "
+         "it is there before you call it, and read the sentences it points at rather "
+         "than quoting its totals as if they were the page."),
         ("codex",
          "You have a read-only shell rather than a Read tool, so a ranged read means "
          "`sed -n '70,90p' doc.txt`. Do not `cat` the whole document: reading it end to "
@@ -460,7 +468,8 @@ def discipline_text(arm, agent):
     home = SKILL_HOME.get(agent, SKILL_HOME["claude"])
     scripts = os.path.join(home, "vet-flat", "scripts")
     text = ARMS[arm]["discipline"].format(
-        finder=os.path.join(scripts, "find.py"), scanner=os.path.join(scripts, "scan.py"))
+        finder=os.path.join(scripts, "find.py"), scanner=os.path.join(scripts, "scan.py"),
+        reviewer=os.path.join(scripts, "reviews.py"))
     if agent == "codex" and ARMS[arm].get("codex"):
         text += "\n" + ARMS[arm]["codex"]
     return text
@@ -558,9 +567,10 @@ def build_command(agent, prompt, workdir, model, system, arm, last_message=None)
 
 # ------------------------------------------------------ the codex audit side --
 COMMAND_KINDS = collections.OrderedDict([
-    # find.py and scan.py first, so `python3 .../find.py` is a find and not a python.
+    # The skill's own scripts first, so `python3 .../find.py` is a find and not a python.
     ("find", re.compile(r"\bfind\.py\b")),
     ("scan", re.compile(r"\bscan\.py\b")),
+    ("reviews", re.compile(r"\breviews\.py\b")),
     ("grep", re.compile(r"(?:^|[|;&(\s])(?:grep|egrep|fgrep|rg|ripgrep)\b")),
     # A ranged read: `sed -n '70,90p'`, `head -n 40`, `awk 'NR>=70 && NR<=90'`. This is
     # what a shell agent has instead of Read with a line range.
@@ -866,6 +876,12 @@ def run_row(row, bed, args, glossary):
         ("sandbox", "read-only" if agent == "codex" else None),
         ("discipline_enforced", agent == "claude"),
         ("skill_dir", skill_dir() if ARMS[arm]["needs_skill"] else None),
+        # The R2 arm names reviews.py in its allow-list whether or not the script has
+        # landed yet: a tool pattern is only a string. This says which it was, so a row
+        # run before it existed is not compared with one run after.
+        ("reviews_py_present", os.path.exists(
+            os.path.join(skill_dir(), "scripts", "reviews.py"))
+         if ARMS[arm]["needs_skill"] else None),
         ("command", journeys.shell_preview(command)),
         ("workdir", workdir),
     ])
@@ -882,48 +898,58 @@ def run_row(row, bed, args, glossary):
         record["dry_run"] = True
         return record, None
 
-    started = time.time()
-    reply, note, usage, stdout = "", None, None, ""
-    try:
-        proc = subprocess.Popen(command, cwd=workdir, stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE, stdin=subprocess.DEVNULL)
-        out, err = proc.communicate(timeout=args.timeout)
-        stdout = (out or b"").decode("utf-8", "replace")
-        stderr = (err or b"").decode("utf-8", "replace")
-        if proc.returncode != 0:
-            note = "the agent exited %d: %s" % (proc.returncode, stderr[-300:])
-        if agent == "claude":
-            reply, usage = journeys.claude_answer(stdout)
-        else:
-            reply = stdout
-            if last_message and os.path.exists(last_message):
-                with io.open(last_message, encoding="utf-8") as fh:
-                    reply = fh.read() or stdout
-    except subprocess.TimeoutExpired:
-        proc.kill()
-        note = "timed out after %d s" % args.timeout
-    except OSError as exc:
-        note = "could not start %r: %s" % (command[0], exc)
-    wall = round(time.time() - started, 2)
+    # One launcher for every runner: stdin closed, both streams captured, a busy
+    # provider retried with a growing pause, and the tails kept when it never let the
+    # row through at all. Ten of the twenty-six rows in the 2026-09-07 pilot died here
+    # and were written down as 0 facts; that mean was a fiction.
+    res = launch.run(command, workdir, args.timeout, agent, label=label)
+    stdout = res.text if agent == "codex" else ""
+    reply, usage = res.text, res.usage
+    if agent == "codex" and last_message and os.path.exists(last_message):
+        with io.open(last_message, encoding="utf-8") as fh:
+            reply = fh.read() or res.text
+    note = res.tail_note("the agent " if (res.note or "").startswith("exited") else "")
 
-    answers, parse_note = parse_answers(reply)
     commands = commands_from_events(stdout) if agent == "codex" else []
     counts, violations = audit_commands(arm, commands)
-    menu = (menu_probe(gold, doc, questions=questions, lang=args.lang)
-            if arm == "R2" else None)
-    grade = docs_grade.grade_session(gold, answers, doc, menu)
-
-    record["wall_time_s"] = wall
+    record["wall_time_s"] = res.seconds
     record["usage"] = usage
     record["total_tokens"] = (usage or {}).get("total_tokens")
     record["commands"] = counts
     record["commands_seen"] = [c[:200] for c in commands]
     record["discipline_violations"] = violations
+    record["attempts"] = res.attempts
+    record["exit_code"] = res.exit_code
+    record["reply_chars"] = len(reply or "")
+
+    if res.provider_error:
+        # No grade at all rather than a zero: `summary` is null, the row is out of every
+        # mean, and the tails stay on the record so the failure can be read months later.
+        # `--retry-failed` re-runs exactly these rows into this same folder.
+        record["outcome"] = "provider_error"
+        record["note"] = note
+        record["stdout_tail"] = res.stdout_tail
+        record["stderr_tail"] = res.stderr_tail
+        record["valid"] = False
+        record["invalid_reason"] = "provider error: %s" % (res.note or "the launch failed")
+        record["summary"] = None
+        record["questions_graded"] = []
+        record["answers"] = []
+        if not args.keep:
+            shutil.rmtree(workdir, ignore_errors=True)
+        return record, None
+
+    answers, parse_note = parse_answers(reply)
+    menu = (menu_probe(gold, doc, questions=questions, lang=args.lang)
+            if arm == "R2" else None)
+    grade = docs_grade.grade_session(gold, answers, doc, menu)
+    record["outcome"] = "completed"
     record["note"] = "; ".join(n for n in (note, parse_note) if n) or None
+    record["valid"] = grade.get("valid", True)
+    record["invalid_reason"] = grade.get("invalid_reason")
     record["summary"] = grade["summary"]
     record["questions_graded"] = grade["questions_graded"]
     record["answers"] = answers
-    record["reply_chars"] = len(reply or "")
     if not args.keep:
         shutil.rmtree(workdir, ignore_errors=True)
     return record, None
@@ -940,9 +966,31 @@ def _num(value, fmt="%.2f"):
     return (fmt % value) if isinstance(value, (int, float)) else "-"
 
 
+def is_valid(record):
+    """Did this row produce something to grade? A launch that failed is not a zero.
+
+    A row is invalid when the grader refused to score it (no answers array), or when the
+    record says so outright - `valid: false`, or an `outcome` bench/launch.py classifies
+    as a provider error rather than a model result.
+    """
+    if record.get("valid") is False:
+        return False
+    if record.get("outcome") in ("provider_error", "launch_error", "timeout"):
+        return False
+    return bool(record.get("summary"))
+
+
 def md_row(record):
     summary = record.get("summary") or {}
     counts = record.get("commands") or {}
+    if not is_valid(record):
+        return ("| %s | %s | %s | %s | %s | NOT RUN | - | - | - | - | - | %s | - | %s | %s |\n"
+                % (record.get("run_at"), record.get("arm"), record.get("agent"),
+                   record.get("model") or "-", record.get("case"),
+                   "yes" if record.get("discipline_enforced") else "AUDIT ONLY",
+                   record.get("total_tokens")
+                   if record.get("total_tokens") is not None else "-",
+                   _num(record.get("wall_time_s"))))
     return ("| %s | %s | %s | %s | %s | %s | %s | %d | %d | %s | %s | %s | %s | %s | %s |\n"
             % (record.get("run_at"), record.get("arm"), record.get("agent"),
                record.get("model") or "-", record.get("case"),
@@ -953,6 +1001,43 @@ def md_row(record):
                ", ".join("%s %d" % (k, v) for k, v in counts.items()) or "-",
                record.get("total_tokens") if record.get("total_tokens") is not None else "-",
                _num(record.get("wall_time_s"))))
+
+
+ARM_MEANS = ("fact_recall", "span_recall", "absent_honesty", "menu_recall@5")
+
+
+def arm_table(rows):
+    """Per-arm means over the VALID rows only, with n on every line.
+
+    A row whose launch failed carries no summary and is counted only in `not run`. It is
+    never averaged in as a zero: thirteen R2 rows of which ten never started would read
+    as an arm that scored 0.11 when the three that ran scored 0.48.
+    """
+    by_arm = collections.OrderedDict()
+    for record in rows:
+        arm = record.get("arm")
+        bucket = by_arm.setdefault(arm, {"valid": [], "invalid": 0})
+        if is_valid(record):
+            bucket["valid"].append(record)
+        else:
+            bucket["invalid"] += 1
+    lines = ["| arm | n | not run | " + " | ".join(ARM_MEANS) +
+             " | fabrications | invented quotes |",
+             "|---|---|---|" + "---|" * (len(ARM_MEANS) + 2)]
+    for arm in sorted(by_arm):
+        bucket = by_arm[arm]
+        valid = bucket["valid"]
+        cells = []
+        for key in ARM_MEANS:
+            values = [r["summary"][key] for r in valid
+                      if isinstance((r.get("summary") or {}).get(key), (int, float))]
+            cells.append("%.3f" % (sum(values) / float(len(values))) if values else "-")
+        fabrications = sum((r.get("summary") or {}).get("fabrications", 0) for r in valid)
+        invented = sum((r.get("summary") or {}).get("invented_quotes", 0) for r in valid)
+        lines.append("| %s %s | %d | %d | %s | %d | %d |"
+                     % (arm, ARMS.get(arm, {}).get("label", ""), len(valid),
+                        bucket["invalid"], " | ".join(cells), fabrications, invented))
+    return "\n".join(lines) + "\n"
 
 
 def summary_of(record, raw_path=None, answers_path=None):
@@ -979,8 +1064,11 @@ def write_scorecard(folder, rows):
                  "declined to answer; `menu@5` is the zero-token find.py probe, filled in "
                  "for R2 rows only. `enforced` says whether the reading discipline was held "
                  "by the tool allow-list (claude) or only written down and audited "
-                 "afterwards (codex).\n\n%s%s"
-                 % (day, MD_HEADER, "".join(md_row(r) for r in rows)))
+                 "afterwards (codex). A row marked NOT RUN produced no answers array - a "
+                 "failed launch, not a model that scored zero - and is left out of every "
+                 "mean below.\n\n## Per arm, valid rows only\n\n%s\n## Every row\n\n%s%s"
+                 % (day, arm_table(rows), MD_HEADER,
+                    "".join(md_row(r) for r in rows)))
 
 
 def write_results(record, root=None, day=None):
@@ -1080,6 +1168,10 @@ def regrade(folder, bed):
         subset = collections.OrderedDict(gold)
         subset["questions"] = questions
         grade = docs_grade.grade_session(subset, record.get("answers") or [], doc, menu)
+        # The same rule reaches rows that were already paid for: a stored row with no
+        # answers array loses its zeros and becomes a row that did not run.
+        record["valid"] = grade.get("valid", True)
+        record["invalid_reason"] = grade.get("invalid_reason")
         record["summary"] = grade["summary"]
         record["questions_graded"] = grade["questions_graded"]
         record["regraded_at"] = journeys.now()
@@ -1090,6 +1182,127 @@ def regrade(folder, bed):
     write_scorecard(folder, rows)
     print("regraded %d row(s) in %s" % (regraded, folder))
     return 0
+
+
+# ----------------------------------------------------------- retry the failed --
+# The two shapes a lost row takes on disk. Today's runner writes outcome
+# provider_error; the 2026-09-07 pilot, which had no such outcome, left only its note:
+# "the agent exited 1: ; no answers array in the reply".
+FAILED_NOTE = re.compile(r"exited|no answers array|provider error", re.I)
+
+
+def is_provider_error(record):
+    """True for a row the provider never let through, whichever runner wrote it."""
+    if (record or {}).get("outcome") == "provider_error":
+        return True
+    if (record or {}).get("valid") is False and "provider" in (
+            (record or {}).get("invalid_reason") or ""):
+        return True
+    return bool(FAILED_NOTE.search((record or {}).get("note") or ""))
+
+
+def failed_rows(folder):
+    """[(raw path, record)] for every row in FOLDER that has to be run again."""
+    raw_dir = os.path.join(folder, "raw")
+    if not os.path.isdir(raw_dir):
+        return None
+    out = []
+    for name in sorted(os.listdir(raw_dir)):
+        if not name.endswith(".json"):
+            continue
+        path = os.path.join(raw_dir, name)
+        try:
+            with io.open(path, encoding="utf-8") as fh:
+                record = json.load(fh, object_pairs_hook=collections.OrderedDict)
+        except ValueError:
+            continue
+        if is_provider_error(record):
+            out.append((path, record))
+    return out
+
+
+def replace_scorecard_row(folder, raw_path, record, answers_path=None):
+    """Put this row back where the failed one was, rather than appending a second row.
+
+    A retry is not a rerun: the failed row was never a result, so it is replaced and
+    not kept beside its replacement."""
+    jpath = os.path.join(folder, "scorecard.json")
+    rows = []
+    if os.path.exists(jpath):
+        try:
+            with io.open(jpath, encoding="utf-8") as fh:
+                rows = json.load(fh)
+        except ValueError:
+            rows = []
+    fresh = summary_of(record, raw_path, answers_path)
+    rel = os.path.relpath(raw_path, ROOT)
+    for index, row in enumerate(rows):
+        if row.get("raw") == rel or row.get("row") == record.get("row"):
+            rows[index] = fresh
+            break
+    else:
+        rows.append(fresh)
+    write_scorecard(folder, rows)
+    return rows
+
+
+def retry_failed(folder, bed, args):
+    """Re-run every row of FOLDER the provider refused, in place.
+
+    The raw file and the scorecard row are replaced where they stand, so the folder ends
+    up with one row per (arm, agent, model, case, run) and no zeros that were never
+    earned. Nothing else in the folder is touched.
+    """
+    rows = failed_rows(folder)
+    if rows is None:
+        print("usage error: no raw/ folder under %s" % folder, file=sys.stderr)
+        return 2
+    if not rows:
+        print("nothing to re-run in %s: no row carries a provider error" % folder)
+        return 0
+    print("%s %d row(s) the provider refused, out of %s"
+          % ("would re-run" if args.dry_run else "re-running", len(rows), folder))
+    for path, record in rows:
+        print("  %-46s %s" % (record.get("row"), (record.get("note") or "")[:110]))
+    if args.dry_run:
+        return 0
+
+    glossary = glossary_wording()
+    again, failures = 0, 0
+    for path, record in rows:
+        plan = collections.OrderedDict([
+            ("arm", record.get("arm")), ("agent", record.get("agent")),
+            ("model", record.get("model")), ("tier", record.get("tier")),
+            ("case", record.get("case")), ("run", record.get("run") or 1)])
+        fresh, problem = _safe_row(plan, bed, args, glossary)
+        if problem or fresh is None:
+            print("  %s: %s" % (record.get("row"), problem or "nothing to ask this arm"),
+                  file=sys.stderr)
+            failures += 1
+            continue
+        fresh["retried_at"] = journeys.now()
+        fresh["replaces"] = collections.OrderedDict([
+            ("run_at", record.get("run_at")), ("note", record.get("note")),
+            ("outcome", record.get("outcome"))])
+        answers_path = os.path.join(folder, "answers",
+                                    os.path.basename(path).replace(".json",
+                                                                   ".answers.json"))
+        with io.open(path, "w", encoding="utf-8") as fh:
+            fh.write(json.dumps(fresh, ensure_ascii=False, indent=1) + "\n")
+        if os.path.isdir(os.path.dirname(answers_path)):
+            with io.open(answers_path, "w", encoding="utf-8") as fh:
+                fh.write(json.dumps(fresh.get("answers") or [], ensure_ascii=False,
+                                    indent=1) + "\n")
+        replace_scorecard_row(folder, path, fresh, answers_path)
+        summary = fresh.get("summary") or {}
+        print("  %-46s %s -> facts %s%s"
+              % (fresh["row"], record.get("outcome") or "note",
+                 _num(summary.get("fact_recall")),
+                 "  (the provider refused it again)"
+                 if fresh.get("outcome") == "provider_error" else ""))
+        again += 1
+    print("re-ran %d row(s) in %s" % (again, folder))
+    return 1 if failures else 0
 
 
 # ------------------------------------------------------------------------ cli --
@@ -1126,6 +1339,11 @@ def build_parser():
                     help="run the zero-token find.py probe over the bed and stop")
     ap.add_argument("--regrade", metavar="FOLDER",
                     help="re-score a results folder with today's rules and stop")
+    ap.add_argument("--retry-failed", metavar="FOLDER",
+                    help="re-run every row of FOLDER the provider refused (outcome "
+                         "provider_error, or a note that says the agent exited or gave "
+                         "no answers array) and replace it where it stands. With "
+                         "--dry-run it only says which rows it would re-run")
     return ap
 
 
@@ -1143,6 +1361,9 @@ def main(argv=None):
 
     if args.regrade:
         return regrade(os.path.abspath(args.regrade), bed)
+
+    if args.retry_failed:
+        return retry_failed(os.path.abspath(args.retry_failed), bed, args)
 
     if args.menu_probe:
         total, hit = 0, 0

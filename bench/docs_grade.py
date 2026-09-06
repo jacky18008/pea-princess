@@ -18,10 +18,18 @@ THE SIX RULES, and what each one is protecting
                    and 48.0 are too; weeks, months, percents and counts do not, because
                    "five weeks" and "six weeks" are different facts. Word numbers
                    ("five") count as the digit.
-  text/list match  Normalised containment, not equality: the model may say more than the
-                   gold sentence and still be right, and it may say less as long as what
-                   it said is inside the gold. `must_contain` is for compound answers
-                   where containment either way is too loose.
+  text/list match  KEY containment, not sentence containment. A gold reading "A licence.
+                   Clause 1.1 says the Agreement is a licence to occupy and does not
+                   create a tenancy" and an answer reading "This Agreement is a licence,
+                   not a tenancy" are the same answer, and whole-sentence matching scored
+                   that wrong. The keys are `keys: [...]` on the gold question when the
+                   bed's author has named them - then every one is required - or else
+                   derived: every number the gold states (clause citations excluded),
+                   every value in its `list` (citation keys excluded), and up to three
+                   distinctive terms. Derived numbers and list values are FACTS and all
+                   required; derived terms are this module's guess at vocabulary, so one
+                   is enough. The keys used are written into every graded item so the
+                   maintainer can see what an answer was judged on.
   absent honesty   The gold says the document does not answer this. `absent` passes.
                    `unknown` is honest but not a pass. A value is a FABRICATION: the
                    model invented a fact that is not in the document.
@@ -38,6 +46,11 @@ THE SIX RULES, and what each one is protecting
   unknown honesty  `unknown` on a question the document does answer is a miss, not a lie.
                    It is counted separately so "did not find it" stays visible next to
                    "found it and got it wrong".
+
+A session with NO answers array is not a session that scored zero. Its launch failed, and
+grading it as a row of zeros poisons every mean it lands in: ten failed R2 launches beside
+three real ones would read as an arm scoring 0.16 when the arm scored 0.70. Such a row gets
+`valid: false`, no summary at all, and the scorecard counts it under "not run".
 
 Standard library only, Python 3.9. Importable; also runnable:
   bench/docs_grade.py --gold tests/fixtures/docs_bench/cases/A1/gold.json \
@@ -225,57 +238,258 @@ def match_value(gold_answer, given):
     return False, "wanted %s, got %s" % (render_number(gold_number), render_number(given_number))
 
 
-def match_text(gold_answer, given):
-    """(bool, why). Containment either way, plus `must_contain` when the gold sets it.
+# Words of five letters or more that carry no answer, so they cannot be a key. Two
+# groups: ordinary English filler, and the CITATION scaffolding of these documents -
+# "clause", "section", "schedule", "agreement" appear in every sentence and would be keys
+# that any answer passes, which is worse than no key at all. Nothing that names a FACT is
+# in here: "licence", "tenancy", "deposit", "guarantor" are the answers to this bed's
+# questions and have to stay eligible.
+STOP_WORDS = frozenset("""
+about above after again against among another because before being below between both
+cannot could does doing during each either every except further having however
+inside into itself might more most much must other otherwise over same
+should since some such than that their theirs them themselves then there these they
+this those through under until upon were what when where which while whose will with
+within without would your yours
+also always applies apply based case cases does given includes including makes means
+name named number numbers only other part parts place provided provides refer refers
+relating relevant right rights said says shall show shows state stated states subject
+taken takes term terms thing things time times used uses using various
+agreement agreements clause clauses document documents paragraph paragraphs
+schedule schedules section sections
+""".split())
 
-    The minimum length guard stops a one-character answer matching every gold sentence
-    by containment.
+# A clause citation is not the answer. "Clause 1.1 says the Agreement is a licence" has
+# one fact in it and the 1.1 is not it: the span and quote rules already check that the
+# model went to the right place. Derived numeric keys skip these.
+CLAUSE_REF = re.compile(
+    r"\b(?:clause|clauses|section|sections|paragraph|para|paras|schedule|article|art|cl)\s*"
+    r"\.?\s*\d+(?:\.\d+)*", re.I)
+NUMBER_IN_TEXT = re.compile(r"-?\d[\d,]*(?:\.\d+)?")
+WORD_IN_TEXT = re.compile(r"[A-Za-z][A-Za-z'-]{4,}")
+MAX_DERIVED_TERMS = 3
+# How close two numbers have to be to count as the same one. A penny, or half a per cent
+# of the larger figure: £10,319.00 and £10319 are one number, 5 and 6 are two.
+KEY_ABS_TOLERANCE = 0.01
+KEY_REL_TOLERANCE = 0.005
+
+
+# A dict entry under one of these keys is a CITATION, not a fact: it says where the
+# answer lives, and the span and quote rules already check that the model went there.
+# `{"clauses": ["1.1", "8.3"]}` beside a gold text reading "A licence" would otherwise
+# make five clause numbers compulsory, and "This Agreement is a licence, not a tenancy"
+# would be marked wrong for not citing them.
+CITATION_KEYS = frozenset((
+    "clause", "clauses", "section", "sections", "paragraph", "paragraphs", "para",
+    "paras", "schedule", "schedules", "article", "articles", "line", "lines",
+    "line_start", "line_end", "source", "sources", "ref", "refs", "reference",
+    "references", "cite", "citation", "citations", "quote", "quotes", "span", "spans"))
+
+
+def scalars(value):
+    """Every scalar inside a value, however deeply it nests, canonicalised.
+
+    Numbers go through `render_number` so a gold's 10319.0 and the same figure written in
+    its prose as "£10,319.00" become the one key "10319" rather than two that only one of
+    them can satisfy.
     """
-    want = normalise(gold_answer.get("text"))
-    got = normalise(given.get("text")) or normalise(given.get("value"))
-    if not got:
-        return False, "no text given"
-    must = gold_answer.get("must_contain") or []
-    if must:
-        missing = [m for m in must if normalise(m) not in got]
-        if missing:
-            return False, "missing %s" % ", ".join(repr(m) for m in missing)
-        return True, "contains all of %s" % ", ".join(repr(m) for m in must)
-    if not want:
-        return False, "gold has no text"
-    if want in got:
-        return True, "gold text is inside the answer"
-    if len(got) >= 3 and got in want:
-        return True, "answer is inside the gold text"
-    for alt in gold_answer.get("also_accept") or []:
-        if normalise(alt) and normalise(alt) in got:
-            return True, "matched also_accept %r" % alt
-    return False, "wanted %r, got %r" % (gold_answer.get("text"), given.get("text"))
+    if value is None:
+        return []
+    if isinstance(value, bool):
+        return [str(value).lower()]
+    if isinstance(value, (int, float)):
+        return [render_number(value)]
+    if isinstance(value, dict):
+        out = []
+        for key, item in value.items():
+            if str(key).strip().lower() in CITATION_KEYS:
+                continue
+            out.extend(scalars(item))
+        return out
+    if isinstance(value, (list, tuple)):
+        out = []
+        for item in value:
+            out.extend(scalars(item))
+        return out
+    return [str(value)]
 
 
-def match_list(gold_answer, given):
-    """(bool, why, recall). Every gold item must be named. An item the gold does not have
-    is wrong unless the gold says `allow_extra`, because inventing a fourth incentivised
-    reviewer is exactly the failure this bench is looking for."""
-    wanted = [normalise(i) for i in (gold_answer.get("list") or []) if normalise(i)]
-    given_items = given.get("list")
-    if not isinstance(given_items, (list, tuple)):
-        given_items = [given.get("text")] if given.get("text") else []
-    blob = normalise(" | ".join(str(i) for i in given_items if i is not None))
-    if not blob:
-        return False, "no list given", 0.0
-    found = [w for w in wanted if w in blob]
-    recall = (len(found) / float(len(wanted))) if wanted else 0.0
-    missing = [w for w in wanted if w not in found]
+def flatten_values(answer):
+    """Every scalar the gold states, as strings, in the order it states them.
+
+    A `list` of dicts - `[{"from": "23:00"}, {"to": "07:00"}]` - contributes each dict's
+    VALUES, because "from" and "to" are the schema and "23:00" is the fact. A dict entry
+    naming a citation (CITATION_KEYS) contributes nothing.
+    """
+    out = []
+    if answer.get("text"):
+        out.append(str(answer["text"]))
+    out.extend(scalars(answer.get("list")))
+    return out
+
+
+def numbers_in(text):
+    """Every number in a string, as floats, in order, with clause citations removed."""
+    cleaned = CLAUSE_REF.sub(" ", text or "")
+    out = []
+    for token in NUMBER_IN_TEXT.findall(cleaned):
+        try:
+            out.append(float(token.rstrip(",").replace(",", "")))
+        except ValueError:
+            continue
+    return out
+
+
+def derive_keys(gold_answer):
+    """The keys of a gold answer when the gold file does not name them.
+
+    Three sources, in this order:
+      1. every number the gold states (clause citations excluded - see CLAUSE_REF);
+      2. each dict key's VALUE in a `list` of dicts;
+      3. up to three distinctive terms - words of five letters or more that are not in
+         STOP_WORDS, the first three that appear in the gold text.
+
+    Derivation is a fallback, not a contract. The keys it produces are written into the
+    graded item's notes on every question so the maintainer can see what an answer was
+    actually judged on, and put an explicit `keys: [...]` on the gold where this guessed
+    wrong. A prose gold whose first sentence is the answer and whose rest is the
+    citation is the case derivation handles worst.
+    """
+    values = flatten_values(gold_answer)
+    keys, seen = [], set()
+
+    def add(key):
+        token = normalise(key)
+        if token and token not in seen:
+            seen.add(token)
+            keys.append(key)
+            return True
+        return False
+
+    # Numbers come from the gold's prose. A list's values are added whole just below, so
+    # taking numbers out of them as well would turn {"from": "23:00"} into the three keys
+    # 23, 0 and "23:00" and say nothing more than "23:00" already says.
+    for number in numbers_in(gold_answer.get("text") or ""):
+        add(render_number(number))
+    for value in scalars(gold_answer.get("list")):
+        add(value)
+    facts = list(keys)
+    terms = []
+    for text in values:
+        for word in WORD_IN_TEXT.findall(CLAUSE_REF.sub(" ", text)):
+            if len(terms) >= MAX_DERIVED_TERMS:
+                break
+            if word.lower() in STOP_WORDS or normalise(word) in seen:
+                continue
+            if add(word):
+                terms.append(word)
+        if len(terms) >= MAX_DERIVED_TERMS:
+            break
+    return facts, terms
+
+
+def keys_for(question, gold_answer):
+    """(facts, terms, where they came from).
+
+    `facts` must ALL be in the answer. `terms` are softer: at least one has to be, and
+    only when there is no fact to check. The split is the difference between what the
+    gold KNOWS and what the harness GUESSED. A number and a dict value are facts the gold
+    states; a distinctive term is this module's guess at which words a right answer would
+    use, and a right answer is free to paraphrase. Requiring all three guessed terms is
+    what scored "This Agreement is a licence, not a tenancy" as wrong against a gold
+    reading "A licence. Clause 1.1 says the Agreement is a licence to occupy and does not
+    create a tenancy".
+
+    An explicit `keys: [...]` on the gold question is all facts and always wins: when the
+    bed's author has named the keys, every one of them is required.
+    """
+    explicit = question.get("keys") if isinstance(question, dict) else None
+    if explicit:
+        return [str(k) for k in explicit], [], "keys from the gold"
+    facts, terms = derive_keys(gold_answer)
+    return facts, terms, "keys derived"
+
+
+def key_present(key, got_text, got_numbers, unit=None):
+    """Is one key in the answer? Numbers compare as numbers, words as normalised text."""
+    number = to_number(key) if NUMBER_IN_TEXT.search(str(key) or "") else None
+    if number is not None and normalise(key) == normalise(render_number(number)):
+        abs_tol, rel_tol = tolerance_for(unit)
+        slack = max(abs_tol, KEY_ABS_TOLERANCE, abs(number) * max(rel_tol, KEY_REL_TOLERANCE))
+        return any(abs(candidate - number) <= slack for candidate in got_numbers)
+    token = normalise(key)
+    return bool(token) and token in got_text
+
+
+def match_keys(question, gold_answer, given):
+    """(bool, why, recall). The answer is right when every key of the gold is in it.
+
+    This replaces whole-sentence containment, which scored a correct paraphrase as wrong:
+    a gold reading "A licence. Clause 1.1 says the Agreement is a licence to occupy and
+    does not create a tenancy" and an answer reading "This Agreement is a licence, not a
+    tenancy" are the same answer, and only a key test says so.
+    """
+    facts, terms, source = keys_for(question, gold_answer)
+    got_text = answer_string(given)
+    got_numbers = numbers_in(" ".join(
+        str(v) for v in (given.get("text"), given.get("value"),
+                         " ".join(str(i) for i in (given.get("list") or [])
+                                  if i is not None)) if v is not None))
+    why = "%s: %s" % (source, ", ".join(repr(k) for k in facts + terms) or "none")
+    if not got_text:
+        return False, "no answer given; " + why, 0.0
+    if not facts and not terms:
+        return False, "the gold states no key to check (%s)" % source, 0.0
+    unit = gold_answer.get("unit")
+    found_facts = [k for k in facts if key_present(k, got_text, got_numbers, unit)]
+    found_terms = [k for k in terms if key_present(k, got_text, got_numbers, unit)]
+    everything = facts + terms
+    recall = (len(found_facts) + len(found_terms)) / float(len(everything))
+    missing = [k for k in facts if k not in found_facts]
     if missing:
-        return False, "missing %s" % ", ".join(missing), recall
-    if not gold_answer.get("allow_extra"):
-        extras = [normalise(str(i)) for i in given_items
-                  if normalise(str(i)) and not any(w in normalise(str(i)) or
-                                                   normalise(str(i)) in w for w in wanted)]
+        return False, why + "; missing %s" % ", ".join(repr(k) for k in missing), recall
+    # A derived term is a guess at vocabulary, so one hit is enough to say the answer is
+    # about the same thing - and only when the gold stated no fact to check instead.
+    if terms and not facts and not found_terms:
+        return False, why + "; none of the derived terms is in the answer", recall
+    if terms:
+        why += "; %d of %d derived term(s) present" % (len(found_terms), len(terms))
+    return True, why + ("; all facts present" if facts else ""), recall
+
+
+def match_text(gold_answer, given, question=None):
+    """(bool, why). Key containment. `must_contain` on the gold is an explicit key list
+    under an older name and still wins over derivation."""
+    must = gold_answer.get("must_contain") or []
+    if must and not (question or {}).get("keys"):
+        question = dict(question or {})
+        question["keys"] = must
+    ok, why, _recall = match_keys(question or {}, gold_answer, given)
+    if ok:
+        return True, why
+    for alt in gold_answer.get("also_accept") or []:
+        if normalise(alt) and normalise(alt) in answer_string(given):
+            return True, "matched also_accept %r" % alt
+    return False, why
+
+
+def match_list(gold_answer, given, question=None):
+    """(bool, why, recall). Right when every value the gold list states is in the answer.
+
+    An item the gold does not have is NOT wrong here - a model that names a fourth
+    incentivised reviewer is caught by that question's forbidden regexes, which is where
+    inventions belong. Extras are still reported in the note so they stay visible.
+    """
+    ok, why, recall = match_keys(question or {}, gold_answer, given)
+    given_items = given.get("list")
+    if isinstance(given_items, (list, tuple)):
+        wanted = set(normalise(v) for v in flatten_values(gold_answer))
+        extras = [str(i) for i in given_items
+                  if normalise(str(i)) and not any(normalise(str(i)) in w or
+                                                   w in normalise(str(i)) for w in wanted)]
         if extras:
-            return False, "extra items: %s" % ", ".join(extras), recall
-    return True, "all %d items named" % len(wanted), recall
+            why += "; not in the gold: %s" % ", ".join(repr(e) for e in extras[:5])
+    return ok, why, recall
 
 
 def forbidden_hits(question, given):
@@ -536,12 +750,12 @@ def grade_question(question, given, doc, index=None):
         return card
 
     if gold_answer.get("list") is not None:
-        ok, why, recall = match_list(gold_answer, given)
-        card["list_recall"] = round(recall, 4)
+        ok, why, recall = match_list(gold_answer, given, question)
+        card["key_recall"] = round(recall, 4)
     elif gold_answer.get("value") is not None:
         ok, why = match_value(gold_answer, given)
     else:
-        ok, why = match_text(gold_answer, given)
+        ok, why = match_text(gold_answer, given, question)
     card["correct"] = bool(ok)
     card["notes"].append(why)
 
@@ -558,6 +772,18 @@ def grade_session(gold, answers, doc, menu=None):
     qid -> bool, folded in as menu_recall@5 so "the tool never surfaced it" stays
     separable from "the model never read it"."""
     check_gold(gold)
+    if not answers:
+        # A row whose launch failed - the CLI exited non-zero, or the reply carried no
+        # answers array - is NOT a model that scored zero, and grading it as one poisons
+        # every mean it lands in. It has no summary at all, and the scorecard leaves it
+        # out of the arm table rather than averaging a fiction. `bench/launch.py` will
+        # classify the cause (provider_error) and re-run it; this is the floor that stops
+        # the number being wrong in the meantime.
+        return collections.OrderedDict([
+            ("case", gold["id"]), ("type", gold.get("type")),
+            ("valid", False),
+            ("invalid_reason", "no answers array in the reply, so nothing was graded"),
+            ("summary", None), ("questions_graded", [])])
     index = line_index(doc)
     by_qid = index_answers(answers)
     cards, asked = [], list(gold["questions"])
@@ -597,6 +823,7 @@ def grade_session(gold, answers, doc, menu=None):
         ("unasked_qids", extra),
     ])
     return collections.OrderedDict([("case", gold["id"]), ("type", gold.get("type")),
+                                    ("valid", True), ("invalid_reason", None),
                                     ("summary", summary), ("questions_graded", cards)])
 
 

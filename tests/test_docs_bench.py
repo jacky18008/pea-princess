@@ -352,7 +352,7 @@ class TestTextAndListMatching(unittest.TestCase):
         self.assertFalse(ok)
         self.assertIn("sixth month", why)
 
-    def test_a_list_needs_every_gold_item_and_no_invented_one(self):
+    def test_a_list_needs_every_value_the_gold_states(self):
         answer = {"list": ["Chloe D.", "Danny K.", "Katya B."]}
         ok, _why, recall = docs_grade.match_list(
             answer, {"list": ["Chloe D.", "Danny K.", "Katya B."]})
@@ -360,11 +360,77 @@ class TestTextAndListMatching(unittest.TestCase):
         self.assertEqual(1.0, recall)
         ok, why, recall = docs_grade.match_list(answer, {"list": ["Chloe D.", "Danny K."]})
         self.assertFalse(ok)
+        self.assertIn("missing", why)
         self.assertAlmostEqual(2 / 3.0, recall, places=3)
+
+    def test_a_list_answered_as_one_sentence_still_counts(self):
+        """The failure that scored a right answer wrong: the gold is structured and the
+        model wrote a sentence."""
+        answer = {"list": [{"from": "23:00"}, {"to": "07:00"}]}
+        ok, why, _recall = docs_grade.match_list(
+            answer, {"text": "Quiet hours are 23:00 to 07:00."})
+        self.assertTrue(ok, why)
+        ok, why, _recall = docs_grade.match_list(
+            answer, {"text": "Quiet hours are 22:00 to 07:00."})
+        self.assertFalse(ok, why)
+
+    def test_an_extra_item_is_reported_but_left_to_the_forbidden_rules(self):
+        """Naming a fourth incentivised reviewer is an invention, and inventions are what
+        that question's forbidden regexes are for. The list rule only reports it."""
+        answer = {"list": ["Chloe D.", "Danny K.", "Katya B."]}
         ok, why, _recall = docs_grade.match_list(
             answer, {"list": ["Chloe D.", "Danny K.", "Katya B.", "Owen S."]})
+        self.assertTrue(ok)
+        self.assertIn("not in the gold", why)
+        gold, _doc = load("V1")
+        question = [q for q in gold["questions"] if q["qid"] == "V1-q1"][0]
+        self.assertTrue(docs_grade.forbidden_hits(
+            question, {"status": "found",
+                       "list": ["Chloe D.", "Danny K.", "Katya B.", "Owen S."]}))
+
+    def test_a_paraphrase_of_a_prose_gold_is_not_marked_wrong(self):
+        """The bug this rule change fixed: whole-sentence containment scored 2/14 on a
+        case where twelve answers were substantively right."""
+        answer = {"text": "A licence. Clause 1.1 says the Agreement is a licence to "
+                          "occupy and does not create a tenancy."}
+        ok, why = docs_grade.match_text(
+            answer, {"text": "This Agreement is a licence, not a tenancy."})
+        self.assertTrue(ok, why)
+        ok, why = docs_grade.match_text(
+            answer, {"text": "It is an assured shorthold tenancy."})
+        self.assertFalse(ok, why)
+
+    def test_a_number_the_gold_states_is_compulsory_and_a_wrong_one_fails(self):
+        answer = {"text": "A damage deposit of £303.50, being half of one week's fee."}
+        ok, _why = docs_grade.match_text(
+            answer, {"text": "The damage deposit is 303.50 pounds, half a week's fee."})
+        self.assertTrue(ok)
+        ok, why = docs_grade.match_text(
+            answer, {"text": "A damage deposit of half a week's fee."})
+        self.assertFalse(ok, why)
+        self.assertIn("missing '303.5'", why)
+        ok, why = docs_grade.match_text(
+            answer, {"text": "The damage deposit is £430.50, half a week's fee."})
+        self.assertFalse(ok, why)
+
+    def test_a_clause_citation_in_the_gold_is_never_a_key(self):
+        """Clause numbers say where the answer is; the span and quote rules check that."""
+        facts, terms = docs_grade.derive_keys(
+            {"text": "A licence. Clause 1.1 and clause 8.3 say so.",
+             "list": [{"clauses": ["1.1", "8.3"]}]})
+        self.assertEqual([], facts)
+        self.assertIn("licence", terms)
+
+    def test_explicit_keys_on_the_gold_are_all_required(self):
+        question = {"keys": ["licence", "tenancy"]}
+        answer = {"text": "anything at all"}
+        ok, _why = docs_grade.match_text(
+            answer, {"text": "a licence, not a tenancy"}, question)
+        self.assertTrue(ok)
+        ok, why = docs_grade.match_text(answer, {"text": "a licence"}, question)
         self.assertFalse(ok)
-        self.assertIn("extra", why)
+        self.assertIn("keys from the gold", why)
+        self.assertIn("missing 'tenancy'", why)
 
 
 class TestForbiddenRules(unittest.TestCase):
@@ -479,18 +545,32 @@ class TestTheSessionScorecard(unittest.TestCase):
         # misplaced-but-real quotes make 1.0 out of 5.
         self.assertEqual(0.2, summary["span_recall"])
 
-    def test_a_question_the_model_never_answered_is_missing_not_absent(self):
+    def test_a_session_with_no_answers_is_not_graded_as_a_row_of_zeros(self):
+        """A failed launch is not a model that scored zero, and averaging it as one
+        turned an arm that scored 0.70 into an arm that read 0.16."""
         gold, doc = load("V1")
         card = docs_grade.grade_session(gold, [], doc)
+        self.assertIsNone(card["summary"])
+        self.assertFalse(card["valid"])
+        self.assertIn("no answers array", card["invalid_reason"])
+        self.assertEqual([], card["questions_graded"])
+
+    def test_a_question_the_model_skipped_inside_a_real_session_is_missing(self):
+        gold, doc = load("V1")
+        card = docs_grade.grade_session(
+            gold, [{"qid": "V1-q6", "status": "absent", "how": "grep"}], doc)
+        self.assertTrue(card["valid"])
         self.assertEqual(6, card["summary"]["questions"])
-        self.assertEqual(0, card["summary"]["answered"])
+        self.assertEqual(1, card["summary"]["answered"])
         self.assertEqual(0, card["summary"]["fabrications"])
-        self.assertEqual(["missing"] * 6, [c["status"] for c in card["questions_graded"]])
+        self.assertEqual(5, len([c for c in card["questions_graded"]
+                                 if c["status"] == "missing"]))
 
     def test_the_menu_probe_lands_on_the_card_when_it_is_supplied(self):
         gold, doc = load("V1")
         menu = {"V1-q1": True, "V1-q2": False}
-        summary = docs_grade.grade_session(gold, [], doc, menu)["summary"]
+        answers = [{"qid": "V1-q1", "status": "unknown", "how": "find"}]
+        summary = docs_grade.grade_session(gold, answers, doc, menu)["summary"]
         self.assertEqual(0.5, summary["menu_recall@5"])
 
 
@@ -533,6 +613,7 @@ class TestTheArms(unittest.TestCase):
         self.assertEqual("Read,Bash(grep:*),Bash(rg:*)", docs_bench.ARMS["R1"]["tools"])
         self.assertEqual(
             "Read,Bash(python3 .claude/skills/vet-flat/scripts/find.py:*),"
+            "Bash(python3 .claude/skills/vet-flat/scripts/reviews.py:*),"
             "Bash(grep:*),Bash(rg:*)", docs_bench.ARMS["R2"]["tools"])
         self.assertEqual("Read,Bash(python3 .claude/skills/vet-flat/scripts/scan.py:*)",
                          docs_bench.ARMS["R3"]["tools"])
@@ -688,6 +769,42 @@ class TestDisciplineEnforcementAndAudit(unittest.TestCase):
         self.assertEqual("python", docs_bench.classify_command("python3 -c 'print(1)'"))
         self.assertEqual("other", docs_bench.classify_command("curl https://example.com"))
 
+    def test_the_review_parser_is_an_r2_tool_and_nobody_elses(self):
+        """reviews.py is named in the R2 allow-list whether or not the script has landed:
+        a tool pattern is only a string, so the dry-run works either way."""
+        self.assertIn("reviews.py", docs_bench.ARMS["R2"]["tools"])
+        self.assertIn("reviews", docs_bench.ARMS["R2"]["shell"])
+        for arm in ("R0", "R1", "R3"):
+            self.assertNotIn("reviews.py", docs_bench.ARMS[arm]["tools"], arm)
+            self.assertNotIn("reviews", docs_bench.ARMS[arm]["shell"], arm)
+        self.assertEqual("reviews", docs_bench.classify_command(
+            "python3 .claude/skills/vet-flat/scripts/reviews.py doc.txt --json"))
+        used = ["python3 x/reviews.py doc.txt"]
+        counts, violations = docs_bench.audit_commands("R2", used)
+        self.assertEqual({"reviews": 1}, dict(counts))
+        self.assertEqual([], violations)
+        _counts, violations = docs_bench.audit_commands("R1", used)
+        self.assertEqual(["reviews"], [v["kind"] for v in violations])
+
+    def test_the_r2_prompt_names_the_review_parser_and_says_to_check_it_exists(self):
+        text = docs_bench.discipline_text("R2", "claude")
+        self.assertIn(".claude/skills/vet-flat/scripts/reviews.py", text)
+        self.assertIn("Check it is there", text)
+        self.assertIn(".agents/skills/vet-flat/scripts/reviews.py",
+                      docs_bench.discipline_text("R2", "codex"))
+
+    def test_a_dry_run_works_whether_or_not_the_review_parser_exists_yet(self):
+        args = docs_bench.build_parser().parse_args(
+            ["--cases", BED, "--case", "V1", "--arm", "R2", "--dry-run"])
+        with quiet() as out:
+            record, problem = docs_bench.run_row(
+                {"arm": "R2", "agent": "claude", "model": "sonnet", "tier": "cheap",
+                 "case": "V1", "run": 1}, BED, args, {})
+        self.assertIsNone(problem)
+        self.assertIn("reviews.py", out.getvalue())
+        self.assertEqual(os.path.exists(os.path.join(SKILL, "scripts", "reviews.py")),
+                         record["reviews_py_present"])
+
     def test_the_audit_counts_kinds_and_names_what_the_arm_forbids(self):
         used = ["grep -n deposit doc.txt", "sed -n '50,60p' doc.txt", "cat doc.txt"]
         counts, violations = docs_bench.audit_commands("R1", used)
@@ -822,6 +939,7 @@ class TestResultsAndRegrade(unittest.TestCase):
     def record(self, answers, arm="R1"):
         gold, doc = load("A1")
         grade = docs_grade.grade_session(gold, answers, doc)
+        valid = grade.get("valid", True)
         return collections.OrderedDict([
             ("row", docs_bench.row_name(arm, "claude", "sonnet", "A1", 1)),
             ("bench", "reading-ablation"), ("arm", arm),
@@ -835,7 +953,9 @@ class TestResultsAndRegrade(unittest.TestCase):
             ("discipline_enforced", True), ("wall_time_s", 12.5),
             ("usage", {"total_tokens": 4242}), ("total_tokens", 4242),
             ("commands", {}), ("commands_seen", []), ("discipline_violations", []),
-            ("note", None), ("summary", grade["summary"]),
+            ("note", None), ("valid", valid),
+            ("invalid_reason", grade.get("invalid_reason")),
+            ("summary", grade["summary"]),
             ("questions_graded", grade["questions_graded"]), ("answers", answers),
         ])
 
@@ -894,6 +1014,50 @@ class TestResultsAndRegrade(unittest.TestCase):
                 self.assertEqual(0, docs_bench.regrade(folder, BED))
             raw = json.loads(read(os.path.join(folder, "raw", record["row"] + ".json")))
             self.assertIsNotNone(raw["summary"]["menu_recall@5"])
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
+    def test_a_row_that_never_ran_is_not_averaged_into_the_arm(self):
+        """The bug: ten failed R2 launches beside three real ones read as an arm scoring
+        0.16 when the arm scored 0.70."""
+        gold, _doc = load("A1")
+        good = self.record([correct_answer(q) for q in gold["questions"]], arm="R2")
+        good["row"] = "docs-R2-claude-sonnet-A1-1"
+        failed = self.record([], arm="R2")
+        failed["row"] = "docs-R2-claude-sonnet-V1-1"
+        failed["note"] = "the agent exited 1: ; no answers array in the reply"
+        self.assertFalse(docs_bench.is_valid(failed))
+        self.assertTrue(docs_bench.is_valid(good))
+        table = docs_bench.arm_table([good, failed])
+        self.assertIn("| R2 find.py | 1 | 1 | 1.000 |", table)
+        self.assertIn("NOT RUN", docs_bench.md_row(failed))
+        self.assertNotIn("NOT RUN", docs_bench.md_row(good))
+
+    def test_a_row_a_launcher_marked_a_provider_error_is_not_averaged_either(self):
+        gold, _doc = load("A1")
+        record = self.record([correct_answer(q) for q in gold["questions"]])
+        record["outcome"] = "provider_error"
+        self.assertFalse(docs_bench.is_valid(record))
+
+    def test_regrade_strips_the_zeros_off_a_row_that_never_ran(self):
+        """The stored row was graded 0.0 across the board by the old rules; regrading it
+        with today's must leave it with no summary at all."""
+        root = tempfile.mkdtemp(prefix="docsbench-regrade4-")
+        try:
+            record = self.record([])
+            record["valid"] = True
+            record["summary"] = collections.OrderedDict(
+                [("fact_recall", 0.0), ("span_recall", 0.0), ("fabrications", 0)])
+            docs_bench.write_results(record, root, "2026-09-07")
+            folder = os.path.join(root, "docs-2026-09-07")
+            with quiet():
+                self.assertEqual(0, docs_bench.regrade(folder, BED))
+            raw = json.loads(read(os.path.join(folder, "raw", record["row"] + ".json")))
+            self.assertIsNone(raw["summary"])
+            self.assertFalse(raw["valid"])
+            card = read(os.path.join(folder, "scorecard.md"))
+            self.assertIn("NOT RUN", card)
+            self.assertIn("| not run |", card)
         finally:
             shutil.rmtree(root, ignore_errors=True)
 

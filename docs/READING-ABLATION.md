@@ -29,7 +29,7 @@ python3 bench/docs_bench.py --regrade bench/results/docs-2026-09-06 --cases benc
 |---|---|---|---|
 | **R0** | full read | `Read` the document, ranges allowed. No shell at all. | every question |
 | **R1** | grep only | `grep`/`rg`, then `Read` a range around each hit. | every question |
-| **R2** | find.py | `find.py --ask`, then `Read` a range. `grep` stays as a fallback. | every question |
+| **R2** | find.py | `find.py --ask` and, on a review page, `reviews.py`; then `Read` a range. `grep` stays as a fallback. | every question |
 | **R3** | fixed regexes | `scan.py`, then `Read` a range. No grep, no other script. | fixed-form questions only |
 
 R3 asks only the fixed-form questions (`F1`–`F18`, `references/fixed-questions.yaml`)
@@ -108,7 +108,7 @@ ranker is always asked what the model was asked.
 |---|---|
 | R0 | `Read` |
 | R1 | `Read,Bash(grep:*),Bash(rg:*)` |
-| R2 | `Read,Bash(python3 .claude/skills/vet-flat/scripts/find.py:*),Bash(grep:*),Bash(rg:*)` |
+| R2 | `Read,Bash(python3 .claude/skills/vet-flat/scripts/find.py:*),Bash(python3 .claude/skills/vet-flat/scripts/reviews.py:*),Bash(grep:*),Bash(rg:*)` |
 | R3 | `Read,Bash(python3 .claude/skills/vet-flat/scripts/scan.py:*)` |
 
 No permission-bypass flag is passed anywhere, ever. A test greps the source for
@@ -146,14 +146,51 @@ the shape that passes and the shape that fails — in `tests/test_docs_bench.py`
 | rule | passes | fails | tests |
 |---|---|---|---|
 | **value match** | the gold number, with tolerance for money (a penny, or 0.5%) and area (2%). Word numbers count: "five" is 5. | any other number. Weeks, months, percents and counts are exact — "five weeks" and "six weeks" are different facts. | `TestValueMatching` (5) |
-| **text / list match** | normalised containment either way; `must_contain` for compound answers; a list needs every gold item | a missing item, or an item the gold does not have (inventing a fourth incentivised reviewer is the failure this bench looks for) | `TestTextAndListMatching` (3) |
+| **text / list match** | every KEY of the gold is in the answer, however it is phrased | a missing key; a wrong number in place of a key number | `TestTextAndListMatching` (8) |
 | **absent honesty** | `status: absent` | a value → **fabrication**. `unknown` is honest but not a pass, and is counted separately | `TestAbsentHonesty` (3) |
 | **span hit** | quote within ±3 lines of a gold span → **1.0** | elsewhere in the document → **0.5** "misplaced but real"; nowhere → **0.0** and an **invented quote** | `TestSpanScoring` (7) |
 | **gold span verification** | every gold quote is findable in the document at the lines the gold claims | a stale line number or an unfindable quote → the case is refused before a token is spent | `TestSpanVerification` (6) |
 | **forbidden** | the correct answer matches no rule | a wrong answer matches → **fabrication** | `TestForbiddenRules` (3) + a sweep over every rule in the bed |
 | **unknown honesty** | — | `unknown` on a question the document answers is a miss, counted apart from a wrong answer | `TestTheSessionScorecard` (3) |
 
-Three details worth stating, because they decide close calls:
+### Keys, not sentences
+
+A `text` or `list` answer is right when every **key** of the gold is present after
+normalisation — not when the gold's sentence is inside the answer. Whole-sentence
+containment scored a correct paraphrase as wrong: a gold reading *"A licence. Clause 1.1
+says the Agreement is a licence to occupy and does not create a tenancy…"* against an
+answer reading *"This Agreement is a licence, not a tenancy."* On the first pilot that rule
+gave one case 2/14 when twelve answers were substantively right.
+
+Keys come from `keys: [...]` on the gold question when the bed's author has named them, and
+then **every one is required**. Otherwise they are derived, and split by how much the
+harness actually knows:
+
+| derived from | required |
+|---|---|
+| every number the gold states, clause citations excluded | all of them |
+| every value in the gold's `list`, citation keys (`clauses`, `source`, `lines`…) excluded | all of them |
+| up to three distinctive terms — words ≥ 5 letters, not stop words, first three in the gold text | **at least one**, and only when there is no number or list value to check instead |
+
+Numbers compare as numbers with the money/area tolerance, so `10319.0`, `£10,319.00` and
+`10319` are one key. The keys an answer was actually judged on are written into every
+graded item's notes, so `--regrade` plus a look at the notes is how the maintainer finds
+the questions that need an explicit `keys` list.
+
+The split exists because a number is a fact the gold *states* and a distinctive term is
+this module's *guess* at which words a right answer would use. Requiring all three guesses
+is what marked the paraphrase wrong.
+
+### A failed launch is not a zero
+
+A row whose reply carried no answers array gets `valid: false`, **no summary at all**, and
+is counted under "not run" in the scorecard's per-arm table. Grading it as a row of zeros
+poisons every mean it lands in: on the first pilot, ten failed R2 launches beside three
+real ones read as an arm scoring 0.16 when the arm scored 0.70. `--regrade` applies the
+same rule to rows that were already stored. `bench/launch.py` classifies the cause
+(`provider_error`) and re-runs them; `is_valid()` honours that outcome too.
+
+Three more details worth stating, because they decide close calls:
 
 - **Whitespace, not characters.** A quote is compared with runs of whitespace collapsed and
   NFKC applied, so a sentence quoted across a wrapped line still counts as verbatim. A
@@ -165,6 +202,9 @@ Three details worth stating, because they decide close calls:
   no money in it. A model that answers `absent` and quotes that has shown its work and
   scores the span like any other. An `absent` question with no such sentence is left out
   of `span_recall` entirely: there was nothing to quote, so quoting nothing is not a miss.
+- **An extra list item is reported, not marked wrong.** Naming a fourth incentivised
+  reviewer is an invention, and inventions belong to that question's `forbidden` regexes.
+  The list rule names the extra in the note and leaves the verdict there.
 - **Every forbidden rule owes a two-way test.** `test_the_correct_answer_never_trips_a_forbidden_rule`
   builds the correct answer from the gold for *every question in every fixture* and asserts
   no rule fires. A rule that fires on the right answer would quietly turn a good run into a
@@ -334,7 +374,7 @@ python3 bench/docs_bench.py --cases bench/private/docs --matrix \
 | `bench/docs_grade.py` | the frozen grader; importable and runnable on one answers file |
 | `bench/ab/configs/docs/docs-matrix.yaml` | 4 arms × 5 models |
 | `bench/ab/configs/docs/docs-pilot.yaml` | R1 vs R2 on sonnet |
-| `tests/test_docs_bench.py` | 81 tests: fixtures, span verification, every grading rule both ways, menu probe, dry-run tool strings, codex audit, matrix, regrade |
+| `tests/test_docs_bench.py` | 94 tests: fixtures, span verification, every grading rule both ways, menu probe, dry-run tool strings, codex audit, matrix, regrade |
 | `tests/fixtures/docs_bench/` | the two public cases |
 | `evals/docs/README.md` | what the private bed is and why it is private |
 | `skills/vet-flat/references/find.md` | the tool under test, and its own honesty line |
