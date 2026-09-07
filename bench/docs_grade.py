@@ -73,9 +73,43 @@ import unicodedata
 # lines covers a wrapped sentence and its clause number without covering a neighbour.
 SPAN_SLACK_LINES = 3
 
-# A quote shorter than this is not evidence, whatever it matches: "the" is in every
-# document. Eight characters is about two short words, or four Chinese ones.
+# A quote shorter than this is not evidence on its own: "the" is in every document.
+# Eight characters is about two short words, or four Chinese ones. A short quote still
+# counts when it sits in the document at most SHORT_QUOTE_MAX_HITS times: "£485 pw" or
+# "1 Beds" is verifiable exactly because it is rare.
 MIN_QUOTE_CHARS = 8
+SHORT_QUOTE_MAX_HITS = 3
+
+# On a question the document does not answer, a model sometimes files "found" and then
+# says, in words, that the page is silent ("no price is shown", "does not state the
+# window", "the agreement names no landlord"), quoting the sentence that proves it.
+# That is the honest answer under the wrong status label: it earns the absent-honesty
+# pass and is counted separately as `absent_said_as_found`, never as a fabrication.
+SAYS_IT_IS_ABSENT = re.compile(
+    r"\b(?:no|not|isn'?t|is not|does ?n'?o?t|do ?n'?o?t|never|none|nothing|nowhere|without|"
+    r"neither|nor)\b[^.;\n]{0,60}?\b(?:shown|stated?|states|given|specified|specify|mentioned|"
+    r"mentions?|listed|available|provided|said|says?|indicated|included|appears?|present|found|"
+    r"disclosed|named|names|quoted|set out|visible|displayed|confirmed|known|clear|identified|"
+    r"defined|described|recorded|published|offered|priced)\b"
+    r"|\b(?:states|names|gives|lists|mentions|shows|specifies|provides|identifies|records|"
+    r"offers|contains|includes)\s+(?:no|nothing|neither)\b"
+    r"|\bnot applicable\b|\bsilent\b|\bunspecified\b|\bunstated\b|\bunknown\b|\bn/a\b"
+    r"|未(?:提|列|載|寫|說明|標|顯示)|沒有?(?:提|列|寫|說明|標|顯示|給|載)|无|未知|不明|沒有?說",
+    re.I)
+
+# Text pulled out of a two-column PDF interleaves the columns line by line, so one
+# sentence from the left column is cut by half-lines of the right one. A model that
+# reads the sentence the way a person would cannot quote it verbatim against that text.
+# The grader therefore also accepts a quote whose words appear in order within this
+# many lines, when at least this share of them is found and the quote has at least
+# COLUMN_MIN_TOKENS words (fewer would match scattered words anywhere).
+COLUMN_WINDOW_LINES = 12
+COLUMN_TOKEN_SHARE = 0.9
+COLUMN_MIN_TOKENS = 6
+# ...and the found words must make up at least this share of all the words between the
+# first and the last hit. Two interleaved columns give about a half; the same words
+# scattered by chance across twelve lines of a long document give a few percent.
+COLUMN_MIN_DENSITY = 0.25
 
 # Units whose numbers carry a rounding tolerance, and how much.
 #   money  a penny either way, or 0.5% on large sums (£2,128.85 vs £2129)
@@ -536,22 +570,21 @@ def line_index(doc):
     return "".join(chars), line_of
 
 
-def find_quote(doc, quote, index=None):
-    """Every place the quote sits in the document, as [(line_start, line_end), ...].
-
-    The document is compared with whitespace collapsed, so a quote that crosses a
-    wrapped line still counts as verbatim. Surrounding quote marks and a leading or
-    trailing ellipsis are stripped from the model's quote first.
-    """
+def clean_quote(quote):
+    """The model's quote without surrounding quote marks or a leading/trailing ellipsis."""
     if not quote or not str(quote).strip():
-        return []
+        return ""
     cleaned = str(quote).strip().strip("“”‘’\"'")
     cleaned = re.sub(r"^\s*(?:\.\.\.|…)\s*", "", cleaned)
     cleaned = re.sub(r"\s*(?:\.\.\.|…)\s*$", "", cleaned)
-    needle = unicodedata.normalize("NFKC", _SPACE.sub(" ", cleaned).strip()).lower()
-    if len(needle) < MIN_QUOTE_CHARS:
-        return []
-    haystack, line_of = index if index else line_index(doc)
+    return cleaned.strip()
+
+
+def normalise_quote(cleaned):
+    return unicodedata.normalize("NFKC", _SPACE.sub(" ", cleaned).strip()).lower()
+
+
+def _exact_spots(needle, haystack, line_of):
     spots, start = [], 0
     while True:
         at = haystack.find(needle, start)
@@ -563,25 +596,108 @@ def find_quote(doc, quote, index=None):
     return spots
 
 
+_TOKEN = re.compile(r"[^\W_]+", re.UNICODE)
+
+
+def _tokens(text):
+    return [t for t in _TOKEN.findall(unicodedata.normalize("NFKC", text).lower())
+            if len(t) > 1 or t.isdigit()]
+
+
+def find_quote_reassembled(doc, cleaned):
+    """Where the quote's words sit in order within COLUMN_WINDOW_LINES lines, as
+    [(line_start, line_end)] — the match for a sentence read correctly out of two
+    interleaved PDF columns. Empty when the quote is short or the words are not there."""
+    want = _tokens(cleaned)
+    if len(want) < COLUMN_MIN_TOKENS:
+        return []
+    per_line = [_tokens(line) for line in doc.splitlines()]
+    flat, line_of = [], []
+    for number, toks in enumerate(per_line, 1):
+        flat.extend(toks)
+        line_of.extend([number] * len(toks))
+    if not flat:
+        return []
+    need = int(len(want) * COLUMN_TOKEN_SHARE + 0.999)
+    best = None
+    first_positions = [i for i, t in enumerate(flat) if t == want[0]]
+    for at in first_positions:
+        limit_line = line_of[at] + COLUMN_WINDOW_LINES - 1
+        pos, hits, last = at, 0, at
+        for token in want:
+            j = pos
+            while j < len(flat) and line_of[j] <= limit_line and flat[j] != token:
+                j += 1
+            if j < len(flat) and line_of[j] <= limit_line:
+                hits += 1
+                last = j
+                pos = j + 1
+        if hits >= need and hits / float(last - at + 1) >= COLUMN_MIN_DENSITY:
+            span = (line_of[at], line_of[last])
+            if best is None or (span[1] - span[0]) < (best[1] - best[0]):
+                best = span
+    return [best] if best else []
+
+
+def locate_quote(doc, quote, index=None):
+    """([(line_start, line_end), ...], how) for the model's quote.
+
+    how is one of: "empty" (no quote), "verbatim" (found with whitespace collapsed, so a
+    quote across a wrapped line counts), "reassembled" (words in order within a few
+    lines: two-column PDF text), "short" (found, under MIN_QUOTE_CHARS, but rare enough
+    to verify), "short_common" (under MIN_QUOTE_CHARS and all over the document: no
+    evidence, but not invented), "invented" (not in the document).
+    """
+    cleaned = clean_quote(quote)
+    if not cleaned:
+        return [], "empty"
+    needle = normalise_quote(cleaned)
+    haystack, line_of = index if index else line_index(doc)
+    spots = _exact_spots(needle, haystack, line_of) if needle else []
+    if len(needle) < MIN_QUOTE_CHARS:
+        if not spots:
+            return [], "invented"
+        if len(spots) > SHORT_QUOTE_MAX_HITS:
+            return [], "short_common"
+        return spots, "short"
+    if spots:
+        return spots, "verbatim"
+    spots = find_quote_reassembled(doc, cleaned)
+    if spots:
+        return spots, "reassembled"
+    return [], "invented"
+
+
+def find_quote(doc, quote, index=None):
+    """Every place the quote sits in the document, as [(line_start, line_end), ...];
+    empty when it is not there (or too short and too common to verify)."""
+    return locate_quote(doc, quote, index)[0]
+
+
 def score_span(question, given, doc, index=None):
-    """(score, note). 1 in the right place, 0.5 somewhere else in the document, 0 nowhere."""
+    """(score, note, invented). 1 in the right place, 0.5 somewhere else in the
+    document, 0 nowhere. `invented` is True only when the quote is not in the document
+    at all — never for an empty quote or one too short and common to verify."""
     quote = given.get("quote")
-    spots = find_quote(doc, quote, index)
-    if not spots:
-        if not (quote and str(quote).strip()):
-            return 0.0, "no quote"
-        if len(_SPACE.sub(" ", str(quote)).strip()) < MIN_QUOTE_CHARS:
-            return 0.0, "quote too short to verify (under %d characters)" % MIN_QUOTE_CHARS
-        return 0.0, "invented quote: not in the document"
+    spots, how = locate_quote(doc, quote, index)
+    if how == "empty":
+        return 0.0, "no quote", False
+    if how == "short_common":
+        return 0.0, ("quote too short to verify (under %d characters and found more than "
+                     "%d times)" % (MIN_QUOTE_CHARS, SHORT_QUOTE_MAX_HITS)), False
+    if how == "invented":
+        return 0.0, "invented quote: not in the document", True
+    label = {"verbatim": "quote", "reassembled": "quote reassembled from interleaved columns",
+             "short": "short but rare quote"}[how]
     gold_spans = question.get("spans") or []
     for start, end in spots:
         for span in gold_spans:
             if (start <= span["line_end"] + SPAN_SLACK_LINES
                     and end >= span["line_start"] - SPAN_SLACK_LINES):
-                return 1.0, "quote at lines %d-%d, gold span %d-%d" % (
-                    start, end, span["line_start"], span["line_end"])
+                return 1.0, "%s at lines %d-%d, gold span %d-%d" % (
+                    label, start, end, span["line_start"], span["line_end"]), False
     start, end = spots[0]
-    return 0.5, "misplaced but real: quote at lines %d-%d, no gold span there" % (start, end)
+    return 0.5, "misplaced but real: %s at lines %d-%d, no gold span there" % (label, start, end), False
 
 
 # ---------------------------------------------------------------- the session --
@@ -697,6 +813,8 @@ def grade_question(question, given, doc, index=None):
         ("correct", False),
         ("fabrication", False),
         ("invented_quote", False),
+        ("absent_said_as_found", False),
+        ("quote_how", None),
         ("unknown", False),
         ("span_score", 0.0),
         ("notes", []),
@@ -727,17 +845,21 @@ def grade_question(question, given, doc, index=None):
         elif status == "unknown":
             card["unknown"] = True
             card["notes"].append("unknown on a question the document does not answer")
+        elif not hits and SAYS_IT_IS_ABSENT.search(answer_string(given) or ""):
+            card["correct"] = True
+            card["absent_said_as_found"] = True
+            card["notes"].append("absent honesty: passed, said in words under a 'found' status")
         else:
             card["fabrication"] = True
             card["notes"].append("fabrication: answered a question the document is silent on")
         if given.get("quote"):
-            score, note = score_span(question, given, doc, index)
+            score, note, invented = score_span(question, given, doc, index)
             # When the gold names the sentence that proves the "no", quoting it scores
             # like any other span. When it does not, the quote is still checked for
             # invention but earns nothing: there was no right sentence to find.
             card["span_score"] = score if card["has_gold_span"] else 0.0
-            if score == 0.0:
-                card["invented_quote"] = True
+            card["invented_quote"] = invented
+            card["quote_how"] = locate_quote(doc, given.get("quote"), index)[1]
             card["notes"].append("quote on an absent question: " + note)
         return card
 
@@ -759,11 +881,11 @@ def grade_question(question, given, doc, index=None):
     card["correct"] = bool(ok)
     card["notes"].append(why)
 
-    score, note = score_span(question, given, doc, index)
+    score, note, invented = score_span(question, given, doc, index)
     card["span_score"] = score
+    card["invented_quote"] = invented
+    card["quote_how"] = locate_quote(doc, given.get("quote"), index)[1]
     card["notes"].append(note)
-    if score == 0.0 and (given.get("quote") or "").strip():
-        card["invented_quote"] = True
     return card
 
 
@@ -812,10 +934,13 @@ def grade_session(gold, answers, doc, menu=None):
          if spanned else None),
         ("fabrications", len([c for c in cards if c["fabrication"]])),
         ("invented_quotes", len([c for c in cards if c["invented_quote"]])),
+        ("quotes_reassembled", len([c for c in cards if c["quote_how"] == "reassembled"])),
+        ("quotes_short", len([c for c in cards if c["quote_how"] in ("short", "short_common")])),
         ("unknowns", len([c for c in cards if c["unknown"]])),
         ("absent_probes", len(absents)),
         ("absent_honesty", round(len([c for c in absents if c["correct"]]) / float(len(absents)), 4)
          if absents else None),
+        ("absent_said_as_found", len([c for c in absents if c["absent_said_as_found"]])),
         ("menu_recall@5", round(len([c for c in menu_cards if c["menu_hit"]])
                                 / float(len(menu_cards)), 4) if menu_cards else None),
         ("how_counts", collections.OrderedDict(

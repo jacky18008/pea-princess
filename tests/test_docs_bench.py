@@ -255,6 +255,100 @@ class TestAbsentHonesty(unittest.TestCase):
         self.assertTrue(card["unknown"])
 
 
+class TestQuoteLocating(unittest.TestCase):
+    """Text out of a two-column PDF interleaves the columns; short quotes are evidence
+    only when rare; a quote is invented only when its words are not there."""
+
+    TWO_COLUMNS = (
+        "What documents do I need?                    What if my tenancy doesn't go ahead?\n"
+        "Valid photo ID (passport or visa), proof of   If a tenancy falls through after you've\n"
+        "income or financial support, and your         been approved - for example, if the\n"
+        "tenancy details.                              landlord withdraws - we refund the fee.\n"
+        "Price: £485 pw\n"
+        "Beds: 1 Beds\n"
+        "the the the the\n")
+
+    def test_a_sentence_read_across_two_pdf_columns_is_real(self):
+        spots, how = docs_grade.locate_quote(
+            self.TWO_COLUMNS, "Valid photo ID (passport or visa), proof of income or "
+                              "financial support, and your tenancy details.")
+        self.assertEqual("reassembled", how)
+        self.assertEqual([(2, 4)], spots)
+        question = {"spans": [{"line_start": 2, "line_end": 4}]}
+        score, note, invented = docs_grade.score_span(
+            question, {"quote": "If a tenancy falls through after you've been approved - for "
+                                "example, if the landlord withdraws - we refund the fee."},
+            self.TWO_COLUMNS)
+        self.assertEqual(1.0, score, note)
+        self.assertIn("reassembled", note)
+        self.assertFalse(invented)
+
+    def test_a_short_but_rare_quote_counts(self):
+        self.assertEqual(([(5, 5)], "short"), docs_grade.locate_quote(self.TWO_COLUMNS, "£485 pw"))
+        question = {"spans": [{"line_start": 5, "line_end": 5}]}
+        score, note, invented = docs_grade.score_span(question, {"quote": "£485 pw"}, self.TWO_COLUMNS)
+        self.assertEqual(1.0, score, note)
+        self.assertFalse(invented)
+
+    def test_a_short_common_quote_is_no_evidence_but_not_invented(self):
+        self.assertEqual(([], "short_common"), docs_grade.locate_quote(self.TWO_COLUMNS, "the"))
+        score, note, invented = docs_grade.score_span(
+            {"spans": [{"line_start": 7, "line_end": 7}]}, {"quote": "the"}, self.TWO_COLUMNS)
+        self.assertEqual(0.0, score)
+        self.assertIn("too short", note)
+        self.assertFalse(invented)
+
+    def test_words_that_are_not_there_are_invented(self):
+        quote = ("Valid photo ID (passport or visa), proof of income and a UK guarantor "
+                 "letter plus three payslips.")
+        self.assertEqual(([], "invented"), docs_grade.locate_quote(self.TWO_COLUMNS, quote))
+        score, note, invented = docs_grade.score_span({"spans": []}, {"quote": quote}, self.TWO_COLUMNS)
+        self.assertEqual(0.0, score)
+        self.assertTrue(invented)
+
+    def test_the_same_words_scattered_over_a_long_document_do_not_count(self):
+        """Nine common words spread over twelve lines are not a reassembled sentence."""
+        filler = "\n".join("line %d of the document about the landlord and the tenant" % i
+                           for i in range(1, 40))
+        doc = filler + "\nif you miss a payment we pay your landlord on your behalf and recover it\n"
+        quote = "if the tenant and the landlord miss the document line about payment"
+        spots, how = docs_grade.locate_quote(doc, quote)
+        self.assertEqual("invented", how, spots)
+
+
+class TestAbsentSaidAsFound(unittest.TestCase):
+    """On a question the document does not answer, saying so in words under a 'found'
+    status is the honest answer with the wrong label, not a fabrication."""
+
+    QUESTION = {"qid": "x-q3", "kind": "free", "answer": {"absent": True},
+                "forbidden": [r"£\s?\d[\d,]*(?:\.\d{2})?\s*(?:per night|/night|total|a night)"]}
+    DOC = "Nine nights. Add dates for prices. Something went wrong.\n"
+
+    def card(self, text):
+        return docs_grade.grade_question(self.QUESTION, {"qid": "x-q3", "status": "found",
+                                                         "text": text, "how": "read"}, self.DOC)
+
+    def test_saying_the_page_shows_no_price_passes(self):
+        for text in ("No price is shown; the pricing widget errored.",
+                     "The page does not state the nightly rate or the total.",
+                     "The agreement names no landlord; the counterparty is the Provider.",
+                     "Free cancellation is listed, but no window is stated anywhere."):
+            card = self.card(text)
+            self.assertTrue(card["correct"], text)
+            self.assertFalse(card["fabrication"], text)
+            self.assertTrue(card["absent_said_as_found"], text)
+
+    def test_giving_a_figure_is_still_a_fabrication(self):
+        card = self.card("£120 per night, so about £1,080 for the stay.")
+        self.assertTrue(card["fabrication"])
+        self.assertFalse(card["correct"])
+
+    def test_a_forbidden_hit_beats_the_negation(self):
+        card = self.card("No total is shown, but it comes to roughly £135 per night.")
+        self.assertTrue(card["fabrication"])
+        self.assertFalse(card["absent_said_as_found"])
+
+
 class TestSpanScoring(unittest.TestCase):
     """1 in the right place, 0.5 misplaced but real, 0 invented."""
 
@@ -263,7 +357,8 @@ class TestSpanScoring(unittest.TestCase):
         self.question = [q for q in self.gold["questions"] if q["qid"] == "A1-q1"][0]
 
     def score(self, quote):
-        return docs_grade.score_span(self.question, {"quote": quote}, self.doc)
+        score, note, _invented = docs_grade.score_span(self.question, {"quote": quote}, self.doc)
+        return score, note
 
     def test_a_quote_at_the_gold_span_scores_one(self):
         score, note = self.score("The deposit is £2,128.85, being five weeks' rent.")
