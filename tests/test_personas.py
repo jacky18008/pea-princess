@@ -397,6 +397,19 @@ class TestThePersonaMayRoundWhatItHolds(unittest.TestCase):
         self.assertEqual([4321.0], [b["value"] for b in bad])
 
 
+class TestFirstValueReadsBothScripts(unittest.TestCase):
+    def test_a_verdict_or_a_step_in_simplified_chinese_counts(self):
+        for reply in ("# 结论先讲\n这个房间在现行条款下对你是「淘汰」——合同结构踩中你说的两个怕。" + "x" * 40,
+                      "在宿舍确认下来之前，先订好 9 月 20–28 号的酒店（可免费取消的那种）。" + "x" * 40,
+                      "把 Accommodation Office 的回复贴给我，我逐条对照着帮你看。" + "x" * 40,
+                      "Book somewhere for tonight first; the message to the host can wait an hour." + "x" * 40):
+            self.assertEqual(1, runner.turns_to_first_value([reply]), reply[:30])
+
+    def test_a_reply_of_questions_only_is_not_a_step(self):
+        reply = "請問你的預算是多少？你幾號到倫敦？要住哪一區？有沒有擔保人？" + "x" * 40
+        self.assertIsNone(runner.turns_to_first_value([reply]))
+
+
 class TestPromptComesLast(unittest.TestCase):
     """A pasted page that begins with dashes must not be read as a CLI option."""
 

@@ -822,10 +822,17 @@ def invented_numbers(text, allowed, seeds=None, percents=()):
     return list(out.values())
 
 
+# The first reply that carries a decision or a step the person can take. Both scripts of
+# Chinese: the matrix of 2026-09-07 read ten sessions as "never" whose first reply opened
+# 结论先讲 / 淘汰 / 先订好酒店 / 把回复贴给我 — every one a verdict or a step.
 FIRST_VALUE = re.compile(
     r"(?i)\bnext step|\bdo this\b|\bsend (?:this|them)\b|\bask (?:them|the agent)\b|"
     r"\bverdict\b|\bconditional\b|\bwalk away\b|\bdo not sign\b|\bpaste\b|"
-    r"\bstart with\b|\bhere is the\b|下一步|先做|建議先|不要簽|不要签|可以先")
+    r"\bstart with\b|\bhere is the\b|\bbook (?:a|the|tonight|somewhere)\b|\btonight\b|"
+    r"\bfirst thing\b|\breply with\b|\bkill\b|\bpass\b|\bedge\b|"
+    r"下一步|先做|建議先|建议先|不要簽|不要签|可以先|結論|结论|淘汰|通過|通过|直接回答|"
+    r"先訂|先订|貼給我|贴给我|你可以|接下來|接下来|馬上|马上|今天就|現在就|现在就|"
+    r"把[^。\n]{0,12}(?:貼|贴)|建議|建议|請你|请你|麻煩你|麻烦你")
 
 
 def turns_to_first_value(replies):
