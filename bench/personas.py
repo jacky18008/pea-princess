@@ -720,7 +720,11 @@ def explainable(value, allowed):
     pool = [a for a in allowed if a and a >= 20 and a not in FREE_NUMBERS]
     # Sums of money are exact to the penny; a rate times a count, a division and the
     # weekly-rent formula carry the rounding of the rate, so they get 0.05 percent.
-    exact = lambda x: abs(x - value) <= 0.011
+    # "28 晚 £3,129" for a £3,129.20 total: a whole-pound figure may sit within 50p of
+    # the sum it rounds. That widens the net only for whole-pound statements, which are
+    # how people quote totals; a figure with pence still has to match to the penny.
+    whole = float(value).is_integer()
+    exact = lambda x: abs(x - value) <= (0.5 if whole else 0.011)
     close = lambda x: abs(x - value) <= max(0.011, 0.0005 * abs(value))
     formula = set()
     for a in pool:

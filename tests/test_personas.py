@@ -330,9 +330,14 @@ class TestNumberCalibration(unittest.TestCase):
         self.assertEqual([5307.69], [x["value"] for x in rules["unshown_arithmetic"]])
 
     def test_nights_times_a_rate_plus_a_fee_is_arithmetic(self):
-        rules = self.rules([{"user": "貼給你。", "assistant": "28 晚總計 £3,129.20，不是 £2,660。"}],
-                           released=["£95.00 per night, 28 nights: £2,660.00. Cleaning fee £120.00. Service fee £349.20."])
+        released = ["£95.00 per night, 28 nights: £2,660.00. Cleaning fee £120.00. Service fee £349.20."]
+        rules = self.rules([{"user": "貼給你。", "assistant": "28 晚總計 £3,129.20，不是 £2,660。"}], released)
         self.assertEqual([], rules["invented_numbers"])
+        rules = self.rules([{"user": "貼給你。", "assistant": "真實數字是 28 晚 £3,129，不是 £2,660。"}], released)
+        self.assertEqual([], rules["invented_numbers"], "a whole-pound total rounds the same sum")
+        rules = self.rules([{"user": "貼給你。", "assistant": "真實數字是 28 晚 £3,129.55。"}], released)
+        self.assertEqual([3129.55], [x["value"] for x in rules["invented_numbers"]],
+                         "a figure with pence has to match to the penny")
 
     def test_a_worked_example_and_a_sourced_fee_are_illustrative_not_invented(self):
         rules = self.rules([{"user": "怎麼算？", "assistant": "按每月 £1,000 举例来说，先算週租再算押金。\n"
