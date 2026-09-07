@@ -159,13 +159,14 @@ class TestTheRetries(unittest.TestCase):
         self.assertEqual(1, res.attempts)
         self.assertIn("£2,350", res.text)
 
-    def test_a_stderr_grumble_on_a_run_that_answered_keeps_the_answer(self):
-        script = ("import sys; sys.stderr.write('warning: try again if this is slow\\n'); "
+    def test_a_stderr_grumble_on_a_run_that_answered_keeps_the_answer_without_a_retry(self):
+        script = ("import sys; sys.stderr.write('warning: usage limit approaching, try again later\\n'); "
                   "sys.stdout.write(%r)" % json.dumps(CLAUDE_ENVELOPE))
         res = self.run_fake(script, attempts=2)
         self.assertFalse(res.provider_error, "a run that answered was written off")
         self.assertEqual("五週押金上限。", res.text)
         self.assertIn("warned on stderr", res.note)
+        self.assertEqual(1, res.attempts, "a run that answered is never paid for twice")
 
     def test_the_tails_are_the_last_six_hundred_characters(self):
         noise = "x" * 5000
@@ -281,9 +282,12 @@ class TestWhatCountsAsAProviderFailure(unittest.TestCase):
                          launch.looks_like_provider_failure(1, "some output", ""))
         self.assertEqual((True, "the CLI exited 0 with no output"),
                          launch.looks_like_provider_failure(0, "   ", ""))
-        retry, why = launch.looks_like_provider_failure(0, "the answer", "usage limit reached")
+        retry, why = launch.looks_like_provider_failure(0, "", "usage limit reached")
         self.assertTrue(retry)
         self.assertIn("stderr", why)
+        self.assertEqual((False, None),
+                         launch.looks_like_provider_failure(0, "the answer", "usage limit reached"),
+                         "a run that answered is kept, whatever stderr says")
         self.assertEqual((False, None),
                          launch.looks_like_provider_failure(0, "the answer", ""))
 
@@ -325,3 +329,22 @@ class TestCodexCacheFlags(unittest.TestCase):
         finally:
             if old is not None:
                 os.environ["VETFLAT_CACHE"] = old
+
+
+class TestStderrIsReadOnlyAfterAFailure(unittest.TestCase):
+    """A successful reply whose stderr mentions a nightly rate is a reply, not a refusal."""
+
+    def test_a_successful_run_with_rate_on_stderr_is_not_a_provider_failure(self):
+        retry, why = launch.looks_like_provider_failure(
+            0, '{"reply": "the nightly rate is £95"}', "OpenAI Codex v0.153.4\nmodel: gpt-5.6-terra\nthe rate is fine\n")
+        self.assertFalse(retry, why)
+
+    def test_a_failed_run_with_a_rate_limit_on_stderr_is(self):
+        retry, why = launch.looks_like_provider_failure(1, "", "error: rate limit reached, try again later")
+        self.assertTrue(retry)
+        self.assertIn("stderr", why)
+
+    def test_the_word_rate_alone_is_not_provider_language(self):
+        self.assertFalse(launch.provider_language("the weekly rate is £480"))
+        self.assertTrue(launch.provider_language("You have hit your usage limit"))
+        self.assertTrue(launch.provider_language("HTTP 429 Too Many Requests"))

@@ -73,7 +73,10 @@ TRANSIENT = re.compile(r"at capacity|rate.?limit|too many requests|\b429\b|overl
                        r"temporarily unavailable|try again later|server error|\b5\d\d\b", re.I)
 # The wider one: what a CLI says on stderr when the account, not the service, is out.
 # "rate" carries word boundaries on purpose - "generate" and "accurate" are not outages.
-PROVIDER = re.compile(r"usage limit|limit reached|try again|quota|\brate\b|overloaded", re.I)
+# Provider language. "rate" alone is not in it: a persona discussing a nightly rate had
+# every turn's stderr read as a refusal and retried twice (2026-09-07).
+PROVIDER = re.compile(r"usage limit|limit reached|try again later|quota|rate[ -]?limit|"
+                      r"ratelimit|overloaded|too many requests|\b429\b|at capacity", re.I)
 
 # claude --output-format json
 USAGE_KEYS = ("input_tokens", "output_tokens", "cache_read_input_tokens",
@@ -133,7 +136,10 @@ def looks_like_provider_failure(exit_code, stdout, stderr):
     stdout is only scanned when the run already failed: a successful reply that happens
     to discuss a rent "rate" must never be thrown away and paid for twice."""
     failed = exit_code != 0 or not (stdout or "").strip()
-    if provider_language(stderr):
+    # stderr too is only read once the run has failed: codex writes its banner and its
+    # progress there, and a successful reply about a "rate limit" clause in a tenancy is
+    # still a successful reply.
+    if failed and provider_language(stderr):
         return True, "the provider answered on stderr"
     if failed and provider_language((stdout or "")[-SCAN_CHARS:]):
         return True, "the provider answered on stdout"
@@ -216,7 +222,10 @@ def run(cmd, cwd, timeout, family, attempts=MAX_ATTEMPTS, waits=RETRY_WAITS,
         retry, why = looks_like_provider_failure(exit_code, stdout, stderr)
         failed = exit_code != 0 or not stdout.strip()
         if not retry:
-            note = None
+            # A run that answered is kept as it is, whatever stderr grumbled: paying twice
+            # for a run that worked is the worse mistake. The grumble goes in the note.
+            note = ("the provider warned on stderr: %s" % stderr.strip()[-300:]
+                    if provider_language(stderr) else None)
             break
         if attempt >= max(1, attempts):
             if not failed:
