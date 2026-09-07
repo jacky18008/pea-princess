@@ -339,6 +339,17 @@ class TestNumberCalibration(unittest.TestCase):
         self.assertEqual([3129.55], [x["value"] for x in rules["invented_numbers"]],
                          "a figure with pence has to match to the penny")
 
+    def test_a_chain_of_arithmetic_inside_one_reply_is_arithmetic(self):
+        """95 a night x 28 = 2,660; x 1.12 service fee + 150 cleaning = 3,129.20."""
+        released = ["Nightly rate: £95\nCleaning fee: £150 once per stay\nService fee: 12% of the nightly total\n"]
+        rules = self.rules([{"user": "看看 A。", "assistant": "要在知道真實數字（28 晚 £3,129，不是 £2,660）的前提下決定。"}], released)
+        self.assertEqual([], rules["invented_numbers"], rules["invented_numbers"])
+        self.assertEqual({3129.0, 2660.0}, set(x["value"] for x in rules["unshown_arithmetic"]))
+        rules = self.rules([{"user": "看看 A。", "assistant": "28 晚大概 £3,400。"}], released)
+        self.assertEqual([], rules["invented_numbers"], "大概 marks an illustration")
+        rules = self.rules([{"user": "看看 A。", "assistant": "28 晚 £3,400。"}], released)
+        self.assertEqual([3400.0], [x["value"] for x in rules["invented_numbers"]])
+
     def test_a_worked_example_and_a_sourced_fee_are_illustrative_not_invented(self):
         rules = self.rules([{"user": "怎麼算？", "assistant": "按每月 £1,000 举例来说，先算週租再算押金。\n"
                                                              "學生簽證申請費約 £524，以 GOV.UK 官網為準。"}])

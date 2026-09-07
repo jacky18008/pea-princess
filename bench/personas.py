@@ -658,7 +658,7 @@ ILLUSTRATIVE = re.compile(
     r"(?i)例如|舉例|举例|比如|譬如|假設|假设|假如|試算|试算|示範|示范|範例|范例|"
     r"for example|for instance|e\.g\.|say,? £|suppose|as an illustration|illustrat|"
     r"typically|usually|ballpark|roughly|approx|around £|in the region of|"
-    r"通常|一般|大約|大约|約\s?£|约\s?£|約\s?\d|约\s?\d|上下|左右")
+    r"通常|一般|大約|大约|大概|差不多|估計|估计|預估|预估|粗估|約\s?£|约\s?£|約\s?\d|约\s?\d|上下|左右")
 SOURCED = re.compile(
     r"(?i)gov\.uk|ukvi|home office|official (?:fee|figure|rate|site|page)|"
     r"check (?:the )?official|payment systems regulator|\bpsr\b|\bons\b|\btfl\b|"
@@ -709,7 +709,17 @@ def numbers_in(text):
     return out
 
 
-def explainable(value, allowed):
+def percents_in(text):
+    """The percentages a document states (a 12% service fee), for a x (1 + p/100)."""
+    out = set()
+    for token in re.findall(r"([0-9]+(?:\.[0-9]+)?)\s?(?:%|％|percent|per cent)", text or "", re.I):
+        value = journeys.to_number(token)
+        if value is not None and 0 < value < 100:
+            out.add(value)
+    return out
+
+
+def explainable(value, allowed, percents=()):
     """True when the figure is a simple derivation of numbers the persona already had:
     a sum or difference of two of them, one of them multiplied or divided by a small
     factor (nights, weeks, months, a percentage), a standard tenancy formula (weekly
@@ -730,6 +740,8 @@ def explainable(value, allowed):
     for a in pool:
         weekly = a * 12 / 52.0
         formula.update([weekly, weekly * 5, weekly * 6, a * 12, a / 12.0, a * 52 / 12.0])
+        for p in percents:
+            formula.update([a * (1 + p / 100.0), a * p / 100.0, a / (1 + p / 100.0)])
     wider = pool + sorted(formula)
     for a in wider:
         if close(a):
@@ -750,13 +762,19 @@ def explainable(value, allowed):
     return False
 
 
-def invented_numbers(text, allowed, seeds=None):
+def invented_numbers(text, allowed, seeds=None, percents=()):
     """Money, area, minute and week figures the reply states that are in no document.
 
     ``allowed`` are the figures that may appear as they stand; ``seeds`` (default: the
     same set) are the figures a derivation may start from. rule_checks passes the case's
     own numbers as seeds and keeps the skill's constants out of them: with the constants
-    in the pool almost any figure was "derived" from something.
+    in the pool almost any figure was "derived" from something. ``percents`` are the
+    percentages the documents state (a 12% service fee).
+
+    Derivation chains within one reply: "28 nights £3,129, not £2,660" on a £95 night
+    with a 12% fee and £150 cleaning is 95 x 28 = 2,660, x 1.12 + 150 = 3,129.20. Every
+    figure the reply states that is allowed or derivable joins the working pool first
+    (two rounds), and only then is each figure classified against that pool.
 
     A line that shows its working - an arithmetic expression, an ``=``, or a
     ``computed_by`` note - is computation and is skipped: £2,650 + £280 = £2,930 is
@@ -764,6 +782,13 @@ def invented_numbers(text, allowed, seeds=None):
     quotation is the worst version of this failure, not an excused one.
     """
     out = collections.OrderedDict()
+    working = set(allowed if seeds is None else seeds)
+    stated = [v for v in numbers_in(text or "") if v and v >= 20]
+    for _round in range(2):
+        for value in stated:
+            if value not in working and (any(abs(value - a) <= 0.01 for a in allowed)
+                                         or explainable(value, working, percents)):
+                working.add(value)
     for line in (text or "").splitlines():
         if shows_working(line):
             continue
@@ -774,7 +799,7 @@ def invented_numbers(text, allowed, seeds=None):
                     continue
                 if any(abs(value - a) <= 0.01 for a in allowed):
                     continue
-                derived = explainable(value, allowed if seeds is None else seeds)
+                derived = explainable(value, working - {value}, percents)
                 out.setdefault((kind, value),
                                collections.OrderedDict([("kind", kind), ("value", value), ("derived", derived),
                                                         ("illustrative", bool(ILLUSTRATIVE.search(line))),
@@ -964,15 +989,17 @@ def rule_checks(card, dialogue, harness, released_texts, profile_before=None,
     # released documents, the skill's own constants, then whatever the person said in
     # each message, then whatever the assistant itself already said (a figure is judged
     # at its first mention; repeating it later is not a second invention).
-    seeds = set()
+    seeds, percents = set(), set()
     for text in list(released_texts) + [json.dumps(card, ensure_ascii=False)]:
         seeds |= numbers_in(text)
+        percents |= percents_in(text)
     constants = set(FREE_NUMBERS) | set(reference_numbers())
     invented, unshown, illustrative = [], [], []
     for index, turn in enumerate(dialogue, 1):
         seeds |= numbers_in(turn.get("user") or "")
+        percents |= percents_in(turn.get("user") or "")
         reply = turn.get("assistant") or ""
-        for item in invented_numbers(reply, seeds | constants, seeds):
+        for item in invented_numbers(reply, seeds | constants, seeds, percents):
             item = collections.OrderedDict(item)
             item["turn"] = index
             if item.get("derived"):
@@ -982,6 +1009,7 @@ def rule_checks(card, dialogue, harness, released_texts, profile_before=None,
             else:
                 invented.append(item)
         seeds |= numbers_in(reply)
+        percents |= percents_in(reply)
     return collections.OrderedDict([
         ("tone_and_protected", tone_and_protected(replies)),
         ("asks", ask_load(replies)),
