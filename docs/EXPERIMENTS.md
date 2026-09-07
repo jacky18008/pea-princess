@@ -239,9 +239,28 @@ exactly the long-lived cache entries warmed by a truth refresh three days before
 monolithic run had worked one day after that refresh, on a warm cache. Fixed on
 2026-09-07 (the cache falls back to a writable directory; the bench opens the cache to the
 sandbox; `epc.py` no longer reports a dead search as zero certificates; the verifier fails
-an item that cites a failed fetch; the plan hands executors named fallbacks). A fair pair
-— monolithic luna and `P2-codex`, same day, same cache — is running; until it is in, do
-not quote this design as a recommendation anywhere, including in `references/pipeline.md`.
+an item that cites a failed fetch; the plan hands executors named fallbacks).
+
+**The fair pair (2026-09-07, one flat, one run each, same day and cache — a diagnostic,
+not a result):**
+
+| arm on v2-buck, standard | facts | stable | fabrications | citations | wall | tokens |
+|---|---|---|---|---|---|---|
+| monolithic gpt-5.6-luna | 7/10 | 5/7 | 0 | 100% | 18 min | 5.9 M |
+| `P2-codex` (luna plans and executes, terra verifies and integrates) | 6/10 | 4/7 | 0 | 100% | 71 min | 16.2 M |
+
+Where the pipeline's tokens went: eight executors 10.3 M (the fallback ladder made them
+thorough), verifier 1.1 M, second round 0.4 M, verifier again 1.4 M, integrator 3.1 M.
+One fact fewer for 2.8 times the tokens and four times the wall. The split did not buy
+facts on this flat; whether the CHECK on its own buys anything (fabrications caught) is
+the open question, and the flat had none to catch.
+
+**The ablation was cut down on that evidence** (the maintainer's call, 2026-09-07, open
+to reversal): `P3` (the monolithic run, then a verify pass — the cheapest arm, and the one
+that could still pay) on the five core flats for both vendors, and `P2-codex` on two more
+flats to see whether the pattern holds; `P1` (split without check) is dropped unless `P2`
+turns. Results land below when in. Until then, do not quote this design as a
+recommendation anywhere, including in `references/pipeline.md`.
 
 Two things the pilot showed that the fix does not touch: the eight executors made twelve
 script calls between them where the monolithic agent made sixty-five, and the verifier,
