@@ -208,12 +208,44 @@ anything piped on stdin as prompt material, so every prompt carried a twelve-lin
 snippet (both arms alike; confirmed with a one-shot test). The runners now close stdin on
 every agent launch, and the numbers above are from the clean rows only.
 
-### Role pipeline (to be measured)
+### Reading a pasted document: the pilot (Sonnet, 2026-09-07)
 
-**Nothing in this section has a number yet.** The arms are defined, the harness runs, the
-grader is the same one every other table on this page used. What is missing is the runs.
-Until they exist, do not quote this design as a recommendation anywhere, including in
-`references/pipeline.md`, which says the same thing about itself.
+Design, arms and grading rules: `docs/READING-ABLATION.md`. Thirteen private de-identified
+documents (tenancy agreements, listings, review pages, planning reports, a short-let page),
+134 questions of which 42 probe something the document does not say. Two arms so far, one
+model, one run each — a small-sample diagnostic, not a result.
+
+| arm | rows | facts right | quote in the right place | said "not there" when it was not | fabrications | invented quotes |
+|---|---|---|---|---|---|---|
+| R1 grep only | 13 | 0.713 | 0.636 | 1.000 | 0 | 0 |
+| R2 find.py (keyword search with synonyms, thick view) | 13 | 0.752 | 0.616 | 0.962 | 1 | 0 |
+
+The first grading of these rows reported 11 invented quotes and 9 fabrications; all of the
+quotes and seven of the fabrications were the grader's (two-column PDF text, short quotes,
+honest "the page does not say" filed under `found`, negation-blind forbidden rules), and
+every fix has a test both ways. The full matrix — four arms, five models, thirteen cases,
+260 rows — is running.
+
+### Role pipeline (pilot only; the ablation is still to run)
+
+**Two pilot runs exist, and neither counts.** `P2-codex` on one private flat (v2-buck,
+standard mode) scored 1/10 facts on 2026-09-06 and 3/10 on 2026-09-07, zero fabrications,
+against 7/10 for the same cheap model (gpt-5.6-luna) run monolithically on the same flat
+three days earlier. Reading the raw streams showed why, and it was not the role split:
+**Codex's workspace-write sandbox denies writes under the home directory, and every fetcher
+wrote its body straight into `~/.cache/vet-flat`, so every cache miss died with
+`curl error 56` and only cache hits survived.** The 15 facts the pipeline did find were
+exactly the long-lived cache entries warmed by a truth refresh three days before; the
+monolithic run had worked one day after that refresh, on a warm cache. Fixed on
+2026-09-07 (the cache falls back to a writable directory; the bench opens the cache to the
+sandbox; `epc.py` no longer reports a dead search as zero certificates; the verifier fails
+an item that cites a failed fetch; the plan hands executors named fallbacks). A fair pair
+— monolithic luna and `P2-codex`, same day, same cache — is running; until it is in, do
+not quote this design as a recommendation anywhere, including in `references/pipeline.md`.
+
+Two things the pilot showed that the fix does not touch: the eight executors made twelve
+script calls between them where the monolithic agent made sixty-five, and the verifier,
+second verifier and integrator spent 40% of the tokens on a run that added no fact.
 
 The idea comes from a different domain — a regulated-document question-answering system
 the maintainer built in July 2026, where role separation, an information-sufficiency
@@ -428,6 +460,15 @@ python3 bench/journeys.py --regrade bench/results/journeys-2026-09-05
 ```
 
 ## Caveats
+
+**Every Codex row dated before 2026-09-07 ran with live fetching broken.** The
+workspace-write sandbox denied the cache write, so those runs could only read what the
+truth refresh or an earlier Claude run had already fetched. Where the cache was warm they
+look able to fetch; where it was cold they say unknown. The Claude rows were not affected
+(no sandbox). Codex numbers on this page are therefore a lower bound with an unknown
+warm-cache subsidy, and the Codex arms of the SKILL.md ablation should be re-run before
+any cross-vendor claim is made.
+
 
 Read these before quoting any number above.
 
