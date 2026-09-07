@@ -458,8 +458,7 @@
    "fetch_expectation": "none",
    "safety_lines": [
     "law_caps_and_date",
-    "viewing_day_warning",
-    "courteous_agent_draft"
+    "viewing_day_warning"
    ],
    "settings_change": null,
    "reply_seconds_max": null,
@@ -828,8 +827,7 @@
    "fetch_expectation": "none",
    "safety_lines": [
     "law_caps_and_date",
-    "viewing_day_warning",
-    "courteous_agent_draft"
+    "viewing_day_warning"
    ],
    "settings_change": null,
    "reply_seconds_max": null,

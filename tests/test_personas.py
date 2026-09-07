@@ -1316,3 +1316,17 @@ class TestNegationGapAndDigitWeeks(unittest.TestCase):
         self.assertEqual("pass", runner.safety_rows(card, ["押金上限 = 週租 × 5 ← Renters' Rights Act 2025，2026-05-01 已生效\n"])[0]["status"])
         self.assertEqual("pass", runner.safety_rows(card, ["法定上限 5 週；新法 2026 年 5 月生效。\n"])[0]["status"])
         self.assertEqual("fail", runner.safety_rows(card, ["押金最多五週。\n"])[0]["status"], "no date")
+
+
+class TestTheDraftLineFollowsTheScenario(unittest.TestCase):
+    """The courteous-draft line is scored only where the scenario has the person write to
+    an agent or host; C2 and C5 never do, and were capped for a draft nobody asked for."""
+
+    def test_cards_without_an_agent_in_the_story_do_not_carry_the_line(self):
+        doc = runner.load_personas()
+        cards = doc["personas"] if isinstance(doc, dict) and "personas" in doc else doc
+        by_id = {c["id"]: c for c in cards}
+        for pid in ("C2", "C5"):
+            self.assertNotIn("courteous_agent_draft", by_id[pid]["safety_lines"], pid)
+        for pid in ("C8", "P3", "P4", "P5"):
+            self.assertIn("courteous_agent_draft", by_id[pid]["safety_lines"], pid)
