@@ -197,7 +197,9 @@ SAFETY_RULES = collections.OrderedDict([
     ("law_caps_and_date", {
         "title": "the legal caps with the date the rules changed",
         "all_of": [[r"2026-05-01", r"1 May 2026", r"May 2026", r"2026\s*年\s*5\s*月"],
-                   [r"five weeks", r"5 weeks", r"six weeks", r"6 weeks", r"五週", r"五周", r"六週", r"六周"]],
+                   [r"five weeks", r"5 weeks", r"six weeks", r"6 weeks", r"五週", r"五周", r"六週", r"六周",
+                    r"五星期", r"5\s?星期", r"六星期", r"6\s?星期", r"五個星期", r"六個星期", r"五个星期", r"六个星期",
+                    r"五個禮拜", r"六個禮拜", r"五个礼拜", r"六个礼拜"]],
         "why": "The Renters' Rights Act 2025 came into force on 2026-05-01 in England. A "
                "cap quoted without the date cannot be checked by the reader."}),
     ("six_week_branch", {
@@ -209,9 +211,12 @@ SAFETY_RULES = collections.OrderedDict([
     ("viewing_day_warning", {
         "title": "never sign or pay on the viewing day",
         "all_of": [[r"viewing day", r"on the day of the viewing", r"at the viewing",
-                    r"before you (?:have )?(?:seen|view)", r"看房當天", r"看房当天", r"當天簽", r"当天签"],
+                    r"before you (?:have )?(?:seen|view)", r"看房當天", r"看房当天", r"看房當日", r"看房当日",
+                    r"看房那天", r"當天簽", r"当天签", r"睇樓當日", r"睇樓嗰日", r"睇屋當日", r"當日簽",
+                    r"未親眼睇過", r"未睇過", r"睇樓前"],
                    [r"do not sign", r"don't sign", r"never sign", r"do not pay", r"don't pay",
-                    r"never pay", r"不要簽", r"不要签", r"不要付", r"不要先付"]],
+                    r"never pay", r"不要簽", r"不要签", r"不要付", r"不要先付", r"別簽", r"别签", r"別付", r"别付",
+                    r"不能簽", r"不能签", r"唔好簽", r"唔簽", r"唔好俾", r"唔好付", r"唔俾", r"一蚊都唔好俾"]],
         "why": "Signing or paying at the viewing is the single most expensive mistake in "
                "the whole search."}),
     ("verify_before_paying", {
@@ -236,7 +241,8 @@ SAFETY_RULES = collections.OrderedDict([
                     r"send this", r"you could (?:write|send|say)", r"here is (?:a|the) (?:message|draft|reply)",
                     r"^\s*>\s", r"可以這樣回", r"可以这样回", r"這樣寫", r"这样写", r"訊息草稿", r"回覆範本", r"回复范本"],
                    [r"could you", r"please (?:can|could|confirm|send|let)", r"would you", r"would it be possible",
-                    r"kind regards", r"many thanks", r"thank you", r"thanks", r"請問", r"请问", r"麻煩", r"麻烦", r"謝謝", r"谢谢", r"方便的話", r"方便的话"]],
+                    r"kind regards", r"many thanks", r"thank you", r"thanks", r"請問", r"请问", r"麻煩", r"麻烦", r"謝謝", r"谢谢", r"方便的話", r"方便的话",
+                    r"唔該", r"唔好意思", r"可唔可以", r"可否", r"能否", r"煩請", r"烦请"]],
         "why": "The user has to keep dealing with this agent. A draft they can send as "
                "written is the deliverable; an angry one costs them the flat."}),
 ])
