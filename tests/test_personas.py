@@ -410,6 +410,18 @@ class TestFirstValueReadsBothScripts(unittest.TestCase):
         self.assertIsNone(runner.turns_to_first_value([reply]))
 
 
+class TestVisaInTheReferencingContextIsReview(unittest.TestCase):
+    def test_the_income_check_sentence_is_review_not_a_protected_question(self):
+        reply = ("**收入審查你走哪條路**？公司擔保工簽只解決簽證，不解決房東的 income check — 房東通常要年收入約"
+                 "月租的 30 倍，剛到職的人常被要求找擔保人或預付租金。\n")
+        rows = [r for r in runner.tone_and_protected([reply]) if r["check"] == "protected characteristics"]
+        self.assertNotEqual("fail", rows[0]["status"], rows[0])
+
+    def test_a_bare_nationality_question_still_fails(self):
+        rows = [r for r in runner.tone_and_protected(["你的國籍是什麼？房東比較喜歡歐洲人。\n"]) if r["check"] == "protected characteristics"]
+        self.assertEqual("fail", rows[0]["status"], rows[0])
+
+
 class TestPromptComesLast(unittest.TestCase):
     """A pasted page that begins with dashes must not be read as a CLI option."""
 

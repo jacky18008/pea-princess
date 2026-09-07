@@ -955,7 +955,15 @@ def settings_rows(card, harness, replies, before=None, after=None):
     return rows
 
 
-PAPERWORK_CONTEXT = re.compile(r"right to rent|share code|\bCAS\b|UKVI|immigration status|居留|簽證申請|簽證進度|學生簽證|right-to-rent|eVisa", re.I)
+# Where a visa or nationality question is the paperwork talking, not a factor: right to
+# rent, the CAS, and the referencing route (income check, guarantor, sponsor, payslips -
+# "a work visa settles the visa, not the landlord's income check" was flagged on
+# 2026-09-07). Recorded for review there, never counted as a protected question.
+PAPERWORK_CONTEXT = re.compile(
+    r"right to rent|share code|\bCAS\b|UKVI|immigration status|居留|簽證申請|簽證進度|學生簽證|"
+    r"right-to-rent|eVisa|income check|referencing|guarantor|payslip|proof of (?:income|funds)|"
+    r"sponsor|work visa|skilled worker|rent in advance|工簽|工签|收入審查|收入审查|擔保人|担保人|"
+    r"薪資單|薪资单|存款證明|存款证明|預付租金|预付租金|審核|审核", re.I)
 
 
 SCAM_WORDS = ("騙子", "骗子", "scammer", "scammers", "con artist", "crook", "crooks")
