@@ -59,6 +59,7 @@ import os
 import re
 import subprocess
 import time
+import uuid
 
 # Growing pauses, in seconds, before attempt 2 and attempt 3. A usage window that has
 # just closed does not reopen in ten seconds; ten minutes is the last try worth making
@@ -87,7 +88,7 @@ TOKEN_KEYS = ("input_tokens", "output_tokens", "cached_input_tokens",
               "completion_tokens", "cache_read_input_tokens")
 
 _FIELDS = ("text usage note seconds attempts provider_error stdout_tail stderr_tail "
-           "exit_code")
+           "exit_code session_id")
 
 
 class LaunchResult(collections.namedtuple("LaunchResult", _FIELDS)):
@@ -98,10 +99,11 @@ class LaunchResult(collections.namedtuple("LaunchResult", _FIELDS)):
     __slots__ = ()
 
     def __new__(cls, text="", usage=None, note=None, seconds=0.0, attempts=1,
-                provider_error=False, stdout_tail="", stderr_tail="", exit_code=None):
+                provider_error=False, stdout_tail="", stderr_tail="", exit_code=None,
+                session_id=None):
         return super(LaunchResult, cls).__new__(
             cls, text, usage, note, seconds, attempts, bool(provider_error),
-            stdout_tail, stderr_tail, exit_code)
+            stdout_tail, stderr_tail, exit_code, session_id)
 
     def tail_note(self, prefix=""):
         """The note with the captured tails appended, for a row someone has to diagnose.
@@ -175,6 +177,14 @@ def codex_cache_flags():
     return ["-c", "sandbox_workspace_write.writable_roots=[%s]" % json.dumps(cache)]
 
 
+
+def session_id_in(cmd):
+    """The value after --session-id in a command list, or None."""
+    try:
+        return cmd[cmd.index("--session-id") + 1]
+    except (ValueError, IndexError):
+        return None
+
 def run(cmd, cwd, timeout, family, attempts=MAX_ATTEMPTS, waits=RETRY_WAITS,
         label=None, sleep=None, echo=None):
     """Run one agent command and return a LaunchResult.
@@ -189,8 +199,17 @@ def run(cmd, cwd, timeout, family, attempts=MAX_ATTEMPTS, waits=RETRY_WAITS,
     echo = echo if echo is not None else print
     started = time.time()
     attempt, stdout, stderr, exit_code, note = 0, "", "", None, None
+    cmd = list(cmd)
+    session_used = session_id_in(cmd)
     while True:
         attempt += 1
+        if attempt > 1 and session_used:
+            # A retry must not reuse a Claude session id: the first attempt registered it
+            # even when it failed, and the second dies with "Session ID ... is already in
+            # use" (seven persona sessions, 2026-09-07). The caller reads the id it must
+            # resume from the result.
+            session_used = str(uuid.uuid4())
+            cmd[cmd.index("--session-id") + 1] = session_used
         proc = None
         try:
             # stdin is closed on purpose, for every actor. `claude -p` treats anything
@@ -209,13 +228,13 @@ def run(cmd, cwd, timeout, family, attempts=MAX_ATTEMPTS, waits=RETRY_WAITS,
                                 note="timed out after %d s" % timeout,
                                 seconds=round(time.time() - started, 2), attempts=attempt,
                                 provider_error=False, stdout_tail="", stderr_tail="",
-                                exit_code=None)
+                                exit_code=None, session_id=session_used)
         except OSError as exc:
             return LaunchResult(text="", usage=None,
                                 note="could not start %r: %s" % (cmd[0], exc),
                                 seconds=round(time.time() - started, 2), attempts=attempt,
                                 provider_error=False, stdout_tail="", stderr_tail="",
-                                exit_code=None)
+                                exit_code=None, session_id=session_used)
         stdout = (out or b"").decode("utf-8", "replace")
         stderr = (err or b"").decode("utf-8", "replace")
         exit_code = proc.returncode
@@ -242,7 +261,7 @@ def run(cmd, cwd, timeout, family, attempts=MAX_ATTEMPTS, waits=RETRY_WAITS,
             return LaunchResult(text=text, usage=usage, note=note,
                                 seconds=round(time.time() - started, 2), attempts=attempt,
                                 provider_error=True, stdout_tail=stdout[-TAIL_CHARS:],
-                                stderr_tail=stderr[-TAIL_CHARS:], exit_code=exit_code)
+                                stderr_tail=stderr[-TAIL_CHARS:], exit_code=exit_code, session_id=session_used)
         pause = waits[min(attempt - 1, len(waits) - 1)] if waits else 0
         echo("  %s%s; retry %d of %d in %d s"
              % (("%s: " % label) if label else "", why, attempt, max(1, attempts) - 1,
@@ -253,7 +272,7 @@ def run(cmd, cwd, timeout, family, attempts=MAX_ATTEMPTS, waits=RETRY_WAITS,
     return LaunchResult(text=text, usage=usage, note=note,
                         seconds=round(time.time() - started, 2), attempts=attempt,
                         provider_error=False, stdout_tail=stdout[-TAIL_CHARS:],
-                        stderr_tail=stderr[-TAIL_CHARS:], exit_code=exit_code)
+                        stderr_tail=stderr[-TAIL_CHARS:], exit_code=exit_code, session_id=session_used)
 
 
 # ------------------------------------------------------------ reading the reply --

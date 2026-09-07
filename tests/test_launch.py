@@ -348,3 +348,37 @@ class TestStderrIsReadOnlyAfterAFailure(unittest.TestCase):
         self.assertFalse(launch.provider_language("the weekly rate is £480"))
         self.assertTrue(launch.provider_language("You have hit your usage limit"))
         self.assertTrue(launch.provider_language("HTTP 429 Too Many Requests"))
+
+
+class TestARetryMintsAFreshSessionId(unittest.TestCase):
+    """The first attempt registers the Claude session id even when it fails; retrying with
+    the same id dies with "Session ID ... is already in use" (seven persona sessions on
+    2026-09-07). Each retry gets a new id, and the result says which one was used."""
+
+    def test_the_second_attempt_carries_a_different_id_and_the_result_reports_it(self):
+        workdir = tempfile.mkdtemp(prefix="vetflat-session-")
+        marker = os.path.join(workdir, "first-attempt-done")
+        script = ("import os, sys, json\n"
+                  "sid = sys.argv[sys.argv.index('--session-id') + 1]\n"
+                  "m = %r\n"
+                  "if not os.path.exists(m):\n"
+                  "    open(m, 'w').write(sid); sys.stderr.write('Error: rate limit reached\\n'); sys.exit(1)\n"
+                  "first = open(m).read()\n"
+                  "if sid == first:\n"
+                  "    sys.stderr.write('Error: Session ID %%s is already in use.\\n' %% sid); sys.exit(1)\n"
+                  "print(json.dumps({'result': 'OK ' + sid, 'session_id': sid}))\n" % marker)
+        path = os.path.join(workdir, "fake.py")
+        with io.open(path, "w", encoding="utf-8") as fh:
+            fh.write(script)
+        cmd = [sys.executable, path, "-p", "--session-id", "11111111-1111-1111-1111-111111111111", "--", "hi"]
+        res = launch.run(cmd, workdir, 30, "claude", attempts=3, waits=[0, 0], sleep=lambda s: None,
+                         echo=lambda line: None)
+        self.assertFalse(res.provider_error, res.note)
+        self.assertEqual(2, res.attempts)
+        self.assertNotEqual("11111111-1111-1111-1111-111111111111", res.session_id)
+        self.assertIn(res.session_id, res.text)
+        shutil.rmtree(workdir, ignore_errors=True)
+
+    def test_a_command_without_a_session_id_reports_none(self):
+        res = launch.run([sys.executable, "-c", "print('{\"result\": \"x\"}')"], tempfile.mkdtemp(), 30, "claude")
+        self.assertIsNone(res.session_id)

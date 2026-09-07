@@ -1017,6 +1017,8 @@ def play(journey, args, variant_id=None):
                              attempts=MAX_ATTEMPTS, waits=RETRY_WAITS,
                              label="turn %d" % index)
             reply, usage = res.text, res.usage
+            if getattr(res, "session_id", None):
+                session_id = res.session_id          # a retry may have minted a new one
             attempts = res.attempts
             provider_error = res.provider_error
             # The note the card always carried, plus the tails: a row that reads

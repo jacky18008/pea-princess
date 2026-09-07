@@ -1390,6 +1390,8 @@ def play(card, args, variant, seed):
                           session=claude_session if carry else None,
                           resume=claude_session if (carry and turn > 1) else None),
             workdir, args.timeout, launcher_of(agent), label="turn %d agent" % turn)
+        if getattr(res, "session_id", None):
+            claude_session = res.session_id          # a retry may have minted a new one
         reply, usage, seconds = res.text, res.usage, res.seconds
         note = res.tail_note()
         if note:
