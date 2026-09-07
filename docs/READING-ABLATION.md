@@ -336,9 +336,66 @@ document, so a span hit can never be an accident of a repeated phrase.
 
 ## 8. Results
 
+**The full matrix ran on 2026-09-07: four arms, five models, thirteen private documents,
+one run per cell, 230 rows planned (R3 asks only the seven cases that carry fixed-form
+questions), 223 graded.** Seven rows were not: six of the strong OpenAI model's R3 rows hit
+the 900-second ceiling with no reply (re-run at 1,800 s; see the scorecard for the second
+run), and one cheap-model R2 row returned no answers array. Single runs: a difference of
+three points in a cell is noise, six is a hint, and the same sign across five models is a
+finding.
+
+### Per arm, all models
+
+| arm | rows | facts right | quote in place | said "not there" when it was not | fabrications (rows) | tokens per row |
+|---|---|---|---|---|---|---|
+| R0 read the whole document | 65 | 0.731 | 0.644 | 0.940 | 12 | 320 k |
+| R1 grep only | 65 | 0.720 | 0.642 | 0.905 | 19 | 299 k |
+| R2 find.py + reviews.py (keyword search with synonyms, thick view) | 64 | 0.725 | 0.638 | 0.906 | 17 | 461 k |
+| R3 scan.py only (fixed-form regexes; 7 cases) | 29 | 0.404 | 0.273 | 0.642 | 2 | 328 k |
+
+### Facts right, per model and arm
+
+| model (tier) | R0 read | R1 grep | R2 find.py | R3 scan.py |
+|---|---|---|---|---|
+| Claude Sonnet (cheap) | 0.727 | 0.706 | **0.768** | 0.424 |
+| Claude Opus (strong) | **0.839** | 0.803 | 0.782 | 0.441 |
+| gpt-5.6-luna (cheap) | **0.722** | 0.711 | 0.684 | 0.361 |
+| gpt-5.6-terra (middle) | 0.680 | 0.669 | **0.699** | 0.355 |
+| gpt-5.6-sol (strong) | 0.688 | **0.711** | 0.690 | 0.636 (1 row) |
+
+Fabrications per model over the three reading arms (39 rows each): Sonnet 7, Opus 5, luna
+15, terra 9, sol 12. Wall time per row: Claude 1.2–1.9 minutes, OpenAI 4–8 minutes. The
+find.py menu probe — the tool's own top-five ranking, zero tokens — put the answering
+paragraph in the top five 0.51 of the time on every model's question set.
+
+### What it says
+
+1. **The reading discipline moves facts by three to six points inside a model; the model
+   moves them by eleven.** Opus reading the whole document (0.839) beats every other cell by
+   a margin no discipline closes. The three hypotheses of section 1 were re-tested, not
+   assumed: none of them held as a general claim.
+2. **find.py does not beat grep or the whole document.** It helps Sonnet (+0.04 over reading)
+   and terra (+0.02), hurts luna (−0.04) and Opus (−0.06), and costs 44% more tokens than
+   reading and 54% more than grep, because its thick view is verbose. The honest reading of
+   the hypothesis "BM25 + a harness beats a bare shell" is: not on documents of this size
+   (4,000–65,000 characters). Its case would have to be made on documents too long to read,
+   and none of these was.
+3. **Tools cost honesty.** With grep or find.py the models said "not there" less often when
+   it was not there (0.905 against 0.940) and fabricated more (19 and 17 rows against 12).
+   A tool that returns nothing reads as "no answer" to a careful model and as "look harder,
+   then guess" to a less careful one.
+4. **The regex scan is a starting point, not a reader.** R3 answers fewer than half the
+   fixed-form questions; that is the floor a model must beat, and every model did by a wide
+   margin.
+5. **OpenAI's Codex ran commands in the arm that forbids them** (R0: 280–400 command
+   executions per thirteen rows). Read those rows as "what the model chose to do", not as
+   the discipline held; the Claude rows held it by construction.
+
+### Files
+
 ```
-bench/results/docs-<day>/
-  raw/<row>.json            the whole record: command, usage, answers, per-question cards
+bench/results/docs-ablation/docs-matrix-2026-09-07/
+  raw/<row>.json              the whole record: command, usage, answers, per-question cards
   answers/<row>.answers.json  just the model's array, for reading by eye
   scorecard.json
   scorecard.md

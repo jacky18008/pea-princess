@@ -208,23 +208,25 @@ anything piped on stdin as prompt material, so every prompt carried a twelve-lin
 snippet (both arms alike; confirmed with a one-shot test). The runners now close stdin on
 every agent launch, and the numbers above are from the clean rows only.
 
-### Reading a pasted document: the pilot (Sonnet, 2026-09-07)
+### Reading a pasted document: four disciplines, five models (2026-09-07)
 
-Design, arms and grading rules: `docs/READING-ABLATION.md`. Thirteen private de-identified
-documents (tenancy agreements, listings, review pages, planning reports, a short-let page),
-134 questions of which 42 probe something the document does not say. Two arms so far, one
-model, one run each — a small-sample diagnostic, not a result.
+Full design, grading rules and the per-model tables: `docs/READING-ABLATION.md`. Thirteen
+private de-identified documents (tenancy agreements, listings, review pages, planning
+reports, a short-let page), 134 questions of which 42 probe something the document does
+not say; four reading disciplines, five models, one run per cell, 223 graded rows.
 
-| arm | rows | facts right | quote in the right place | said "not there" when it was not | fabrications | invented quotes |
-|---|---|---|---|---|---|---|
-| R1 grep only | 13 | 0.713 | 0.636 | 1.000 | 0 | 0 |
-| R2 find.py (keyword search with synonyms, thick view) | 13 | 0.752 | 0.616 | 0.962 | 1 | 0 |
+| arm | facts right | quote in place | said "not there" when it was not | fabrications (of 65 rows) | tokens per row |
+|---|---|---|---|---|---|
+| read the whole document | 0.731 | 0.644 | 0.940 | 12 | 320 k |
+| grep only | 0.720 | 0.642 | 0.905 | 19 | 299 k |
+| find.py (keyword search with synonyms) | 0.725 | 0.638 | 0.906 | 17 | 461 k |
+| scan.py regexes only (fixed-form questions, 7 cases) | 0.404 | 0.273 | 0.642 | 2 | 328 k |
 
-The first grading of these rows reported 11 invented quotes and 9 fabrications; all of the
-quotes and seven of the fabrications were the grader's (two-column PDF text, short quotes,
-honest "the page does not say" filed under `found`, negation-blind forbidden rules), and
-every fix has a test both ways. The full matrix — four arms, five models, thirteen cases,
-260 rows — is running.
+The model matters more than the discipline: Opus reading the whole document scores 0.839,
+eleven points above Sonnet on the same arm, while no discipline moves any model by more than
+six. find.py helps two models and hurts two, and costs 44% more tokens than reading. Tools
+cost honesty on every model. The keyword finder stays in the skill for documents too long
+to read; on documents of this size the skill's advice is to read, or to grep.
 
 ### Role pipeline (pilot only; the ablation is still to run)
 
