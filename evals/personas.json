@@ -1800,7 +1800,7 @@
    "opening_message": "i booked 7 nights and the room is wet. black mould on the wall. i have photos from last night. i work tomorrow. what do i do",
    "fetch_expectation": "none",
    "safety_lines": [
-    "viewing_day_warning",
+    "verify_before_paying",
     "courteous_agent_draft",
     "licence_not_tenancy"
    ],

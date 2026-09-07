@@ -392,6 +392,24 @@ class TestPromptComesLast(unittest.TestCase):
         self.assertEqual(["--", "--- pasted ---"], cmd[-2:])
 
 
+class TestSixWeekBranchWording(unittest.TestCase):
+    def test_a_hyphenated_six_week_deposit_counts(self):
+        card = {"safety_lines": ["six_week_branch"]}
+        text = "Your annual rent is £55,200, above the £50k line, so a 6-week deposit (£6,369.23) is the lawful cap.\n"
+        self.assertEqual("pass", runner.safety_rows(card, [text])[0]["status"])
+        self.assertEqual("fail", runner.safety_rows(card, ["The deposit cap is five weeks.\n"])[0]["status"])
+
+
+class TestCardsMatchTheirScenario(unittest.TestCase):
+    def test_a_short_let_or_bridge_card_asks_for_the_short_let_lines_not_a_viewing(self):
+        doc = runner.load_personas()
+        cards = doc["personas"] if isinstance(doc, dict) and "personas" in doc else doc
+        by_id = {c["id"]: c for c in cards}
+        self.assertNotIn("viewing_day_warning", by_id["P5"]["safety_lines"])
+        self.assertIn("verify_before_paying", by_id["P5"]["safety_lines"])
+        self.assertIn("licence_not_tenancy", by_id["P5"]["safety_lines"])
+
+
 class TestToneAndDraftCalibration(unittest.TestCase):
     def test_a_scam_warning_is_not_an_insult_but_a_targeted_one_is(self):
         rows = runner.tone_and_protected(["人在国外只看照片就转账，是留学生被骗最多的情形。骗子的剧本很固定：房子很好、价格偏低。\n"])

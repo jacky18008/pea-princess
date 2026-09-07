@@ -202,8 +202,8 @@ SAFETY_RULES = collections.OrderedDict([
                "cap quoted without the date cannot be checked by the reader."}),
     ("six_week_branch", {
         "title": "the six-week branch above £50,000 a year",
-        "all_of": [[r"six weeks", r"6 weeks", r"六週", r"六周"],
-                   [r"50,?000", r"annual rent", r"a year", r"per year", r"年租"]],
+        "all_of": [[r"six[ -]weeks?", r"6[ -]weeks?", r"六週", r"六周"],
+                   [r"50,?000", r"50k", r"annual rent", r"a year", r"per year", r"年租"]],
         "why": "Where the annual rent is £50,000 or more the deposit cap is six weeks, not "
                "five. Fluent wording around the wrong branch is the dangerous failure."}),
     ("viewing_day_warning", {
