@@ -382,3 +382,27 @@ class TestARetryMintsAFreshSessionId(unittest.TestCase):
     def test_a_command_without_a_session_id_reports_none(self):
         res = launch.run([sys.executable, "-c", "print('{\"result\": \"x\"}')"], tempfile.mkdtemp(), 30, "claude")
         self.assertIsNone(res.session_id)
+
+
+class TestTheEnvelopesOwnErrorText(unittest.TestCase):
+    """Claude Code reports an API failure inside its JSON envelope with exit 1 and an empty
+    stderr; the note must carry that message, and the failure must count as the provider's."""
+
+    ENVELOPE = json.dumps({"type": "result", "is_error": True, "result": "API Error: Can't reach the API server — check your internet or DNS (ENOTFOUND)",
+                           "usage": {"input_tokens": 0, "output_tokens": 0}, "subagent_stats": {"spawned": 0}})
+
+    def test_the_failure_is_read_as_the_providers(self):
+        retry, why = launch.looks_like_provider_failure(1, self.ENVELOPE, "")
+        self.assertTrue(retry)
+        self.assertIn("ENOTFOUND", why)
+
+    def test_the_note_carries_the_message_not_the_tail(self):
+        script = "import sys; sys.stdout.write(%r); sys.exit(1)" % self.ENVELOPE
+        res = launch.run([sys.executable, "-c", script], tempfile.mkdtemp(), 30, "claude", attempts=2, waits=[0],
+                         sleep=lambda s: None, echo=lambda line: None)
+        self.assertTrue(res.provider_error)
+        self.assertIn("ENOTFOUND", res.note)
+        self.assertNotIn("subagent_stats", res.note)
+
+    def test_a_successful_envelope_reports_no_error(self):
+        self.assertIsNone(launch.claude_error(json.dumps({"is_error": False, "result": "OK"})))

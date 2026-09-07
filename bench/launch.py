@@ -71,7 +71,9 @@ SCAN_CHARS = 2000         # of stdout, scanned for provider language when a run 
 
 # The narrow pattern: what a provider says when it is refusing to serve right now.
 TRANSIENT = re.compile(r"at capacity|rate.?limit|too many requests|\b429\b|overloaded|"
-                       r"temporarily unavailable|try again later|server error|\b5\d\d\b", re.I)
+                       r"temporarily unavailable|try again later|server error|\b5\d\d\b|"
+                       r"ENOTFOUND|ECONNRESET|ECONNREFUSED|ETIMEDOUT|can'?t reach the API|"
+                       r"API Error", re.I)
 # The wider one: what a CLI says on stderr when the account, not the service, is out.
 # "rate" carries word boundaries on purpose - "generate" and "accurate" are not outages.
 # Provider language. "rate" alone is not in it: a persona discussing a nightly rate had
@@ -132,12 +134,57 @@ def provider_language(text):
     return bool(TRANSIENT.search(text or "") or PROVIDER.search(text or ""))
 
 
+def claude_envelope(stdout):
+    """The --output-format json envelope as a dict, or None."""
+    try:
+        start = stdout.index("{")
+    except (ValueError, AttributeError):
+        return None
+    depth, in_string, escape = 0, False, False
+    for i in range(start, len(stdout)):
+        ch = stdout[i]
+        if in_string:
+            if escape:
+                escape = False
+            elif ch == "\\":
+                escape = True
+            elif ch == '"':
+                in_string = False
+            continue
+        if ch == '"':
+            in_string = True
+        elif ch == "{":
+            depth += 1
+        elif ch == "}":
+            depth -= 1
+            if depth == 0:
+                try:
+                    obj = json.loads(stdout[start:i + 1])
+                except ValueError:
+                    return None
+                return obj if isinstance(obj, dict) else None
+    return None
+
+
+def claude_error(stdout):
+    """The message Claude Code put in .result when it flagged is_error, else None.
+    "API Error: Can't reach the API server (ENOTFOUND)" arrived this way on 2026-09-07,
+    exit 1, with nothing on stderr - and the note showed the tail of the envelope."""
+    obj = claude_envelope(stdout or "")
+    if isinstance(obj, dict) and obj.get("is_error"):
+        return str(obj.get("result") or obj.get("error") or "an error the CLI did not name")[:300]
+    return None
+
+
 def looks_like_provider_failure(exit_code, stdout, stderr):
     """(retry, why). The three shapes a provider failure took in the two pilots.
 
     stdout is only scanned when the run already failed: a successful reply that happens
     to discuss a rent "rate" must never be thrown away and paid for twice."""
     failed = exit_code != 0 or not (stdout or "").strip()
+    flagged = claude_error(stdout) if failed else None
+    if flagged and provider_language(flagged):
+        return True, "the CLI reported: %s" % flagged[:120]
     # stderr too is only read once the run has failed: codex writes its banner and its
     # progress there, and a successful reply about a "rate limit" clause in a tenancy is
     # still a successful reply.
@@ -252,7 +299,8 @@ def run(cmd, cwd, timeout, family, attempts=MAX_ATTEMPTS, waits=RETRY_WAITS,
                 # paying twice for a run that worked is the worse mistake.
                 note = "the provider warned on stderr: %s" % stderr.strip()[-300:]
                 break
-            note = ("exited %d: %s" % (exit_code, stderr.strip()[-300:])) if exit_code \
+            flagged = claude_error(stdout) if family == "claude" else None
+            note = ("exited %d: %s" % (exit_code, flagged or stderr.strip()[-300:])) if exit_code \
                 else "exited 0 with no output"
             # Whatever did come back is kept beside the tails. It is not graded - the
             # run never completed - but a reader looking at this row months later
