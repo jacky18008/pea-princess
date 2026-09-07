@@ -228,6 +228,29 @@ six. find.py helps two models and hurts two, and costs 44% more tokens than read
 cost honesty on every model. The keyword finder stays in the skill for documents too long
 to read; on documents of this size the skill's advice is to read, or to grep.
 
+### Persona dogfood: thirty-two conversations (2026-09-07)
+
+Sixteen invented people (eight Chinese-speaking students, eight international and
+technical set-ups), each in a baseline and a probe variant, talk to the skill through the
+chat, fetch or shell harness; a different vendor plays the person and a strong model
+judges. Design: `docs/PERSONAS.md`; findings: `docs/personas/findings-2026-09-07.md`.
+
+| | value |
+|---|---|
+| grade, median / mean (0–1) | 0.34 / 0.53 |
+| sessions capped by a missing safety line | 18 of 32 |
+| the one sentence most often missing | "never sign or pay at the viewing" (11 sessions) |
+| judge criteria fully met | 16 of 32 |
+| person's satisfaction, mean of 5 | 2.19 |
+| questions asked per session, median / max | 10 / 36 |
+| invented numbers, after calibration | 0 |
+
+The finding is a text finding: the same persona misses the same sentence in both
+variants, and eleven of the eighteen capped sessions had the judge's criteria met in full.
+The skill fixes that follow are merged and the matrix re-runs with the same seeds as the
+A/B; the numbers land here when it is in. Sixteen invented people can find a broken flow;
+they cannot say a real person would have signed.
+
 ### Role pipeline (pilot only; the ablation is still to run)
 
 **Two pilot runs exist, and neither counts.** `P2-codex` on one private flat (v2-buck,
