@@ -498,10 +498,13 @@ class Controller(object):
 
     def check_numbers(self, message, replies=()):
         """A money or area number the persona states that is in no document is an
-        invented fact, and invented facts end the run."""
+        invented fact, and invented facts end the run. Not invented: a figure derived
+        from what the persona holds, and a round approximation of one ("£3,000 多" for
+        the £3,129.20 total the assistant had just computed ended a run on 2026-09-07)."""
         allowed = self.allowed_numbers(replies)
         bad = invented_numbers(message, allowed)
-        return [b for b in bad if b["kind"] in ("money", "area")]
+        return [b for b in bad if b["kind"] in ("money", "area") and not b.get("derived")
+                and not rounds_to_allowed(b["value"], allowed)]
 
     def message_stop(self, message):
         """Completion or abandonment, read off the persona's own message.
@@ -717,6 +720,17 @@ def percents_in(text):
         if value is not None and 0 < value < 100:
             out.add(value)
     return out
+
+
+def rounds_to_allowed(value, allowed):
+    """True for a round figure within a quarter of one the speaker holds: "over £3,000",
+    "about 1,600", "£2k or so". Round means a multiple of 100 (of 50 below 500)."""
+    if value is None or value <= 0:
+        return False
+    step = 50 if value < 500 else 100
+    if abs(value / step - round(value / step)) > 1e-9:
+        return False
+    return any(a >= 100 and 0.75 * a <= value <= 1.25 * a for a in allowed if a)
 
 
 def explainable(value, allowed, percents=()):

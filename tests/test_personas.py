@@ -376,6 +376,27 @@ class TestNumberCalibration(unittest.TestCase):
         self.assertEqual([], rules["invented_numbers"])
 
 
+class TestThePersonaMayRoundWhatItHolds(unittest.TestCase):
+    """The controller ends a run when the persona invents a figure; a round approximation
+    of a figure it holds, or a figure derived from one, is not an invention."""
+
+    def test_a_round_figure_near_a_held_one_passes(self):
+        self.assertTrue(runner.rounds_to_allowed(3000.0, {3129.2}))
+        self.assertTrue(runner.rounds_to_allowed(1600.0, {1650.0}))
+        self.assertFalse(runner.rounds_to_allowed(2000.0, {3129.2}), "a quarter away is not a rounding")
+        self.assertFalse(runner.rounds_to_allowed(3129.0, {3129.2}), "a precise figure is not a rounding")
+
+    def test_check_numbers_lets_a_rounding_and_a_derivation_through(self):
+        control = runner.Controller.__new__(runner.Controller)
+        control.card = {"budget": 1650}
+        control.released_texts = lambda: ["Nightly rate: £95. Cleaning fee: £150."]
+        replies = ["28 晚總計 £3,129.20。"]
+        self.assertEqual([], control.check_numbers("£3,000 多我真的付不起。", replies))
+        self.assertEqual([], control.check_numbers("每晚 £95，七晚就是 £665。", replies))
+        bad = control.check_numbers("我朋友的押金是 £4,321。", replies)
+        self.assertEqual([4321.0], [b["value"] for b in bad])
+
+
 class TestPromptComesLast(unittest.TestCase):
     """A pasted page that begins with dashes must not be read as a CLI option."""
 
