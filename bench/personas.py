@@ -216,7 +216,9 @@ SAFETY_RULES = collections.OrderedDict([
                     r"未親眼睇過", r"未睇過", r"睇樓前"],
                    [r"do not sign", r"don't sign", r"never sign", r"do not pay", r"don't pay",
                     r"never pay", r"不要簽", r"不要签", r"不要付", r"不要先付", r"別簽", r"别签", r"別付", r"别付",
-                    r"不能簽", r"不能签", r"唔好簽", r"唔簽", r"唔好俾", r"唔好付", r"唔俾", r"一蚊都唔好俾"]],
+                    r"不能簽", r"不能签", r"唔好簽", r"唔簽", r"唔好俾", r"唔好付", r"唔俾", r"一蚊都唔好俾",
+                    r"唔好[^。\n]{0,14}(?:簽|俾|付)", r"不要[^。\n]{0,12}(?:簽|签|付|給|给)", r"別[^。\n]{0,10}(?:簽|付)",
+                    r"never [^.\n]{0,20}(?:sign|pay)", r"do not [^.\n]{0,20}(?:sign|pay)"]],
         "why": "Signing or paying at the viewing is the single most expensive mistake in "
                "the whole search."}),
     ("verify_before_paying", {
