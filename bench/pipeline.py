@@ -70,6 +70,13 @@ Nothing here passes a permission-bypass flag. The Claude side is scoped by
 ``--allowedTools``, the Codex side by ``-s workspace-write``, and stdin is closed on
 every launch (an open stdin becomes part of the prompt).
 
+Every role - planner, each executor, the verifier and any replan round of it, the
+integrator - launches through ``bench/launch.py``, the one launcher every runner in this
+directory shares. That is where the retry on a busy provider, the closed stdin and the
+token parsing for both CLIs live now; a role that never reached the model comes back with
+``provider_error=True`` and is recorded as such on its own row and in the run's notes,
+not as an empty answer graded like a model's.
+
 Usage:
   bench/pipeline.py --config P2-claude --cases bench/private/cases_private.json \\
       --case v2-buck --run 1 --dry-run
@@ -91,7 +98,6 @@ import json
 import os
 import re
 import shutil
-import subprocess
 import sys
 import tempfile
 import time
@@ -109,6 +115,7 @@ import grade as grader  # noqa: E402
 import run_codex  # noqa: E402
 import plan as planner_tool  # noqa: E402
 import verify as verifier_tool  # noqa: E402
+import launch  # noqa: E402  the one launcher every role goes through now
 
 ROLES = ("planner", "executors", "verifier", "integrator")
 ROLE_KEYS = ("agent", "model", "parallel", "skip", "note")
@@ -419,84 +426,65 @@ def write_agents_md(workdir, role, config):
         fh.write("\n".join(x for x in text if x is not None) + "\n")
 
 
-def launch(command, workdir, timeout):
-    """(stdout, stderr, note). stdin is closed: anything on it becomes part of the prompt."""
-    try:
-        proc = subprocess.Popen(command, cwd=workdir, stdin=subprocess.DEVNULL,
-                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    except OSError as exc:
-        return "", "", "could not start %r: %s" % (command[0], exc)
-    try:
-        out, err = proc.communicate(timeout=timeout)
-    except subprocess.TimeoutExpired:
-        proc.kill()
-        out, err = proc.communicate()
-        return ((out or b"").decode("utf-8", "replace"),
-                (err or b"").decode("utf-8", "replace"),
-                "timed out after %d s" % timeout)
-    note = None
-    if proc.returncode != 0:
-        note = "%s exited %d: %s" % (command[0], proc.returncode,
-                                     (err or b"").decode("utf-8", "replace").strip()[-300:])
-    return ((out or b"").decode("utf-8", "replace"),
-            (err or b"").decode("utf-8", "replace"), note)
+def launch_many(commands, workdir, timeout, parallel, family, labels=None):
+    """Run these commands through bench/launch.py, at most `parallel` in flight at once;
+    results come back in the same order as `commands`.
 
-
-def launch_many(commands, workdir, timeout, parallel):
-    """Run these commands with at most `parallel` in flight; results in the same order."""
-    results = [None] * len(commands)
+    The executors run concurrently in one shared workdir - each already writes to its own
+    answer file, see `answer_file` - so this is a thread pool over the one launcher every
+    role uses, the same shape bench/docs_bench.py uses for its own row-level concurrency.
+    Each call still gets bench/launch.py's retries, closed stdin and provider_error
+    outcome; only the fan-out is new here.
+    """
+    labels = list(labels or [None] * len(commands))
     width = max(1, int(parallel or 1))
-    for start in range(0, len(commands), width):
-        batch = list(range(start, min(start + width, len(commands))))
-        live = []
-        for index in batch:
-            try:
-                # stdin closed here too: a runner started from a shell heredoc otherwise
-                # hands that heredoc to every child it spawns.
-                proc = subprocess.Popen(commands[index], cwd=workdir,
-                                        stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
-                                        stderr=subprocess.PIPE)
-                live.append((index, proc, time.time()))
-            except OSError as exc:
-                results[index] = ("", "", "could not start: %s" % exc, 0.0)
-        for index, proc, started in live:
-            try:
-                out, err = proc.communicate(timeout=timeout)
-                note = None
-            except subprocess.TimeoutExpired:
-                proc.kill()
-                out, err = proc.communicate()
-                note = "timed out after %d s" % timeout
-            if note is None and proc.returncode != 0:
-                note = "exited %d" % proc.returncode
-            results[index] = ((out or b"").decode("utf-8", "replace"),
-                              (err or b"").decode("utf-8", "replace"), note,
-                              time.time() - started)
-    return results
+    if width <= 1 or len(commands) <= 1:
+        return [launch.run(cmd, workdir, timeout, family, label=label)
+                for cmd, label in zip(commands, labels)]
+    from concurrent.futures import ThreadPoolExecutor
+    with ThreadPoolExecutor(max_workers=width) as pool:
+        return list(pool.map(
+            lambda pair: launch.run(pair[0], workdir, timeout, family, label=pair[1]),
+            zip(commands, labels)))
 
 
-def usage_of(agent, stdout):
-    return (run_codex.usage_from_events(stdout) if agent == "codex"
-            else runner.usage_from_stdout("claude", stdout))
+def record_role(roles, notes, role, conf, res, command, group=None, note_label=None):
+    """Append this launch's row - with `provider_error` visible on it - and, if the
+    launch left a note, add it to the run's notes too.
+
+    `res` is the LaunchResult bench/launch.py returned. Every role's row and every note
+    go through here, so a role that failed at the provider (rate limit, 5xx, ENOTFOUND)
+    is recorded as such - attempts, exit code, both tails - and not read as an empty
+    answer the model gave.
+    """
+    note = res.tail_note()
+    roles.append(role_row(role, conf, res.seconds, res.usage, note, command, group,
+                          provider_error=res.provider_error))
+    if note:
+        notes.append("%s: %s" % (note_label or role, note))
+    return note
 
 
-def last_text(agent, workdir, role, stdout, group=None):
-    """A role's final message: the file Codex was told to write it to, else stdout."""
+def last_text(agent, workdir, role, text, group=None):
+    """A role's final message: the file Codex was told to write it to, else `text` -
+    the LaunchResult's own text, already Claude Code's extracted answer, or Codex's raw
+    stdout."""
     if agent == "codex":
         path = answer_file(workdir, role, group)
         if os.path.exists(path):
             with io.open(path, encoding="utf-8", errors="replace") as fh:
                 return fh.read()
-        return run_codex.last_message(workdir, stdout)
-    return runner.answer_text("claude", stdout)
+        return run_codex.last_message(workdir, text)
+    return text
 
 
-def answer_object(agent, stdout, answer_path=None):
-    """The one JSON object a role printed, out of whatever the CLI wrapped it in.
+def answer_object(agent, text, answer_path=None):
+    """The one JSON object a role printed, out of the LaunchResult's text.
 
-    Claude Code returns the answer inside `.result` of one JSON object. Codex prints a
-    JSONL EVENT STREAM, whose first object is an event and not the answer at all, so its
-    answer is read from the file `-o` named.
+    bench/launch.py already unwraps Claude Code's `--output-format json` envelope, so
+    `text` is the role's own printed answer for claude. Codex prints a JSONL EVENT
+    STREAM on stdout instead, whose first object is an event and not the answer at all,
+    so its answer is read from the file `-o` named.
     """
     if agent == "codex":
         if answer_path and os.path.exists(answer_path):
@@ -505,9 +493,7 @@ def answer_object(agent, stdout, answer_path=None):
             if found is not None:
                 return found
         return None
-    found = runner.first_json_object(runner.answer_text("claude", stdout))
-    if found is None:
-        found = runner.first_json_object(stdout)
+    found = runner.first_json_object(text)
     if isinstance(found, dict) and isinstance(found.get("result"), str):
         inner = runner.first_json_object(found["result"])
         if inner is not None:
@@ -659,17 +645,13 @@ def run_pipeline(args, case, config):
         command = build_role_command(role, conf, config, case, workdir,
                                      role_prompt(role, config, case, prompt,
                                                  agent=conf["agent"]))
-        began = time.time()
-        stdout, _stderr, note = launch(command, workdir, args.timeout)
-        wall = time.time() - began
-        usage = usage_of(conf["agent"], stdout)
-        roles.append(role_row(role, conf, wall, usage, note, command))
-        if note:
-            notes.append("%s: %s" % (role, note))
-        write_raw(args, arm, case, role, stdout)
+        res = launch.run(command, workdir, args.timeout, conf["agent"],
+                         label="%s %s" % (arm, role))
+        record_role(roles, notes, role, conf, res, command)
+        write_raw(args, arm, case, role, res.text)
 
         if role == "planner":
-            answered = answer_object(conf["agent"], stdout,
+            answered = answer_object(conf["agent"], res.text,
                                      answer_file(workdir, role))
             plan_doc = keep_the_plan_honest(answered, scaffold, mode, notes)
             retarget(plan_doc, skill_rel(conf["agent"]))
@@ -677,7 +659,7 @@ def run_pipeline(args, case, config):
             keep(args, arm, case, "plan", plan_doc)
         elif role == "baseline":
             report, _path = runner.find_report(workdir, last_text(conf["agent"], workdir,
-                                                                  role, stdout))
+                                                                  role, res.text))
             if report is None:
                 notes.append("the baseline run wrote no report, so there is nothing to "
                              "verify")
@@ -719,12 +701,13 @@ def set_aside(workdir, path):
     return os.path.basename(target)
 
 
-def role_row(role, conf, wall, usage, note, command, group=None):
+def role_row(role, conf, wall, usage, note, command, group=None, provider_error=False):
     return collections.OrderedDict([
         ("role", role), ("group", group), ("agent", conf["agent"]),
         ("model", conf.get("model")), ("wall_s", round(wall, 1)),
         ("total_tokens", runner.total_tokens(usage)),
         ("tokens", usage), ("note", note),
+        ("provider_error", bool(provider_error)),
         ("allowed_tools", role_tools(role, conf["agent"])),
         ("command", runner.shell(command) if command else None)])
 
@@ -763,7 +746,7 @@ def run_executor_rounds(args, case, config, conf, workdir, prompt, plan_doc, rol
     if not groups:
         return plan_doc, evidence, 1 if replan else 0
 
-    commands, prompts = [], []
+    commands, prompts, labels = [], [], []
     for group, axes in groups:
         extra = (REPLAN_EXTRA.format(asks="\n".join("- " + a for a in asks.get(group, [])))
                  if replan else "")
@@ -772,18 +755,18 @@ def run_executor_rounds(args, case, config, conf, workdir, prompt, plan_doc, rol
         prompts.append(text)
         commands.append(build_role_command("executors", conf, config, case, workdir, text,
                                            group))
-    results = launch_many(commands, workdir, args.timeout, conf.get("parallel"))
+        labels.append("%s executors[%s]%s" % (config["name"], group,
+                                              "-again" if replan else ""))
+    results = launch_many(commands, workdir, args.timeout, conf.get("parallel"),
+                          conf["agent"], labels)
 
     collected = []
-    for (group, _axes), command, result in zip(groups, commands, results):
-        stdout, _stderr, note, wall = result
-        usage = usage_of(conf["agent"], stdout)
-        roles.append(role_row("executors", conf, wall, usage, note, command, group))
-        if note:
-            notes.append("executor %s: %s" % (group, note))
+    for (group, _axes), command, res in zip(groups, commands, results):
+        record_role(roles, notes, "executors", conf, res, command, group,
+                   note_label="executor %s" % group)
         write_raw(args, config["name"], case,
-                  "executor-%s%s" % (group, "-2" if replan else ""), stdout)
-        doc = answer_object(conf["agent"], stdout,
+                  "executor-%s%s" % (group, "-2" if replan else ""), res.text)
+        doc = answer_object(conf["agent"], res.text,
                             answer_file(workdir, "executors", group))
         if isinstance(doc, dict):
             collected.append((group, doc))
@@ -845,16 +828,13 @@ def run_verifier(args, case, config, conf, workdir, prompt, evidence_doc, roles,
     command = build_role_command("verifier", conf, config, case, workdir,
                                  role_prompt("verifier", config, case, prompt,
                                              agent=conf["agent"]))
-    began = time.time()
-    stdout, _stderr, note = launch(command, workdir, args.timeout)
-    usage = usage_of(conf["agent"], stdout)
-    roles.append(role_row("verifier" + ("-again" if again else ""), conf,
-                          time.time() - began, usage, note, command))
-    if note:
-        notes.append("verifier: %s" % note)
-    write_raw(args, config["name"], case, "verifier" + ("-2" if again else ""), stdout)
+    res = launch.run(command, workdir, args.timeout, conf["agent"],
+                     label="%s verifier%s" % (config["name"], "-again" if again else ""))
+    record_role(roles, notes, "verifier" + ("-again" if again else ""), conf, res, command,
+               note_label="verifier")
+    write_raw(args, config["name"], case, "verifier" + ("-2" if again else ""), res.text)
 
-    answered = answer_object(conf["agent"], stdout, answer_file(workdir, "verifier"))
+    answered = answer_object(conf["agent"], res.text, answer_file(workdir, "verifier"))
     if isinstance(answered, dict) and answered.get("items"):
         verified = merge_verdicts(deterministic, answered, notes)
     else:

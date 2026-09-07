@@ -10,8 +10,10 @@ import io
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
+import tempfile
 import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -42,6 +44,41 @@ def fixture(name):
 def schema(name):
     with io.open(os.path.join(REFS, name), encoding="utf-8") as fh:
         return json.load(fh)
+
+
+class quiet(object):
+    """Swallow stdout and stderr. run_pipeline() prints a scorecard line and a note per
+    role; that is the tool doing its job, not the test reporting."""
+
+    def __enter__(self):
+        self.out, self.err = sys.stdout, sys.stderr
+        sys.stdout, sys.stderr = io.StringIO(), io.StringIO()
+        return self
+
+    def __exit__(self, *exc):
+        sys.stdout, sys.stderr = self.out, self.err
+        return False
+
+
+class Args(object):
+    """A stand-in for the argparse.Namespace bench/pipeline.py's own CLI builds, for
+    calling run_verifier()/run_executor_rounds() directly without going through main()."""
+
+    def __init__(self, **kw):
+        self.budget_mode = None
+        self.gold = None
+        self.gold_id = None
+        self.strict = False
+        self.timeout = 5
+        self.day = None
+        self.results = None
+        self.run = 1
+        self.case_row = None
+        self.workdir = None
+        self.keep = False
+        self.dry_run = False
+        for key, value in kw.items():
+            setattr(self, key, value)
 
 
 class ThePlanScaffold(unittest.TestCase):
@@ -360,14 +397,18 @@ class TheDryRun(unittest.TestCase):
         out, _err = proc.communicate()
         return out.decode("utf-8")
 
-    def test_every_launch_closes_stdin(self):
+    def test_every_role_launches_through_bench_launch_py(self):
+        """bench/launch.py is the one place that starts an agent: closed stdin, the
+        retries with a growing pause and the provider_error outcome all live there once,
+        instead of a second copy in this file that could drift out of sync with it."""
         source = read(os.path.join(ROOT, "bench", "pipeline.py"))
-        launches = [m.start() for m in re.finditer(r"subprocess\.Popen\(", source)]
-        self.assertGreaterEqual(len(launches), 2)
-        for start in launches:
-            window = source[start:start + 400]
-            self.assertIn("stdin=subprocess.DEVNULL", window,
-                          "an open stdin becomes part of the prompt")
+        self.assertNotIn("subprocess.Popen(", source,
+                         "every role must launch through bench/launch.py, not its own "
+                         "subprocess call")
+        self.assertIn("import launch", source)
+        self.assertGreaterEqual(len(re.findall(r"launch\.run\(", source)), 2,
+                                "the single-role launch and the executors' launch_many "
+                                "both call launch.run")
 
     def test_the_budget_mode_override_renames_the_arm_and_changes_the_plan(self):
         out = self.dry("--budget-mode", "lite")
@@ -602,6 +643,180 @@ class TheRowItRecords(unittest.TestCase):
                                    "x-demo")
         self.assertEqual([i["id"] for i in merged["items"]], ["e1", "place-e1"])
         self.assertEqual(merged["schema"], "vet-flat/evidence/1")
+
+
+class TheLauncher(unittest.TestCase):
+    """Every role now launches through bench/launch.py. These monkeypatch launch.run
+    with a fake that never starts a process, and check that the pipeline actually calls
+    it - once per single-shot role, once per executor group - and that a provider_error
+    result is recorded on the role's own row and in the run's notes, not read as an
+    empty answer the model gave."""
+
+    def setUp(self):
+        self.results = tempfile.mkdtemp(prefix="vetflat-pipeline-test-results-")
+        self.real_run = PL.launch.run
+
+    def tearDown(self):
+        PL.launch.run = self.real_run
+        shutil.rmtree(self.results, ignore_errors=True)
+
+    def fake(self, calls, provider_error_labels=()):
+        """A launch.run stand-in: records every (family, label) it was called with and
+        answers with plain unparseable text, so the pipeline's own fallbacks (the
+        scaffold, the deterministic verify) take over exactly as they must when a real
+        model answers badly. A label named in `provider_error_labels` instead comes
+        back the way a launch that never reached the model does."""
+        def run(cmd, cwd, timeout, family, label=None, **kwargs):
+            calls.append((family, label))
+            if label in provider_error_labels:
+                return PL.launch.LaunchResult(
+                    text="", note="exited 1: ", seconds=1.2, attempts=3,
+                    provider_error=True, stdout_tail="", stderr_tail="rate limited",
+                    exit_code=1)
+            return PL.launch.LaunchResult(text="not json", usage={"input_tokens": 3},
+                                          seconds=0.05, attempts=1)
+        return run
+
+    def test_record_role_leaves_a_clean_result_out_of_the_notes(self):
+        roles, notes = [], []
+        conf = {"agent": "claude", "model": "sonnet"}
+        res = PL.launch.LaunchResult(text="ok", usage={"input_tokens": 1}, seconds=2.0)
+        note = PL.record_role(roles, notes, "planner", conf, res, ["claude", "-p", "x"])
+        self.assertIsNone(note)
+        self.assertEqual(notes, [])
+        self.assertFalse(roles[0]["provider_error"])
+        self.assertEqual(roles[0]["wall_s"], 2.0)
+
+    def test_record_role_marks_a_provider_error_result_in_the_row_and_the_notes(self):
+        roles, notes = [], []
+        conf = {"agent": "codex", "model": None}
+        res = PL.launch.LaunchResult(text="", note="exited 1: ", seconds=180.0, attempts=3,
+                                     provider_error=True, stdout_tail="", stderr_tail="",
+                                     exit_code=1)
+        PL.record_role(roles, notes, "verifier", conf, res, ["codex", "exec"],
+                       note_label="verifier")
+        self.assertTrue(roles[0]["provider_error"])
+        self.assertIn("attempts 3", roles[0]["note"])
+        self.assertIn("stderr tail: (empty)", roles[0]["note"])
+        self.assertEqual(len(notes), 1)
+        self.assertTrue(notes[0].startswith("verifier: "), notes)
+        self.assertIn("attempts 3", notes[0])
+
+    def test_run_verifier_and_its_replan_round_both_go_through_the_launcher(self):
+        calls = []
+        PL.launch.run = self.fake(calls, provider_error_labels=("P-test verifier-again",))
+        workdir = tempfile.mkdtemp(prefix="vetflat-pipeline-test-verifier-")
+        try:
+            args = Args(results=self.results)
+            config = {"name": "P-test", "budget_mode": "standard"}
+            conf = {"agent": "claude", "model": "opus", "parallel": 1}
+            case = {"id": "test-case"}
+            evidence = fixture("evidence-good.json")
+            roles, notes = [], []
+            verified = PL.run_verifier(args, case, config, conf, workdir, "vet this",
+                                       evidence, roles, notes)
+            self.assertEqual(calls, [("claude", "P-test verifier")])
+            self.assertEqual(roles[-1]["role"], "verifier")
+            self.assertFalse(roles[-1]["provider_error"])
+            self.assertIsNotNone(verified)
+
+            again = PL.run_verifier(args, case, config, conf, workdir, "vet this",
+                                    evidence, roles, notes, again=True)
+            self.assertEqual(calls, [("claude", "P-test verifier"),
+                                     ("claude", "P-test verifier-again")])
+            self.assertEqual(roles[-1]["role"], "verifier-again")
+            self.assertTrue(roles[-1]["provider_error"], "the -again round must be "
+                            "visible as a provider failure too")
+            self.assertTrue(any(n.startswith("verifier: ") and "attempts 3" in n
+                               for n in notes), notes)
+            self.assertIsNotNone(again)
+        finally:
+            shutil.rmtree(workdir, ignore_errors=True)
+
+    def test_run_executor_rounds_launches_one_command_per_group(self):
+        scaffold = P.scaffold("standard")
+        groups = PL.groups_of(scaffold)
+        failing_group = groups[0][0]
+        calls = []
+        PL.launch.run = self.fake(
+            calls, provider_error_labels=("P-test executors[%s]" % failing_group,))
+        workdir = tempfile.mkdtemp(prefix="vetflat-pipeline-test-executors-")
+        try:
+            args = Args(results=self.results)
+            config = {"name": "P-test", "budget_mode": "standard"}
+            conf = {"agent": "claude", "model": "sonnet", "parallel": 1}
+            case = {"id": "test-case"}
+            roles, notes = [], []
+            _plan, merged, rounds = PL.run_executor_rounds(
+                args, case, config, conf, workdir, "vet this", scaffold, roles, notes)
+            self.assertEqual(len(calls), len(groups))
+            self.assertEqual(rounds, 0)
+            self.assertEqual(len(roles), len(groups))
+            by_group = dict((r["group"], r) for r in roles)
+            self.assertTrue(by_group[failing_group]["provider_error"])
+            for group, _axes in groups:
+                if group != failing_group:
+                    self.assertFalse(by_group[group]["provider_error"], group)
+            self.assertTrue(any(n.startswith("executor %s: " % failing_group)
+                               for n in notes), notes)
+            self.assertEqual(merged["schema"], "vet-flat/evidence/1")
+        finally:
+            shutil.rmtree(workdir, ignore_errors=True)
+
+    def test_launch_many_keeps_result_order_under_concurrency(self):
+        commands = [["cmd", str(i)] for i in range(5)]
+        labels = ["c%d" % i for i in range(5)]
+        calls = []
+
+        def fake_run(cmd, cwd, timeout, family, label=None, **kwargs):
+            calls.append(label)
+            return PL.launch.LaunchResult(text=label, seconds=0.01)
+
+        real = PL.launch.run
+        PL.launch.run = fake_run
+        try:
+            results = PL.launch_many(commands, "/tmp", 5, 3, "claude", labels)
+        finally:
+            PL.launch.run = real
+        self.assertEqual([r.text for r in results], labels,
+                         "results come back in command order, not completion order")
+        self.assertEqual(sorted(calls), labels)
+
+    def test_the_full_pipeline_routes_planner_executors_and_integrator_through_it(self):
+        """P1-claude has no verifier, so no replan round complicates the count: exactly
+        one planner call, one per executor group, and one integrator call."""
+        cases_path = os.path.join(ROOT, "evals", "evals.json")
+        case = PL.runner.load_cases(cases_path, "e14-marsh-wall-301", False)[0]
+        config = PL.load_config("P1-claude")
+        target = "%s planner" % config["name"]
+        calls = []
+        PL.launch.run = self.fake(calls, provider_error_labels=(target,))
+        args = PL.build_parser().parse_args([
+            "--config", "P1-claude", "--cases", cases_path, "--case", case["id"],
+            "--run", "1", "--timeout", "5", "--results", self.results])
+        args.case_row = case
+        with quiet():
+            code, row = PL.run_pipeline(args, case, config)
+        groups = len(PL.groups_of(P.scaffold("standard")))
+        self.assertEqual(len(calls), 2 + groups, calls)
+        self.assertEqual({fam for fam, _label in calls}, {"claude"})
+        self.assertEqual(code, 1, "no report.json was ever written, so there is nothing "
+                         "to grade - that is not a crash")
+        by_role = {}
+        for r in row["roles"]:
+            by_role.setdefault(r["role"], []).append(r)
+        self.assertIn("planner", by_role)
+        self.assertEqual(len(by_role["executors"]), groups)
+        self.assertEqual(len(by_role["integrator"]), 1)
+        self.assertTrue(by_role["planner"][0]["provider_error"],
+                        "the provider refusing the planner call must be visible on its "
+                        "own row")
+        self.assertIn("attempts 3", by_role["planner"][0]["note"])
+        self.assertFalse(by_role["integrator"][0]["provider_error"])
+        for r in by_role["executors"]:
+            self.assertFalse(r["provider_error"], r)
+        self.assertIn("planner:", row["note"], "the scorecard note must say which role "
+                      "the provider refused")
 
 
 class TheReferenceDocument(unittest.TestCase):
