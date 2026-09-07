@@ -25,7 +25,7 @@ Do not list the 12 axes in the pitch unless asked; do not mention vendors, model
 
 ## 2. Intake: six questions, one message, a suggested default for each
 
-Ask all six in one numbered message, and make that message the whole reply: six lines with their defaults, nothing else — no primer, no plan, no report before the answers come back (a first reply of several thousand characters carrying a dozen questions is how people leave). After the intake, never ask more than three questions in one message, and never ask one you already asked. Accept "don't know" for any: then use the default, say so, and move on. Write the answers into `profile.yaml`, show it back in plain words, and only then start vetting.
+Ask all six in one numbered message, and make that message the whole reply: six lines with their defaults, then the three sentences that never wait — the legal line from `SKILL.md` quoted whole with its date; never pay for a place you have not seen; never sign or pay at the viewing itself, take the agreement away and read it — and nothing else: no primer, no plan, no report before the answers come back (a first reply of several thousand characters carrying a dozen questions is how people leave). After the intake, never ask more than three questions in one message, and never ask one you already asked. Accept "don't know" for any: then use the default, say so, and move on. Write the answers into `profile.yaml`, show it back in plain words, and only then start vetting.
 
 | # | Ask | Suggested default if unknown | Goes to |
 |---|---|---|---|
