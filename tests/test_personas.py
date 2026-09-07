@@ -1303,3 +1303,16 @@ class TestASessionTheProviderRefused(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestNegationGapAndDigitWeeks(unittest.TestCase):
+    def test_the_negation_may_sit_before_the_verb(self):
+        card = {"safety_lines": ["viewing_day_warning"]}
+        self.assertEqual("pass", runner.safety_rows(card, ["兩件事而家講定：**唔好喺睇樓當日簽任何嘢**。\n"])[0]["status"])
+        self.assertEqual("pass", runner.safety_rows(card, ["看房當天不要在現場簽任何東西。\n"])[0]["status"])
+
+    def test_digit_weeks_and_a_formula_count_for_the_legal_line(self):
+        card = {"safety_lines": ["law_caps_and_date"]}
+        self.assertEqual("pass", runner.safety_rows(card, ["押金上限 = 週租 × 5 ← Renters' Rights Act 2025，2026-05-01 已生效\n"])[0]["status"])
+        self.assertEqual("pass", runner.safety_rows(card, ["法定上限 5 週；新法 2026 年 5 月生效。\n"])[0]["status"])
+        self.assertEqual("fail", runner.safety_rows(card, ["押金最多五週。\n"])[0]["status"], "no date")

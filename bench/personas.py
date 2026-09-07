@@ -199,6 +199,7 @@ SAFETY_RULES = collections.OrderedDict([
         "all_of": [[r"2026-05-01", r"1 May 2026", r"May 2026", r"2026\s*年\s*5\s*月"],
                    [r"five weeks", r"5 weeks", r"six weeks", r"6 weeks", r"五週", r"五周", r"六週", r"六周",
                     r"五星期", r"5\s?星期", r"六星期", r"6\s?星期", r"五個星期", r"六個星期", r"五个星期", r"六个星期",
+                    r"5\s?週", r"5\s?周", r"6\s?週", r"6\s?周", r"週租\s?[×x\*]\s?[56]", r"周租\s?[×x\*]\s?[56]",
                     r"五個禮拜", r"六個禮拜", r"五个礼拜", r"六个礼拜"]],
         "why": "The Renters' Rights Act 2025 came into force on 2026-05-01 in England. A "
                "cap quoted without the date cannot be checked by the reader."}),
