@@ -251,20 +251,19 @@ The skill fixes that follow are merged and the matrix re-runs with the same seed
 A/B; the numbers land here when it is in. Sixteen invented people can find a broken flow;
 they cannot say a real person would have signed.
 
-### Role pipeline (pilot only; the ablation is still to run)
+### Role pipeline: measured, and not recommended (2026-09-07)
 
-**Two pilot runs exist, and neither counts.** `P2-codex` on one private flat (v2-buck,
-standard mode) scored 1/10 facts on 2026-09-06 and 3/10 on 2026-09-07, zero fabrications,
-against 7/10 for the same cheap model (gpt-5.6-luna) run monolithically on the same flat
-three days earlier. Reading the raw streams showed why, and it was not the role split:
-**Codex's workspace-write sandbox denies writes under the home directory, and every fetcher
-wrote its body straight into `~/.cache/vet-flat`, so every cache miss died with
-`curl error 56` and only cache hits survived.** The 15 facts the pipeline did find were
-exactly the long-lived cache entries warmed by a truth refresh three days before; the
-monolithic run had worked one day after that refresh, on a warm cache. Fixed on
-2026-09-07 (the cache falls back to a writable directory; the bench opens the cache to the
-sandbox; `epc.py` no longer reports a dead search as zero certificates; the verifier fails
-an item that cites a failed fetch; the plan hands executors named fallbacks).
+**Two pilot runs were thrown out first.** `P2-codex` on one private flat (v2-buck, standard
+mode) scored 1/10 facts on 2026-09-06 and 3/10 on 2026-09-07, against 7/10 for the same
+cheap model (gpt-5.6-luna) run monolithically three days earlier. Reading the raw streams
+showed why, and it was not the role split: **Codex's workspace-write sandbox denies writes
+under the home directory, and every fetcher wrote its body straight into
+`~/.cache/vet-flat`, so every cache miss died with `curl error 56` and only cache hits
+survived.** Fixed on 2026-09-07 (the cache falls back to a writable directory; the bench
+opens the cache to the sandbox; `epc.py` no longer reports a dead search as zero
+certificates; the verifier fails an item that cites a failed fetch; the plan hands
+executors named fallbacks). Everything below ran after the fix, on the skill pinned at
+one commit.
 
 **The fair pair (2026-09-07, one flat, one run each, same day and cache — a diagnostic,
 not a result):**
@@ -280,12 +279,37 @@ One fact fewer for 2.8 times the tokens and four times the wall. The split did n
 facts on this flat; whether the CHECK on its own buys anything (fabrications caught) is
 the open question, and the flat had none to catch.
 
-**The ablation was cut down on that evidence** (the maintainer's call, 2026-09-07, open
-to reversal): `P3` (the monolithic run, then a verify pass — the cheapest arm, and the one
-that could still pay) on the five core flats for both vendors, and `P2-codex` on two more
-flats to see whether the pattern holds; `P1` (split without check) is dropped unless `P2`
-turns. Results land below when in. Until then, do not quote this design as a
-recommendation anywhere, including in `references/pipeline.md`.
+**The check on its own (`P3`: the single agent runs, then a verifier and an integrator
+rewrite anything unverified as unknown), five core flats, both vendors, one run each.**
+Each row grades its own baseline report, so the pair is exact:
+
+| flat | Claude: single agent → after the check | OpenAI: single agent → after the check |
+|---|---|---|
+| v2-buck | 7/10 → 6/10 | 5/10 → no report (the integrator's JSON did not parse) |
+| e01 | 8/10 → 7/10 | 9/10 → 8/10 (citations 100% → 88%) |
+| nw01 | 7/10, 0 fabrications → 6/10, **1 fabrication** | 6/10 → 5/10 |
+| s02 | 7/10 → no report (integrator failed on a network blip) | 7/10, 1 fabrication → 5/10, **the same fabrication** |
+| s09 | 8/10 → 8/10 | single agent timed out at 1,800 s, no pair |
+
+Eight exact pairs: seven lose one or two facts, one is unchanged, none gains; the check
+caught zero fabrications, let the one real fabrication through, and introduced one; two
+arms produced no report at all. Tokens per row 1.5–14.9 M against 5–6 M for the single
+agent alone.
+
+**The whole pipeline (`P2-codex`: luna plans and executes, terra verifies and integrates),
+three flats:** v2-buck 6/10 (single luna the same day: 7/10), e01 6/10 (single terra:
+9/10), s09 7/10 (single terra: 8/10); zero fabrications on all three; 12.7–20 M tokens per
+flat against 5.9 M, and one to four hours of wall against eighteen minutes (the machine
+slept during one of them, so wall is a bound, not a measurement).
+
+**Verdict.** On this task the role split does not buy facts and the check does not buy
+safety, at two to four times the cost; the failure mode of the design is a role that
+writes nothing usable, which no single agent did. The two structural weaknesses the pilot
+named — executors that give up where one agent retries, and a verify-and-integrate tail
+that spends 40% of the tokens for zero facts — are not fixed by fixing the fetcher.
+`references/pipeline.md` stays in the skill as a documented, measured, not-recommended
+mode. `P1` (the split without the check) was not run: with `P2` and `P3` both below the
+baseline it could not have changed the verdict.
 
 Two things the pilot showed that the fix does not touch: the eight executors made twelve
 script calls between them where the monolithic agent made sixty-five, and the verifier,

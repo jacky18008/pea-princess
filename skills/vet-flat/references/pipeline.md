@@ -8,6 +8,14 @@ This page splits the work into four roles that cannot do each other's job, and p
 
 ## When to use it
 
+**Measured on 2026-09-07 and not recommended.** On five private flats, the check on its
+own (single agent, then verify and integrate) lost one or two facts in seven of eight exact
+pairs and gained none, caught no fabrication and introduced one; the whole pipeline scored
+below the single agent on all three flats it ran on, at two to four times the tokens. The
+numbers are in `docs/EXPERIMENTS.md`. This file stays as the documented shape of the mode
+for anyone who wants to re-test it; the default remains one agent with the whole skill.
+
+
 Run the pipeline when **any** of these is true:
 
 - the model doing the judging is not the strongest one you have;
