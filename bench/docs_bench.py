@@ -1413,22 +1413,23 @@ def main(argv=None):
              "" if glossary else "  (no glossary wording found; using the gold's own)"))
 
     records, failures = [], 0
-    if args.parallel > 1 and not args.dry_run:
-        from concurrent.futures import ThreadPoolExecutor
-        with ThreadPoolExecutor(max_workers=args.parallel) as pool:
-            results = list(pool.map(lambda r: _safe_row(r, bed, args, glossary), rows))
-    else:
-        results = [_safe_row(r, bed, args, glossary) for r in rows]
-    for record, problem in results:
+
+    def land(record, problem):
+        """Write and print one finished row. Returns 1 for a row that failed to run.
+
+        Each row is written the moment it finishes, in both the sequential and the
+        parallel path: a 260-row matrix that only wrote at the end lost every row to a
+        crash and showed no progress for hours (2026-09-07). The scorecard therefore
+        holds rows in completion order; the tables group them by arm anyway.
+        """
         if problem:
             print("  skipped: %s" % problem, file=sys.stderr)
-            failures += 1
-            continue
+            return 1
         if record is None:
-            continue
+            return 0
         records.append(record)
         if args.dry_run:
-            continue
+            return 0
         raw_path, _answers = write_results(record, args.results, args.day)
         summary = record.get("summary") or {}
         print("  %-46s facts %s  spans %s  fab %d  -> %s"
@@ -1438,6 +1439,22 @@ def main(argv=None):
         if record.get("discipline_violations"):
             print("      discipline violations: %s"
                   % ", ".join(v["kind"] for v in record["discipline_violations"]))
+        sys.stdout.flush()
+        return 0
+
+    if args.parallel > 1 and not args.dry_run:
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+        import threading
+        lock = threading.Lock()
+        with ThreadPoolExecutor(max_workers=args.parallel) as pool:
+            futures = [pool.submit(_safe_row, r, bed, args, glossary) for r in rows]
+            for future in as_completed(futures):
+                record, problem = future.result()
+                with lock:
+                    failures += land(record, problem)
+    else:
+        for r in rows:
+            failures += land(*_safe_row(r, bed, args, glossary))
     if not args.dry_run and records:
         print("scorecard: %s" % os.path.relpath(
             os.path.join(results_dir(args.results, args.day), "scorecard.md"), ROOT))
