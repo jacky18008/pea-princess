@@ -220,7 +220,7 @@ not say; four reading disciplines, five models, one run per cell, 223 graded row
 | read the whole document | 0.731 | 0.644 | 0.940 | 12 | 320 k |
 | grep only | 0.720 | 0.642 | 0.905 | 19 | 299 k |
 | find.py (keyword search with synonyms) | 0.725 | 0.638 | 0.906 | 17 | 461 k |
-| scan.py regexes only (fixed-form questions, 7 cases) | 0.404 | 0.273 | 0.642 | 2 | 328 k |
+| scan.py regexes only (fixed-form questions, 7 cases) | 0.395 | 0.276 | 0.634 | 2 | 331 k |
 
 The model matters more than the discipline: Opus reading the whole document scores 0.839,
 eleven points above Sonnet on the same arm, while no discipline moves any model by more than

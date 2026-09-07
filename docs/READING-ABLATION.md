@@ -338,11 +338,12 @@ document, so a span hit can never be an accident of a repeated phrase.
 
 **The full matrix ran on 2026-09-07: four arms, five models, thirteen private documents,
 one run per cell, 230 rows planned (R3 asks only the seven cases that carry fixed-form
-questions), 223 graded.** Seven rows were not: six of the strong OpenAI model's R3 rows hit
-the 900-second ceiling with no reply (re-run at 1,800 s; see the scorecard for the second
-run), and one cheap-model R2 row returned no answers array. Single runs: a difference of
-three points in a cell is noise, six is a hint, and the same sign across five models is a
-finding.
+questions), all 230 graded.** Seven rows needed a second attempt: six of the strong OpenAI
+model's R3 rows hit the 900-second ceiling with no reply and one cheap-model R2 row returned
+no answers array; re-run with an 1,800-second ceiling they finished in two to nine minutes
+(transient slowness, not a property of the arm) and the tables use one row per cell, the
+first valid one. Single runs: a difference of three points in a cell is noise, six is a
+hint, and the same sign across five models is a finding.
 
 ### Per arm, all models
 
@@ -351,7 +352,7 @@ finding.
 | R0 read the whole document | 65 | 0.731 | 0.644 | 0.940 | 12 | 320 k |
 | R1 grep only | 65 | 0.720 | 0.642 | 0.905 | 19 | 299 k |
 | R2 find.py + reviews.py (keyword search with synonyms, thick view) | 64 | 0.725 | 0.638 | 0.906 | 17 | 461 k |
-| R3 scan.py only (fixed-form regexes; 7 cases) | 29 | 0.404 | 0.273 | 0.642 | 2 | 328 k |
+| R3 scan.py only (fixed-form regexes; 7 cases) | 35 | 0.395 | 0.276 | 0.634 | 2 | 331 k |
 
 ### Facts right, per model and arm
 
@@ -361,7 +362,7 @@ finding.
 | Claude Opus (strong) | **0.839** | 0.803 | 0.782 | 0.441 |
 | gpt-5.6-luna (cheap) | **0.722** | 0.711 | 0.684 | 0.361 |
 | gpt-5.6-terra (middle) | 0.680 | 0.669 | **0.699** | 0.355 |
-| gpt-5.6-sol (strong) | 0.688 | **0.711** | 0.690 | 0.636 (1 row) |
+| gpt-5.6-sol (strong) | 0.688 | **0.711** | 0.690 | 0.392 |
 
 Fabrications per model over the three reading arms (39 rows each): Sonnet 7, Opus 5, luna
 15, terra 9, sol 12. Wall time per row: Claude 1.2–1.9 minutes, OpenAI 4–8 minutes. The
