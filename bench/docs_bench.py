@@ -564,7 +564,7 @@ def codex_command(prompt, workdir, model, last_message=None):
         cmd += ["--output-last-message", last_message]
     if model:
         cmd += ["--model", model]
-    return cmd + [prompt]
+    return cmd + ["--", prompt]
 
 
 def build_command(agent, prompt, workdir, model, system, arm, last_message=None):

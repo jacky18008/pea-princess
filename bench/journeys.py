@@ -760,7 +760,7 @@ def no_mcp_config(workdir):
 
 def claude_command(prompt, workdir, model, system, session_id=None, resume=None,
                    tools=CLAUDE_TOOLS_READ):
-    cmd = ["claude", "-p", prompt]
+    cmd = ["claude", "-p"]
     if resume:
         cmd += ["--resume", resume]
     else:
@@ -772,7 +772,10 @@ def claude_command(prompt, workdir, model, system, session_id=None, resume=None,
             "--strict-mcp-config", "--mcp-config", no_mcp_config(workdir)]
     if model:
         cmd += ["--model", model]
-    return cmd
+    # `--` ends the options, so a prompt that begins with a dash (a persona's pasted page
+    # opened "--- pasted: booking homepage ---" on 2026-09-06 and the CLI refused it as an
+    # unknown option) is still the prompt. Both CLIs accept it; tested 2026-09-07.
+    return cmd + ["--", prompt]
 
 
 def codex_command(prompt, workdir, model, sandbox="read-only"):
@@ -780,7 +783,7 @@ def codex_command(prompt, workdir, model, sandbox="read-only"):
            "--skip-git-repo-check"]
     if model:
         cmd += ["--model", model]
-    return cmd + [prompt]
+    return cmd + ["--", prompt]
 
 
 def claude_supports_resume(mode="auto"):

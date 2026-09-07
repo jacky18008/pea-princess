@@ -203,7 +203,8 @@ class ConfigLoading(unittest.TestCase):
     def test_command_carries_the_appendix_the_tools_and_the_model(self):
         cfg = runner.load_config("C-twenty")
         cmd = runner.build_command("claude", {"prompt": "p"}, None, "/tmp/wd", "p", cfg)
-        self.assertEqual(cmd[:3], ["claude", "-p", "p"])
+        self.assertEqual(cmd[:2], ["claude", "-p"])
+        self.assertEqual(cmd[-2:], ["--", "p"], "the prompt comes last, after `--`")
         self.assertIn("--append-system-prompt", cmd)
         self.assertIn(cfg["append_system_prompt"], cmd)
         self.assertIn("--allowedTools", cmd)

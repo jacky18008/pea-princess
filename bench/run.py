@@ -333,13 +333,15 @@ def build_command(agent, case, model, workdir, prompt=None, config=None):
         model = config["main_model"]
     if agent == "claude":
         tools = config.get("allowed_tools") or ["Bash(python3:*)", "Read", "Write"]
-        cmd = ["claude", "-p", prompt]
+        cmd = ["claude", "-p"]
         if config.get("append_system_prompt"):
             cmd += ["--append-system-prompt", config["append_system_prompt"]]
         cmd += ["--allowedTools"] + list(tools) + ["--output-format", "json", "--setting-sources", "project", "--add-dir", workdir]
         if model:
             cmd += ["--model", model]
-        return cmd
+        # `--` ends the options: a prompt that begins with a dash (a pasted page starting
+        # "--- pasted: ..." did, 2026-09-06) is otherwise read as an unknown option.
+        return cmd + ["--", prompt]
     if agent == "codex":
         cmd = ["codex", "exec",
                "--cd", workdir,
@@ -348,7 +350,7 @@ def build_command(agent, case, model, workdir, prompt=None, config=None):
                "--skip-git-repo-check"] + launch.codex_cache_flags()
         if model:
             cmd += ["--model", model]
-        return cmd + [prompt]
+        return cmd + ["--", prompt]
     if agent == "gemini":
         cmd = ["gemini", "--prompt", prompt]
         if model:

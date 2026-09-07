@@ -130,7 +130,7 @@ def build_command(config, case, workdir, model=None, prompt=None, out=None):
     cmd += launch.codex_cache_flags()
     cmd += ["-o", out or os.path.join(workdir, "last.txt"),
             "--json",
-            prompt or case["prompt"]]
+            "--", prompt or case["prompt"]]
     return cmd
 
 

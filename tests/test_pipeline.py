@@ -350,7 +350,8 @@ class TheDryRun(unittest.TestCase):
         planner = [c for c in self.commands() if "Planner" in c]
         self.assertEqual(len(planner), 1)
         self.assertNotIn("Bash", planner[0])
-        self.assertNotIn("Write", planner[0].split("--allowedTools", 1)[1])
+        flags = planner[0].split("--allowedTools", 1)[1].split(" -- ", 1)[0]
+        self.assertNotIn("Write", flags)
 
     def test_the_first_line_of_every_role_prompt_is_shown(self):
         self.assertEqual(self.out.count("    prompt: "), len(self.commands()))

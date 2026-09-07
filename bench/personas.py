@@ -650,26 +650,109 @@ Line 2: the one thing you still do not know or still cannot do, in your own word
 SMALL_FACTORS = [2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 12.0, 13.0, 14.0, 21.0, 26.0, 28.0, 30.0, 31.0, 52.0, 100.0]
 
 
+# A line that says it is an illustration ("例如 £1,000/月", "for example", "typically
+# £25-40") or names where the figure can be checked (GOV.UK, the official fee page) is
+# not an invented fact about this flat. It is counted apart, as `illustrative_numbers`,
+# and does not cap the grade: the cap is for a figure presented as a fact of the case.
+ILLUSTRATIVE = re.compile(
+    r"(?i)例如|舉例|举例|比如|譬如|假設|假设|假如|試算|试算|示範|示范|範例|范例|"
+    r"for example|for instance|e\.g\.|say,? £|suppose|as an illustration|illustrat|"
+    r"typically|usually|ballpark|roughly|approx|around £|in the region of|"
+    r"通常|一般|大約|大约|約\s?£|约\s?£|約\s?\d|约\s?\d|上下|左右")
+SOURCED = re.compile(
+    r"(?i)gov\.uk|ukvi|home office|official (?:fee|figure|rate|site|page)|"
+    r"check (?:the )?official|payment systems regulator|\bpsr\b|\bons\b|\btfl\b|"
+    r"官網|官网|以官方為準|以官方为准|以官方公告|以公告為準|以公告为准|政府網站|政府网站")
+
+# Numbers the skill itself carries - the legal caps and thresholds in thresholds.yaml and
+# the "Constants (England)" section of arithmetic.md - are the assistant's to state as
+# they are. The rest of arithmetic.md is worked EXAMPLES (a £2,400 rent, a £65,000 income)
+# and must not become licence to state those figures about a real flat. Read once.
+_REFERENCE_NUMBERS = None
+
+
+def reference_numbers():
+    global _REFERENCE_NUMBERS
+    if _REFERENCE_NUMBERS is None:
+        values = set()
+        folder = os.path.join(ROOT, "skills", "vet-flat", "references")
+        texts = []
+        try:
+            with io.open(os.path.join(folder, "thresholds.yaml"), encoding="utf-8") as fh:
+                texts.append(fh.read())
+        except IOError:
+            pass
+        try:
+            with io.open(os.path.join(folder, "arithmetic.md"), encoding="utf-8") as fh:
+                doc = fh.read()
+            at = doc.find("## Constants")
+            if at >= 0:
+                end = doc.find("\n## ", at + 3)
+                texts.append(doc[at:end if end > 0 else len(doc)])
+        except IOError:
+            pass
+        for text in texts:
+            for token in re.findall(r"[0-9][0-9,]*(?:\.[0-9]+)?", text):
+                value = journeys.to_number(token)
+                if value is not None:
+                    values.add(value)
+        _REFERENCE_NUMBERS = values
+    return _REFERENCE_NUMBERS
+
+
+def numbers_in(text):
+    out = set()
+    for token in re.findall(r"[0-9][0-9,]*(?:\.[0-9]+)?", text or ""):
+        value = journeys.to_number(token)
+        if value is not None:
+            out.add(value)
+    return out
+
+
 def explainable(value, allowed):
     """True when the figure is a simple derivation of numbers the persona already had:
-    a sum or difference of two of them, or one of them multiplied or divided by a
-    small factor (nights, weeks, months, a percentage). £57 a night is £1,600 / 28; it
-    is arithmetic, not invention, even when the line does not show its working."""
+    a sum or difference of two of them, one of them multiplied or divided by a small
+    factor (nights, weeks, months, a percentage), a standard tenancy formula (weekly
+    rent = pcm x 12 / 52, deposit = five or six weeks, holding deposit = one week), or a
+    rate times a count plus a fee (28 nights x £111.76 + cleaning). £57 a night is
+    £1,600 / 28; it is arithmetic, not invention, even when the line does not show its
+    working."""
     pool = [a for a in allowed if a and a >= 20 and a not in FREE_NUMBERS]
-    close = lambda x: abs(x - value) <= max(0.02, 0.006 * abs(value))
+    # Sums of money are exact to the penny; a rate times a count, a division and the
+    # weekly-rent formula carry the rounding of the rate, so they get 0.05 percent.
+    exact = lambda x: abs(x - value) <= 0.011
+    close = lambda x: abs(x - value) <= max(0.011, 0.0005 * abs(value))
+    formula = set()
     for a in pool:
+        weekly = a * 12 / 52.0
+        formula.update([weekly, weekly * 5, weekly * 6, a * 12, a / 12.0, a * 52 / 12.0])
+    wider = pool + sorted(formula)
+    for a in wider:
+        if close(a):
+            return True
         for f in SMALL_FACTORS:
             if close(a * f) or close(a / f) or close(a * f / 100.0):
                 return True
-    for i, a in enumerate(pool):
-        for b in pool[i:]:
-            if close(a + b) or close(abs(a - b)):
+    for i, a in enumerate(wider):
+        for b in wider[i:]:
+            if exact(a + b) or exact(abs(a - b)):
                 return True
+    if len(pool) <= 60:               # base + cleaning fee + service fee, to the penny
+        for i, a in enumerate(pool):
+            for j in range(i, len(pool)):
+                for c in pool[j:]:
+                    if exact(a + pool[j] + c):
+                        return True
     return False
 
 
-def invented_numbers(text, allowed):
+def invented_numbers(text, allowed, seeds=None):
     """Money, area, minute and week figures the reply states that are in no document.
+
+    ``allowed`` are the figures that may appear as they stand; ``seeds`` (default: the
+    same set) are the figures a derivation may start from. rule_checks passes the case's
+    own numbers as seeds and keeps the skill's constants out of them: with the constants
+    in the pool almost any figure was "derived" from something.
 
     A line that shows its working - an arithmetic expression, an ``=``, or a
     ``computed_by`` note - is computation and is skipped: £2,650 + £280 = £2,930 is
@@ -687,9 +770,11 @@ def invented_numbers(text, allowed):
                     continue
                 if any(abs(value - a) <= 0.01 for a in allowed):
                     continue
-                derived = explainable(value, allowed)
+                derived = explainable(value, allowed if seeds is None else seeds)
                 out.setdefault((kind, value),
                                collections.OrderedDict([("kind", kind), ("value", value), ("derived", derived),
+                                                        ("illustrative", bool(ILLUSTRATIVE.search(line))),
+                                                        ("sourced", bool(SOURCED.search(line))),
                                                         ("span", line.strip()[:160])]))
     return list(out.values())
 
@@ -871,22 +956,33 @@ def rule_checks(card, dialogue, harness, released_texts, profile_before=None,
                 profile_after=None):
     """Everything a machine can decide on its own, before any model judges anything."""
     replies = [t.get("assistant") or "" for t in dialogue]
-    allowed = set(FREE_NUMBERS)
+    # The pool of numbers the assistant may state grows turn by turn: the card and the
+    # released documents, the skill's own constants, then whatever the person said in
+    # each message, then whatever the assistant itself already said (a figure is judged
+    # at its first mention; repeating it later is not a second invention).
+    seeds = set()
     for text in list(released_texts) + [json.dumps(card, ensure_ascii=False)]:
-        for token in re.findall(r"[0-9][0-9,]*(?:\.[0-9]+)?", text or ""):
-            value = journeys.to_number(token)
-            if value is not None:
-                allowed.add(value)
-    invented, unshown = [], []
-    for index, reply in enumerate(replies, 1):
-        for item in invented_numbers(reply, allowed):
+        seeds |= numbers_in(text)
+    constants = set(FREE_NUMBERS) | set(reference_numbers())
+    invented, unshown, illustrative = [], [], []
+    for index, turn in enumerate(dialogue, 1):
+        seeds |= numbers_in(turn.get("user") or "")
+        reply = turn.get("assistant") or ""
+        for item in invented_numbers(reply, seeds | constants, seeds):
             item = collections.OrderedDict(item)
             item["turn"] = index
-            (unshown if item.get("derived") else invented).append(item)
+            if item.get("derived"):
+                unshown.append(item)
+            elif item.get("illustrative") or item.get("sourced"):
+                illustrative.append(item)
+            else:
+                invented.append(item)
+        seeds |= numbers_in(reply)
     return collections.OrderedDict([
         ("tone_and_protected", tone_and_protected(replies)),
         ("asks", ask_load(replies)),
         ("invented_numbers", invented),
+        ("illustrative_numbers", illustrative),
         ("unshown_arithmetic", unshown),
         ("safety", safety_rows(card, replies)),
         ("settings", settings_rows(card, harness, replies, profile_before, profile_after)),
@@ -1076,16 +1172,16 @@ def agent_command(agent, harness, prompt, workdir, model, system,
 def helper_command(family, prompt, workdir, model):
     """The persona and the judge. No tools, no skill, no filesystem to touch."""
     if family == "claude":
-        cmd = ["claude", "-p", prompt, "--allowedTools", "", "--output-format", "json",
+        cmd = ["claude", "-p", "--allowedTools", "", "--output-format", "json",
                "--setting-sources", "project", "--strict-mcp-config", "--mcp-config",
                journeys.no_mcp_config(workdir)]
         if model:
             cmd += ["--model", model]
-        return cmd
+        return cmd + ["--", prompt]
     cmd = ["codex", "exec", "--cd", workdir, "--sandbox", "read-only", "--skip-git-repo-check"]
     if model:
         cmd += ["--model", model]
-    return cmd + [prompt]
+    return cmd + ["--", prompt]
 
 
 def launch(cmd, workdir, timeout, family="claude", label=None, **kwargs):
@@ -1618,11 +1714,14 @@ def regrade(folder, args, doc=None):
                     criteria[index - 1]["evidence"] = item.get("evidence")
                     criteria[index - 1]["note"] = item.get("note")
             stored["judge_summary"] = parsed.get("summary") or note
+            stored["judge_model"] = model
         before = stored.get("grade")
         stored.update(collections.OrderedDict([
             ("criteria", criteria), ("safety", rules["safety"]),
             ("tone_and_protected", rules["tone_and_protected"]),
-            ("invented_numbers", rules["invented_numbers"]), ("asks", rules["asks"]),
+            ("invented_numbers", rules["invented_numbers"]),
+            ("illustrative_numbers", rules.get("illustrative_numbers") or []),
+            ("unshown_arithmetic", rules.get("unshown_arithmetic") or []), ("asks", rules["asks"]),
             ("turns_to_first_value", rules["turns_to_first_value"]),
             ("language", rules["language"]), ("settings_checks", rules["settings"]),
             ("regraded_at", journeys.now())]))
