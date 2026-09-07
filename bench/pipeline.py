@@ -999,7 +999,22 @@ def finish(args, case, config, arm, mode, workdir, roles, notes, wall, worst,
     labelled["name"], labelled["budget_mode"] = arm, mode
     card = None
     if report is None:
-        notes.append("no report.json in the working directory")
+        stray = os.path.join(workdir, "report.json")
+        if os.path.exists(stray):
+            # The integrator wrote a report that does not parse. Keep it: a role that
+            # wrote 2,000 lines of almost-JSON is a different failure from one that wrote
+            # nothing, and the next reader needs to see which (P3-codex, 2026-09-07).
+            try:
+                with io.open(stray, encoding="utf-8") as fh:
+                    broken = fh.read()
+                runner.write_raw(broken, arm + "-report-invalid", case["id"], args.run, when=when,
+                                 results_root=args.results)
+                notes.append("report.json is present but not valid JSON (%d chars, kept under raw/)"
+                             % len(broken))
+            except (IOError, OSError) as exc:
+                notes.append("report.json is present but unreadable: %s" % exc)
+        else:
+            notes.append("no report.json in the working directory")
         worst = 1
     else:
         try:
@@ -1046,7 +1061,7 @@ def finish(args, case, config, arm, mode, workdir, roles, notes, wall, worst,
                 base_report = json.load(fh, object_pairs_hook=collections.OrderedDict)
             base_card = grader.grade(base_report, case, grader.case_profile_path(args.cases, case))
             row["baseline"] = collections.OrderedDict(
-                (k, base_card.get(k)) for k in ("summary", "facts", "fact_recall", "stable_fact_recall",
+                (k, base_card.get(k)) for k in ("summary", "fact_recall", "stable_fact_recall",
                                                 "fabrications", "citations", "unknown_honesty")
                 if k in base_card)
             runner.persist_report(base_report, arm + "-baseline", case["id"], args.run, when=when,
