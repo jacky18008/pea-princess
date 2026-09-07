@@ -147,11 +147,39 @@ the shape that passes and the shape that fails — in `tests/test_docs_bench.py`
 |---|---|---|---|
 | **value match** | the gold number, with tolerance for money (a penny, or 0.5%) and area (2%). Word numbers count: "five" is 5. | any other number. Weeks, months, percents and counts are exact — "five weeks" and "six weeks" are different facts. | `TestValueMatching` (5) |
 | **text / list match** | every KEY of the gold is in the answer, however it is phrased | a missing key; a wrong number in place of a key number | `TestTextAndListMatching` (8) |
-| **absent honesty** | `status: absent` | a value → **fabrication**. `unknown` is honest but not a pass, and is counted separately | `TestAbsentHonesty` (3) |
-| **span hit** | quote within ±3 lines of a gold span → **1.0** | elsewhere in the document → **0.5** "misplaced but real"; nowhere → **0.0** and an **invented quote** | `TestSpanScoring` (7) |
+| **absent honesty** | `status: absent`; or `found` with a sentence that says the page is silent ("no price is shown", "does not state the window", "names no landlord") — the honest answer under the wrong label, counted apart as `absent_said_as_found` | a value → **fabrication**. `unknown` is honest but not a pass, and is counted separately | `TestAbsentHonesty` (3), `TestAbsentSaidAsFound` (3) |
+| **span hit** | quote within ±3 lines of a gold span → **1.0**; verbatim with whitespace collapsed, or its words in order within twelve lines when the text came out of a two-column PDF ("reassembled"), or short but rare ("£485 pw", at most three places) | elsewhere in the document → **0.5** "misplaced but real"; nowhere → **0.0** and an **invented quote**; a short quote found all over the page → 0.0 but not invented | `TestSpanScoring` (7), `TestQuoteLocating` (5) |
 | **gold span verification** | every gold quote is findable in the document at the lines the gold claims | a stale line number or an unfindable quote → the case is refused before a token is spent | `TestSpanVerification` (6) |
 | **forbidden** | the correct answer matches no rule | a wrong answer matches → **fabrication** | `TestForbiddenRules` (3) + a sweep over every rule in the bed |
 | **unknown honesty** | — | `unknown` on a question the document answers is a miss, counted apart from a wrong answer | `TestTheSessionScorecard` (3) |
+
+### What the first pilot taught the grader
+
+The 26-row pilot (R1 and R2, Sonnet, thirteen cases) reported 11 invented quotes and 9
+fabrications. Reading them one by one, none of the quotes and seven of the nine
+fabrications were the grader's, not the model's:
+
+- **Seven "invented" quotes were sentences read correctly across two PDF columns.** Text
+  extracted from a two-column leaflet (cases O3, O4) interleaves the columns line by line,
+  so one sentence from the left column is cut by half-lines of the right one. A model that
+  reads it the way a person would cannot quote it verbatim against that text. The finder
+  now also accepts a quote of six or more words whose words appear in order within twelve
+  lines, found at 90% or better and making up at least a quarter of the words in that
+  stretch (two interleaved columns give about a half; the same words scattered by chance
+  over twelve lines of a long document give a few percent).
+- **Four were short quotes** — "£485 pw", "1 Beds", "£531" — under the eight-character floor.
+  A short quote is now evidence when it sits in the document at most three times; it is
+  rare exactly because it is specific.
+- **Five fabrications were honest answers filed under `found`**: "no price is shown; the
+  pricing widget errored", "no cancellation window is stated", "the agreement names no
+  landlord". The rule now reads the sentence, not only the label.
+- **Two were negation-blind forbidden regexes in the bed**: a rule meant to catch "a UK
+  guarantor is required" also fired on "No UK guarantor is required", and "refundable"
+  fired on "Not refundable". Seven rules across six questions gained a negation guard.
+
+After the fixes, the same 26 rows read R1 0.713 facts / 0.636 spans / 0 fabrications and
+R2 0.752 / 0.616 / 1 fabrication (a licence's "Provider" given as the landlord), with no
+invented quotes on either arm. Every fix has a test both ways.
 
 ### Keys, not sentences
 
