@@ -901,3 +901,11 @@ class TheReferenceDocument(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TheDayLabel(unittest.TestCase):
+    def test_a_label_that_is_not_a_date_names_the_folder_and_does_not_crash(self):
+        import datetime
+        self.assertEqual(datetime.datetime(2026, 9, 7), PL.results_when("2026-09-07"))
+        self.assertIsInstance(PL.results_when("ablation-2026-09-07"), datetime.datetime)
+        self.assertIsInstance(PL.results_when(None), datetime.datetime)

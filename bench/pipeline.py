@@ -967,12 +967,22 @@ def write_raw(args, arm, case, role, stdout):
         fh.write(stdout or "")
 
 
+def results_when(day):
+    """The timestamp behind a --day label. A label that is not a date ("ablation-2026-09-07")
+    names the folder and nothing else: the row is stamped with now. Before 2026-09-07 such
+    a label crashed finish() after forty minutes of model calls, and lost the run."""
+    try:
+        return datetime.datetime.strptime(day, "%Y-%m-%d")
+    except (TypeError, ValueError):
+        return datetime.datetime.utcnow()
+
+
 # -------------------------------------------------------------------- output --
 def finish(args, case, config, arm, mode, workdir, roles, notes, wall, worst,
            evidence_doc, verified_doc, rounds_used):
     kept_names = list(KEPT)
     day = args.day or datetime.datetime.utcnow().strftime("%Y-%m-%d")
-    when = datetime.datetime.strptime(day, "%Y-%m-%d")
+    when = results_when(day)
     report, path = runner.find_report(workdir, "")
     raw_path = runner.write_raw(json.dumps({"roles": roles, "notes": notes},
                                            ensure_ascii=False, indent=1),
