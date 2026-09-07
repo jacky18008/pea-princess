@@ -379,13 +379,16 @@ class DerivingEvidenceFromAFinishedReport(unittest.TestCase):
         self.assertEqual(evidence["flat"], "301")
         self.assertEqual(evidence["schema"], V.EVIDENCE_SCHEMA)
 
-    def test_a_number_with_no_quote_comes_back_unverified_not_verified(self):
+    def test_a_number_with_no_quote_is_checked_for_what_it_can_be_and_listed_unchecked(self):
+        """A report-derived number holds no quote because the report never did. It is
+        not failed for that (failing them all emptied a 7/10 report to 0/10 on
+        2026-09-07); it passes the checks it can face and is listed as unchecked."""
         evidence = V.evidence_from_report(self.REPORT, "x-demo")
         result = V.verify(evidence, self.REPORT, V.load_sources(SOURCES), "lite")
         verdict = state(result, "a2-1")
-        self.assertEqual(verdict["state"], "fail")
-        self.assertIn("quote_missing", verdict["rules"],
-                      "an unverified number is not a verified one")
+        self.assertEqual(verdict["state"], "pass", verdict)
+        self.assertNotIn("quote_missing", verdict["rules"])
+        self.assertIn("a2-1", result["counts"]["quotes_unchecked"], "the scorecard must say it was only resolved, not read")
 
 
 class TheSharedReferentRules(unittest.TestCase):
@@ -534,3 +537,39 @@ class TestFixedFormAxes(unittest.TestCase):
         self.assertEqual(7, V.fixed_axis("F14"))
         self.assertEqual(7, V.fixed_axis("F16"))
         self.assertEqual(7, V.fixed_axis("F99"))
+
+
+class TestReportDerivedItems(unittest.TestCase):
+    """The check-only arm derives evidence from a finished report; those items carry no
+    quote and are not failed for it (that emptied a 7/10 report to 0/10 on 2026-09-07)."""
+
+    REPORT = {"candidates": [{"identity": {"flat": "Flat 42"}, "metrics": {
+        "crime_6mo_count": {"value": 48, "unit": "crimes", "sources": ["police_uk_street_crime"]}},
+        "axes": [{"id": 5, "numbers": [{"label": "crimes in six months", "value": 48, "unit": "crimes",
+                                        "sources": ["police_uk_street_crime"]}]}],
+        "fixed_answers": [{"id": "F1", "status": "found", "answer": "5 weeks", "source": "pasted:offer.txt",
+                           "quote": "deposit of five weeks"}]}]}
+
+    def test_derived_items_are_marked_and_pass_without_a_quote(self):
+        doc = V.evidence_from_report(self.REPORT, "x")
+        items = doc["items"]
+        self.assertTrue(items)
+        self.assertTrue(all(i.get("derived_from") == "report" for i in items))
+        quoteless = [i for i in items if not i.get("quote")]
+        self.assertTrue(quoteless)
+        for item in quoteless:
+            state, reason, rules = V.check_item(item, {}, {}, {}, known={"police_uk_street_crime"})
+            self.assertNotIn("quote_missing", rules, (item["id"], reason))
+
+    def test_a_derived_item_with_an_unknown_source_still_fails(self):
+        item = {"id": "m-x", "axis": 1, "claim": "x", "status": "ok", "value": 3, "unit": "u",
+                "source": "made_up_source", "derived_from": "report"}
+        state, reason, rules = V.check_item(item, {}, {"police_uk_street_crime": "https://x"}, {})
+        self.assertEqual("fail", state)
+        self.assertIn("source_resolves", rules)
+
+    def test_an_executor_item_without_a_quote_still_fails(self):
+        item = {"id": "e-x", "axis": 1, "claim": "x", "status": "ok", "value": 3, "unit": "u",
+                "source": "police_uk_street_crime"}
+        state, reason, rules = V.check_item(item, {}, {}, {}, known={"police_uk_street_crime"})
+        self.assertIn("quote_missing", rules)

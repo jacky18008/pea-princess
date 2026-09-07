@@ -1037,6 +1037,24 @@ def finish(args, case, config, arm, mode, workdir, roles, notes, wall, worst,
     suff = (verified_doc or {}).get("sufficiency")
     row["information_sufficiency"] = (suff or {}).get("sufficiency")
     row["information_sufficiency_detail"] = suff
+    baseline_path = os.path.join(workdir, "report.baseline.json")
+    if os.path.exists(baseline_path):
+        # The check-only arm ran the single agent first; grade that report too, so the
+        # row carries its own control: what the check changed is the difference.
+        try:
+            with io.open(baseline_path, encoding="utf-8") as fh:
+                base_report = json.load(fh, object_pairs_hook=collections.OrderedDict)
+            base_card = grader.grade(base_report, case, grader.case_profile_path(args.cases, case))
+            row["baseline"] = collections.OrderedDict(
+                (k, base_card.get(k)) for k in ("summary", "facts", "fact_recall", "stable_fact_recall",
+                                                "fabrications", "citations", "unknown_honesty")
+                if k in base_card)
+            runner.persist_report(base_report, arm + "-baseline", case["id"], args.run, when=when,
+                                  results_root=args.results)
+            notes.append("baseline graded: %s" % base_card.get("summary"))
+        except Exception as exc:                            # bookkeeping never kills a run
+            notes.append("the baseline report could not be graded: %s" % exc)
+        row["note"] = "; ".join(n for n in notes if n) or None
     runner.append_scorecard(row, when=when)
     if card:
         print(card["summary"])

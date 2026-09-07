@@ -5,7 +5,10 @@
   "description": "Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen - https://github.com/jacky18008/pea-princess - CC BY 4.0. What the executors write in the role pipeline (references/pipeline.md): one item per thing that was read, and nothing else. NO VERDICTS. NO SCORES. NO ARITHMETIC except a scripts/calc.py call recorded in computed_by. An executor that could not get something writes an item with status \"unknown\" and lists what it tried, because a gap somebody tried to fill is a different thing from a gap nobody looked at. Every found item carries a verbatim quote and a source that resolves, and scripts/verify.py checks both.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema", "items"],
+  "required": [
+    "schema",
+    "items"
+  ],
   "properties": {
     "schema": {
       "type": "string",
@@ -13,31 +16,47 @@
       "description": "Always the literal \"vet-flat/evidence/1\"."
     },
     "case": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "description": "The same short label the plan carries.",
       "maxLength": 120
     },
     "flat": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "description": "The flat this run is about, as the register writes it: \"301\", \"12b\". The referent guard needs it to tell this flat's numbers from the one next door.",
       "maxLength": 40
     },
     "group": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "description": "The executor group that wrote this file, when one executor writes its own. The harness merges the groups.",
       "maxLength": 40
     },
     "items": {
       "type": "array",
       "description": "One item per fact. Two executors may write about the same axis; ids must still be unique across the merged file.",
-      "items": {"$ref": "#/definitions/item"}
+      "items": {
+        "$ref": "#/definitions/item"
+      }
     }
   },
   "definitions": {
     "item": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "axis", "claim", "status"],
+      "required": [
+        "id",
+        "axis",
+        "claim",
+        "status"
+      ],
       "properties": {
         "id": {
           "type": "string",
@@ -58,51 +77,91 @@
         },
         "status": {
           "type": "string",
-          "enum": ["ok", "unknown"],
+          "enum": [
+            "ok",
+            "unknown"
+          ],
           "description": "ok = it was read and the quote is below. unknown = it could not be got; say what was tried in `tried`, and leave value, quote and source out."
         },
         "value": {
-          "type": ["number", "string", "boolean", "null"],
+          "type": [
+            "number",
+            "string",
+            "boolean",
+            "null"
+          ],
           "description": "The value exactly as the source states it. A number stays a number; a letter grade or a class name is a string. Never a range, never a rounded figure, never a guess."
         },
         "unit": {
-          "type": ["string", "null"],
+          "type": [
+            "string",
+            "null"
+          ],
           "description": "The unit, written out: \"m2\", \"square feet\", \"minutes\", \"GBP per month\", \"crimes per six months\", \"weeks of rent\". A number without a unit is not evidence; scripts/verify.py fails it.",
           "maxLength": 60
         },
         "source": {
-          "type": ["string", "null"],
+          "type": [
+            "string",
+            "null"
+          ],
           "description": "Either an id that resolves in the report's sources[] (\"epc-cert\"), or \"pasted:<name>\" for text the user supplied, where <name> is the file in the pasted-sources folder. Never \"the internet\", never a bare URL with no entry behind it."
         },
         "quote": {
-          "type": ["string", "null"],
+          "type": [
+            "string",
+            "null"
+          ],
           "description": "The sentence you read it in, VERBATIM, copied not retyped. scripts/verify.py looks for it in the source, ignoring only how the whitespace falls. At most 300 characters, the same limit as the report.",
           "maxLength": 300
         },
         "fetched_at": {
-          "type": ["string", "null"],
+          "type": [
+            "string",
+            "null"
+          ],
           "description": "When it was read, UTC, as 2026-09-06T11:20:00Z. Crime counts and journey times move.",
           "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}(:[0-9]{2})?(Z|[+-][0-9]{2}:[0-9]{2})$"
         },
         "script": {
-          "type": ["string", "null"],
+          "type": [
+            "string",
+            "null"
+          ],
           "description": "The exact command that produced it, when a script did: \"scripts/epc.py cert 1234-5678-9012-3456-7890\". Blank when the text was pasted.",
           "maxLength": 400
         },
         "computed_by": {
-          "type": ["string", "null"],
+          "type": [
+            "string",
+            "null"
+          ],
           "description": "The ONLY arithmetic an executor may report, and only as a scripts/calc.py call with its output: \"calc.py deposit --rent-pcm 2400 -> 5 weeks = 2769.23\". Anything an executor worked out in its head belongs to nobody and is thrown away.",
           "maxLength": 400
         },
         "tried": {
           "type": "array",
           "description": "For an unknown item: what was actually attempted, one line each, specific enough for somebody else to carry on. An unknown with an empty `tried` is a gap nobody looked at, and scripts/verify.py --strict fails it.",
-          "items": {"type": "string", "minLength": 1, "maxLength": 300}
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          }
         },
         "note": {
-          "type": ["string", "null"],
+          "type": [
+            "string",
+            "null"
+          ],
           "description": "Anything the verifier should know: that the register carries two flats at this number, that the month is missing rather than zero.",
           "maxLength": 400
+        },
+        "derived_from": {
+          "type": "string",
+          "enum": [
+            "report"
+          ],
+          "description": "report: the item was derived by verify.py from a finished report.json (the check-only arm). It carries no quote because the report held none; it is checked for source, referent, caps and contradictions, and listed as unchecked otherwise."
         }
       }
     }

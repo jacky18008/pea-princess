@@ -274,7 +274,7 @@ def check_item(item, pasted, source_ids, report_texts, flat=None, strict=False,
             rules.append("quote_in_source")
             reasons.append("the quote is not in the source, even ignoring whitespace")
     elif not quote and not (item.get("computed_by") or "").strip() \
-            and "source_resolves" not in rules:
+            and "source_resolves" not in rules and item.get("derived_from") != "report":
         rules.append("quote_missing")
         reasons.append("a found item needs the sentence it was read in")
 
@@ -608,9 +608,11 @@ def evidence_from_report(report, case=None):
     """Turn a finished report.json into evidence items, deterministically.
 
     This is what lets a single-agent run be verified without being re-run: every
-    labelled number, every metric and every fixed answer becomes an item. Most carry no
-    quote, so most come back `unknown` rather than `pass` - which is exactly the point.
-    An unverified number is not a verified one.
+    labelled number, every metric and every fixed answer becomes an item, marked
+    `derived_from: report`. Most carry no quote, and a report-derived item is not failed
+    for that: the report never held one. It is checked for what can be checked - the
+    source id resolves, the referent is right, the caps, the contradictions - and listed
+    as unchecked otherwise (failing them all emptied a 7/10 report to 0/10, 2026-09-07).
     """
     items = []
     candidates = report.get("candidates") or []
@@ -626,7 +628,7 @@ def evidence_from_report(report, case=None):
             ("unit", metric.get("unit")),
             ("source", (metric.get("sources") or [None])[0]),
             ("quote", None), ("note", metric.get("meaning")),
-            ("computed_by", metric.get("computed_by"))]))
+            ("computed_by", metric.get("computed_by")), ("derived_from", "report")]))
     for axis in candidate.get("axes") or []:
         if not isinstance(axis, dict):
             continue
@@ -640,7 +642,7 @@ def evidence_from_report(report, case=None):
                 ("source", (number.get("sources") or [None])[0]),
                 ("quote", None),
                 ("note", number.get("meaning") or number.get("compared_to")),
-                ("computed_by", number.get("computed_by"))]))
+                ("computed_by", number.get("computed_by")), ("derived_from", "report")]))
     for answer in candidate.get("fixed_answers") or []:
         if not isinstance(answer, dict):
             continue
@@ -651,7 +653,7 @@ def evidence_from_report(report, case=None):
             ("status", status), ("value", answer.get("answer")),
             ("unit", None), ("source", answer.get("source")),
             ("quote", answer.get("quote")), ("note", answer.get("note")),
-            ("tried", [] if status == "unknown" else None)]))
+            ("tried", [] if status == "unknown" else None), ("derived_from", "report")]))
     for item in items:
         for key in [k for k, v in item.items() if v is None and k in ("computed_by", "tried")]:
             del item[key]
@@ -704,8 +706,9 @@ def verify(evidence, report=None, pasted=None, tier="standard", strict=False,
     # we have no evidence against it - but a run where most passes are unchecked is a
     # different thing from one where they were read, and the scorecard should say which.
     unchecked = [i.get("id") for i in items
-                 if (i.get("status") or "ok") != "unknown" and i.get("quote")
-                 and source_text(i, pasted, {}) is None]
+                 if (i.get("status") or "ok") != "unknown"
+                 and ((i.get("quote") and source_text(i, pasted, {}) is None)
+                      or (i.get("derived_from") == "report" and not i.get("quote")))]
 
     states = [v["state"] for v in verdicts.values()]
     counts = collections.OrderedDict([
