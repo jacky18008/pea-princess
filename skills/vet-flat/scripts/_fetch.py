@@ -14,15 +14,54 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
 import time
 from datetime import datetime, timezone
 
 BROWSER_UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
               "(KHTML, like Gecko) Chrome/128.0 Safari/537.36")
 TOOL_UA = "vet-flat/0.1 (flat-vetting research; contact via project page)"
+# Where fetched bodies are kept. $VETFLAT_CACHE, else ~/.cache/vet-flat - but only if it can
+# be written to: curl writes every body straight into the cache file, so an unwritable cache
+# directory used to turn every cache miss into "curl error 56" while cache hits kept working.
+# Codex's default workspace-write sandbox denies writes under the home directory, which is
+# exactly that case (found 2026-09-07). cache_dir() therefore falls back, in order, to
+# $TMPDIR/vet-flat and ./.vet-flat-cache, and last to a fresh temporary directory.
 CACHE_DIR = os.environ.get("VETFLAT_CACHE",
                            os.path.join(os.path.expanduser("~"), ".cache", "vet-flat"))
+_cache_dir_resolved = None
 _last_hit = {}
+
+
+def cache_dir():
+    """The first writable of $VETFLAT_CACHE or ~/.cache/vet-flat, $TMPDIR/vet-flat,
+    ./.vet-flat-cache; else a fresh temporary directory. Decided once per process."""
+    global _cache_dir_resolved
+    if _cache_dir_resolved:
+        return _cache_dir_resolved
+    candidates = [CACHE_DIR,
+                  os.path.join(tempfile.gettempdir(), "vet-flat"),
+                  os.path.join(os.getcwd(), ".vet-flat-cache")]
+    for cand in candidates:
+        try:
+            os.makedirs(cand, exist_ok=True)
+            probe = os.path.join(cand, ".write-probe-%d" % os.getpid())
+            with open(probe, "w") as fh:
+                fh.write("ok")
+            os.remove(probe)
+        except OSError:
+            continue
+        _cache_dir_resolved = cand
+        return cand
+    _cache_dir_resolved = tempfile.mkdtemp(prefix="vet-flat-cache-")
+    return _cache_dir_resolved
+
+
+def _curl_note(returncode, stderr):
+    note = f"curl error {returncode}: {(stderr or '').strip()[:200]}"
+    if returncode in (23, 56):
+        note += f"; curl could not write the body - is the cache directory writable? ({cache_dir()})"
+    return note
 
 
 def now_iso():
@@ -44,8 +83,7 @@ def _throttle(url, min_gap):
 
 
 def _cache_path(key):
-    os.makedirs(CACHE_DIR, exist_ok=True)
-    return os.path.join(CACHE_DIR, hashlib.sha1(key.encode("utf-8")).hexdigest())
+    return os.path.join(cache_dir(), hashlib.sha1(key.encode("utf-8")).hexdigest())
 
 
 def fetch(url, ua=BROWSER_UA, headers=None, method="GET", data=None, timeout=20,
@@ -94,7 +132,7 @@ def fetch(url, ua=BROWSER_UA, headers=None, method="GET", data=None, timeout=20,
     if out.returncode != 0:
         return dict(url=url, final_url=None, status=0, content_type=None, body="",
                     retrieved_at=now_iso(), from_cache=False, ok=False,
-                    note=f"curl error {out.returncode}: {out.stderr.strip()[:200]}")
+                    note=_curl_note(out.returncode, out.stderr))
     parts = (out.stdout or "").split("\t")
     status = int(parts[0]) if parts and parts[0].isdigit() else 0
     ctype = parts[1] if len(parts) > 1 else None

@@ -188,6 +188,49 @@ def source_text(item, pasted, report_texts):
 
 
 # --------------------------------------------------------------- item checks ---
+# What a fetcher's JSON says when the fetch itself failed. An executor that copies a zero
+# out of such an output ("certificates_found": 0 after curl error 56) has recorded a
+# failure as a measurement; the verifier turns it back into a failure.
+DEAD_FETCH = re.compile(r"curl error \d+|curl timeout|cache directory (?:is )?not writable|"
+                        r"could not write the body|\"http_status\":\s*0\b", re.I)
+
+_FIXED_AXES = {}
+
+
+def fixed_axis(qid, questions_path=None):
+    """The axis a fixed-form question belongs to, from references/fixed-questions.yaml
+    (F1 the deposit is axis 7, F9 the council tax band axis 10). 7 when unknown."""
+    path = questions_path or DEFAULT_QUESTIONS
+    if path not in _FIXED_AXES:
+        doc = scan.load_document(path)
+        _FIXED_AXES[path] = {key: (block or {}).get("axis")
+                             for key, block in (doc.get("questions") or {}).items()
+                             if isinstance(block, dict)}
+    axis = _FIXED_AXES[path].get(str(qid))
+    # The yaml also files paperwork questions under the reference chapters 15-17; the
+    # plan has twelve axes, and their executor group is the compliance one, axis 7.
+    return axis if isinstance(axis, int) and 1 <= axis <= 12 else 7
+
+
+def dead_fetch(item, pasted, report_texts):
+    """Why a found item is really a failed fetch, or None: the note or the quote carries a
+    fetcher's error, or the cited source is a JSON document that says ok: false."""
+    for field in (item.get("note"), item.get("quote")):
+        hit = DEAD_FETCH.search(str(field or ""))
+        if hit:
+            return ("the cited fetch failed (%s): a dead fetch is not an answer, and a zero "
+                    "read out of it is not a count" % hit.group(0))
+    text = source_text(item, pasted, report_texts)
+    if text and text.lstrip().startswith("{"):
+        try:
+            doc = json.loads(text)
+        except ValueError:
+            return None
+        if isinstance(doc, dict) and doc.get("ok") is False:
+            return "the cited source says ok: false (%s)" % (doc.get("note") or "no note")
+    return None
+
+
 def check_item(item, pasted, source_ids, report_texts, flat=None, strict=False,
                known=None):
     """(state, reason, [rule ids]) for one evidence item."""
@@ -200,6 +243,11 @@ def check_item(item, pasted, source_ids, report_texts, flat=None, strict=False,
             return "fail", ("nobody says what was tried, so this is a gap nobody looked "
                             "at rather than one somebody could not fill"), ["untried_unknown"]
         return "unknown", (item.get("note") or "the executor could not get it"), []
+
+    dead = dead_fetch(item, pasted, report_texts)
+    if dead:
+        rules.append("dead_fetch")
+        reasons.append(dead)
 
     source = (item.get("source") or "").strip()
     if not source and not (item.get("computed_by") or "").strip():
@@ -598,7 +646,7 @@ def evidence_from_report(report, case=None):
             continue
         status = "unknown" if answer.get("status") == "unknown" else "ok"
         items.append(collections.OrderedDict([
-            ("id", "f-" + str(answer.get("id"))), ("axis", 7),
+            ("id", "f-" + str(answer.get("id"))), ("axis", fixed_axis(answer.get("id"))),
             ("claim", "%s %s" % (answer.get("id"), answer.get("answer") or "")),
             ("status", status), ("value", answer.get("answer")),
             ("unit", None), ("source", answer.get("source")),
@@ -648,7 +696,7 @@ def verify(evidence, report=None, pasted=None, tier="standard", strict=False,
                 ("ask", "go back for this one: %s" % (verdict["reason"] or "")), ("round", 1)]))
     for qid in missing_fixed:
         replan.append(collections.OrderedDict([
-            ("axis", 7), ("item", None),
+            ("axis", fixed_axis(qid, questions_path)), ("item", None),
             ("ask", "the fixed form owes %s an answer at the %s tier; find it or ask the "
                     "user once" % (qid, tier)), ("round", 1)]))
 

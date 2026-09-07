@@ -253,7 +253,13 @@ def building(postcode=None, street=None, town=None, match=None, limit=120):
         "caveat": ("Earliest assessment year approximates completion year for new builds (SAP) but a building "
                    "may have older certificates under other postcodes. Floor areas exclude balconies."),
     }
+    # A search that failed (curl error, HTTP error, timeout) is not an empty postcode. Say
+    # so at the top level and leave the count null, so nobody reads a dead fetch as zero.
+    failed = not s.get("ok", True) and not rows
+    if failed:
+        summary["certificates_found"] = None
     return {"query": s["query"], "search_url": s["source_url"], "retrieved_at": now_iso(),
+            "ok": not failed, "note": (s.get("note") if failed else None),
             "evidence_class": "G", "summary": summary, "certificates": certs}
 
 

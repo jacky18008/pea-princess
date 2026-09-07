@@ -486,3 +486,51 @@ class TheCommandLine(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestDeadFetchRule(unittest.TestCase):
+    """A found item that cites a fetch which itself says it failed is a failure."""
+
+    def item(self, **over):
+        base = {"id": "e-epc-building-count", "axis": 3, "status": "ok", "value": 0,
+                "unit": "certificates", "claim": "EPC certificates returned for the building",
+                "source": "epc_register_search", "quote": '"certificates_found": 0,'}
+        base.update(over)
+        return base
+
+    def test_a_curl_error_in_the_note_fails_the_item(self):
+        state, reason, rules = V.check_item(
+            self.item(note="curl error 56: Failure writing output to destination"),
+            {}, {}, {}, known={"epc_register_search"})
+        self.assertEqual("fail", state)
+        self.assertIn("dead_fetch", rules)
+        self.assertIn("not a count", reason)
+
+    def test_a_source_that_says_ok_false_fails_the_item(self):
+        pasted = {"epc-search.json": '{"ok": false, "note": "curl timeout", "count": 0, "results": []}'}
+        state, reason, rules = V.check_item(
+            self.item(source="pasted:epc-search.json", quote=None, computed_by="read from the file"),
+            pasted, {}, {})
+        self.assertEqual("fail", state)
+        self.assertIn("dead_fetch", rules)
+
+    def test_a_live_fetch_with_a_real_zero_passes_the_rule(self):
+        state, reason, rules = V.check_item(
+            self.item(note="the register holds no certificate at this postcode"),
+            {}, {}, {}, known={"epc_register_search"})
+        self.assertNotIn("dead_fetch", rules)
+
+
+class TestFixedFormAxes(unittest.TestCase):
+    """Replan asks for the fixed form go to the axis the question belongs to, not all to 7."""
+
+    def test_axes_come_from_the_questions_file(self):
+        self.assertEqual(7, V.fixed_axis("F1"))       # the deposit
+        self.assertEqual(2, V.fixed_axis("F9"))       # floor area
+        self.assertEqual(10, V.fixed_axis("F11"))     # council tax band
+        self.assertEqual(12, V.fixed_axis("F18"))
+
+    def test_chapters_beyond_the_twelve_axes_route_to_compliance(self):
+        self.assertEqual(7, V.fixed_axis("F14"))
+        self.assertEqual(7, V.fixed_axis("F16"))
+        self.assertEqual(7, V.fixed_axis("F99"))

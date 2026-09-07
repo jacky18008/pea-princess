@@ -83,26 +83,37 @@ AXES_BY_MODE = {
     "deep": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
 }
 
-# axis -> mode -> [(command template, why)]. A command is a template: the angle brackets
-# are filled from the profile and the arguments, and an executor that cannot fill one
-# writes an unknown item rather than guessing.
+# axis -> mode -> [(command template, why[, fallback])]. A command is a template: the angle
+# brackets are filled from the profile and the arguments, and an executor that cannot fill
+# one writes an unknown item rather than guessing. A third element True marks a FALLBACK:
+# a call to run when the axis's primary call returned nothing or failed, before writing
+# unknown. The monolithic agent discovers these ladders for itself over sixty-odd calls; an
+# executor with one axis and a short horizon has to be handed them (pilot, 2026-09-07).
 CALLS = {
     1: {"lite": [('scripts/geo.py lookup "<postcode>"',
                   "coordinates, borough and ward; every other axis keys off these"),
                  ('scripts/epc.py search --postcode "<postcode>"',
                   "the flats the register holds at this postcode, to pick the right one")],
-        "standard": [], "deep": [('scripts/epc.py building --postcode "<postcode>"',
-                                  "the whole building's certificates in one call")]},
+        "standard": [('scripts/epc.py search --street "<street>" --town "<town>"',
+                      "FALLBACK when the postcode search returns nothing or fails: a big "
+                      "building spans postcodes, so search the register by street", True)],
+        "deep": []},
     2: {"lite": [("scripts/epc.py cert <certificate_id>",
                   "certified internal area, from the certificate for THIS flat")],
         "standard": [],
         "deep": [("scripts/epc.py cert <certificate_id> --history",
                   "earlier certificates: a subdivided unit shows up here and nowhere else")]},
-    3: {"lite": [], "standard": [],
+    3: {"lite": [],
+        "standard": [('scripts/epc.py building --postcode "<postcode>" --match "<building>" --limit 120',
+                      "every certificate in the building: first assessment year ~ completion, "
+                      "heating class, air permeability")],
         "deep": [("scripts/company.py heat-supplier <company_number>",
                   "when the heating is a communal network, who sells the heat")]},
     4: {"standard": [("scripts/planning.py near --lat <lat> --lng <lng> --radius 250 --limit 20",
-                      "applications within 250 m; a discharged condition means work starts")],
+                      "applications within 250 m; a discharged condition means work starts"),
+                     ('scripts/planning.py planit --postcode "<postcode>" --km 0.3',
+                      "FALLBACK when the London Datahub returns nothing or fails: PlanIt "
+                      "covers the same boroughs", True)],
         "deep": [("scripts/planning.py stages <application_reference>",
                   "how far along a nearby scheme is"),
                  ("scripts/roads.py near --lat <lat> --lng <lng>",
@@ -121,7 +132,10 @@ CALLS = {
         "standard": [('scripts/company.py search --name "<agent_name>"',
                       "same-name shells and dissolved companies"),
                      ('scripts/redress.py cmp --agent "<agent_name>"',
-                      "client money protection")],
+                      "client money protection"),
+                     ('scripts/company.py address-search --query "<address>"',
+                      "FALLBACK when the agent or landlord is not found by name: the "
+                      "companies registered at the building's address", True)],
         "deep": [('scripts/redress.py rogue --name "<agent_name>"',
                   "the rogue landlord and agent checker"),
                  ("scripts/company.py filings <company_number>",
@@ -140,11 +154,15 @@ CALLS = {
     11: {"lite": [('scripts/commute.py journey --from "<postcode>" --to "<destination>"',
                    "door to door, at the arrival time the profile asks for")],
          "standard": [("scripts/commute.py redundancy --lat <lat> --lng <lng>",
-                       "a second independent rail family within a ten-minute walk")],
-         "deep": [("scripts/commute.py stations --lat <lat> --lng <lng>",
-                   "which stations they actually are")]},
-    12: {"standard": [], "deep": [("scripts/geo.py nearby --lat <lat> --lng <lng> --radius 500",
-                                   "what is inside a short walk")]},
+                       "a second independent rail family within a ten-minute walk"),
+                      ("scripts/commute.py stations --lat <lat> --lng <lng>",
+                       "FALLBACK when redundancy cannot grade: the stations and their "
+                       "walks, to grade by hand", True)],
+         "deep": []},
+    12: {"standard": [("scripts/geo.py nearby --lat <lat> --lng <lng> --radius 300",
+                       "what is inside a three-minute walk: the shop, the launderette, "
+                       "the pharmacy")],
+         "deep": []},
 }
 
 # What only the user can supply, per axis, from the mode it starts to matter at.
@@ -177,14 +195,24 @@ SOURCES = {1: ["postcodes_io_lookup", "epc_register_search"],
 INHERITS = {"lite": [], "standard": ["lite"], "deep": ["lite", "standard"]}
 
 
-def calls_for(axis, mode):
-    """[(cmd, why)] for this axis at this depth, shallower depths first."""
+def _entries(axis, mode, fallback):
     out = []
     table = CALLS.get(axis) or {}
     for step in INHERITS[mode] + [mode]:
-        for cmd, why in table.get(step) or []:
-            out.append((cmd, why))
+        for entry in table.get(step) or []:
+            if (bool(entry[2]) if len(entry) > 2 else False) == fallback:
+                out.append((entry[0], entry[1]))
     return out
+
+
+def calls_for(axis, mode):
+    """[(cmd, why)] of the PRIMARY calls for this axis at this depth, shallower first."""
+    return _entries(axis, mode, fallback=False)
+
+
+def fallbacks_for(axis, mode):
+    """[(cmd, why)] of the FALLBACK calls: run when the primary returned nothing or failed."""
+    return _entries(axis, mode, fallback=True)
 
 
 def paste_for(axis, mode):
@@ -224,6 +252,9 @@ def scaffold(mode="standard", tier=None, values=None, case=None, questions_path=
         calls = [collections.OrderedDict([("cmd", fill(cmd, values)), ("why", why),
                                           ("required", True)])
                  for cmd, why in calls_for(axis, mode)]
+        calls += [collections.OrderedDict([("cmd", fill(cmd, values)), ("why", why),
+                                           ("required", False), ("fallback", True)])
+                  for cmd, why in fallbacks_for(axis, mode)]
         pastes = paste_for(axis, mode)
         asked.extend(pastes)
         axes.append(collections.OrderedDict([
@@ -280,7 +311,13 @@ def check(plan, mode="standard", tier=None, questions_path=None, values=None):
     got_axes = {}
     for axis in plan.get("axes") or []:
         if isinstance(axis, dict) and isinstance(axis.get("id"), int):
-            got_axes[axis["id"]] = axis
+            if axis["id"] in got_axes:
+                # the same axis listed twice reads as one axis with both call lists
+                merged = dict(got_axes[axis["id"]])
+                merged["scripts"] = list(merged.get("scripts") or []) + list(axis.get("scripts") or [])
+                got_axes[axis["id"]] = merged
+            else:
+                got_axes[axis["id"]] = axis
     for axis in want["axes"]:
         found = got_axes.get(axis["id"])
         if found is None:
@@ -293,6 +330,7 @@ def check(plan, mode="standard", tier=None, questions_path=None, values=None):
         shapes = set(call_shape(c.get("cmd")) for c in (found.get("scripts") or [])
                      if isinstance(c, dict))
         for call in axis["scripts"]:
+            # a dropped fallback counts too: the ladder is part of what the executor needs
             if call_shape(call["cmd"]) not in shapes:
                 problems["missing_calls"].append(
                     collections.OrderedDict([("axis", axis["id"]), ("cmd", call["cmd"])]))

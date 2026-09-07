@@ -19,6 +19,12 @@
      "cmd": "scripts/epc.py search --postcode \"XE1 9AA\"",
      "why": "the flats the register holds at this postcode, to pick the right one",
      "required": true
+    },
+    {
+     "cmd": "scripts/epc.py search --street \"<street>\" --town \"<town>\"",
+     "why": "FALLBACK when the postcode search returns nothing or fails: a big building spans postcodes, so search the register by street",
+     "required": false,
+     "fallback": true
     }
    ],
    "sources": [
@@ -51,7 +57,13 @@
    "name": "age and fabric",
    "group": "fabric",
    "required": true,
-   "scripts": [],
+   "scripts": [
+    {
+     "cmd": "scripts/epc.py building --postcode \"XE1 9AA\" --match \"<building>\" --limit 120",
+     "why": "every certificate in the building: first assessment year ~ completion, heating class, air permeability",
+     "required": true
+    }
+   ],
    "sources": [
     "epc_register_certificate",
     "companies_house_profile"
@@ -68,6 +80,12 @@
      "cmd": "scripts/planning.py near --lat <lat> --lng <lng> --radius 250 --limit 20",
      "why": "applications within 250 m; a discharged condition means work starts",
      "required": true
+    },
+    {
+     "cmd": "scripts/planning.py planit --postcode \"XE1 9AA\" --km 0.3",
+     "why": "FALLBACK when the London Datahub returns nothing or fails: PlanIt covers the same boroughs",
+     "required": false,
+     "fallback": true
     }
    ],
    "sources": [
@@ -133,6 +151,12 @@
      "cmd": "scripts/redress.py cmp --agent \"<agent_name>\"",
      "why": "client money protection",
      "required": true
+    },
+    {
+     "cmd": "scripts/company.py address-search --query \"<address>\"",
+     "why": "FALLBACK when the agent or landlord is not found by name: the companies registered at the building's address",
+     "required": false,
+     "fallback": true
     }
    ],
    "sources": [
@@ -193,7 +217,7 @@
    "required": true,
    "scripts": [
     {
-     "cmd": "scripts/commute.py journey --from \"XE1 9AA\" --to \"XW1 1AA\"",
+     "cmd": "scripts/commute.py journey --from \"XE1 9AA\" --to \"<destination>\"",
      "why": "door to door, at the arrival time the profile asks for",
      "required": true
     },
@@ -201,6 +225,12 @@
      "cmd": "scripts/commute.py redundancy --lat <lat> --lng <lng>",
      "why": "a second independent rail family within a ten-minute walk",
      "required": true
+    },
+    {
+     "cmd": "scripts/commute.py stations --lat <lat> --lng <lng>",
+     "why": "FALLBACK when redundancy cannot grade: the stations and their walks, to grade by hand",
+     "required": false,
+     "fallback": true
     }
    ],
    "sources": [
@@ -213,7 +243,13 @@
    "name": "low-maintenance living",
    "group": "place",
    "required": true,
-   "scripts": [],
+   "scripts": [
+    {
+     "cmd": "scripts/geo.py nearby --lat <lat> --lng <lng> --radius 300",
+     "why": "what is inside a three-minute walk: the shop, the launderette, the pharmacy",
+     "required": true
+    }
+   ],
    "sources": [
     "postcodes_io_nearest"
    ],

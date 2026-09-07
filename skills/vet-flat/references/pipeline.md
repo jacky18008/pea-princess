@@ -76,6 +76,15 @@ A cheap model is right for this job and there is evidence for it: on a comparabl
 **Input:** `plan.json`, and only the axes in your group.
 **Output:** `evidence.json` items — `references/evidence-schema.json`.
 
+Two rules the pilot taught (2026-09-07). **A call marked `fallback` in the plan runs when
+the axis's primary call returned nothing or failed** — before an item is written unknown —
+and every attempt, primary or fallback, goes under `tried` with its error. **A script whose
+JSON says `ok: false`, carries a `curl error`, or shows `http_status: 0` is a failed fetch,
+never an answer**: do not copy a count or a null out of it as a value (a `certificates_found:
+0` after a dead search is not zero certificates). Record it as unknown with the error under
+`tried`, and try the fallback. The verifier fails a found item whose note or quote carries
+such an error (`dead_fetch`).
+
 One executor per axis group, in parallel. Each writes items and nothing else:
 
 ```json

@@ -116,3 +116,35 @@ class TestTooManyResultsPage(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestBuildingPropagatesAFailedSearch(unittest.TestCase):
+    """A search that died (curl error, sandbox, timeout) is not an empty postcode."""
+
+    def test_a_dead_search_is_ok_false_with_a_null_count(self):
+        dead = {"ok": False, "note": "curl error 56: Failure writing output to destination",
+                "count": 0, "results": [], "query": {"postcode": "SE1 8BW"},
+                "source_url": "https://example.invalid/search"}
+        real = epc.search
+        epc.search = lambda **kw: dead
+        try:
+            out = epc.building(postcode="SE1 8BW")
+        finally:
+            epc.search = real
+        self.assertIs(False, out["ok"])
+        self.assertIn("curl error 56", out["note"])
+        self.assertIsNone(out["summary"]["certificates_found"])
+        self.assertIsNone(out["summary"]["earliest_assessment_year"])
+
+    def test_an_empty_postcode_is_ok_true_with_a_zero_count(self):
+        empty = {"ok": True, "note": None, "count": 0, "results": [],
+                 "query": {"postcode": "SE1 8BW"}, "source_url": "https://example.invalid/search"}
+        real = epc.search
+        epc.search = lambda **kw: empty
+        try:
+            out = epc.building(postcode="SE1 8BW")
+        finally:
+            epc.search = real
+        self.assertIs(True, out["ok"])
+        self.assertIsNone(out["note"])
+        self.assertEqual(0, out["summary"]["certificates_found"])
