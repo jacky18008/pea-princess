@@ -126,8 +126,9 @@ def build_command(config, case, workdir, model=None, prompt=None, out=None):
     cmd += ["-C", workdir,
             "--skip-git-repo-check",
             "-s", "workspace-write",
-            "-c", "sandbox_workspace_write.network_access=true",
-            "-o", out or os.path.join(workdir, "last.txt"),
+            "-c", "sandbox_workspace_write.network_access=true"]
+    cmd += launch.codex_cache_flags()
+    cmd += ["-o", out or os.path.join(workdir, "last.txt"),
             "--json",
             prompt or case["prompt"]]
     return cmd

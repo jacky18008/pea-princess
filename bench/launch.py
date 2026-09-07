@@ -55,6 +55,7 @@ from __future__ import unicode_literals
 
 import collections
 import json
+import os
 import re
 import subprocess
 import time
@@ -141,6 +142,31 @@ def looks_like_provider_failure(exit_code, stdout, stderr):
     if not (stdout or "").strip():
         return True, "the CLI exited 0 with no output"
     return False, None
+
+
+def vetflat_cache_dir():
+    """Where the skill's fetchers keep bodies: $VETFLAT_CACHE, else ~/.cache/vet-flat."""
+    return os.environ.get("VETFLAT_CACHE") or os.path.join(os.path.expanduser("~"), ".cache",
+                                                           "vet-flat")
+
+
+def codex_cache_flags():
+    """Extra `codex exec` flags that open the fetch cache to a workspace-write sandbox.
+
+    Codex's workspace-write sandbox denies writes under the home directory, and every
+    fetcher in the skill writes the body it downloads straight into ~/.cache/vet-flat, so
+    a Codex run inside the sandbox failed every cache miss with "curl error 56" and only
+    cache hits survived (found 2026-09-07; it confounded every Codex row before it: a
+    warm cache made a run look able to fetch). The skill now falls back to a writable
+    cache on its own, but a bench run should share the one cache with the Claude runs,
+    so the sandbox gets that directory as an extra writable root.
+    """
+    cache = vetflat_cache_dir()
+    try:
+        os.makedirs(cache, exist_ok=True)
+    except OSError:
+        pass
+    return ["-c", "sandbox_workspace_write.writable_roots=[%s]" % json.dumps(cache)]
 
 
 def run(cmd, cwd, timeout, family, attempts=MAX_ATTEMPTS, waits=RETRY_WAITS,

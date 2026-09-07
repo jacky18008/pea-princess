@@ -102,6 +102,9 @@ import sys
 import tempfile
 import time
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import launch  # noqa: E402  the shared launcher owns the Codex sandbox flags
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, ".."))
 SKILL_DIR = os.path.join(ROOT, "skills", "vet-flat")
@@ -342,7 +345,7 @@ def build_command(agent, case, model, workdir, prompt=None, config=None):
                "--cd", workdir,
                "--sandbox", "workspace-write",
                "-c", "sandbox_workspace_write.network_access=true",
-               "--skip-git-repo-check"]
+               "--skip-git-repo-check"] + launch.codex_cache_flags()
         if model:
             cmd += ["--model", model]
         return cmd + [prompt]

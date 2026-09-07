@@ -297,3 +297,31 @@ class TestWhatCountsAsAProviderFailure(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestCodexCacheFlags(unittest.TestCase):
+    """The workspace-write sandbox gets the fetch cache as an extra writable root."""
+
+    def test_the_flag_names_the_cache_directory(self):
+        want = tempfile.mkdtemp(prefix="vetflat-cache-flag-")
+        old = os.environ.get("VETFLAT_CACHE")
+        os.environ["VETFLAT_CACHE"] = want
+        try:
+            flags = launch.codex_cache_flags()
+        finally:
+            if old is None:
+                os.environ.pop("VETFLAT_CACHE", None)
+            else:
+                os.environ["VETFLAT_CACHE"] = old
+            shutil.rmtree(want, ignore_errors=True)
+        self.assertEqual("-c", flags[0])
+        self.assertTrue(flags[1].startswith("sandbox_workspace_write.writable_roots=["))
+        self.assertIn(json.dumps(want), flags[1])
+
+    def test_the_default_is_the_home_cache(self):
+        old = os.environ.pop("VETFLAT_CACHE", None)
+        try:
+            self.assertTrue(launch.vetflat_cache_dir().endswith(os.path.join(".cache", "vet-flat")))
+        finally:
+            if old is not None:
+                os.environ["VETFLAT_CACHE"] = old
