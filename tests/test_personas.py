@@ -33,6 +33,7 @@ import sys
 import tempfile
 import shutil
 import unittest
+from unittest import mock
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, ".."))
@@ -1299,6 +1300,168 @@ class TestASessionTheProviderRefused(unittest.TestCase):
         self.assertIsNone(record["satisfaction"]["rating"],
                           "a refused session was asked how satisfied it was")
         self.assertTrue(runner.provider_error_row(runner.summary_of(record)))
+
+
+class TestSessionSpendingGuards(unittest.TestCase):
+    def setUp(self):
+        self.doc = runner.load_personas()
+        self.card = runner.variant_of(runner.card_by_id(self.doc, "C1"), False)
+        self.args = runner.build_parser().parse_args([
+            "--persona", "C1", "--agent", "chat", "--session-mode", "replay"])
+
+    def record(self, card=None, outcome="completed", failures=None):
+        card = card or self.card
+        return {"session": runner.session_id(card, "baseline", 1), "persona": card["id"],
+                "variant": "baseline", "seed": 1, "agent": "chat", "harness": "chat",
+                "model": None, "persona_family": "codex", "persona_model": "gpt-5.6-terra",
+                "judge_model": "gpt-5.6-sol", "settings": card["settings"],
+                "probe": card["probe"], "outcome": outcome, "grade": 1,
+                "capped_by": [], "satisfaction": {"rating": 4},
+                "provider_failures": failures or []}
+
+    def test_default_launch_makes_one_attempt_and_preserves_the_failure(self):
+        with tempfile.TemporaryDirectory() as folder:
+            result = runner.launch([sys.executable, "-c",
+                                    "import sys; sys.stderr.write('429 usage limit reached'); "
+                                    "sys.exit(1)"], folder, 5, "codex")
+        self.assertEqual(1, result.attempts)
+        self.assertTrue(result.provider_error)
+        self.assertIn("429 usage limit reached", result.tail_note())
+
+    def test_regrade_dry_run_never_calls_models_or_changes_saved_files(self):
+        with tempfile.TemporaryDirectory() as folder:
+            transcripts = os.path.join(folder, "transcripts")
+            os.makedirs(transcripts)
+            path = os.path.join(transcripts, "saved.md")
+            with io.open(path, "w", encoding="utf-8") as fh:
+                fh.write("unchanged original transcript")
+            for extra in ([], ["--rules-only"]):
+                with mock.patch.object(runner, "launch", side_effect=AssertionError("model call")), \
+                        contextlib.redirect_stdout(io.StringIO()):
+                    code = runner.main(["--regrade", folder, "--dry-run"] + extra)
+                self.assertEqual(code, 0)
+                self.assertEqual(os.listdir(folder), ["transcripts"])
+                self.assertEqual(read_text(path), "unchanged original transcript")
+
+    def test_zero_exit_claude_error_envelope_is_still_a_failure(self):
+        envelope = json.dumps({"is_error": True, "result": "authentication_error: invalid API key"})
+        with mock.patch.object(runner.launcher, "run", return_value=launch.LaunchResult(
+                text="authentication_error", stdout_tail=envelope, exit_code=0)):
+            result = runner.launch(["claude", "--"], ".", 5)
+        self.assertTrue(result.provider_error)
+        self.assertIn("authentication_error", result.note)
+
+    def test_every_actor_failure_stops_further_launches_without_changing_completed_dialogue(self):
+        for failure_label, count, outcome in (("turn 1 agent", 1, "provider_error"),
+                                               ("turn 2 persona", 2, "provider_error"),
+                                               ("satisfaction", 3, "completed"),
+                                               ("judge", 4, "completed")):
+            with self.subTest(actor=failure_label):
+                calls = []
+
+                def fake_launch(cmd, cwd, timeout, family, label=None):
+                    calls.append(label)
+                    if label == failure_label:
+                        return launch.LaunchResult(provider_error=True,
+                                                   note="exited 1: rate limit reached")
+                    answer = {"turn 1 agent": GOOD_REPLY, "turn 2 persona": "Thanks. [END]",
+                              "satisfaction": "4\nThe tenancy details.",
+                              "judge": '{"criteria": []}'}[label]
+                    return launch.LaunchResult(text=answer, usage={"input_tokens": 10})
+
+                with mock.patch.object(runner, "launch", side_effect=fake_launch), \
+                        contextlib.redirect_stdout(io.StringIO()):
+                    record = runner.play(self.card, self.args, "baseline", 1)
+                self.assertEqual(count, len(calls))
+                self.assertEqual(outcome, record["outcome"])
+                self.assertIsNone(record["grade"])
+                self.assertEqual(failure_label, record["provider_failures"][0]["label"])
+                self.assertEqual(count, len(record["cost"]["launches"]))
+                self.assertEqual([failure_label], record["cost"]["usage_missing_for"])
+                self.assertFalse(record["cost"]["all_launches_reported_usage"])
+                subtotal = {"input_tokens": 10 * (count - 1)} if count > 1 else None
+                self.assertEqual(subtotal, record["cost"]["all_actor_usage_reported"])
+                self.assertEqual({"input_tokens": 10} if count > 1 else None,
+                                 record["cost"]["usage"])
+
+    def test_matrix_stops_after_provider_failure_and_canary_starts_only_one_session(self):
+        for extra, record, expected_code in (([], self.record(outcome="provider_error"), 1),
+                ([], self.record(failures=[{"actor": "judge"}]), 1),
+                (["--max-sessions", "1"], self.record(), 0)):
+            with self.subTest(extra=extra, outcome=record["outcome"]), \
+                    mock.patch.object(runner, "play", return_value=record) as play, \
+                    mock.patch.object(runner, "write_session") as write, \
+                    contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(expected_code, runner.main(["--matrix", "first"] + extra))
+                self.assertEqual(1, play.call_count)
+                self.assertEqual(1, write.call_count)
+
+    def test_skip_existing_requires_matching_configuration_and_calls_no_models(self):
+        with tempfile.TemporaryDirectory() as folder:
+            saved = os.path.join(folder, "personas-test", "cards")
+            os.makedirs(saved)
+            path = os.path.join(saved, "C1-baseline-s1.json")
+            with io.open(path, "w", encoding="utf-8") as fh:
+                json.dump(self.record(), fh)
+            args = ["--persona", "C1", "--agent", "chat", "--skip-existing",
+                    "--results", folder, "--day", "test", "--max-sessions", "1"]
+            with mock.patch.object(runner, "play") as play, \
+                    contextlib.redirect_stdout(io.StringIO()), \
+                    contextlib.redirect_stderr(io.StringIO()):
+                self.assertEqual(0, runner.main(args))
+                self.assertEqual(2, runner.main(args + ["--model", "changed-model"]))
+                play.assert_not_called()
+
+    def test_retry_canary_keeps_unattempted_cards_and_archives_only_after_a_replacement(self):
+        with tempfile.TemporaryDirectory() as folder:
+            records = [(os.path.join(folder, "one.json"), self.record(outcome="provider_error")),
+                       (os.path.join(folder, "two.json"), self.record(outcome="provider_error"))]
+            args = runner.build_parser().parse_args(["--retry-failed", folder, "--max-sessions", "1"])
+            with mock.patch.object(runner, "failed_sessions", return_value=records), \
+                    mock.patch.object(runner, "play", return_value=self.record()) as play, \
+                    mock.patch.object(runner, "supersede") as supersede, \
+                    mock.patch.object(runner, "write_session"), \
+                    contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(0, runner.retry_failed(folder, args, self.doc))
+                self.assertEqual(1, play.call_count)
+                self.assertEqual(1, supersede.call_count)
+            with mock.patch.object(runner, "failed_sessions", return_value=records), \
+                    mock.patch.object(runner, "play", side_effect=KeyboardInterrupt), \
+                    mock.patch.object(runner, "supersede") as supersede, \
+                    contextlib.redirect_stdout(io.StringIO()):
+                with self.assertRaises(KeyboardInterrupt):
+                    runner.retry_failed(folder, args, self.doc)
+                supersede.assert_not_called()
+
+    def test_regrade_stops_on_provider_failure_and_keeps_untouched_scorecard_rows(self):
+        with tempfile.TemporaryDirectory() as folder:
+            builder = TestTranscriptAndRegrade()
+            builder.doc = self.doc
+            builder.build(folder, GOOD_REPLY)
+            root = os.path.join(folder, "personas-2026-09-06")
+            for sub, suffix in (("cards", ".json"), ("transcripts", ".md")):
+                original = os.path.join(root, sub, "P4-baseline-s1" + suffix)
+                copied = os.path.join(root, sub, "P4-baseline-s2" + suffix)
+                body = read_text(original).replace("P4-baseline-s1", "P4-baseline-s2")
+                with io.open(copied, "w", encoding="utf-8") as fh:
+                    fh.write(body)
+            args = runner.build_parser().parse_args(["--regrade", root, "--judge-model", "new-model"])
+            with mock.patch.object(runner, "launch", return_value=launch.LaunchResult(
+                    provider_error=True, note="quota exhausted",
+                    usage={"input_tokens": 12})) as launch_mock, \
+                    contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(1, runner.regrade(root, args, self.doc))
+                self.assertEqual(1, launch_mock.call_count)
+            rows = json.loads(read_text(os.path.join(root, "scorecard.json")))
+            self.assertEqual(2, len(rows))
+            failed = json.loads(read_text(os.path.join(root, "cards", "P4-baseline-s1.json")))
+            self.assertEqual("gpt-5.6-terra", failed["judge_model"])
+            self.assertEqual("summary", failed["judge_summary"])
+            self.assertTrue(all(c["score"] == 3 for c in failed["criteria"]))
+            self.assertEqual({"input_tokens": 12}, failed["cost"]["regrade_usage_reported"])
+            self.assertEqual("new-model", failed["cost"]["regrade_launches"][0]["model"])
+            untouched = json.loads(read_text(os.path.join(root, "cards", "P4-baseline-s2.json")))
+            self.assertNotIn("regrade_provider_failures", untouched)
 
 
 if __name__ == "__main__":

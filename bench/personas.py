@@ -53,7 +53,8 @@ shell   the skill is installed and the profile validator may run, so a settings 
 
 Every launch goes through ``bench/launch.py``, the one launcher this directory shares:
 stdin closed (``stdin=subprocess.DEVNULL``) for the agent, the persona and the judge,
-both streams captured, and a busy provider retried with a growing pause. Nothing here
+both streams captured. Persona runs make one attempt per launch and stop their batch
+on a provider failure; a refused launch is retried only in a later invocation. Nothing here
 passes a flag whose job is to skip a permission prompt or disable a sandbox;
 ``tests/test_personas.py`` asserts it.
 
@@ -1262,9 +1263,19 @@ def launch(cmd, workdir, timeout, family="claude", label=None, **kwargs):
     bench/launch.py, one copy for every runner in this directory. ``kwargs`` reaches
     that launcher unchanged (``attempts``, ``waits``, ``sleep``, ``echo``).
     """
-    return launcher.run(cmd, workdir, timeout,
-                        "claude" if cmd[0] == "claude" else family, label=label,
-                        **kwargs)
+    # Retrying an entire actor command may buy work again. A later, bounded invocation
+    # is the recovery policy for this harness, including explicit provider outages.
+    kwargs.setdefault("attempts", 1)
+    result = launcher.run(cmd, workdir, timeout,
+                          "claude" if cmd[0] == "claude" else family, label=label,
+                          **kwargs)
+    # A structured Claude error is still a failed call when a CLI version exits 0.
+    flagged = launcher.claude_error(result.stdout_tail) if cmd[0] == "claude" else None
+    if flagged:
+        return result._replace(provider_error=True, note="the CLI reported: " + flagged)
+    if (result.note or "").startswith("could not start "):
+        return result._replace(provider_error=True)
+    return result
 
 
 # -------------------------------------------------------------------- play --
@@ -1371,6 +1382,20 @@ def play(card, args, variant, seed):
     # in full, because that is what it was actually sent. The persona's carries its own
     # words with the paste marker, so it is not re-reading its own certificate every turn.
     history, persona_history, dialogue, notes = [], [], [], []
+    launches, provider_failures = [], []
+
+    def run_actor(cmd, cwd, timeout, actor_family, label):
+        result = launch(cmd, cwd, timeout, actor_family, label=label)
+        actor = label.split()[-1]
+        launches.append(collections.OrderedDict([
+            ("label", label), ("actor", actor), ("family", actor_family),
+            ("usage", result.usage), ("wall_time_s", result.seconds),
+            ("attempts", result.attempts), ("provider_error", result.provider_error)]))
+        if result.provider_error:
+            provider_failures.append({"actor": actor, "label": label,
+                                      "note": result.tail_note()})
+        return result
+
     outcome, started = "abandoned", time.time()
     for turn in range(1, patience + 1):
         for doc in control.due(turn):
@@ -1384,7 +1409,7 @@ def play(card, args, variant, seed):
         if turn == 1:
             raw = card["opening_message"]
         else:
-            res = launch(
+            res = run_actor(
                 helper_command(family, persona_prompt(card, brief, persona_history),
                                persona_dir, helper_model),
                 persona_dir, args.timeout, family, label="turn %d persona" % turn)
@@ -1409,7 +1434,7 @@ def play(card, args, variant, seed):
             outcome = ended
             break
         prompt = user if (carry or turn == 1) else journeys.transcript(history, user)
-        res = launch(
+        res = run_actor(
             agent_command(agent, harness, prompt, workdir, args.model, system,
                           session=claude_session if carry else None,
                           resume=claude_session if (carry and turn > 1) else None),
@@ -1458,12 +1483,15 @@ def play(card, args, variant, seed):
     satisfaction = collections.OrderedDict([("rating", None), ("unresolved", None),
                                             ("diagnostic", True)])
     if dialogue and outcome not in ("invalid", "provider_error"):
-        res = launch(
+        res = run_actor(
             helper_command(family,
                            persona_prompt(card, control.brief(len(dialogue)), persona_history)
                            + "\n\n" + SATISFACTION_PROMPT, persona_dir, helper_model),
             persona_dir, args.timeout, family, label="satisfaction")
-        lines = [l.strip() for l in (res.text or "").splitlines() if l.strip()]
+        if res.tail_note():
+            notes.append("satisfaction: " + res.tail_note())
+        lines = [l.strip() for l in (res.text or "").splitlines() if l.strip()] \
+            if not res.provider_error else []
         if lines:
             rating = re.search(r"[1-5]", lines[0])
             satisfaction["rating"] = int(rating.group(0)) if rating else None
@@ -1475,13 +1503,15 @@ def play(card, args, variant, seed):
                                          ("evidence", None), ("note", None)])
                 for i, t in enumerate(card.get("success") or [], 1)]
     judge_note = None
-    if not args.rules_only and dialogue and outcome != "provider_error":
-        res = launch(
+    if not args.rules_only and dialogue and outcome != "provider_error" and not provider_failures:
+        res = run_actor(
             helper_command(family, judge_prompt(card, dialogue, rules), persona_dir,
                            judge_model),
             persona_dir, args.timeout, family, label="judge")
         judge_note = res.tail_note()
-        parsed = first_json(res.text) or {}
+        if res.provider_error:
+            notes.append("judge: " + (judge_note or "the provider refused the launch"))
+        parsed = (first_json(res.text) or {}) if not res.provider_error else {}
         for item in parsed.get("criteria") or []:
             index = int(item.get("n") or 0)
             if 1 <= index <= len(criteria):
@@ -1494,6 +1524,15 @@ def play(card, args, variant, seed):
                         judge_model, dialogue, control, rules, criteria, outcome,
                         satisfaction, judge_note, notes, round(time.time() - started, 2),
                         profile_before, profile_after, workdir)
+    # Keep the historical successful-agent-turn subtotal comparable. These additions
+    # expose all actors, including failed calls, without turning missing usage into 0.
+    record["provider_failures"] = provider_failures
+    record["cost"]["usage_scope"] = "successful agent turns only (historical field)"
+    record["cost"]["launches"] = launches
+    record["cost"]["all_actor_usage_reported"] = sum_usage(launches)
+    record["cost"]["usage_missing_for"] = [r["label"] for r in launches if not r["usage"]]
+    record["cost"]["all_launches_reported_usage"] = (
+        bool(launches) and not record["cost"]["usage_missing_for"])
     if not args.keep and not args.workdir:
         shutil.rmtree(workdir, ignore_errors=True)
     return record
@@ -1640,6 +1679,7 @@ def summary_of(record):
     row["notes"] = record.get("notes") or []
     row["wall_time_s"] = (record.get("cost") or {}).get("wall_time_s")
     row["usage"] = (record.get("cost") or {}).get("usage")
+    row["provider_failures"] = record.get("provider_failures") or []
     return row
 
 
@@ -1742,7 +1782,14 @@ def regrade(folder, args, doc=None):
     if not os.path.isdir(tdir):
         print("usage error: no transcripts/ folder under %s" % folder, file=sys.stderr)
         return 2
+    if getattr(args, "dry_run", False):
+        count = sum(name.endswith(".md") for name in os.listdir(tdir))
+        print("would inspect %d transcript(s) for %s regrading in %s; "
+              "no models called or files changed" % (
+                  count, "rules-only" if args.rules_only else "model-judge", folder))
+        return 0
     rows = []
+    provider_stopped = False
     for name in sorted(os.listdir(tdir)):
         if not name.endswith(".md"):
             continue
@@ -1769,7 +1816,7 @@ def regrade(folder, args, doc=None):
             collections.OrderedDict([("n", i), ("text", t), ("score", None),
                                      ("evidence", None), ("note", None)])
             for i, t in enumerate(card.get("success") or [], 1)]
-        if not args.rules_only:
+        if not args.rules_only and dialogue and not provider_error_row(stored or meta):
             family = meta.get("persona_family") or persona_family(meta.get("agent") or "claude")[0]
             model = args.judge_model or meta.get("judge_model")
             workdir = tempfile.mkdtemp(prefix="vetflat-regrade-")
@@ -1778,15 +1825,27 @@ def regrade(folder, args, doc=None):
                 workdir, args.timeout, family, label="judge")
             note = res.tail_note()
             shutil.rmtree(workdir, ignore_errors=True)
-            parsed = first_json(res.text) or {}
+            provider_stopped = res.provider_error
+            parsed = (first_json(res.text) or {}) if not provider_stopped else {}
             for item in parsed.get("criteria") or []:
                 index = int(item.get("n") or 0)
                 if 1 <= index <= len(criteria):
                     criteria[index - 1]["score"] = item.get("score")
                     criteria[index - 1]["evidence"] = item.get("evidence")
                     criteria[index - 1]["note"] = item.get("note")
-            stored["judge_summary"] = parsed.get("summary") or note
-            stored["judge_model"] = model
+            cost = stored.setdefault("cost", {})
+            regrade_launches = cost.setdefault("regrade_launches", [])
+            regrade_launches.append({"at": journeys.now(), "actor": "judge", "family": family,
+                                    "model": model, "usage": res.usage, "wall_time_s": res.seconds,
+                                    "attempts": res.attempts, "provider_error": res.provider_error})
+            cost["regrade_usage_reported"] = sum_usage(regrade_launches)
+            cost["all_regrade_launches_reported_usage"] = all(r["usage"] for r in regrade_launches)
+            if provider_stopped:
+                stored.setdefault("regrade_provider_failures", []).append(
+                    {"at": journeys.now(), "note": note, "model": model})
+            else:
+                stored["judge_summary"] = parsed.get("summary") or note
+                stored["judge_model"] = model
         before = stored.get("grade")
         stored.update(collections.OrderedDict([
             ("criteria", criteria), ("safety", rules["safety"]),
@@ -1813,10 +1872,19 @@ def regrade(folder, args, doc=None):
                                   "-" if stored.get("grade") is None else "%.2f" % stored["grade"],
                                   (", capped by " + ", ".join(stored["capped_by"]))
                                   if stored.get("capped_by") else ""))
+        if provider_stopped:
+            print("batch paused: the model judge failed; remaining transcripts were not sent")
+            # Keep every untouched card in the scorecard when a regrade stops early.
+            rows = []
+            for saved_name in sorted(os.listdir(os.path.join(folder, "cards"))):
+                if saved_name.endswith(".json"):
+                    with io.open(os.path.join(folder, "cards", saved_name), encoding="utf-8") as fh:
+                        rows.append(summary_of(json.load(fh)))
+            break
     rows.sort(key=lambda r: r.get("run_at") or "")
     write_scorecard(folder, rows)
-    print("%d session(s) regraded into %s" % (len(rows), os.path.join(folder, "scorecard.md")))
-    return 0
+    print("%d session(s) in %s" % (len(rows), os.path.join(folder, "scorecard.md")))
+    return 1 if provider_stopped else 0
 
 
 # -------------------------------------------------------------------- main --
@@ -1892,6 +1960,8 @@ def retry_failed(folder, args, doc=None):
     if not targets:
         print("nothing to re-run in %s: no session carries a provider error" % folder)
         return 0
+    if args.max_sessions is not None:
+        targets = targets[:args.max_sessions]
     print("%s %d session(s) the provider refused, in %s"
           % ("would re-run" if args.dry_run else "re-running", len(targets), folder))
     for _path, record in targets:
@@ -1912,7 +1982,7 @@ def retry_failed(folder, args, doc=None):
             worst = 1
             continue
         variant = record.get("variant") or "baseline"
-        seed = int(record.get("seed") or 1)
+        seed = int(record["seed"]) if record.get("seed") is not None else 1
         again = argparse.Namespace(**vars(args))
         again.retry_failed = None
         again.dry_run = False
@@ -1922,19 +1992,71 @@ def retry_failed(folder, args, doc=None):
             else args.persona_model
         again.judge_model = record.get("judge_model") if args.judge_model is None \
             else args.judge_model
-        supersede(folder, record, path)
+        if args.persona_agent == "auto" and record.get("persona_family"):
+            again.persona_agent = record["persona_family"]
         print("%s  (%s, %s, seed %d)  retry"
               % (record.get("session"), card["name"], variant, seed))
         fresh = play(variant_of(card, variant == "probe"), again, variant, seed)
         if fresh is None:
             continue
+        # Preserve the old evidence until a replacement is ready, including when a
+        # canary is interrupted halfway through its conversation.
+        supersede(folder, record, path)
         write_session(fresh, root, day)
         print("  %s: %s, grade %s"
               % (fresh["session"], fresh["outcome"],
                  "-" if fresh.get("grade") is None else "%.2f" % fresh["grade"]))
         if fresh["outcome"] != "completed" or (fresh.get("grade") or 0) < 0.67:
             worst = 1
+        if batch_should_stop(fresh):
+            return 1
     return worst
+
+
+def batch_should_stop(record):
+    """Stop buying sessions after a failure by any actor, including the final helpers.
+
+    A diagnostic/judge failure does not change the conversation's observed outcome:
+    that transcript can be regraded without purchasing the conversation again.
+    """
+    if record.get("outcome") == "provider_error" or record.get("provider_failures"):
+        print("  batch paused: a provider/launch failure occurred; inspect the saved "
+              "record and resume with --max-sessions 1 after recovery")
+        return True
+    return False
+
+
+def existing_session_matches(card, variant, seed, args):
+    """Skip a saved session only when its experiment configuration matches exactly.
+
+    Refused sessions also stay saved; --retry-failed is the explicit recovery path.
+    A different configuration must use its own result folder, not overwrite a card.
+    """
+    path = os.path.join(results_dir(args.results, args.day), "cards",
+                        session_id(card, variant, seed) + ".json")
+    if not os.path.isfile(path):
+        return False
+    with io.open(path, encoding="utf-8") as fh:
+        stored = json.load(fh)
+    agent = args.agent or default_agent(card)
+    family, model = persona_family(agent, args.persona_agent)
+    expected = {"persona": card["id"], "variant": variant, "seed": seed,
+                "agent": agent, "harness": harness_of(card, agent), "model": args.model,
+                "persona_family": family, "persona_model": args.persona_model or model,
+                "judge_model": args.judge_model or JUDGE_FAMILY[agent][1],
+                "settings": card["settings"], "probe": card["probe"]}
+    differing = [key for key, value in expected.items() if stored.get(key) != value]
+    if differing:
+        raise ValueError("saved session %s has different %s; use the original configuration "
+                         "or a separate results folder" % (path, ", ".join(differing)))
+    return True
+
+
+def positive_int(value):
+    number = int(value)
+    if number < 1:
+        raise argparse.ArgumentTypeError("must be at least 1")
+    return number
 
 
 def sessions_for(args, doc):
@@ -1986,6 +2108,12 @@ def build_parser():
                                       "personas-<date> folder is created inside it")
     ap.add_argument("--day", help="date label of the results folder (personas-<day>); default "
                                   "today. A batch that crosses midnight must pass it")
+    ap.add_argument("--max-sessions", type=positive_int,
+                    help="start at most N sessions (also --retry-failed); use 1 for a "
+                         "recovery canary. Does not cap tokens within a session")
+    ap.add_argument("--skip-existing", action="store_true",
+                    help="resume a session selection by skipping matching saved cards "
+                         "under --results/--day; use --retry-failed for refused cards")
     ap.add_argument("--dry-run", action="store_true",
                     help="print the plan and the exact command for every turn, and run nothing")
     ap.add_argument("--rules-only", action="store_true",
@@ -2012,6 +2140,10 @@ def build_parser():
 
 def main(argv=None):
     args = build_parser().parse_args(argv)
+    if args.regrade and (args.max_sessions is not None or args.skip_existing):
+        print("usage error: --max-sessions and --skip-existing apply to session runs, "
+              "not --regrade", file=sys.stderr)
+        return 2
     if args.regrade:
         return regrade(args.regrade, args)
     if args.retry_failed:
@@ -2023,9 +2155,22 @@ def main(argv=None):
     if args.persona and card_by_id(doc, args.persona) is None:
         print("usage error: no persona %r in %s" % (args.persona, args.personas), file=sys.stderr)
         return 2
-    worst, first = 0, True
+    worst, first, started = 0, True, 0
     for card, variant, seed in sessions_for(args, doc):
         played = variant_of(card, variant == "probe")
+        if args.skip_existing:
+            try:
+                if existing_session_matches(played, variant, seed, args):
+                    print("%s: saved matching session, skipped" % session_id(card, variant, seed))
+                    continue
+            except (ValueError, OSError) as exc:
+                print("usage error: %s" % exc, file=sys.stderr)
+                return 2
+        if args.max_sessions is not None and started >= args.max_sessions:
+            print("session budget reached: %d session(s); remaining selection was not started"
+                  % started)
+            break
+        started += 1
         if not first:
             print("")
         first = False
@@ -2044,6 +2189,8 @@ def main(argv=None):
                  record["satisfaction"]["rating"]))
         if record["outcome"] != "completed" or (record.get("grade") or 0) < 0.67:
             worst = 1
+        if batch_should_stop(record):
+            return 1
     return worst
 
 
