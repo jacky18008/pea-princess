@@ -688,6 +688,15 @@ class TheLauncher(unittest.TestCase):
         self.assertFalse(roles[0]["provider_error"])
         self.assertEqual(roles[0]["wall_s"], 2.0)
 
+    def test_saved_report_uses_the_same_named_output_folder(self):
+        report = {"candidates": []}
+        path = PL.runner.persist_report(report, "P1-claude", "synthetic", 1,
+                                        results_root=self.results, day="handoff-isolated-run")
+        self.assertEqual(path, os.path.join(self.results, "handoff-isolated-run", "raw",
+                                           "P1-claude-synthetic-1.report.json"))
+        with io.open(path, encoding="utf-8") as fh:
+            self.assertEqual(json.load(fh), report)
+
     def test_record_role_marks_a_provider_error_result_in_the_row_and_the_notes(self):
         roles, notes = [], []
         conf = {"agent": "codex", "model": None}
@@ -794,10 +803,26 @@ class TheLauncher(unittest.TestCase):
         PL.launch.run = self.fake(calls, provider_error_labels=(target,))
         args = PL.build_parser().parse_args([
             "--config", "P1-claude", "--cases", cases_path, "--case", case["id"],
-            "--run", "1", "--timeout", "5", "--results", self.results])
+            "--run", "1", "--timeout", "5", "--results", self.results,
+            "--day", "handoff-isolated-run"])
         args.case_row = case
-        with quiet():
-            code, row = PL.run_pipeline(args, case, config)
+        # Catch leaks to the default output root without touching real experiment data.
+        original_results = PL.runner.RESULTS
+        default_results = os.path.join(self.results, "default-must-stay-empty")
+        PL.runner.RESULTS = default_results
+        try:
+            with quiet():
+                code, row = PL.run_pipeline(args, case, config)
+        finally:
+            PL.runner.RESULTS = original_results
+        self.assertFalse(os.path.exists(default_results))
+        self.assertEqual(os.listdir(self.results), ["handoff-isolated-run"])
+        output = os.path.join(self.results, "handoff-isolated-run")
+        with io.open(os.path.join(output, "scorecard.json"), encoding="utf-8") as fh:
+            self.assertEqual(json.load(fh), [row])
+        self.assertTrue(os.path.isfile(os.path.join(output, "scorecard.md")))
+        self.assertTrue(os.path.isfile(os.path.join(output, "raw",
+                                                   "P1-claude-e14-marsh-wall-301-1.json")))
         groups = len(PL.groups_of(P.scaffold("standard")))
         self.assertEqual(len(calls), 2 + groups, calls)
         self.assertEqual({fam for fam, _label in calls}, {"claude"})

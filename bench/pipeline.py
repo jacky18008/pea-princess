@@ -987,10 +987,10 @@ def finish(args, case, config, arm, mode, workdir, roles, notes, wall, worst,
     raw_path = runner.write_raw(json.dumps({"roles": roles, "notes": notes},
                                            ensure_ascii=False, indent=1),
                                 arm, case["id"], args.run, when=when,
-                                results_root=args.results)
+                                results_root=args.results, day=day)
     try:
         runner.persist_report(report, arm, case["id"], args.run, when=when,
-                              results_root=args.results)
+                              results_root=args.results, day=day)
     except Exception as exc:                                # bookkeeping never kills a run
         print("could not persist report: %s" % exc, file=sys.stderr)
 
@@ -1008,7 +1008,7 @@ def finish(args, case, config, arm, mode, workdir, roles, notes, wall, worst,
                 with io.open(stray, encoding="utf-8") as fh:
                     broken = fh.read()
                 runner.write_raw(broken, arm + "-report-invalid", case["id"], args.run, when=when,
-                                 results_root=args.results)
+                                 results_root=args.results, day=day)
                 notes.append("report.json is present but not valid JSON (%d chars, kept under raw/)"
                              % len(broken))
             except (IOError, OSError) as exc:
@@ -1065,12 +1065,12 @@ def finish(args, case, config, arm, mode, workdir, roles, notes, wall, worst,
                                                 "fabrications", "citations", "unknown_honesty")
                 if k in base_card)
             runner.persist_report(base_report, arm + "-baseline", case["id"], args.run, when=when,
-                                  results_root=args.results)
+                                  results_root=args.results, day=day)
             notes.append("baseline graded: %s" % base_card.get("summary"))
         except Exception as exc:                            # bookkeeping never kills a run
             notes.append("the baseline report could not be graded: %s" % exc)
         row["note"] = "; ".join(n for n in notes if n) or None
-    runner.append_scorecard(row, when=when)
+    runner.append_scorecard(row, when=when, results_root=args.results, day=day)
     if card:
         print(card["summary"])
     for note in notes:

@@ -661,9 +661,9 @@ def usage_from_stdout(agent, stdout):
     return None
 
 
-def write_raw(stdout, config_name, case_label, run_index, when=None, results_root=None):
+def write_raw(stdout, config_name, case_label, run_index, when=None, results_root=None, day=None):
     """bench/results/<date>/raw/<config>-<case>-<run>.json, verbatim."""
-    day = (when or datetime.datetime.utcnow()).strftime("%Y-%m-%d")
+    day = day or (when or datetime.datetime.utcnow()).strftime("%Y-%m-%d")
     folder = os.path.join(results_root or RESULTS, day, "raw")
     if not os.path.isdir(folder):
         os.makedirs(folder, exist_ok=True)
@@ -674,12 +674,12 @@ def write_raw(stdout, config_name, case_label, run_index, when=None, results_roo
 
 
 
-def persist_report(report, config_name, case_label, run_index, when=None, results_root=None):
+def persist_report(report, config_name, case_label, run_index, when=None, results_root=None, day=None):
     """Copy the located report next to the raw stdout as <config>-<case>-<run>.report.json.
     Temp workdirs do not survive a Claude Code restart; the results tree must be self-contained."""
     if report is None:
         return None
-    day = (when or datetime.datetime.utcnow()).strftime("%Y-%m-%d")
+    day = day or (when or datetime.datetime.utcnow()).strftime("%Y-%m-%d")
     folder = os.path.join(results_root or RESULTS, day, "raw")
     os.makedirs(folder, exist_ok=True)
     path = os.path.join(folder, raw_name(config_name, case_label, run_index).replace(".json", ".report.json"))
@@ -769,9 +769,10 @@ def atomic_write(path, text):
     return path
 
 
-def append_scorecard(row, when=None):
-    day = (when or datetime.datetime.utcnow()).strftime("%Y-%m-%d")
-    folder = os.path.join(RESULTS, day)
+def append_scorecard(row, when=None, results_root=None, day=None):
+    """Append within the same output root and run label as the raw artifacts."""
+    day = day or (when or datetime.datetime.utcnow()).strftime("%Y-%m-%d")
+    folder = os.path.join(results_root or RESULTS, day)
     if not os.path.isdir(folder):
         os.makedirs(folder)
     jpath = os.path.join(folder, "scorecard.json")
