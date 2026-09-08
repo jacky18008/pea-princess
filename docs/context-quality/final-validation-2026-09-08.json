@@ -1,0 +1,82 @@
+{
+  "verified_at_utc": "2026-09-08T17:31:23.389929+00:00",
+  "source_commit": "d01c369a7d863aa920d8d90c0c2ec563228b8478",
+  "live_completed": true,
+  "benchmark_cli_calls": 38,
+  "claude_calls": 0,
+  "known_cli_processed_tokens": 669726,
+  "answer_processed_tokens": 469243,
+  "judge_processed_tokens": 200483,
+  "controller_benchmark_model_calls": 0,
+  "full_offline_suite": {
+    "command": "python3 -m unittest discover -s tests",
+    "passed": 1611,
+    "seconds": 16.907,
+    "log": "bench/results/context-quality-2026-09-08/validation/full-offline-tests-final.log",
+    "log_sha256": "cdf7972f5c88636df84c82e36e797cac9525f2cbebfee70171952f437df921e8"
+  },
+  "source_or_benchmark_changes_after_freeze": false,
+  "result_phase_changes": "Documentation, independent reviews and offline ledger assembly only; no benchmark reruns.",
+  "evidence_checks": {
+    "generated_ledgers_reproduced_byte_for_byte": true,
+    "checks": [
+      {
+        "name": "original_artifacts",
+        "count": 2060,
+        "changed_or_missing": []
+      },
+      {
+        "name": "previous_reporting_trial",
+        "count": 113,
+        "changed_or_missing": []
+      },
+      {
+        "name": "frozen_live_source",
+        "count": 6,
+        "changed_or_missing": []
+      }
+    ]
+  },
+  "independent_audit_status": "PASS_WITH_RECORDED_DIAGNOSTICS",
+  "independent_audit_discrepancies": [],
+  "raw_files_archived_and_sha256_verified": 365,
+  "raw_inventory_sha256": "661e4dbc5b5efae1a2c8408e288e922ceb1e9a31a3979d83a290b457ced497b0",
+  "raw_archive_sha256": "1983a5c7f7f2bb7a039503a1fd0ff5be63b6f2cce5b788a015986bc2dabe413b",
+  "backup": {
+    "path": "/Users/chenhsienhao/Documents/pea-princess-context-quality-20260908T173123Z",
+    "completion_record": "/Users/chenhsienhao/Documents/pea-princess-context-quality-20260908T173123Z/COMPLETED.json",
+    "git_bundle_note": "The exact results commit and verified Git bundle are recorded in the external completion record after committing this validation file."
+  },
+  "result_artifact_sha256": {
+    "docs/context-quality/analysis-fixture-notes.md": "941bc7ae6ae7523589102f17f0630e2e20148f7a2503790a02cdcfa2254018f7",
+    "docs/context-quality/build-result-ledger.py": "a52da469b22b923a6b436d1820426623321a29fbfdad6e79583df26ead8d239a",
+    "docs/context-quality/controller-results-2026-09-08.json": "507003d92ed53b70171c67f29623d9a9b2a7cf73e14b5e30edbb64565138de61",
+    "docs/context-quality/controller-results-2026-09-08.md": "4ff9d357bef07a72e067784d6d3e5825bfdd248afadfeaf3cb71646bb89cfd18",
+    "docs/context-quality/cost-ledger-2026-09-08.json": "f900d669ae537e177064e6ed0ed360199873c46487aa8612253526287f5aef7e",
+    "docs/context-quality/independent-analysis-review-2026-09-08.json": "c0216e65920a343275114576102741426754524593ca1f35ab6d84bed4d4f0e9",
+    "docs/context-quality/independent-analysis-review-2026-09-08.md": "3f678109144904217dd0705d8021debafcaba8153291c89da3998bec7c4ada0f",
+    "docs/context-quality/independent-rental-review-2026-09-08.json": "3f538997488cf64a84beed08ecd60c7ca143105ba958e4458ee58653eb548343",
+    "docs/context-quality/independent-rental-review-2026-09-08.md": "39fd620df0b974f4006eb9d557f175de959d5043a04a093a5c396a76a85e7a01",
+    "docs/context-quality/independent-run-audit-2026-09-08.json": "37d9fc019183536c524624972837c0b5431f89106545f19eebd1d5f96fa39e3d",
+    "docs/context-quality/independent-run-audit-2026-09-08.md": "5cff2714a72c5f92da3b017c6ff908a4099a541c35a08be5fb2ba45de1d0c9db",
+    "docs/context-quality/live-results-2026-09-08.json": "c52223b74d353d5ca81c093dcc9e04ebba84ba5f2be712ee918571d470434572",
+    "docs/context-quality/protocol-2026-09-08.md": "40bb6254f0fa7ead6552c7ba665a70883eb7eeecca83e21e8c78a49595c5cf3c",
+    "docs/context-quality/rental-fixture-notes.md": "70d7beb9734095a48539a5a858bcd60ad454dfc980d3b8a441caaa27b7c6ec3c",
+    "docs/context-quality/results-2026-09-08.md": "c2ae906a72fb073f79e78dfc8e78c372afce2d4377730104fbe76386dea85e39",
+    "docs/context-quality/review-reconciliation-2026-09-08.json": "33f4d4eb060a0bff59c91f93015443293852abc6c7d49d2d114cc969d1344a54",
+    "docs/context-quality/validation-before-live-2026-09-08.json": "0904bad520617e3d88d555cd7b9f8d62a1223a28ea7e0b96f5416d7f9184d25e"
+  },
+  "claude_confirmations": {
+    "status": "paused",
+    "remaining": 7,
+    "automatic_resume_scheduled": false
+  },
+  "limits": "CLI usage excludes parent/subagent preparation, review and documentation. Processed tokens are not billing or subscription allowance. Independent AI review is not human ground truth.",
+  "final_report_cross_review": "Independent agent compared numerical tables and source interpretations with saved JSON: no numerical discrepancies; corrected R4 word-count terminology and avoided billing phrasing.",
+  "documentation_validation": {
+    "valid_json_files": 9,
+    "local_markdown_links_checked": 34,
+    "missing_links": [],
+    "git_diff_check": "passed"
+  }
+}

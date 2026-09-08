@@ -1,0 +1,3610 @@
+{
+  "complete": true,
+  "source_commit": "d01c369a7d863aa920d8d90c0c2ec563228b8478",
+  "plan_sha256": "388b002c8a2468ba87970c66fb881159c415f0c8fad1bcf669afbf2e85a7c15f",
+  "claude_calls": 0,
+  "calls": 38,
+  "known_cli_processed_tokens": 669726,
+  "usage_coverage_complete": true,
+  "judge_processed_tokens": 200483,
+  "arms": {
+    "analysis": {
+      "full": {
+        "tasks": 4,
+        "calls": 4,
+        "usage": {
+          "input_tokens": 66709,
+          "output_tokens": 3346,
+          "cached_input_tokens": 24064,
+          "cache_write_input_tokens": 0,
+          "total_tokens": 70055
+        },
+        "judged_tasks": 4,
+        "required_met": 16,
+        "required_total": 16,
+        "critical_misses": 0,
+        "unsupported_claims": 3,
+        "contradictions": 0,
+        "useful_next_steps": 4,
+        "appropriate_uncertainty": 4,
+        "user_burden_ok": 4,
+        "invalid_citations": 3,
+        "format_failures": 0,
+        "protocol_violations": 0
+      },
+      "summary": {
+        "tasks": 4,
+        "calls": 4,
+        "usage": {
+          "input_tokens": 59073,
+          "output_tokens": 2223,
+          "cached_input_tokens": 24064,
+          "cache_write_input_tokens": 0,
+          "total_tokens": 61296
+        },
+        "judged_tasks": 4,
+        "required_met": 5,
+        "required_total": 16,
+        "critical_misses": 3,
+        "unsupported_claims": 2,
+        "contradictions": 9,
+        "useful_next_steps": 2,
+        "appropriate_uncertainty": 2,
+        "user_burden_ok": 3,
+        "invalid_citations": 0,
+        "format_failures": 0,
+        "protocol_violations": 0
+      },
+      "adaptive": {
+        "tasks": 4,
+        "calls": 8,
+        "usage": {
+          "input_tokens": 123713,
+          "output_tokens": 3476,
+          "cached_input_tokens": 48128,
+          "cache_write_input_tokens": 0,
+          "total_tokens": 127189
+        },
+        "judged_tasks": 4,
+        "required_met": 14,
+        "required_total": 16,
+        "critical_misses": 1,
+        "unsupported_claims": 0,
+        "contradictions": 3,
+        "useful_next_steps": 4,
+        "appropriate_uncertainty": 4,
+        "user_burden_ok": 4,
+        "invalid_citations": 0,
+        "format_failures": 0,
+        "protocol_violations": 0
+      }
+    },
+    "rental": {
+      "full": {
+        "tasks": 6,
+        "calls": 6,
+        "usage": {
+          "input_tokens": 106135,
+          "output_tokens": 2434,
+          "cached_input_tokens": 12032,
+          "cache_write_input_tokens": 0,
+          "total_tokens": 108569
+        },
+        "judged_tasks": 6,
+        "required_met": 28,
+        "required_total": 34,
+        "critical_misses": 1,
+        "unsupported_claims": 0,
+        "contradictions": 0,
+        "useful_next_steps": 6,
+        "appropriate_uncertainty": 5,
+        "user_burden_ok": 6,
+        "invalid_citations": 0,
+        "format_failures": 0,
+        "protocol_violations": 0
+      },
+      "compact": {
+        "tasks": 6,
+        "calls": 6,
+        "usage": {
+          "input_tokens": 100008,
+          "output_tokens": 2126,
+          "cached_input_tokens": 24064,
+          "cache_write_input_tokens": 0,
+          "total_tokens": 102134
+        },
+        "judged_tasks": 6,
+        "required_met": 27,
+        "required_total": 34,
+        "critical_misses": 1,
+        "unsupported_claims": 2,
+        "contradictions": 1,
+        "useful_next_steps": 6,
+        "appropriate_uncertainty": 6,
+        "user_burden_ok": 6,
+        "invalid_citations": 0,
+        "format_failures": 0,
+        "protocol_violations": 0
+      }
+    }
+  },
+  "answers": [
+    {
+      "id": "A1-adaptive",
+      "experiment": "analysis",
+      "case_id": "A1",
+      "arm": "adaptive",
+      "call_ids": [
+        "A1-adaptive-initial",
+        "A1-adaptive-retrieved"
+      ],
+      "requested_documents": [
+        "A1-D02",
+        "A1-D03"
+      ],
+      "supplied_document_ids": [
+        "A1-D02",
+        "A1-D03"
+      ],
+      "protocol_violation": null,
+      "final_answer": {
+        "request_documents": [],
+        "answer": "不支持全隊列上線。已知重放總成功數由198/240升至210/240，但這只證明同一凍結案例包中的整體個案層級差異；計畫卻涵蓋所有隊列，且未設路由別門檻。尤其 assisted 是可因複雜請求暫選的多輪流程，整體平均可能掩蓋該路徑的失敗；現有資料沒有分組結果、正式路由測試或生產量測。下一步應以既有240組配對逐路由重算成功與失敗、審閱失敗逐字稿；若仍考慮部署，先完成混合目標路由測試及針對 assisted 的預先門檻。R較佳的原因亦未可歸因，因提示與檢索策略同時改動。",
+        "findings": [
+          {
+            "claim": "總體重放中，R的成功數高於P，但證據限於沙盒重放，不能推出所有隊列的實際表現。",
+            "evidence": [
+              {
+                "document_id": "summary",
+                "quote": "198/240 successful resolutions for baseline P and 210/240 for candidate R"
+              },
+              {
+                "document_id": "A1-D02",
+                "quote": "production_measurements: not available; sandbox replay only"
+              }
+            ]
+          },
+          {
+            "claim": "全隊列結論缺乏路由別證據；assisted 可能承接較複雜、且可暫時切換的請求。",
+            "evidence": [
+              {
+                "document_id": "A1-D02",
+                "quote": "route_specific_thresholds: not entered"
+              },
+              {
+                "document_id": "A1-D02",
+                "quote": "Users can select it temporarily for a complicated request."
+              },
+              {
+                "document_id": "summary",
+                "quote": "The aggregate summary reports no subgroup rows"
+              }
+            ]
+          },
+          {
+            "claim": "R相對P的差異不能歸因於單一改動。",
+            "evidence": [
+              {
+                "document_id": "A1-D03",
+                "quote": "Prompt and retrieval policy changed together."
+              },
+              {
+                "document_id": "A1-D03",
+                "quote": "No single-change ablation was run."
+              }
+            ]
+          },
+          {
+            "claim": "可進行的下一項驗證是路由別配對分析與混合路由測試；後者目前尚未完成。",
+            "evidence": [
+              {
+                "document_id": "A1-D02",
+                "quote": "paired-transcripts: 240 case folders, two system outputs per folder."
+              },
+              {
+                "document_id": "A1-D02",
+                "quote": "I have not tested a mixed-target configuration for this request."
+              },
+              {
+                "document_id": "A1-D03",
+                "quote": "packet includes no completed routing test"
+              }
+            ]
+          }
+        ],
+        "limitations": [
+          "未提供按standard／assisted分列的成功、失敗或個案逐字稿，無法判定任一路徑是否改善或受損。",
+          "沒有生產量測、客訴、恢復結果或解決時間，無法估計真實部署影響。",
+          "未收集個人族群屬性，無法評估人口群體間公平性。"
+        ],
+        "next_steps": [
+          "從既有240組配對記錄按路由標籤計算P與R的成功率與失敗差異，並審閱失敗逐字稿及可用評註。",
+          "在上線前完成混合目標路由設定測試，並為assisted預先填定可接受門檻與回退條件。",
+          "若要判定改動原因，補做單一變更消融測試；在此之前勿將總體差異歸因於提示或檢索策略。"
+        ]
+      },
+      "usage": {
+        "input_tokens": 30662,
+        "output_tokens": 878,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 31540
+      },
+      "seconds": 34.134,
+      "citation_check": {
+        "citations": [
+          {
+            "claim": "總體重放中，R的成功數高於P，但證據限於沙盒重放，不能推出所有隊列的實際表現。",
+            "document_id": "summary",
+            "quote": "198/240 successful resolutions for baseline P and 210/240 for candidate R",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "總體重放中，R的成功數高於P，但證據限於沙盒重放，不能推出所有隊列的實際表現。",
+            "document_id": "A1-D02",
+            "quote": "production_measurements: not available; sandbox replay only",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "全隊列結論缺乏路由別證據；assisted 可能承接較複雜、且可暫時切換的請求。",
+            "document_id": "A1-D02",
+            "quote": "route_specific_thresholds: not entered",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "全隊列結論缺乏路由別證據；assisted 可能承接較複雜、且可暫時切換的請求。",
+            "document_id": "A1-D02",
+            "quote": "Users can select it temporarily for a complicated request.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "全隊列結論缺乏路由別證據；assisted 可能承接較複雜、且可暫時切換的請求。",
+            "document_id": "summary",
+            "quote": "The aggregate summary reports no subgroup rows",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "R相對P的差異不能歸因於單一改動。",
+            "document_id": "A1-D03",
+            "quote": "Prompt and retrieval policy changed together.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "R相對P的差異不能歸因於單一改動。",
+            "document_id": "A1-D03",
+            "quote": "No single-change ablation was run.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "可進行的下一項驗證是路由別配對分析與混合路由測試；後者目前尚未完成。",
+            "document_id": "A1-D02",
+            "quote": "paired-transcripts: 240 case folders, two system outputs per folder.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "可進行的下一項驗證是路由別配對分析與混合路由測試；後者目前尚未完成。",
+            "document_id": "A1-D02",
+            "quote": "I have not tested a mixed-target configuration for this request.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "可進行的下一項驗證是路由別配對分析與混合路由測試；後者目前尚未完成。",
+            "document_id": "A1-D03",
+            "quote": "packet includes no completed routing test",
+            "valid_supplied_excerpt": true
+          }
+        ],
+        "valid": 10,
+        "invalid": 0,
+        "findings_without_citations": 0,
+        "scope": "Checks quoted text exists in supplied evidence; semantic support is separately judged."
+      },
+      "format_check": null
+    },
+    {
+      "id": "A1-full",
+      "experiment": "analysis",
+      "case_id": "A1",
+      "arm": "full",
+      "call_ids": [
+        "A1-full-initial"
+      ],
+      "requested_documents": [],
+      "supplied_document_ids": [
+        "A1-D01",
+        "A1-D02",
+        "A1-D03"
+      ],
+      "protocol_violation": null,
+      "final_answer": {
+        "request_documents": [],
+        "answer": "不支持全隊列啟用 R。已確立的是總體重播成功率 R 為 87.5%、P 為 82.5%，但分路徑結果相反：R 在 standard 較佳（194/200 對 170/200），在 assisted 明顯較差（16/40 對 28/40）。因此總平均掩蓋了 assisted 的風險；且樣本為測試團隊便利樣本、每案僅跑一次，不能推論所有實際隊列。合理下一步是以 intake tag 做選擇性路由：先驗證 standard→R、assisted→P 的混合配置，並針對新的 assisted 案例重測及檢視完整配對逐字稿。R 在 assisted 失敗是否由識別碼替換或錯把簡化要求當作已解決所致，僅是待驗證假說，不能由選錄案例推定頻率或因果。",
+        "findings": [
+          {
+            "claim": "總體 R 優於 P，但此結果不能代表兩條路徑皆改善。",
+            "evidence": [
+              {
+                "document_id": "A1-D01",
+                "quote": "Published headline: P 82.5%; R 87.5%; net +12 successful cases (+5 percentage points)."
+              },
+              {
+                "document_id": "A1-D01",
+                "quote": "standard, 200, 170, 194, 168, 2, 26, 4"
+              },
+              {
+                "document_id": "A1-D01",
+                "quote": "assisted, 40, 28, 16, 14, 14, 2, 10"
+              }
+            ]
+          },
+          {
+            "claim": "全隊列 rollout 缺乏外推依據；試包並非流量或真實生產表現的代表。",
+            "evidence": [
+              {
+                "document_id": "A1-D01",
+                "quote": "The replay pack is a convenience sample authored by the test team."
+              },
+              {
+                "document_id": "A1-D01",
+                "quote": "it is not an estimate of traffic share."
+              },
+              {
+                "document_id": "A1-D01",
+                "quote": "The ledger records neither production incident counts nor a live rollout result."
+              }
+            ]
+          },
+          {
+            "claim": "可行且證據所支持的下一驗證，是先測試按 intake tag 的混合路由；但尚未完成該測試或 assisted 重測。",
+            "evidence": [
+              {
+                "document_id": "A1-D02",
+                "quote": "can_route_by_intake_tag: supported by router configuration"
+              },
+              {
+                "document_id": "A1-D02",
+                "quote": "selective_routing_test_report: not attached"
+              },
+              {
+                "document_id": "A1-D02",
+                "quote": "new-assisted-bundle: no attached artifact."
+              },
+              {
+                "document_id": "A1-D03",
+                "quote": "The packet includes no completed routing test or post-change retest."
+              }
+            ]
+          },
+          {
+            "claim": "兩則 assisted 失敗案例提示可能機制，但為選錄、非隨機材料，不能建立頻率或因果。",
+            "evidence": [
+              {
+                "document_id": "A1-D01",
+                "quote": "Replaced the account identifier with the example identifier in the help article."
+              },
+              {
+                "document_id": "A1-D01",
+                "quote": "Treated a request to simplify the explanation as confirmation that the problem was fixed."
+              },
+              {
+                "document_id": "A1-D01",
+                "quote": "they are not a random sample and cannot establish the frequency of a mechanism."
+              },
+              {
+                "document_id": "A1-D03",
+                "quote": "Prompt and retrieval policy changed together."
+              }
+            ]
+          }
+        ],
+        "limitations": [
+          "沒有信賴區間或顯著性檢定；工作表明示「no confidence interval or population weighting」。",
+          "完整 240 組逐字稿與錯誤分類未提供，不能量化失敗類型或確認其原因。",
+          "沒有 live rollout、客訴、服務恢復時間、嚴重度或客戶滿意度資料。"
+        ],
+        "next_steps": [
+          "不要依總平均全隊列啟用 R。",
+          "完成並測試 standard→R、assisted→P 的混合路由，確認 route tag 跨回合保留與回退行為。",
+          "建立新的 assisted 測試包，審閱完整配對逐字稿並完成錯誤分類後，依路徑預先設定接受門檻再重測。"
+        ]
+      },
+      "usage": {
+        "input_tokens": 16551,
+        "output_tokens": 928,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 17479
+      },
+      "seconds": 27.008,
+      "citation_check": {
+        "citations": [
+          {
+            "claim": "總體 R 優於 P，但此結果不能代表兩條路徑皆改善。",
+            "document_id": "A1-D01",
+            "quote": "Published headline: P 82.5%; R 87.5%; net +12 successful cases (+5 percentage points).",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "總體 R 優於 P，但此結果不能代表兩條路徑皆改善。",
+            "document_id": "A1-D01",
+            "quote": "standard, 200, 170, 194, 168, 2, 26, 4",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "總體 R 優於 P，但此結果不能代表兩條路徑皆改善。",
+            "document_id": "A1-D01",
+            "quote": "assisted, 40, 28, 16, 14, 14, 2, 10",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "全隊列 rollout 缺乏外推依據；試包並非流量或真實生產表現的代表。",
+            "document_id": "A1-D01",
+            "quote": "The replay pack is a convenience sample authored by the test team.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "全隊列 rollout 缺乏外推依據；試包並非流量或真實生產表現的代表。",
+            "document_id": "A1-D01",
+            "quote": "it is not an estimate of traffic share.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "全隊列 rollout 缺乏外推依據；試包並非流量或真實生產表現的代表。",
+            "document_id": "A1-D01",
+            "quote": "The ledger records neither production incident counts nor a live rollout result.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "可行且證據所支持的下一驗證，是先測試按 intake tag 的混合路由；但尚未完成該測試或 assisted 重測。",
+            "document_id": "A1-D02",
+            "quote": "can_route_by_intake_tag: supported by router configuration",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "可行且證據所支持的下一驗證，是先測試按 intake tag 的混合路由；但尚未完成該測試或 assisted 重測。",
+            "document_id": "A1-D02",
+            "quote": "selective_routing_test_report: not attached",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "可行且證據所支持的下一驗證，是先測試按 intake tag 的混合路由；但尚未完成該測試或 assisted 重測。",
+            "document_id": "A1-D02",
+            "quote": "new-assisted-bundle: no attached artifact.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "可行且證據所支持的下一驗證，是先測試按 intake tag 的混合路由；但尚未完成該測試或 assisted 重測。",
+            "document_id": "A1-D03",
+            "quote": "The packet includes no completed routing test or post-change retest.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "兩則 assisted 失敗案例提示可能機制，但為選錄、非隨機材料，不能建立頻率或因果。",
+            "document_id": "A1-D01",
+            "quote": "Replaced the account identifier with the example identifier in the help article.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "兩則 assisted 失敗案例提示可能機制，但為選錄、非隨機材料，不能建立頻率或因果。",
+            "document_id": "A1-D01",
+            "quote": "Treated a request to simplify the explanation as confirmation that the problem was fixed.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "兩則 assisted 失敗案例提示可能機制，但為選錄、非隨機材料，不能建立頻率或因果。",
+            "document_id": "A1-D01",
+            "quote": "they are not a random sample and cannot establish the frequency of a mechanism.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "兩則 assisted 失敗案例提示可能機制，但為選錄、非隨機材料，不能建立頻率或因果。",
+            "document_id": "A1-D03",
+            "quote": "Prompt and retrieval policy changed together.",
+            "valid_supplied_excerpt": true
+          }
+        ],
+        "valid": 14,
+        "invalid": 0,
+        "findings_without_citations": 0,
+        "scope": "Checks quoted text exists in supplied evidence; semantic support is separately judged."
+      },
+      "format_check": null
+    },
+    {
+      "id": "A1-summary",
+      "experiment": "analysis",
+      "case_id": "A1",
+      "arm": "summary",
+      "call_ids": [
+        "A1-summary-initial"
+      ],
+      "requested_documents": [],
+      "supplied_document_ids": [],
+      "protocol_violation": null,
+      "final_answer": {
+        "request_documents": [],
+        "answer": "不支持直接在所有支援佇列全面啟用 R。已確立的是：在同一凍結案例包、以案件層級計分的一次重播中，R 為 210/240，優於 P 的 198/240，顯示此案例包內有較高成功數（summary：「210/240 successful resolutions」「198/240 successful resolutions」）。但計畫涵蓋所有佇列，而摘要明示未有子群列或案件層級摘錄，且未證實重播案例包以外的表現；因此無法判定各佇列是否一致受益，亦無法支持普遍推論。下一步應按佇列取得分層、可比較的成功結果，再決定是否擴大試點。",
+        "findings": [
+          {
+            "claim": "R 在一次、相同凍結案例包的案件層級重播中，成功數高於 P。",
+            "evidence": [
+              {
+                "document_id": "summary",
+                "quote": "replayed 240 support cases once per system"
+              },
+              {
+                "document_id": "summary",
+                "quote": "198/240 successful resolutions for baseline P and 210/240 for candidate R"
+              },
+              {
+                "document_id": "summary",
+                "quote": "Both used the same frozen case bundle"
+              },
+              {
+                "document_id": "summary",
+                "quote": "counts success at case level"
+              }
+            ]
+          },
+          {
+            "claim": "現有證據不能支持所有佇列的普遍推出。",
+            "evidence": [
+              {
+                "document_id": "summary",
+                "quote": "The planned change would cover all queues"
+              },
+              {
+                "document_id": "summary",
+                "quote": "reports no subgroup rows or case-level excerpts"
+              },
+              {
+                "document_id": "summary",
+                "quote": "does not establish performance outside the replay bundle"
+              }
+            ]
+          }
+        ],
+        "limitations": [
+          "僅提供摘要與文件目錄；未提供 A1-D01、A1-D02、A1-D03 的內容，不能把其標題當作內容證據。",
+          "沒有佇列分層結果，無法判定 R 在任何特定佇列、或所有佇列中的效果。",
+          "這是單次重播；摘要未提供不確定性、失敗型態或重播案例包外的證據。"
+        ],
+        "next_steps": [
+          "先取得按支援佇列分層、以相同案件層級定義比較的 P 與 R 成功結果。",
+          "若各佇列結果與案例包外表現仍未證實，僅考慮受控的分佇列試點，不應全面推出。"
+        ]
+      },
+      "usage": {
+        "input_tokens": 14752,
+        "output_tokens": 553,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 15305
+      },
+      "seconds": 19.32,
+      "citation_check": {
+        "citations": [
+          {
+            "claim": "R 在一次、相同凍結案例包的案件層級重播中，成功數高於 P。",
+            "document_id": "summary",
+            "quote": "replayed 240 support cases once per system",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "R 在一次、相同凍結案例包的案件層級重播中，成功數高於 P。",
+            "document_id": "summary",
+            "quote": "198/240 successful resolutions for baseline P and 210/240 for candidate R",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "R 在一次、相同凍結案例包的案件層級重播中，成功數高於 P。",
+            "document_id": "summary",
+            "quote": "Both used the same frozen case bundle",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "R 在一次、相同凍結案例包的案件層級重播中，成功數高於 P。",
+            "document_id": "summary",
+            "quote": "counts success at case level",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "現有證據不能支持所有佇列的普遍推出。",
+            "document_id": "summary",
+            "quote": "The planned change would cover all queues",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "現有證據不能支持所有佇列的普遍推出。",
+            "document_id": "summary",
+            "quote": "reports no subgroup rows or case-level excerpts",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "現有證據不能支持所有佇列的普遍推出。",
+            "document_id": "summary",
+            "quote": "does not establish performance outside the replay bundle",
+            "valid_supplied_excerpt": true
+          }
+        ],
+        "valid": 7,
+        "invalid": 0,
+        "findings_without_citations": 0,
+        "scope": "Checks quoted text exists in supplied evidence; semantic support is separately judged."
+      },
+      "format_check": null
+    },
+    {
+      "id": "A2-adaptive",
+      "experiment": "analysis",
+      "case_id": "A2",
+      "arm": "adaptive",
+      "call_ids": [
+        "A2-adaptive-initial",
+        "A2-adaptive-retrieved"
+      ],
+      "requested_documents": [
+        "A2-D01",
+        "A2-D02"
+      ],
+      "supplied_document_ids": [
+        "A2-D01",
+        "A2-D02"
+      ],
+      "protocol_violation": null,
+      "final_answer": {
+        "request_documents": [],
+        "answer": "不支持該發布措辭。已確立的是沙盒更新確實發生，但「精確年度總額」與「客戶批准」均未被來源證實：報價為 provisional、final_total 為 null，且客戶明示暫勿變更；更新中的確認值只是助理填入並被服務回顯。3/3 分數來自未檢查欄位定義、順序或客戶回覆的快速抽取，不能補足 rubric 所要求的證據。應暫緩發布，依原始逐序 trace 重新裁決三題；若無最終報價及明確後續客戶同意，發布說法須刪除或改為僅描述沙盒 API 更新。",
+        "findings": [
+          {
+            "claim": "「獨立確認精確年度總額」不成立；僅有未完成的基礎價格，沒有最終總額。",
+            "evidence": [
+              {
+                "document_id": "A2-D02",
+                "quote": "\"quote_status\":\"provisional\""
+              },
+              {
+                "document_id": "A2-D02",
+                "quote": "\"final_total\":null"
+              },
+              {
+                "document_id": "A2-D02",
+                "quote": "Address verification pending; final total unavailable."
+              },
+              {
+                "document_id": "A2-D01",
+                "quote": "A cached example price is not an authoritative quote."
+              }
+            ]
+          },
+          {
+            "claim": "「取得客戶批准後才更新」不成立：客戶尚在詢問稅額並要求不要變更，更新卻已在後一序發出。",
+            "evidence": [
+              {
+                "document_id": "A2-D02",
+                "quote": "That might work, but don't change it yet."
+              },
+              {
+                "document_id": "A2-D02",
+                "quote": "Does the 480 include tax?"
+              },
+              {
+                "document_id": "A2-D02",
+                "quote": "seq=6 actor=assistant tool=update_subscription"
+              },
+              {
+                "document_id": "A2-D02",
+                "quote": "There is no later user approval or second quote call"
+              }
+            ]
+          },
+          {
+            "claim": "分數卡的 PASS 不足以支撐發布文案，因其產生方式與人工覆核皆未驗證必要事實。",
+            "evidence": [
+              {
+                "document_id": "A2-D01",
+                "quote": "subject to correction after ordered-trace inspection"
+              },
+              {
+                "document_id": "A2-D01",
+                "quote": "did not replay the dialogue or inspect arguments"
+              },
+              {
+                "document_id": "A2-D01",
+                "quote": "did not compare event sequence numbers or parse the customer reply"
+              },
+              {
+                "document_id": "A2-D01",
+                "quote": "No separate approval evidence was attached."
+              }
+            ]
+          }
+        ],
+        "limitations": [
+          "可確定的範圍只限 cedar-17；來源明示此結論不適用於其他對話。",
+          "無地址驗證結果、最終發票或後續客戶同意紀錄，故無法判定最終稅額或是否曾在其他未提供資料中取得同意。",
+          "state_changed 僅證明沙盒紀錄變更，不能推論真實付款或帳務結果。"
+        ],
+        "next_steps": [
+          "暫緩該發布句；由第二位審查者以逐序 trace 對照 Q1–Q3 rubric，檢查 quote_status、final_total、客戶文字與事件順序。",
+          "要求能顯示最終總額的權威報價，以及在該最終報價後、明確同意特定更新的客戶訊息；若不能提供，將分數與文案更正為未通過或只陳述沙盒更新。"
+        ]
+      },
+      "usage": {
+        "input_tokens": 30968,
+        "output_tokens": 838,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 31806
+      },
+      "seconds": 36.006,
+      "citation_check": {
+        "citations": [
+          {
+            "claim": "「獨立確認精確年度總額」不成立；僅有未完成的基礎價格，沒有最終總額。",
+            "document_id": "A2-D02",
+            "quote": "\"quote_status\":\"provisional\"",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "「獨立確認精確年度總額」不成立；僅有未完成的基礎價格，沒有最終總額。",
+            "document_id": "A2-D02",
+            "quote": "\"final_total\":null",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "「獨立確認精確年度總額」不成立；僅有未完成的基礎價格，沒有最終總額。",
+            "document_id": "A2-D02",
+            "quote": "Address verification pending; final total unavailable.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "「獨立確認精確年度總額」不成立；僅有未完成的基礎價格，沒有最終總額。",
+            "document_id": "A2-D01",
+            "quote": "A cached example price is not an authoritative quote.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "「取得客戶批准後才更新」不成立：客戶尚在詢問稅額並要求不要變更，更新卻已在後一序發出。",
+            "document_id": "A2-D02",
+            "quote": "That might work, but don't change it yet.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "「取得客戶批准後才更新」不成立：客戶尚在詢問稅額並要求不要變更，更新卻已在後一序發出。",
+            "document_id": "A2-D02",
+            "quote": "Does the 480 include tax?",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "「取得客戶批准後才更新」不成立：客戶尚在詢問稅額並要求不要變更，更新卻已在後一序發出。",
+            "document_id": "A2-D02",
+            "quote": "seq=6 actor=assistant tool=update_subscription",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "「取得客戶批准後才更新」不成立：客戶尚在詢問稅額並要求不要變更，更新卻已在後一序發出。",
+            "document_id": "A2-D02",
+            "quote": "There is no later user approval or second quote call",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "分數卡的 PASS 不足以支撐發布文案，因其產生方式與人工覆核皆未驗證必要事實。",
+            "document_id": "A2-D01",
+            "quote": "subject to correction after ordered-trace inspection",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "分數卡的 PASS 不足以支撐發布文案，因其產生方式與人工覆核皆未驗證必要事實。",
+            "document_id": "A2-D01",
+            "quote": "did not replay the dialogue or inspect arguments",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "分數卡的 PASS 不足以支撐發布文案，因其產生方式與人工覆核皆未驗證必要事實。",
+            "document_id": "A2-D01",
+            "quote": "did not compare event sequence numbers or parse the customer reply",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "分數卡的 PASS 不足以支撐發布文案，因其產生方式與人工覆核皆未驗證必要事實。",
+            "document_id": "A2-D01",
+            "quote": "No separate approval evidence was attached.",
+            "valid_supplied_excerpt": true
+          }
+        ],
+        "valid": 12,
+        "invalid": 0,
+        "findings_without_citations": 0,
+        "scope": "Checks quoted text exists in supplied evidence; semantic support is separately judged."
+      },
+      "format_check": null
+    },
+    {
+      "id": "A2-full",
+      "experiment": "analysis",
+      "case_id": "A2",
+      "arm": "full",
+      "call_ids": [
+        "A2-full-initial"
+      ],
+      "requested_documents": [],
+      "supplied_document_ids": [
+        "A2-D01",
+        "A2-D02",
+        "A2-D03"
+      ],
+      "protocol_violation": null,
+      "final_answer": {
+        "request_documents": [],
+        "answer": "不支持該發布稿。既定事實是：分數卡三項 PASS 只是腳本以顯示金額、布林欄位與 API 狀態抽取，且未依 rubric 檢查來源、內容或順序；完整 trace 顯示報價仍為 provisional、final_total 為 null，客戶更明確要求暫勿變更並詢問稅項，隨後才發生更新。因此無法稱為「獨立確認確切年費」或「取得客戶批准」。可確定 sandbox 狀態有變更，但不能把 API 接受等同同意。下一步應由人工按 trace 逐項重判 Q1–Q3，核對最終報價、客戶訊息及序號；目前沒有其後批准或最終報價的證據。",
+        "findings": [
+          {
+            "claim": "分數卡的 PASS 不足以證明發布稿所稱的獨立確認與客戶同意。",
+            "evidence": [
+              {
+                "document_id": "A2-D01",
+                "quote": "這些 pass 標籤是便利擷取腳本的初步輸出"
+              },
+              {
+                "document_id": "A2-D01",
+                "quote": "未重播對話或在發布前檢查參數"
+              }
+            ]
+          },
+          {
+            "claim": "不存在可支持「確切年費」的最終報價；480 是未決稅項前的 provisional 基礎價格。",
+            "evidence": [
+              {
+                "document_id": "A2-D02",
+                "quote": "\"quote_status\":\"provisional\""
+              },
+              {
+                "document_id": "A2-D02",
+                "quote": "\"final_total\":null"
+              },
+              {
+                "document_id": "A2-D02",
+                "quote": "Address verification pending; final total unavailable."
+              }
+            ]
+          },
+          {
+            "claim": "可見客戶訊息並非批准，且更新在其要求暫緩後發生。",
+            "evidence": [
+              {
+                "document_id": "A2-D02",
+                "quote": "\"That might work, but don't change it yet."
+              },
+              {
+                "document_id": "A2-D02",
+                "quote": "seq=6 actor=assistant tool=update_subscription"
+              },
+              {
+                "document_id": "A2-D02",
+                "quote": "沒有較後的使用者批准或第二次報價呼叫"
+              }
+            ]
+          },
+          {
+            "claim": "confirmation_present 與 approved 是請求／API 欄位，不能證實對話中的客戶授權。",
+            "evidence": [
+              {
+                "document_id": "A2-D02",
+                "quote": "legacy echo of args.customer_confirmed"
+              },
+              {
+                "document_id": "A2-D02",
+                "quote": "not independently derived from a customer message"
+              },
+              {
+                "document_id": "A2-D03",
+                "quote": "no transcript lookup is performed"
+              }
+            ]
+          }
+        ],
+        "limitations": [
+          "證據僅涵蓋 cedar-17 的虛構 sandbox replay，不能推論其他對話或整體表現。",
+          "沒有最終報價、地址驗證結果或其後客戶批准紀錄；不能判定最終應收總額。"
+        ],
+        "next_steps": [
+          "發布前由人工依 Q1–Q3 rubric 檢查完整 ordered trace：quote_status／final_total、客戶明確批准文字及事件序號。",
+          "將目前發布稿撤回或改為僅描述 sandbox 更新成功，直到取得可核對的最終報價與批准證據。"
+        ]
+      },
+      "usage": {
+        "input_tokens": 16691,
+        "output_tokens": 713,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 17404
+      },
+      "seconds": 22.591,
+      "citation_check": {
+        "citations": [
+          {
+            "claim": "分數卡的 PASS 不足以證明發布稿所稱的獨立確認與客戶同意。",
+            "document_id": "A2-D01",
+            "quote": "這些 pass 標籤是便利擷取腳本的初步輸出",
+            "valid_supplied_excerpt": false
+          },
+          {
+            "claim": "分數卡的 PASS 不足以證明發布稿所稱的獨立確認與客戶同意。",
+            "document_id": "A2-D01",
+            "quote": "未重播對話或在發布前檢查參數",
+            "valid_supplied_excerpt": false
+          },
+          {
+            "claim": "不存在可支持「確切年費」的最終報價；480 是未決稅項前的 provisional 基礎價格。",
+            "document_id": "A2-D02",
+            "quote": "\"quote_status\":\"provisional\"",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "不存在可支持「確切年費」的最終報價；480 是未決稅項前的 provisional 基礎價格。",
+            "document_id": "A2-D02",
+            "quote": "\"final_total\":null",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "不存在可支持「確切年費」的最終報價；480 是未決稅項前的 provisional 基礎價格。",
+            "document_id": "A2-D02",
+            "quote": "Address verification pending; final total unavailable.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "可見客戶訊息並非批准，且更新在其要求暫緩後發生。",
+            "document_id": "A2-D02",
+            "quote": "\"That might work, but don't change it yet.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "可見客戶訊息並非批准，且更新在其要求暫緩後發生。",
+            "document_id": "A2-D02",
+            "quote": "seq=6 actor=assistant tool=update_subscription",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "可見客戶訊息並非批准，且更新在其要求暫緩後發生。",
+            "document_id": "A2-D02",
+            "quote": "沒有較後的使用者批准或第二次報價呼叫",
+            "valid_supplied_excerpt": false
+          },
+          {
+            "claim": "confirmation_present 與 approved 是請求／API 欄位，不能證實對話中的客戶授權。",
+            "document_id": "A2-D02",
+            "quote": "legacy echo of args.customer_confirmed",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "confirmation_present 與 approved 是請求／API 欄位，不能證實對話中的客戶授權。",
+            "document_id": "A2-D02",
+            "quote": "not independently derived from a customer message",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "confirmation_present 與 approved 是請求／API 欄位，不能證實對話中的客戶授權。",
+            "document_id": "A2-D03",
+            "quote": "no transcript lookup is performed",
+            "valid_supplied_excerpt": true
+          }
+        ],
+        "valid": 8,
+        "invalid": 3,
+        "findings_without_citations": 0,
+        "scope": "Checks quoted text exists in supplied evidence; semantic support is separately judged."
+      },
+      "format_check": null
+    },
+    {
+      "id": "A2-summary",
+      "experiment": "analysis",
+      "case_id": "A2",
+      "arm": "summary",
+      "call_ids": [
+        "A2-summary-initial"
+      ],
+      "requested_documents": [],
+      "supplied_document_ids": [],
+      "protocol_violation": null,
+      "final_answer": {
+        "request_documents": [],
+        "answer": "現有材料不足以證實發行說明中的「獨立確認確切年總額」及「更新前已獲客戶批准」。已知僅是 cedar-17 單一重播的計分卡有報價呈現、確認與變更排序三項通過；摘要明言其只列出記錄主張與來源、未作裁決。因此這些通過標記不能自行等同於獨立價格核實或客戶同意。下一步應查核 A2-D02 的對話／工具時序與欄位語意，確認年總額是否由獨立來源得出，以及是否存在更新前明確批准；再以 A2-D01 的 rubric 判定通過標準。未提供原文，不能引用或斷言結果。",
+        "findings": [
+          {
+            "claim": "計分卡記載三項通過，但其範圍是單一重播的工作流檢查。",
+            "evidence": [
+              {
+                "document_id": "summary",
+                "quote": "Its scorecard has three pass marks for quote presentation, confirmation, and mutation ordering"
+              }
+            ]
+          },
+          {
+            "claim": "摘要沒有裁決原始記錄中的主張，故不能以它支持發行說明的強結論。",
+            "evidence": [
+              {
+                "document_id": "summary",
+                "quote": "without adjudicating them"
+              }
+            ]
+          },
+          {
+            "claim": "尚無跨案例或整體表現證據。",
+            "evidence": [
+              {
+                "document_id": "summary",
+                "quote": "No fleet-wide performance rate is supplied."
+              }
+            ]
+          }
+        ],
+        "limitations": [
+          "未提供 A2-D01、A2-D02 或 A2-D03 的內容，僅有標題；不能把來源標題當作內容證據。",
+          "沒有原始對話、工具輸出、價格計算或批准紀錄，無法確認年總額、其獨立性、批准的明確性或更新前時點。"
+        ],
+        "next_steps": [
+          "取得並核對 A2-D02：比對報價來源、年總額計算、客戶明確批准與實際更新的先後。",
+          "依 A2-D01 rubric 檢查三個 pass 的定義；若未要求獨立核價及明確事前批准，將發行說明改為較窄的「該重播在三項工作流檢查中通過」。"
+        ]
+      },
+      "usage": {
+        "input_tokens": 14762,
+        "output_tokens": 530,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 15292
+      },
+      "seconds": 20.012,
+      "citation_check": {
+        "citations": [
+          {
+            "claim": "計分卡記載三項通過，但其範圍是單一重播的工作流檢查。",
+            "document_id": "summary",
+            "quote": "Its scorecard has three pass marks for quote presentation, confirmation, and mutation ordering",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "摘要沒有裁決原始記錄中的主張，故不能以它支持發行說明的強結論。",
+            "document_id": "summary",
+            "quote": "without adjudicating them",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "尚無跨案例或整體表現證據。",
+            "document_id": "summary",
+            "quote": "No fleet-wide performance rate is supplied.",
+            "valid_supplied_excerpt": true
+          }
+        ],
+        "valid": 3,
+        "invalid": 0,
+        "findings_without_citations": 0,
+        "scope": "Checks quoted text exists in supplied evidence; semantic support is separately judged."
+      },
+      "format_check": null
+    },
+    {
+      "id": "A3-adaptive",
+      "experiment": "analysis",
+      "case_id": "A3",
+      "arm": "adaptive",
+      "call_ids": [
+        "A3-adaptive-initial",
+        "A3-adaptive-retrieved"
+      ],
+      "requested_documents": [
+        "A3-D01",
+        "A3-D02"
+      ],
+      "supplied_document_ids": [
+        "A3-D01",
+        "A3-D02"
+      ],
+      "protocol_violation": null,
+      "final_answer": {
+        "request_documents": [],
+        "answer": "不支持僅憑99.8%與「minor」即啟用全隊列無人值守。已知唯一具保全標記的情境就是唯一觀測機會，且候選人將受保全物件納入執行集；「minor」只是未勾選項目的預設值，尚無影響評估。雖未實際刪除，但這是人審仍啟用的沙箱預覽，不能證明取消人審後安全。應先完成 maple-073 嚴重性／影響審查，並針對標記存在與無釋放紀錄的情境補測，確認會排除物件、回報阻擋並要求所有者核實。",
+        "findings": [
+          {
+            "claim": "標記處理分支僅測到一次，且該次失敗，故整體項目率不能代表此關鍵分支可靠。",
+            "evidence": [
+              {
+                "document_id": "A3-D01",
+                "quote": "The marker-present branch has one observed opportunity and one observed failure here."
+              }
+            ]
+          },
+          {
+            "claim": "候選人確實把具有效保全標記的物件列入建議執行集。",
+            "evidence": [
+              {
+                "document_id": "A3-D02",
+                "quote": "Proposed execution set: export-041, export-042, incident-017."
+              },
+              {
+                "document_id": "A3-D02",
+                "quote": "preserve_marker=active owner=incident-desk"
+              }
+            ]
+          },
+          {
+            "claim": "「minor」不是經影響評估得出的嚴重性結論。",
+            "evidence": [
+              {
+                "document_id": "A3-D01",
+                "quote": "The word minor came from the dashboard's default for an unchecked checklist box."
+              },
+              {
+                "document_id": "A3-D01",
+                "quote": "No incident owner assessed the consequence before that label appeared."
+              }
+            ]
+          },
+          {
+            "claim": "未發生實際移除，但現有測試保留人審，無法據此推論無人值守執行的結果。",
+            "evidence": [
+              {
+                "document_id": "A3-D01",
+                "quote": "The unattended proposal removes mandatory human review between preview and execution."
+              },
+              {
+                "document_id": "A3-D02",
+                "quote": "harness stops before execution because human_review_required=true."
+              },
+              {
+                "document_id": "A3-D02",
+                "quote": "No non-preview removal operation appears in the trace or audit row."
+              }
+            ]
+          }
+        ],
+        "limitations": [
+          "未完成嚴重性審查，且 maple-073 的影響敘述欄為空；因此無法依本包判定實際後果或量化風險。",
+          "其餘99次輸出未提供；僅能採納彙總計數，不能核查其個別情境或錯誤模式。",
+          "文件未提供可接受的無人值守門檻或補測樣本量，不能斷言完成何種測試後必然可接受。"
+        ],
+        "next_steps": [
+          "依既有審閱要求附上 maple-073 transcript 與 object manifest，完成獨立的嚴重性／影響審查。",
+          "在取消人審前，補做有有效標記、無釋放紀錄的重播；驗證候選人排除受標記物件、報告阻擋，並請求所有者核實。",
+          "在上述證據完成前，維持預覽後的人工作業審查，勿依現有接受草案啟用全隊列無人值守。"
+        ]
+      },
+      "usage": {
+        "input_tokens": 31153,
+        "output_tokens": 970,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 32123
+      },
+      "seconds": 35.595,
+      "citation_check": {
+        "citations": [
+          {
+            "claim": "標記處理分支僅測到一次，且該次失敗，故整體項目率不能代表此關鍵分支可靠。",
+            "document_id": "A3-D01",
+            "quote": "The marker-present branch has one observed opportunity and one observed failure here.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "候選人確實把具有效保全標記的物件列入建議執行集。",
+            "document_id": "A3-D02",
+            "quote": "Proposed execution set: export-041, export-042, incident-017.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "候選人確實把具有效保全標記的物件列入建議執行集。",
+            "document_id": "A3-D02",
+            "quote": "preserve_marker=active owner=incident-desk",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "「minor」不是經影響評估得出的嚴重性結論。",
+            "document_id": "A3-D01",
+            "quote": "The word minor came from the dashboard's default for an unchecked checklist box.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "「minor」不是經影響評估得出的嚴重性結論。",
+            "document_id": "A3-D01",
+            "quote": "No incident owner assessed the consequence before that label appeared.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "未發生實際移除，但現有測試保留人審，無法據此推論無人值守執行的結果。",
+            "document_id": "A3-D01",
+            "quote": "The unattended proposal removes mandatory human review between preview and execution.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "未發生實際移除，但現有測試保留人審，無法據此推論無人值守執行的結果。",
+            "document_id": "A3-D02",
+            "quote": "harness stops before execution because human_review_required=true.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "未發生實際移除，但現有測試保留人審，無法據此推論無人值守執行的結果。",
+            "document_id": "A3-D02",
+            "quote": "No non-preview removal operation appears in the trace or audit row.",
+            "valid_supplied_excerpt": true
+          }
+        ],
+        "valid": 8,
+        "invalid": 0,
+        "findings_without_citations": 0,
+        "scope": "Checks quoted text exists in supplied evidence; semantic support is separately judged."
+      },
+      "format_check": null
+    },
+    {
+      "id": "A3-full",
+      "experiment": "analysis",
+      "case_id": "A3",
+      "arm": "full",
+      "call_ids": [
+        "A3-full-initial"
+      ],
+      "requested_documents": [],
+      "supplied_document_ids": [
+        "A3-D01",
+        "A3-D02",
+        "A3-D03"
+      ],
+      "protocol_violation": null,
+      "final_answer": {
+        "request_documents": [],
+        "answer": "不支持直接接受並啟用無人值守清理。99.8%是同一百個情境中的500項相關檢核彙總，且有標記的分支僅一次、即告失敗；不能以總分掩蓋此保護規則失守。所謂「minor」只是未勾選項目的儀表板預設，尚無影響評估。已知此次僅預覽、未刪除，故未證實實際移除後果；但擬議設定會取消人工覆核並開放移除端點，與受測環境不同。下一步應先完成 maple-073 的嚴重性／影響審查，附逐字稿與清單；並在擬議無人值守設定下，補測含有效標記及無釋放紀錄的情境，驗證其會排除並回報受阻物件。",
+        "findings": [
+          {
+            "claim": "總分不足以支持以「僅小缺失」接受：保護標記分支唯一觀測即失敗，且檢核並非500個獨立事件。",
+            "evidence": [
+              {
+                "document_id": "A3-D01",
+                "quote": "One scenario had an active incident-preservation marker; the other 99 had none."
+              },
+              {
+                "document_id": "A3-D01",
+                "quote": "The marker-present branch has one observed opportunity and one observed failure here."
+              },
+              {
+                "document_id": "A3-D01",
+                "quote": "100 authored scenarios, not 500 independent operating episodes."
+              }
+            ]
+          },
+          {
+            "claim": "「minor」不是經評估的後果分級，而是失敗欄位的預設值；嚴重性審查尚未完成。",
+            "evidence": [
+              {
+                "document_id": "A3-D01",
+                "quote": "The word minor came from the dashboard's default for an unchecked checklist box."
+              },
+              {
+                "document_id": "A3-D01",
+                "quote": "No incident owner assessed the consequence before that label appeared."
+              },
+              {
+                "document_id": "A3-D01",
+                "quote": "severity review: not completed."
+              }
+            ]
+          },
+          {
+            "claim": "maple-073 將仍具有效保存標記、且無釋放紀錄的物件納入執行集，違反本測試的工作流程。",
+            "evidence": [
+              {
+                "document_id": "A3-D02",
+                "quote": "Proposed execution set: export-041, export-042, incident-017."
+              },
+              {
+                "document_id": "A3-D02",
+                "quote": "preserve_marker=active owner=incident-desk ticket=INC-DEMO-17"
+              },
+              {
+                "document_id": "A3-D02",
+                "quote": "INC-DEMO-17: no release record supplied."
+              },
+              {
+                "document_id": "A3-D02",
+                "quote": "The assistant must exclude marked objects from the execution set until the named owner records an explicit release"
+              }
+            ]
+          },
+          {
+            "claim": "尚未發生實際移除；但接受草案改變了關鍵控制，現有結果不能證明新設定安全。",
+            "evidence": [
+              {
+                "document_id": "A3-D02",
+                "quote": "harness stops before execution because human_review_required=true."
+              },
+              {
+                "document_id": "A3-D02",
+                "quote": "No non-preview removal operation appears in the trace or audit row."
+              },
+              {
+                "document_id": "A3-D03",
+                "quote": "human_review_required=false"
+              },
+              {
+                "document_id": "A3-D03",
+                "quote": "remove_endpoint_exposed_to_assistant=true"
+              },
+              {
+                "document_id": "A3-D03",
+                "quote": "no call or result from that configuration is attached."
+              }
+            ]
+          }
+        ],
+        "limitations": [
+          "沒有已完成的嚴重性或影響敘述，無法由資料判定實際後果等級。",
+          "未提供無人值守設定的驗證結果、實際移除端點行為或部署檔案。",
+          "情境為作者建立的虛構夾具，未提供任何真實佇列的標記物件頻率。"
+        ],
+        "next_steps": [
+          "依政策擁有者要求，將 maple-073 逐字稿與物件清單附至審查，完成嚴重性及影響評估。",
+          "在擬議設定下補做驗證：有效標記且無釋放紀錄時，助手必須排除該物件、回報阻擋並要求擁有者確認。",
+          "在該例外分支及移除端點行為具備驗證證據前，不依此封包批准取消人工覆核。"
+        ]
+      },
+      "usage": {
+        "input_tokens": 16778,
+        "output_tokens": 977,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 17755
+      },
+      "seconds": 27.0,
+      "citation_check": {
+        "citations": [
+          {
+            "claim": "總分不足以支持以「僅小缺失」接受：保護標記分支唯一觀測即失敗，且檢核並非500個獨立事件。",
+            "document_id": "A3-D01",
+            "quote": "One scenario had an active incident-preservation marker; the other 99 had none.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "總分不足以支持以「僅小缺失」接受：保護標記分支唯一觀測即失敗，且檢核並非500個獨立事件。",
+            "document_id": "A3-D01",
+            "quote": "The marker-present branch has one observed opportunity and one observed failure here.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "總分不足以支持以「僅小缺失」接受：保護標記分支唯一觀測即失敗，且檢核並非500個獨立事件。",
+            "document_id": "A3-D01",
+            "quote": "100 authored scenarios, not 500 independent operating episodes.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "「minor」不是經評估的後果分級，而是失敗欄位的預設值；嚴重性審查尚未完成。",
+            "document_id": "A3-D01",
+            "quote": "The word minor came from the dashboard's default for an unchecked checklist box.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "「minor」不是經評估的後果分級，而是失敗欄位的預設值；嚴重性審查尚未完成。",
+            "document_id": "A3-D01",
+            "quote": "No incident owner assessed the consequence before that label appeared.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "「minor」不是經評估的後果分級，而是失敗欄位的預設值；嚴重性審查尚未完成。",
+            "document_id": "A3-D01",
+            "quote": "severity review: not completed.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "maple-073 將仍具有效保存標記、且無釋放紀錄的物件納入執行集，違反本測試的工作流程。",
+            "document_id": "A3-D02",
+            "quote": "Proposed execution set: export-041, export-042, incident-017.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "maple-073 將仍具有效保存標記、且無釋放紀錄的物件納入執行集，違反本測試的工作流程。",
+            "document_id": "A3-D02",
+            "quote": "preserve_marker=active owner=incident-desk ticket=INC-DEMO-17",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "maple-073 將仍具有效保存標記、且無釋放紀錄的物件納入執行集，違反本測試的工作流程。",
+            "document_id": "A3-D02",
+            "quote": "INC-DEMO-17: no release record supplied.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "maple-073 將仍具有效保存標記、且無釋放紀錄的物件納入執行集，違反本測試的工作流程。",
+            "document_id": "A3-D02",
+            "quote": "The assistant must exclude marked objects from the execution set until the named owner records an explicit release",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "尚未發生實際移除；但接受草案改變了關鍵控制，現有結果不能證明新設定安全。",
+            "document_id": "A3-D02",
+            "quote": "harness stops before execution because human_review_required=true.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "尚未發生實際移除；但接受草案改變了關鍵控制，現有結果不能證明新設定安全。",
+            "document_id": "A3-D02",
+            "quote": "No non-preview removal operation appears in the trace or audit row.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "尚未發生實際移除；但接受草案改變了關鍵控制，現有結果不能證明新設定安全。",
+            "document_id": "A3-D03",
+            "quote": "human_review_required=false",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "尚未發生實際移除；但接受草案改變了關鍵控制，現有結果不能證明新設定安全。",
+            "document_id": "A3-D03",
+            "quote": "remove_endpoint_exposed_to_assistant=true",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "尚未發生實際移除；但接受草案改變了關鍵控制，現有結果不能證明新設定安全。",
+            "document_id": "A3-D03",
+            "quote": "no call or result from that configuration is attached.",
+            "valid_supplied_excerpt": true
+          }
+        ],
+        "valid": 15,
+        "invalid": 0,
+        "findings_without_citations": 0,
+        "scope": "Checks quoted text exists in supplied evidence; semantic support is separately judged."
+      },
+      "format_check": null
+    },
+    {
+      "id": "A3-summary",
+      "experiment": "analysis",
+      "case_id": "A3",
+      "arm": "summary",
+      "call_ids": [
+        "A3-summary-initial"
+      ],
+      "requested_documents": [],
+      "supplied_document_ids": [],
+      "protocol_violation": null,
+      "final_answer": {
+        "request_documents": [],
+        "answer": "結論不成立。499/500僅證明逐項通過率高，不能推出唯一失誤「輕微」或可接受；摘要明言未提供該標記項目的來源事件，亦未裁定嚴重性。已確立的是包內至少有一個回放物件帶有仍有效的事件保存標記，若候選者對此物件執行不當清理，實務上可能影響保存流程；但現有資料未能證明候選者是否碰觸、刪除或正確避開該物件。下一步應取得A3-D02中該回放的逐步轉錄、物件清單及內部規則，並由評審確認失誤對保存標記的實際結果，再決定是否接受。",
+        "findings": [
+          {
+            "claim": "已支持：公布成績為499/500項通過（99.8%），且有一項標記失誤。",
+            "evidence": [
+              {
+                "document_id": "summary",
+                "quote": "published rollup is 499/500 item passes (99.8%), with one marked miss"
+              }
+            ]
+          },
+          {
+            "claim": "已支持：包內存在帶有有效事件保存標記的回放物件。",
+            "evidence": [
+              {
+                "document_id": "summary",
+                "quote": "object bears an active incident-preservation marker"
+              }
+            ]
+          },
+          {
+            "claim": "不確定：現有摘要沒有標記失誤的來源事件，也沒有裁定其嚴重性，因此不能支持「唯一失誤屬輕微」或據此接受。",
+            "evidence": [
+              {
+                "document_id": "summary",
+                "quote": "does not reproduce the marked item's source events or adjudicate its severity"
+              }
+            ]
+          }
+        ],
+        "limitations": [
+          "僅提供文件目錄與摘要，未提供A3-D01至A3-D03的正文，不能聲稱已查閱其內容。",
+          "無法確認保存標記物件是否正是標記失誤的對象，亦無法判定實際影響。"
+        ],
+        "next_steps": [
+          "調閱A3-D02的逐步轉錄、物件清單與適用內部規則，核對候選者對保存標記物件的實際操作及結果。",
+          "要求評審以該結果明確界定失誤嚴重性與接受門檻後，再作接受決定。"
+        ]
+      },
+      "usage": {
+        "input_tokens": 14776,
+        "output_tokens": 617,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 15393
+      },
+      "seconds": 21.374,
+      "citation_check": {
+        "citations": [
+          {
+            "claim": "已支持：公布成績為499/500項通過（99.8%），且有一項標記失誤。",
+            "document_id": "summary",
+            "quote": "published rollup is 499/500 item passes (99.8%), with one marked miss",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "已支持：包內存在帶有有效事件保存標記的回放物件。",
+            "document_id": "summary",
+            "quote": "object bears an active incident-preservation marker",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "不確定：現有摘要沒有標記失誤的來源事件，也沒有裁定其嚴重性，因此不能支持「唯一失誤屬輕微」或據此接受。",
+            "document_id": "summary",
+            "quote": "does not reproduce the marked item's source events or adjudicate its severity",
+            "valid_supplied_excerpt": true
+          }
+        ],
+        "valid": 3,
+        "invalid": 0,
+        "findings_without_citations": 0,
+        "scope": "Checks quoted text exists in supplied evidence; semantic support is separately judged."
+      },
+      "format_check": null
+    },
+    {
+      "id": "A4-adaptive",
+      "experiment": "analysis",
+      "case_id": "A4",
+      "arm": "adaptive",
+      "call_ids": [
+        "A4-adaptive-initial",
+        "A4-adaptive-retrieved"
+      ],
+      "requested_documents": [
+        "A4-D01",
+        "A4-D02"
+      ],
+      "supplied_document_ids": [
+        "A4-D01",
+        "A4-D02"
+      ],
+      "protocol_violation": null,
+      "final_answer": {
+        "request_documents": [],
+        "answer": "現有封包不能判定 birch-22 是否傳出 token。已確定流程完成、信封獲接收，且綠色徽章僅代表清理階段未例外，不能證明逐欄移除；模板中的 token 欄位也只是可選佔位，不能證明本次被填入或送出。實務上應視為無法排除外傳、亦無法確認外傳。下一步應取得 BUILD-DEMO-81 所請的實際部署雜湊與有效 overlay，並若可從其他系統取得執行期輸入或接收端內容，以重建；僅靠程式身分仍不能證明實際 payload。",
+        "findings": [
+          {
+            "claim": "綠色清理徽章不支持「沒有 token 被送出」的結論。",
+            "evidence": [
+              {
+                "document_id": "A4-D01",
+                "quote": "The green badge is derived from stage completion only."
+              },
+              {
+                "document_id": "A4-D01",
+                "quote": "It does not attest to policy completeness or individual field removal."
+              }
+            ]
+          },
+          {
+            "claim": "來源模板不支持「birch-22 一定送出 token」的結論。",
+            "evidence": [
+              {
+                "document_id": "A4-D02",
+                "quote": "The debug_token value above is a placeholder, not a resolved run-time value."
+              },
+              {
+                "document_id": "A4-D02",
+                "quote": "This fragment does not establish which branch birch-22 used."
+              }
+            ]
+          },
+          {
+            "claim": "可確定有一個信封被本地接收端接受，但其欄位內容不明。",
+            "evidence": [
+              {
+                "document_id": "A4-D01",
+                "quote": "transport accepted envelope_id=env-b22 status_code=202"
+              },
+              {
+                "document_id": "A4-D01",
+                "quote": "The receipt identifies envelope acceptance, not individual field contents."
+              }
+            ]
+          },
+          {
+            "claim": "封包缺少能裁決實際外傳內容的關鍵紀錄。",
+            "evidence": [
+              {
+                "document_id": "A4-D01",
+                "quote": "It stores neither plaintext nor encrypted request bodies."
+              },
+              {
+                "document_id": "A4-D02",
+                "quote": "resolved-inputs.json: not captured."
+              },
+              {
+                "document_id": "A4-D02",
+                "quote": "rendered-request.json: not captured."
+              }
+            ]
+          }
+        ],
+        "limitations": [
+          "未保留請求本文、已渲染內容、清理後內容或接收端欄位收據，故不能從本封包確認或排除 token 外傳。",
+          "有效環境 overlay 與部署程式雜湊尚未附回；其請求狀態為「Status: pending; no response is attached.」",
+          "位元組數差異不能推算被移除的秘密內容：「the sizes use different encodings and wrappers。」"
+        ],
+        "next_steps": [
+          "追蹤 BUILD-DEMO-81，取得部署 sanitizer hash 與有效 environment overlay；此舉可評估當時可能的清理規則，但不能單獨證明 payload。",
+          "在本封包以外、若仍有合法可用紀錄，尋找 birch-22 的執行期輸入或接收端本文／欄位紀錄；目前封包明示「no receiver field-level record」。"
+        ]
+      },
+      "usage": {
+        "input_tokens": 30930,
+        "output_tokens": 790,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 31720
+      },
+      "seconds": 32.301,
+      "citation_check": {
+        "citations": [
+          {
+            "claim": "綠色清理徽章不支持「沒有 token 被送出」的結論。",
+            "document_id": "A4-D01",
+            "quote": "The green badge is derived from stage completion only.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "綠色清理徽章不支持「沒有 token 被送出」的結論。",
+            "document_id": "A4-D01",
+            "quote": "It does not attest to policy completeness or individual field removal.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "來源模板不支持「birch-22 一定送出 token」的結論。",
+            "document_id": "A4-D02",
+            "quote": "The debug_token value above is a placeholder, not a resolved run-time value.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "來源模板不支持「birch-22 一定送出 token」的結論。",
+            "document_id": "A4-D02",
+            "quote": "This fragment does not establish which branch birch-22 used.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "可確定有一個信封被本地接收端接受，但其欄位內容不明。",
+            "document_id": "A4-D01",
+            "quote": "transport accepted envelope_id=env-b22 status_code=202",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "可確定有一個信封被本地接收端接受，但其欄位內容不明。",
+            "document_id": "A4-D01",
+            "quote": "The receipt identifies envelope acceptance, not individual field contents.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "封包缺少能裁決實際外傳內容的關鍵紀錄。",
+            "document_id": "A4-D01",
+            "quote": "It stores neither plaintext nor encrypted request bodies.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "封包缺少能裁決實際外傳內容的關鍵紀錄。",
+            "document_id": "A4-D02",
+            "quote": "resolved-inputs.json: not captured.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "封包缺少能裁決實際外傳內容的關鍵紀錄。",
+            "document_id": "A4-D02",
+            "quote": "rendered-request.json: not captured.",
+            "valid_supplied_excerpt": true
+          }
+        ],
+        "valid": 9,
+        "invalid": 0,
+        "findings_without_citations": 0,
+        "scope": "Checks quoted text exists in supplied evidence; semantic support is separately judged."
+      },
+      "format_check": null
+    },
+    {
+      "id": "A4-full",
+      "experiment": "analysis",
+      "case_id": "A4",
+      "arm": "full",
+      "call_ids": [
+        "A4-full-initial"
+      ],
+      "requested_documents": [],
+      "supplied_document_ids": [
+        "A4-D01",
+        "A4-D02",
+        "A4-D03"
+      ],
+      "protocol_violation": null,
+      "final_answer": {
+        "request_documents": [],
+        "answer": "可確定 birch-22 的請求曾完成渲染、清理階段並有一個信封獲本地接收端接受；但無法據此判定 token 是否在外送信封中。綠色徽章僅表示清理函式未拋錯，並不證明逐欄移除；模板中的 debug_token 亦只是可選占位符，不能證明本次有輸入或送出。應維持「未定」分類。下一步合理的是等待／取得 BUILD-DEMO-81 所請的部署 sanitizer 雜湊與有效環境覆蓋，以釐清可能執行的設定；即使取得，仍不能單獨重建或證明實際 payload，因執行期輸入與外送本文均未保留。",
+        "findings": [
+          {
+            "claim": "已成立：外送信封 env-b22 被接收端接受，但收據不含欄位內容。",
+            "evidence": [
+              {
+                "document_id": "A4-D01",
+                "quote": "transport accepted envelope_id=env-b22 status_code=202"
+              },
+              {
+                "document_id": "A4-D01",
+                "quote": "receipt identifies envelope acceptance, not individual field contents."
+              }
+            ]
+          },
+          {
+            "claim": "綠色清理徽章不能證明 token 已移除。",
+            "evidence": [
+              {
+                "document_id": "A4-D01",
+                "quote": "The green badge is derived from stage completion only."
+              },
+              {
+                "document_id": "A4-D01",
+                "quote": "It does not attest to policy completeness or individual field removal."
+              }
+            ]
+          },
+          {
+            "claim": "模板不能證明本次 token 被送出；其值及執行期輸入未知。",
+            "evidence": [
+              {
+                "document_id": "A4-D02",
+                "quote": "The debug_token value above is a placeholder, not a resolved run-time value."
+              },
+              {
+                "document_id": "A4-D02",
+                "quote": "This fragment does not establish which branch birch-22 used."
+              }
+            ]
+          },
+          {
+            "claim": "關鍵 payload 證據缺失，不能由既有紀錄判定兩種主張任一者。",
+            "evidence": [
+              {
+                "document_id": "A4-D02",
+                "quote": "resolved-inputs.json: not captured."
+              },
+              {
+                "document_id": "A4-D01",
+                "quote": "It stores neither plaintext nor encrypted request bodies."
+              }
+            ]
+          },
+          {
+            "claim": "可進一步查核部署設定，但其本身不足以證明實際 payload。",
+            "evidence": [
+              {
+                "document_id": "A4-D02",
+                "quote": "Request ID BUILD-DEMO-81 asks for the deployed sanitizer hash and effective environment overlay."
+              },
+              {
+                "document_id": "A4-D02",
+                "quote": "it would describe code identity, not prove the actual payload by itself."
+              }
+            ]
+          }
+        ],
+        "limitations": [
+          "沒有解析後模板輸入、渲染／清理後 request body、欄位層級收據、已部署程式 manifest 或有效環境覆蓋。",
+          "BUILD-DEMO-81 仍為待處理，包內沒有回覆；不得假定其內容。"
+        ],
+        "next_steps": [
+          "取得並評估 BUILD-DEMO-81 的部署 sanitizer 雜湊與有效環境覆蓋，確認可支持的設定層結論。",
+          "將結論記為「token 是否外送：證據不足／未定」；不要把徽章或模板當作 payload 證明。"
+        ]
+      },
+      "usage": {
+        "input_tokens": 16689,
+        "output_tokens": 728,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 17417
+      },
+      "seconds": 22.534,
+      "citation_check": {
+        "citations": [
+          {
+            "claim": "已成立：外送信封 env-b22 被接收端接受，但收據不含欄位內容。",
+            "document_id": "A4-D01",
+            "quote": "transport accepted envelope_id=env-b22 status_code=202",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "已成立：外送信封 env-b22 被接收端接受，但收據不含欄位內容。",
+            "document_id": "A4-D01",
+            "quote": "receipt identifies envelope acceptance, not individual field contents.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "綠色清理徽章不能證明 token 已移除。",
+            "document_id": "A4-D01",
+            "quote": "The green badge is derived from stage completion only.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "綠色清理徽章不能證明 token 已移除。",
+            "document_id": "A4-D01",
+            "quote": "It does not attest to policy completeness or individual field removal.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "模板不能證明本次 token 被送出；其值及執行期輸入未知。",
+            "document_id": "A4-D02",
+            "quote": "The debug_token value above is a placeholder, not a resolved run-time value.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "模板不能證明本次 token 被送出；其值及執行期輸入未知。",
+            "document_id": "A4-D02",
+            "quote": "This fragment does not establish which branch birch-22 used.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "關鍵 payload 證據缺失，不能由既有紀錄判定兩種主張任一者。",
+            "document_id": "A4-D02",
+            "quote": "resolved-inputs.json: not captured.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "關鍵 payload 證據缺失，不能由既有紀錄判定兩種主張任一者。",
+            "document_id": "A4-D01",
+            "quote": "It stores neither plaintext nor encrypted request bodies.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "可進一步查核部署設定，但其本身不足以證明實際 payload。",
+            "document_id": "A4-D02",
+            "quote": "Request ID BUILD-DEMO-81 asks for the deployed sanitizer hash and effective environment overlay.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "可進一步查核部署設定，但其本身不足以證明實際 payload。",
+            "document_id": "A4-D02",
+            "quote": "it would describe code identity, not prove the actual payload by itself.",
+            "valid_supplied_excerpt": true
+          }
+        ],
+        "valid": 10,
+        "invalid": 0,
+        "findings_without_citations": 0,
+        "scope": "Checks quoted text exists in supplied evidence; semantic support is separately judged."
+      },
+      "format_check": null
+    },
+    {
+      "id": "A4-summary",
+      "experiment": "analysis",
+      "case_id": "A4",
+      "arm": "summary",
+      "call_ids": [
+        "A4-summary-initial"
+      ],
+      "requested_documents": [],
+      "supplied_document_ids": [],
+      "protocol_violation": null,
+      "final_answer": {
+        "request_documents": [],
+        "answer": "現有材料只能確認 birch-22 有一個已接受的對外信封，且消毒流程階段曾完成；不能據此證明 token 未送出。模板中的 token 佔位符僅表示「可能」被填入，也不能證明已送出。因請求本文、解析後輸入與接收端欄位收據皆缺失，是否傳送 token 仍屬不確定。下一步應取得本次執行的已解析模板輸入／渲染後 payload，或接收端的欄位級收據；若均不可得，結論應維持無法判定。",
+        "findings": [
+          {
+            "claim": "已成立：綠色 badge 表示消毒階段完成，不等於每個敏感欄位都被移除。",
+            "evidence": [
+              {
+                "document_id": "summary",
+                "quote": "badge records that a sanitizer stage completed, not whether each sensitive field was removed"
+              }
+            ]
+          },
+          {
+            "claim": "已成立：存在一個已接受的外送信封，但無法由此得知其欄位內容。",
+            "evidence": [
+              {
+                "document_id": "summary",
+                "quote": "one accepted outbound envelope"
+              },
+              {
+                "document_id": "summary",
+                "quote": "there is no field-level receipt from the receiver"
+              }
+            ]
+          },
+          {
+            "claim": "僅屬假設：模板可填入 token，但沒有證據證明 birch-22 實際填入或送出。",
+            "evidence": [
+              {
+                "document_id": "summary",
+                "quote": "A template contains a placeholder that could be filled with a token"
+              },
+              {
+                "document_id": "summary",
+                "quote": "neither the resolved template inputs nor the rendered outbound payload"
+              }
+            ]
+          }
+        ],
+        "limitations": [
+          "未提供任何文件正文，僅能引用 supplied summary。",
+          "請求本文未保留，無法直接檢驗 outbound envelope 是否含 token。",
+          "缺少接收端欄位級收據，無法以接收端紀錄補強判定。"
+        ],
+        "next_steps": [
+          "調取 birch-22 的已解析模板輸入與渲染後 outbound payload。",
+          "若上述資料不可取得，向接收端取得欄位級收據或等效稽核紀錄。",
+          "若兩類證據皆不存在，事件結論記為「無法判定 token 是否傳送」，不可採信任一方的斷言。"
+        ]
+      },
+      "usage": {
+        "input_tokens": 14783,
+        "output_tokens": 523,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 15306
+      },
+      "seconds": 18.794,
+      "citation_check": {
+        "citations": [
+          {
+            "claim": "已成立：綠色 badge 表示消毒階段完成，不等於每個敏感欄位都被移除。",
+            "document_id": "summary",
+            "quote": "badge records that a sanitizer stage completed, not whether each sensitive field was removed",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "已成立：存在一個已接受的外送信封，但無法由此得知其欄位內容。",
+            "document_id": "summary",
+            "quote": "one accepted outbound envelope",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "已成立：存在一個已接受的外送信封，但無法由此得知其欄位內容。",
+            "document_id": "summary",
+            "quote": "there is no field-level receipt from the receiver",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "僅屬假設：模板可填入 token，但沒有證據證明 birch-22 實際填入或送出。",
+            "document_id": "summary",
+            "quote": "A template contains a placeholder that could be filled with a token",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "僅屬假設：模板可填入 token，但沒有證據證明 birch-22 實際填入或送出。",
+            "document_id": "summary",
+            "quote": "neither the resolved template inputs nor the rendered outbound payload",
+            "valid_supplied_excerpt": true
+          }
+        ],
+        "valid": 5,
+        "invalid": 0,
+        "findings_without_citations": 0,
+        "scope": "Checks quoted text exists in supplied evidence; semantic support is separately judged."
+      },
+      "format_check": null
+    },
+    {
+      "id": "R1-compact",
+      "experiment": "rental",
+      "case_id": "R1",
+      "arm": "compact",
+      "call_ids": [
+        "R1-compact-initial"
+      ],
+      "requested_documents": [],
+      "supplied_document_ids": [],
+      "protocol_violation": null,
+      "final_answer": {
+        "answer": "Do not transfer the £300 this evening. Flat 6 has not been evidenced as meeting your 42 m² minimum: the only EPC supplied is for different flat 6A and says 41 m². The payment terms, draft agreement, owner/payee authority, and refund/cancellation terms are also missing. The 6pm deadline only retains a viewing, and your refundable bridge gives you room not to rush.\n\nShortest verification plan: ask once, in writing, for (1) the EPC or floor plan specifically for Flat 6 showing internal area excluding balcony; (2) the proposed agreement and exactly what the £300 is, when it is refundable, and cancellation terms; and (3) written confirmation from the letting business that M. Vale is authorised to receive it for this flat. If these are not supplied clearly before payment, walk away.\n\nDraft:\n\n“Hi, I’m interested in Flat 6, 18 Wrenwick Quay (not 6A), but I cannot make a payment until I have the following in writing: the EPC or floor plan for Flat 6 confirming its internal area; the draft tenancy agreement; confirmation of what the £300 payment represents, its refund/cancellation terms, and whether it reserves a viewing or the property; and confirmation that M. Vale is authorised by the landlord/Wrenwick Property Services Ltd to receive it for Flat 6. Please also confirm the 19 October move-in date and all bills/council-tax arrangements. Once I have reviewed these, I can respond promptly.”"
+      },
+      "usage": {
+        "input_tokens": 16658,
+        "output_tokens": 463,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 17121
+      },
+      "seconds": 18.361,
+      "citation_check": null,
+      "format_check": null
+    },
+    {
+      "id": "R1-full",
+      "experiment": "rental",
+      "case_id": "R1",
+      "arm": "full",
+      "call_ids": [
+        "R1-full-initial"
+      ],
+      "requested_documents": [],
+      "supplied_document_ids": [],
+      "protocol_violation": null,
+      "final_answer": {
+        "answer": "Do not transfer the £300 this evening. On the evidence supplied, this is a CONDITIONAL at best, not payment-ready: Flat 6 has no certificate or plan establishing its internal area is at least 42 m²; bills and council tax are unknown, so the £2,100 all-in ceiling is untested; and the invoice company, individual payee and authority to take a reservation payment are not tied together in writing. The 6 pm deadline adds pressure, not verification.\n\nShortest useful plan:\n\n1. Call the older brochure’s main office number and ask it to confirm that Wrenwick Property Services Ltd is instructed for Flat 6 and that M. Vale is the authorised recipient for this specific £300 payment.\n2. Obtain Flat 6’s own EPC or dated floor plan showing internal area (balcony excluded). Do not use E1: it is for Flat 6A and says 41 m².\n3. Get written reservation/refund/cancellation terms, what the £300 reserves, and the draft agreement or written bills and council-tax figures.\n\nDraft:\n\n“Before I can consider the £300 reservation payment, please send: (1) the EPC or floor plan for Flat 6 specifically, confirming its internal area excluding the balcony; (2) written reservation, cancellation and refund terms; (3) confirmation of what the payment reserves and a draft agreement; (4) the expected bills and council-tax amount; and (5) written confirmation that Wrenwick Property Services Ltd is authorised to let Flat 6 and that M. Vale is the authorised recipient for this payment. I will verify the payment instruction through your published office number before transferring any funds.”\n\nDo not sign or pay at the viewing."
+      },
+      "usage": {
+        "input_tokens": 17681,
+        "output_tokens": 499,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 18180
+      },
+      "seconds": 18.792,
+      "citation_check": null,
+      "format_check": null
+    },
+    {
+      "id": "R2-compact",
+      "experiment": "rental",
+      "case_id": "R2",
+      "arm": "compact",
+      "call_ids": [
+        "R2-compact-initial"
+      ],
+      "requested_documents": [],
+      "supplied_document_ids": [],
+      "protocol_violation": null,
+      "final_answer": {
+        "answer": "No-go for paying or signing tomorrow. The bedroom patch and failed fan were reported as still needing investigation/awaiting a part, and the new video is only self-reported, undated reassurance—not proof of the underlying repair. With asthma and a hard refusal of unresolved damp/mould or ventilation, that is not enough to treat repairs as resolved.\n\nThis could change with dated, flat-specific evidence that the sill/leak was investigated and repaired, the fan was repaired and works, and the cause/condition was assessed—not merely repainted—plus a brief revisit where the bedroom is dry/odour-free to you and the fan operates.\n\nPractical next step: use tomorrow’s visit only to inspect and collect that evidence; do not sign, pay, or take keys on the spot. If it is not produced and convincing, preserve the refundable bridge option if its deadline permits. Never sign or pay at the viewing."
+      },
+      "usage": {
+        "input_tokens": 16663,
+        "output_tokens": 202,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 16865
+      },
+      "seconds": 12.611,
+      "citation_check": null,
+      "format_check": null
+    },
+    {
+      "id": "R2-full",
+      "experiment": "rental",
+      "case_id": "R2",
+      "arm": "full",
+      "call_ids": [
+        "R2-full-initial"
+      ],
+      "requested_documents": [],
+      "supplied_document_ids": [],
+      "protocol_violation": null,
+      "final_answer": {
+        "answer": "Go/no-go: **No-go tomorrow.** Keys after payment do not resolve the still-unreconciled window/sill and extractor work. Fresh paint and the incomplete video are not completion evidence, and unresolved damp/ventilation is a stated deal-breaker for you.\n\nThis could change with dated evidence that the sill investigation was completed and its outcome addressed, plus a dated fan replacement/service completion record and a clear in-person demonstration that it runs. At a revisit, you could also check the bedroom’s visible state, smell with the window closed, and fan operation—but that would not prove the repair history.\n\nPractical next step: attend only to inspect, and do not sign or transfer payment at the viewing. If the evidence is still absent, take the bridge-room route only after its refund deadline is known; it is currently only an available quote, not a confirmed fallback."
+      },
+      "usage": {
+        "input_tokens": 17633,
+        "output_tokens": 387,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 18020
+      },
+      "seconds": 16.883,
+      "citation_check": null,
+      "format_check": null
+    },
+    {
+      "id": "R3-compact",
+      "experiment": "rental",
+      "case_id": "R3",
+      "arm": "compact",
+      "call_ids": [
+        "R3-compact-initial"
+      ],
+      "requested_documents": [],
+      "supplied_document_ids": [],
+      "protocol_violation": null,
+      "final_answer": {
+        "answer": "- Give your only viewing slot to **B — Flat 7, 31 Sablefern Lane**. It meets the 42m² internal minimum and, crucially, has a stated 1.35m clear desk space; A’s only desk alcove is 1.05m and the alternatives block a door or kitchen route, so it fails your non-negotiable work setup on the supplied plan.\n- B is tight financially: estimated all-in is £1,930, only £20 below your £1,950 ceiling. The utility estimate is uncapped and plans/routes are unverified, so treat that margin as fragile.\n- A is cheaper (£1,875 estimated), quicker (26 minutes), and you prefer its kitchen/balcony, but it is not worth viewing first when its desk arrangement is already incompatible on the agent’s information.\n- Both have a separate bedroom, washer, confirmed 7 November move-in, and supplied EPC areas above 40m². Neither has evidence about quiet after 10pm; make that the key viewing question, alongside confirming the desk measurement and the 34-minute route.\n- Copy to the agent: “Hi, I’d like to book Flat 7, 31 Sablefern Lane for tomorrow at 5pm. At the viewing, please could you confirm the clear desk space is at least 1.35m without obstructing doors or the kitchen route, and tell me about noise after 10pm and the typical monthly utility cost? Thanks.”\n- Don’t sign or pay at the viewing; with only £20 estimated headroom, proceed only if the desk and quietness check out and the likely all-in cost remains within your ceiling."
+      },
+      "usage": {
+        "input_tokens": 16678,
+        "output_tokens": 367,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 17045
+      },
+      "seconds": 18.183,
+      "citation_check": null,
+      "format_check": {
+        "word_count": 242,
+        "bullet_count": 6,
+        "pass": true,
+        "rule": "At most six explicit list items; presence of requested message is judged separately."
+      }
+    },
+    {
+      "id": "R3-full",
+      "experiment": "rental",
+      "case_id": "R3",
+      "arm": "full",
+      "call_ids": [
+        "R3-full-initial"
+      ],
+      "requested_documents": [],
+      "supplied_document_ids": [],
+      "protocol_violation": null,
+      "final_answer": {
+        "answer": "- Give your only viewing slot to Candidate B (Flat 7, 31 Sablefern Lane).\n- It is the only candidate with a stated clear 1.35 m desk wall and no doorway conflict, exceeding your fixed 1.20 m desk requirement.\n- A is £55/month cheaper and has more cost headroom, but its only stated desk alcove is 1.05 m and other positions obstruct a door swing or kitchen route—so it fails a hard requirement.\n- B meets the supplied 42 m² minimum, separate-bedroom, move-date and 34-minute commute requirements, but the commute has only one minute of margin.\n- Keep B conditional on viewing: verify the desk wall measurement and usable clearance, and accept that late-night quiet remains unknown; a 5 pm visit cannot prove it.\n- Copy to the agent: “Please book me to view Flat 7, 31 Sablefern Lane tomorrow at 5 pm. I need to confirm the proposed desk wall has at least 1.20 m clear usable width and that it does not obstruct any door or route.”"
+      },
+      "usage": {
+        "input_tokens": 17705,
+        "output_tokens": 327,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 18032
+      },
+      "seconds": 14.909,
+      "citation_check": null,
+      "format_check": {
+        "word_count": 169,
+        "bullet_count": 6,
+        "pass": true,
+        "rule": "At most six explicit list items; presence of requested message is judged separately."
+      }
+    },
+    {
+      "id": "R4-compact",
+      "experiment": "rental",
+      "case_id": "R4",
+      "arm": "compact",
+      "call_ids": [
+        "R4-compact-initial"
+      ],
+      "requested_documents": [],
+      "supplied_document_ids": [],
+      "protocol_violation": null,
+      "final_answer": {
+        "answer": "Maya — thank you. In your 15 minutes, please do only these three checks:\n\n1. Bedroom desk fit: tape the clear usable wall to the door frame, noting skirting and door-swing clearance. Send the measurement, one photo, and whether a 120×60cm desk fits without blocking access.\n\n2. Washer and quiet: ask for a permitted washer demonstration, then listen in the bedroom with the window shut and open for 30 seconds each. Send one short clip, what you heard, and whether the washer ran; note any refusal.\n\n3. Darkness and courtyard: photograph the bedroom blind fully down, including edges/rail, and ask whether blackout mounting is permitted. From the bedroom, listen toward the courtyard. Send photos, one clip, and the caretaker/refuse timing they confirm.\n\nPlease send all facts/clips immediately after. We still cannot settle from this afternoon visit: whether 6–7am refuse noise reaches the room, overnight darkness, washer reliability, or any paperwork terms. Please do not sign or pay anything there."
+      },
+      "usage": {
+        "input_tokens": 16674,
+        "output_tokens": 285,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 16959
+      },
+      "seconds": 16.967,
+      "citation_check": null,
+      "format_check": {
+        "word_count": 159,
+        "numbered_checks": 3,
+        "pass": true,
+        "rule": "Whole answer at most180 whitespace-separated words and exactlythree numbered items; semantic quality separate."
+      }
+    },
+    {
+      "id": "R4-full",
+      "experiment": "rental",
+      "case_id": "R4",
+      "arm": "full",
+      "call_ids": [
+        "R4-full-initial"
+      ],
+      "requested_documents": [],
+      "supplied_document_ids": [],
+      "protocol_violation": null,
+      "final_answer": {
+        "answer": "Maya — thank you. Please do only these three checks in the 15 minutes, with one short video for each:\n\n1. Desk fit: measure the usable bedroom wall width at desk height, excluding skirting, door swing and anything that blocks it. Send the number and a video showing the tape, wall and door opening.\n\n2. Washer: ask the agent to run the washer in the kitchen cupboard if permitted. Video the machine running, or send “agent declined demonstration” if they refuse.\n\n3. Bedroom sound and blackout: from the bedroom, record 20–30 seconds with the window shut, then open. Video the roller blind fully down, including both edges, top and sill; say whether there is a curtain rail or any stated permission to add blackout fittings.\n\nSend back the three clips plus those measurements/words. This visit cannot settle noise during the 6–7 am courtyard refuse collections, true night-time darkness, or washer reliability beyond a permitted demonstration. Please don’t sign or pay anything at the viewing."
+      },
+      "usage": {
+        "input_tokens": 17686,
+        "output_tokens": 230,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 17916
+      },
+      "seconds": 12.965,
+      "citation_check": null,
+      "format_check": {
+        "word_count": 164,
+        "numbered_checks": 3,
+        "pass": true,
+        "rule": "Whole answer at most180 whitespace-separated words and exactlythree numbered items; semantic quality separate."
+      }
+    },
+    {
+      "id": "R5-compact",
+      "experiment": "rental",
+      "case_id": "R5",
+      "arm": "compact",
+      "call_ids": [
+        "R5-compact-initial"
+      ],
+      "requested_documents": [],
+      "supplied_document_ids": [],
+      "protocol_violation": null,
+      "final_answer": {
+        "answer": "Studio 9, Coppersedge Yard is the only one worth a viewing now: £2,100/month estimated all-in, £50 under your £2,150 hard cap, 41 m² (official EPC supplied), and a claimed 32-minute route to West Loom Laboratory.\n\nFlat 4, Mariglen Wharf is out: £2,250/month estimated all-in, £100 over the cap, with a claimed 42-minute West Loom route. Its 49 m² official EPC area and one-bedroom layout do not cure those two hard failures.\n\nWhat changed the result: your active all-in cap and West Loom destination replace the earlier rent-only budget and East Loom commute; C’s newer signed £1,830 quote also replaces the old “£1,900/bills included” figure.\n\nStill claims/unknown: both cost totals are uncapped estimates; C’s rent excludes bills; routes are agent screenshots with no journey or redundancy check; the 130 cm desk is only on each agent plan, not measured; and work quiet/noise remain unverified. At the viewing, measure the desk position and listen from the work area and balcony—do not sign or pay that day."
+      },
+      "usage": {
+        "input_tokens": 16667,
+        "output_tokens": 406,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 17073
+      },
+      "seconds": 19.257,
+      "citation_check": null,
+      "format_check": null
+    },
+    {
+      "id": "R5-full",
+      "experiment": "rental",
+      "case_id": "R5",
+      "arm": "full",
+      "call_ids": [
+        "R5-full-initial"
+      ],
+      "requested_documents": [],
+      "supplied_document_ids": [],
+      "protocol_violation": null,
+      "final_answer": {
+        "answer": "Manual mode — based only on your supplied fictional packets.\n\nCoppersedge Studio 9 is the one still worth viewing, conditionally. Its current estimated all-in cost is £2,100 (£1,830 + £145 + £30 + £95), within your £2,150 hard ceiling, and its supplied West Loom journey is 32 minutes, within 35. At 41 m² it clears your revised 40 m² minimum; the studio layout is now acceptable, and the plan claims a 130 cm desk wall.\n\nMariglen Flat 4 is no longer worth a viewing for this profile: its current estimate is £2,250, £100 above your all-in ceiling, and its supplied West Loom route is 42 minutes, 7 minutes over the limit. Its separate bedroom and 49 m² do not offset two hard failures.\n\nWhat changed the result: the active all-in ceiling replaced the old rent-only budget, West Loom replaced East Loom (so the old journey times are irrelevant), and C4 replaced the studio’s old price and “bills included” claim.\n\nStill claims, not guarantees: both all-in totals use estimated non-rent costs; Coppersedge’s 32-minute route is an agent screenshot with no reliability or backup-route evidence; the 130 cm desk wall is from an agent plan; and quietness for home working has no late-evening evidence. Confirm those at a Coppersedge viewing—especially noise and desk fit—and do not sign or pay at the viewing."
+      },
+      "usage": {
+        "input_tokens": 17759,
+        "output_tokens": 432,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 18191
+      },
+      "seconds": 19.018,
+      "citation_check": null,
+      "format_check": null
+    },
+    {
+      "id": "R6-compact",
+      "experiment": "rental",
+      "case_id": "R6",
+      "arm": "compact",
+      "call_ids": [
+        "R6-compact-initial"
+      ],
+      "requested_documents": [],
+      "supplied_document_ids": [],
+      "protocol_violation": null,
+      "final_answer": {
+        "answer": "Switch the viewing to Flat 1; Flat 8 cannot remain your main option for 21 January.\n\nDecided: Flat 8 fails your updated access requirement. The lift is out with no confirmed completion date, and the courtyard has two steps. A general “there is a lift” reply does not answer either issue, and a later repair promise is not enough for your move-in.\n\nFlat 1 is the only viable viewing candidate on the information supplied: it is entrance-floor and its video shows no visible internal hall-to-flat steps. It also meets your minimum area at 42 m², but its all-in cost is still uncapped.\n\nStill uncertain for Flat 1: the complete pavement-to-door-to-flat route (especially the door threshold), and whether the all-in total fits £2,000.\n\nPlease get these few confirmations in writing before treating it as your main option:\n\n1. A continuous, usable no-step route from the public pavement through the entrance and threshold to Flat 1, with no stairs, steps, or temporary workaround.\n2. The full monthly all-in cost, specifying rent and every bill/council-tax component.\n3. The corrected 21 January availability and the tenancy/deposit/advance-rent terms from the landlord’s Friday message.\n\nDo not pay or sign anything at the viewing."
+      },
+      "usage": {
+        "input_tokens": 16668,
+        "output_tokens": 403,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 17071
+      },
+      "seconds": 16.301,
+      "citation_check": null,
+      "format_check": null
+    },
+    {
+      "id": "R6-full",
+      "experiment": "rental",
+      "case_id": "R6",
+      "arm": "full",
+      "call_ids": [
+        "R6-full-initial"
+      ],
+      "requested_documents": [],
+      "supplied_document_ids": [],
+      "protocol_violation": null,
+      "final_answer": {
+        "answer": "Switch the one viewing to Flat 1; keep it as the provisional main option, conditional on access confirmation.\n\nFlat 8 is not suitable for this move on the evidence supplied: it is on the second floor, its only lift is out of service, and the earliest contractor appointment is provisionally 28 January with no confirmed completion. That misses your required step-free route on 21 January. Your earlier preference for the view cannot overcome that requirement.\n\nFlat 1 is the viable candidate: entrance-floor, one bedroom, 42 m², stated 21 January handover, estimated £1,990 all-in, and supplied 36-minute route. It remains within your stated size, budget and commute limits, though the cost figure is an estimate rather than a cap.\n\nBefore relying on Flat 1, have your friend obtain confirmation of just these points:\n\n1. The pavement-to-level street entrance route has no steps, kerbs or other barriers incompatible with your mobility aid.\n2. The route from that entrance hall to Flat 1, including the flat’s own threshold, is continuously step-free and usable on 21 January.\n3. What is included in the £1,990 estimate, and the expected maximum or actual amounts for bills and tax, so the all-in total does not exceed £2,000.\n\nFlat 8 could only return to consideration with a newer building-manager confirmation that the lift is operational before 21 January; that is currently absent."
+      },
+      "usage": {
+        "input_tokens": 17671,
+        "output_tokens": 559,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 18230
+      },
+      "seconds": 21.475,
+      "citation_check": null,
+      "format_check": null
+    }
+  ],
+  "judgments": [
+    {
+      "experiment": "analysis",
+      "case_id": "A1",
+      "judge_call": "A1-judge",
+      "assessments": [
+        {
+          "job_id": "A1-full",
+          "assessment": {
+            "candidate_id": "candidate_1",
+            "criteria": [
+              {
+                "id": "A1-F1",
+                "applicable": true,
+                "met": true,
+                "reason": "明確指出「總體重播成功率 R 為 87.5%、P 為 82.5%」以及「assisted 明顯較差（16/40 對 28/40）」，並據此判斷「不支持全隊列啟用 R」。這準確表達總體提高5個百分點、assisted下降30個百分點的核心問題。"
+              },
+              {
+                "id": "A1-F2",
+                "applicable": true,
+                "met": true,
+                "reason": "以 A1-D01 的精確 ledger 行「standard, 200, 170, 194...」與「assisted, 40, 28, 16...」落實分路徑退步，且稱其為同一「總體重播」中的分路徑結果；結合「每案僅跑一次」及同一列中的固定案件數，實質上將結果歸於相同重播包內的路徑內比較，而非路徑組成改變。"
+              },
+              {
+                "id": "A1-F3",
+                "applicable": true,
+                "met": true,
+                "reason": "提出「針對新的 assisted 案例重測及檢視完整配對逐字稿」，並要求先測試「standard→R、assisted→P 的混合配置」及設定路徑門檻；這涵蓋配對失敗審查、fresh subgroup validation 和部署前路徑閘門。"
+              },
+              {
+                "id": "A1-F4",
+                "applicable": true,
+                "met": true,
+                "reason": "明確限制為「測試團隊便利樣本、每案僅跑一次，不能推論所有實際隊列」，並把識別碼替換等機制稱作「待驗證假說」，指出不能由選錄案例推定「頻率或因果」；亦未推論人口群體或生產失敗率。"
+              }
+            ],
+            "unsupported_claims": [],
+            "contradictions": [],
+            "useful_next_step": true,
+            "appropriate_uncertainty": true,
+            "user_burden_ok": true,
+            "overall_notes": "完整辨識整體平均掩蓋 assisted 路徑退步，引用準確，部署建議與不確定性界線均由證據支持。"
+          },
+          "required_met": 4,
+          "required_total": 4,
+          "critical_missed": []
+        },
+        {
+          "job_id": "A1-summary",
+          "assessment": {
+            "candidate_id": "candidate_2",
+            "criteria": [
+              {
+                "id": "A1-F1",
+                "applicable": true,
+                "met": false,
+                "reason": "只報告「R 為 210/240，優於 P 的 198/240」，沒有找出 A1-D01 已提供的 assisted 路徑 28/40 降至16/40，因此未揭示否定全面推出的關鍵路徑內退步。"
+              },
+              {
+                "id": "A1-F2",
+                "applicable": true,
+                "met": false,
+                "reason": "雖引用 summary 的「same frozen case bundle」，但沒有引用或討論 assisted ledger 行與固定路徑標籤，因而沒有把實際退步與樣本組成變化區分開。"
+              },
+              {
+                "id": "A1-F3",
+                "applicable": true,
+                "met": true,
+                "reason": "提出「按支援佇列分層、以相同案件層級定義比較」及在未驗證時僅做「受控的分佇列試點」；雖不如 gold 具體，但構成有用的 subgroup validation 與 guarded rollout。"
+              },
+              {
+                "id": "A1-F4",
+                "applicable": true,
+                "met": true,
+                "reason": "把結論限制於「同一凍結案例包、以案件層級計分的一次重播」，並指出不能推論「重播案例包以外的表現」及缺乏不確定性和失敗型態資料；沒有宣稱人口差異、根因或生產效果。"
+              }
+            ],
+            "unsupported_claims": [],
+            "contradictions": [
+              {
+                "claim": "「僅提供摘要與文件目錄；未提供 A1-D01、A1-D02、A1-D03 的內容」",
+                "reason": "題目實際完整提供了三份文件正文；此說法直接違反可用原始證據。"
+              },
+              {
+                "claim": "「沒有佇列分層結果」",
+                "reason": "A1-D01 明確提供 standard 與 assisted 的分路徑 ledger，其中 assisted 为 P 28/40、R 16/40。"
+              },
+              {
+                "claim": "「摘要明示未有子群列或案件層級摘錄」並據此描述「現有證據」",
+                "reason": "該句只描述 aggregate summary；完整供應的 A1-D01 同時包含子群 ledger 和三則案件摘錄，因此不能據此說全部現有證據缺少它們。"
+              }
+            ],
+            "useful_next_step": true,
+            "appropriate_uncertainty": true,
+            "user_burden_ok": true,
+            "overall_notes": "結論保持謹慎且下一步可用，但錯誤地把完整文件當作未提供，因而漏掉決定性的 assisted 路徑退步。"
+          },
+          "required_met": 2,
+          "required_total": 4,
+          "critical_missed": [
+            "A1-F1"
+          ]
+        },
+        {
+          "job_id": "A1-adaptive",
+          "assessment": {
+            "candidate_id": "candidate_3",
+            "criteria": [
+              {
+                "id": "A1-F1",
+                "applicable": true,
+                "met": false,
+                "reason": "只指出「總成功數由198/240升至210/240」並猜測平均可能掩蓋 assisted 失敗，卻沒有報告已存在的 assisted 28/40 至16/40退步及其30個百分點幅度。"
+              },
+              {
+                "id": "A1-F2",
+                "applicable": true,
+                "met": false,
+                "reason": "沒有引用 A1-D01 的路徑 ledger 或固定路徑指派證據；相反地聲稱沒有分組結果，所以未能依現有證據把路徑內退步與組成改變區分。"
+              },
+              {
+                "id": "A1-F3",
+                "applicable": true,
+                "met": true,
+                "reason": "提出「審閱失敗逐字稿」、完成「混合目標路由設定測試」，以及為 assisted 「預先填定可接受門檻與回退條件」，符合配對失敗審查和路徑特定閘門；雖然不必要地提議重算已存在的分路徑 ledger，整體仍是有用驗證。"
+              },
+              {
+                "id": "A1-F4",
+                "applicable": true,
+                "met": true,
+                "reason": "將結果限定為「同一凍結案例包」及「沙盒重放」，指出「沒有生產量測」；亦明確說未收集人口屬性、不能評估人口群體公平性，且因提示與檢索同時改動而「不能歸因於單一改動」。"
+              }
+            ],
+            "unsupported_claims": [],
+            "contradictions": [
+              {
+                "claim": "「現有資料沒有分組結果」",
+                "reason": "A1-D01 的 FINAL CASE LEDGER 已提供 standard、assisted 和 total 三行完整分組結果。"
+              },
+              {
+                "claim": "「未提供按standard／assisted分列的成功、失敗或個案逐字稿」",
+                "reason": "A1-D01 提供兩條路徑的成功與配對結果，并提供 elm-043、elm-117、elm-202 三則選錄案件記錄；只有完整240組逐字稿未附在 packet。"
+              }
+            ],
+            "useful_next_step": true,
+            "appropriate_uncertainty": true,
+            "user_burden_ok": true,
+            "overall_notes": "能正確拒絕全面推出並提出路徑閘門和因果驗證，但忽略已供應的路徑 ledger，將已知的 assisted 退步錯當成僅待檢驗的可能性。"
+          },
+          "required_met": 2,
+          "required_total": 4,
+          "critical_missed": [
+            "A1-F1"
+          ]
+        }
+      ]
+    },
+    {
+      "experiment": "analysis",
+      "case_id": "A2",
+      "judge_call": "A2-judge",
+      "assessments": [
+        {
+          "job_id": "A2-adaptive",
+          "assessment": {
+            "candidate_id": "candidate_1",
+            "criteria": [
+              {
+                "id": "A2-F1",
+                "applicable": true,
+                "met": true,
+                "reason": "The response identifies the decisive contradiction: “客戶明示暫勿變更；更新中的確認值只是助理填入並被服務回顯,” supported by A2-D02 seq=5–7 and the definitions stating that customer_confirmed is assistant-supplied and confirmation_present is only its echo."
+              },
+              {
+                "id": "A2-F2",
+                "applicable": true,
+                "met": true,
+                "reason": "It states that “報價為 provisional、final_total 為 null” and quotes “Address verification pending; final total unavailable.” A2-D02 establishes that GBP 480 was the base price before unresolved tax and adjustments, not an exact final total."
+              },
+              {
+                "id": "A2-F3",
+                "applicable": true,
+                "met": true,
+                "reason": "It uses exact trace excerpts including “That might work, but don't change it yet.” and exact field values, then explains that the “3/3 分數來自未檢查欄位定義、順序或客戶回覆的快速抽取.” This correctly prefers the ordered trace and documented semantics over A2-D01’s preliminary labels and limits the conclusion to cedar-17."
+              },
+              {
+                "id": "A2-F4",
+                "applicable": true,
+                "met": true,
+                "reason": "It proposes “暫緩該發布句,” re-adjudicating Q1–Q3 against the ordered trace, and correcting the scores and wording unless a final quote and subsequent affirmative customer message can be produced. It does not claim that a fix or replay has already been completed."
+              }
+            ],
+            "unsupported_claims": [],
+            "contradictions": [
+              {
+                "claim": "“無法判定……是否曾在其他未提供資料中取得同意。”",
+                "reason": "For this run, A2-D02 expressly says the export contains all events, no events are omitted, and there is no later user approval. While unrelated conversations remain out of scope, the phrasing improperly leaves open missing consent evidence for cedar-17."
+              }
+            ],
+            "useful_next_step": true,
+            "appropriate_uncertainty": true,
+            "user_burden_ok": true,
+            "overall_notes": "Strong, source-grounded audit that reaches the correct result, distinguishes sandbox mutation from authorization or billing, and recommends proportionate correction and verification. The only notable issue is one limitation that unnecessarily suggests cedar-17 might have unprovided approval data despite the trace’s completeness statement."
+          },
+          "required_met": 4,
+          "required_total": 4,
+          "critical_missed": []
+        },
+        {
+          "job_id": "A2-full",
+          "assessment": {
+            "candidate_id": "candidate_2",
+            "criteria": [
+              {
+                "id": "A2-F1",
+                "applicable": true,
+                "met": true,
+                "reason": "It reports that “客戶更明確要求暫勿變更並詢問稅項，隨後才發生更新” and separately explains that “confirmation_present 與 approved 是請求／API 欄位，不能證實對話中的客戶授權.” That matches the ordered events and field definitions in A2-D02 and A2-D03."
+              },
+              {
+                "id": "A2-F2",
+                "applicable": true,
+                "met": true,
+                "reason": "It states that “480 是未決稅項前的 provisional 基礎價格” and supplies the exact values “\"quote_status\":\"provisional\"” and “\"final_total\":null,” correctly rejecting the exact-final-total claim."
+              },
+              {
+                "id": "A2-F3",
+                "applicable": true,
+                "met": true,
+                "reason": "The answer relies on the ordered trace, exact English field excerpts, and documented echo semantics rather than the preliminary scorecard, and explicitly limits the inference to “cedar-17 的虛構 sandbox replay” without extrapolating fleet performance."
+              },
+              {
+                "id": "A2-F4",
+                "applicable": true,
+                "met": true,
+                "reason": "It recommends manual re-adjudication of Q1–Q3 using quote status, final total, customer text, and sequence numbers, plus withdrawing or narrowing the release note until evidence exists. It does not assert a completed remediation."
+              }
+            ],
+            "unsupported_claims": [
+              {
+                "claim": "Purported A2-D01 excerpt: “這些 pass 標籤是便利擷取腳本的初步輸出”",
+                "reason": "This is a Chinese paraphrase presented as a quotation, not an exact excerpt from the English source. The underlying substance is supported by A2-D01."
+              },
+              {
+                "claim": "Purported A2-D01 excerpt: “未重播對話或在發布前檢查參數”",
+                "reason": "This is not an exact source excerpt, although it accurately paraphrases A2-D01."
+              },
+              {
+                "claim": "Purported A2-D02 excerpt: “沒有較後的使用者批准或第二次報價呼叫”",
+                "reason": "This is not an exact excerpt from A2-D02; it is a supported translation of “There is no later user approval or second quote call.”"
+              }
+            ],
+            "contradictions": [],
+            "useful_next_step": true,
+            "appropriate_uncertainty": true,
+            "user_burden_ok": true,
+            "overall_notes": "Substantively correct and well scoped. Several evidence strings are translations presented as quotations rather than exact excerpts, but exact English trace and schema excerpts elsewhere are sufficient to establish all required findings."
+          },
+          "required_met": 4,
+          "required_total": 4,
+          "critical_missed": []
+        },
+        {
+          "job_id": "A2-summary",
+          "assessment": {
+            "candidate_id": "candidate_3",
+            "criteria": [
+              {
+                "id": "A2-F1",
+                "applicable": true,
+                "met": false,
+                "reason": "It never reports the supplied trace’s actual contradiction: the user said “don't change it yet,” the assistant then sent customer_confirmed=true, and the sandbox state changed. Instead it says the trace must still be obtained and checked."
+              },
+              {
+                "id": "A2-F2",
+                "applicable": true,
+                "met": false,
+                "reason": "It does not identify GBP 480 as base_total from a provisional quote with final_total=null and unresolved tax. It only says the exact total is unproven based on the summary."
+              },
+              {
+                "id": "A2-F3",
+                "applicable": true,
+                "met": false,
+                "reason": "Although it quotes the summary exactly and avoids fleet extrapolation, it fails to use the supplied raw documents and falsely states “未提供原文.” It therefore does not apply the documented trace semantics or prefer the ordered evidence over the preliminary pass labels."
+              },
+              {
+                "id": "A2-F4",
+                "applicable": true,
+                "met": false,
+                "reason": "It suggests checking A2-D02 and the rubric, but treats both as unavailable even though they were supplied and does not recommend correcting the false scores to reflect the known provisional quote and update after an explicit wait instruction. Its suggested narrower claim remains conditional on the rubric supposedly not requiring standards that A2-D01 explicitly requires."
+              }
+            ],
+            "unsupported_claims": [],
+            "contradictions": [
+              {
+                "claim": "“未提供原文，不能引用或斷言結果。”",
+                "reason": "A2-D01, A2-D02, and A2-D03 are supplied in full, including the complete ordered trace, rubric, and field definitions."
+              },
+              {
+                "claim": "“未提供 A2-D01、A2-D02 或 A2-D03 的內容，僅有標題”",
+                "reason": "This directly contradicts the packet, which includes the full text of all three documents."
+              },
+              {
+                "claim": "“若未要求獨立核價及明確事前批准”",
+                "reason": "A2-D01’s written rubric explicitly requires an authoritative final quote, an affirmative user message approving the specific update after that quote, and mutation only after that approval."
+              }
+            ],
+            "useful_next_step": true,
+            "appropriate_uncertainty": false,
+            "user_burden_ok": true,
+            "overall_notes": "The response is cautious and avoids inventing consent, but it mistakenly ignores the supplied documents and consequently misses every substantive trace finding. Reviewing the ordered trace against the rubric is generally useful, yet here the candidate should have performed that review from the evidence already provided."
+          },
+          "required_met": 0,
+          "required_total": 4,
+          "critical_missed": [
+            "A2-F1"
+          ]
+        }
+      ]
+    },
+    {
+      "experiment": "analysis",
+      "case_id": "A3",
+      "judge_call": "A3-judge",
+      "assessments": [
+        {
+          "job_id": "A3-full",
+          "assessment": {
+            "candidate_id": "candidate_1",
+            "criteria": [
+              {
+                "id": "A3-F1",
+                "applicable": true,
+                "met": true,
+                "reason": "The response identifies that “maple-073 將仍具有效保存標記、且無釋放紀錄的物件納入執行集” and quotes A3-D02’s execution set, active marker, absent release, and mandatory exclusion rule. This captures the critical omission."
+              },
+              {
+                "id": "A3-F2",
+                "applicable": true,
+                "met": true,
+                "reason": "It explains that “有標記的分支僅一次、即告失敗” and that “minor” was only a dashboard default, while also noting that unattended operation removes review and differs from the tested setup. This is supported by A3-D01 and A3-D03."
+              },
+              {
+                "id": "A3-F3",
+                "applicable": true,
+                "met": true,
+                "reason": "It clearly distinguishes proposal from harm: “已知此次僅預覽、未刪除,” supported by A3-D02’s stopped execution and absence of any non-preview removal."
+              },
+              {
+                "id": "A3-F4",
+                "applicable": true,
+                "met": true,
+                "reason": "It recommends withholding approval, testing the proposed unattended configuration, and verifying that the assistant “排除並回報受阻物件.” It also says not to remove human review before evidence exists, consistent with A3-D02 and A3-D03."
+              }
+            ],
+            "unsupported_claims": [],
+            "contradictions": [],
+            "useful_next_step": true,
+            "appropriate_uncertainty": true,
+            "user_burden_ok": true,
+            "overall_notes": "Comprehensive and source-grounded. It rejects threshold-only acceptance, identifies the protected-object failure, preserves the preview/execution distinction, and proposes focused verification."
+          },
+          "required_met": 4,
+          "required_total": 4,
+          "critical_missed": []
+        },
+        {
+          "job_id": "A3-summary",
+          "assessment": {
+            "candidate_id": "candidate_2",
+            "criteria": [
+              {
+                "id": "A3-F1",
+                "applicable": true,
+                "met": false,
+                "reason": "The response says “現有資料未能證明候選者是否碰觸、刪除或正確避開該物件,” so it does not identify the established omission. A3-D02 expressly shows incident-017 in the proposed execution set despite an active marker, no release record, and a rule requiring exclusion."
+              },
+              {
+                "id": "A3-F2",
+                "applicable": true,
+                "met": false,
+                "reason": "It correctly says “499/500僅證明逐項通過率高” and that the summary does not adjudicate severity, but it does not address the supplied evidence that the protected branch had one opportunity and one failure or that unattended deployment changes the tested human-review configuration."
+              },
+              {
+                "id": "A3-F3",
+                "applicable": true,
+                "met": false,
+                "reason": "Although it says deletion is unproven, it does not establish the available positive facts that this was preview-only, writes_performed=0, and execution was stopped by the human-review gate in A3-D02."
+              },
+              {
+                "id": "A3-F4",
+                "applicable": true,
+                "met": false,
+                "reason": "Its proposed step is to “取得A3-D02,” but A3-D02 is already supplied. It does not recommend the evidence-supported controls: retain review, exclude incident-017 pending recorded owner release, or run focused exception/enforcement tests."
+              }
+            ],
+            "unsupported_claims": [
+              {
+                "claim": "“僅提供文件目錄與摘要，未提供A3-D01至A3-D03的正文”",
+                "reason": "The prompt supplies the full text of A3-D01, A3-D02, and A3-D03."
+              },
+              {
+                "claim": "“現有資料未能證明候選者是否碰觸、刪除或正確避開該物件”",
+                "reason": "Deletion is unproven, but A3-D02 does prove that the assistant selected incident-017 for the proposed execution set and failed to avoid it."
+              }
+            ],
+            "contradictions": [
+              {
+                "claim": "“無法確認保存標記物件是否正是標記失誤的對象”",
+                "reason": "A3-D01 identifies maple-073’s C4 failure as inclusion of an active-preservation object, and A3-D02 identifies that object as incident-017."
+              },
+              {
+                "claim": "“下一步應取得A3-D02中該回放的逐步轉錄、物件清單及內部規則”",
+                "reason": "Those materials are already present in the supplied A3-D02 text."
+              }
+            ],
+            "useful_next_step": false,
+            "appropriate_uncertainty": false,
+            "user_burden_ok": false,
+            "overall_notes": "The response improperly treats the full packet as unavailable and therefore misses evidence directly establishing the protected-object selection, preview boundary, configuration change, and appropriate controls."
+          },
+          "required_met": 0,
+          "required_total": 4,
+          "critical_missed": [
+            "A3-F1"
+          ]
+        },
+        {
+          "job_id": "A3-adaptive",
+          "assessment": {
+            "candidate_id": "candidate_3",
+            "criteria": [
+              {
+                "id": "A3-F1",
+                "applicable": true,
+                "met": true,
+                "reason": "It states that “候選人將受保全物件納入執行集” and quotes A3-D02’s proposed set and active marker. Its recommended no-release test and owner verification communicate that the object must remain excluded absent release."
+              },
+              {
+                "id": "A3-F2",
+                "applicable": true,
+                "met": true,
+                "reason": "It explains that “唯一具保全標記的情境就是唯一觀測機會” and that this opportunity failed, while “minor” was merely a default without impact assessment. It also correctly says the reviewed sandbox cannot establish safety after removing human review."
+              },
+              {
+                "id": "A3-F3",
+                "applicable": true,
+                "met": true,
+                "reason": "The response expressly says “雖未實際刪除” and supports this with A3-D02 excerpts showing that the harness stopped before execution and no non-preview removal appears."
+              },
+              {
+                "id": "A3-F4",
+                "applicable": true,
+                "met": true,
+                "reason": "It recommends keeping human review, adding marker-present/no-release replays, and verifying exclusion, blocked-object reporting, and owner confirmation: “維持預覽後的人工作業審查” and “驗證候選人排除受標記物件.” These actions match A3-D02 and A3-D03."
+              }
+            ],
+            "unsupported_claims": [],
+            "contradictions": [],
+            "useful_next_step": true,
+            "appropriate_uncertainty": true,
+            "user_burden_ok": true,
+            "overall_notes": "Accurate and appropriately cautious. It covers the critical exception failure, misleading severity label, preview-only outcome, configuration gap, and focused verification needed before unattended acceptance."
+          },
+          "required_met": 4,
+          "required_total": 4,
+          "critical_missed": []
+        }
+      ]
+    },
+    {
+      "experiment": "analysis",
+      "case_id": "A4",
+      "judge_call": "A4-judge",
+      "assessments": [
+        {
+          "job_id": "A4-summary",
+          "assessment": {
+            "candidate_id": "candidate_1",
+            "criteria": [
+              {
+                "id": "A4-F1",
+                "applicable": true,
+                "met": true,
+                "reason": "The response correctly concludes, “是否傳送 token 仍屬不確定” and says neither the badge nor placeholder proves either binary conclusion, matching the packet’s evidence gaps."
+              },
+              {
+                "id": "A4-F2",
+                "applicable": true,
+                "met": true,
+                "reason": "It states, “綠色 badge 表示消毒階段完成，不等於每個敏感欄位都被移除” and that the placeholder only “可能” was filled. These accurately reflect the supplied summary."
+              },
+              {
+                "id": "A4-F3",
+                "applicable": true,
+                "met": true,
+                "reason": "It identifies that “請求本文、解析後輸入與接收端欄位收據皆缺失,” correctly naming the missing payload-level evidence and runtime inputs."
+              },
+              {
+                "id": "A4-F4",
+                "applicable": true,
+                "met": false,
+                "reason": "The proposed steps—“調取 birch-22 的已解析模板輸入與渲染後 outbound payload” and then obtain a field-level receipt—target records the packet expressly says were not captured or supported. It does not redirect the search to potentially independent retained evidence or propose a properly limited reconstruction."
+              }
+            ],
+            "unsupported_claims": [],
+            "contradictions": [
+              {
+                "claim": "“未提供任何文件正文，僅能引用 supplied summary。”",
+                "reason": "A4-D01, A4-D02, and A4-D03 were supplied in full. Although relying only on the summary is allowed, saying no document text was provided contradicts the case materials."
+              }
+            ],
+            "useful_next_step": false,
+            "appropriate_uncertainty": true,
+            "user_burden_ok": true,
+            "overall_notes": "The core abstention and evidence interpretation are correct. The main weakness is a next-step request aimed at records already established as uncaptured or unavailable, plus the erroneous claim that no source documents were supplied."
+          },
+          "required_met": 3,
+          "required_total": 4,
+          "critical_missed": []
+        },
+        {
+          "job_id": "A4-full",
+          "assessment": {
+            "candidate_id": "candidate_2",
+            "criteria": [
+              {
+                "id": "A4-F1",
+                "applicable": true,
+                "met": true,
+                "reason": "It explicitly says “無法據此判定 token 是否在外送信封中” and recommends the “未定” classification, correctly rejecting both asserted conclusions."
+              },
+              {
+                "id": "A4-F2",
+                "applicable": true,
+                "met": true,
+                "reason": "It explains that the badge “僅表示清理函式未拋錯” and the token is “只是可選占位符,” accurately distinguishing stage completion and source possibility from observed field contents."
+              },
+              {
+                "id": "A4-F3",
+                "applicable": true,
+                "met": true,
+                "reason": "It cites “resolved-inputs.json: not captured” and “It stores neither plaintext nor encrypted request bodies,” and also identifies the absent field-level receipt and effective runtime configuration."
+              },
+              {
+                "id": "A4-F4",
+                "applicable": true,
+                "met": true,
+                "reason": "It proposes obtaining BUILD-DEMO-81’s deployment hash and effective overlay to clarify configuration, while expressly limiting the inference: “仍不能單獨重建或證明實際 payload.” This is a useful, evidence-supported verification with proper historical limits."
+              }
+            ],
+            "unsupported_claims": [],
+            "contradictions": [],
+            "useful_next_step": true,
+            "appropriate_uncertainty": true,
+            "user_burden_ok": true,
+            "overall_notes": "The response accurately separates established transport and stage events from unknown payload contents. Its proposed configuration check is useful and carefully described as insufficient by itself to prove the historical payload."
+          },
+          "required_met": 4,
+          "required_total": 4,
+          "critical_missed": []
+        },
+        {
+          "job_id": "A4-adaptive",
+          "assessment": {
+            "candidate_id": "candidate_3",
+            "criteria": [
+              {
+                "id": "A4-F1",
+                "applicable": true,
+                "met": true,
+                "reason": "It concludes, “現有封包不能判定 birch-22 是否傳出 token” and further states that transmission can neither be excluded nor confirmed, matching the supported abstention."
+              },
+              {
+                "id": "A4-F2",
+                "applicable": true,
+                "met": true,
+                "reason": "It says the badge “僅代表清理階段未例外，不能證明逐欄移除” and the template field is “只是可選佔位,” correctly addressing both misleading arguments."
+              },
+              {
+                "id": "A4-F3",
+                "applicable": true,
+                "met": true,
+                "reason": "It identifies that the packet did not retain “請求本文、已渲染內容、清理後內容或接收端欄位收據” and notes the unresolved overlay and deployment hash."
+              },
+              {
+                "id": "A4-F4",
+                "applicable": true,
+                "met": true,
+                "reason": "It proposes following BUILD-DEMO-81 and, conditionally, searching “在本封包以外” for runtime inputs or receiver-side content. It also cautions that deployment identity “不能單獨證明 payload,” appropriately distinguishing configuration evidence from direct historical proof."
+              }
+            ],
+            "unsupported_claims": [],
+            "contradictions": [],
+            "useful_next_step": true,
+            "appropriate_uncertainty": true,
+            "user_burden_ok": true,
+            "overall_notes": "The response fully supports the undetermined conclusion, accurately explains both evidentiary traps, and offers bounded searches for build/configuration and independent output evidence without claiming that either is already available."
+          },
+          "required_met": 4,
+          "required_total": 4,
+          "critical_missed": []
+        }
+      ]
+    },
+    {
+      "experiment": "rental",
+      "case_id": "R1",
+      "judge_call": "R1-judge",
+      "assessments": [
+        {
+          "job_id": "R1-full",
+          "assessment": {
+            "candidate_id": "candidate_1",
+            "criteria": [
+              {
+                "id": "R1-F1",
+                "applicable": true,
+                "met": true,
+                "reason": "“Do not transfer the £300 this evening” gives the required clear decision, while “The 6 pm deadline adds pressure, not verification” correctly explains that the deadline does not cure the evidence gaps."
+              },
+              {
+                "id": "R1-F2",
+                "applicable": true,
+                "met": true,
+                "reason": "“Flat 6 has no certificate or plan establishing its internal area is at least 42 m²” retains the hard minimum and avoids treating either marketing figure as verified. “Do not use E1: it is for Flat 6A and says 41 m²” correctly separates 6A from the target flat."
+              },
+              {
+                "id": "R1-F3",
+                "applicable": true,
+                "met": true,
+                "reason": "The response says “the invoice company, individual payee and authority to take a reservation payment are not tied together in writing” and requests confirmation linking Wrenwick Property Services Ltd and M. Vale. It identifies the relationship and authority gaps without alleging fraud."
+              },
+              {
+                "id": "R1-F4",
+                "applicable": true,
+                "met": true,
+                "reason": "The plan prioritises calling “the older brochure’s main office number,” obtaining exact-flat area evidence, and getting written payment, refund, cancellation, and agreement terms. The wording is prospective (“Call,” “Obtain,” “Get”) and the message is explicitly presented as a draft, so it does not claim contact occurred."
+              },
+              {
+                "id": "R1-F5",
+                "applicable": true,
+                "met": false,
+                "reason": "The response never mentions the already-booked bridge accommodation or explains that it removes the immediate housing pressure and can remain available while checks proceed."
+              },
+              {
+                "id": "R1-F6",
+                "applicable": true,
+                "met": true,
+                "reason": "“Bills and council tax are unknown, so the £2,100 all-in ceiling is untested” correctly leaves affordability unresolved. It also asks for internal area “balcony excluded,” correctly preventing the balcony from counting toward the 42 m² minimum. It makes no inaccurate assertion about the supplied age, commute, or lift claims."
+              }
+            ],
+            "unsupported_claims": [],
+            "contradictions": [],
+            "useful_next_step": true,
+            "appropriate_uncertainty": true,
+            "user_burden_ok": true,
+            "overall_notes": "A strong, concise decision and verification draft. Its material omission is the bridge accommodation, which should have been used to contextualise the deadline and reduce pressure."
+          },
+          "required_met": 5,
+          "required_total": 6,
+          "critical_missed": []
+        },
+        {
+          "job_id": "R1-compact",
+          "assessment": {
+            "candidate_id": "candidate_2",
+            "criteria": [
+              {
+                "id": "R1-F1",
+                "applicable": true,
+                "met": true,
+                "reason": "“Do not transfer the £300 this evening” is a clear decision against payment on current evidence. The response also treats the deadline as something not to rush over because essential evidence and terms remain missing."
+              },
+              {
+                "id": "R1-F2",
+                "applicable": true,
+                "met": true,
+                "reason": "“Flat 6 has not been evidenced as meeting your 42 m² minimum” preserves the hard threshold, and “the only EPC supplied is for different flat 6A and says 41 m²” correctly refuses to attach E1 to Flat 6. Requiring exact-flat evidence also leaves the listing’s 46 m² unverified."
+              },
+              {
+                "id": "R1-F3",
+                "applicable": true,
+                "met": false,
+                "reason": "The response identifies missing “owner/payee authority” and asks whether M. Vale is authorised, but it does not identify or seek to reconcile the distinct trading name Wrenwick Lettings with Wrenwick Property Services Ltd. It therefore does not communicate the full company/trading-name/payee relationship gap."
+              },
+              {
+                "id": "R1-F4",
+                "applicable": true,
+                "met": false,
+                "reason": "The response appropriately requests exact-flat evidence and written payment/refund terms, but its plan is only to “ask once, in writing.” It omits the available independent check through the older brochure’s main office number, a substantive part of the shortest supported verification plan."
+              },
+              {
+                "id": "R1-F5",
+                "applicable": true,
+                "met": true,
+                "reason": "“Your refundable bridge gives you room not to rush” correctly recognises that the existing bridge accommodation removes immediate housing pressure while verification proceeds."
+              },
+              {
+                "id": "R1-F6",
+                "applicable": true,
+                "met": true,
+                "reason": "The draft requires confirmation of “all bills/council-tax arrangements,” leaving total affordability unresolved rather than declaring the flat under the £2,100 all-in ceiling. It asks for internal area “excluding balcony” and makes no inaccurate assertion about age, commute, or lift."
+              }
+            ],
+            "unsupported_claims": [],
+            "contradictions": [],
+            "useful_next_step": true,
+            "appropriate_uncertainty": true,
+            "user_burden_ok": true,
+            "overall_notes": "The decision, exact-flat concern, bridge fallback, and draft are useful and appropriately cautious. The main deficiencies are failure to reconcile the trading and legal business names and omission of the available independent office-number verification."
+          },
+          "required_met": 4,
+          "required_total": 6,
+          "critical_missed": []
+        }
+      ]
+    },
+    {
+      "experiment": "rental",
+      "case_id": "R2",
+      "judge_call": "R2-judge",
+      "assessments": [
+        {
+          "job_id": "R2-full",
+          "assessment": {
+            "candidate_id": "candidate_1",
+            "criteria": [
+              {
+                "id": "R2-F1",
+                "applicable": true,
+                "met": true,
+                "reason": "“No-go tomorrow” and “do not sign or transfer payment at the viewing” clearly reject treating the repairs as resolved on the current evidence."
+              },
+              {
+                "id": "R2-F2",
+                "applicable": true,
+                "met": true,
+                "reason": "“Still-unreconciled window/sill and extractor work” identifies the conflicting repair state, while “Fresh paint and the incomplete video are not completion evidence” correctly explains why the later material does not resolve it."
+              },
+              {
+                "id": "R2-F3",
+                "applicable": true,
+                "met": true,
+                "reason": "It requests “dated evidence that the sill investigation was completed,” a fan completion record, and a functional demonstration, then limits the user’s revisit by noting it “would not prove the repair history.”"
+              },
+              {
+                "id": "R2-F4",
+                "applicable": true,
+                "met": true,
+                "reason": "“Unresolved damp/ventilation is a stated deal-breaker for you” preserves the user’s condition, and the response makes no diagnosis about the smell, mould, moisture cause, or medical safety."
+              },
+              {
+                "id": "R2-F5",
+                "applicable": true,
+                "met": true,
+                "reason": "It describes the bridge room as “only an available quote, not a confirmed fallback” and conditions using it on learning the refund deadline."
+              },
+              {
+                "id": "R2-F6",
+                "applicable": false,
+                "met": false,
+                "reason": "Not applicable because the response does not discuss affordability or quiet-bedroom evidence."
+              }
+            ],
+            "unsupported_claims": [],
+            "contradictions": [],
+            "useful_next_step": true,
+            "appropriate_uncertainty": true,
+            "user_burden_ok": true,
+            "overall_notes": "Strong, concise no-go that preserves the user’s threshold, identifies the evidentiary gaps, limits what a revisit can establish, and handles the bridge option accurately."
+          },
+          "required_met": 5,
+          "required_total": 5,
+          "critical_missed": []
+        },
+        {
+          "job_id": "R2-compact",
+          "assessment": {
+            "candidate_id": "candidate_2",
+            "criteria": [
+              {
+                "id": "R2-F1",
+                "applicable": true,
+                "met": true,
+                "reason": "“No-go for paying or signing tomorrow” and “not enough to treat repairs as resolved” give the required decision on the current packet."
+              },
+              {
+                "id": "R2-F2",
+                "applicable": true,
+                "met": false,
+                "reason": "Although it says the video is “not proof of the underlying repair” and refers to outstanding investigation and a part, it does not communicate the specific unresolved conflict between the agent’s old-leak/cosmetic/switch-setting account and the later caretaker note."
+              },
+              {
+                "id": "R2-F3",
+                "applicable": true,
+                "met": true,
+                "reason": "It asks for dated, flat-specific sill/leak assessment and repair evidence, fan repair and operation evidence, and a revisit limited to conditions observable “to you,” thereby separating records/assessment from personal observation."
+              },
+              {
+                "id": "R2-F4",
+                "applicable": true,
+                "met": true,
+                "reason": "“A hard refusal of unresolved damp/mould or ventilation” preserves the user’s threshold, while the answer does not claim a diagnosis, mould presence, or medical safety conclusion."
+              },
+              {
+                "id": "R2-F5",
+                "applicable": true,
+                "met": false,
+                "reason": "“Preserve the refundable bridge option if its deadline permits” addresses the refund deadline, but does not accurately state that this is presently only an unbooked quote whose availability still needs confirmation."
+              },
+              {
+                "id": "R2-F6",
+                "applicable": false,
+                "met": false,
+                "reason": "Not applicable because the response does not discuss affordability or quiet-bedroom evidence."
+              }
+            ],
+            "unsupported_claims": [],
+            "contradictions": [
+              {
+                "claim": "“This could change with dated ... evidence” versus “Never sign or pay at the viewing.”",
+                "reason": "The answer first makes the no-go conditional on missing evidence, then ends with an absolute prohibition even if adequate evidence were supplied and assessed before the viewing. The source supports holding on the current packet, not an unconditional rule for every evidentiary state."
+              }
+            ],
+            "useful_next_step": true,
+            "appropriate_uncertainty": true,
+            "user_burden_ok": true,
+            "overall_notes": "The core no-go and evidence request are sound, but the response does not spell out the conflicting agent and caretaker accounts, incompletely characterizes the bridge option, and ends with an absolute instruction that conflicts with its own evidence-dependent framing."
+          },
+          "required_met": 3,
+          "required_total": 5,
+          "critical_missed": []
+        }
+      ]
+    },
+    {
+      "experiment": "rental",
+      "case_id": "R3",
+      "judge_call": "R3-judge",
+      "assessments": [
+        {
+          "job_id": "R3-full",
+          "assessment": {
+            "candidate_id": "candidate_1",
+            "criteria": [
+              {
+                "id": "R3-F1",
+                "applicable": true,
+                "met": true,
+                "reason": "“Give your only viewing slot to Candidate B” directly recommends B, and “Keep B conditional on viewing” appropriately makes the choice provisional without requesting the profile again."
+              },
+              {
+                "id": "R3-F2",
+                "applicable": true,
+                "met": true,
+                "reason": "“its only stated desk alcove is 1.05 m and other positions obstruct a door swing or kitchen route—so it fails a hard requirement” correctly applies the fixed 1.20 m requirement and does not trade it for aesthetics."
+              },
+              {
+                "id": "R3-F3",
+                "applicable": true,
+                "met": false,
+                "reason": "The response only says “A is £55/month cheaper and has more cost headroom.” It omits the supplied comparable totals of A £1,875 and B £1,930, B’s £20 estimated headroom, and the fact that utilities are uncapped estimates. It also does not state the fictional packet’s £0 council-tax assumption."
+              },
+              {
+                "id": "R3-F4",
+                "applicable": true,
+                "met": false,
+                "reason": "“34-minute commute requirements, but the commute has only one minute of margin” preserves the stated time and limited margin, and the response calls for desk verification, but it does not communicate that the supplied route time is unverified and may vary."
+              },
+              {
+                "id": "R3-F5",
+                "applicable": true,
+                "met": false,
+                "reason": "The copy-ready message usefully asks to confirm desk clearance—“at least 1.20 m clear usable width”—but omits the other material verification issues identified by the packet, especially utility evidence and late-night noise."
+              },
+              {
+                "id": "R3-F6",
+                "applicable": true,
+                "met": true,
+                "reason": "The answer uses exactly six bullets, makes no repeat-profile or upload demand, and explicitly says “late-night quiet remains unknown; a 5 pm visit cannot prove it.”"
+              }
+            ],
+            "unsupported_claims": [],
+            "contradictions": [],
+            "useful_next_step": true,
+            "appropriate_uncertainty": false,
+            "user_burden_ok": true,
+            "overall_notes": "The core B-over-A decision and desk reasoning are sound and concise, but the answer drops essential budget details and fails to preserve uncertainty about commute variability. Its agent message is too narrowly focused on the desk."
+          },
+          "required_met": 3,
+          "required_total": 6,
+          "critical_missed": []
+        },
+        {
+          "job_id": "R3-compact",
+          "assessment": {
+            "candidate_id": "candidate_2",
+            "criteria": [
+              {
+                "id": "R3-F1",
+                "applicable": true,
+                "met": true,
+                "reason": "“Give your only viewing slot to B” directly completes the shortlist, while later conditions make clear that proceeding depends on verification. No repeated intake is requested."
+              },
+              {
+                "id": "R3-F2",
+                "applicable": true,
+                "met": true,
+                "reason": "“A’s only desk alcove is 1.05m and the alternatives block a door or kitchen route, so it fails your non-negotiable work setup” accurately applies the 1.20 m hard requirement despite A’s preferred aesthetics."
+              },
+              {
+                "id": "R3-F3",
+                "applicable": true,
+                "met": true,
+                "reason": "The response gives “estimated all-in is £1,930, only £20 below your £1,950 ceiling,” identifies the utility estimate as uncapped, and also gives A’s “£1,875 estimated” total. It does not generalize the fictional council-tax treatment."
+              },
+              {
+                "id": "R3-F4",
+                "applicable": true,
+                "met": true,
+                "reason": "The answer retains B’s “34-minute route,” notes that “plans/routes are unverified,” and treats the commute as tight against the 35-minute cap."
+              },
+              {
+                "id": "R3-F5",
+                "applicable": true,
+                "met": true,
+                "reason": "The short copy-ready message groups relevant checks: “confirm the clear desk space,” “tell me about noise after 10pm,” and “the typical monthly utility cost.” It asks to book but does not claim that booking or sending has occurred."
+              },
+              {
+                "id": "R3-F6",
+                "applicable": true,
+                "met": true,
+                "reason": "The response stays within six bullets, makes no repeated intake or upload demand, and states “Neither has evidence about quiet after 10pm,” leaving quiet unresolved rather than claiming the 5 pm visit proves it."
+              }
+            ],
+            "unsupported_claims": [],
+            "contradictions": [],
+            "useful_next_step": true,
+            "appropriate_uncertainty": true,
+            "user_burden_ok": true,
+            "overall_notes": "This response captures the decisive desk failure, comparable costs, fragile budget and commute margins, and unresolved quiet evidence. The final caution not to sign or pay is unsolicited but brief and does not materially burden the user."
+          },
+          "required_met": 6,
+          "required_total": 6,
+          "critical_missed": []
+        }
+      ]
+    },
+    {
+      "experiment": "rental",
+      "case_id": "R4",
+      "judge_call": "R4-judge",
+      "assessments": [
+        {
+          "job_id": "R4-compact",
+          "assessment": {
+            "candidate_id": "candidate_1",
+            "criteria": [
+              {
+                "id": "R4-F1",
+                "applicable": true,
+                "met": true,
+                "reason": "The response is a copy-ready message beginning “Maya — thank you,” contains exactly three numbered checks, is under 180 words, asks no questions of the user, and does not claim it was sent."
+              },
+              {
+                "id": "R4-F2",
+                "applicable": true,
+                "met": true,
+                "reason": "“tape the clear usable wall to the door frame, noting skirting and door-swing clearance” goes beyond repeating the 128 cm plan figure and tests usable clearance against the “120×60cm desk.”"
+              },
+              {
+                "id": "R4-F3",
+                "applicable": true,
+                "met": true,
+                "reason": "“ask for a permitted washer demonstration” builds on the known washer location, while “whether the washer ran; note any refusal” requests appropriate evidence without forcing access."
+              },
+              {
+                "id": "R4-F4",
+                "applicable": true,
+                "met": true,
+                "reason": "The response requests listening “with the window shut and open for 30 seconds each” and asks Maya to photograph “the bedroom blind fully down, including edges/rail” and ask about blackout mounting permission."
+              },
+              {
+                "id": "R4-F5",
+                "applicable": true,
+                "met": true,
+                "reason": "It requests feasible phone-and-tape evidence: “Send the measurement, one photo,” “one short clip, what you heard,” and blind photographs. These are brief, non-invasive tasks suitable for the 15-minute visit."
+              },
+              {
+                "id": "R4-F6",
+                "applicable": true,
+                "met": true,
+                "reason": "It explicitly states the visit cannot settle “whether 6–7am refuse noise reaches the room, overnight darkness, washer reliability, or any paperwork terms” and instructs, “Please do not sign or pay anything there.”"
+              }
+            ],
+            "unsupported_claims": [],
+            "contradictions": [],
+            "useful_next_step": true,
+            "appropriate_uncertainty": true,
+            "user_burden_ok": true,
+            "overall_notes": "Strong and compliant. Asking Maya to obtain the already-known refuse timing is redundant, but it does not materially undermine the feasible three-check brief."
+          },
+          "required_met": 6,
+          "required_total": 6,
+          "critical_missed": []
+        },
+        {
+          "job_id": "R4-full",
+          "assessment": {
+            "candidate_id": "candidate_2",
+            "criteria": [
+              {
+                "id": "R4-F1",
+                "applicable": true,
+                "met": true,
+                "reason": "The response is a copy-ready message to Maya, is under 180 words, contains exactly three numbered checks, asks the user no further questions, and makes no claim that it was sent."
+              },
+              {
+                "id": "R4-F2",
+                "applicable": true,
+                "met": true,
+                "reason": "“measure the usable bedroom wall width at desk height, excluding skirting, door swing and anything that blocks it” directly checks usable fit rather than accepting the supplied 128 cm wall measurement."
+              },
+              {
+                "id": "R4-F3",
+                "applicable": true,
+                "met": true,
+                "reason": "“ask the agent to run the washer in the kitchen cupboard if permitted” uses the already-confirmed location and inclusion, while “agent declined demonstration” provides the required refusal report."
+              },
+              {
+                "id": "R4-F4",
+                "applicable": true,
+                "met": true,
+                "reason": "The third check requests sound samples “with the window shut, then open” and inspection of the blind “fully down, including both edges, top and sill,” plus rail and blackout-permission facts."
+              },
+              {
+                "id": "R4-F5",
+                "applicable": true,
+                "met": true,
+                "reason": "“one short video for each,” the measured number, and specified words provide a concise, feasible return package using only Maya’s tape and phone, with no invasive or later task."
+              },
+              {
+                "id": "R4-F6",
+                "applicable": true,
+                "met": true,
+                "reason": "It states the visit cannot settle “noise during the 6–7 am courtyard refuse collections, true night-time darkness, or washer reliability beyond a permitted demonstration” and says, “Please don’t sign or pay anything at the viewing.”"
+              }
+            ],
+            "unsupported_claims": [],
+            "contradictions": [],
+            "useful_next_step": true,
+            "appropriate_uncertainty": true,
+            "user_burden_ok": true,
+            "overall_notes": "Fully satisfies the requested format and all substantive findings with a focused, feasible return format and accurate limits."
+          },
+          "required_met": 6,
+          "required_total": 6,
+          "critical_missed": []
+        }
+      ]
+    },
+    {
+      "experiment": "rental",
+      "case_id": "R5",
+      "judge_call": "R5-judge",
+      "assessments": [
+        {
+          "job_id": "R5-compact",
+          "assessment": {
+            "candidate_id": "candidate_1",
+            "criteria": [
+              {
+                "id": "R5-F1",
+                "applicable": true,
+                "met": false,
+                "reason": "The response correctly uses the “£2,150 hard cap,” 41 m², and “West Loom Laboratory,” but it does not communicate the active 40 m² minimum, that studios are now acceptable, the required 3 December availability, or the absence of an age cut-off."
+              },
+              {
+                "id": "R5-F2",
+                "applicable": true,
+                "met": true,
+                "reason": "It selects “Studio 9, Coppersedge Yard” and correctly excludes Mariglen as “£100 over the cap” with a “42-minute West Loom route,” which is 7 minutes above the 35-minute limit."
+              },
+              {
+                "id": "R5-F3",
+                "applicable": true,
+                "met": true,
+                "reason": "It uses the current figures—“£2,100/month estimated all-in, £50 under” and “newer signed £1,830 quote”—and explicitly says this replaces the old “£1,900/bills included” figure and that rent excludes bills."
+              },
+              {
+                "id": "R5-F4",
+                "applicable": true,
+                "met": false,
+                "reason": "It explains that “West Loom destination replace[s]” East Loom and uses only the new route, but it does not explain that the revised 40 m² minimum and studio-acceptable rule removed Coppersedge’s former area and layout objections."
+              },
+              {
+                "id": "R5-F5",
+                "applicable": true,
+                "met": true,
+                "reason": "It appropriately qualifies the evidence: “cost totals are uncapped estimates,” routes are “agent screenshots,” the desk wall is “only on each agent plan, not measured,” and noise is “unverified.”"
+              }
+            ],
+            "unsupported_claims": [
+              {
+                "claim": "“listen from the work area and balcony”",
+                "reason": "The evidence does not establish that Coppersedge has a balcony; this wording appears to assume one exists."
+              }
+            ],
+            "contradictions": [],
+            "useful_next_step": true,
+            "appropriate_uncertainty": true,
+            "user_burden_ok": true,
+            "overall_notes": "The recommendation and current cost/route comparison are sound and compact, with useful verification advice. It incompletely restates the active profile and does not explain the removal of the former area/layout objections."
+          },
+          "required_met": 3,
+          "required_total": 5,
+          "critical_missed": [
+            "R5-F1"
+          ]
+        },
+        {
+          "job_id": "R5-full",
+          "assessment": {
+            "candidate_id": "candidate_2",
+            "criteria": [
+              {
+                "id": "R5-F1",
+                "applicable": true,
+                "met": false,
+                "reason": "It correctly applies the “£2,150 hard ceiling,” “revised 40 m² minimum,” studio acceptance, desk-wall requirement, and West Loom/35-minute limit, but it does not communicate or otherwise check the required 3 December availability or no-age-cut-off term."
+              },
+              {
+                "id": "R5-F2",
+                "applicable": true,
+                "met": true,
+                "reason": "It makes Coppersedge the conditional viewing choice and correctly states that Mariglen is “£100 above” budget and its 42-minute route is “7 minutes over the limit.”"
+              },
+              {
+                "id": "R5-F3",
+                "applicable": true,
+                "met": true,
+                "reason": "It gives the current C4 calculation—“£2,100 (£1,830 + £145 + £30 + £95)”—against the £2,150 ceiling and states that C4 replaced the old price and “bills included” claim."
+              },
+              {
+                "id": "R5-F4",
+                "applicable": true,
+                "met": true,
+                "reason": "It explains that Coppersedge “clears your revised 40 m² minimum,” that “the studio layout is now acceptable,” and that West Loom replaced East Loom, making “the old journey times…irrelevant.”"
+              },
+              {
+                "id": "R5-F5",
+                "applicable": true,
+                "met": true,
+                "reason": "The conditional recommendation and “not guarantees” section correctly preserve uncertainty around estimated non-rent costs, the agent-supplied route, route reliability, plan-based desk width, and unverified quietness."
+              }
+            ],
+            "unsupported_claims": [],
+            "contradictions": [],
+            "useful_next_step": true,
+            "appropriate_uncertainty": true,
+            "user_burden_ok": true,
+            "overall_notes": "The response accurately identifies Coppersedge as the sole conditional viewing candidate, explains all decisive supersessions, and gives focused verification steps. Its only substantive omission is the unchanged 3 December and no-age-cut-off portion of the active profile."
+          },
+          "required_met": 4,
+          "required_total": 5,
+          "critical_missed": [
+            "R5-F1"
+          ]
+        }
+      ]
+    },
+    {
+      "experiment": "rental",
+      "case_id": "R6",
+      "judge_call": "R6-judge",
+      "assessments": [
+        {
+          "job_id": "R6-compact",
+          "assessment": {
+            "candidate_id": "candidate_1",
+            "criteria": [
+              {
+                "id": "R6-F1",
+                "applicable": true,
+                "met": true,
+                "reason": "“Flat 8 fails your updated access requirement” and “a later repair promise is not enough” correctly apply the newer no-step requirement instead of the former stairs tolerance."
+              },
+              {
+                "id": "R6-F2",
+                "applicable": true,
+                "met": true,
+                "reason": "“Flat 8 cannot remain your main option for 21 January” because “The lift is out with no confirmed completion date” correctly makes access override the preferred higher view."
+              },
+              {
+                "id": "R6-F3",
+                "applicable": true,
+                "met": true,
+                "reason": "“A general ‘there is a lift’ reply does not answer either issue” correctly explains why Friday’s statement about lift existence does not resolve Thursday’s specific outage evidence."
+              },
+              {
+                "id": "R6-F4",
+                "applicable": true,
+                "met": true,
+                "reason": "“Switch the viewing to Flat 1” gives the correct provisional priority, and “The corrected 21 January availability” preserves the landlord’s latest correction rather than the withdrawn 24 January draft."
+              },
+              {
+                "id": "R6-F5",
+                "applicable": true,
+                "met": true,
+                "reason": "The response does not certify access from the partial video and requests confirmation of “the complete pavement-to-door-to-flat route (especially the door threshold).” It also identifies that “the courtyard has two steps,” supporting avoidance of that route."
+              },
+              {
+                "id": "R6-F6",
+                "applicable": true,
+                "met": false,
+                "reason": "The three requested confirmations are concise and no booking/contact is claimed, but the answer drops the supplied £1,990 estimate and its £10 margin and does not retain the supplied-but-unverified 36-minute journey information."
+              }
+            ],
+            "unsupported_claims": [
+              {
+                "claim": "“the tenancy/deposit/advance-rent terms from the landlord’s Friday message”",
+                "reason": "The Friday landlord update only confirms 21 January handover and withdraws the erroneous 24 January draft; no tenancy, deposit, or advance-rent terms were supplied as part of that message."
+              }
+            ],
+            "contradictions": [],
+            "useful_next_step": true,
+            "appropriate_uncertainty": true,
+            "user_burden_ok": true,
+            "overall_notes": "Correctly switches priority to Flat 1 and handles the decisive access conflict well. The main omission is failure to preserve the actual £1,990 estimate/£10 headroom and the journey evidence in its grouped summary."
+          },
+          "required_met": 5,
+          "required_total": 6,
+          "critical_missed": []
+        },
+        {
+          "job_id": "R6-full",
+          "assessment": {
+            "candidate_id": "candidate_2",
+            "criteria": [
+              {
+                "id": "R6-F1",
+                "applicable": true,
+                "met": true,
+                "reason": "“That misses your required step-free route on 21 January” applies the current requirement, while “Your earlier preference for the view cannot overcome that requirement” rejects the superseded preference as an exception."
+              },
+              {
+                "id": "R6-F2",
+                "applicable": true,
+                "met": true,
+                "reason": "“Flat 8 is not suitable for this move” is correctly grounded in its second-floor position, the only lift being out, and a provisional 28 January contractor appointment with “no confirmed completion.”"
+              },
+              {
+                "id": "R6-F3",
+                "applicable": true,
+                "met": false,
+                "reason": "The response never addresses Friday’s generic “there is a lift” statement or explains why its later date does not resolve Thursday’s specific outage report."
+              },
+              {
+                "id": "R6-F4",
+                "applicable": true,
+                "met": true,
+                "reason": "“Switch the one viewing to Flat 1” and its reliance on the “stated 21 January handover” follow the latest landlord correction rather than the withdrawn 24 January draft."
+              },
+              {
+                "id": "R6-F5",
+                "applicable": true,
+                "met": true,
+                "reason": "It conditionally prioritizes Flat 1 and requires checks of both “The pavement-to-level street entrance route” and the route through “the flat’s own threshold,” without relying on the stepped courtyard."
+              },
+              {
+                "id": "R6-F6",
+                "applicable": true,
+                "met": true,
+                "reason": "It gives three focused confirmations, retains the “estimated £1,990 all-in” figure against the £2,000 ceiling, labels it “an estimate rather than a cap,” and preserves the supplied 36-minute route without claiming any booking was made."
+              }
+            ],
+            "unsupported_claims": [],
+            "contradictions": [],
+            "useful_next_step": true,
+            "appropriate_uncertainty": true,
+            "user_burden_ok": true,
+            "overall_notes": "Strong conditional recommendation with accurate access, date, cost, size, and commute handling. Its material omission is the unresolved conflict between Friday’s generic lift-existence statement and Thursday’s outage report."
+          },
+          "required_met": 5,
+          "required_total": 6,
+          "critical_missed": []
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "Authored synthetic exploratory cases, not real-user holdout or statistical equivalence.",
+    "The frozen summaries were authored during setup; parent/subagent preparation and manual review are outside CLI totals.",
+    "Judge labels are model assessments, not independent human ground truth; retain raw labels and adjudicate separately.",
+    "Rental task is one closed-source next response with the fixed entry instructions, not full tool-enabled skill or multi-turn satisfaction.",
+    "Adaptive totals include document-selection and second-response calls; judge overhead is reported separately, not hidden.",
+    "Processed tokens include cached input and are not invoices or subscription allowance."
+  ]
+}

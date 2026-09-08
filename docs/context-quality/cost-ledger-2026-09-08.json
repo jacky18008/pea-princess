@@ -1,0 +1,1411 @@
+{
+  "source_summary_sha256": "c52223b74d353d5ca81c093dcc9e04ebba84ba5f2be712ee918571d470434572",
+  "definition": "Direct terminal CLI input + output; cached input is a subset, not added again. Not billing or account quota.",
+  "known_cli_processed_tokens": 669726,
+  "answer_processed_tokens": 469243,
+  "judge_processed_tokens": 200483,
+  "calls": 38,
+  "arms": [
+    {
+      "experiment": "analysis",
+      "arm": "full",
+      "calls": 4,
+      "tasks": 4,
+      "usage": {
+        "input_tokens": 66709,
+        "output_tokens": 3346,
+        "cached_input_tokens": 24064,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 70055
+      },
+      "change_percent_vs_full": 0.0,
+      "seconds": 99.133
+    },
+    {
+      "experiment": "analysis",
+      "arm": "summary",
+      "calls": 4,
+      "tasks": 4,
+      "usage": {
+        "input_tokens": 59073,
+        "output_tokens": 2223,
+        "cached_input_tokens": 24064,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 61296
+      },
+      "change_percent_vs_full": -12.50303333095425,
+      "seconds": 79.5
+    },
+    {
+      "experiment": "analysis",
+      "arm": "adaptive",
+      "calls": 8,
+      "tasks": 4,
+      "usage": {
+        "input_tokens": 123713,
+        "output_tokens": 3476,
+        "cached_input_tokens": 48128,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 127189
+      },
+      "change_percent_vs_full": 81.55592034829778,
+      "seconds": 138.036
+    },
+    {
+      "experiment": "rental",
+      "arm": "full",
+      "calls": 6,
+      "tasks": 6,
+      "usage": {
+        "input_tokens": 106135,
+        "output_tokens": 2434,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 108569
+      },
+      "change_percent_vs_full": 0.0,
+      "seconds": 104.042
+    },
+    {
+      "experiment": "rental",
+      "arm": "compact",
+      "calls": 6,
+      "tasks": 6,
+      "usage": {
+        "input_tokens": 100008,
+        "output_tokens": 2126,
+        "cached_input_tokens": 24064,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 102134
+      },
+      "change_percent_vs_full": -5.9271062642190735,
+      "seconds": 101.68
+    }
+  ],
+  "answers": [
+    {
+      "id": "A1-adaptive",
+      "case_id": "A1",
+      "arm": "adaptive",
+      "experiment": "analysis",
+      "call_ids": [
+        "A1-adaptive-initial",
+        "A1-adaptive-retrieved"
+      ],
+      "requested_documents": [
+        "A1-D02",
+        "A1-D03"
+      ],
+      "supplied_document_ids": [
+        "A1-D02",
+        "A1-D03"
+      ],
+      "usage": {
+        "input_tokens": 30662,
+        "output_tokens": 878,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 31540
+      },
+      "seconds": 34.134,
+      "citation_check": {
+        "citations": [
+          {
+            "claim": "總體重放中，R的成功數高於P，但證據限於沙盒重放，不能推出所有隊列的實際表現。",
+            "document_id": "summary",
+            "quote": "198/240 successful resolutions for baseline P and 210/240 for candidate R",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "總體重放中，R的成功數高於P，但證據限於沙盒重放，不能推出所有隊列的實際表現。",
+            "document_id": "A1-D02",
+            "quote": "production_measurements: not available; sandbox replay only",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "全隊列結論缺乏路由別證據；assisted 可能承接較複雜、且可暫時切換的請求。",
+            "document_id": "A1-D02",
+            "quote": "route_specific_thresholds: not entered",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "全隊列結論缺乏路由別證據；assisted 可能承接較複雜、且可暫時切換的請求。",
+            "document_id": "A1-D02",
+            "quote": "Users can select it temporarily for a complicated request.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "全隊列結論缺乏路由別證據；assisted 可能承接較複雜、且可暫時切換的請求。",
+            "document_id": "summary",
+            "quote": "The aggregate summary reports no subgroup rows",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "R相對P的差異不能歸因於單一改動。",
+            "document_id": "A1-D03",
+            "quote": "Prompt and retrieval policy changed together.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "R相對P的差異不能歸因於單一改動。",
+            "document_id": "A1-D03",
+            "quote": "No single-change ablation was run.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "可進行的下一項驗證是路由別配對分析與混合路由測試；後者目前尚未完成。",
+            "document_id": "A1-D02",
+            "quote": "paired-transcripts: 240 case folders, two system outputs per folder.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "可進行的下一項驗證是路由別配對分析與混合路由測試；後者目前尚未完成。",
+            "document_id": "A1-D02",
+            "quote": "I have not tested a mixed-target configuration for this request.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "可進行的下一項驗證是路由別配對分析與混合路由測試；後者目前尚未完成。",
+            "document_id": "A1-D03",
+            "quote": "packet includes no completed routing test",
+            "valid_supplied_excerpt": true
+          }
+        ],
+        "valid": 10,
+        "invalid": 0,
+        "findings_without_citations": 0,
+        "scope": "Checks quoted text exists in supplied evidence; semantic support is separately judged."
+      },
+      "format_check": null,
+      "protocol_violation": null
+    },
+    {
+      "id": "A1-full",
+      "case_id": "A1",
+      "arm": "full",
+      "experiment": "analysis",
+      "call_ids": [
+        "A1-full-initial"
+      ],
+      "requested_documents": [],
+      "supplied_document_ids": [
+        "A1-D01",
+        "A1-D02",
+        "A1-D03"
+      ],
+      "usage": {
+        "input_tokens": 16551,
+        "output_tokens": 928,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 17479
+      },
+      "seconds": 27.008,
+      "citation_check": {
+        "citations": [
+          {
+            "claim": "總體 R 優於 P，但此結果不能代表兩條路徑皆改善。",
+            "document_id": "A1-D01",
+            "quote": "Published headline: P 82.5%; R 87.5%; net +12 successful cases (+5 percentage points).",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "總體 R 優於 P，但此結果不能代表兩條路徑皆改善。",
+            "document_id": "A1-D01",
+            "quote": "standard, 200, 170, 194, 168, 2, 26, 4",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "總體 R 優於 P，但此結果不能代表兩條路徑皆改善。",
+            "document_id": "A1-D01",
+            "quote": "assisted, 40, 28, 16, 14, 14, 2, 10",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "全隊列 rollout 缺乏外推依據；試包並非流量或真實生產表現的代表。",
+            "document_id": "A1-D01",
+            "quote": "The replay pack is a convenience sample authored by the test team.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "全隊列 rollout 缺乏外推依據；試包並非流量或真實生產表現的代表。",
+            "document_id": "A1-D01",
+            "quote": "it is not an estimate of traffic share.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "全隊列 rollout 缺乏外推依據；試包並非流量或真實生產表現的代表。",
+            "document_id": "A1-D01",
+            "quote": "The ledger records neither production incident counts nor a live rollout result.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "可行且證據所支持的下一驗證，是先測試按 intake tag 的混合路由；但尚未完成該測試或 assisted 重測。",
+            "document_id": "A1-D02",
+            "quote": "can_route_by_intake_tag: supported by router configuration",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "可行且證據所支持的下一驗證，是先測試按 intake tag 的混合路由；但尚未完成該測試或 assisted 重測。",
+            "document_id": "A1-D02",
+            "quote": "selective_routing_test_report: not attached",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "可行且證據所支持的下一驗證，是先測試按 intake tag 的混合路由；但尚未完成該測試或 assisted 重測。",
+            "document_id": "A1-D02",
+            "quote": "new-assisted-bundle: no attached artifact.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "可行且證據所支持的下一驗證，是先測試按 intake tag 的混合路由；但尚未完成該測試或 assisted 重測。",
+            "document_id": "A1-D03",
+            "quote": "The packet includes no completed routing test or post-change retest.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "兩則 assisted 失敗案例提示可能機制，但為選錄、非隨機材料，不能建立頻率或因果。",
+            "document_id": "A1-D01",
+            "quote": "Replaced the account identifier with the example identifier in the help article.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "兩則 assisted 失敗案例提示可能機制，但為選錄、非隨機材料，不能建立頻率或因果。",
+            "document_id": "A1-D01",
+            "quote": "Treated a request to simplify the explanation as confirmation that the problem was fixed.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "兩則 assisted 失敗案例提示可能機制，但為選錄、非隨機材料，不能建立頻率或因果。",
+            "document_id": "A1-D01",
+            "quote": "they are not a random sample and cannot establish the frequency of a mechanism.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "兩則 assisted 失敗案例提示可能機制，但為選錄、非隨機材料，不能建立頻率或因果。",
+            "document_id": "A1-D03",
+            "quote": "Prompt and retrieval policy changed together.",
+            "valid_supplied_excerpt": true
+          }
+        ],
+        "valid": 14,
+        "invalid": 0,
+        "findings_without_citations": 0,
+        "scope": "Checks quoted text exists in supplied evidence; semantic support is separately judged."
+      },
+      "format_check": null,
+      "protocol_violation": null
+    },
+    {
+      "id": "A1-summary",
+      "case_id": "A1",
+      "arm": "summary",
+      "experiment": "analysis",
+      "call_ids": [
+        "A1-summary-initial"
+      ],
+      "requested_documents": [],
+      "supplied_document_ids": [],
+      "usage": {
+        "input_tokens": 14752,
+        "output_tokens": 553,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 15305
+      },
+      "seconds": 19.32,
+      "citation_check": {
+        "citations": [
+          {
+            "claim": "R 在一次、相同凍結案例包的案件層級重播中，成功數高於 P。",
+            "document_id": "summary",
+            "quote": "replayed 240 support cases once per system",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "R 在一次、相同凍結案例包的案件層級重播中，成功數高於 P。",
+            "document_id": "summary",
+            "quote": "198/240 successful resolutions for baseline P and 210/240 for candidate R",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "R 在一次、相同凍結案例包的案件層級重播中，成功數高於 P。",
+            "document_id": "summary",
+            "quote": "Both used the same frozen case bundle",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "R 在一次、相同凍結案例包的案件層級重播中，成功數高於 P。",
+            "document_id": "summary",
+            "quote": "counts success at case level",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "現有證據不能支持所有佇列的普遍推出。",
+            "document_id": "summary",
+            "quote": "The planned change would cover all queues",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "現有證據不能支持所有佇列的普遍推出。",
+            "document_id": "summary",
+            "quote": "reports no subgroup rows or case-level excerpts",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "現有證據不能支持所有佇列的普遍推出。",
+            "document_id": "summary",
+            "quote": "does not establish performance outside the replay bundle",
+            "valid_supplied_excerpt": true
+          }
+        ],
+        "valid": 7,
+        "invalid": 0,
+        "findings_without_citations": 0,
+        "scope": "Checks quoted text exists in supplied evidence; semantic support is separately judged."
+      },
+      "format_check": null,
+      "protocol_violation": null
+    },
+    {
+      "id": "A2-adaptive",
+      "case_id": "A2",
+      "arm": "adaptive",
+      "experiment": "analysis",
+      "call_ids": [
+        "A2-adaptive-initial",
+        "A2-adaptive-retrieved"
+      ],
+      "requested_documents": [
+        "A2-D01",
+        "A2-D02"
+      ],
+      "supplied_document_ids": [
+        "A2-D01",
+        "A2-D02"
+      ],
+      "usage": {
+        "input_tokens": 30968,
+        "output_tokens": 838,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 31806
+      },
+      "seconds": 36.006,
+      "citation_check": {
+        "citations": [
+          {
+            "claim": "「獨立確認精確年度總額」不成立；僅有未完成的基礎價格，沒有最終總額。",
+            "document_id": "A2-D02",
+            "quote": "\"quote_status\":\"provisional\"",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "「獨立確認精確年度總額」不成立；僅有未完成的基礎價格，沒有最終總額。",
+            "document_id": "A2-D02",
+            "quote": "\"final_total\":null",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "「獨立確認精確年度總額」不成立；僅有未完成的基礎價格，沒有最終總額。",
+            "document_id": "A2-D02",
+            "quote": "Address verification pending; final total unavailable.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "「獨立確認精確年度總額」不成立；僅有未完成的基礎價格，沒有最終總額。",
+            "document_id": "A2-D01",
+            "quote": "A cached example price is not an authoritative quote.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "「取得客戶批准後才更新」不成立：客戶尚在詢問稅額並要求不要變更，更新卻已在後一序發出。",
+            "document_id": "A2-D02",
+            "quote": "That might work, but don't change it yet.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "「取得客戶批准後才更新」不成立：客戶尚在詢問稅額並要求不要變更，更新卻已在後一序發出。",
+            "document_id": "A2-D02",
+            "quote": "Does the 480 include tax?",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "「取得客戶批准後才更新」不成立：客戶尚在詢問稅額並要求不要變更，更新卻已在後一序發出。",
+            "document_id": "A2-D02",
+            "quote": "seq=6 actor=assistant tool=update_subscription",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "「取得客戶批准後才更新」不成立：客戶尚在詢問稅額並要求不要變更，更新卻已在後一序發出。",
+            "document_id": "A2-D02",
+            "quote": "There is no later user approval or second quote call",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "分數卡的 PASS 不足以支撐發布文案，因其產生方式與人工覆核皆未驗證必要事實。",
+            "document_id": "A2-D01",
+            "quote": "subject to correction after ordered-trace inspection",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "分數卡的 PASS 不足以支撐發布文案，因其產生方式與人工覆核皆未驗證必要事實。",
+            "document_id": "A2-D01",
+            "quote": "did not replay the dialogue or inspect arguments",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "分數卡的 PASS 不足以支撐發布文案，因其產生方式與人工覆核皆未驗證必要事實。",
+            "document_id": "A2-D01",
+            "quote": "did not compare event sequence numbers or parse the customer reply",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "分數卡的 PASS 不足以支撐發布文案，因其產生方式與人工覆核皆未驗證必要事實。",
+            "document_id": "A2-D01",
+            "quote": "No separate approval evidence was attached.",
+            "valid_supplied_excerpt": true
+          }
+        ],
+        "valid": 12,
+        "invalid": 0,
+        "findings_without_citations": 0,
+        "scope": "Checks quoted text exists in supplied evidence; semantic support is separately judged."
+      },
+      "format_check": null,
+      "protocol_violation": null
+    },
+    {
+      "id": "A2-full",
+      "case_id": "A2",
+      "arm": "full",
+      "experiment": "analysis",
+      "call_ids": [
+        "A2-full-initial"
+      ],
+      "requested_documents": [],
+      "supplied_document_ids": [
+        "A2-D01",
+        "A2-D02",
+        "A2-D03"
+      ],
+      "usage": {
+        "input_tokens": 16691,
+        "output_tokens": 713,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 17404
+      },
+      "seconds": 22.591,
+      "citation_check": {
+        "citations": [
+          {
+            "claim": "分數卡的 PASS 不足以證明發布稿所稱的獨立確認與客戶同意。",
+            "document_id": "A2-D01",
+            "quote": "這些 pass 標籤是便利擷取腳本的初步輸出",
+            "valid_supplied_excerpt": false
+          },
+          {
+            "claim": "分數卡的 PASS 不足以證明發布稿所稱的獨立確認與客戶同意。",
+            "document_id": "A2-D01",
+            "quote": "未重播對話或在發布前檢查參數",
+            "valid_supplied_excerpt": false
+          },
+          {
+            "claim": "不存在可支持「確切年費」的最終報價；480 是未決稅項前的 provisional 基礎價格。",
+            "document_id": "A2-D02",
+            "quote": "\"quote_status\":\"provisional\"",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "不存在可支持「確切年費」的最終報價；480 是未決稅項前的 provisional 基礎價格。",
+            "document_id": "A2-D02",
+            "quote": "\"final_total\":null",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "不存在可支持「確切年費」的最終報價；480 是未決稅項前的 provisional 基礎價格。",
+            "document_id": "A2-D02",
+            "quote": "Address verification pending; final total unavailable.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "可見客戶訊息並非批准，且更新在其要求暫緩後發生。",
+            "document_id": "A2-D02",
+            "quote": "\"That might work, but don't change it yet.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "可見客戶訊息並非批准，且更新在其要求暫緩後發生。",
+            "document_id": "A2-D02",
+            "quote": "seq=6 actor=assistant tool=update_subscription",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "可見客戶訊息並非批准，且更新在其要求暫緩後發生。",
+            "document_id": "A2-D02",
+            "quote": "沒有較後的使用者批准或第二次報價呼叫",
+            "valid_supplied_excerpt": false
+          },
+          {
+            "claim": "confirmation_present 與 approved 是請求／API 欄位，不能證實對話中的客戶授權。",
+            "document_id": "A2-D02",
+            "quote": "legacy echo of args.customer_confirmed",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "confirmation_present 與 approved 是請求／API 欄位，不能證實對話中的客戶授權。",
+            "document_id": "A2-D02",
+            "quote": "not independently derived from a customer message",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "confirmation_present 與 approved 是請求／API 欄位，不能證實對話中的客戶授權。",
+            "document_id": "A2-D03",
+            "quote": "no transcript lookup is performed",
+            "valid_supplied_excerpt": true
+          }
+        ],
+        "valid": 8,
+        "invalid": 3,
+        "findings_without_citations": 0,
+        "scope": "Checks quoted text exists in supplied evidence; semantic support is separately judged."
+      },
+      "format_check": null,
+      "protocol_violation": null
+    },
+    {
+      "id": "A2-summary",
+      "case_id": "A2",
+      "arm": "summary",
+      "experiment": "analysis",
+      "call_ids": [
+        "A2-summary-initial"
+      ],
+      "requested_documents": [],
+      "supplied_document_ids": [],
+      "usage": {
+        "input_tokens": 14762,
+        "output_tokens": 530,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 15292
+      },
+      "seconds": 20.012,
+      "citation_check": {
+        "citations": [
+          {
+            "claim": "計分卡記載三項通過，但其範圍是單一重播的工作流檢查。",
+            "document_id": "summary",
+            "quote": "Its scorecard has three pass marks for quote presentation, confirmation, and mutation ordering",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "摘要沒有裁決原始記錄中的主張，故不能以它支持發行說明的強結論。",
+            "document_id": "summary",
+            "quote": "without adjudicating them",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "尚無跨案例或整體表現證據。",
+            "document_id": "summary",
+            "quote": "No fleet-wide performance rate is supplied.",
+            "valid_supplied_excerpt": true
+          }
+        ],
+        "valid": 3,
+        "invalid": 0,
+        "findings_without_citations": 0,
+        "scope": "Checks quoted text exists in supplied evidence; semantic support is separately judged."
+      },
+      "format_check": null,
+      "protocol_violation": null
+    },
+    {
+      "id": "A3-adaptive",
+      "case_id": "A3",
+      "arm": "adaptive",
+      "experiment": "analysis",
+      "call_ids": [
+        "A3-adaptive-initial",
+        "A3-adaptive-retrieved"
+      ],
+      "requested_documents": [
+        "A3-D01",
+        "A3-D02"
+      ],
+      "supplied_document_ids": [
+        "A3-D01",
+        "A3-D02"
+      ],
+      "usage": {
+        "input_tokens": 31153,
+        "output_tokens": 970,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 32123
+      },
+      "seconds": 35.595,
+      "citation_check": {
+        "citations": [
+          {
+            "claim": "標記處理分支僅測到一次，且該次失敗，故整體項目率不能代表此關鍵分支可靠。",
+            "document_id": "A3-D01",
+            "quote": "The marker-present branch has one observed opportunity and one observed failure here.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "候選人確實把具有效保全標記的物件列入建議執行集。",
+            "document_id": "A3-D02",
+            "quote": "Proposed execution set: export-041, export-042, incident-017.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "候選人確實把具有效保全標記的物件列入建議執行集。",
+            "document_id": "A3-D02",
+            "quote": "preserve_marker=active owner=incident-desk",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "「minor」不是經影響評估得出的嚴重性結論。",
+            "document_id": "A3-D01",
+            "quote": "The word minor came from the dashboard's default for an unchecked checklist box.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "「minor」不是經影響評估得出的嚴重性結論。",
+            "document_id": "A3-D01",
+            "quote": "No incident owner assessed the consequence before that label appeared.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "未發生實際移除，但現有測試保留人審，無法據此推論無人值守執行的結果。",
+            "document_id": "A3-D01",
+            "quote": "The unattended proposal removes mandatory human review between preview and execution.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "未發生實際移除，但現有測試保留人審，無法據此推論無人值守執行的結果。",
+            "document_id": "A3-D02",
+            "quote": "harness stops before execution because human_review_required=true.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "未發生實際移除，但現有測試保留人審，無法據此推論無人值守執行的結果。",
+            "document_id": "A3-D02",
+            "quote": "No non-preview removal operation appears in the trace or audit row.",
+            "valid_supplied_excerpt": true
+          }
+        ],
+        "valid": 8,
+        "invalid": 0,
+        "findings_without_citations": 0,
+        "scope": "Checks quoted text exists in supplied evidence; semantic support is separately judged."
+      },
+      "format_check": null,
+      "protocol_violation": null
+    },
+    {
+      "id": "A3-full",
+      "case_id": "A3",
+      "arm": "full",
+      "experiment": "analysis",
+      "call_ids": [
+        "A3-full-initial"
+      ],
+      "requested_documents": [],
+      "supplied_document_ids": [
+        "A3-D01",
+        "A3-D02",
+        "A3-D03"
+      ],
+      "usage": {
+        "input_tokens": 16778,
+        "output_tokens": 977,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 17755
+      },
+      "seconds": 27.0,
+      "citation_check": {
+        "citations": [
+          {
+            "claim": "總分不足以支持以「僅小缺失」接受：保護標記分支唯一觀測即失敗，且檢核並非500個獨立事件。",
+            "document_id": "A3-D01",
+            "quote": "One scenario had an active incident-preservation marker; the other 99 had none.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "總分不足以支持以「僅小缺失」接受：保護標記分支唯一觀測即失敗，且檢核並非500個獨立事件。",
+            "document_id": "A3-D01",
+            "quote": "The marker-present branch has one observed opportunity and one observed failure here.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "總分不足以支持以「僅小缺失」接受：保護標記分支唯一觀測即失敗，且檢核並非500個獨立事件。",
+            "document_id": "A3-D01",
+            "quote": "100 authored scenarios, not 500 independent operating episodes.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "「minor」不是經評估的後果分級，而是失敗欄位的預設值；嚴重性審查尚未完成。",
+            "document_id": "A3-D01",
+            "quote": "The word minor came from the dashboard's default for an unchecked checklist box.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "「minor」不是經評估的後果分級，而是失敗欄位的預設值；嚴重性審查尚未完成。",
+            "document_id": "A3-D01",
+            "quote": "No incident owner assessed the consequence before that label appeared.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "「minor」不是經評估的後果分級，而是失敗欄位的預設值；嚴重性審查尚未完成。",
+            "document_id": "A3-D01",
+            "quote": "severity review: not completed.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "maple-073 將仍具有效保存標記、且無釋放紀錄的物件納入執行集，違反本測試的工作流程。",
+            "document_id": "A3-D02",
+            "quote": "Proposed execution set: export-041, export-042, incident-017.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "maple-073 將仍具有效保存標記、且無釋放紀錄的物件納入執行集，違反本測試的工作流程。",
+            "document_id": "A3-D02",
+            "quote": "preserve_marker=active owner=incident-desk ticket=INC-DEMO-17",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "maple-073 將仍具有效保存標記、且無釋放紀錄的物件納入執行集，違反本測試的工作流程。",
+            "document_id": "A3-D02",
+            "quote": "INC-DEMO-17: no release record supplied.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "maple-073 將仍具有效保存標記、且無釋放紀錄的物件納入執行集，違反本測試的工作流程。",
+            "document_id": "A3-D02",
+            "quote": "The assistant must exclude marked objects from the execution set until the named owner records an explicit release",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "尚未發生實際移除；但接受草案改變了關鍵控制，現有結果不能證明新設定安全。",
+            "document_id": "A3-D02",
+            "quote": "harness stops before execution because human_review_required=true.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "尚未發生實際移除；但接受草案改變了關鍵控制，現有結果不能證明新設定安全。",
+            "document_id": "A3-D02",
+            "quote": "No non-preview removal operation appears in the trace or audit row.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "尚未發生實際移除；但接受草案改變了關鍵控制，現有結果不能證明新設定安全。",
+            "document_id": "A3-D03",
+            "quote": "human_review_required=false",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "尚未發生實際移除；但接受草案改變了關鍵控制，現有結果不能證明新設定安全。",
+            "document_id": "A3-D03",
+            "quote": "remove_endpoint_exposed_to_assistant=true",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "尚未發生實際移除；但接受草案改變了關鍵控制，現有結果不能證明新設定安全。",
+            "document_id": "A3-D03",
+            "quote": "no call or result from that configuration is attached.",
+            "valid_supplied_excerpt": true
+          }
+        ],
+        "valid": 15,
+        "invalid": 0,
+        "findings_without_citations": 0,
+        "scope": "Checks quoted text exists in supplied evidence; semantic support is separately judged."
+      },
+      "format_check": null,
+      "protocol_violation": null
+    },
+    {
+      "id": "A3-summary",
+      "case_id": "A3",
+      "arm": "summary",
+      "experiment": "analysis",
+      "call_ids": [
+        "A3-summary-initial"
+      ],
+      "requested_documents": [],
+      "supplied_document_ids": [],
+      "usage": {
+        "input_tokens": 14776,
+        "output_tokens": 617,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 15393
+      },
+      "seconds": 21.374,
+      "citation_check": {
+        "citations": [
+          {
+            "claim": "已支持：公布成績為499/500項通過（99.8%），且有一項標記失誤。",
+            "document_id": "summary",
+            "quote": "published rollup is 499/500 item passes (99.8%), with one marked miss",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "已支持：包內存在帶有有效事件保存標記的回放物件。",
+            "document_id": "summary",
+            "quote": "object bears an active incident-preservation marker",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "不確定：現有摘要沒有標記失誤的來源事件，也沒有裁定其嚴重性，因此不能支持「唯一失誤屬輕微」或據此接受。",
+            "document_id": "summary",
+            "quote": "does not reproduce the marked item's source events or adjudicate its severity",
+            "valid_supplied_excerpt": true
+          }
+        ],
+        "valid": 3,
+        "invalid": 0,
+        "findings_without_citations": 0,
+        "scope": "Checks quoted text exists in supplied evidence; semantic support is separately judged."
+      },
+      "format_check": null,
+      "protocol_violation": null
+    },
+    {
+      "id": "A4-adaptive",
+      "case_id": "A4",
+      "arm": "adaptive",
+      "experiment": "analysis",
+      "call_ids": [
+        "A4-adaptive-initial",
+        "A4-adaptive-retrieved"
+      ],
+      "requested_documents": [
+        "A4-D01",
+        "A4-D02"
+      ],
+      "supplied_document_ids": [
+        "A4-D01",
+        "A4-D02"
+      ],
+      "usage": {
+        "input_tokens": 30930,
+        "output_tokens": 790,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 31720
+      },
+      "seconds": 32.301,
+      "citation_check": {
+        "citations": [
+          {
+            "claim": "綠色清理徽章不支持「沒有 token 被送出」的結論。",
+            "document_id": "A4-D01",
+            "quote": "The green badge is derived from stage completion only.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "綠色清理徽章不支持「沒有 token 被送出」的結論。",
+            "document_id": "A4-D01",
+            "quote": "It does not attest to policy completeness or individual field removal.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "來源模板不支持「birch-22 一定送出 token」的結論。",
+            "document_id": "A4-D02",
+            "quote": "The debug_token value above is a placeholder, not a resolved run-time value.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "來源模板不支持「birch-22 一定送出 token」的結論。",
+            "document_id": "A4-D02",
+            "quote": "This fragment does not establish which branch birch-22 used.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "可確定有一個信封被本地接收端接受，但其欄位內容不明。",
+            "document_id": "A4-D01",
+            "quote": "transport accepted envelope_id=env-b22 status_code=202",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "可確定有一個信封被本地接收端接受，但其欄位內容不明。",
+            "document_id": "A4-D01",
+            "quote": "The receipt identifies envelope acceptance, not individual field contents.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "封包缺少能裁決實際外傳內容的關鍵紀錄。",
+            "document_id": "A4-D01",
+            "quote": "It stores neither plaintext nor encrypted request bodies.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "封包缺少能裁決實際外傳內容的關鍵紀錄。",
+            "document_id": "A4-D02",
+            "quote": "resolved-inputs.json: not captured.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "封包缺少能裁決實際外傳內容的關鍵紀錄。",
+            "document_id": "A4-D02",
+            "quote": "rendered-request.json: not captured.",
+            "valid_supplied_excerpt": true
+          }
+        ],
+        "valid": 9,
+        "invalid": 0,
+        "findings_without_citations": 0,
+        "scope": "Checks quoted text exists in supplied evidence; semantic support is separately judged."
+      },
+      "format_check": null,
+      "protocol_violation": null
+    },
+    {
+      "id": "A4-full",
+      "case_id": "A4",
+      "arm": "full",
+      "experiment": "analysis",
+      "call_ids": [
+        "A4-full-initial"
+      ],
+      "requested_documents": [],
+      "supplied_document_ids": [
+        "A4-D01",
+        "A4-D02",
+        "A4-D03"
+      ],
+      "usage": {
+        "input_tokens": 16689,
+        "output_tokens": 728,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 17417
+      },
+      "seconds": 22.534,
+      "citation_check": {
+        "citations": [
+          {
+            "claim": "已成立：外送信封 env-b22 被接收端接受，但收據不含欄位內容。",
+            "document_id": "A4-D01",
+            "quote": "transport accepted envelope_id=env-b22 status_code=202",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "已成立：外送信封 env-b22 被接收端接受，但收據不含欄位內容。",
+            "document_id": "A4-D01",
+            "quote": "receipt identifies envelope acceptance, not individual field contents.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "綠色清理徽章不能證明 token 已移除。",
+            "document_id": "A4-D01",
+            "quote": "The green badge is derived from stage completion only.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "綠色清理徽章不能證明 token 已移除。",
+            "document_id": "A4-D01",
+            "quote": "It does not attest to policy completeness or individual field removal.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "模板不能證明本次 token 被送出；其值及執行期輸入未知。",
+            "document_id": "A4-D02",
+            "quote": "The debug_token value above is a placeholder, not a resolved run-time value.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "模板不能證明本次 token 被送出；其值及執行期輸入未知。",
+            "document_id": "A4-D02",
+            "quote": "This fragment does not establish which branch birch-22 used.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "關鍵 payload 證據缺失，不能由既有紀錄判定兩種主張任一者。",
+            "document_id": "A4-D02",
+            "quote": "resolved-inputs.json: not captured.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "關鍵 payload 證據缺失，不能由既有紀錄判定兩種主張任一者。",
+            "document_id": "A4-D01",
+            "quote": "It stores neither plaintext nor encrypted request bodies.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "可進一步查核部署設定，但其本身不足以證明實際 payload。",
+            "document_id": "A4-D02",
+            "quote": "Request ID BUILD-DEMO-81 asks for the deployed sanitizer hash and effective environment overlay.",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "可進一步查核部署設定，但其本身不足以證明實際 payload。",
+            "document_id": "A4-D02",
+            "quote": "it would describe code identity, not prove the actual payload by itself.",
+            "valid_supplied_excerpt": true
+          }
+        ],
+        "valid": 10,
+        "invalid": 0,
+        "findings_without_citations": 0,
+        "scope": "Checks quoted text exists in supplied evidence; semantic support is separately judged."
+      },
+      "format_check": null,
+      "protocol_violation": null
+    },
+    {
+      "id": "A4-summary",
+      "case_id": "A4",
+      "arm": "summary",
+      "experiment": "analysis",
+      "call_ids": [
+        "A4-summary-initial"
+      ],
+      "requested_documents": [],
+      "supplied_document_ids": [],
+      "usage": {
+        "input_tokens": 14783,
+        "output_tokens": 523,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 15306
+      },
+      "seconds": 18.794,
+      "citation_check": {
+        "citations": [
+          {
+            "claim": "已成立：綠色 badge 表示消毒階段完成，不等於每個敏感欄位都被移除。",
+            "document_id": "summary",
+            "quote": "badge records that a sanitizer stage completed, not whether each sensitive field was removed",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "已成立：存在一個已接受的外送信封，但無法由此得知其欄位內容。",
+            "document_id": "summary",
+            "quote": "one accepted outbound envelope",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "已成立：存在一個已接受的外送信封，但無法由此得知其欄位內容。",
+            "document_id": "summary",
+            "quote": "there is no field-level receipt from the receiver",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "僅屬假設：模板可填入 token，但沒有證據證明 birch-22 實際填入或送出。",
+            "document_id": "summary",
+            "quote": "A template contains a placeholder that could be filled with a token",
+            "valid_supplied_excerpt": true
+          },
+          {
+            "claim": "僅屬假設：模板可填入 token，但沒有證據證明 birch-22 實際填入或送出。",
+            "document_id": "summary",
+            "quote": "neither the resolved template inputs nor the rendered outbound payload",
+            "valid_supplied_excerpt": true
+          }
+        ],
+        "valid": 5,
+        "invalid": 0,
+        "findings_without_citations": 0,
+        "scope": "Checks quoted text exists in supplied evidence; semantic support is separately judged."
+      },
+      "format_check": null,
+      "protocol_violation": null
+    },
+    {
+      "id": "R1-compact",
+      "case_id": "R1",
+      "arm": "compact",
+      "experiment": "rental",
+      "call_ids": [
+        "R1-compact-initial"
+      ],
+      "requested_documents": [],
+      "supplied_document_ids": [],
+      "usage": {
+        "input_tokens": 16658,
+        "output_tokens": 463,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 17121
+      },
+      "seconds": 18.361,
+      "citation_check": null,
+      "format_check": null,
+      "protocol_violation": null
+    },
+    {
+      "id": "R1-full",
+      "case_id": "R1",
+      "arm": "full",
+      "experiment": "rental",
+      "call_ids": [
+        "R1-full-initial"
+      ],
+      "requested_documents": [],
+      "supplied_document_ids": [],
+      "usage": {
+        "input_tokens": 17681,
+        "output_tokens": 499,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 18180
+      },
+      "seconds": 18.792,
+      "citation_check": null,
+      "format_check": null,
+      "protocol_violation": null
+    },
+    {
+      "id": "R2-compact",
+      "case_id": "R2",
+      "arm": "compact",
+      "experiment": "rental",
+      "call_ids": [
+        "R2-compact-initial"
+      ],
+      "requested_documents": [],
+      "supplied_document_ids": [],
+      "usage": {
+        "input_tokens": 16663,
+        "output_tokens": 202,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 16865
+      },
+      "seconds": 12.611,
+      "citation_check": null,
+      "format_check": null,
+      "protocol_violation": null
+    },
+    {
+      "id": "R2-full",
+      "case_id": "R2",
+      "arm": "full",
+      "experiment": "rental",
+      "call_ids": [
+        "R2-full-initial"
+      ],
+      "requested_documents": [],
+      "supplied_document_ids": [],
+      "usage": {
+        "input_tokens": 17633,
+        "output_tokens": 387,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 18020
+      },
+      "seconds": 16.883,
+      "citation_check": null,
+      "format_check": null,
+      "protocol_violation": null
+    },
+    {
+      "id": "R3-compact",
+      "case_id": "R3",
+      "arm": "compact",
+      "experiment": "rental",
+      "call_ids": [
+        "R3-compact-initial"
+      ],
+      "requested_documents": [],
+      "supplied_document_ids": [],
+      "usage": {
+        "input_tokens": 16678,
+        "output_tokens": 367,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 17045
+      },
+      "seconds": 18.183,
+      "citation_check": null,
+      "format_check": {
+        "word_count": 242,
+        "bullet_count": 6,
+        "pass": true,
+        "rule": "At most six explicit list items; presence of requested message is judged separately."
+      },
+      "protocol_violation": null
+    },
+    {
+      "id": "R3-full",
+      "case_id": "R3",
+      "arm": "full",
+      "experiment": "rental",
+      "call_ids": [
+        "R3-full-initial"
+      ],
+      "requested_documents": [],
+      "supplied_document_ids": [],
+      "usage": {
+        "input_tokens": 17705,
+        "output_tokens": 327,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 18032
+      },
+      "seconds": 14.909,
+      "citation_check": null,
+      "format_check": {
+        "word_count": 169,
+        "bullet_count": 6,
+        "pass": true,
+        "rule": "At most six explicit list items; presence of requested message is judged separately."
+      },
+      "protocol_violation": null
+    },
+    {
+      "id": "R4-compact",
+      "case_id": "R4",
+      "arm": "compact",
+      "experiment": "rental",
+      "call_ids": [
+        "R4-compact-initial"
+      ],
+      "requested_documents": [],
+      "supplied_document_ids": [],
+      "usage": {
+        "input_tokens": 16674,
+        "output_tokens": 285,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 16959
+      },
+      "seconds": 16.967,
+      "citation_check": null,
+      "format_check": {
+        "word_count": 159,
+        "numbered_checks": 3,
+        "pass": true,
+        "rule": "Whole answer at most180 whitespace-separated words and exactlythree numbered items; semantic quality separate."
+      },
+      "protocol_violation": null
+    },
+    {
+      "id": "R4-full",
+      "case_id": "R4",
+      "arm": "full",
+      "experiment": "rental",
+      "call_ids": [
+        "R4-full-initial"
+      ],
+      "requested_documents": [],
+      "supplied_document_ids": [],
+      "usage": {
+        "input_tokens": 17686,
+        "output_tokens": 230,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 17916
+      },
+      "seconds": 12.965,
+      "citation_check": null,
+      "format_check": {
+        "word_count": 164,
+        "numbered_checks": 3,
+        "pass": true,
+        "rule": "Whole answer at most180 whitespace-separated words and exactlythree numbered items; semantic quality separate."
+      },
+      "protocol_violation": null
+    },
+    {
+      "id": "R5-compact",
+      "case_id": "R5",
+      "arm": "compact",
+      "experiment": "rental",
+      "call_ids": [
+        "R5-compact-initial"
+      ],
+      "requested_documents": [],
+      "supplied_document_ids": [],
+      "usage": {
+        "input_tokens": 16667,
+        "output_tokens": 406,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 17073
+      },
+      "seconds": 19.257,
+      "citation_check": null,
+      "format_check": null,
+      "protocol_violation": null
+    },
+    {
+      "id": "R5-full",
+      "case_id": "R5",
+      "arm": "full",
+      "experiment": "rental",
+      "call_ids": [
+        "R5-full-initial"
+      ],
+      "requested_documents": [],
+      "supplied_document_ids": [],
+      "usage": {
+        "input_tokens": 17759,
+        "output_tokens": 432,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 18191
+      },
+      "seconds": 19.018,
+      "citation_check": null,
+      "format_check": null,
+      "protocol_violation": null
+    },
+    {
+      "id": "R6-compact",
+      "case_id": "R6",
+      "arm": "compact",
+      "experiment": "rental",
+      "call_ids": [
+        "R6-compact-initial"
+      ],
+      "requested_documents": [],
+      "supplied_document_ids": [],
+      "usage": {
+        "input_tokens": 16668,
+        "output_tokens": 403,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 17071
+      },
+      "seconds": 16.301,
+      "citation_check": null,
+      "format_check": null,
+      "protocol_violation": null
+    },
+    {
+      "id": "R6-full",
+      "case_id": "R6",
+      "arm": "full",
+      "experiment": "rental",
+      "call_ids": [
+        "R6-full-initial"
+      ],
+      "requested_documents": [],
+      "supplied_document_ids": [],
+      "usage": {
+        "input_tokens": 17671,
+        "output_tokens": 559,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 18230
+      },
+      "seconds": 21.475,
+      "citation_check": null,
+      "format_check": null,
+      "protocol_violation": null
+    }
+  ],
+  "excluded": [
+    "Parent/subagent preparation and fixture/summary authorship",
+    "Parent/subagent source review and documentation",
+    "Offline compute",
+    "Earlier separate cost-probe experiment"
+  ]
+}

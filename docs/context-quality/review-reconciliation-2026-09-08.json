@@ -1,0 +1,1188 @@
+{
+  "review_type": "Post-hoc root synthesis of two separately blinded AI source reviews and frozen primary model judgments; not human ground truth",
+  "primary_labels_modified": false,
+  "additional_benchmark_model_calls": 0,
+  "source_commit": "d01c369a7d863aa920d8d90c0c2ec563228b8478",
+  "source_sha256": {
+    "bench/results/context-quality-2026-09-08/live-v1/plan.json": "388b002c8a2468ba87970c66fb881159c415f0c8fad1bcf669afbf2e85a7c15f",
+    "bench/results/context-quality-2026-09-08/live-v1/summary.json": "c52223b74d353d5ca81c093dcc9e04ebba84ba5f2be712ee918571d470434572",
+    "docs/context-quality/independent-analysis-review-2026-09-08.json": "c0216e65920a343275114576102741426754524593ca1f35ab6d84bed4d4f0e9",
+    "docs/context-quality/independent-rental-review-2026-09-08.json": "3f538997488cf64a84beed08ecd60c7ca143105ba958e4458ee58653eb548343"
+  },
+  "denominator_rule": "Analysis: 16 always-required findings per arm. Rental: 33 always-required findings, with R1-F6/R2-F6 conditional accuracy reported separately. Applicable total is 34 per rental arm in both reviews.",
+  "aggregates": {
+    "analysis/full/primary": {
+      "always_required_met": 16,
+      "always_required_total": 16,
+      "applicable_met": 16,
+      "applicable_total": 16,
+      "critical_misses": 0,
+      "unsupported_annotations": 3,
+      "contradiction_annotations": 0
+    },
+    "analysis/full/independent": {
+      "always_required_met": 14,
+      "always_required_total": 16,
+      "applicable_met": 14,
+      "applicable_total": 16,
+      "critical_misses": 0,
+      "unsupported_annotations": 0,
+      "contradiction_annotations": 0
+    },
+    "analysis/summary/primary": {
+      "always_required_met": 5,
+      "always_required_total": 16,
+      "applicable_met": 5,
+      "applicable_total": 16,
+      "critical_misses": 3,
+      "unsupported_annotations": 2,
+      "contradiction_annotations": 9
+    },
+    "analysis/summary/independent": {
+      "always_required_met": 6,
+      "always_required_total": 16,
+      "applicable_met": 6,
+      "applicable_total": 16,
+      "critical_misses": 3,
+      "unsupported_annotations": 0,
+      "contradiction_annotations": 0
+    },
+    "analysis/adaptive/primary": {
+      "always_required_met": 14,
+      "always_required_total": 16,
+      "applicable_met": 14,
+      "applicable_total": 16,
+      "critical_misses": 1,
+      "unsupported_annotations": 0,
+      "contradiction_annotations": 3
+    },
+    "analysis/adaptive/independent": {
+      "always_required_met": 14,
+      "always_required_total": 16,
+      "applicable_met": 14,
+      "applicable_total": 16,
+      "critical_misses": 1,
+      "unsupported_annotations": 0,
+      "contradiction_annotations": 0
+    },
+    "rental/full/primary": {
+      "always_required_met": 27,
+      "always_required_total": 33,
+      "applicable_met": 28,
+      "applicable_total": 34,
+      "critical_misses": 1,
+      "unsupported_annotations": 0,
+      "contradiction_annotations": 0
+    },
+    "rental/full/independent": {
+      "always_required_met": 29,
+      "always_required_total": 33,
+      "applicable_met": 30,
+      "applicable_total": 34,
+      "critical_misses": 0,
+      "unsupported_annotations": 0,
+      "contradiction_annotations": 1
+    },
+    "rental/compact/primary": {
+      "always_required_met": 26,
+      "always_required_total": 33,
+      "applicable_met": 27,
+      "applicable_total": 34,
+      "critical_misses": 1,
+      "unsupported_annotations": 2,
+      "contradiction_annotations": 1
+    },
+    "rental/compact/independent": {
+      "always_required_met": 28,
+      "always_required_total": 33,
+      "applicable_met": 29,
+      "applicable_total": 34,
+      "critical_misses": 0,
+      "unsupported_annotations": 1,
+      "contradiction_annotations": 1
+    }
+  },
+  "candidate_mapping_and_metrics": [
+    {
+      "job_id": "A1-full",
+      "candidate_id": "candidate_1",
+      "metrics": {
+        "primary": {
+          "always_required_met": 4,
+          "always_required_total": 4,
+          "applicable_met": 4,
+          "applicable_total": 4,
+          "critical_misses": 0,
+          "unsupported_annotations": 0,
+          "contradiction_annotations": 0
+        },
+        "independent": {
+          "always_required_met": 3,
+          "always_required_total": 4,
+          "applicable_met": 3,
+          "applicable_total": 4,
+          "critical_misses": 0,
+          "unsupported_annotations": 0,
+          "contradiction_annotations": 0
+        }
+      },
+      "primary_unsupported_claims": [],
+      "primary_contradictions": [],
+      "independent_unsupported_claims": [],
+      "independent_contradictions": []
+    },
+    {
+      "job_id": "A1-summary",
+      "candidate_id": "candidate_2",
+      "metrics": {
+        "primary": {
+          "always_required_met": 2,
+          "always_required_total": 4,
+          "applicable_met": 2,
+          "applicable_total": 4,
+          "critical_misses": 1,
+          "unsupported_annotations": 0,
+          "contradiction_annotations": 3
+        },
+        "independent": {
+          "always_required_met": 1,
+          "always_required_total": 4,
+          "applicable_met": 1,
+          "applicable_total": 4,
+          "critical_misses": 1,
+          "unsupported_annotations": 0,
+          "contradiction_annotations": 0
+        }
+      },
+      "primary_unsupported_claims": [],
+      "primary_contradictions": [
+        {
+          "claim": "「僅提供摘要與文件目錄；未提供 A1-D01、A1-D02、A1-D03 的內容」",
+          "reason": "題目實際完整提供了三份文件正文；此說法直接違反可用原始證據。"
+        },
+        {
+          "claim": "「沒有佇列分層結果」",
+          "reason": "A1-D01 明確提供 standard 與 assisted 的分路徑 ledger，其中 assisted 为 P 28/40、R 16/40。"
+        },
+        {
+          "claim": "「摘要明示未有子群列或案件層級摘錄」並據此描述「現有證據」",
+          "reason": "該句只描述 aggregate summary；完整供應的 A1-D01 同時包含子群 ledger 和三則案件摘錄，因此不能據此說全部現有證據缺少它們。"
+        }
+      ],
+      "independent_unsupported_claims": [],
+      "independent_contradictions": []
+    },
+    {
+      "job_id": "A1-adaptive",
+      "candidate_id": "candidate_3",
+      "metrics": {
+        "primary": {
+          "always_required_met": 2,
+          "always_required_total": 4,
+          "applicable_met": 2,
+          "applicable_total": 4,
+          "critical_misses": 1,
+          "unsupported_annotations": 0,
+          "contradiction_annotations": 2
+        },
+        "independent": {
+          "always_required_met": 2,
+          "always_required_total": 4,
+          "applicable_met": 2,
+          "applicable_total": 4,
+          "critical_misses": 1,
+          "unsupported_annotations": 0,
+          "contradiction_annotations": 0
+        }
+      },
+      "primary_unsupported_claims": [],
+      "primary_contradictions": [
+        {
+          "claim": "「現有資料沒有分組結果」",
+          "reason": "A1-D01 的 FINAL CASE LEDGER 已提供 standard、assisted 和 total 三行完整分組結果。"
+        },
+        {
+          "claim": "「未提供按standard／assisted分列的成功、失敗或個案逐字稿」",
+          "reason": "A1-D01 提供兩條路徑的成功與配對結果，并提供 elm-043、elm-117、elm-202 三則選錄案件記錄；只有完整240組逐字稿未附在 packet。"
+        }
+      ],
+      "independent_unsupported_claims": [],
+      "independent_contradictions": []
+    },
+    {
+      "job_id": "A2-adaptive",
+      "candidate_id": "candidate_1",
+      "metrics": {
+        "primary": {
+          "always_required_met": 4,
+          "always_required_total": 4,
+          "applicable_met": 4,
+          "applicable_total": 4,
+          "critical_misses": 0,
+          "unsupported_annotations": 0,
+          "contradiction_annotations": 1
+        },
+        "independent": {
+          "always_required_met": 4,
+          "always_required_total": 4,
+          "applicable_met": 4,
+          "applicable_total": 4,
+          "critical_misses": 0,
+          "unsupported_annotations": 0,
+          "contradiction_annotations": 0
+        }
+      },
+      "primary_unsupported_claims": [],
+      "primary_contradictions": [
+        {
+          "claim": "“無法判定……是否曾在其他未提供資料中取得同意。”",
+          "reason": "For this run, A2-D02 expressly says the export contains all events, no events are omitted, and there is no later user approval. While unrelated conversations remain out of scope, the phrasing improperly leaves open missing consent evidence for cedar-17."
+        }
+      ],
+      "independent_unsupported_claims": [],
+      "independent_contradictions": []
+    },
+    {
+      "job_id": "A2-full",
+      "candidate_id": "candidate_2",
+      "metrics": {
+        "primary": {
+          "always_required_met": 4,
+          "always_required_total": 4,
+          "applicable_met": 4,
+          "applicable_total": 4,
+          "critical_misses": 0,
+          "unsupported_annotations": 3,
+          "contradiction_annotations": 0
+        },
+        "independent": {
+          "always_required_met": 4,
+          "always_required_total": 4,
+          "applicable_met": 4,
+          "applicable_total": 4,
+          "critical_misses": 0,
+          "unsupported_annotations": 0,
+          "contradiction_annotations": 0
+        }
+      },
+      "primary_unsupported_claims": [
+        {
+          "claim": "Purported A2-D01 excerpt: “這些 pass 標籤是便利擷取腳本的初步輸出”",
+          "reason": "This is a Chinese paraphrase presented as a quotation, not an exact excerpt from the English source. The underlying substance is supported by A2-D01."
+        },
+        {
+          "claim": "Purported A2-D01 excerpt: “未重播對話或在發布前檢查參數”",
+          "reason": "This is not an exact source excerpt, although it accurately paraphrases A2-D01."
+        },
+        {
+          "claim": "Purported A2-D02 excerpt: “沒有較後的使用者批准或第二次報價呼叫”",
+          "reason": "This is not an exact excerpt from A2-D02; it is a supported translation of “There is no later user approval or second quote call.”"
+        }
+      ],
+      "primary_contradictions": [],
+      "independent_unsupported_claims": [],
+      "independent_contradictions": []
+    },
+    {
+      "job_id": "A2-summary",
+      "candidate_id": "candidate_3",
+      "metrics": {
+        "primary": {
+          "always_required_met": 0,
+          "always_required_total": 4,
+          "applicable_met": 0,
+          "applicable_total": 4,
+          "critical_misses": 1,
+          "unsupported_annotations": 0,
+          "contradiction_annotations": 3
+        },
+        "independent": {
+          "always_required_met": 1,
+          "always_required_total": 4,
+          "applicable_met": 1,
+          "applicable_total": 4,
+          "critical_misses": 1,
+          "unsupported_annotations": 0,
+          "contradiction_annotations": 0
+        }
+      },
+      "primary_unsupported_claims": [],
+      "primary_contradictions": [
+        {
+          "claim": "“未提供原文，不能引用或斷言結果。”",
+          "reason": "A2-D01, A2-D02, and A2-D03 are supplied in full, including the complete ordered trace, rubric, and field definitions."
+        },
+        {
+          "claim": "“未提供 A2-D01、A2-D02 或 A2-D03 的內容，僅有標題”",
+          "reason": "This directly contradicts the packet, which includes the full text of all three documents."
+        },
+        {
+          "claim": "“若未要求獨立核價及明確事前批准”",
+          "reason": "A2-D01’s written rubric explicitly requires an authoritative final quote, an affirmative user message approving the specific update after that quote, and mutation only after that approval."
+        }
+      ],
+      "independent_unsupported_claims": [],
+      "independent_contradictions": []
+    },
+    {
+      "job_id": "A3-full",
+      "candidate_id": "candidate_1",
+      "metrics": {
+        "primary": {
+          "always_required_met": 4,
+          "always_required_total": 4,
+          "applicable_met": 4,
+          "applicable_total": 4,
+          "critical_misses": 0,
+          "unsupported_annotations": 0,
+          "contradiction_annotations": 0
+        },
+        "independent": {
+          "always_required_met": 4,
+          "always_required_total": 4,
+          "applicable_met": 4,
+          "applicable_total": 4,
+          "critical_misses": 0,
+          "unsupported_annotations": 0,
+          "contradiction_annotations": 0
+        }
+      },
+      "primary_unsupported_claims": [],
+      "primary_contradictions": [],
+      "independent_unsupported_claims": [],
+      "independent_contradictions": []
+    },
+    {
+      "job_id": "A3-summary",
+      "candidate_id": "candidate_2",
+      "metrics": {
+        "primary": {
+          "always_required_met": 0,
+          "always_required_total": 4,
+          "applicable_met": 0,
+          "applicable_total": 4,
+          "critical_misses": 1,
+          "unsupported_annotations": 2,
+          "contradiction_annotations": 2
+        },
+        "independent": {
+          "always_required_met": 0,
+          "always_required_total": 4,
+          "applicable_met": 0,
+          "applicable_total": 4,
+          "critical_misses": 1,
+          "unsupported_annotations": 0,
+          "contradiction_annotations": 0
+        }
+      },
+      "primary_unsupported_claims": [
+        {
+          "claim": "“僅提供文件目錄與摘要，未提供A3-D01至A3-D03的正文”",
+          "reason": "The prompt supplies the full text of A3-D01, A3-D02, and A3-D03."
+        },
+        {
+          "claim": "“現有資料未能證明候選者是否碰觸、刪除或正確避開該物件”",
+          "reason": "Deletion is unproven, but A3-D02 does prove that the assistant selected incident-017 for the proposed execution set and failed to avoid it."
+        }
+      ],
+      "primary_contradictions": [
+        {
+          "claim": "“無法確認保存標記物件是否正是標記失誤的對象”",
+          "reason": "A3-D01 identifies maple-073’s C4 failure as inclusion of an active-preservation object, and A3-D02 identifies that object as incident-017."
+        },
+        {
+          "claim": "“下一步應取得A3-D02中該回放的逐步轉錄、物件清單及內部規則”",
+          "reason": "Those materials are already present in the supplied A3-D02 text."
+        }
+      ],
+      "independent_unsupported_claims": [],
+      "independent_contradictions": []
+    },
+    {
+      "job_id": "A3-adaptive",
+      "candidate_id": "candidate_3",
+      "metrics": {
+        "primary": {
+          "always_required_met": 4,
+          "always_required_total": 4,
+          "applicable_met": 4,
+          "applicable_total": 4,
+          "critical_misses": 0,
+          "unsupported_annotations": 0,
+          "contradiction_annotations": 0
+        },
+        "independent": {
+          "always_required_met": 4,
+          "always_required_total": 4,
+          "applicable_met": 4,
+          "applicable_total": 4,
+          "critical_misses": 0,
+          "unsupported_annotations": 0,
+          "contradiction_annotations": 0
+        }
+      },
+      "primary_unsupported_claims": [],
+      "primary_contradictions": [],
+      "independent_unsupported_claims": [],
+      "independent_contradictions": []
+    },
+    {
+      "job_id": "A4-summary",
+      "candidate_id": "candidate_1",
+      "metrics": {
+        "primary": {
+          "always_required_met": 3,
+          "always_required_total": 4,
+          "applicable_met": 3,
+          "applicable_total": 4,
+          "critical_misses": 0,
+          "unsupported_annotations": 0,
+          "contradiction_annotations": 1
+        },
+        "independent": {
+          "always_required_met": 4,
+          "always_required_total": 4,
+          "applicable_met": 4,
+          "applicable_total": 4,
+          "critical_misses": 0,
+          "unsupported_annotations": 0,
+          "contradiction_annotations": 0
+        }
+      },
+      "primary_unsupported_claims": [],
+      "primary_contradictions": [
+        {
+          "claim": "“未提供任何文件正文，僅能引用 supplied summary。”",
+          "reason": "A4-D01, A4-D02, and A4-D03 were supplied in full. Although relying only on the summary is allowed, saying no document text was provided contradicts the case materials."
+        }
+      ],
+      "independent_unsupported_claims": [],
+      "independent_contradictions": []
+    },
+    {
+      "job_id": "A4-full",
+      "candidate_id": "candidate_2",
+      "metrics": {
+        "primary": {
+          "always_required_met": 4,
+          "always_required_total": 4,
+          "applicable_met": 4,
+          "applicable_total": 4,
+          "critical_misses": 0,
+          "unsupported_annotations": 0,
+          "contradiction_annotations": 0
+        },
+        "independent": {
+          "always_required_met": 3,
+          "always_required_total": 4,
+          "applicable_met": 3,
+          "applicable_total": 4,
+          "critical_misses": 0,
+          "unsupported_annotations": 0,
+          "contradiction_annotations": 0
+        }
+      },
+      "primary_unsupported_claims": [],
+      "primary_contradictions": [],
+      "independent_unsupported_claims": [],
+      "independent_contradictions": []
+    },
+    {
+      "job_id": "A4-adaptive",
+      "candidate_id": "candidate_3",
+      "metrics": {
+        "primary": {
+          "always_required_met": 4,
+          "always_required_total": 4,
+          "applicable_met": 4,
+          "applicable_total": 4,
+          "critical_misses": 0,
+          "unsupported_annotations": 0,
+          "contradiction_annotations": 0
+        },
+        "independent": {
+          "always_required_met": 4,
+          "always_required_total": 4,
+          "applicable_met": 4,
+          "applicable_total": 4,
+          "critical_misses": 0,
+          "unsupported_annotations": 0,
+          "contradiction_annotations": 0
+        }
+      },
+      "primary_unsupported_claims": [],
+      "primary_contradictions": [],
+      "independent_unsupported_claims": [],
+      "independent_contradictions": []
+    },
+    {
+      "job_id": "R1-full",
+      "candidate_id": "candidate_1",
+      "metrics": {
+        "primary": {
+          "always_required_met": 4,
+          "always_required_total": 5,
+          "applicable_met": 5,
+          "applicable_total": 6,
+          "critical_misses": 0,
+          "unsupported_annotations": 0,
+          "contradiction_annotations": 0
+        },
+        "independent": {
+          "always_required_met": 4,
+          "always_required_total": 5,
+          "applicable_met": 5,
+          "applicable_total": 6,
+          "critical_misses": 0,
+          "unsupported_annotations": 0,
+          "contradiction_annotations": 0
+        }
+      },
+      "primary_unsupported_claims": [],
+      "primary_contradictions": [],
+      "independent_unsupported_claims": [],
+      "independent_contradictions": []
+    },
+    {
+      "job_id": "R1-compact",
+      "candidate_id": "candidate_2",
+      "metrics": {
+        "primary": {
+          "always_required_met": 3,
+          "always_required_total": 5,
+          "applicable_met": 4,
+          "applicable_total": 6,
+          "critical_misses": 0,
+          "unsupported_annotations": 0,
+          "contradiction_annotations": 0
+        },
+        "independent": {
+          "always_required_met": 4,
+          "always_required_total": 5,
+          "applicable_met": 5,
+          "applicable_total": 6,
+          "critical_misses": 0,
+          "unsupported_annotations": 0,
+          "contradiction_annotations": 0
+        }
+      },
+      "primary_unsupported_claims": [],
+      "primary_contradictions": [],
+      "independent_unsupported_claims": [],
+      "independent_contradictions": []
+    },
+    {
+      "job_id": "R2-full",
+      "candidate_id": "candidate_1",
+      "metrics": {
+        "primary": {
+          "always_required_met": 5,
+          "always_required_total": 5,
+          "applicable_met": 5,
+          "applicable_total": 5,
+          "critical_misses": 0,
+          "unsupported_annotations": 0,
+          "contradiction_annotations": 0
+        },
+        "independent": {
+          "always_required_met": 5,
+          "always_required_total": 5,
+          "applicable_met": 5,
+          "applicable_total": 5,
+          "critical_misses": 0,
+          "unsupported_annotations": 0,
+          "contradiction_annotations": 0
+        }
+      },
+      "primary_unsupported_claims": [],
+      "primary_contradictions": [],
+      "independent_unsupported_claims": [],
+      "independent_contradictions": []
+    },
+    {
+      "job_id": "R2-compact",
+      "candidate_id": "candidate_2",
+      "metrics": {
+        "primary": {
+          "always_required_met": 3,
+          "always_required_total": 5,
+          "applicable_met": 3,
+          "applicable_total": 5,
+          "critical_misses": 0,
+          "unsupported_annotations": 0,
+          "contradiction_annotations": 1
+        },
+        "independent": {
+          "always_required_met": 4,
+          "always_required_total": 5,
+          "applicable_met": 4,
+          "applicable_total": 5,
+          "critical_misses": 0,
+          "unsupported_annotations": 0,
+          "contradiction_annotations": 0
+        }
+      },
+      "primary_unsupported_claims": [],
+      "primary_contradictions": [
+        {
+          "claim": "“This could change with dated ... evidence” versus “Never sign or pay at the viewing.”",
+          "reason": "The answer first makes the no-go conditional on missing evidence, then ends with an absolute prohibition even if adequate evidence were supplied and assessed before the viewing. The source supports holding on the current packet, not an unconditional rule for every evidentiary state."
+        }
+      ],
+      "independent_unsupported_claims": [],
+      "independent_contradictions": []
+    },
+    {
+      "job_id": "R3-full",
+      "candidate_id": "candidate_1",
+      "metrics": {
+        "primary": {
+          "always_required_met": 3,
+          "always_required_total": 6,
+          "applicable_met": 3,
+          "applicable_total": 6,
+          "critical_misses": 0,
+          "unsupported_annotations": 0,
+          "contradiction_annotations": 0
+        },
+        "independent": {
+          "always_required_met": 5,
+          "always_required_total": 6,
+          "applicable_met": 5,
+          "applicable_total": 6,
+          "critical_misses": 0,
+          "unsupported_annotations": 0,
+          "contradiction_annotations": 1
+        }
+      },
+      "primary_unsupported_claims": [],
+      "primary_contradictions": [],
+      "independent_unsupported_claims": [],
+      "independent_contradictions": [
+        {
+          "claim": "B meets the supplied 42 m² minimum",
+          "source_ids": [
+            "U1",
+            "U3"
+          ],
+          "severity": "minor",
+          "reason": "U1 sets the minimum at 40 m²; U3 gives B’s area as 42 m². The response conflates the property area with the user’s threshold."
+        }
+      ]
+    },
+    {
+      "job_id": "R3-compact",
+      "candidate_id": "candidate_2",
+      "metrics": {
+        "primary": {
+          "always_required_met": 6,
+          "always_required_total": 6,
+          "applicable_met": 6,
+          "applicable_total": 6,
+          "critical_misses": 0,
+          "unsupported_annotations": 0,
+          "contradiction_annotations": 0
+        },
+        "independent": {
+          "always_required_met": 5,
+          "always_required_total": 6,
+          "applicable_met": 5,
+          "applicable_total": 6,
+          "critical_misses": 0,
+          "unsupported_annotations": 0,
+          "contradiction_annotations": 1
+        }
+      },
+      "primary_unsupported_claims": [],
+      "primary_contradictions": [],
+      "independent_unsupported_claims": [],
+      "independent_contradictions": [
+        {
+          "claim": "It meets the 42m² internal minimum",
+          "source_ids": [
+            "U1",
+            "U3"
+          ],
+          "severity": "minor",
+          "reason": "U1 requires 40 m² and U3 gives B an area of 42 m². The later phrase \"supplied EPC areas above 40m²\" does not erase the earlier incorrect threshold."
+        }
+      ]
+    },
+    {
+      "job_id": "R4-compact",
+      "candidate_id": "candidate_1",
+      "metrics": {
+        "primary": {
+          "always_required_met": 6,
+          "always_required_total": 6,
+          "applicable_met": 6,
+          "applicable_total": 6,
+          "critical_misses": 0,
+          "unsupported_annotations": 0,
+          "contradiction_annotations": 0
+        },
+        "independent": {
+          "always_required_met": 6,
+          "always_required_total": 6,
+          "applicable_met": 6,
+          "applicable_total": 6,
+          "critical_misses": 0,
+          "unsupported_annotations": 0,
+          "contradiction_annotations": 0
+        }
+      },
+      "primary_unsupported_claims": [],
+      "primary_contradictions": [],
+      "independent_unsupported_claims": [],
+      "independent_contradictions": []
+    },
+    {
+      "job_id": "R4-full",
+      "candidate_id": "candidate_2",
+      "metrics": {
+        "primary": {
+          "always_required_met": 6,
+          "always_required_total": 6,
+          "applicable_met": 6,
+          "applicable_total": 6,
+          "critical_misses": 0,
+          "unsupported_annotations": 0,
+          "contradiction_annotations": 0
+        },
+        "independent": {
+          "always_required_met": 5,
+          "always_required_total": 6,
+          "applicable_met": 5,
+          "applicable_total": 6,
+          "critical_misses": 0,
+          "unsupported_annotations": 0,
+          "contradiction_annotations": 0
+        }
+      },
+      "primary_unsupported_claims": [],
+      "primary_contradictions": [],
+      "independent_unsupported_claims": [],
+      "independent_contradictions": []
+    },
+    {
+      "job_id": "R5-compact",
+      "candidate_id": "candidate_1",
+      "metrics": {
+        "primary": {
+          "always_required_met": 3,
+          "always_required_total": 5,
+          "applicable_met": 3,
+          "applicable_total": 5,
+          "critical_misses": 1,
+          "unsupported_annotations": 1,
+          "contradiction_annotations": 0
+        },
+        "independent": {
+          "always_required_met": 4,
+          "always_required_total": 5,
+          "applicable_met": 4,
+          "applicable_total": 5,
+          "critical_misses": 0,
+          "unsupported_annotations": 1,
+          "contradiction_annotations": 0
+        }
+      },
+      "primary_unsupported_claims": [
+        {
+          "claim": "“listen from the work area and balcony”",
+          "reason": "The evidence does not establish that Coppersedge has a balcony; this wording appears to assume one exists."
+        }
+      ],
+      "primary_contradictions": [],
+      "independent_unsupported_claims": [
+        {
+          "claim": "listen from the work area and balcony",
+          "source_ids": [
+            "U2",
+            "U3",
+            "U5"
+          ],
+          "severity": "minor",
+          "reason": "U3 mentions balcony only as a lower-priority preference; neither listing packet establishes an actual balcony. The instruction assumes a viewing location not in the evidence."
+        }
+      ],
+      "independent_contradictions": []
+    },
+    {
+      "job_id": "R5-full",
+      "candidate_id": "candidate_2",
+      "metrics": {
+        "primary": {
+          "always_required_met": 4,
+          "always_required_total": 5,
+          "applicable_met": 4,
+          "applicable_total": 5,
+          "critical_misses": 1,
+          "unsupported_annotations": 0,
+          "contradiction_annotations": 0
+        },
+        "independent": {
+          "always_required_met": 5,
+          "always_required_total": 5,
+          "applicable_met": 5,
+          "applicable_total": 5,
+          "critical_misses": 0,
+          "unsupported_annotations": 0,
+          "contradiction_annotations": 0
+        }
+      },
+      "primary_unsupported_claims": [],
+      "primary_contradictions": [],
+      "independent_unsupported_claims": [],
+      "independent_contradictions": []
+    },
+    {
+      "job_id": "R6-compact",
+      "candidate_id": "candidate_1",
+      "metrics": {
+        "primary": {
+          "always_required_met": 5,
+          "always_required_total": 6,
+          "applicable_met": 5,
+          "applicable_total": 6,
+          "critical_misses": 0,
+          "unsupported_annotations": 1,
+          "contradiction_annotations": 0
+        },
+        "independent": {
+          "always_required_met": 5,
+          "always_required_total": 6,
+          "applicable_met": 5,
+          "applicable_total": 6,
+          "critical_misses": 0,
+          "unsupported_annotations": 0,
+          "contradiction_annotations": 0
+        }
+      },
+      "primary_unsupported_claims": [
+        {
+          "claim": "“the tenancy/deposit/advance-rent terms from the landlord’s Friday message”",
+          "reason": "The Friday landlord update only confirms 21 January handover and withdraws the erroneous 24 January draft; no tenancy, deposit, or advance-rent terms were supplied as part of that message."
+        }
+      ],
+      "primary_contradictions": [],
+      "independent_unsupported_claims": [],
+      "independent_contradictions": []
+    },
+    {
+      "job_id": "R6-full",
+      "candidate_id": "candidate_2",
+      "metrics": {
+        "primary": {
+          "always_required_met": 5,
+          "always_required_total": 6,
+          "applicable_met": 5,
+          "applicable_total": 6,
+          "critical_misses": 0,
+          "unsupported_annotations": 0,
+          "contradiction_annotations": 0
+        },
+        "independent": {
+          "always_required_met": 5,
+          "always_required_total": 6,
+          "applicable_met": 5,
+          "applicable_total": 6,
+          "critical_misses": 0,
+          "unsupported_annotations": 0,
+          "contradiction_annotations": 0
+        }
+      },
+      "primary_unsupported_claims": [],
+      "primary_contradictions": [],
+      "independent_unsupported_claims": [],
+      "independent_contradictions": []
+    }
+  ],
+  "criterion_disagreements": [
+    {
+      "job_id": "A1-full",
+      "criterion_id": "A1-F2",
+      "primary": {
+        "id": "A1-F2",
+        "applicable": true,
+        "met": true,
+        "reason": "以 A1-D01 的精確 ledger 行「standard, 200, 170, 194...」與「assisted, 40, 28, 16...」落實分路徑退步，且稱其為同一「總體重播」中的分路徑結果；結合「每案僅跑一次」及同一列中的固定案件數，實質上將結果歸於相同重播包內的路徑內比較，而非路徑組成改變。"
+      },
+      "independent": {
+        "id": "A1-F2",
+        "met": false,
+        "reason": "Candidate: “總體 R 優於 P，但此結果不能代表兩條路徑皆改善。”. Source A1-D01: “No cases moved between routes during scoring.”. Exact ledger rows ground the regression, but the answer does not establish the same paired cases and preassigned fixed route tags as the reason changed composition cannot explain it. Partial coverage only."
+      },
+      "resolution": "Retain both judgments; no primary relabeling or model rerun. See source review and report for interpretation."
+    },
+    {
+      "job_id": "A1-summary",
+      "criterion_id": "A1-F3",
+      "primary": {
+        "id": "A1-F3",
+        "applicable": true,
+        "met": true,
+        "reason": "提出「按支援佇列分層、以相同案件層級定義比較」及在未驗證時僅做「受控的分佇列試點」；雖不如 gold 具體，但構成有用的 subgroup validation 與 guarded rollout。"
+      },
+      "independent": {
+        "id": "A1-F3",
+        "met": false,
+        "reason": "Candidate: “先取得按支援佇列分層、以相同案件層級定義比較的 P 與 R 成功結果。”. Source A1-D02: “paired-transcripts: 240 case folders, two system outputs per folder.”. The request for subgroup data is useful, but falls short of paired assisted-failure review together with a fresh assisted validation or route-specific acceptance gate."
+      },
+      "resolution": "Retain both judgments; no primary relabeling or model rerun. See source review and report for interpretation."
+    },
+    {
+      "job_id": "A2-summary",
+      "criterion_id": "A2-F4",
+      "primary": {
+        "id": "A2-F4",
+        "applicable": true,
+        "met": false,
+        "reason": "It suggests checking A2-D02 and the rubric, but treats both as unavailable even though they were supplied and does not recommend correcting the false scores to reflect the known provisional quote and update after an explicit wait instruction. Its suggested narrower claim remains conditional on the rubric supposedly not requiring standards that A2-D01 explicitly requires."
+      },
+      "independent": {
+        "id": "A2-F4",
+        "met": true,
+        "reason": "Candidate: “比對報價來源、年總額計算、客戶明確批准與實際更新的先後”. Source A2-D01: “Q2 requires an affirmative user message approving the specific update after the final quote.”. A useful prospective verification checks price evidence, explicit pre-update approval, ordering and rubric meaning, and conditionally narrows the release sentence. It does not claim completed correction or approval."
+      },
+      "resolution": "Retain both judgments; no primary relabeling or model rerun. See source review and report for interpretation."
+    },
+    {
+      "job_id": "A4-summary",
+      "criterion_id": "A4-F4",
+      "primary": {
+        "id": "A4-F4",
+        "applicable": true,
+        "met": false,
+        "reason": "The proposed steps—“調取 birch-22 的已解析模板輸入與渲染後 outbound payload” and then obtain a field-level receipt—target records the packet expressly says were not captured or supported. It does not redirect the search to potentially independent retained evidence or propose a properly limited reconstruction."
+      },
+      "independent": {
+        "id": "A4-F4",
+        "met": true,
+        "reason": "Candidate: “若兩類證據皆不存在，事件結論記為「無法判定 token 是否傳送」”. Source summary: “there is no field-level receipt from the receiver”. The focused requests for run-specific payload/input or receiver evidence are conditional on availability, followed by explicit abstention. The gold permits this without a detailed reconstruction plan."
+      },
+      "resolution": "Retain both judgments; no primary relabeling or model rerun. See source review and report for interpretation."
+    },
+    {
+      "job_id": "A4-full",
+      "criterion_id": "A4-F4",
+      "primary": {
+        "id": "A4-F4",
+        "applicable": true,
+        "met": true,
+        "reason": "It proposes obtaining BUILD-DEMO-81’s deployment hash and effective overlay to clarify configuration, while expressly limiting the inference: “仍不能單獨重建或證明實際 payload.” This is a useful, evidence-supported verification with proper historical limits."
+      },
+      "independent": {
+        "id": "A4-F4",
+        "met": false,
+        "reason": "Candidate: “取得並評估 BUILD-DEMO-81 的部署 sanitizer 雜湊與有效環境覆蓋”. Source A4-D02: “it would describe code identity, not prove the actual payload by itself.”. Configuration lookup is useful and properly limited, but the answer stops there: it proposes neither a conditional independent payload/receiver evidence search nor a canary reconstruction with historical limits."
+      },
+      "resolution": "Retain both judgments; no primary relabeling or model rerun. See source review and report for interpretation."
+    },
+    {
+      "job_id": "R1-compact",
+      "criterion_id": "R1-F3",
+      "primary": {
+        "id": "R1-F3",
+        "applicable": true,
+        "met": false,
+        "reason": "The response identifies missing “owner/payee authority” and asks whether M. Vale is authorised, but it does not identify or seek to reconcile the distinct trading name Wrenwick Lettings with Wrenwick Property Services Ltd. It therefore does not communicate the full company/trading-name/payee relationship gap."
+      },
+      "independent": {
+        "id": "R1-F3",
+        "applicable": true,
+        "met": true,
+        "reason": "\"owner/payee authority\" is missing, and the draft asks whether M. Vale is authorised by the landlord/Wrenwick Property Services Ltd (U3/U4). No fraud allegation is made."
+      },
+      "resolution": "Retain both judgments; no primary relabeling or model rerun. See source review and report for interpretation."
+    },
+    {
+      "job_id": "R2-compact",
+      "criterion_id": "R2-F2",
+      "primary": {
+        "id": "R2-F2",
+        "applicable": true,
+        "met": false,
+        "reason": "Although it says the video is “not proof of the underlying repair” and refers to outstanding investigation and a part, it does not communicate the specific unresolved conflict between the agent’s old-leak/cosmetic/switch-setting account and the later caretaker note."
+      },
+      "independent": {
+        "id": "R2-F2",
+        "applicable": true,
+        "met": true,
+        "reason": "\"still needing investigation/awaiting a part\" contrasts with \"undated reassurance—not proof of the underlying repair\", preserving the substance of the U3/U4 conflict."
+      },
+      "resolution": "Retain both judgments; no primary relabeling or model rerun. See source review and report for interpretation."
+    },
+    {
+      "job_id": "R3-full",
+      "criterion_id": "R3-F4",
+      "primary": {
+        "id": "R3-F4",
+        "applicable": true,
+        "met": false,
+        "reason": "“34-minute commute requirements, but the commute has only one minute of margin” preserves the stated time and limited margin, and the response calls for desk verification, but it does not communicate that the supplied route time is unverified and may vary."
+      },
+      "independent": {
+        "id": "R3-F4",
+        "applicable": true,
+        "met": true,
+        "reason": "\"34-minute commute\" and \"only one minute of margin\" preserve U1/U3. The wording \"supplied\" and the conditional recommendation avoid claiming a verified journey; the desk is explicitly to be measured."
+      },
+      "resolution": "Retain both judgments; no primary relabeling or model rerun. See source review and report for interpretation."
+    },
+    {
+      "job_id": "R3-full",
+      "criterion_id": "R3-F5",
+      "primary": {
+        "id": "R3-F5",
+        "applicable": true,
+        "met": false,
+        "reason": "The copy-ready message usefully asks to confirm desk clearance—“at least 1.20 m clear usable width”—but omits the other material verification issues identified by the packet, especially utility evidence and late-night noise."
+      },
+      "independent": {
+        "id": "R3-F5",
+        "applicable": true,
+        "met": true,
+        "reason": "The copy-ready draft asks for \"at least 1.20 m clear usable width\" without obstructing a route (U1/U3/U5). This is a useful verification request even though it does not include every possible utility/noise question. A draft asking to book is not a claim that booking occurred."
+      },
+      "resolution": "Retain both judgments; no primary relabeling or model rerun. See source review and report for interpretation."
+    },
+    {
+      "job_id": "R3-compact",
+      "criterion_id": "R3-F4",
+      "primary": {
+        "id": "R3-F4",
+        "applicable": true,
+        "met": true,
+        "reason": "The answer retains B’s “34-minute route,” notes that “plans/routes are unverified,” and treats the commute as tight against the 35-minute cap."
+      },
+      "independent": {
+        "id": "R3-F4",
+        "applicable": true,
+        "met": false,
+        "reason": "The response names the \"34-minute route\" and says routes are unverified, but omits the 35-minute cap/one-minute margin from U1/U3. Route uncertainty is partial coverage; the narrow constraint margin itself is not communicated."
+      },
+      "resolution": "Retain both judgments; no primary relabeling or model rerun. See source review and report for interpretation."
+    },
+    {
+      "job_id": "R4-full",
+      "criterion_id": "R4-F2",
+      "primary": {
+        "id": "R4-F2",
+        "applicable": true,
+        "met": true,
+        "reason": "“measure the usable bedroom wall width at desk height, excluding skirting, door swing and anything that blocks it” directly checks usable fit rather than accepting the supplied 128 cm wall measurement."
+      },
+      "independent": {
+        "id": "R4-F2",
+        "applicable": true,
+        "met": false,
+        "reason": "\"measure the usable bedroom wall width\" plus a video of the door opening checks width/door movement only. It never supplies the 120×60 cm target or checks the 60 cm depth/usable footprint required by U1/U2. A width number alone leaves this check incomplete."
+      },
+      "resolution": "Retain both judgments; no primary relabeling or model rerun. See source review and report for interpretation."
+    },
+    {
+      "job_id": "R5-compact",
+      "criterion_id": "R5-F1",
+      "primary": {
+        "id": "R5-F1",
+        "applicable": true,
+        "met": false,
+        "reason": "The response correctly uses the “£2,150 hard cap,” 41 m², and “West Loom Laboratory,” but it does not communicate the active 40 m² minimum, that studios are now acceptable, the required 3 December availability, or the absence of an age cut-off."
+      },
+      "independent": {
+        "id": "R5-F1",
+        "applicable": true,
+        "met": true,
+        "reason": "Uses \"£2,150 hard cap\", the West Loom destination and selects the 41 m² studio with desk verification (U3/U4/U5). Its decision does not reimpose the withdrawn area/bedroom requirements or an age/date objection. Repeating every unchanged profile field is unnecessary."
+      },
+      "resolution": "Retain both judgments; no primary relabeling or model rerun. See source review and report for interpretation."
+    },
+    {
+      "job_id": "R5-full",
+      "criterion_id": "R5-F1",
+      "primary": {
+        "id": "R5-F1",
+        "applicable": true,
+        "met": false,
+        "reason": "It correctly applies the “£2,150 hard ceiling,” “revised 40 m² minimum,” studio acceptance, desk-wall requirement, and West Loom/35-minute limit, but it does not communicate or otherwise check the required 3 December availability or no-age-cut-off term."
+      },
+      "independent": {
+        "id": "R5-F1",
+        "applicable": true,
+        "met": true,
+        "reason": "Explicitly uses the £2,150 all-in cap, \"revised 40 m² minimum\", acceptable studio and West Loom/35-minute profile, with a claimed 130 cm desk wall (U3/U4/U5). It does not reject on unchanged date or age facts; no needless full-profile recital is required."
+      },
+      "resolution": "Retain both judgments; no primary relabeling or model rerun. See source review and report for interpretation."
+    }
+  ],
+  "root_source_annotations": [
+    {
+      "jobs": [
+        "A1-summary",
+        "A1-adaptive",
+        "A2-summary",
+        "A3-summary",
+        "A4-summary"
+      ],
+      "finding": "Primary judge confused its own full-source visibility with each answerer's visibility.",
+      "root_assessment": "The 11 contradiction annotations and 2 unsupported annotations on these jobs rely on sources being supplied when they were not. Actual prompts and supplied_document_ids show summary-only access, or A1 adaptive D02/D03 without D01. Missing core findings still count as omissions, but these annotations do not establish a material false claim."
+    },
+    {
+      "jobs": [
+        "A2-full"
+      ],
+      "finding": "Three supported translations were placed in exact quotation fields.",
+      "root_assessment": "Retain all three deterministic quote failures. Primary unsupported-claim annotations explicitly acknowledge the supported substance. Classify as citation fidelity defects rather than three fabricated material facts."
+    },
+    {
+      "jobs": [
+        "A2-adaptive"
+      ],
+      "finding": "Primary judge flagged uncertainty about consent in other unsupplied material.",
+      "root_assessment": "Main answer and quotes explicitly establish no approval in the complete cedar-17 trace. The limitations phrase about other material is unnecessarily broad and could imply missing in-run consent. Treat as a scope/wording ambiguity; independent review found no material contradiction. Do not erase the primary flag or count it as a proven incorrect core conclusion."
+    },
+    {
+      "jobs": [
+        "R2-compact"
+      ],
+      "finding": "Primary judge called Never sign or pay at the viewing a contradiction with conditional repair evidence.",
+      "root_assessment": "The source and fixed entry guidance support withholding on-the-spot commitment in this case. Repair evidence could change the property assessment while off-site review before commitment remains appropriate. The absolute wording is broader than necessary, but is not a contradiction in the user's fictional record. Bridge availability and its unbooked status remain incompletely communicated."
+    },
+    {
+      "jobs": [
+        "R3-full",
+        "R3-compact"
+      ],
+      "finding": "Both answers explicitly call 42 square metres the user's minimum; U1 says 40 and U3 gives B's area as 42.",
+      "root_assessment": "A real shared source error missed by the primary judge and caught by the blinded review. It does not change which listed flat meets the true threshold here, but it defeats a claim of error-free outputs."
+    },
+    {
+      "jobs": [
+        "R5-compact"
+      ],
+      "finding": "Answer assumes a balcony listening location without evidence that the property has a balcony.",
+      "root_assessment": "Both reviews flag this minor unsupported assumption. A balcony preference does not establish a balcony exists."
+    },
+    {
+      "jobs": [
+        "R6-compact"
+      ],
+      "finding": "Primary judge flagged tenancy/deposit/advance-rent terms from the landlord's Friday message; that message only corrects handover date.",
+      "root_assessment": "This source-attribution ambiguity remains a valid concern even though the independent review did not flag it. Asking for terms is reasonable, but saying from the Friday message implies that unsupplied terms were in that message. Do not claim all compact-answer unsupported details were cleared by review."
+    },
+    {
+      "jobs": [
+        "R5-full",
+        "R5-compact"
+      ],
+      "finding": "Primary judge marks one composite critical profile criterion missed in each answer; blinded review marks it met.",
+      "root_assessment": "The disagreement is over restating unchanged move-date/age details and all profile fields, not choosing using a withdrawn budget, destination or layout restriction. Both choose on the revised profile. Report primary one critical miss per arm and independent zero, without claiming human-validated equivalence or erasing the stricter rubric reading."
+    }
+  ],
+  "limits": [
+    "Checklist counts are descriptive, not statistical equivalence or user satisfaction.",
+    "Root annotations saw arm/cost information after the blinded reviews and are not a third blinded grader.",
+    "All raw primary labels and independent source reasons remain inspectable; no single reconciled score is substituted."
+  ]
+}

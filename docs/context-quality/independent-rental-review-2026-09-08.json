@@ -1,0 +1,634 @@
+{
+  "reviewer_type": "AI agent source review, not human groundtruth",
+  "review_date": "2026-09-08",
+  "blinding": {
+    "inputs": "Only review-packets/R1.json through R6.json: source histories, latest questions, frozen rubrics and anonymous responses.",
+    "not_read": [
+      "arm assignments",
+      "costs",
+      "judge masks",
+      "plan files",
+      "primary model-judge outputs"
+    ],
+    "authorship": "This reviewer authored the separate analysis fixtures, not these rental fixtures.",
+    "model_calls": "No benchmark, CLI, external-model, network, or Claude calls were made for this review. Current agent reasoning is outside measured benchmark totals."
+  },
+  "method": "Judge each frozen criterion for substance against the user request; record omissions separately from false claims. R1-F6/R2-F6 are conditional. Do not require irrelevant known facts to be recited or a preferred exact wording. This is a source-grounded blinded agent review, not independent human validation. Borderline composite-criterion decisions are explained in reasons/notes.",
+  "cases": [
+    {
+      "case_id": "R1",
+      "candidate_id": "candidate_1",
+      "criteria": [
+        {
+          "id": "R1-F1",
+          "applicable": true,
+          "met": true,
+          "reason": "\"Do not transfer the £300 this evening\" and \"deadline adds pressure, not verification\" preserve the decision supported by unresolved authority and terms in U3/U5."
+        },
+        {
+          "id": "R1-F2",
+          "applicable": true,
+          "met": true,
+          "reason": "\"Flat 6 has no certificate or plan establishing its internal area is at least 42 m²\" and \"Do not use E1: it is for Flat 6A\" preserve U1/U3/U4. Neither 41 nor the advertised 46 is presented as verified for Flat 6; requesting its own EPC also leaves its rating open."
+        },
+        {
+          "id": "R1-F3",
+          "applicable": true,
+          "met": true,
+          "reason": "\"invoice company, individual payee and authority ... are not tied together\" identifies the relationship gap; the plan names Wrenwick Property Services Ltd and M. Vale (U3/U4). It does not accuse them of fraud. Repeating the trading name verbatim is unnecessary here."
+        },
+        {
+          "id": "R1-F4",
+          "applicable": true,
+          "met": true,
+          "reason": "\"Call the older brochure’s main office number\" supplies the separate contact route available in U4, followed by exact-flat evidence and written payment/refund terms (U3/U5). The provided text is a draft, with no completed-contact claim."
+        },
+        {
+          "id": "R1-F5",
+          "applicable": true,
+          "met": false,
+          "reason": "No answer span uses the already-booked two-week bridge or its refund deadline. U5 makes it the concrete alternative to the pressure deadline; the response omits this decision-relevant fallback."
+        },
+        {
+          "id": "R1-F6",
+          "applicable": true,
+          "met": true,
+          "reason": "Applicable because affordability is discussed: \"bills and council tax are unknown, so the £2,100 all-in ceiling is untested\" and \"balcony excluded\" preserve U1/U2 without asserting a budget pass."
+        }
+      ],
+      "unsupported_claims": [],
+      "contradictions": [],
+      "useful_next_step": true,
+      "appropriate_uncertainty": true,
+      "user_burden_ok": true,
+      "notes": "Clear no-payment decision, independent verification route, and usable draft. Main omission is the booked bridge option. The future no-sign/no-pay instruction is advice, not a claim that an action occurred."
+    },
+    {
+      "case_id": "R1",
+      "candidate_id": "candidate_2",
+      "criteria": [
+        {
+          "id": "R1-F1",
+          "applicable": true,
+          "met": true,
+          "reason": "\"Do not transfer the £300 this evening\" directly answers the payment question on the incomplete U3/U5 evidence."
+        },
+        {
+          "id": "R1-F2",
+          "applicable": true,
+          "met": true,
+          "reason": "\"Flat 6 has not been evidenced as meeting your 42 m² minimum\" and \"only EPC ... different flat 6A\" preserve U1/U3/U4 and do not adopt either area as verified for Flat 6."
+        },
+        {
+          "id": "R1-F3",
+          "applicable": true,
+          "met": true,
+          "reason": "\"owner/payee authority\" is missing, and the draft asks whether M. Vale is authorised by the landlord/Wrenwick Property Services Ltd (U3/U4). No fraud allegation is made."
+        },
+        {
+          "id": "R1-F4",
+          "applicable": true,
+          "met": false,
+          "reason": "\"ask once, in writing\" and the draft seek authority from the same letting business, but never use the already-available older-brochure office route in U4 for separate confirmation. Exact-flat and written-term requests are useful partial coverage; independent verification is absent."
+        },
+        {
+          "id": "R1-F5",
+          "applicable": true,
+          "met": true,
+          "reason": "\"your refundable bridge gives you room not to rush\" recognises the existing fallback in U5. It need not repeat the full two-week booking details to use them correctly."
+        },
+        {
+          "id": "R1-F6",
+          "applicable": true,
+          "met": true,
+          "reason": "Applicable because the draft asks for \"all bills/council-tax arrangements\" (U2/U5). Costs are requested as unresolved; it makes no all-in affordability claim. It does not discuss age, lift, or route as verified facts."
+        }
+      ],
+      "unsupported_claims": [],
+      "contradictions": [],
+      "useful_next_step": true,
+      "appropriate_uncertainty": true,
+      "user_burden_ok": true,
+      "notes": "Useful decision and draft with the bridge correctly treated as available. The principal omission is independent confirmation of the money instructions, not an unsupported claim that verification was completed."
+    },
+    {
+      "case_id": "R2",
+      "candidate_id": "candidate_1",
+      "criteria": [
+        {
+          "id": "R2-F1",
+          "applicable": true,
+          "met": true,
+          "reason": "\"No-go tomorrow\" and \"do not sign or transfer payment at the viewing\" preserve the U1 condition boundary despite U5 pressure."
+        },
+        {
+          "id": "R2-F2",
+          "applicable": true,
+          "met": true,
+          "reason": "\"still-unreconciled window/sill and extractor work\" plus \"Fresh paint and the incomplete video are not completion evidence\" communicates the conflict in U3/U4. This compact wording is adequate without restating every cosmetic/switch-setting sentence."
+        },
+        {
+          "id": "R2-F3",
+          "applicable": true,
+          "met": true,
+          "reason": "\"dated evidence that the sill investigation was completed and its outcome addressed\" and a \"fan replacement/service completion record\" request documentary resolution. Its observational revisit \"would not prove the repair history\", appropriately separating the user’s limited check from the U3/U4 technical gap."
+        },
+        {
+          "id": "R2-F4",
+          "applicable": true,
+          "met": true,
+          "reason": "\"unresolved damp/ventilation is a stated deal-breaker\" preserves U1/U4. It does not diagnose mould, smell cause, or medical safety."
+        },
+        {
+          "id": "R2-F5",
+          "applicable": true,
+          "met": true,
+          "reason": "\"only after its refund deadline is known\" and \"only an available quote, not a confirmed fallback\" treat U5 as an unbooked option requiring confirmation, not a reservation already secured."
+        },
+        {
+          "id": "R2-F6",
+          "applicable": false,
+          "met": false,
+          "reason": "No affordability or quiet-bedroom claim is made. R2-F6 is conditional and is therefore inapplicable, rather than failed."
+        }
+      ],
+      "unsupported_claims": [],
+      "contradictions": [],
+      "useful_next_step": true,
+      "appropriate_uncertainty": true,
+      "user_burden_ok": true,
+      "notes": "Provides a short hold decision, repair evidence that could change it, a limited observational revisit, and an explicitly unconfirmed bridge option. Mentioning smell with the window closed is observation, not a diagnosis."
+    },
+    {
+      "case_id": "R2",
+      "candidate_id": "candidate_2",
+      "criteria": [
+        {
+          "id": "R2-F1",
+          "applicable": true,
+          "met": true,
+          "reason": "\"No-go for paying or signing tomorrow\" and \"not enough to treat repairs as resolved\" answer the U3–U5 question correctly."
+        },
+        {
+          "id": "R2-F2",
+          "applicable": true,
+          "met": true,
+          "reason": "\"still needing investigation/awaiting a part\" contrasts with \"undated reassurance—not proof of the underlying repair\", preserving the substance of the U3/U4 conflict."
+        },
+        {
+          "id": "R2-F3",
+          "applicable": true,
+          "met": true,
+          "reason": "Requests \"dated, flat-specific evidence\" that the cause/condition was assessed and repairs completed, plus a fan demonstration and revisit (U3/U4). \"dry/odour-free to you\" is read as an observational supplement, not a moisture certification, because documented assessment is separately required."
+        },
+        {
+          "id": "R2-F4",
+          "applicable": true,
+          "met": true,
+          "reason": "\"hard refusal of unresolved damp/mould or ventilation\" preserves U1/U4; no cause, mould-presence or medical-safety diagnosis is asserted."
+        },
+        {
+          "id": "R2-F5",
+          "applicable": true,
+          "met": false,
+          "reason": "\"preserve the refundable bridge option if its deadline permits\" recognises a fallback and an unresolved deadline, but omits confirmation of its availability/unbooked status in U5. This is incomplete practical coverage, not a claim that a booking exists."
+        },
+        {
+          "id": "R2-F6",
+          "applicable": false,
+          "met": false,
+          "reason": "Neither affordability nor quiet-bedroom evidence is discussed, so the conditional R2-F6 is inapplicable."
+        }
+      ],
+      "unsupported_claims": [],
+      "contradictions": [],
+      "useful_next_step": true,
+      "appropriate_uncertainty": true,
+      "user_burden_ok": true,
+      "notes": "The technical and payment boundaries are sound. The bridge advice is partial: it conditions on the deadline but leaves the actual unbooked option less concrete. The user’s impression of dryness must not substitute for the requested documented condition assessment; the response does not explicitly make that substitution."
+    },
+    {
+      "case_id": "R3",
+      "candidate_id": "candidate_1",
+      "criteria": [
+        {
+          "id": "R3-F1",
+          "applicable": true,
+          "met": true,
+          "reason": "\"Give your only viewing slot to Candidate B\" followed by \"Keep B conditional on viewing\" completes the requested shortlist using U1/U3/U5."
+        },
+        {
+          "id": "R3-F2",
+          "applicable": true,
+          "met": true,
+          "reason": "\"only stated desk alcove is 1.05 m\" and alternatives \"obstruct a door swing or kitchen route\" explain the failure against the \"fixed 1.20 m\" requirement in U1/U2/U5."
+        },
+        {
+          "id": "R3-F3",
+          "applicable": true,
+          "met": false,
+          "reason": "\"A is £55/month cheaper and has more cost headroom\" is accurate but omits the supplied £1,875/£1,930 totals, £1,950 cap and especially B’s £20 estimated margin in U4. It does not communicate the substantive budget comparison."
+        },
+        {
+          "id": "R3-F4",
+          "applicable": true,
+          "met": true,
+          "reason": "\"34-minute commute\" and \"only one minute of margin\" preserve U1/U3. The wording \"supplied\" and the conditional recommendation avoid claiming a verified journey; the desk is explicitly to be measured."
+        },
+        {
+          "id": "R3-F5",
+          "applicable": true,
+          "met": true,
+          "reason": "The copy-ready draft asks for \"at least 1.20 m clear usable width\" without obstructing a route (U1/U3/U5). This is a useful verification request even though it does not include every possible utility/noise question. A draft asking to book is not a claim that booking occurred."
+        },
+        {
+          "id": "R3-F6",
+          "applicable": true,
+          "met": true,
+          "reason": "Exactly six bullets; no profile or upload demand. \"late-night quiet remains unknown; a 5 pm visit cannot prove it\" directly preserves U3/U5."
+        }
+      ],
+      "unsupported_claims": [],
+      "contradictions": [
+        {
+          "claim": "B meets the supplied 42 m² minimum",
+          "source_ids": [
+            "U1",
+            "U3"
+          ],
+          "severity": "minor",
+          "reason": "U1 sets the minimum at 40 m²; U3 gives B’s area as 42 m². The response conflates the property area with the user’s threshold."
+        }
+      ],
+      "useful_next_step": true,
+      "appropriate_uncertainty": true,
+      "user_burden_ok": true,
+      "notes": "Useful shortlist and desk-focused draft, but the narrow financial margin is missing. Separately, it mislabels B’s 42 m² area as the user’s minimum; this does not change the viewing choice but is a source contradiction.",
+      "format_check": {
+        "word_count": 169,
+        "numbered_checks": 0,
+        "bullet_count": 6
+      }
+    },
+    {
+      "case_id": "R3",
+      "candidate_id": "candidate_2",
+      "criteria": [
+        {
+          "id": "R3-F1",
+          "applicable": true,
+          "met": true,
+          "reason": "\"Give your only viewing slot to B\" and conditions about estimates, desk and noise complete U5’s request without restarting intake."
+        },
+        {
+          "id": "R3-F2",
+          "applicable": true,
+          "met": true,
+          "reason": "\"A’s only desk alcove is 1.05m\" and alternatives block circulation explain why it fails the \"non-negotiable work setup\" of U1/U2/U5."
+        },
+        {
+          "id": "R3-F3",
+          "applicable": true,
+          "met": true,
+          "reason": "\"£1,930, only £20 below your £1,950 ceiling\", \"uncapped\" utilities, and A’s \"£1,875 estimated\" use U4’s comparable costs correctly. No general real-world tax rule is asserted."
+        },
+        {
+          "id": "R3-F4",
+          "applicable": true,
+          "met": false,
+          "reason": "The response names the \"34-minute route\" and says routes are unverified, but omits the 35-minute cap/one-minute margin from U1/U3. Route uncertainty is partial coverage; the narrow constraint margin itself is not communicated."
+        },
+        {
+          "id": "R3-F5",
+          "applicable": true,
+          "met": true,
+          "reason": "A short draft requests desk clearance, noise after 10 pm and typical utilities (U3/U4/U5), with no sending or booking claim. Asking to confirm the advertised 1.35 m is acceptable verification and does not explicitly change the user’s 1.20 m minimum."
+        },
+        {
+          "id": "R3-F6",
+          "applicable": true,
+          "met": true,
+          "reason": "Exactly six bullets and no repeated intake. \"Neither has evidence about quiet after 10pm\" leaves the issue unresolved; asking about it at a viewing is not a claim that a daytime visit proves night quiet."
+        }
+      ],
+      "unsupported_claims": [],
+      "contradictions": [
+        {
+          "claim": "It meets the 42m² internal minimum",
+          "source_ids": [
+            "U1",
+            "U3"
+          ],
+          "severity": "minor",
+          "reason": "U1 requires 40 m² and U3 gives B an area of 42 m². The later phrase \"supplied EPC areas above 40m²\" does not erase the earlier incorrect threshold."
+        }
+      ],
+      "useful_next_step": true,
+      "appropriate_uncertainty": true,
+      "user_burden_ok": true,
+      "notes": "Communicates the financial constraint and supplies a broader useful draft. It omits the narrow commute margin. The first bullet calls 42 m² the minimum, while a later bullet correctly refers to areas above 40 m²; the contradiction is recorded separately.",
+      "format_check": {
+        "word_count": 242,
+        "numbered_checks": 0,
+        "bullet_count": 6
+      }
+    },
+    {
+      "case_id": "R4",
+      "candidate_id": "candidate_1",
+      "criteria": [
+        {
+          "id": "R4-F1",
+          "applicable": true,
+          "met": true,
+          "reason": "Copy-ready \"Maya — thank you\" message, exactly three numbered checks, 159 whitespace-separated words, no question to the user or claim of sending (question/U1/U4)."
+        },
+        {
+          "id": "R4-F2",
+          "applicable": true,
+          "met": true,
+          "reason": "\"clear usable wall ... skirting and door-swing clearance\" and \"whether a 120×60cm desk fits without blocking access\" address physical fit and door clearance rather than trusting the 128 cm drawing (U1/U2). Explicitly asking for both width and depth would strengthen the instruction, but the actual desk footprint is included."
+        },
+        {
+          "id": "R4-F3",
+          "applicable": true,
+          "met": true,
+          "reason": "\"ask for a permitted washer demonstration\" and \"whether the washer ran; note any refusal\" test operation within U3/U4 limits without asking to rediscover location."
+        },
+        {
+          "id": "R4-F4",
+          "applicable": true,
+          "met": true,
+          "reason": "Check 2 includes window-shut/window-open listening and check 3 covers blind edges/rail and blackout permission. This valid three-item grouping covers all requested areas in U1/U3/U5; noise and blinds need not share an item."
+        },
+        {
+          "id": "R4-F5",
+          "applicable": true,
+          "met": true,
+          "reason": "Measurement, observed facts, photos and short clips are feasible with the tape/phone in U4; no app, invasive operation or later visit is demanded. The requested reporting format need not be identical across all three checks."
+        },
+        {
+          "id": "R4-F6",
+          "applicable": true,
+          "met": true,
+          "reason": "\"cannot settle ... 6–7am refuse noise ... overnight darkness\" and \"do not sign or pay\" retain U3/U5’s limits. It also avoids presenting a short washer demonstration as long-term reliability evidence."
+        }
+      ],
+      "unsupported_claims": [],
+      "contradictions": [],
+      "useful_next_step": true,
+      "appropriate_uncertainty": true,
+      "user_burden_ok": true,
+      "notes": "All three practical checks are present and the message meets the format limit. Desk-depth measurement could be more explicit; requesting reconfirmation of the known refuse timing is a small redundant task, not a material overload of the 15-minute brief.",
+      "format_check": {
+        "word_count": 159,
+        "numbered_checks": 3,
+        "bullet_count": 0
+      }
+    },
+    {
+      "case_id": "R4",
+      "candidate_id": "candidate_2",
+      "criteria": [
+        {
+          "id": "R4-F1",
+          "applicable": true,
+          "met": true,
+          "reason": "One copy-ready Maya message, exactly three numbered checks, 164 whitespace-separated words, with no further user question or sending claim (question/U1/U4)."
+        },
+        {
+          "id": "R4-F2",
+          "applicable": true,
+          "met": false,
+          "reason": "\"measure the usable bedroom wall width\" plus a video of the door opening checks width/door movement only. It never supplies the 120×60 cm target or checks the 60 cm depth/usable footprint required by U1/U2. A width number alone leaves this check incomplete."
+        },
+        {
+          "id": "R4-F3",
+          "applicable": true,
+          "met": true,
+          "reason": "\"washer in the kitchen cupboard if permitted\" and \"agent declined demonstration\" preserve known location and the operation/refusal boundary in U3/U4."
+        },
+        {
+          "id": "R4-F4",
+          "applicable": true,
+          "met": true,
+          "reason": "\"window shut, then open\" and the roller blind fully down with edges/top/sill, rail and mounting permission cover sound and blackout observations from U3/U5."
+        },
+        {
+          "id": "R4-F5",
+          "applicable": true,
+          "met": true,
+          "reason": "\"three clips plus those measurements/words\" matches U4’s available tools and time. No prohibited app, invasive task, or later return is introduced."
+        },
+        {
+          "id": "R4-F6",
+          "applicable": true,
+          "met": true,
+          "reason": "\"cannot settle ... 6–7 am ... true night-time darkness\" and \"don’t sign or pay\" retain U3/U5’s critical limits, with washer reliability appropriately bounded."
+        }
+      ],
+      "unsupported_claims": [],
+      "contradictions": [],
+      "useful_next_step": true,
+      "appropriate_uncertainty": true,
+      "user_burden_ok": true,
+      "notes": "Concise and practical, but the desk check does not establish the required footprint because depth and the actual desk dimensions are missing. The other checks and viewing limitations are well bounded.",
+      "format_check": {
+        "word_count": 164,
+        "numbered_checks": 3,
+        "bullet_count": 0
+      }
+    },
+    {
+      "case_id": "R5",
+      "candidate_id": "candidate_1",
+      "criteria": [
+        {
+          "id": "R5-F1",
+          "applicable": true,
+          "met": true,
+          "reason": "Uses \"£2,150 hard cap\", the West Loom destination and selects the 41 m² studio with desk verification (U3/U4/U5). Its decision does not reimpose the withdrawn area/bedroom requirements or an age/date objection. Repeating every unchanged profile field is unnecessary."
+        },
+        {
+          "id": "R5-F2",
+          "applicable": true,
+          "met": true,
+          "reason": "Coppersedge is worth viewing, while Mariglen is \"£2,250 ... £100 over\" with a \"42-minute West Loom route\" and \"two hard failures\" (U3–U5). The comparison uses the current destination rather than the old route."
+        },
+        {
+          "id": "R5-F3",
+          "applicable": true,
+          "met": true,
+          "reason": "Uses \"£2,100/month estimated all-in\", \"£50 under\", the \"newer signed £1,830 quote\" and explicitly \"rent excludes bills\" (U5). Old price/included-bills wording is treated as superseded."
+        },
+        {
+          "id": "R5-F4",
+          "applicable": true,
+          "met": false,
+          "reason": "\"What changed\" explains cap, destination and price supersession, but omits how the revised 40 m² minimum and studio acceptance remove the earlier layout/area objections (U2/U3). The decision behaves correctly; the requested explanation of those changes is incomplete."
+        },
+        {
+          "id": "R5-F5",
+          "applicable": true,
+          "met": true,
+          "reason": "\"uncapped estimates\", agent screenshots, unmeasured desk plans and \"work quiet/noise remain unverified\" preserve the material uncertainties in U2/U4/U5. It recommends viewing rather than an unconditional property approval."
+        }
+      ],
+      "unsupported_claims": [
+        {
+          "claim": "listen from the work area and balcony",
+          "source_ids": [
+            "U2",
+            "U3",
+            "U5"
+          ],
+          "severity": "minor",
+          "reason": "U3 mentions balcony only as a lower-priority preference; neither listing packet establishes an actual balcony. The instruction assumes a viewing location not in the evidence."
+        }
+      ],
+      "contradictions": [],
+      "useful_next_step": true,
+      "appropriate_uncertainty": true,
+      "user_burden_ok": true,
+      "notes": "Correct current-basis comparison and cautious outcome. It does not explain the area/layout revision. It also assumes a balcony exists when proposing a listening location; none is established in the packet."
+    },
+    {
+      "case_id": "R5",
+      "candidate_id": "candidate_2",
+      "criteria": [
+        {
+          "id": "R5-F1",
+          "applicable": true,
+          "met": true,
+          "reason": "Explicitly uses the £2,150 all-in cap, \"revised 40 m² minimum\", acceptable studio and West Loom/35-minute profile, with a claimed 130 cm desk wall (U3/U4/U5). It does not reject on unchanged date or age facts; no needless full-profile recital is required."
+        },
+        {
+          "id": "R5-F2",
+          "applicable": true,
+          "met": true,
+          "reason": "Coppersedge is the conditional viewing choice; Mariglen is £2,250, \"£100 above\" and \"42 minutes, 7 minutes over\" (U3–U5)."
+        },
+        {
+          "id": "R5-F3",
+          "applicable": true,
+          "met": true,
+          "reason": "\"£2,100 (£1,830 + £145 + £30 + £95)\" is the current estimated all-in total under the £2,150 ceiling, and C4 replaces the earlier price/bills wording (U5). The £50 margin is clear from these quantities even without spelling out the subtraction."
+        },
+        {
+          "id": "R5-F4",
+          "applicable": true,
+          "met": true,
+          "reason": "\"clears your revised 40 m² minimum; the studio layout is now acceptable\" and \"West Loom replaced East Loom\" explain the substantive profile changes and route supersession (U2/U3/U4)."
+        },
+        {
+          "id": "R5-F5",
+          "applicable": true,
+          "met": true,
+          "reason": "\"Still claims, not guarantees\" separately identifies estimated costs, screenshot route/reliability gaps, agent desk plan and absent late-evening noise evidence (U2/U4/U5)."
+        }
+      ],
+      "unsupported_claims": [],
+      "contradictions": [],
+      "useful_next_step": true,
+      "appropriate_uncertainty": true,
+      "user_burden_ok": true,
+      "notes": "Complete current-basis comparison with supported revision handling. The general suggestion to confirm items at a viewing should not be read as proving late-evening quiet in one daytime visit; the answer explicitly preserves the missing noise evidence and makes no completed-verification claim."
+    },
+    {
+      "case_id": "R6",
+      "candidate_id": "candidate_1",
+      "criteria": [
+        {
+          "id": "R6-F1",
+          "applicable": true,
+          "met": true,
+          "reason": "\"Flat 8 cannot remain your main option for 21 January\" and the requested \"continuous, usable no-step route\" apply the corrected requirement in U3, without stairs or delayed-repair substitution."
+        },
+        {
+          "id": "R6-F2",
+          "applicable": true,
+          "met": true,
+          "reason": "\"lift is out with no confirmed completion date\" and \"later repair promise is not enough\" justify removing Flat 8 from the main move plan (U2/U3/U4)."
+        },
+        {
+          "id": "R6-F3",
+          "applicable": true,
+          "met": true,
+          "reason": "\"A general ‘there is a lift’ reply does not answer either issue\" directly distinguishes the Friday existence statement from the Thursday outage in U4."
+        },
+        {
+          "id": "R6-F4",
+          "applicable": true,
+          "met": true,
+          "reason": "\"Switch the viewing to Flat 1\" and \"corrected 21 January availability ... landlord’s Friday message\" preserve U5’s correction instead of using the withdrawn 24 January draft."
+        },
+        {
+          "id": "R6-F5",
+          "applicable": true,
+          "met": true,
+          "reason": "\"complete pavement-to-door-to-flat route (especially the door threshold)\" remains uncertain, with a required continuous no-step route. It notes the courtyard’s two steps and never certifies the partial video as full access (U3/U4/U5)."
+        },
+        {
+          "id": "R6-F6",
+          "applicable": true,
+          "met": false,
+          "reason": "The three grouped requests are useful, and cost is called \"uncapped\", but it omits the known £1,990 estimate and only £10 margin under the £2,000 ceiling (U2/U5). Asking for full components does not preserve that already-available, decision-relevant cost basis. The route need not be re-explained at length here."
+        }
+      ],
+      "unsupported_claims": [],
+      "contradictions": [],
+      "useful_next_step": true,
+      "appropriate_uncertainty": true,
+      "user_burden_ok": true,
+      "notes": "Correct access decision and source-conflict reasoning. The main completeness gap is the known narrow cost estimate. Reconfirmation of the already-corrected handover date is mildly redundant, but grouped with otherwise missing tenancy/payment terms and does not materially burden the user."
+    },
+    {
+      "case_id": "R6",
+      "candidate_id": "candidate_2",
+      "criteria": [
+        {
+          "id": "R6-F1",
+          "applicable": true,
+          "met": true,
+          "reason": "\"required step-free route on 21 January\" and \"earlier preference for the view cannot overcome that requirement\" apply U3’s replacement of stairs tolerance."
+        },
+        {
+          "id": "R6-F2",
+          "applicable": true,
+          "met": true,
+          "reason": "\"second floor, its only lift is out of service\" and the provisional 28 January appointment with no completion date correctly remove Flat 8 as the current main option (U2/U3/U4)."
+        },
+        {
+          "id": "R6-F3",
+          "applicable": true,
+          "met": false,
+          "reason": "It correctly relies on the outage and requires a \"newer building-manager confirmation ... operational\", but never explains why the actual Friday agent existence-of-lift statement fails to resolve the Thursday outage (U4). This is an omitted conflict explanation, not an unsafe recency-based conclusion."
+        },
+        {
+          "id": "R6-F4",
+          "applicable": true,
+          "met": true,
+          "reason": "\"Switch the one viewing to Flat 1\" and \"stated 21 January handover\" use U5’s latest correction. Repeating the withdrawn 24 January date is unnecessary."
+        },
+        {
+          "id": "R6-F5",
+          "applicable": true,
+          "met": true,
+          "reason": "The friend must verify \"pavement-to-level street entrance\" and the complete route \"including the flat’s own threshold\" (U3/U4/U5). The chosen street route avoids the known stepped courtyard; no full-access guarantee is made."
+        },
+        {
+          "id": "R6-F6",
+          "applicable": true,
+          "met": true,
+          "reason": "Three small checks focus on continuous access and cost inclusions; £1,990 is explicitly estimated against the £2,000 cap, with the supplied 36-minute route identified as supplied (U2/U5). The friend can perform the check, and no booking/contact is claimed."
+        }
+      ],
+      "unsupported_claims": [],
+      "contradictions": [],
+      "useful_next_step": true,
+      "appropriate_uncertainty": true,
+      "user_burden_ok": true,
+      "notes": "Clear provisional priority using the corrected access requirement and availability. It omits the explicit explanation of the Friday/Thursday source conflict, while still making the correct evidence-based decision. Costs and route are not treated as guarantees."
+    }
+  ]
+}

@@ -1,0 +1,2163 @@
+{
+  "audit_date": "2026-09-08",
+  "audit_type": "independent read-only saved-run reconstruction",
+  "status": "PASS_WITH_RECORDED_DIAGNOSTICS",
+  "run_root": "bench/results/context-quality-2026-09-08/live-v1",
+  "new_model_calls": 0,
+  "source_edits": 0,
+  "reruns": 0,
+  "method": "No context_quality.py or launch.py function was imported or executed. Every cost quantity was summed directly from the unique turn.completed.usage in each raw events.jsonl. Saved normalized records were comparison targets only. Frozen prompt packets, masking, raw judgments, excerpt membership and rental format were independently reconstructed.",
+  "discrepancies": [],
+  "findings": [
+    {
+      "id": "D1",
+      "kind": "nonfatal_diagnostic",
+      "description": "34 calls emitted the model-catalog refresh timeout ERROR line on stderr; all 38 still have one successful terminal completion, valid direct usage and exit code zero. Do not describe the run as having zero diagnostics.",
+      "count": 34
+    },
+    {
+      "id": "Q1",
+      "kind": "known_quality_finding",
+      "description": "Three full-context analysis quotations fail the frozen exact supplied-excerpt rule. They were already counted in summary.json. This checks excerpt presence only, not whether the associated claim is true.",
+      "count": 3
+    }
+  ],
+  "counts": {
+    "call_directories": 38,
+    "unique_raw_threads": 38,
+    "terminal_turn_completed": 38,
+    "answer_tasks": 24,
+    "answer_cli_calls": 28,
+    "adaptive_initial_calls": 4,
+    "adaptive_retrieved_calls": 4,
+    "judge_cli_calls": 10,
+    "native_tool_events": 0,
+    "raw_error_or_turn_failed_events": 0,
+    "malformed_event_lines": 0,
+    "failed_exit_codes": 0,
+    "timeouts": 0,
+    "automatic_retries_observed": 0,
+    "nonempty_stderr_files": 38,
+    "nonfatal_catalog_timeout_files": 34,
+    "nonfatal_catalog_timeout_lines": 34,
+    "other_stderr_diagnostics": 0,
+    "claude_cli_calls": 0
+  },
+  "cli_model_counts": {
+    "gpt-5.6-terra": 28,
+    "gpt-5.6-sol": 10
+  },
+  "model_attestation_limit": "CLI --model values and matching stored requested_model were checked. Raw terminal events do not independently attest the resolved provider model/version.",
+  "raw_event_types": {
+    "thread.started": 38,
+    "turn.started": 38,
+    "item.completed": 38,
+    "turn.completed": 38
+  },
+  "raw_item_types": {
+    "agent_message": 38
+  },
+  "totals": {
+    "input_tokens": 639639,
+    "cached_input_tokens": 132352,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 30087,
+    "reasoning_output_tokens": 6482,
+    "total_tokens": 669726,
+    "uncached_input_tokens": 507287
+  },
+  "answer_totals": {
+    "input_tokens": 455638,
+    "cached_input_tokens": 132352,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 13605,
+    "reasoning_output_tokens": 1386,
+    "total_tokens": 469243,
+    "uncached_input_tokens": 323286
+  },
+  "judge_totals": {
+    "input_tokens": 184001,
+    "cached_input_tokens": 0,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 16482,
+    "reasoning_output_tokens": 5096,
+    "total_tokens": 200483,
+    "uncached_input_tokens": 184001
+  },
+  "arms": {
+    "analysis/full": {
+      "tasks": 4,
+      "calls": 4,
+      "usage": {
+        "input_tokens": 66709,
+        "output_tokens": 3346,
+        "cached_input_tokens": 24064,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 70055
+      },
+      "judged_tasks": 4,
+      "required_met": 16,
+      "required_total": 16,
+      "critical_misses": 0,
+      "unsupported_claims": 3,
+      "contradictions": 0,
+      "useful_next_steps": 4,
+      "appropriate_uncertainty": 4,
+      "user_burden_ok": 4,
+      "invalid_citations": 3,
+      "format_failures": 0,
+      "protocol_violations": 0
+    },
+    "analysis/summary": {
+      "tasks": 4,
+      "calls": 4,
+      "usage": {
+        "input_tokens": 59073,
+        "output_tokens": 2223,
+        "cached_input_tokens": 24064,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 61296
+      },
+      "judged_tasks": 4,
+      "required_met": 5,
+      "required_total": 16,
+      "critical_misses": 3,
+      "unsupported_claims": 2,
+      "contradictions": 9,
+      "useful_next_steps": 2,
+      "appropriate_uncertainty": 2,
+      "user_burden_ok": 3,
+      "invalid_citations": 0,
+      "format_failures": 0,
+      "protocol_violations": 0
+    },
+    "analysis/adaptive": {
+      "tasks": 4,
+      "calls": 8,
+      "usage": {
+        "input_tokens": 123713,
+        "output_tokens": 3476,
+        "cached_input_tokens": 48128,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 127189
+      },
+      "judged_tasks": 4,
+      "required_met": 14,
+      "required_total": 16,
+      "critical_misses": 1,
+      "unsupported_claims": 0,
+      "contradictions": 3,
+      "useful_next_steps": 4,
+      "appropriate_uncertainty": 4,
+      "user_burden_ok": 4,
+      "invalid_citations": 0,
+      "format_failures": 0,
+      "protocol_violations": 0
+    },
+    "rental/full": {
+      "tasks": 6,
+      "calls": 6,
+      "usage": {
+        "input_tokens": 106135,
+        "output_tokens": 2434,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 108569
+      },
+      "judged_tasks": 6,
+      "required_met": 28,
+      "required_total": 34,
+      "critical_misses": 1,
+      "unsupported_claims": 0,
+      "contradictions": 0,
+      "useful_next_steps": 6,
+      "appropriate_uncertainty": 5,
+      "user_burden_ok": 6,
+      "invalid_citations": 0,
+      "format_failures": 0,
+      "protocol_violations": 0
+    },
+    "rental/compact": {
+      "tasks": 6,
+      "calls": 6,
+      "usage": {
+        "input_tokens": 100008,
+        "output_tokens": 2126,
+        "cached_input_tokens": 24064,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 102134
+      },
+      "judged_tasks": 6,
+      "required_met": 27,
+      "required_total": 34,
+      "critical_misses": 1,
+      "unsupported_claims": 2,
+      "contradictions": 1,
+      "useful_next_steps": 6,
+      "appropriate_uncertainty": 6,
+      "user_burden_ok": 6,
+      "invalid_citations": 0,
+      "format_failures": 0,
+      "protocol_violations": 0
+    }
+  },
+  "cost_scope": "Processed tokens = input_tokens + output_tokens. Cached input is a subset of input and reasoning output is a subset of output, so neither is added twice. All direct fields were known; no fallback usage or missing-as-zero substitution was used. USD/invoice/subscription allowance cost is not available from these records.",
+  "usd_cost": null,
+  "verification": {
+    "source_hashes_checked": 6,
+    "prepared_hashes_checked": 3,
+    "call_artifact_hashes_checked": 152,
+    "command_prompts_checked": 38,
+    "target_packets_checked": 28,
+    "judge_packets_checked": 10,
+    "answer_aggregates_checked": 24,
+    "summary_arms_checked": 5,
+    "execution_order_matches_frozen_plan": true,
+    "exact_terminal_usage_only": true,
+    "all_adaptive_calls_included": true,
+    "plan_bounds_satisfied": true,
+    "review_packets_checked": 10
+  },
+  "plan": {
+    "path": "bench/results/context-quality-2026-09-08/live-v1/plan.json",
+    "sha256": "388b002c8a2468ba87970c66fb881159c415f0c8fad1bcf669afbf2e85a7c15f",
+    "source_commit": "d01c369a7d863aa920d8d90c0c2ec563228b8478",
+    "maximum_cli_calls": 38,
+    "reported_token_stop_threshold": 900000
+  },
+  "summary": {
+    "path": "bench/results/context-quality-2026-09-08/live-v1/summary.json",
+    "sha256": "c52223b74d353d5ca81c093dcc9e04ebba84ba5f2be712ee918571d470434572"
+  },
+  "inventory": {
+    "files": 316,
+    "sorted_path_sha256_pairs_digest": "58ddf8d14c2f9c222e1e4b7f5f96a374090c57033469a9d17a84268b1a30d2dd",
+    "encoding": "SHA-256 of UTF-8 json.dumps(sorted relative-path/SHA-256 pairs, separators=(comma,colon))"
+  },
+  "source_hash_checks": [
+    {
+      "path": "bench/context_quality.py",
+      "expected_sha256": "8b59cee65a36a9cf4ccefb415d35219601d7e73da9b4764daeb1b473740e5bf0",
+      "actual_sha256": "8b59cee65a36a9cf4ccefb415d35219601d7e73da9b4764daeb1b473740e5bf0",
+      "match": true,
+      "git_commit_sha256": "8b59cee65a36a9cf4ccefb415d35219601d7e73da9b4764daeb1b473740e5bf0",
+      "git_commit_match": true
+    },
+    {
+      "path": "bench/launch.py",
+      "expected_sha256": "97408a88f28756dbe1643e769836166eeb1497480486a5abee7da4d9cf69199c",
+      "actual_sha256": "97408a88f28756dbe1643e769836166eeb1497480486a5abee7da4d9cf69199c",
+      "match": true,
+      "git_commit_sha256": "97408a88f28756dbe1643e769836166eeb1497480486a5abee7da4d9cf69199c",
+      "git_commit_match": true
+    },
+    {
+      "path": "evals/context-quality/analysis-cases.json",
+      "expected_sha256": "805c48c58ce62de15bc41bd790539e52b9c4ac149621659f29a6a243e9609e0b",
+      "actual_sha256": "805c48c58ce62de15bc41bd790539e52b9c4ac149621659f29a6a243e9609e0b",
+      "match": true,
+      "git_commit_sha256": "805c48c58ce62de15bc41bd790539e52b9c4ac149621659f29a6a243e9609e0b",
+      "git_commit_match": true
+    },
+    {
+      "path": "evals/context-quality/rental-cases.json",
+      "expected_sha256": "dae426b9e28b5c9b207d2b21dcb6fdd23d670737aeae643f84fb608c167d40be",
+      "actual_sha256": "dae426b9e28b5c9b207d2b21dcb6fdd23d670737aeae643f84fb608c167d40be",
+      "match": true,
+      "git_commit_sha256": "dae426b9e28b5c9b207d2b21dcb6fdd23d670737aeae643f84fb608c167d40be",
+      "git_commit_match": true
+    },
+    {
+      "path": "dist/prompt-pack/INSTRUCTIONS.md",
+      "expected_sha256": "912ae34b83631dc1859881fc4b7243ddf3f9a9151570558c32ad733ff1d1bd78",
+      "actual_sha256": "912ae34b83631dc1859881fc4b7243ddf3f9a9151570558c32ad733ff1d1bd78",
+      "match": true,
+      "git_commit_sha256": null,
+      "git_commit_match": null
+    },
+    {
+      "path": "docs/context-quality/protocol-2026-09-08.md",
+      "expected_sha256": "40bb6254f0fa7ead6552c7ba665a70883eb7eeecca83e21e8c78a49595c5cf3c",
+      "actual_sha256": "40bb6254f0fa7ead6552c7ba665a70883eb7eeecca83e21e8c78a49595c5cf3c",
+      "match": true,
+      "git_commit_sha256": "40bb6254f0fa7ead6552c7ba665a70883eb7eeecca83e21e8c78a49595c5cf3c",
+      "git_commit_match": true
+    }
+  ],
+  "prepared_hash_checks": [
+    {
+      "path": "bench/results/context-quality-2026-09-08/live-v1/analysis-cases.json",
+      "expected_sha256": "805c48c58ce62de15bc41bd790539e52b9c4ac149621659f29a6a243e9609e0b",
+      "actual_sha256": "805c48c58ce62de15bc41bd790539e52b9c4ac149621659f29a6a243e9609e0b",
+      "match": true
+    },
+    {
+      "path": "bench/results/context-quality-2026-09-08/live-v1/rental-cases.json",
+      "expected_sha256": "dae426b9e28b5c9b207d2b21dcb6fdd23d670737aeae643f84fb608c167d40be",
+      "actual_sha256": "dae426b9e28b5c9b207d2b21dcb6fdd23d670737aeae643f84fb608c167d40be",
+      "match": true
+    },
+    {
+      "path": "bench/results/context-quality-2026-09-08/live-v1/target-instructions.md",
+      "expected_sha256": "912ae34b83631dc1859881fc4b7243ddf3f9a9151570558c32ad733ff1d1bd78",
+      "actual_sha256": "912ae34b83631dc1859881fc4b7243ddf3f9a9151570558c32ad733ff1d1bd78",
+      "match": true
+    }
+  ],
+  "calls": [
+    {
+      "id": "A1-adaptive-initial",
+      "purpose": "answer",
+      "cli_model": "gpt-5.6-terra",
+      "direct_terminal_usage": {
+        "input_tokens": 14786,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 79,
+        "reasoning_output_tokens": 39
+      },
+      "processed_tokens": 14865,
+      "uncached_input_tokens": 2754,
+      "terminal_events": 1,
+      "seconds": 10.984,
+      "nonfatal_catalog_timeout": true,
+      "hashes": {
+        "events.jsonl": "e891706eaeb7534422f2c4e0de241e0a10a4a8c8d29e4234267162b407a65bb2",
+        "command.json": "8ab9c6e303333650555030625df63b93ca1f42fa2765074e79ccc40ff2af3425",
+        "result.json": "76d8b5f42f3b3e6428a71f7aca3c9c9f19e33d0f71df6fa8e953ff7e8e7129e8",
+        "stderr.txt": "62583b55e0286a6706794eddad05340f4c4e27c408c6dfb1ba52cc0e31ef9baf",
+        "prompt.txt": "003566ea30e73d048e5ec69e915914b9b79239106514e434eaf181b177045f3a",
+        "schema.json": "f5eba01820ea551f568fd3b07834de0d036ed7862298f842678f680140ff1e10",
+        "answer.txt": "9159ffb6a7dd9ac4fe47bc44264923ebcc81629248d022d20eab98c6789e49b5"
+      }
+    },
+    {
+      "id": "A1-adaptive-retrieved",
+      "purpose": "retrieval_answer",
+      "cli_model": "gpt-5.6-terra",
+      "direct_terminal_usage": {
+        "input_tokens": 15876,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 799,
+        "reasoning_output_tokens": 0
+      },
+      "processed_tokens": 16675,
+      "uncached_input_tokens": 15876,
+      "terminal_events": 1,
+      "seconds": 23.15,
+      "nonfatal_catalog_timeout": true,
+      "hashes": {
+        "events.jsonl": "cd08de17d811bacb6f06eff6c0b923d50f2c3f615fe90597f1a214ee827cf949",
+        "command.json": "c61870443ad848a8c56208ac867a627e2012b8180d059dfb58600d3b46922714",
+        "result.json": "e982a654710a4f7dde37c5985140f37857e4e641580427ba68649de637749b70",
+        "stderr.txt": "2871eada9aac84d3a40ecbeb814b51a07f12eb8dee8f240104be6ff4ecfd8555",
+        "prompt.txt": "f95bcbce5c8f63a8f6421c6603e851f7ef55ee7799d9c69452c0378bf5dee949",
+        "schema.json": "f5eba01820ea551f568fd3b07834de0d036ed7862298f842678f680140ff1e10",
+        "answer.txt": "3efb1907e82a5f22a66ada90ee3583fd5c09f8d4a4061ce25c9159171be057d2"
+      }
+    },
+    {
+      "id": "A1-full-initial",
+      "purpose": "answer",
+      "cli_model": "gpt-5.6-terra",
+      "direct_terminal_usage": {
+        "input_tokens": 16551,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 928,
+        "reasoning_output_tokens": 0
+      },
+      "processed_tokens": 17479,
+      "uncached_input_tokens": 16551,
+      "terminal_events": 1,
+      "seconds": 27.008,
+      "nonfatal_catalog_timeout": true,
+      "hashes": {
+        "events.jsonl": "4e16ca1e798b5e28a8382392b0ee3b7f1380e42a694f2728d5363f0c0e8a4a84",
+        "command.json": "7e3a12fa9af758ea4061cf9ed247dc0638d7de874c9d58efe58efacae4ba8984",
+        "result.json": "0bd0e0b43777f0b672017c47e528e12b43aa1b640706b13ba7bc80acd379004f",
+        "stderr.txt": "02dff4df6e9d61bd1e833668e2942deaf559c75b1ba339cc27ef1fc3d0260ac9",
+        "prompt.txt": "80a9045c62d7c37ab35367d56c8601e65648164a1deef7bb1dc6f5198c8657be",
+        "schema.json": "f5eba01820ea551f568fd3b07834de0d036ed7862298f842678f680140ff1e10",
+        "answer.txt": "9e3a949448bd3fa9b3c052e75debfad36f9630d2583f28226a4f65085343c2ed"
+      }
+    },
+    {
+      "id": "A1-judge",
+      "purpose": "judge",
+      "cli_model": "gpt-5.6-sol",
+      "direct_terminal_usage": {
+        "input_tokens": 19884,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 2216,
+        "reasoning_output_tokens": 516
+      },
+      "processed_tokens": 22100,
+      "uncached_input_tokens": 19884,
+      "terminal_events": 1,
+      "seconds": 77.739,
+      "nonfatal_catalog_timeout": true,
+      "hashes": {
+        "events.jsonl": "8fb20d5a4def79614eb36bb9da3ce510ce1188512eb68a5ef5d9090d7c724228",
+        "command.json": "a56abc797bec9992aaf31f50fc95ff19c8afe0fac2a29f105f69fd3779276aab",
+        "result.json": "7be6cee4cacd232b4c589d0b0019e65c07225c2c5ba2ab6c851b06d4e504d70f",
+        "stderr.txt": "bf2380f256cd50386214244693c96f37eb6ae175e06cd660a6b534ceb6496ca5",
+        "prompt.txt": "53120c6e3a8a8d89f92837abd1bb41cd03d2cb1240978513972c83635209db25",
+        "schema.json": "4328a606f868f691ce11382e2da327a9c2bd901fae5315a6728aeac5f45fca78",
+        "answer.txt": "cd6269e82ebd0e7399e38e219c2fb8f1c8e13d28d4e5e731dc98c2c2c5c8b517"
+      }
+    },
+    {
+      "id": "A1-summary-initial",
+      "purpose": "answer",
+      "cli_model": "gpt-5.6-terra",
+      "direct_terminal_usage": {
+        "input_tokens": 14752,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 553,
+        "reasoning_output_tokens": 0
+      },
+      "processed_tokens": 15305,
+      "uncached_input_tokens": 14752,
+      "terminal_events": 1,
+      "seconds": 19.32,
+      "nonfatal_catalog_timeout": true,
+      "hashes": {
+        "events.jsonl": "f51e9712a9462e750082b608bd13adb73f64cc1216cbadffa8e6560e5cac37fa",
+        "command.json": "00d307a1a7500002c5c72dd26d31f0d7df458e39d52f5a3546a7880b2facebf3",
+        "result.json": "0aa37963ff0e2cbe7c8065e4dbdef20d4a95518d8962a089fa2009f846ef307a",
+        "stderr.txt": "3ba65db21261d761a05fe73ef4a883859033ce8044af3ce2b8a2447c7b50217e",
+        "prompt.txt": "dd1d136b658ed2970cbf445f6ef4208bc1f4807777293c5c43e6d57244c5c37c",
+        "schema.json": "f5eba01820ea551f568fd3b07834de0d036ed7862298f842678f680140ff1e10",
+        "answer.txt": "4f75ec361b03c8d362b4cfe9f93914630930ca11b221c2cf9c9a834ac3f37fb6"
+      }
+    },
+    {
+      "id": "A2-adaptive-initial",
+      "purpose": "answer",
+      "cli_model": "gpt-5.6-terra",
+      "direct_terminal_usage": {
+        "input_tokens": 14796,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 67,
+        "reasoning_output_tokens": 27
+      },
+      "processed_tokens": 14863,
+      "uncached_input_tokens": 14796,
+      "terminal_events": 1,
+      "seconds": 11.122,
+      "nonfatal_catalog_timeout": true,
+      "hashes": {
+        "events.jsonl": "c0d591cf52e16f4c4687d2bcf213254ef44fdc722927a34d1071a039024da524",
+        "command.json": "3ca45f26ffdfed203e60e67432805414cd0950226c04dce3cceb17e60f3ca2e6",
+        "result.json": "864ae56bffe995dab4794d0375f7a7c4a97f19e4e5f0e69f70fde861aba3f6d4",
+        "stderr.txt": "86f5db9715627a1cb84429b2968a90c20ae90b1276821d86a6d6a5dd6838a230",
+        "prompt.txt": "94442ae19d6c86416981c425a7c5e6baa981cb974c79b59b0277451807eb3f40",
+        "schema.json": "f5eba01820ea551f568fd3b07834de0d036ed7862298f842678f680140ff1e10",
+        "answer.txt": "2f29d7af85dfd5fc897f6293adc5941d62ac8044188726432410f07d213d9282"
+      }
+    },
+    {
+      "id": "A2-adaptive-retrieved",
+      "purpose": "retrieval_answer",
+      "cli_model": "gpt-5.6-terra",
+      "direct_terminal_usage": {
+        "input_tokens": 16172,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 771,
+        "reasoning_output_tokens": 0
+      },
+      "processed_tokens": 16943,
+      "uncached_input_tokens": 4140,
+      "terminal_events": 1,
+      "seconds": 24.884,
+      "nonfatal_catalog_timeout": true,
+      "hashes": {
+        "events.jsonl": "f8f82b57b51a34ec03cbe90a5c42f3cdf3073cdac2d9634c6e419f73ee3582a0",
+        "command.json": "7d00172aaca88f6cad9a15622b95f1c527f6f18963d669a30e41d6355c86b0bf",
+        "result.json": "bd4110c75a62d2b1cd8b02b945250769ce42aef11de41a8d15a17a1ba8462719",
+        "stderr.txt": "c18004438e46f5fc7f1a4dfaa6a1581c699ef274c925820dc05f9596f572ad4a",
+        "prompt.txt": "f9abe37d2e65ad0db594094cce283898a3b96570f74b59e4b2455525cb7ce985",
+        "schema.json": "f5eba01820ea551f568fd3b07834de0d036ed7862298f842678f680140ff1e10",
+        "answer.txt": "01e1ae51b379f1c88676ce5e6e417520efe115d73da80ff3a764a7fb90768da1"
+      }
+    },
+    {
+      "id": "A2-full-initial",
+      "purpose": "answer",
+      "cli_model": "gpt-5.6-terra",
+      "direct_terminal_usage": {
+        "input_tokens": 16691,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 713,
+        "reasoning_output_tokens": 0
+      },
+      "processed_tokens": 17404,
+      "uncached_input_tokens": 4659,
+      "terminal_events": 1,
+      "seconds": 22.591,
+      "nonfatal_catalog_timeout": true,
+      "hashes": {
+        "events.jsonl": "761d4962e7b34e01f0dc8a404e632e2bd9e0a679d9646b10107c0e2c0dcd66fe",
+        "command.json": "6448d4e3d10480129f147be2435a14b30b8ea9e8d6663d5c904f4b2de2d6b160",
+        "result.json": "32d730af4f7117f7d3775ecf3d44b9a81c2d939e49ac3b3b8de6bfe22d8d6c7c",
+        "stderr.txt": "cb7e536029615ed99080443bda86731c3aba150d132f3fd0f15a1cd73a8fafb9",
+        "prompt.txt": "9432353dceabbbb4a5171f1cf9918150b80339e09d0a0d3f8ce3f262eef0c84b",
+        "schema.json": "f5eba01820ea551f568fd3b07834de0d036ed7862298f842678f680140ff1e10",
+        "answer.txt": "ff0ec15fe14718845f64c90a52100cc8dfb35a9fdb0390a58907bbc05b3e19ad"
+      }
+    },
+    {
+      "id": "A2-judge",
+      "purpose": "judge",
+      "cli_model": "gpt-5.6-sol",
+      "direct_terminal_usage": {
+        "input_tokens": 19690,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 2046,
+        "reasoning_output_tokens": 432
+      },
+      "processed_tokens": 21736,
+      "uncached_input_tokens": 19690,
+      "terminal_events": 1,
+      "seconds": 73.114,
+      "nonfatal_catalog_timeout": true,
+      "hashes": {
+        "events.jsonl": "b8bf9cd9b91741829304c8271cfc8671d18dd076424e929f455fc2c402c8e4e4",
+        "command.json": "e7a172953c75e46e865d1b555b336e63bdbb13f44174abed85668da958c53715",
+        "result.json": "778d6d30b700ac696831dc9d73071bc566d1a672c28d51a38ebaab5c4c14002e",
+        "stderr.txt": "c8617af5c8afe84cc0e409584d73aa75ccca7bc47d58e8d8c1e10cf7c8bcb5c3",
+        "prompt.txt": "1547dd11ca768b5ee012803e4eb93f3d842ea47c03c850743d1ccf9a4eeb4e69",
+        "schema.json": "68cbef475ef519f1519f56fa8c1ce5010c24574c08a4d8cd48c363b990b02d83",
+        "answer.txt": "ea4fb5fdfe5a8ff3a0bad953ac2f97f51863ccc82e19ac4e1644fdd98712ddf4"
+      }
+    },
+    {
+      "id": "A2-summary-initial",
+      "purpose": "answer",
+      "cli_model": "gpt-5.6-terra",
+      "direct_terminal_usage": {
+        "input_tokens": 14762,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 530,
+        "reasoning_output_tokens": 0
+      },
+      "processed_tokens": 15292,
+      "uncached_input_tokens": 14762,
+      "terminal_events": 1,
+      "seconds": 20.012,
+      "nonfatal_catalog_timeout": true,
+      "hashes": {
+        "events.jsonl": "9023114b1728de22764490fa3e402203870d1d5451df81079987cdaf7dea7952",
+        "command.json": "dcb51b8cbaab7957baa3f33264471844c7ead0e16632bd50bbca3f9a74e1d17c",
+        "result.json": "d6ec3098c49a640f6aa25f8cca3304df7db22731920d90683aef7440b56665af",
+        "stderr.txt": "dd8f6883c804e8e43f9b714b84525921d4c6a402d6448d38c328d471a786d422",
+        "prompt.txt": "9c76c78a42c6d27daf059ed29683b9239e7607d01c7fb50f1a60750cf0ebfefe",
+        "schema.json": "f5eba01820ea551f568fd3b07834de0d036ed7862298f842678f680140ff1e10",
+        "answer.txt": "c0383c7540c8a8d01d7b696f22fd10af029ddcaaed2dc7ea340fe1ffaa6cd81c"
+      }
+    },
+    {
+      "id": "A3-adaptive-initial",
+      "purpose": "answer",
+      "cli_model": "gpt-5.6-terra",
+      "direct_terminal_usage": {
+        "input_tokens": 14810,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 191,
+        "reasoning_output_tokens": 43
+      },
+      "processed_tokens": 15001,
+      "uncached_input_tokens": 2778,
+      "terminal_events": 1,
+      "seconds": 12.699,
+      "nonfatal_catalog_timeout": true,
+      "hashes": {
+        "events.jsonl": "ea89bf573cd1e1edd75d025d4ae31b84bfa3bce8e1d29e00c58a14a3fdf35159",
+        "command.json": "590c319300a802d42f15b17de58d17340cd79b729ff2889fb13ffb8f9c1f7e15",
+        "result.json": "51c0f38cb8f3a2327c3a7f8c6bf99281d86b4b0c07dc963277e7aa1906550dfa",
+        "stderr.txt": "b4caed389476ac2e107fad709f21a7f781331a80434366396fec0a0f5653fe74",
+        "prompt.txt": "77a81eeca1b1e127f121773c0f3fc882e4cd3de6d5da91db65b5203d9f95e2e9",
+        "schema.json": "f5eba01820ea551f568fd3b07834de0d036ed7862298f842678f680140ff1e10",
+        "answer.txt": "446ab5cbd67070f12f4fd3c20c81a01443ff122cfc82e87d8033a2f097075144"
+      }
+    },
+    {
+      "id": "A3-adaptive-retrieved",
+      "purpose": "retrieval_answer",
+      "cli_model": "gpt-5.6-terra",
+      "direct_terminal_usage": {
+        "input_tokens": 16343,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 779,
+        "reasoning_output_tokens": 0
+      },
+      "processed_tokens": 17122,
+      "uncached_input_tokens": 16343,
+      "terminal_events": 1,
+      "seconds": 22.896,
+      "nonfatal_catalog_timeout": true,
+      "hashes": {
+        "events.jsonl": "6e7496390dcf614101b8b296edb40a0a37ed3a402b937bb9012fb62913439954",
+        "command.json": "8bea6b6dd444c46240a93b175c15b3b393295577e13a913bedabc09495a74d0e",
+        "result.json": "b8f9634967c1d720075721a60f781b53d9d74c16a0d5a419c5562c4c5285578a",
+        "stderr.txt": "aec58c3d7f86d929c17b0ff781ff64cf8c1e4d04a867696b712a7d961f6b1da3",
+        "prompt.txt": "8c420fef6ac87edc80bff6e4854a93a93de318ae2b5c9d79ee10b764e98a23f6",
+        "schema.json": "f5eba01820ea551f568fd3b07834de0d036ed7862298f842678f680140ff1e10",
+        "answer.txt": "2ea766c84bd5b486df056d67a8d207bf4307421fd4c8a632a9c534e9ed08953d"
+      }
+    },
+    {
+      "id": "A3-full-initial",
+      "purpose": "answer",
+      "cli_model": "gpt-5.6-terra",
+      "direct_terminal_usage": {
+        "input_tokens": 16778,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 977,
+        "reasoning_output_tokens": 0
+      },
+      "processed_tokens": 17755,
+      "uncached_input_tokens": 4746,
+      "terminal_events": 1,
+      "seconds": 27.0,
+      "nonfatal_catalog_timeout": true,
+      "hashes": {
+        "events.jsonl": "274a81a2e40a4631c6572532966c5088f957dd94b0e4fd58f340d62dcc1068c0",
+        "command.json": "50cf75c70514e2037a28a31a7fcdd8bc64a1bbcb5e7f8dc2a5f185aedd8e70b7",
+        "result.json": "9cc139943d20213c3522544d1a62486515fabdf4ef6634b60bf7450c83e56b3c",
+        "stderr.txt": "2cecf7582ded27b15cd19c94edd42c98c142fae9615063a1bdf26885cd4bf8b5",
+        "prompt.txt": "f722c010e089f96c17cf29619cf786ad85b495f3bd3a8e683b2181c74f3e8da9",
+        "schema.json": "f5eba01820ea551f568fd3b07834de0d036ed7862298f842678f680140ff1e10",
+        "answer.txt": "0ceaf1e7a236a4c6cd646d8fd74303ee8265c045e844b0ac5a86c6a7898c8bf7"
+      }
+    },
+    {
+      "id": "A3-judge",
+      "purpose": "judge",
+      "cli_model": "gpt-5.6-sol",
+      "direct_terminal_usage": {
+        "input_tokens": 20075,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1580,
+        "reasoning_output_tokens": 228
+      },
+      "processed_tokens": 21655,
+      "uncached_input_tokens": 20075,
+      "terminal_events": 1,
+      "seconds": 60.226,
+      "nonfatal_catalog_timeout": true,
+      "hashes": {
+        "events.jsonl": "1193907d34b69c2a24328e0d7467c74e805c97eccd1e15949a1614423bb98a33",
+        "command.json": "ce54c4d7e7575f4889edcbfe21a5de15b1a4fe2136a1934173adae4ab893fbb0",
+        "result.json": "8cb56477d8442082f0cc778950be6732dbc9478b8bef8374aec6170b4dd12b1b",
+        "stderr.txt": "b5c4f4301d5ab88189f83ba8be6071b85e93cc8b015598912f46cb9542a00033",
+        "prompt.txt": "7e1b5978a8da1c4addc5fe695c4441b83eeab18606360db9452bc4df8eb2f1fc",
+        "schema.json": "0ca91a9e351259a04139e69ce0367394ee431e2dd7377b775f71814974380ce0",
+        "answer.txt": "4d816368cc46aa786fe2421855ed43da2bc30449d527c2616608a345a14a10c4"
+      }
+    },
+    {
+      "id": "A3-summary-initial",
+      "purpose": "answer",
+      "cli_model": "gpt-5.6-terra",
+      "direct_terminal_usage": {
+        "input_tokens": 14776,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 617,
+        "reasoning_output_tokens": 77
+      },
+      "processed_tokens": 15393,
+      "uncached_input_tokens": 2744,
+      "terminal_events": 1,
+      "seconds": 21.374,
+      "nonfatal_catalog_timeout": true,
+      "hashes": {
+        "events.jsonl": "f04f1dcc0d52f43826ca8f2834eab87740fcded63318c26fea5eba14ef7d2e61",
+        "command.json": "1ffc1f082eedcf91e2645a54fe9c4149d88a9e0ee0313f2cbc9de1c187df1107",
+        "result.json": "6758110b67ad61dfa85fd6178145db245ef56831547ece8b3df2472dda36c3b0",
+        "stderr.txt": "85af88997c6b5d5fc0893270f88fe41bb6e8d2b548764b2f186d372473586391",
+        "prompt.txt": "0f46760daed763a3143522e8a89d5dca6627104a35f04fa10a47aa468e2c9e39",
+        "schema.json": "f5eba01820ea551f568fd3b07834de0d036ed7862298f842678f680140ff1e10",
+        "answer.txt": "80e91a1d9b442fd416c0b0d6da7548db3b4dcdf11df8965dc2ef1e1cbde6229b"
+      }
+    },
+    {
+      "id": "A4-adaptive-initial",
+      "purpose": "answer",
+      "cli_model": "gpt-5.6-terra",
+      "direct_terminal_usage": {
+        "input_tokens": 14817,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 85,
+        "reasoning_output_tokens": 45
+      },
+      "processed_tokens": 14902,
+      "uncached_input_tokens": 14817,
+      "terminal_events": 1,
+      "seconds": 11.255,
+      "nonfatal_catalog_timeout": true,
+      "hashes": {
+        "events.jsonl": "8501be5922df309e78d09bc36bf0f4d921881d122e8c75bd07eb9062cadb5f59",
+        "command.json": "f679c96a028a696c8423343e7442aceb6e849bd8af1995df902cb1919eb6eb14",
+        "result.json": "3c1ba3472c9a2500e73f3a95ecaab02846f0a937099a5b1fa73c75f04aea0fd6",
+        "stderr.txt": "692bac66c21bf8077f88b3a75059d132eaee9fff02a3eda8330939cc6e2fad6c",
+        "prompt.txt": "f46de3bb1dcaba6d9f08d05b507296cbd86377d0e14c0192a8574df6ef6e73f2",
+        "schema.json": "f5eba01820ea551f568fd3b07834de0d036ed7862298f842678f680140ff1e10",
+        "answer.txt": "318ee23e020a0bb4b73aee3320c9eb25ab5aed5801f0c05ebcf3f0846729d97b"
+      }
+    },
+    {
+      "id": "A4-adaptive-retrieved",
+      "purpose": "retrieval_answer",
+      "cli_model": "gpt-5.6-terra",
+      "direct_terminal_usage": {
+        "input_tokens": 16113,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 705,
+        "reasoning_output_tokens": 0
+      },
+      "processed_tokens": 16818,
+      "uncached_input_tokens": 4081,
+      "terminal_events": 1,
+      "seconds": 21.046,
+      "nonfatal_catalog_timeout": true,
+      "hashes": {
+        "events.jsonl": "c41983db4c084b86da0910ccf52e7c1006d15509cda9070d1ec02f1538483cd4",
+        "command.json": "cea596d910e8d4b3319ad81f0f64fe60912c7e1709d6ea9a56bb47515375796e",
+        "result.json": "f49e13a78ae2f45d45f6af3452fe25c4a3c8baca449979a9967ca92e5a4aa8de",
+        "stderr.txt": "1091c47f1d518b57f9e3ad4c59ac319663b8803152f7f55923a0d2bf64dd5282",
+        "prompt.txt": "9f5771cde1a02f221cf05be6976ca4d64f49562420d2c06f503728862e3b86a2",
+        "schema.json": "f5eba01820ea551f568fd3b07834de0d036ed7862298f842678f680140ff1e10",
+        "answer.txt": "dff1e92f74155e27b8c282ab8cb836c62fa0d9f3346acec6afc0f4b71d4ea96a"
+      }
+    },
+    {
+      "id": "A4-full-initial",
+      "purpose": "answer",
+      "cli_model": "gpt-5.6-terra",
+      "direct_terminal_usage": {
+        "input_tokens": 16689,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 728,
+        "reasoning_output_tokens": 0
+      },
+      "processed_tokens": 17417,
+      "uncached_input_tokens": 16689,
+      "terminal_events": 1,
+      "seconds": 22.534,
+      "nonfatal_catalog_timeout": true,
+      "hashes": {
+        "events.jsonl": "da659d37c5405433f7bc4ed1f10a98b7b61eb6d9eb303d0d6f69b4de1e688e18",
+        "command.json": "ae5ebac2d069029687457071c49a5cbaffa6f1d6dd2f1d4b826aa890680544c1",
+        "result.json": "8217305942f16312dd694385c2b8e0dba964c53e074c28e55049408ea10bbbfe",
+        "stderr.txt": "9204db04ed0645a6d7c708960b1943b59abc5fa738bcd4fdeea15a823e9152a8",
+        "prompt.txt": "443612bda2ed3b51ec988e8b565848f8f4a4ccca526c43a0ae6e84e4ee733404",
+        "schema.json": "f5eba01820ea551f568fd3b07834de0d036ed7862298f842678f680140ff1e10",
+        "answer.txt": "42e65ca0b0d11b62e1f029b8f85674f938f71616189101ef8ee97a72b0b2b309"
+      }
+    },
+    {
+      "id": "A4-judge",
+      "purpose": "judge",
+      "cli_model": "gpt-5.6-sol",
+      "direct_terminal_usage": {
+        "input_tokens": 19737,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1364,
+        "reasoning_output_tokens": 278
+      },
+      "processed_tokens": 21101,
+      "uncached_input_tokens": 19737,
+      "terminal_events": 1,
+      "seconds": 53.701,
+      "nonfatal_catalog_timeout": true,
+      "hashes": {
+        "events.jsonl": "8eb27986b4dca14160de7e6626df6c2284f0e3427043230c29cf92f203621854",
+        "command.json": "9b7eed19133a6e077990632741ddeeaf37717924c7da6687adfe2cfd1ce3b4ef",
+        "result.json": "9f77f2a27a18f23f08dbc3f037a19c2577173dc8d3f108fefc09b508ca3b3d16",
+        "stderr.txt": "175ff0d249417d5e2b4417f189238d77b3974bd39527d49ddc3e3ccb01fd9071",
+        "prompt.txt": "12d334678017ba1094a1996dbd1c9a4cea26363c77fa0711dacfdb4eb516759f",
+        "schema.json": "90f4bd72129a007ccf9650b03878b86398a534b3908f6260559e9958217ef752",
+        "answer.txt": "be20be6a9b76f1812075fa5a581ba011b37f658871c15c84075ea7331823175f"
+      }
+    },
+    {
+      "id": "A4-summary-initial",
+      "purpose": "answer",
+      "cli_model": "gpt-5.6-terra",
+      "direct_terminal_usage": {
+        "input_tokens": 14783,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 523,
+        "reasoning_output_tokens": 0
+      },
+      "processed_tokens": 15306,
+      "uncached_input_tokens": 2751,
+      "terminal_events": 1,
+      "seconds": 18.794,
+      "nonfatal_catalog_timeout": true,
+      "hashes": {
+        "events.jsonl": "28ace90b265dfa6969c44d91912698adc964ec7581b1b130452781a474b76667",
+        "command.json": "8a6f6219baee333db2d035ca3e2b4d180d0e5518db4b680b2639397746db0036",
+        "result.json": "f9349ea2f8604a4fe15cf80f0d188296649b45078ed0815dc0d29f9b75b4a176",
+        "stderr.txt": "aabf7acb98cb560dd53f5dc03d86125a506854996605be4062fb09ab950c0e5d",
+        "prompt.txt": "6a715914cc7afb641a6629eab11b8b39c842cad310dfd7fd406e3b204d3e7da6",
+        "schema.json": "f5eba01820ea551f568fd3b07834de0d036ed7862298f842678f680140ff1e10",
+        "answer.txt": "ccb541a55681c08c7ca22a17e08f1f5136619469d015cf6e19577429fc48c0e4"
+      }
+    },
+    {
+      "id": "R1-compact-initial",
+      "purpose": "answer",
+      "cli_model": "gpt-5.6-terra",
+      "direct_terminal_usage": {
+        "input_tokens": 16658,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 463,
+        "reasoning_output_tokens": 129
+      },
+      "processed_tokens": 17121,
+      "uncached_input_tokens": 16658,
+      "terminal_events": 1,
+      "seconds": 18.361,
+      "nonfatal_catalog_timeout": true,
+      "hashes": {
+        "events.jsonl": "6e06273813b337c6e894e8bce00688978b7cc9fc97934ed797fbbff7c38c2d66",
+        "command.json": "1a5e16f37c5a355297f205f0e54fd7d736605e4bdcd8d321b9f7af3526986d37",
+        "result.json": "c98a5ce25be5c95a9d51b24fbe1c66cd913d94912f5c455daec5523135dbf361",
+        "stderr.txt": "d3d3155d347d048cf8bc19530abe3620d734088f7fca0f6d7d8e6d2b05ae278d",
+        "prompt.txt": "16a12c4d86978f14368a7d750d432e91f6759363acd05e5f2aff4a8429b1cc41",
+        "schema.json": "9e3afa3811a1e241af40a70c086b2f7990c271e8b13c3a68376f4e6505098647",
+        "answer.txt": "1dab833726c0429806b7e30ea1433af8587b9ed9f5381bdef61147f5279bd78b"
+      }
+    },
+    {
+      "id": "R1-full-initial",
+      "purpose": "answer",
+      "cli_model": "gpt-5.6-terra",
+      "direct_terminal_usage": {
+        "input_tokens": 17681,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 499,
+        "reasoning_output_tokens": 121
+      },
+      "processed_tokens": 18180,
+      "uncached_input_tokens": 17681,
+      "terminal_events": 1,
+      "seconds": 18.792,
+      "nonfatal_catalog_timeout": false,
+      "hashes": {
+        "events.jsonl": "222f06c8a409720e21d08b8fe7d487e8f142d3f81f38d457384d71102b726bb2",
+        "command.json": "10ad9200fee4df3f8de7cdc0da9537254cc6081ad43e4429e4ca3fd2a9197d6e",
+        "result.json": "025380f8f9b5376801fee0e3a7468793f9fa2aabe91009a203f9c342cd72cd59",
+        "stderr.txt": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721",
+        "prompt.txt": "994295559ceb7841e7c6c20295f51c74169a01ed9065e37d7bde666b6774fe7c",
+        "schema.json": "9e3afa3811a1e241af40a70c086b2f7990c271e8b13c3a68376f4e6505098647",
+        "answer.txt": "6ca7e6d2b78bdba756717e1aad787264f05f44f2de8faa890b252fabad4369a1"
+      }
+    },
+    {
+      "id": "R1-judge",
+      "purpose": "judge",
+      "cli_model": "gpt-5.6-sol",
+      "direct_terminal_usage": {
+        "input_tokens": 17561,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1794,
+        "reasoning_output_tokens": 759
+      },
+      "processed_tokens": 19355,
+      "uncached_input_tokens": 17561,
+      "terminal_events": 1,
+      "seconds": 65.416,
+      "nonfatal_catalog_timeout": true,
+      "hashes": {
+        "events.jsonl": "80b6199560d28926160919e5f1911e28930e5486dd4ec904e9f146bdf8ecac6d",
+        "command.json": "68fa6988d7c0fb1226870adb0991c0da055bdf28eb5c777fda71717e306311f4",
+        "result.json": "cdd43b9cffdbcb80f9fa128deb360e98ddfb2c66d2363d3ab3ce6599e30904ed",
+        "stderr.txt": "debeb720f9206996c6d7ab92079e5762e37c5d072263f883b6952ee644655eeb",
+        "prompt.txt": "679ada45601610ce53b52e8e35ecc4002d827fe6f5aaabb2e50d33289e77185c",
+        "schema.json": "4c96ba7ba5f673e43dee0b1c3c2027998262b1e68da3b05dfc041130d552ae40",
+        "answer.txt": "af3366f070fa3782491773a3eb9ccd6404175a241aaed15fbb4405f929584313"
+      }
+    },
+    {
+      "id": "R2-compact-initial",
+      "purpose": "answer",
+      "cli_model": "gpt-5.6-terra",
+      "direct_terminal_usage": {
+        "input_tokens": 16663,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 202,
+        "reasoning_output_tokens": 0
+      },
+      "processed_tokens": 16865,
+      "uncached_input_tokens": 16663,
+      "terminal_events": 1,
+      "seconds": 12.611,
+      "nonfatal_catalog_timeout": true,
+      "hashes": {
+        "events.jsonl": "18faa48268409a135c37cc60fa72b4858a7c80f25a1abd8c430d5e6bcd035e8a",
+        "command.json": "9db1c83bc8209bcd859f1d1530cb9d93fac351cf7ab7b80d02d0768002098a8a",
+        "result.json": "a7a72514b131a9bb68860a8acfc4ef0b97f55397762ae069c93bafa897c774e3",
+        "stderr.txt": "85fcc7f3399ad49d96fe83a2b32a4ffc6cbe173584c99bad542a4ce64d8096fd",
+        "prompt.txt": "14dd2253f98da95cb68f46b534e841a5c7b3f46c703c157992097073c771bdad",
+        "schema.json": "9e3afa3811a1e241af40a70c086b2f7990c271e8b13c3a68376f4e6505098647",
+        "answer.txt": "ec99d85b3d9f186cfda282e20e5cb80c32e55e5e051c11b53e6e65bc153e06c7"
+      }
+    },
+    {
+      "id": "R2-full-initial",
+      "purpose": "answer",
+      "cli_model": "gpt-5.6-terra",
+      "direct_terminal_usage": {
+        "input_tokens": 17633,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 387,
+        "reasoning_output_tokens": 191
+      },
+      "processed_tokens": 18020,
+      "uncached_input_tokens": 17633,
+      "terminal_events": 1,
+      "seconds": 16.883,
+      "nonfatal_catalog_timeout": true,
+      "hashes": {
+        "events.jsonl": "d73e3612e681b72423f55941c1a8f3e75db5bfdbb9da21c58844a7ede84c6267",
+        "command.json": "e55dc41b8b21a5da4f351361322cdc35cae49aed8ea5bfc94f3366060c847925",
+        "result.json": "5d9d21311a425a9f87de221c8b48d54326efc630d5abe350682e324a1126fb00",
+        "stderr.txt": "56a10b4b2b8b6f469f2ff58916b4dea0af99015407096a7de1a3e0b48ec0ce8b",
+        "prompt.txt": "1dc1ae6de516c390bfbcd1fab9d660b099621d31e7c323124010f53a96956893",
+        "schema.json": "9e3afa3811a1e241af40a70c086b2f7990c271e8b13c3a68376f4e6505098647",
+        "answer.txt": "5922857462be7506d627252351f86d4832ab918d3a70a7c6cffa63e70adb1199"
+      }
+    },
+    {
+      "id": "R2-judge",
+      "purpose": "judge",
+      "cli_model": "gpt-5.6-sol",
+      "direct_terminal_usage": {
+        "input_tokens": 17198,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1822,
+        "reasoning_output_tokens": 925
+      },
+      "processed_tokens": 19020,
+      "uncached_input_tokens": 17198,
+      "terminal_events": 1,
+      "seconds": 66.336,
+      "nonfatal_catalog_timeout": true,
+      "hashes": {
+        "events.jsonl": "85a0aec74d7ea027d125df7262467918c52402c64f759dc54b970eff0578b7c5",
+        "command.json": "a6ff71fa2e9cf119b2873c2e742a1046b6cd3c5f13012126fd73f6027acfb7b0",
+        "result.json": "5647b1e0948c878ad977030581aea13aab0d9cf26affbfdaf65114a76257da91",
+        "stderr.txt": "5ef75415c3a293655ed708289edac5873180ed4b9874fc6ed90ab795c11bdba6",
+        "prompt.txt": "4b52e8023387bb20743876a99fcb5bdc499fc0524bde7be014449122279d92c7",
+        "schema.json": "9d2a4875ddec30a394b3dabbe35796d6b7c0c4fef7302da72257f84045e60d28",
+        "answer.txt": "9cdc636d435dda6e8372ab594625ac26ad790b2a1e818ba3885b77357a2118aa"
+      }
+    },
+    {
+      "id": "R3-compact-initial",
+      "purpose": "answer",
+      "cli_model": "gpt-5.6-terra",
+      "direct_terminal_usage": {
+        "input_tokens": 16678,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 367,
+        "reasoning_output_tokens": 0
+      },
+      "processed_tokens": 17045,
+      "uncached_input_tokens": 4646,
+      "terminal_events": 1,
+      "seconds": 18.183,
+      "nonfatal_catalog_timeout": true,
+      "hashes": {
+        "events.jsonl": "8f4b1bfc538d24899961b43f562904e98fce2eac433595dd29009bac1843663f",
+        "command.json": "d4f421e4b624c27f3da7a4fbff0a8dbb61f891dff7921c8bb1af0daf3dddfa36",
+        "result.json": "3655463e6eb56c79107bb14bca85a92897c796dc3ba3fc7ad695f4bf1201400d",
+        "stderr.txt": "ea4d2ee1f8c70716bc222492deea4e80fd3d41d3d45d8ed5e567ff6efae74dde",
+        "prompt.txt": "b0600685946768b2a987583fd7b5d7eb84e6fc0db047a103a9b3d27983234bab",
+        "schema.json": "9e3afa3811a1e241af40a70c086b2f7990c271e8b13c3a68376f4e6505098647",
+        "answer.txt": "953765c3d83f775d696f7de6bf58d824f568142db64428e88e280c15b3abfd5a"
+      }
+    },
+    {
+      "id": "R3-full-initial",
+      "purpose": "answer",
+      "cli_model": "gpt-5.6-terra",
+      "direct_terminal_usage": {
+        "input_tokens": 17705,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 327,
+        "reasoning_output_tokens": 82
+      },
+      "processed_tokens": 18032,
+      "uncached_input_tokens": 17705,
+      "terminal_events": 1,
+      "seconds": 14.909,
+      "nonfatal_catalog_timeout": true,
+      "hashes": {
+        "events.jsonl": "ad55c11088e9d5ba3f2775175af192866bc5d50fddb8cdd607250471a727179b",
+        "command.json": "776b38863b13e33a3532ef0c4646009148a96777b95926a9816de9fdd22d3b8d",
+        "result.json": "9f3c5552ab70ad83acab87f057e150933c0f3ea5d80eebf356f9d1986373aa5a",
+        "stderr.txt": "83192a8c38d12c1db677dd0beb491cf210e0892b221eec7e97fdea391d8c2ba9",
+        "prompt.txt": "c6561bc862dfd4c754ead75763fe1e8c20caf774a048903a4c9465fcf511890f",
+        "schema.json": "9e3afa3811a1e241af40a70c086b2f7990c271e8b13c3a68376f4e6505098647",
+        "answer.txt": "4e4eb3bc17a62800e58c7bdcd14eff297c61f2be5b2d767c8a11e59a07b42303"
+      }
+    },
+    {
+      "id": "R3-judge",
+      "purpose": "judge",
+      "cli_model": "gpt-5.6-sol",
+      "direct_terminal_usage": {
+        "input_tokens": 17518,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1476,
+        "reasoning_output_tokens": 510
+      },
+      "processed_tokens": 18994,
+      "uncached_input_tokens": 17518,
+      "terminal_events": 1,
+      "seconds": 55.734,
+      "nonfatal_catalog_timeout": false,
+      "hashes": {
+        "events.jsonl": "d3b79f3ffda402213be7a88de434484832a236a93a184dcea40dc9d2e368e1b5",
+        "command.json": "3b864ff2246bb8faceb6439a103cd5b984a86f40b1477460efa194b2cd7b8a80",
+        "result.json": "61feed37749bf08d6cf6c0f499bcac8ac45f6a8714b1af67ffd0c05504ee4ec9",
+        "stderr.txt": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721",
+        "prompt.txt": "5bb265967a5205c6c54becb04b2058e4c204ac722b20227e8276217d6310f609",
+        "schema.json": "93ef1538ff91f6dad96d2ba34bd937bc2125b89bded7db69198f60a2d653285a",
+        "answer.txt": "a2b736e6639d5b5b4bfb25298a24713eedb634d51bc53ed2fe119da3b26b04b9"
+      }
+    },
+    {
+      "id": "R4-compact-initial",
+      "purpose": "answer",
+      "cli_model": "gpt-5.6-terra",
+      "direct_terminal_usage": {
+        "input_tokens": 16674,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 285,
+        "reasoning_output_tokens": 47
+      },
+      "processed_tokens": 16959,
+      "uncached_input_tokens": 16674,
+      "terminal_events": 1,
+      "seconds": 16.967,
+      "nonfatal_catalog_timeout": true,
+      "hashes": {
+        "events.jsonl": "9649db3b7849462fd4481e322905247222f0213e2a8dbc04b55fdebf5f70c168",
+        "command.json": "f65ca1f92d05febe535b71546d4882937e5c6d9395d0a2a1aae929b4edb95f27",
+        "result.json": "d493f425ff591b4f31deaf791bbc1808b02a16df19758f9adeadf301a7a76b14",
+        "stderr.txt": "4daa66f3cbc70651d5c85ba885f70569f38ac2d0f22dee816c8990f6987c3bbd",
+        "prompt.txt": "f13b417587b0252e30134b805a898b8e9c92b83443ab329b7db7cf16b769eccc",
+        "schema.json": "9e3afa3811a1e241af40a70c086b2f7990c271e8b13c3a68376f4e6505098647",
+        "answer.txt": "815fa7658b5a90a3a494a3ae5b44f032ab6a599cf7620d66e36e3596676d887f"
+      }
+    },
+    {
+      "id": "R4-full-initial",
+      "purpose": "answer",
+      "cli_model": "gpt-5.6-terra",
+      "direct_terminal_usage": {
+        "input_tokens": 17686,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 230,
+        "reasoning_output_tokens": 0
+      },
+      "processed_tokens": 17916,
+      "uncached_input_tokens": 5654,
+      "terminal_events": 1,
+      "seconds": 12.965,
+      "nonfatal_catalog_timeout": true,
+      "hashes": {
+        "events.jsonl": "abb7e7639ebfcc664adae6124c21a0ad95714efcf010b11da23d84796b13b45f",
+        "command.json": "5aba426babeb96e6c909ab27fc4cc5d3ac53b364283f6d5e36ad531678d50ea8",
+        "result.json": "bd6cdaab9c31b8d2579ffb47444031562bed173fbf0431ee9ee93df91e4b94c7",
+        "stderr.txt": "d09dde7edf9fd99b84fc84f90b9023b1328605bf0c9b5eb32d7bf82dbb00e2d9",
+        "prompt.txt": "23416f469d4fab0271993116f4cb0264af96bf8901f2952edc220c0c90821da7",
+        "schema.json": "9e3afa3811a1e241af40a70c086b2f7990c271e8b13c3a68376f4e6505098647",
+        "answer.txt": "9c232e0eac1f5ac3089a12b27f39d9890ede03ea4ab55baac60fb2db04e6d7eb"
+      }
+    },
+    {
+      "id": "R4-judge",
+      "purpose": "judge",
+      "cli_model": "gpt-5.6-sol",
+      "direct_terminal_usage": {
+        "input_tokens": 17364,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1298,
+        "reasoning_output_tokens": 425
+      },
+      "processed_tokens": 18662,
+      "uncached_input_tokens": 17364,
+      "terminal_events": 1,
+      "seconds": 51.108,
+      "nonfatal_catalog_timeout": true,
+      "hashes": {
+        "events.jsonl": "a5f7b325a46fbf6ba7e37d374fac848b7693eb48f42942b5b6cf05a2db702450",
+        "command.json": "7c96cfd3bf5f581b31d1594e9abea848d95e266bbed37f76114337bb2ca7a883",
+        "result.json": "0944858b938660555b38ad46c26b4730bb092903beea02a23988d4abfa1fab2e",
+        "stderr.txt": "4661af2ea76eb30e71381d56552ffe1e2fa9862ec21faf9e69c93347c270a241",
+        "prompt.txt": "5fde475a53501c415767dacfea06dd317941fd4292e739fa0b3311ea5e0251ae",
+        "schema.json": "b47fb788244651ca54028e517359b46b373fcd371a89033540be3ff6bcbf24f9",
+        "answer.txt": "4ce6357cda5053ada5a0034da800d1ca30e4dfef19c19aea245516bba05d7bf4"
+      }
+    },
+    {
+      "id": "R5-compact-initial",
+      "purpose": "answer",
+      "cli_model": "gpt-5.6-terra",
+      "direct_terminal_usage": {
+        "input_tokens": 16667,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 406,
+        "reasoning_output_tokens": 142
+      },
+      "processed_tokens": 17073,
+      "uncached_input_tokens": 16667,
+      "terminal_events": 1,
+      "seconds": 19.257,
+      "nonfatal_catalog_timeout": false,
+      "hashes": {
+        "events.jsonl": "f799a8d82cda6397582c99dfd6730a9fc23acb8e05ddb8bd29e4c58d139ff7bc",
+        "command.json": "de50ee5dfbea6bef1cae27ae39dd0f9db991afcf7a555f6b17a44dede136074f",
+        "result.json": "7f47b76371dec641b552fc113e140dca2e7a34e6f60d26b061b7d610a8c768a1",
+        "stderr.txt": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721",
+        "prompt.txt": "32157aa81fef0877e4f55dd2abb7abe8bdce0e6c1047b44b9f8da1c7adbe5efe",
+        "schema.json": "9e3afa3811a1e241af40a70c086b2f7990c271e8b13c3a68376f4e6505098647",
+        "answer.txt": "03678cea35df9d2c0fa61c8a5c4bc4c21cbdfdf9d6fb02db8c976caa9d1c62e3"
+      }
+    },
+    {
+      "id": "R5-full-initial",
+      "purpose": "answer",
+      "cli_model": "gpt-5.6-terra",
+      "direct_terminal_usage": {
+        "input_tokens": 17759,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 432,
+        "reasoning_output_tokens": 99
+      },
+      "processed_tokens": 18191,
+      "uncached_input_tokens": 17759,
+      "terminal_events": 1,
+      "seconds": 19.018,
+      "nonfatal_catalog_timeout": false,
+      "hashes": {
+        "events.jsonl": "bdd40e5a65aea8d6a212f746120d7a666591b8df32b29ed484fcb3bc6eb38998",
+        "command.json": "1b77d069ee16bd654d1dfaf0b2315035d6ac85aa11a960492d5b9127c9084ca7",
+        "result.json": "c35a510cc256693a48be660586064c7d384678692c600d29e99a75036f7009cf",
+        "stderr.txt": "1aa26269eb1cc57f86b235a03cda53c004edb5b1e9fc99d4da4f00843293d721",
+        "prompt.txt": "4feb170114647df020eebc811fe9b08ac996517115280cab3985f97bb6b07e8c",
+        "schema.json": "9e3afa3811a1e241af40a70c086b2f7990c271e8b13c3a68376f4e6505098647",
+        "answer.txt": "7634ef76edc80c148d5205a2670d88067d4ff7084c35e5c301ef2512ec0a684a"
+      }
+    },
+    {
+      "id": "R5-judge",
+      "purpose": "judge",
+      "cli_model": "gpt-5.6-sol",
+      "direct_terminal_usage": {
+        "input_tokens": 17480,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1150,
+        "reasoning_output_tokens": 244
+      },
+      "processed_tokens": 18630,
+      "uncached_input_tokens": 17480,
+      "terminal_events": 1,
+      "seconds": 47.673,
+      "nonfatal_catalog_timeout": true,
+      "hashes": {
+        "events.jsonl": "f90ccb9f255b388b8c7b7dd4dae169e5efae52f017a4bb06453b2972b721cade",
+        "command.json": "53f6787fe4dc725716e16a9df824360dde7a90a01dcaebbaf1270a2cabad5c9a",
+        "result.json": "2b8d56834275c1131ba9f0b3da8240a4efc1e71722f1dcd46a6cd1f24fd9b194",
+        "stderr.txt": "98e722c9a868a74f758223e3e97ce22cf968efdfb6cf5ec4e36fc0c793ae9258",
+        "prompt.txt": "61f8ac5120aefceee6371c947072c860583b9dec81a125ff0a9a9190d05d502d",
+        "schema.json": "305485c2fe63d3a9bae1c77bc5631329da7e8afff79e8c3a2fe6eac96591c1f4",
+        "answer.txt": "00b5b7ee86ff79c519e158a19b954428b0da7516d7886b3e5ebed399e3b35c79"
+      }
+    },
+    {
+      "id": "R6-compact-initial",
+      "purpose": "answer",
+      "cli_model": "gpt-5.6-terra",
+      "direct_terminal_usage": {
+        "input_tokens": 16668,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 403,
+        "reasoning_output_tokens": 107
+      },
+      "processed_tokens": 17071,
+      "uncached_input_tokens": 4636,
+      "terminal_events": 1,
+      "seconds": 16.301,
+      "nonfatal_catalog_timeout": true,
+      "hashes": {
+        "events.jsonl": "0897cac97e6b92e30d1a208ec6a49c8754a33c1a84515c7c5aa8ba8dcb55ebc1",
+        "command.json": "91f91229f293f5fbe4682a0fdb4d3888dcb29787bac5901140d08dd39982f9a0",
+        "result.json": "7ec16a5882d25ce5f96e6f6d4eb5ded3708bf0d1a1b47e5d99a255a16f82c31a",
+        "stderr.txt": "f133d0c8f84f265dfff9662d64fbc7557d6e35d2724f38ab659bd44d01cbb284",
+        "prompt.txt": "39a6901b495bcd4bd64650b30d4909281d6c0354d3aa7fe91d908452eaf0645d",
+        "schema.json": "9e3afa3811a1e241af40a70c086b2f7990c271e8b13c3a68376f4e6505098647",
+        "answer.txt": "60bd0d00f2c2565ac4d6e5d2e168f06a4f07456bb6ea3a2105193acf7128b35a"
+      }
+    },
+    {
+      "id": "R6-full-initial",
+      "purpose": "answer",
+      "cli_model": "gpt-5.6-terra",
+      "direct_terminal_usage": {
+        "input_tokens": 17671,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 559,
+        "reasoning_output_tokens": 237
+      },
+      "processed_tokens": 18230,
+      "uncached_input_tokens": 17671,
+      "terminal_events": 1,
+      "seconds": 21.475,
+      "nonfatal_catalog_timeout": true,
+      "hashes": {
+        "events.jsonl": "cf3fbd505c6bffc9fba02fb78aeac35aa53e52922af067d111affb7e9c3a61c9",
+        "command.json": "86b42953335f37995b6f73e543fd78824398842f0df41304243a64699fdfacf1",
+        "result.json": "b6847dcc2ae442bff0f15e99a7699df28e4dc8521f5cb16b2cd1ffaffacd84e0",
+        "stderr.txt": "65801a0a6f638c4465355a42692cde1ab6d311befa443fab8d6392faf0c2fd84",
+        "prompt.txt": "d84e72aa983d56b4e89d49a7b162e0d076d02fc6cfd169ac31d1d62016fa9ad0",
+        "schema.json": "9e3afa3811a1e241af40a70c086b2f7990c271e8b13c3a68376f4e6505098647",
+        "answer.txt": "03ea117ed5c351e8f90fdc6061366f612806c2629dd5f01bdf3b92ba03adb358"
+      }
+    },
+    {
+      "id": "R6-judge",
+      "purpose": "judge",
+      "cli_model": "gpt-5.6-sol",
+      "direct_terminal_usage": {
+        "input_tokens": 17494,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1736,
+        "reasoning_output_tokens": 779
+      },
+      "processed_tokens": 19230,
+      "uncached_input_tokens": 17494,
+      "terminal_events": 1,
+      "seconds": 62.673,
+      "nonfatal_catalog_timeout": true,
+      "hashes": {
+        "events.jsonl": "a9c24256cb798625d7242de15fb650c3e1c754e250b9284e46a9d29b9dd593b3",
+        "command.json": "87db4c53dbcd99c0f348bbf7383d551bf5a669149d4bda3809c7ad5270458572",
+        "result.json": "06127884f7b3cc66f4d4000a76372af1d3cdc4fc0101cd4786fa80587bb0b145",
+        "stderr.txt": "8aa4bfbc43aa738b8aed7dc706cc7fc2da6354f74641a34d6cbde38a9c8d5a10",
+        "prompt.txt": "d8ee8684ae4bd7a8cb27e19877e93dae799b83cc07aa6fb251e3e2938ec24b6c",
+        "schema.json": "89b0394fcf565945c732ee2a9eec523acbe21c8446a959799003d4c56bd2cc17",
+        "answer.txt": "5de4f62fe0fb8f24b3b5725ebba4b2d47a0867beadc18391e33c8cec7334a8ca"
+      }
+    }
+  ],
+  "answer_aggregate_checks": [
+    {
+      "job_id": "A1-full",
+      "call_ids": [
+        "A1-full-initial"
+      ],
+      "direct_usage_sum": {
+        "input_tokens": 16551,
+        "output_tokens": 928,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 17479
+      },
+      "aggregate_matches": true
+    },
+    {
+      "job_id": "A1-summary",
+      "call_ids": [
+        "A1-summary-initial"
+      ],
+      "direct_usage_sum": {
+        "input_tokens": 14752,
+        "output_tokens": 553,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 15305
+      },
+      "aggregate_matches": true
+    },
+    {
+      "job_id": "A1-adaptive",
+      "call_ids": [
+        "A1-adaptive-initial",
+        "A1-adaptive-retrieved"
+      ],
+      "direct_usage_sum": {
+        "input_tokens": 30662,
+        "output_tokens": 878,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 31540
+      },
+      "aggregate_matches": true
+    },
+    {
+      "job_id": "A2-summary",
+      "call_ids": [
+        "A2-summary-initial"
+      ],
+      "direct_usage_sum": {
+        "input_tokens": 14762,
+        "output_tokens": 530,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 15292
+      },
+      "aggregate_matches": true
+    },
+    {
+      "job_id": "A2-adaptive",
+      "call_ids": [
+        "A2-adaptive-initial",
+        "A2-adaptive-retrieved"
+      ],
+      "direct_usage_sum": {
+        "input_tokens": 30968,
+        "output_tokens": 838,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 31806
+      },
+      "aggregate_matches": true
+    },
+    {
+      "job_id": "A2-full",
+      "call_ids": [
+        "A2-full-initial"
+      ],
+      "direct_usage_sum": {
+        "input_tokens": 16691,
+        "output_tokens": 713,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 17404
+      },
+      "aggregate_matches": true
+    },
+    {
+      "job_id": "A3-adaptive",
+      "call_ids": [
+        "A3-adaptive-initial",
+        "A3-adaptive-retrieved"
+      ],
+      "direct_usage_sum": {
+        "input_tokens": 31153,
+        "output_tokens": 970,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 32123
+      },
+      "aggregate_matches": true
+    },
+    {
+      "job_id": "A3-full",
+      "call_ids": [
+        "A3-full-initial"
+      ],
+      "direct_usage_sum": {
+        "input_tokens": 16778,
+        "output_tokens": 977,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 17755
+      },
+      "aggregate_matches": true
+    },
+    {
+      "job_id": "A3-summary",
+      "call_ids": [
+        "A3-summary-initial"
+      ],
+      "direct_usage_sum": {
+        "input_tokens": 14776,
+        "output_tokens": 617,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 15393
+      },
+      "aggregate_matches": true
+    },
+    {
+      "job_id": "A4-full",
+      "call_ids": [
+        "A4-full-initial"
+      ],
+      "direct_usage_sum": {
+        "input_tokens": 16689,
+        "output_tokens": 728,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 17417
+      },
+      "aggregate_matches": true
+    },
+    {
+      "job_id": "A4-summary",
+      "call_ids": [
+        "A4-summary-initial"
+      ],
+      "direct_usage_sum": {
+        "input_tokens": 14783,
+        "output_tokens": 523,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 15306
+      },
+      "aggregate_matches": true
+    },
+    {
+      "job_id": "A4-adaptive",
+      "call_ids": [
+        "A4-adaptive-initial",
+        "A4-adaptive-retrieved"
+      ],
+      "direct_usage_sum": {
+        "input_tokens": 30930,
+        "output_tokens": 790,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 31720
+      },
+      "aggregate_matches": true
+    },
+    {
+      "job_id": "R1-full",
+      "call_ids": [
+        "R1-full-initial"
+      ],
+      "direct_usage_sum": {
+        "input_tokens": 17681,
+        "output_tokens": 499,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 18180
+      },
+      "aggregate_matches": true
+    },
+    {
+      "job_id": "R1-compact",
+      "call_ids": [
+        "R1-compact-initial"
+      ],
+      "direct_usage_sum": {
+        "input_tokens": 16658,
+        "output_tokens": 463,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 17121
+      },
+      "aggregate_matches": true
+    },
+    {
+      "job_id": "R2-compact",
+      "call_ids": [
+        "R2-compact-initial"
+      ],
+      "direct_usage_sum": {
+        "input_tokens": 16663,
+        "output_tokens": 202,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 16865
+      },
+      "aggregate_matches": true
+    },
+    {
+      "job_id": "R2-full",
+      "call_ids": [
+        "R2-full-initial"
+      ],
+      "direct_usage_sum": {
+        "input_tokens": 17633,
+        "output_tokens": 387,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 18020
+      },
+      "aggregate_matches": true
+    },
+    {
+      "job_id": "R3-full",
+      "call_ids": [
+        "R3-full-initial"
+      ],
+      "direct_usage_sum": {
+        "input_tokens": 17705,
+        "output_tokens": 327,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 18032
+      },
+      "aggregate_matches": true
+    },
+    {
+      "job_id": "R3-compact",
+      "call_ids": [
+        "R3-compact-initial"
+      ],
+      "direct_usage_sum": {
+        "input_tokens": 16678,
+        "output_tokens": 367,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 17045
+      },
+      "aggregate_matches": true
+    },
+    {
+      "job_id": "R4-compact",
+      "call_ids": [
+        "R4-compact-initial"
+      ],
+      "direct_usage_sum": {
+        "input_tokens": 16674,
+        "output_tokens": 285,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 16959
+      },
+      "aggregate_matches": true
+    },
+    {
+      "job_id": "R4-full",
+      "call_ids": [
+        "R4-full-initial"
+      ],
+      "direct_usage_sum": {
+        "input_tokens": 17686,
+        "output_tokens": 230,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 17916
+      },
+      "aggregate_matches": true
+    },
+    {
+      "job_id": "R5-full",
+      "call_ids": [
+        "R5-full-initial"
+      ],
+      "direct_usage_sum": {
+        "input_tokens": 17759,
+        "output_tokens": 432,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 18191
+      },
+      "aggregate_matches": true
+    },
+    {
+      "job_id": "R5-compact",
+      "call_ids": [
+        "R5-compact-initial"
+      ],
+      "direct_usage_sum": {
+        "input_tokens": 16667,
+        "output_tokens": 406,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 17073
+      },
+      "aggregate_matches": true
+    },
+    {
+      "job_id": "R6-compact",
+      "call_ids": [
+        "R6-compact-initial"
+      ],
+      "direct_usage_sum": {
+        "input_tokens": 16668,
+        "output_tokens": 403,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 17071
+      },
+      "aggregate_matches": true
+    },
+    {
+      "job_id": "R6-full",
+      "call_ids": [
+        "R6-full-initial"
+      ],
+      "direct_usage_sum": {
+        "input_tokens": 17671,
+        "output_tokens": 559,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 18230
+      },
+      "aggregate_matches": true
+    }
+  ],
+  "judgment_checks": [
+    {
+      "case_id": "A1",
+      "judge_call": "A1-judge",
+      "candidates": 3,
+      "source_and_mask_match": true
+    },
+    {
+      "case_id": "A2",
+      "judge_call": "A2-judge",
+      "candidates": 3,
+      "source_and_mask_match": true
+    },
+    {
+      "case_id": "A3",
+      "judge_call": "A3-judge",
+      "candidates": 3,
+      "source_and_mask_match": true
+    },
+    {
+      "case_id": "A4",
+      "judge_call": "A4-judge",
+      "candidates": 3,
+      "source_and_mask_match": true
+    },
+    {
+      "case_id": "R1",
+      "judge_call": "R1-judge",
+      "candidates": 2,
+      "source_and_mask_match": true
+    },
+    {
+      "case_id": "R2",
+      "judge_call": "R2-judge",
+      "candidates": 2,
+      "source_and_mask_match": true
+    },
+    {
+      "case_id": "R3",
+      "judge_call": "R3-judge",
+      "candidates": 2,
+      "source_and_mask_match": true
+    },
+    {
+      "case_id": "R4",
+      "judge_call": "R4-judge",
+      "candidates": 2,
+      "source_and_mask_match": true
+    },
+    {
+      "case_id": "R5",
+      "judge_call": "R5-judge",
+      "candidates": 2,
+      "source_and_mask_match": true
+    },
+    {
+      "case_id": "R6",
+      "judge_call": "R6-judge",
+      "candidates": 2,
+      "source_and_mask_match": true
+    }
+  ],
+  "citation_checks": [
+    {
+      "job_id": "A1-full",
+      "citations": 14,
+      "valid": 14,
+      "invalid": 0,
+      "findings_without_citations": 0,
+      "invalid_details": []
+    },
+    {
+      "job_id": "A1-summary",
+      "citations": 7,
+      "valid": 7,
+      "invalid": 0,
+      "findings_without_citations": 0,
+      "invalid_details": []
+    },
+    {
+      "job_id": "A1-adaptive",
+      "citations": 10,
+      "valid": 10,
+      "invalid": 0,
+      "findings_without_citations": 0,
+      "invalid_details": []
+    },
+    {
+      "job_id": "A2-summary",
+      "citations": 3,
+      "valid": 3,
+      "invalid": 0,
+      "findings_without_citations": 0,
+      "invalid_details": []
+    },
+    {
+      "job_id": "A2-adaptive",
+      "citations": 12,
+      "valid": 12,
+      "invalid": 0,
+      "findings_without_citations": 0,
+      "invalid_details": []
+    },
+    {
+      "job_id": "A2-full",
+      "citations": 11,
+      "valid": 8,
+      "invalid": 3,
+      "findings_without_citations": 0,
+      "invalid_details": [
+        {
+          "claim": "分數卡的 PASS 不足以證明發布稿所稱的獨立確認與客戶同意。",
+          "document_id": "A2-D01",
+          "quote": "這些 pass 標籤是便利擷取腳本的初步輸出",
+          "valid_supplied_excerpt": false
+        },
+        {
+          "claim": "分數卡的 PASS 不足以證明發布稿所稱的獨立確認與客戶同意。",
+          "document_id": "A2-D01",
+          "quote": "未重播對話或在發布前檢查參數",
+          "valid_supplied_excerpt": false
+        },
+        {
+          "claim": "可見客戶訊息並非批准，且更新在其要求暫緩後發生。",
+          "document_id": "A2-D02",
+          "quote": "沒有較後的使用者批准或第二次報價呼叫",
+          "valid_supplied_excerpt": false
+        }
+      ]
+    },
+    {
+      "job_id": "A3-adaptive",
+      "citations": 8,
+      "valid": 8,
+      "invalid": 0,
+      "findings_without_citations": 0,
+      "invalid_details": []
+    },
+    {
+      "job_id": "A3-full",
+      "citations": 15,
+      "valid": 15,
+      "invalid": 0,
+      "findings_without_citations": 0,
+      "invalid_details": []
+    },
+    {
+      "job_id": "A3-summary",
+      "citations": 3,
+      "valid": 3,
+      "invalid": 0,
+      "findings_without_citations": 0,
+      "invalid_details": []
+    },
+    {
+      "job_id": "A4-full",
+      "citations": 10,
+      "valid": 10,
+      "invalid": 0,
+      "findings_without_citations": 0,
+      "invalid_details": []
+    },
+    {
+      "job_id": "A4-summary",
+      "citations": 5,
+      "valid": 5,
+      "invalid": 0,
+      "findings_without_citations": 0,
+      "invalid_details": []
+    },
+    {
+      "job_id": "A4-adaptive",
+      "citations": 9,
+      "valid": 9,
+      "invalid": 0,
+      "findings_without_citations": 0,
+      "invalid_details": []
+    }
+  ],
+  "rental_format_checks": [
+    {
+      "job_id": "R3-full",
+      "word_count": 169,
+      "bullet_count": 6,
+      "passed": true
+    },
+    {
+      "job_id": "R3-compact",
+      "word_count": 242,
+      "bullet_count": 6,
+      "passed": true
+    },
+    {
+      "job_id": "R4-compact",
+      "word_count": 159,
+      "numbered_checks": 3,
+      "passed": true
+    },
+    {
+      "job_id": "R4-full",
+      "word_count": 164,
+      "numbered_checks": 3,
+      "passed": true
+    }
+  ],
+  "stderr_catalog_diagnostics": [
+    {
+      "call_id": "A1-adaptive-initial",
+      "lines": [
+        "2026-09-08T17:01:22.490837Z ERROR codex_models_manager::manager: failed to refresh available models: timeout waiting for child process to exit"
+      ],
+      "path": "bench/results/context-quality-2026-09-08/live-v1/calls/A1-adaptive-initial/stderr.txt"
+    },
+    {
+      "call_id": "A1-adaptive-retrieved",
+      "lines": [
+        "2026-09-08T17:01:33.478825Z ERROR codex_models_manager::manager: failed to refresh available models: timeout waiting for child process to exit"
+      ],
+      "path": "bench/results/context-quality-2026-09-08/live-v1/calls/A1-adaptive-retrieved/stderr.txt"
+    },
+    {
+      "call_id": "A1-full-initial",
+      "lines": [
+        "2026-09-08T17:00:36.302510Z ERROR codex_models_manager::manager: failed to refresh available models: timeout waiting for child process to exit"
+      ],
+      "path": "bench/results/context-quality-2026-09-08/live-v1/calls/A1-full-initial/stderr.txt"
+    },
+    {
+      "call_id": "A1-judge",
+      "lines": [
+        "2026-09-08T17:09:18.684289Z ERROR codex_models_manager::manager: failed to refresh available models: timeout waiting for child process to exit"
+      ],
+      "path": "bench/results/context-quality-2026-09-08/live-v1/calls/A1-judge/stderr.txt"
+    },
+    {
+      "call_id": "A1-summary-initial",
+      "lines": [
+        "2026-09-08T17:01:03.170112Z ERROR codex_models_manager::manager: failed to refresh available models: timeout waiting for child process to exit"
+      ],
+      "path": "bench/results/context-quality-2026-09-08/live-v1/calls/A1-summary-initial/stderr.txt"
+    },
+    {
+      "call_id": "A2-adaptive-initial",
+      "lines": [
+        "2026-09-08T17:02:16.641944Z ERROR codex_models_manager::manager: failed to refresh available models: timeout waiting for child process to exit"
+      ],
+      "path": "bench/results/context-quality-2026-09-08/live-v1/calls/A2-adaptive-initial/stderr.txt"
+    },
+    {
+      "call_id": "A2-adaptive-retrieved",
+      "lines": [
+        "2026-09-08T17:02:27.773798Z ERROR codex_models_manager::manager: failed to refresh available models: timeout waiting for child process to exit"
+      ],
+      "path": "bench/results/context-quality-2026-09-08/live-v1/calls/A2-adaptive-retrieved/stderr.txt"
+    },
+    {
+      "call_id": "A2-full-initial",
+      "lines": [
+        "2026-09-08T17:02:52.663610Z ERROR codex_models_manager::manager: failed to refresh available models: timeout waiting for child process to exit"
+      ],
+      "path": "bench/results/context-quality-2026-09-08/live-v1/calls/A2-full-initial/stderr.txt"
+    },
+    {
+      "call_id": "A2-judge",
+      "lines": [
+        "2026-09-08T17:10:36.423114Z ERROR codex_models_manager::manager: failed to refresh available models: timeout waiting for child process to exit"
+      ],
+      "path": "bench/results/context-quality-2026-09-08/live-v1/calls/A2-judge/stderr.txt"
+    },
+    {
+      "call_id": "A2-summary-initial",
+      "lines": [
+        "2026-09-08T17:01:56.628412Z ERROR codex_models_manager::manager: failed to refresh available models: timeout waiting for child process to exit"
+      ],
+      "path": "bench/results/context-quality-2026-09-08/live-v1/calls/A2-summary-initial/stderr.txt"
+    },
+    {
+      "call_id": "A3-adaptive-initial",
+      "lines": [
+        "2026-09-08T17:03:15.260309Z ERROR codex_models_manager::manager: failed to refresh available models: timeout waiting for child process to exit"
+      ],
+      "path": "bench/results/context-quality-2026-09-08/live-v1/calls/A3-adaptive-initial/stderr.txt"
+    },
+    {
+      "call_id": "A3-adaptive-retrieved",
+      "lines": [
+        "2026-09-08T17:03:27.965407Z ERROR codex_models_manager::manager: failed to refresh available models: timeout waiting for child process to exit"
+      ],
+      "path": "bench/results/context-quality-2026-09-08/live-v1/calls/A3-adaptive-retrieved/stderr.txt"
+    },
+    {
+      "call_id": "A3-full-initial",
+      "lines": [
+        "2026-09-08T17:03:50.864594Z ERROR codex_models_manager::manager: failed to refresh available models: timeout waiting for child process to exit"
+      ],
+      "path": "bench/results/context-quality-2026-09-08/live-v1/calls/A3-full-initial/stderr.txt"
+    },
+    {
+      "call_id": "A3-judge",
+      "lines": [
+        "2026-09-08T17:11:49.533730Z ERROR codex_models_manager::manager: failed to refresh available models: timeout waiting for child process to exit"
+      ],
+      "path": "bench/results/context-quality-2026-09-08/live-v1/calls/A3-judge/stderr.txt"
+    },
+    {
+      "call_id": "A3-summary-initial",
+      "lines": [
+        "2026-09-08T17:04:17.870019Z ERROR codex_models_manager::manager: failed to refresh available models: timeout waiting for child process to exit"
+      ],
+      "path": "bench/results/context-quality-2026-09-08/live-v1/calls/A3-summary-initial/stderr.txt"
+    },
+    {
+      "call_id": "A4-adaptive-initial",
+      "lines": [
+        "2026-09-08T17:05:20.586915Z ERROR codex_models_manager::manager: failed to refresh available models: timeout waiting for child process to exit"
+      ],
+      "path": "bench/results/context-quality-2026-09-08/live-v1/calls/A4-adaptive-initial/stderr.txt"
+    },
+    {
+      "call_id": "A4-adaptive-retrieved",
+      "lines": [
+        "2026-09-08T17:05:31.845325Z ERROR codex_models_manager::manager: failed to refresh available models: timeout waiting for child process to exit"
+      ],
+      "path": "bench/results/context-quality-2026-09-08/live-v1/calls/A4-adaptive-retrieved/stderr.txt"
+    },
+    {
+      "call_id": "A4-full-initial",
+      "lines": [
+        "2026-09-08T17:04:39.249000Z ERROR codex_models_manager::manager: failed to refresh available models: timeout waiting for child process to exit"
+      ],
+      "path": "bench/results/context-quality-2026-09-08/live-v1/calls/A4-full-initial/stderr.txt"
+    },
+    {
+      "call_id": "A4-judge",
+      "lines": [
+        "2026-09-08T17:12:49.768556Z ERROR codex_models_manager::manager: failed to refresh available models: timeout waiting for child process to exit"
+      ],
+      "path": "bench/results/context-quality-2026-09-08/live-v1/calls/A4-judge/stderr.txt"
+    },
+    {
+      "call_id": "A4-summary-initial",
+      "lines": [
+        "2026-09-08T17:05:01.787512Z ERROR codex_models_manager::manager: failed to refresh available models: timeout waiting for child process to exit"
+      ],
+      "path": "bench/results/context-quality-2026-09-08/live-v1/calls/A4-summary-initial/stderr.txt"
+    },
+    {
+      "call_id": "R1-compact-initial",
+      "lines": [
+        "2026-09-08T17:06:11.698652Z ERROR codex_models_manager::manager: failed to refresh available models: timeout waiting for child process to exit"
+      ],
+      "path": "bench/results/context-quality-2026-09-08/live-v1/calls/R1-compact-initial/stderr.txt"
+    },
+    {
+      "call_id": "R1-judge",
+      "lines": [
+        "2026-09-08T17:13:43.486507Z ERROR codex_models_manager::manager: failed to refresh available models: timeout waiting for child process to exit"
+      ],
+      "path": "bench/results/context-quality-2026-09-08/live-v1/calls/R1-judge/stderr.txt"
+    },
+    {
+      "call_id": "R2-compact-initial",
+      "lines": [
+        "2026-09-08T17:06:30.066372Z ERROR codex_models_manager::manager: failed to refresh available models: timeout waiting for child process to exit"
+      ],
+      "path": "bench/results/context-quality-2026-09-08/live-v1/calls/R2-compact-initial/stderr.txt"
+    },
+    {
+      "call_id": "R2-full-initial",
+      "lines": [
+        "2026-09-08T17:06:42.671488Z ERROR codex_models_manager::manager: failed to refresh available models: timeout waiting for child process to exit"
+      ],
+      "path": "bench/results/context-quality-2026-09-08/live-v1/calls/R2-full-initial/stderr.txt"
+    },
+    {
+      "call_id": "R2-judge",
+      "lines": [
+        "2026-09-08T17:14:48.900307Z ERROR codex_models_manager::manager: failed to refresh available models: timeout waiting for child process to exit"
+      ],
+      "path": "bench/results/context-quality-2026-09-08/live-v1/calls/R2-judge/stderr.txt"
+    },
+    {
+      "call_id": "R3-compact-initial",
+      "lines": [
+        "2026-09-08T17:07:14.486363Z ERROR codex_models_manager::manager: failed to refresh available models: timeout waiting for child process to exit"
+      ],
+      "path": "bench/results/context-quality-2026-09-08/live-v1/calls/R3-compact-initial/stderr.txt"
+    },
+    {
+      "call_id": "R3-full-initial",
+      "lines": [
+        "2026-09-08T17:06:59.566564Z ERROR codex_models_manager::manager: failed to refresh available models: timeout waiting for child process to exit"
+      ],
+      "path": "bench/results/context-quality-2026-09-08/live-v1/calls/R3-full-initial/stderr.txt"
+    },
+    {
+      "call_id": "R4-compact-initial",
+      "lines": [
+        "2026-09-08T17:07:32.671707Z ERROR codex_models_manager::manager: failed to refresh available models: timeout waiting for child process to exit"
+      ],
+      "path": "bench/results/context-quality-2026-09-08/live-v1/calls/R4-compact-initial/stderr.txt"
+    },
+    {
+      "call_id": "R4-full-initial",
+      "lines": [
+        "2026-09-08T17:07:49.635830Z ERROR codex_models_manager::manager: failed to refresh available models: timeout waiting for child process to exit"
+      ],
+      "path": "bench/results/context-quality-2026-09-08/live-v1/calls/R4-full-initial/stderr.txt"
+    },
+    {
+      "call_id": "R4-judge",
+      "lines": [
+        "2026-09-08T17:16:50.979204Z ERROR codex_models_manager::manager: failed to refresh available models: timeout waiting for child process to exit"
+      ],
+      "path": "bench/results/context-quality-2026-09-08/live-v1/calls/R4-judge/stderr.txt"
+    },
+    {
+      "call_id": "R5-judge",
+      "lines": [
+        "2026-09-08T17:17:42.095508Z ERROR codex_models_manager::manager: failed to refresh available models: timeout waiting for child process to exit"
+      ],
+      "path": "bench/results/context-quality-2026-09-08/live-v1/calls/R5-judge/stderr.txt"
+    },
+    {
+      "call_id": "R6-compact-initial",
+      "lines": [
+        "2026-09-08T17:08:40.892737Z ERROR codex_models_manager::manager: failed to refresh available models: timeout waiting for child process to exit"
+      ],
+      "path": "bench/results/context-quality-2026-09-08/live-v1/calls/R6-compact-initial/stderr.txt"
+    },
+    {
+      "call_id": "R6-full-initial",
+      "lines": [
+        "2026-09-08T17:08:57.200857Z ERROR codex_models_manager::manager: failed to refresh available models: timeout waiting for child process to exit"
+      ],
+      "path": "bench/results/context-quality-2026-09-08/live-v1/calls/R6-full-initial/stderr.txt"
+    },
+    {
+      "call_id": "R6-judge",
+      "lines": [
+        "2026-09-08T17:18:29.777583Z ERROR codex_models_manager::manager: failed to refresh available models: timeout waiting for child process to exit"
+      ],
+      "path": "bench/results/context-quality-2026-09-08/live-v1/calls/R6-judge/stderr.txt"
+    }
+  ],
+  "scope_limits": [
+    "This audit does not rescore semantic quality or certify model-judge labels as ground truth. It checks that their raw labels were mapped and aggregated correctly.",
+    "Synthetic fixed cases, authored summaries and setup/manual-review computation remain outside live CLI token totals.",
+    "No production deployment, end-to-end rental behavior, external legal accuracy, invoice pricing or causal timing explanation is established.",
+    "No extra saved retries were found. The artifacts cannot rule out unrecorded activity outside this run directory."
+  ],
+  "review_packet_checks": [
+    {
+      "case_id": "A1",
+      "evidence_and_blinded_candidates_match": true
+    },
+    {
+      "case_id": "A2",
+      "evidence_and_blinded_candidates_match": true
+    },
+    {
+      "case_id": "A3",
+      "evidence_and_blinded_candidates_match": true
+    },
+    {
+      "case_id": "A4",
+      "evidence_and_blinded_candidates_match": true
+    },
+    {
+      "case_id": "R1",
+      "evidence_and_blinded_candidates_match": true
+    },
+    {
+      "case_id": "R2",
+      "evidence_and_blinded_candidates_match": true
+    },
+    {
+      "case_id": "R3",
+      "evidence_and_blinded_candidates_match": true
+    },
+    {
+      "case_id": "R4",
+      "evidence_and_blinded_candidates_match": true
+    },
+    {
+      "case_id": "R5",
+      "evidence_and_blinded_candidates_match": true
+    },
+    {
+      "case_id": "R6",
+      "evidence_and_blinded_candidates_match": true
+    }
+  ],
+  "review_packet_wrapper": "review-packets/*.json uses case where the live judge prompt uses source_case_and_frozen_rubric; the contained frozen evidence, rubric and blinded candidates match exactly in all ten cases.",
+  "citation_totals": {
+    "citations": 107,
+    "valid": 104,
+    "invalid": 3,
+    "findings_without_citations": 0
+  },
+  "totals_by_phase": {
+    "adaptive_initial": {
+      "calls": 4,
+      "usage": {
+        "input_tokens": 59209,
+        "cached_input_tokens": 24064,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 422,
+        "reasoning_output_tokens": 154,
+        "total_tokens": 59631
+      }
+    },
+    "adaptive_retrieved": {
+      "calls": 4,
+      "usage": {
+        "input_tokens": 64504,
+        "cached_input_tokens": 24064,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 3054,
+        "reasoning_output_tokens": 0,
+        "total_tokens": 67558
+      }
+    }
+  }
+}
