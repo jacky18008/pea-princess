@@ -24,7 +24,7 @@ metadata:
 | wants a shortlist roasted (尻洗) or two flats compared | `references/axes/13-adversarial-review.md`, then the report contract |
 | is about to sign, needs a bridge stay, or asks about referencing | `references/axes/15`–`17` |
 | is going to a viewing, or has just been | `references/axes/14-site-visit.md`, `18-street-view.md` |
-| asks about depth, cost or which model | `references/budget-modes.md` (escalation ladder) |
+| asks about depth, cost or which model | `references/budget-modes.md` |
 | asks how this works, changes a setting by talking, shares a seed, or tells stories about past homes | `references/how-to-use.md` (diff, confirm, `scripts/profile_check.py`), `references/sharing.md` (`scripts/seed.py`) |
 | is a student weighing halls against a private flat, or asks what rent is normal | `references/student-housing.md` |
 | needs any number computed | `references/arithmetic.md` (`scripts/calc.py`) |
@@ -33,7 +33,7 @@ metadata:
 ## Three presumptions that run through every axis
 1. **Cheap has a reason.** A price below the local band means the landlord or agent has a reason to sell you. Find it and name it; an unexplained discount is a reason to walk.
 2. **Pay more only for a nameable benefit** (aspect, floor, quiet side, management).
-3. **The user is the princess; you only lift the mattresses.** Say what only the user can supply (floor plan, street view, how the street felt) instead of guessing. Landlords and agents are partners; roast the listing, never the person. This is a filter; the viewing decides.
+3. **The user is the princess; you only lift the mattresses.** Say what only the user can supply (floor plan, street view, how the street felt) instead of guessing. Landlords and agents are partners; roast the listing, never the person.
 
 ## The 12 axes (method per axis in `references/axes/`)
 1. **Identity** — exact flat, building, postcode; the EPC register is the arbiter (`scripts/epc.py`). Big buildings span postcodes.
@@ -54,10 +54,10 @@ metadata:
 - **Sources**: automate only what `references/sources.yaml` marks open. Named only, no method (their terms forbid automation): Rightmove, Zoopla, OnTheMarket, OpenRent, HomeViews, Trustpilot, Google reviews, Airbnb, Booking.com — ask the user to paste. Borough portals: `references/boroughs.yaml`.
 - **When you cannot get something**: try first, collect every gap, ask **once** with URL, format and why, record `provenance: user_supplied`, mark the axis U. Never invent a number.
 - **Arithmetic is never done in your head**: `scripts/calc.py` prints every step; without a shell, write the formula (weekly rent = monthly × 12 ÷ 52; deposit cap = 5 × weekly, 6 × at £50k a year or more) and each step, check it a second way, and mark the number `computed_by: shown formula`.
-- **Escalation is automatic**: start every flat at `standard`; go to `breadth` only for the final two or three flats, or a CONDITIONAL/EDGE verdict with over 40% of axes unknown; four or more subagents at once use the cheap tier; the report's first line names the tier.
+- **Escalation is automatic**: start every flat at `standard`; go to `breadth` only for the final two or three flats, or a CONDITIONAL/EDGE verdict with over 40% of axes unknown; the report's first line names the tier.
 - **Legal facts** (England; quote whole, with the date): Renters' Rights Act 2025, in force since **2026-05-01**: periodic tenancies only; at most one month's rent in advance; deposit at most **five weeks' rent, six at £50,000 a year or more**; holding deposit at most one week. Cite `references/sources.yaml`.
 - **The fixed form** (`references/fixed-questions.yaml`): found (quote it) · asked · unknown; eight / fourteen / eighteen by budget mode; `advanced.fixed_form` overrides; F1–F8 every flat, the rest when a page was pasted; scan the paste first (`scripts/scan.py`; without a shell, list candidate sentences); ask once for the rest.
 - **Never**: sign on the viewing day; treat listing area as fact; scale crime figures for missing months; turn a missing item into a pass; hide a red flag; use ethnicity or nationality as a factor.
 
 ## Output
-Write `report.json` per `references/report-schema.json`; render with `scripts/render.py` or `viewer/viewer.html`; print the one-page verdict in the user's language. Verdicts: PASS · EDGE (break-even rent) · CONDITIONAL (conditions) · KILL (fatal axis).
+Write `report.json` per `references/report-schema.json`; render with `scripts/render.py` or `viewer/viewer.html`; print the one-page verdict in the user's language, closing with the viewing-day line (never sign or pay at the viewing) and the legal line with its date. Verdicts: PASS · EDGE (break-even rent) · CONDITIONAL (conditions) · KILL (fatal axis).
