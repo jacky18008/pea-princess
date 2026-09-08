@@ -1,0 +1,379 @@
+{
+  "completed_at_utc": "2026-09-08T12:23:31.878252+00:00",
+  "protocol_commit": "d0a8caa",
+  "usage_parser_commit": "ba94d98",
+  "plan_sha256": "5a071aae9f934e3ccd51a4ee6dbe738c2fd1a388e8f3e2523024a464f3f352e3",
+  "summary_sha256": "8d1ba26143e9bedc3f3e0b49a761da458047987aafc08bac1a54aef9c83207f3",
+  "model_requested": "gpt-5.6-terra",
+  "effort": "low",
+  "claude_calls": 0,
+  "tool_events": 0,
+  "formal_calls": 10,
+  "arms": {
+    "verbose": {
+      "calls": 7,
+      "usage_reported_for_calls": 7,
+      "usage": {
+        "input_tokens": 301180,
+        "output_tokens": 1079,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 302259,
+        "input_not_from_read_cache": 301180
+      },
+      "known_reported_usage": {
+        "input_tokens": 301180,
+        "output_tokens": 1079,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 302259,
+        "input_not_from_read_cache": 301180
+      },
+      "quality_passes": 7,
+      "final_quality_passes": 3,
+      "final_reports": 3
+    },
+    "compact": {
+      "calls": 3,
+      "usage_reported_for_calls": 3,
+      "usage": {
+        "input_tokens": 44353,
+        "output_tokens": 489,
+        "cached_input_tokens": 24064,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 44842,
+        "input_not_from_read_cache": 20289
+      },
+      "known_reported_usage": {
+        "input_tokens": 44353,
+        "output_tokens": 489,
+        "cached_input_tokens": 24064,
+        "cache_write_input_tokens": 0,
+        "total_tokens": 44842,
+        "input_not_from_read_cache": 20289
+      },
+      "quality_passes": 3,
+      "final_quality_passes": 3,
+      "final_reports": 3
+    }
+  },
+  "reduction": 0.8516437889359787,
+  "datasets": [
+    {
+      "dataset": "personas-2026-09-07",
+      "verbose_calls": 3,
+      "compact_calls": 1,
+      "verbose_tokens": 138987,
+      "compact_tokens": 14910,
+      "reduction": 0.8927237799218632,
+      "all_factual_checks_pass": true
+    },
+    {
+      "dataset": "personas-2026-09-07-fixed",
+      "verbose_calls": 3,
+      "compact_calls": 1,
+      "verbose_tokens": 136293,
+      "compact_tokens": 14916,
+      "reduction": 0.8905593097224362,
+      "all_factual_checks_pass": true
+    },
+    {
+      "dataset": "personas-2026-09-07-fix2",
+      "verbose_calls": 1,
+      "compact_calls": 1,
+      "verbose_tokens": 26979,
+      "compact_tokens": 15016,
+      "reduction": 0.44341895548389487,
+      "all_factual_checks_pass": true
+    }
+  ],
+  "final_reports_only": {
+    "verbose": 139071,
+    "compact": 44842,
+    "reduction": 0.6775603828260385
+  },
+  "canary": {
+    "usage": {
+      "input_tokens": 14031,
+      "cached_input_tokens": 9984,
+      "cache_write_input_tokens": 0,
+      "output_tokens": 9,
+      "reasoning_output_tokens": 0
+    },
+    "total_tokens": 14040,
+    "seconds": 9.762
+  },
+  "known_cli_tokens_including_canary": 361141,
+  "scope_exclusion": "Parent/subagent implementation and analysis are outside these CLI totals. The pilot reports coordination over existing data, not full rental-agent savings or an invoice.",
+  "validation": {
+    "offline_suite_passed": 1586,
+    "seconds": 13.085,
+    "independent_raw_event_and_source_fact_recount": "passed",
+    "paired_final_aggregate_inputs_equal": true,
+    "all_call_factual_checks_passed": 10,
+    "compact_final_reports_passed": 3
+  },
+  "source_sha256": {
+    "docs/personas/design-notes-claude-2026-09-06.md": "3f7e9767c3f90142a066a8c47397d5de2e781d1e2441e37ef4ec0a48771ecd69",
+    "docs/personas/design-notes-astra-2026-09-06.md": "03f9d234bc34b342f9aef0730fcaa4dfc6ece46d065f2bf4af814c829e8885e0",
+    "bench/cost_probe.py": "9996a471c9d5f2504494dec784036f11d5e9a25e1e0d418903efc385780ddf37",
+    "bench/launch.py": "97408a88f28756dbe1643e769836166eeb1497480486a5abee7da4d9cf69199c",
+    "docs/cost-probe/protocol-2026-09-08.md": "55a00607d7f1949ab352bcef1078d1dd19053551cd0e022e03b990591523cc2b",
+    "bench/results/handoff-2026-09-08-verified/personas-2026-09-07/scorecard.json": "6db9e3183a988f471fb433ca02950ae3fcb30e66a9c6d7f9fbae65a0d6a3a6d9",
+    "bench/results/handoff-2026-09-08-verified/personas-2026-09-07-fixed/scorecard.json": "3c7c936483923d4b6a24e0871c5d1bf18ed54f72739dc8e7ab6577cdd07efd9d",
+    "bench/results/handoff-2026-09-08-verified/personas-2026-09-07-fix2/scorecard.json": "5fd56f0960b67bb55b6392d2da7491286bb01a365bcbcb9106dce53d8d07c39a"
+  },
+  "raw_results_directory": "/Users/chenhsienhao/Documents/pea-princess/bench/results/codex-cost-probe-2026-09-08/trial-v1",
+  "calls": [
+    {
+      "id": "personas-2026-09-07-compact-32",
+      "arm": "compact",
+      "final": true,
+      "requested_model": "gpt-5.6-terra",
+      "effort": "low",
+      "seconds": 11.26,
+      "usage": {
+        "input_tokens": 14763,
+        "output_tokens": 147,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "reasoning_output_tokens": 0,
+        "total_tokens": 14910,
+        "usage_shapes_seen": [
+          "cache_write_input_tokens+cached_input_tokens+input_tokens+output_tokens+reasoning_output_tokens"
+        ]
+      },
+      "prompt_sha256": "428be0da08a0788bf181f4e81948d1b2e720cd31445d34ae6252654129082745",
+      "events_sha256": "ee0875c362d18cca0f4d951fa5d811fe1284f3d67ec5333759464597430d3c56",
+      "quality": {
+        "pass": true,
+        "failures": []
+      }
+    },
+    {
+      "id": "personas-2026-09-07-fix2-compact-07",
+      "arm": "compact",
+      "final": true,
+      "requested_model": "gpt-5.6-terra",
+      "effort": "low",
+      "seconds": 14.314,
+      "usage": {
+        "input_tokens": 14822,
+        "output_tokens": 194,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "reasoning_output_tokens": 0,
+        "total_tokens": 15016,
+        "usage_shapes_seen": [
+          "cache_write_input_tokens+cached_input_tokens+input_tokens+output_tokens+reasoning_output_tokens"
+        ]
+      },
+      "prompt_sha256": "1f5f151a64a13fe0c0e0721edc0d04bcc16f2c341fb4750574f1409b907a22b1",
+      "events_sha256": "b20a2abb8f6f9326cb1fdb459c582f760e4b89310703ffe7fe904d296e832099",
+      "quality": {
+        "pass": true,
+        "failures": []
+      }
+    },
+    {
+      "id": "personas-2026-09-07-fix2-verbose-07",
+      "arm": "verbose",
+      "final": true,
+      "requested_model": "gpt-5.6-terra",
+      "effort": "low",
+      "seconds": 15.641,
+      "usage": {
+        "input_tokens": 26785,
+        "output_tokens": 194,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "reasoning_output_tokens": 0,
+        "total_tokens": 26979,
+        "usage_shapes_seen": [
+          "cache_write_input_tokens+cached_input_tokens+input_tokens+output_tokens+reasoning_output_tokens"
+        ]
+      },
+      "prompt_sha256": "0901c60246e5d8d1f561b9c42acf6b2d25d158fa6ab3c519fc618446325ce4b6",
+      "events_sha256": "4ddd060ce15d9ff258da897ba95f10335bd9da20381c578d42a650b22367962b",
+      "quality": {
+        "pass": true,
+        "failures": []
+      }
+    },
+    {
+      "id": "personas-2026-09-07-fixed-compact-32",
+      "arm": "compact",
+      "final": true,
+      "requested_model": "gpt-5.6-terra",
+      "effort": "low",
+      "seconds": 12.574,
+      "usage": {
+        "input_tokens": 14768,
+        "output_tokens": 148,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "reasoning_output_tokens": 0,
+        "total_tokens": 14916,
+        "usage_shapes_seen": [
+          "cache_write_input_tokens+cached_input_tokens+input_tokens+output_tokens+reasoning_output_tokens"
+        ]
+      },
+      "prompt_sha256": "4c25bdfaba7b94ea8fefd6d4853ea9c1960d33a2e0bcec7a7fc00df74305fbf9",
+      "events_sha256": "cad7e25de2bb3833ac5f3003e2824ac442ca229da161187de334bb7d72e49e02",
+      "quality": {
+        "pass": true,
+        "failures": []
+      }
+    },
+    {
+      "id": "personas-2026-09-07-fixed-verbose-10",
+      "arm": "verbose",
+      "final": false,
+      "requested_model": "gpt-5.6-terra",
+      "effort": "low",
+      "seconds": 12.551,
+      "usage": {
+        "input_tokens": 36670,
+        "output_tokens": 148,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "reasoning_output_tokens": 0,
+        "total_tokens": 36818,
+        "usage_shapes_seen": [
+          "cache_write_input_tokens+cached_input_tokens+input_tokens+output_tokens+reasoning_output_tokens"
+        ]
+      },
+      "prompt_sha256": "2346e01cfbfaac5b8cdc10eea46c2adc69c8aec4c4470ee8ab6f396d6245df2b",
+      "events_sha256": "5cdd3a593fb81e486688d0c2f2e787969ebed61f9533397a23663dafa161b4ac",
+      "quality": {
+        "pass": true,
+        "failures": []
+      }
+    },
+    {
+      "id": "personas-2026-09-07-fixed-verbose-21",
+      "arm": "verbose",
+      "final": false,
+      "requested_model": "gpt-5.6-terra",
+      "effort": "low",
+      "seconds": 13.512,
+      "usage": {
+        "input_tokens": 43135,
+        "output_tokens": 148,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "reasoning_output_tokens": 0,
+        "total_tokens": 43283,
+        "usage_shapes_seen": [
+          "cache_write_input_tokens+cached_input_tokens+input_tokens+output_tokens+reasoning_output_tokens"
+        ]
+      },
+      "prompt_sha256": "686bc3e418dab60303a10550f557b27a3275cc8292dd58ab1c48b983a71feee8",
+      "events_sha256": "68ddbcd1f125413e2899cb9ab6cf83e9ef9ab47c79de5f81530b713a6bc9ca98",
+      "quality": {
+        "pass": true,
+        "failures": []
+      }
+    },
+    {
+      "id": "personas-2026-09-07-fixed-verbose-32",
+      "arm": "verbose",
+      "final": true,
+      "requested_model": "gpt-5.6-terra",
+      "effort": "low",
+      "seconds": 12.471,
+      "usage": {
+        "input_tokens": 56044,
+        "output_tokens": 148,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "reasoning_output_tokens": 0,
+        "total_tokens": 56192,
+        "usage_shapes_seen": [
+          "cache_write_input_tokens+cached_input_tokens+input_tokens+output_tokens+reasoning_output_tokens"
+        ]
+      },
+      "prompt_sha256": "2e1c7ba60acb3c0db3c3f560ea74c4c24fb9249ce4f53963409efb868f917b16",
+      "events_sha256": "1e2cafe7dab49c7cdef1a55f8005759c5978421ba7869a88f7fa384fd4fd8dea",
+      "quality": {
+        "pass": true,
+        "failures": []
+      }
+    },
+    {
+      "id": "personas-2026-09-07-verbose-10",
+      "arm": "verbose",
+      "final": false,
+      "requested_model": "gpt-5.6-terra",
+      "effort": "low",
+      "seconds": 24.473,
+      "usage": {
+        "input_tokens": 36358,
+        "output_tokens": 147,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "reasoning_output_tokens": 0,
+        "total_tokens": 36505,
+        "usage_shapes_seen": [
+          "cache_write_input_tokens+cached_input_tokens+input_tokens+output_tokens+reasoning_output_tokens"
+        ]
+      },
+      "prompt_sha256": "a826bc6d0413df25a0ebf9a0ba468b1e427df9b508651a25cd2836615284dd0d",
+      "events_sha256": "fee55c3c2db0b6b00785143e8d837cbbd05dc270df58a19ad740d056823d190c",
+      "quality": {
+        "pass": true,
+        "failures": []
+      }
+    },
+    {
+      "id": "personas-2026-09-07-verbose-21",
+      "arm": "verbose",
+      "final": false,
+      "requested_model": "gpt-5.6-terra",
+      "effort": "low",
+      "seconds": 13.7,
+      "usage": {
+        "input_tokens": 46435,
+        "output_tokens": 147,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "reasoning_output_tokens": 0,
+        "total_tokens": 46582,
+        "usage_shapes_seen": [
+          "cache_write_input_tokens+cached_input_tokens+input_tokens+output_tokens+reasoning_output_tokens"
+        ]
+      },
+      "prompt_sha256": "19d76bbeb5ce107ffe94f37cd8b1b0cbd562008ee24603760fd3f0531f9de9d6",
+      "events_sha256": "ef127485e7ded436c8b9ed4c8ca0b797c16433aae0a2a38eaa162f0db1a178a4",
+      "quality": {
+        "pass": true,
+        "failures": []
+      }
+    },
+    {
+      "id": "personas-2026-09-07-verbose-32",
+      "arm": "verbose",
+      "final": true,
+      "requested_model": "gpt-5.6-terra",
+      "effort": "low",
+      "seconds": 20.629,
+      "usage": {
+        "input_tokens": 55753,
+        "output_tokens": 147,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "reasoning_output_tokens": 0,
+        "total_tokens": 55900,
+        "usage_shapes_seen": [
+          "cache_write_input_tokens+cached_input_tokens+input_tokens+output_tokens+reasoning_output_tokens"
+        ]
+      },
+      "prompt_sha256": "44cd0c633c110f207e67bebe62019c902d9df03dedc5232c21b500fd7cf4a555",
+      "events_sha256": "d126664f6b79d8940af5ead765fe6eb60fb704404695270262f36c57fa896199",
+      "quality": {
+        "pass": true,
+        "failures": []
+      }
+    }
+  ]
+}
