@@ -1,0 +1,20 @@
+# Authored analysis fixture notes — 2026-09-08
+
+These four cases are new synthetic pilot fixtures. They are agent-authored invented records, not an untouched production holdout, not a sample of the saved reporting datasets, and not evidence of statistical equivalence. No network or separate benchmark/summary-generation invocation was used to prepare them. Fixture and summary authorship used the setup agent itself; that computation is outside the measured CLI totals and is not free production compression. The fixed summaries and the evidence-based gold were authored as separate fields by the same setup agent; there is no shared facts-extraction function producing both.
+
+| Case | Intended evidence dependency | Essential source access | Document characters | Summary characters |
+| --- | --- | --- | ---: | ---: |
+| A1 | Improved mean conceals an assisted-route regression | D01 ledger plus D02 scope/configuration | 8,167 | 673 |
+| A2 | Preliminary scorecard conflicts with ordered quote/approval trace | D01 rubric plus D02 trace/field definitions | 8,555 | 674 |
+| A3 | One serious preservation-rule omission is diluted by item counts | D01 rollup plus D02 rule/manifest/trace | 8,670 | 697 |
+| A4 | Historical payload content is not retained | Summary is enough to abstain; D01+D02 can substantiate details | 8,454 | 689 |
+
+Document IDs use each case prefix, for example A1-D01. D03 supplies environment/coverage context but is not required for a justified core answer. An adaptive reader can retrieve the two essential sources in one round. Titles are source descriptions; they do not label the verdict. The same question, catalog, and summary must be shown in all conditions. Full adds source documents; adaptive adds only selected documents. The gold block must never enter an answering or retrieval-selection prompt.
+
+The summaries contain fixed counts and source inventories, not extracted failure rows for A1–A3. A4 contains the retained-evidence gaps and badge semantics needed to justify abstention, without stating the verdict as a conclusion. Source-side evaluator instructions and ready-made diagnosis/verification prose were removed during fixture review; sources retain raw tables, traces, rubric/policy definitions, configuration records, ordinary preliminary claims, and realistic archive metadata.
+
+Scoring should distinguish an omitted finding or explicit uncertainty from an unsupported confident claim. Summary-only readers of A1–A3 can reasonably request the relevant evidence and withhold approval, but should not receive credit for fabricating the concealed source details. A4 permits full credit for justified abstention based on explicitly labeled exact summary excerpts without any retrieval. No condition should be punished merely for declining to claim access to an unseen document. Gold lists alternative actions and uncertainty boundaries; exact preferred wording is not required.
+
+Important limitations: all four cases challenge an asserted conclusion or action; there is no well-supported approval control. A generally skeptical policy may therefore look better than it would on a balanced workload. Sources are deliberately discoverable under a two-document retrieval cap, and source lengths are moderate. This is an evidence-location and audit pilot, not proof of general deep-analysis capability. The investigator authored and reviewed these fixtures, so they are not independent blind holdouts. A1 supports descriptive subgroup comparison, not demographic or causal conclusions. A2 demonstrates only sandbox mutation, A3 only a preview stopped by human review, and A4 neither transmission nor non-transmission. Counts are scenario-specific and not population estimates.
+
+Validation: JSON parsed; four unique case IDs; three unique documents per case; all source IDs in gold resolve (with summary as an explicitly allowed source); summary/document lengths satisfy the requested ranges. A1 ledger paired counts and totals were checked separately. No benchmark models were run and no commits were made by the fixture author.

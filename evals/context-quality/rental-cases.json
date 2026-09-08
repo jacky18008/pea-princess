@@ -1,0 +1,815 @@
+{
+  "version": 1,
+  "provenance": "Six new, deliberately constructed fictional rental conversation prefixes authored by a Codex setup subagent for a paired context-representation experiment. Full histories, neutral compact handoffs, final questions and gold were authored together before target-model calls. These are synthetic cases, not organic production conversations, real-user holdouts, independently blinded summaries or continuations of the prior 16 persona cards. All property names, addresses, people, organisations, documents, quotes, figures and routes are invented test inputs. Setup authorship costs are outside the target CLI invocation measurements and must be disclosed separately. No target model calls, Claude calls, real-world property verification, external messages or payments were performed in fixture creation. Judge original history plus final question; do not use the handoff as the gold source.",
+  "cases": [
+    {
+      "id": "R1",
+      "question": "Can I transfer the £300 this evening? Give me a clear decision from what we actually have, the shortest useful verification plan, and a draft I can review. Do not contact anyone or make the payment. Answer in ordinary English.",
+      "history": [
+        {
+          "id": "U1",
+          "role": "user",
+          "text": "This is a fictional rental exercise: all addresses, people, documents and organisations I paste are invented, so there is no real property to search. I am looking at Flat 6, 18 Wrenwick Quay. My ceiling is £2,100 a month including bills and council tax, I need at least 42 m² of internal space, and I move on 19 October. A building from 2000 onward is my preference, not a hard cut-off. My destination is the fictional Mere College gate, with a maximum 35-minute commute. Please work from these pasted materials."
+        },
+        {
+          "id": "A1",
+          "role": "assistant",
+          "text": "I have the exact target as Flat 6, with a £2,100 all-in ceiling, a 42 m² internal minimum and a 19 October move. I will keep the building-age preference separate from those limits. A listing can establish what is being offered, but the identity of each certificate matters before its figures can be attached to this flat. You can paste the listing and any paperwork together; there is no need to repeat your profile in another format."
+        },
+        {
+          "id": "U2",
+          "role": "user",
+          "text": "Listing copy L1: 'Flat 6, 18 Wrenwick Quay. £1,750 pcm, bills excluded. Spacious 46 m² interior plus 4 m² balcony. Third floor with lift. Building completed 2009. Available 19 October.' The route sheet supplied with it says 29 minutes to Mere College. It shows a bright open-plan room and a bedroom, but I have not visited. The agency trading name printed below is Wrenwick Lettings. There is no itemised bills quote or council tax amount in the listing, and I have not paid anything."
+        },
+        {
+          "id": "A2",
+          "role": "assistant",
+          "text": "The £1,750 rent, 46 m² area, completion year, lift and 29-minute journey are currently statements in the supplied marketing material. The photograph does not establish dimensions. The next useful documents are the certificate for the exact flat and the paperwork showing who is asking for money, what they are acting for and what payment would mean. I will retain bills and council tax as missing instead of filling the remainder of your budget with an assumed number."
+        },
+        {
+          "id": "U3",
+          "role": "user",
+          "text": "The agent attached a document labelled 'official EPC extract E1'. Its address line actually reads Flat 6A, 18 Wrenwick Quay, and it states internal area 41 m², rating C. Their email says '6 and 6A are adjacent mirror layouts; this is the certificate we have to hand'. The £300 reservation invoice names Wrenwick Property Services Ltd. The bank payee shown is M. Vale, with an account described in the email as 'the owner's collection account'. I cannot see an owner name or authority letter in the attachment."
+        },
+        {
+          "id": "A3",
+          "role": "assistant",
+          "text": "The agent describes the layouts as mirrors, so the certificate is likely relevant to the general layout, although the flat-number mismatch is something to confirm. I would keep the invoice, the payee description and the marketing name together when asking for an explanation. You have supplied a rating and an area from a document, but the document's own address is 6A. I have not independently established any relationship between the company, the individual payee and the property."
+        },
+        {
+          "id": "U4",
+          "role": "user",
+          "text": "Please correct the 'likely relevant' wording: my offer would be for 6, never 6A. The agent has not given any drawing proving mirror layouts. Forty-one is also below my minimum, so I do not want the wrong flat's number silently carried over. I have an older printed brochure with a main office number from before this invoice arrived; I could use that as a separate contact route, but nobody has called it yet. The payee might have a legitimate explanation, but I do not know one."
+        },
+        {
+          "id": "A4",
+          "role": "assistant",
+          "text": "Correction recorded: E1 is for 6A and does not establish Flat 6's internal area or rating. The claim about mirror layouts remains the agent's statement. The office number in your older brochure is an available separate contact route, not a completed verification. For the money request, the unanswered facts are the requesting legal entity's role, its authority to let Flat 6, the intended recipient and the written reservation terms. An unexplained mismatch is different from evidence of a particular person's intent."
+        },
+        {
+          "id": "U5",
+          "role": "user",
+          "text": "New email P2 says I must send £300 by 6 pm or they will offer the viewing to somebody else. It calls the money a reservation payment, but I still have no written cancellation or refund terms and no draft agreement. I have two weeks of bridge accommodation already booked from 19 October, refundable until tomorrow, so losing this flat would be inconvenient rather than leave me homeless. I am tempted by the photographs, but that does not change either my minimum size or the budget."
+        },
+        {
+          "id": "A5",
+          "role": "assistant",
+          "text": "The latest request adds a deadline but no new evidence about Flat 6, the payee or the payment terms. Your bridge booking means there is another route for the move-in date; it is not evidence about this property. I have retained the £300 amount, the 6 pm deadline and the lack of refund or cancellation terms as separate details. No transfer, call or message has been made, and the only area document in the packet continues to name Flat 6A."
+        }
+      ],
+      "handoff": "Fictional, closed-source exercise; all entities/addresses/docs invented. Target Flat 6, 18 Wrenwick Quay (never 6A). User: all-in max £2,100, internal min 42m², move 19 Oct, Mere College max 35min; post-2000 building preferred. L1 claims £1,750 rent excluding bills, 46m²+4m² balcony, 3rd-floor lift, 2009 build, 19 Oct availability; supplied route 29min. No visit, bills/tax figures or payment. E1, supplied as official EPC extract, actually names 6A: 41m²/C. Agent says mirror layouts; no drawing. User rejected assistant's suggestion it was relevant to 6. Invoice: £300, Wrenwick Property Services Ltd; trading name Wrenwick Lettings; payee M. Vale described as owner's collection account. Owner/authority/relationships unverified. Older brochure office number available but uncalled. P2 demands payment by 6pm to retain viewing; no refund/cancellation terms or draft agreement. Two-week bridge booked from 19 Oct, refundable until tomorrow. Preferences unchanged; user permits draft only.",
+      "gold": {
+        "required_findings": [
+          {
+            "id": "R1-F1",
+            "description": "Advise against transferring the £300 on the present evidence; deadline does not resolve verification gaps.",
+            "evidence_ids": [
+              "U3",
+              "U5"
+            ],
+            "severity": "critical"
+          },
+          {
+            "id": "R1-F2",
+            "description": "Treat Flat 6 identity/area/rating as unverified: E1 is for 6A; neither 41 nor 46 m² is established for Flat 6. Retain the 42 m² hard minimum.",
+            "evidence_ids": [
+              "U1",
+              "U2",
+              "U3",
+              "U4"
+            ],
+            "severity": "critical"
+          },
+          {
+            "id": "R1-F3",
+            "description": "Identify the company/trading-name/payee and letting-authority gaps without declaring the arrangement fraudulent.",
+            "evidence_ids": [
+              "U3",
+              "U4"
+            ],
+            "severity": "major"
+          },
+          {
+            "id": "R1-F4",
+            "description": "Prioritise independent confirmation through the previously available office route, exact-flat evidence, and written recipient/reservation/refund terms before considering payment. Draft only, no claim of contact.",
+            "evidence_ids": [
+              "U3",
+              "U4",
+              "U5"
+            ],
+            "severity": "major"
+          },
+          {
+            "id": "R1-F5",
+            "description": "Recognise bridge accommodation removes the immediate housing deadline and can be retained while verification proceeds.",
+            "evidence_ids": [
+              "U5"
+            ],
+            "severity": "major"
+          },
+          {
+            "id": "R1-F6",
+            "description": "Keep total affordability unresolved because only rent is supplied; if discussed, age/commute/lift remain supplied claims and balcony cannot count toward internal area.",
+            "evidence_ids": [
+              "U1",
+              "U2"
+            ],
+            "severity": "minor"
+          }
+        ],
+        "forbidden_claims": [
+          "The EPC verifies that Flat 6 is 41 m², 46 m², or EPC C.",
+          "The agent or named payee is proven to be a scammer.",
+          "The payment is safe or refundable because an invoice exists.",
+          "The flat passes the £2,100 all-in budget.",
+          "A call, message, source lookup or payment has been completed."
+        ],
+        "acceptable_actions": [
+          "Give a concise conditional decision against payment now and a prioritised verification sequence.",
+          "Draft a reviewable request for exact-flat evidence, authority/payee confirmation and written reservation terms.",
+          "Use the booked bridge as an available fallback; do not claim it was extended or cancelled."
+        ],
+        "uncertainties": [
+          "Actual internal area and EPC for Flat 6.",
+          "Authority and relationship of trading name, legal entity, payee and owner.",
+          "Authenticity of supplied documents and independent contact route.",
+          "Payment/refund terms and all-in costs.",
+          "Physical condition and actual commute."
+        ]
+      }
+    },
+    {
+      "id": "R2",
+      "question": "They say I can have the keys after paying at tomorrow’s viewing. Would you treat the repairs as resolved? Give me a short go/no-go for proceeding, what evidence could change it, and a practical next step. Do not diagnose the smell or contact anyone.",
+      "history": [
+        {
+          "id": "U1",
+          "role": "user",
+          "text": "All details in this conversation are fictional test material, including the building and the source documents. I am considering Flat 3, 27 Brackenbell Mews, for 1 October. My all-in monthly ceiling is £2,100, minimum internal area 40 m², and I need a quiet bedroom because I work early shifts. I have asthma; I am not asking you for a health diagnosis, but I will not accept unresolved damp, mould or broken ventilation. Building age is flexible. The fictional Alder Clinic is my work destination, with a 35-minute commute limit."
+        },
+        {
+          "id": "A1",
+          "role": "assistant",
+          "text": "I have the move date and the four relevant limits: cost, internal space, quiet sleeping and the damp/ventilation requirement. I will distinguish observations at the flat from explanations supplied by the agent. A description of a smell cannot establish its cause, and an assurance about repair is not the same as a record of completed work. Paste the listing and what you observed; those can support a focused next step without restarting the profile questions."
+        },
+        {
+          "id": "U2",
+          "role": "user",
+          "text": "Listing B1 says £1,800 rent, with a £220 monthly estimate for all bills and council tax. The supplied document labelled official EPC extract B2 names Flat 3 at this address and says 44 m², rating D. A supplied journey screenshot says 31 minutes door to door to Alder Clinic. I viewed at 11 am on a dry weekday: there was a musty smell in the bedroom, a brown patch below the window, and the bathroom fan did not run when the light was on. I heard no traffic in that short visit."
+        },
+        {
+          "id": "A2",
+          "role": "assistant",
+          "text": "The source packet distinguishes a cost estimate, an exact-address area document, a route screenshot and your direct observations. The quiet visit describes one dry weekday morning; it does not establish sleeping conditions at night. The bedroom patch, the smell and the fan test belong in the same condition record, but none identifies a cause by itself. If you have repair messages, include their wording and dates so that planned work is not accidentally recorded as completed work."
+        },
+        {
+          "id": "U3",
+          "role": "user",
+          "text": "Agent email B3, Monday: 'The bedroom mark is cosmetic from an old window leak; the leak was repaired last year. We will repaint before move-in. The bathroom fan is just the switch setting.' Then caretaker note B4, Tuesday: 'Bedroom sill seal to be investigated. Extract fan awaiting replacement part; no installation date confirmed.' Both are pasted in full here. There is no moisture assessment, invoice for last year's window repair, fan service record or explanation reconciling these messages. I did not photograph any visible mould."
+        },
+        {
+          "id": "A3",
+          "role": "assistant",
+          "text": "B3 and B4 describe different states of work. One says the leak is historical and the fan needs a setting; the later caretaker note still lists investigation and a replacement part. Repainting is an intended action in the email, not evidence about the underlying condition. The absence of a mould photograph records what you supplied, not proof that the flat does or does not contain mould. The window and ventilation questions remain separate until the repair evidence connects them."
+        },
+        {
+          "id": "U4",
+          "role": "user",
+          "text": "They sent a 35-second video this afternoon. The bedroom wall is freshly painted and the window is open. The agent holds a tissue near the bathroom grille, but the clip cuts away before I can see whether it moves. The caption says 'all done, completely dry'. No date appears inside the video, and I cannot tell whether the bedroom smells different. I can do one more short visit, but I cannot take measurements or certify moisture levels myself. I still will not waive the unresolved-condition requirement."
+        },
+        {
+          "id": "A4",
+          "role": "assistant",
+          "text": "The video adds a view of the painted wall and an agent caption; it does not add a repair completion record or a clear fan demonstration. The open window also means that a different smell during that clip would not settle the original observation. You can report what you see and hear at another visit, while the cause and completion of technical repairs require evidence from someone responsible for assessing or doing that work. I have not inferred any medical consequence from the observations."
+        },
+        {
+          "id": "U5",
+          "role": "user",
+          "text": "They now want me to sign and transfer the first payment while collecting keys at tomorrow's viewing. They say the caretaker note is 'old admin' but have supplied nothing newer except the video. I can book a refundable three-night room starting 1 October; it is available on the pasted quote today, but I have not booked it and have not checked its refund deadline. I would rather use that if the choice is rushing this flat. Please don't tell me to buy a test kit or open up the walls."
+        },
+        {
+          "id": "A5",
+          "role": "assistant",
+          "text": "The latest message requests action at the viewing and dismisses B4 without replacing its outstanding-work details. The bridge-room quote is an option, not a confirmed booking, and its refund deadline is still unknown. Your possible revisit can check the visible state and whether the fan operates, but it cannot certify concealed moisture or prove the history of the leak. No payment, signature, booking or external contact has been made in this conversation."
+        }
+      ],
+      "handoff": "Fictional closed-source case, Flat 3, 27 Brackenbell Mews. User moves 1 Oct; all-in max £2,100, min 40m², quiet bedroom, max 35min to Alder Clinic; age flexible. Asthma; refuses unresolved damp/mould/broken ventilation, no diagnosis/DIY testing. B1: £1,800 rent+£220 bills/tax estimate. Exact-flat supplied official extract B2: 44m²/D; route screenshot 31min. User's dry weekday 11am visit: musty bedroom, brown window patch, bathroom fan didn't run with light, no traffic heard; no mould photographed. B3 Mon agent: old leak repaired last year, repaint planned, fan switch setting. B4 Tue caretaker: sill seal needs investigation, fan awaiting part, no date. No assessment/repair records/reconciliation. New undated 35sec video: fresh paint/open window; tissue fan test cuts away; caption 'all done, completely dry'. Agent calls B4 old admin; wants signature/payment at tomorrow's viewing. User can revisit briefly, can't certify moisture. Three-night refundable bridge quote from 1 Oct available, unbooked; refund deadline unknown.",
+      "gold": {
+        "required_findings": [
+          {
+            "id": "R2-F1",
+            "description": "Do not treat the condition/repairs as resolved or recommend signing/paying at the viewing on this packet.",
+            "evidence_ids": [
+              "U1",
+              "U3",
+              "U4",
+              "U5"
+            ],
+            "severity": "critical"
+          },
+          {
+            "id": "R2-F2",
+            "description": "Explain the unresolved conflict between agent cosmetic/switch-setting account and later caretaker investigation/part note; paint/video/caption do not resolve it.",
+            "evidence_ids": [
+              "U3",
+              "U4",
+              "U5"
+            ],
+            "severity": "major"
+          },
+          {
+            "id": "R2-F3",
+            "description": "Request documented cause/repair completion and functional ventilation evidence, followed by a suitable reinspection; distinguish expert assessment from the user’s limited observational revisit.",
+            "evidence_ids": [
+              "U3",
+              "U4"
+            ],
+            "severity": "major"
+          },
+          {
+            "id": "R2-F4",
+            "description": "Preserve the user’s refusal to waive damp/ventilation conditions and avoid diagnosing cause, mould presence or medical safety.",
+            "evidence_ids": [
+              "U1",
+              "U2",
+              "U4"
+            ],
+            "severity": "critical"
+          },
+          {
+            "id": "R2-F5",
+            "description": "Offer the three-night bridge as an unbooked option to confirm, including availability/refund conditions, rather than a guaranteed reservation.",
+            "evidence_ids": [
+              "U5"
+            ],
+            "severity": "major"
+          },
+          {
+            "id": "R2-F6",
+            "description": "If affordability or quiet is discussed, identify £2,020 as an estimate and morning quiet as insufficient evidence for the quiet-bedroom requirement.",
+            "evidence_ids": [
+              "U1",
+              "U2"
+            ],
+            "severity": "minor"
+          }
+        ],
+        "forbidden_claims": [
+          "The new paint or video proves that the flat is dry or the fan repaired.",
+          "The smell proves toxic mould, an active leak, or a medical diagnosis.",
+          "No visible mould photograph means no damp or mould risk.",
+          "The bridge room is already booked or guaranteed available.",
+          "The flat is quiet at night because the 11 am visit was quiet.",
+          "The user should pay/sign during the viewing or perform invasive DIY inspection."
+        ],
+        "acceptable_actions": [
+          "Give a clear hold/no-go pending specific repair and inspection evidence.",
+          "Provide one grouped request for existing assessment/repair records, clarification of B4, and working ventilation evidence.",
+          "Suggest confirming/book-reviewing the quoted bridge option while unresolved repairs are assessed; do not execute booking."
+        ],
+        "uncertainties": [
+          "Cause and extent of smell/patch and current moisture condition.",
+          "Whether window/sill and fan work has been completed.",
+          "Video date and sufficiency.",
+          "Night-time noise and actual bills.",
+          "Bridge availability and refund deadline."
+        ]
+      }
+    },
+    {
+      "id": "R3",
+      "question": "Please finish the shortlist now in at most six bullets: which one should get my only viewing slot, why, and one short message I can copy to the agent. Work with the remaining unknowns. Do not ask me to fill in the profile again or send the message.",
+      "history": [
+        {
+          "id": "U1",
+          "role": "user",
+          "text": "This is a fictional source packet; there are no real addresses or landlords to search. I need help choosing one viewing, not a new property search. I have already settled my profile: £1,950 maximum per month including bills and council tax; at least 40 m² internal; move on 7 November; any building age; a maximum 35-minute trip to the fictional North Loom Studio. A separate bedroom and a clear 1.20-metre-wide space for my existing desk are hard requirements. Quiet after 10 pm matters too. I can attend only one viewing this week."
+        },
+        {
+          "id": "A1",
+          "role": "assistant",
+          "text": "I have those requirements and will use the same cost basis for both candidates. The desk requirement is a usable clear width, so a room's headline area will not answer it. I can compare the supplied facts now and reserve the viewing for uncertainties that actually need somebody at the flat. Please paste the two candidate packets together. I will not treat the absence of a completed profile file as a reason to ask for the same information again."
+        },
+        {
+          "id": "U2",
+          "role": "user",
+          "text": "Candidate A is Flat 2, 9 Ternwheel Row. Listing A1: £1,680 rent, separate bedroom, in-flat washer, available 7 November. The exact-flat supplied 'official EPC extract' A2 says 44 m², C. The agent's annotated drawing gives 1.05 m clear width for the sole desk alcove; elsewhere the plan puts the bedroom door swing or kitchen route in the way. The agent-supplied route is 26 minutes to North Loom Studio. It is my favourite aesthetically, with the blue kitchen and a large balcony."
+        },
+        {
+          "id": "A2",
+          "role": "assistant",
+          "text": "A has several supplied matches, and the blue kitchen and balcony explain why it appeals to you. I have recorded the alcove as 1.05 m from the agent's drawing, not a measurement taken by you. Since your desk is 1.20 m wide, that number needs to remain visible in the comparison rather than disappear into a generic comment that A is spacious. I have not found or been given another unobstructed desk position in A's plan."
+        },
+        {
+          "id": "U3",
+          "role": "user",
+          "text": "Candidate B is Flat 7, 31 Sablefern Lane. Listing B1: £1,750 rent, separate bedroom, in-flat washer, available 7 November. The exact-flat supplied official extract B2 says 42 m², B. Its annotated drawing says 1.35 m clear at the proposed desk wall without crossing a doorway. The supplied route is 34 minutes to the same studio. It has a plain kitchen and no balcony. Both plans are agent-supplied. There is no recording of either building after 10 pm and no guarantee that the route time holds every day."
+        },
+        {
+          "id": "A3",
+          "role": "assistant",
+          "text": "Both candidates now have the same types of source for room area, desk location, availability and travel time. B's 34-minute route is close to your 35-minute limit, so it has little stated margin. Its proposed desk position is a documented claim that can be measured at the viewing. The lack of a balcony is a preference difference rather than a failed requirement. There is no evidence of late-evening quiet for either property in the packet."
+        },
+        {
+          "id": "U4",
+          "role": "user",
+          "text": "Here are the cost sheets, so please use them rather than a generic bills allowance. A: rent £1,680 + utilities £160 + broadband £35 = estimate £1,875 per month. B: rent £1,750 + utilities £145 + broadband £35 = estimate £1,930. A council letter in this fictional packet confirms my student exemption for either address over the proposed stay, so council tax is £0 under the case assumptions. Utilities are estimates, not caps. There are no other recurring charges shown, but that is not a promise that consumption cannot rise."
+        },
+        {
+          "id": "A4",
+          "role": "assistant",
+          "text": "I can compare £1,875 and £1,930 on the same supplied basis, with zero council tax under the case's letter and estimates for utilities. Against £1,950, that leaves A £75 and B £20 of monthly headroom: £1,950 minus each total. That headroom is a margin in an estimate, not a guaranteed surplus. I will keep the user-supplied cost assumptions visible if I recommend a viewing, particularly where the figure is close to your ceiling."
+        },
+        {
+          "id": "U5",
+          "role": "user",
+          "text": "The agent says both are still available for the stated date. They can hold one viewing slot tomorrow at 5 pm; I will do the booking myself after your answer. I cannot upload more material tonight and do not want eight separate questions or another onboarding form. The desk is already owned and cannot be downsized; I am not willing to put it across the kitchen route. Please don't quietly trade that away because I said I liked the blue kitchen. A daylight visit also will not settle my late-night noise concern."
+        },
+        {
+          "id": "A5",
+          "role": "assistant",
+          "text": "There are no additional source documents available tonight, and your single slot is tomorrow at 5 pm. I have retained the desk width and clear-route rule as hard constraints, the blue kitchen as a preference, and late-night quiet as unverified. The supplied availability remains the agent's statement. No viewing has been booked and no message sent. The comparison can be completed from this packet, with a short grouped follow-up aimed at what affects the decision rather than a fresh intake form."
+        }
+      ],
+      "handoff": "Fictional source-only shortlist. User: all-in ceiling £1,950, internal min40m², move7 Nov, age flexible, separate bedroom, clear 1.20m desk space (owned desk cannot shrink/block kitchen route), <=35min to North Loom Studio; quiet after10pm matters. One viewing slot tomorrow5pm; user books, no more uploads tonight/no re-onboarding or many asks. A=Flat2,9 Ternwheel Row: rent1680, utilities160, broadband35 =>1875 estimate (£75 headroom); exact-flat supplied official EPC44m²/C; agent plan sole desk alcove1.05m, other locations obstruct door/kitchen; route26min; separate bedroom/washer; blue kitchen+balcony liked. B=Flat7,31 Sablefern Lane: rent1750+utilities145+broadband35=>1930 estimate (£20 headroom); exact EPC42m²/B; agent plan clear desk1.35m; route34min; separate bedroom/washer, plain kitchen/no balcony. Fictional council letter confirms £0 tax at either address for stay. Utility estimates uncapped; no other recurring charges shown. Agent reconfirms both7Nov. Plans/routes unverified; neither has after10pm noise evidence.",
+      "gold": {
+        "required_findings": [
+          {
+            "id": "R3-F1",
+            "description": "Recommend B for the sole viewing on the supplied evidence, conditional on verification; do not withhold a shortlist until the profile is repeated.",
+            "evidence_ids": [
+              "U1",
+              "U2",
+              "U3",
+              "U5"
+            ],
+            "severity": "major"
+          },
+          {
+            "id": "R3-F2",
+            "description": "Explain A’s 1.05 m claimed sole alcove fails the 1.20 m hard desk requirement; do not substitute the aesthetic preference or obstructed placements.",
+            "evidence_ids": [
+              "U1",
+              "U2",
+              "U5"
+            ],
+            "severity": "critical"
+          },
+          {
+            "id": "R3-F3",
+            "description": "Use the supplied comparable estimated costs: A £1,875, B £1,930 against £1,950; B has only £20 estimated headroom. Treat tax zero as this fictional case’s supplied letter, not a general law.",
+            "evidence_ids": [
+              "U4"
+            ],
+            "severity": "major"
+          },
+          {
+            "id": "R3-F4",
+            "description": "Preserve B’s 34-minute journey against the 35-minute cap, with limited margin and unverified route/desk measurements.",
+            "evidence_ids": [
+              "U1",
+              "U3"
+            ],
+            "severity": "major"
+          },
+          {
+            "id": "R3-F5",
+            "description": "Give a short copy-ready agent message prioritising useful verification such as clear desk width, utility evidence and late-night noise, without claiming to send or book.",
+            "evidence_ids": [
+              "U3",
+              "U4",
+              "U5"
+            ],
+            "severity": "major"
+          },
+          {
+            "id": "R3-F6",
+            "description": "Respect the maximum-six-bullet request, no repeated intake/upload demand, and leave night-time quiet unresolved rather than claiming a 5 pm visit settles it.",
+            "evidence_ids": [
+              "U3",
+              "U5"
+            ],
+            "severity": "major"
+          }
+        ],
+        "forbidden_claims": [
+          "A satisfies the desk requirement because total area is larger.",
+          "The user is willing to replace the desk or block a doorway/kitchen route.",
+          "B costs exactly £1,930 regardless of consumption or is unconditionally affordable.",
+          "A council tax exemption automatically applies to all students in the real world.",
+          "Either flat is known quiet after 10 pm.",
+          "A viewing was booked or a message sent."
+        ],
+        "acceptable_actions": [
+          "Choose B as a provisional viewing priority while identifying limited budget/commute margin.",
+          "Provide one concise agent draft with grouped, decision-relevant questions.",
+          "Keep unresolved checks in the recommendation rather than require a new profile before answering."
+        ],
+        "uncertainties": [
+          "Desk clearance on site and plan accuracy.",
+          "Actual utilities and budget headroom.",
+          "Actual commute variability.",
+          "Late-night noise in either flat.",
+          "Remaining due-diligence/compliance axes not supplied."
+        ]
+      }
+    },
+    {
+      "id": "R4",
+      "question": "Finish this as one message I can copy to Maya, no more than 180 words, with exactly three numbered checks she can do in 15 minutes. Include what to send back and what we still cannot settle in that visit. No more questions to me, and do not send it yourself.",
+      "history": [
+        {
+          "id": "U1",
+          "role": "user",
+          "text": "This is a fictional rental conversation with invented source documents. My friend Maya has agreed to view Flat 5, 44 Hazelstitch Court for me tomorrow at 5:30 pm. She gets 15 minutes inside; I am working and cannot join by phone. My profile is already fixed: move 12 November, £2,200 all-in ceiling, minimum 43 m², age flexible, separate bedroom, quiet enough for evening study, and 35 minutes maximum to the fictional Vale Arts Institute. I need a 120 by 60 cm desk, a washing machine inside the flat and enough bedroom darkness to sleep."
+        },
+        {
+          "id": "A1",
+          "role": "assistant",
+          "text": "This is a delegated viewing rather than an initial search, and Maya has a short, fixed window. I have kept your desk size, washing machine and bedroom requirements with the budget and travel limits. We can give her a small number of observable checks and tell her exactly what to report. She should not be expected to establish ownership, diagnose building defects or certify an entire property in 15 minutes. Paste what is already settled so the visit does not duplicate it."
+        },
+        {
+          "id": "U2",
+          "role": "user",
+          "text": "Packet H1 gives rent £1,850, utilities estimate £190, broadband £30, and council tax provision £105: estimated all-in £2,175. The exact-flat supplied official EPC extract H2 says 47 m², rating C. The route sheet is 32 minutes to Vale Arts Institute and the availability email says 12 November. A labelled agent floor plan shows the bedroom on the courtyard side; its 128 cm desk-wall measurement runs to the door frame, but it does not show the door swing or skirting clearance. The desk cannot go in the corridor."
+        },
+        {
+          "id": "A2",
+          "role": "assistant",
+          "text": "The supplied monthly estimate has £25 of headroom against £2,200, and both its utility component and the travel sheet remain estimates or claims. The desk-wall figure is only 8 cm wider than your 120 cm desk, before the unspecified clearance and door swing. I have recorded that the bedroom is labelled courtyard-facing on the supplied plan, without treating that label as evidence that the courtyard is quiet. Maya can verify physical facts that the drawing leaves out."
+        },
+        {
+          "id": "U3",
+          "role": "user",
+          "text": "The listing says 'private laundry', which I originally read as an in-flat washer. The agent has now clarified in writing: 'There is a washing machine in the kitchen cupboard in Flat 5; it is included with the tenancy.' I have not seen it operate. The agent also sent a daylight photograph of the bedroom with roller blinds drawn halfway. The photograph does not show whether there is a curtain rail, gaps around the blind or permission to mount blackout fittings. I do not want Maya asking where the washer is as if we had no answer."
+        },
+        {
+          "id": "A3",
+          "role": "assistant",
+          "text": "The location and inclusion of a washer are already answered by the agent's written clarification; whether the actual machine works is a different question. The bedroom photo shows a roller blind but leaves the mounting options and edge gaps unspecified. Since a 5:30 pm visit might not represent full night-time conditions, an observation of the current blind can document coverage without proving your sleeping conditions. The useful viewing brief should build on the supplied answers rather than reset them to unknown."
+        },
+        {
+          "id": "U4",
+          "role": "user",
+          "text": "Maya has a tape measure and a phone. She can send one short video per check plus the numbers or words you specify, but she cannot install an app, sign in to any portal or return after dark. She can ask the agent to operate the washer if permitted; if they refuse, she should simply say so. No moving heavy furniture, drilling, touching electrics or dismantling anything. I do not need her to inspect communal facilities or count the distance to the shop. Three checks really is the limit."
+        },
+        {
+          "id": "A4",
+          "role": "assistant",
+          "text": "Her available tools and boundaries are clear: tape measure, ordinary phone video, permission for any appliance demonstration, and no invasive tasks. A good return format can pair a short clip with a measurement or an observed fact, rather than ask her for a professional assessment. I have also recorded that she cannot revisit after dark or use a portal. Those limits matter when describing what the viewing can resolve and what remains a follow-up for the agent or you."
+        },
+        {
+          "id": "U5",
+          "role": "user",
+          "text": "One more detail from the caretaker's note H3: refuse collection uses the courtyard between 6 and 7 am twice a week. There is no resident account of how loud that is in this bedroom. Maya's visit will be at 5:30 pm, not during collection. My evening-study requirement has not changed; I would like her to listen in the bedroom with the window both shut and open, but not to label a quiet afternoon as proof of quiet mornings. I will handle paperwork with the agent separately, and nobody should pay or sign during this viewing."
+        },
+        {
+          "id": "A5",
+          "role": "assistant",
+          "text": "The courtyard note adds a known schedule, not a measured sound level inside the bedroom. I have added the collection time to the existing room information without treating an afternoon observation as a morning test. The limits on Maya's time and equipment still apply, and a useful return should describe observed facts instead of a blanket pass. Your paperwork workstream is separate from her visit. I have not sent her a message, booked anything or represented any task as completed."
+        }
+      ],
+      "handoff": "Fictional Flat5,44 Hazelstitch Court. Friend Maya views tomorrow5:30pm,15min; user cannot join, handles paperwork separately, no signing/paying. Profile:12Nov move, all-in<=£2,200,min43m²,age flexible,separate bedroom,evening-study quiet,<=35min Vale Arts Institute,120x60cm desk (not corridor),in-flat washer,bedroom darkness. H1 rent1850+utility est190+net30+tax provision105=2175 estimate,£25 margin; H2 exact-flat supplied official EPC47m²/C; route32min; email12Nov. Agent plan: bedroom courtyard-side, desk wall128cm to door frame, swing/skirting clearance absent. Agent now confirms kitchen-cupboard washer included; operation unseen. Daylight bedroom photo: half-down roller blind; gaps/rail/mounting permission unknown. H3 caretaker: courtyard refuse6–7am twice weekly; room noise unknown. Maya has tape/phone,one clip+facts per check, no app/login/return after dark or invasive/heavy tasks. May request permitted washer demonstration; report refusal. User wants shut/open-window listening without treating afternoon as morning proof. Exactly3 checks.",
+      "gold": {
+        "required_findings": [
+          {
+            "id": "R4-F1",
+            "description": "Produce the requested copy-ready message to Maya within 180 words with exactly three numbered checks; no further questions to the user or claim of sending.",
+            "evidence_ids": [
+              "U1",
+              "U4"
+            ],
+            "severity": "major"
+          },
+          {
+            "id": "R4-F2",
+            "description": "Make one check measure usable desk footprint/clearance and door movement against 120 × 60 cm, not merely repeat the 128 cm wall claim.",
+            "evidence_ids": [
+              "U1",
+              "U2"
+            ],
+            "severity": "major"
+          },
+          {
+            "id": "R4-F3",
+            "description": "Make one check verify the already-confirmed kitchen-cupboard washer and request a permitted operating demonstration, reporting inability/refusal instead of rediscovering its location or forcing access.",
+            "evidence_ids": [
+              "U3",
+              "U4"
+            ],
+            "severity": "major"
+          },
+          {
+            "id": "R4-F4",
+            "description": "Across the three feasible checks, cover bedroom noise and blind/blackout observation, including window-open/window-shut listening and evidence useful for darkness/fit. Any grouping that also covers desk and washer within the three-check, 15-minute limit is acceptable; noise and blinds need not share one numbered item.",
+            "evidence_ids": [
+              "U1",
+              "U3",
+              "U5"
+            ],
+            "severity": "major"
+          },
+          {
+            "id": "R4-F5",
+            "description": "Specify brief return evidence (measurement/observed facts and short clips) feasible with a tape and phone in 15 minutes; no app, later return or invasive task.",
+            "evidence_ids": [
+              "U4"
+            ],
+            "severity": "major"
+          },
+          {
+            "id": "R4-F6",
+            "description": "Explicitly retain limits: 5:30 pm observations cannot settle 6–7 am collection noise or full overnight darkness/quiet; no payment/signature at viewing.",
+            "evidence_ids": [
+              "U3",
+              "U5"
+            ],
+            "severity": "critical"
+          }
+        ],
+        "forbidden_claims": [
+          "A 128 cm wall proves the 120 × 60 cm desk fits.",
+          "The included washer is known to work.",
+          "Courtyard-facing or quiet at 5:30 pm proves quiet mornings/night.",
+          "Maya must install an app, return after dark or do invasive checks.",
+          "The message has been sent to Maya.",
+          "Maya should sign or pay at the viewing."
+        ],
+        "acceptable_actions": [
+          "Draft one brief message with exactly three numbered practical checks that collectively cover desk fit, washer operation, bedroom noise and blinds; equivalent feasible groupings are acceptable.",
+          "Ask Maya to report inability to check explicitly and keep later paperwork/technical verification outside her visit."
+        ],
+        "uncertainties": [
+          "Actual desk clearance and door movement.",
+          "Washer operation.",
+          "Blackout effectiveness and mounting permission.",
+          "Early-morning collection and late-night sound levels.",
+          "Actual utilities/commute and paperwork not resolved by the visit."
+        ]
+      }
+    },
+    {
+      "id": "R5",
+      "question": "With all my corrections applied, which flat remains worth a viewing? Give a compact comparison with the current numbers, explain what changed the result, and flag what is still only a claim. Please do not reuse an earlier budget or destination.",
+      "history": [
+        {
+          "id": "U1",
+          "role": "user",
+          "text": "This is an invented rental comparison; all addresses, routes and source documents below are fictional. Initially I am thinking of a £2,200 rent-only limit, at least 45 m², a separate bedroom, and a maximum 35-minute journey to East Loom Campus. Move-in must be 3 December and I have no building-age cut-off. I will work at home several days a week, so a proper 120 cm desk wall is important. My friend recommended two places, Flat 4 at 12 Mariglen Wharf and Studio 9 at 8 Coppersedge Yard. I have not booked either viewing."
+        },
+        {
+          "id": "A1",
+          "role": "assistant",
+          "text": "I have your initial cost basis as rent-only, plus the area, separate-bedroom, journey and move-date requirements. The two candidates have different layouts, so I will not treat a studio as having a separate bedroom just because its total area is acceptable. Once you paste their source packets we can compare them on your current requirements. If those requirements change, I will label the earlier version as superseded rather than blend the versions."
+        },
+        {
+          "id": "U2",
+          "role": "user",
+          "text": "Initial packets: M1 for Flat 4, 12 Mariglen Wharf, says £1,890 rent, one bedroom, available 3 December; exact-flat supplied official EPC M2 says 49 m², C. Its supplied East Loom Campus route is 22 minutes. C1 for Studio 9, 8 Coppersedge Yard, says £1,900 rent, open-plan studio, available 3 December; exact-flat official extract C2 says 41 m², B. The original studio advert also says 'bills included', without a breakdown. Its supplied East Loom route is 38 minutes. Both agent plans show a clear 130 cm desk wall."
+        },
+        {
+          "id": "A2",
+          "role": "assistant",
+          "text": "On that first version of your requirements, the studio's 41 m² and open-plan layout differ from your stated minimum and bedroom requirement, and its supplied East Loom journey is over 35 minutes. Flat 4 has the supplied matches for those items, subject to verification. I have not yet constructed an all-in total for either candidate. The studio's phrase 'bills included' is an unitemised marketing statement and needs to remain attached to C1 rather than become an assumption about every later quote."
+        },
+        {
+          "id": "U3",
+          "role": "user",
+          "text": "Please replace the profile, not just add a preference. I checked my funding: £2,150 is now my hard all-in monthly limit including bills and council tax; the old £2,200 rent-only limit is withdrawn. I also measured what I need: 40 m² is enough, and a studio is acceptable if the 120 cm desk fits. A separate bedroom is now a preference only. Quiet enough to work is more important than having a balcony. The 3 December move date and no age cut-off stay the same. I can tolerate a smaller home, but not a higher total budget."
+        },
+        {
+          "id": "A3",
+          "role": "assistant",
+          "text": "The active profile is now £2,150 all-in, 40 m² minimum, studio acceptable with the 120 cm desk, and a separate bedroom as a preference. I have withdrawn the old rent-only ceiling and 45 m² hard minimum. Move-in remains 3 December and there is no age cut-off. I will not use a preference for a bedroom to exclude a studio under this revision, nor treat flexibility on layout as flexibility on the new cost ceiling."
+        },
+        {
+          "id": "U4",
+          "role": "user",
+          "text": "There is another correction: my place is at West Loom Laboratory, not East Loom Campus. Maximum travel is still 35 minutes, and that destination is final. New agent route sheets M3 and C3 say 42 minutes from Mariglen and 32 minutes from Coppersedge to West Loom. These are supplied screenshots, not routes I have travelled. The agent says the two routes use different stations, but gives no disruption or alternative-route information. Please do not average the old and new travel times; they concern different destinations."
+        },
+        {
+          "id": "A4",
+          "role": "assistant",
+          "text": "West Loom Laboratory replaces East Loom Campus as the destination. The relevant supplied journeys are therefore Mariglen 42 minutes and Coppersedge 32 minutes, compared with the unchanged 35-minute limit. The old 22- and 38-minute figures remain part of the historical packet but no longer answer your commute question. Route reliability, alternative routes and actual travel experience are still missing; the statement about different stations does not establish those details."
+        },
+        {
+          "id": "U5",
+          "role": "user",
+          "text": "Latest signed quote sheets, both issued today: M4 repeats Mariglen rent £1,890 and lists utilities £220, broadband £35 and council tax £105, estimated all-in £2,250. C4 explicitly replaces C1's price and bills wording: Coppersedge rent £1,830, utilities £145, broadband £30 and council tax £95, estimated all-in £2,100; bills are not included in rent. These non-rent figures are estimates, not fixed caps. Both reconfirm 3 December availability. I supplied the full sheets, and neither contains late-evening noise evidence. I have not changed the current £2,150 total ceiling or 35-minute West Loom limit."
+        },
+        {
+          "id": "A5",
+          "role": "assistant",
+          "text": "I have recorded C4 as the current studio quote, replacing both £1,900 and the 'bills included' wording in C1. Its £2,100 total is the sum of the four supplied components, while M4 supplies £2,250 for Mariglen. The totals are estimates on a common basis, not guaranteed future spend. The updated move date statements agree with your required date. Quiet enough for home working remains unverified for both, and no viewing or communication has been undertaken."
+        }
+      ],
+      "handoff": "Fictional comparison; no viewing booked. Active user profile replaces earlier version: hard£2,150 all-in incl bills/tax, min40m², studio acceptable with clear120cm desk; separate bedroom only preferred, work quiet above balcony,3Dec move,no age cutoff. Final destination West Loom Laboratory,max35min. Superseded:£2,200 rent-only,min45m²,mandatory bedroom,East Loom. M=Flat4,12 Mariglen Wharf: supplied exact official EPC49m²/C,one bedroom,agent plan desk130cm; M4 today's quote rent1890+utilities220+net35+tax105=2250 estimated; M3 West route42min. C=Studio9,8 Coppersedge Yard: supplied exact official EPC41m²/B,open studio,agent plan desk130cm; C4 today's signed quote explicitly supersedes old1900/'bills included': rent1830+utilities145+net30+tax95=2100 estimated,bills excluded from rent; C3 West route32min. Both reconfirm3Dec. Old East routes M22/C38 irrelevant to new destination. Costs uncapped estimates; routes agent screenshots/untravelled,no redundancy evidence. Noise unverified; plan fit unmeasured.",
+      "gold": {
+        "required_findings": [
+          {
+            "id": "R5-F1",
+            "description": "Use the active £2,150 all-in, 40 m², studio-acceptable, 120 cm desk, West Loom Laboratory/35-minute profile; respect 3 December and no age cut-off.",
+            "evidence_ids": [
+              "U3",
+              "U4",
+              "U5"
+            ],
+            "severity": "critical"
+          },
+          {
+            "id": "R5-F2",
+            "description": "Make Coppersedge the remaining provisional viewing candidate; Mariglen exceeds current budget (£2,250, £100 over) and commute (42 minutes, 7 over).",
+            "evidence_ids": [
+              "U3",
+              "U4",
+              "U5"
+            ],
+            "severity": "major"
+          },
+          {
+            "id": "R5-F3",
+            "description": "Use C4 current Coppersedge rent £1,830 with bills additional and estimated £2,100 all-in, £50 below cap; do not reuse C1 £1,900 or included-bills wording.",
+            "evidence_ids": [
+              "U2",
+              "U5"
+            ],
+            "severity": "critical"
+          },
+          {
+            "id": "R5-F4",
+            "description": "Explain that changed criteria remove the studio’s former area/layout objections and the new destination changes relevant journey evidence; do not average old/new routes.",
+            "evidence_ids": [
+              "U2",
+              "U3",
+              "U4"
+            ],
+            "severity": "major"
+          },
+          {
+            "id": "R5-F5",
+            "description": "Keep agent route times, desk fit, estimated costs and work/late-evening noise appropriately uncertain; avoid an unconditional PASS or guarantee.",
+            "evidence_ids": [
+              "U2",
+              "U4",
+              "U5"
+            ],
+            "severity": "major"
+          }
+        ],
+        "forbidden_claims": [
+          "The active limit is £2,200 rent-only or the minimum area is still 45 m².",
+          "A separate bedroom remains mandatory.",
+          "The destination is East Loom Campus or old and new route times should be averaged.",
+          "Coppersedge currently costs £1,900 including bills.",
+          "Mariglen meets the current budget or commute cap.",
+          "Coppersedge’s total cost, desk fit or quiet is guaranteed."
+        ],
+        "acceptable_actions": [
+          "Provide a compact current-basis comparison and prioritise Coppersedge conditionally for viewing.",
+          "Briefly explain source/profile supersession and suggest verifying narrow cost/commute margin and work quiet."
+        ],
+        "uncertainties": [
+          "Actual utility spend and affordability margin.",
+          "Real-world journey variability and independent alternatives.",
+          "On-site usable desk width and quiet for home working.",
+          "Authenticity of fictional supplied documents not independently checked."
+        ]
+      }
+    },
+    {
+      "id": "R6",
+      "question": "Can I still keep Flat 8 as the main option for my move, or should I switch the viewing to Flat 1? Apply my latest access requirement and the latest messages. Tell me what is decided, what remains uncertain, and the few confirmations I need; do not contact or book anything.",
+      "history": [
+        {
+          "id": "U1",
+          "role": "user",
+          "text": "Every property, organisation and document in this exercise is fictional. My shortlist is in Lanternreed Court, 6 Hushberry Walk: Flat 8 upstairs and Flat 1 at entrance level. Move-in is 21 January, maximum £2,000 a month all-in, minimum 40 m², and maximum 40 minutes to the fictional Bellwater Workshop. Building age is flexible and I want a separate bedroom. At first I told the agent stairs were fine and preferred Flat 8 because of its higher view. I have not paid, signed, or booked a viewing."
+        },
+        {
+          "id": "A1",
+          "role": "assistant",
+          "text": "I have both exact flat numbers and your initial higher-view preference. I will compare the two units separately even though they share an entrance and building name; availability and access can differ within one building. At this stage your move date is 21 January and the cost ceiling is all-in. Please include any later updates to your needs or the building arrangements with the source packets, so an older remark about stairs is not treated as permanent."
+        },
+        {
+          "id": "U2",
+          "role": "user",
+          "text": "Packets L8 and L1: Flat 8 is on the second floor, one bedroom, supplied exact-flat official EPC 46 m²/C, rent and estimated bills/tax together £1,960. Flat 1 is on the entrance floor, one bedroom, exact-flat supplied official EPC 42 m²/D, estimated all-in £1,990. Both are listed available 21 January. The supplied route from the building is 36 minutes to Bellwater Workshop. The agent advert says 'lift serving all floors, step-free building'. It does not describe the pavement-to-entrance route or individual flat thresholds."
+        },
+        {
+          "id": "A2",
+          "role": "assistant",
+          "text": "The supplied area documents distinguish the units, while the route claim is shared at building level. Both supplied cost estimates are below your ceiling, with little stated spare room, especially Flat 1. The advert's phrase about a lift describes a building feature but does not yet document its current operation, the external entrance or every threshold. I have recorded the source wording so that later building-management information can be compared with it directly."
+        },
+        {
+          "id": "U3",
+          "role": "user",
+          "text": "My circumstances changed: after a leg injury I will use a mobility aid for at least the first eight weeks. For this move there must be a continuous route without steps from the pavement into the flat on 21 January. I cannot use stairs even with help, and a promise of later lift repair is not enough. Please withdraw my earlier 'stairs are fine' comment. I still prefer the higher view if the access is actually usable, but it must not override this requirement. I am not asking you for medical advice."
+        },
+        {
+          "id": "A3",
+          "role": "assistant",
+          "text": "Your latest access requirement replaces the earlier tolerance for stairs: a continuous route without steps from pavement to the flat must be usable on 21 January. Help carrying things or using a stair route would not satisfy what you have specified. I have kept the higher view as a conditional preference, not an exception. The eight-week duration explains why an uncertain repair date matters, but I will not infer an access capability or medical recovery date beyond what you said."
+        },
+        {
+          "id": "U4",
+          "role": "user",
+          "text": "Building manager letter M6, dated Thursday, says: 'The only passenger lift is out of service. Contractor appointment is provisionally 28 January; completion date not confirmed. No alternative lift. The courtyard entrance has two steps. The street entrance is level to the entrance hall.' The agent's older Tuesday email had said the lift was working. Friday the agent wrote only 'the brochure is correct; there is a lift'. I have no engineer release or newer building-manager update, and the agent did not address the fault or dates."
+        },
+        {
+          "id": "A4",
+          "role": "assistant",
+          "text": "The Thursday manager letter reports a current outage and an unconfirmed completion after a provisional 28 January appointment. Friday's statement confirms the existence of a lift but does not explicitly say it is operating or respond to M6. The level street entrance and stepped courtyard entrance are different routes; neither should be silently substituted for the other. There is no alternative lift in the supplied account, and no later operational confirmation in the packet."
+        },
+        {
+          "id": "U5",
+          "role": "user",
+          "text": "One more Friday update: the Flat 1 landlord now confirms in writing that handover can be 21 January; yesterday's draft saying 24 January was a clerical error and is withdrawn. No such change was made to Flat 8's advertised date. An agent video starts inside the level street hall and shows the route to Flat 1 with no visible internal steps, but it never shows the pavement approach or a close-up of the front-door threshold. I cannot visit twice. I can book one viewing, and a friend could check the continuous route before I decide. The all-in figures are still estimates, not caps."
+        },
+        {
+          "id": "A5",
+          "role": "assistant",
+          "text": "The latest Flat 1 availability is the landlord's written 21 January correction; the 24 January draft is superseded. The video adds part of an indoor route but leaves the pavement approach and exact flat-door threshold unseen. Flat 8's listing date still says 21 January, which is separate from whether its only lift is usable then. You have one viewing available and a friend can check access; nothing has been booked or communicated on your behalf."
+        }
+      ],
+      "handoff": "Fictional Lanternreed Court,6 Hushberry Walk. User moves21Jan,all-in<=£2,000,min40m²,bedroom,age flexible,<=40min Bellwater Workshop; one viewing,friend can check route; nothing booked/paid/sent. New leg injury/mobility aid >=8weeks: continuous usable no-step pavement-to-flat route required21Jan; cannot use stairs even with help, later repair promise insufficient. Earlier stairs tolerance withdrawn; higher view only preferred if accessible. F8 second floor,exact supplied official EPC46m²/C,1960 all-in estimate,listed21Jan. F1 entrance floor,EPC42m²/D,1990 estimate; Fri landlord written21Jan corrects/withdraws prior24Jan draft. Shared supplied route36min. Advert 'lift all floors,step-free'; Tue agent lift working. Thu manager M6: ONLY lift out,provisional contractor28Jan,completion unknown,no alternative; courtyard2steps,street entrance level to hall. Fri agent 'there is a lift' no fault/date answer; no newer manager/engineer release. F1 video hall-to-flat no visible steps; pavement/door threshold unseen. Costs uncapped.",
+      "gold": {
+        "required_findings": [
+          {
+            "id": "R6-F1",
+            "description": "Apply the latest no-step route requirement on 21 January, rejecting superseded stairs tolerance and suggestions of assisted stair use or waiting for repairs.",
+            "evidence_ids": [
+              "U3"
+            ],
+            "severity": "critical"
+          },
+          {
+            "id": "R6-F2",
+            "description": "Treat Flat 8 as unsuitable as the main move-in option on current evidence because its only lift is out and repair completion is unconfirmed after the move date; higher view cannot override access.",
+            "evidence_ids": [
+              "U2",
+              "U3",
+              "U4"
+            ],
+            "severity": "critical"
+          },
+          {
+            "id": "R6-F3",
+            "description": "Explain Friday’s existence-of-lift statement does not resolve Thursday’s outage evidence; recency alone is insufficient when the new statement does not address the conflict.",
+            "evidence_ids": [
+              "U4"
+            ],
+            "severity": "major"
+          },
+          {
+            "id": "R6-F4",
+            "description": "Switch the provisional viewing priority to Flat 1, preserving the latest landlord correction to 21 January rather than rejecting it on the withdrawn 24 January draft.",
+            "evidence_ids": [
+              "U5"
+            ],
+            "severity": "major"
+          },
+          {
+            "id": "R6-F5",
+            "description": "Do not certify Flat 1 fully step-free: verify the complete street/pavement entrance route and flat-door threshold; avoid courtyard’s known two steps.",
+            "evidence_ids": [
+              "U3",
+              "U4",
+              "U5"
+            ],
+            "severity": "critical"
+          },
+          {
+            "id": "R6-F6",
+            "description": "Give a small grouped set of confirmations without booking/contact; retain estimated costs (£1,990 for Flat 1, only £10 below ceiling) and unverified journey/other axes as appropriate.",
+            "evidence_ids": [
+              "U1",
+              "U2",
+              "U5"
+            ],
+            "severity": "major"
+          }
+        ],
+        "forbidden_claims": [
+          "The user can manage stairs with assistance or is willing to wait for repair.",
+          "Flat 8 meets access requirements because the advert says lift or the Friday email is newer.",
+          "The lift is guaranteed repaired by 21 or 28 January.",
+          "Flat 1 is unavailable until 24 January.",
+          "The partial indoor video proves continuous step-free pavement-to-flat access.",
+          "Either all-in estimate is a fixed cap.",
+          "A viewing, contact, or booking has already been made."
+        ],
+        "acceptable_actions": [
+          "Prioritise Flat 1 conditionally for the sole viewing and full continuous-route check.",
+          "Keep Flat 8 out of the main move plan unless new credible evidence establishes timely working access; do not promise that evidence will arrive.",
+          "Group confirmation of Flat 1 handover, usable complete access and costs into a short actionable list."
+        ],
+        "uncertainties": [
+          "Actual lift repair completion and operational status.",
+          "Complete pavement/street-entry/Flat 1 threshold access.",
+          "Actual bills and cost margin.",
+          "Actual commute variability and remaining due-diligence axes."
+        ]
+      }
+    }
+  ]
+}

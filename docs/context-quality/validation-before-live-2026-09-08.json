@@ -1,0 +1,33 @@
+{
+  "checked_at_utc": "2026-09-08T17:00:23.447548+00:00",
+  "live_calls_before_freeze": 0,
+  "full_suite": {
+    "command": "python3 -m unittest discover -s tests",
+    "passed": 1611,
+    "seconds": 16.907,
+    "log": "bench/results/context-quality-2026-09-08/validation/full-offline-tests-final.log",
+    "log_sha256": "cdf7972f5c88636df84c82e36e797cac9525f2cbebfee70171952f437df921e8"
+  },
+  "offline_controller": {
+    "traces_passed": 20,
+    "saved_reports_reproduced": 3,
+    "logical_fields_equal": 60
+  },
+  "reviews": [
+    "Analysis source answer hints removed before any outputs; essential evidence reachable under two-document limit.",
+    "Rental handoffs retain current decision-relevant facts and corrections; alternate equivalent three-check grouping accepted.",
+    "Direct terminal usage required; fallback telemetry cannot masquerade as complete usage.",
+    "Conditional R1-F6/R2-F6 accuracy checks excluded when not applicable."
+  ],
+  "source_sha256": {
+    "bench/context_quality.py": "8b59cee65a36a9cf4ccefb415d35219601d7e73da9b4764daeb1b473740e5bf0",
+    "bench/launch.py": "97408a88f28756dbe1643e769836166eeb1497480486a5abee7da4d9cf69199c",
+    "bench/report_control.py": "c89635e22eba04e9fc6dfd3a0a38bbcf760b044840b1d1db54b2428a9a4d5f5a",
+    "tests/test_context_quality.py": "68a9e414d226f8f4407a6c9e00104d62c05a0d092b0fd21b792819b719c005aa",
+    "tests/test_report_control.py": "a76425ff71a22fc5bb8239409a3f7ddfcc203b792d5ee9589814555a1bcefb9f",
+    "evals/context-quality/analysis-cases.json": "805c48c58ce62de15bc41bd790539e52b9c4ac149621659f29a6a243e9609e0b",
+    "evals/context-quality/rental-cases.json": "dae426b9e28b5c9b207d2b21dcb6fdd23d670737aeae643f84fb608c167d40be",
+    "evals/context-quality/controller-cases.json": "80bfefb02d491c3c1602eae435f9dcbe08502a1c52d54060c10294b63f2b6388",
+    "dist/prompt-pack/INSTRUCTIONS.md": "912ae34b83631dc1859881fc4b7243ddf3f9a9151570558c32ad733ff1d1bd78"
+  }
+}
