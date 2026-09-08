@@ -1,0 +1,40 @@
+{
+  "created_at_utc": "2026-09-08T11:41:22.080727+00:00",
+  "source_commit": "8126037ef68caf9ca85ed2fc8bfe19af17029985",
+  "branch": "main",
+  "skillfix_commit": "20b46ddeb2f5a75aa2cdb0bf8d83c9e78f43b1a0",
+  "initial_worktrees_clean": true,
+  "local_backup_directory": "/Users/chenhsienhao/Documents/pea-princess-handoff-20260908T113914Z",
+  "artifact_files_verified": 2060,
+  "archives": {
+    "artifact-inventory.json": {
+      "bytes": 412009,
+      "sha256": "51398e19fe32a1b77c9431ba6713465cfdda42c7e54d6cc272713b6f4f429b25"
+    },
+    "claude-handoff-transcript.txt": {
+      "bytes": 19066,
+      "sha256": "bc97618cfe9500cdf5765eca887f0e4b19280d6d00ecf4bf3b2923080cbe7a86"
+    },
+    "git-state.txt": {
+      "bytes": 34574,
+      "sha256": "285087941345ee203393f750fee0377cf8eabc7e51fd845858f83406a49aee1c"
+    },
+    "history.bundle": {
+      "bytes": 1947845,
+      "sha256": "9c406b9247742f912c672c594ea39eb866aa49026667ce4ed51f1e092bb3436b"
+    },
+    "local-experiment-artifacts.tar.gz": {
+      "bytes": 25287131,
+      "sha256": "4e101aab06c12dd732122c73166ebbcf0dd9c366962b5d0f3321921287cc0a16"
+    },
+    "source-8126037.tar.gz": {
+      "bytes": 1638610,
+      "sha256": "859db2789ff41035efa4860f764b55fe29691d9e08863529d500785657e7cad3"
+    },
+    "experiment-scratch-supplement.tar.gz": {
+      "bytes": 47446,
+      "sha256": "f7760f1fba928c77dd082476381c4bcff05e0e49f17ac3d36d81d5e0015f2f78"
+    }
+  },
+  "privacy": "Raw results, private gold and original conversation remain in the local backup; this manifest can be committed."
+}
