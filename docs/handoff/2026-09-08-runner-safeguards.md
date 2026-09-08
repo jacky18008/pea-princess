@@ -89,7 +89,8 @@ Older runs cannot be backfilled from absent telemetry.
 
 ## Offline verification
 
-`python3 -m unittest discover -s tests -p test_personas.py`: **105 tests passed**.
+The final full offline suite passed, including all **105 persona tests**. Run this
+subset with `python3 -m unittest discover -s tests -p test_personas.py`.
 New regressions cover a one-attempt failed subprocess, zero-exit Claude error
 envelopes, failure at every actor, canary/matrix stopping, configuration-safe skips,
 retry archival after replacement, interruption preservation, incomplete usage,

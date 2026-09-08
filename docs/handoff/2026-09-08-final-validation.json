@@ -1,0 +1,33 @@
+{
+  "validated_at_utc": "2026-09-08T11:53:17.290166+00:00",
+  "runner_commit": "ec746ad",
+  "offline_tests": {
+    "command": "python3 -m unittest discover -s tests -p 'test_*.py'",
+    "count": 1567,
+    "seconds": 12.333,
+    "status": "passed",
+    "log": "/Users/chenhsienhao/Documents/pea-princess-handoff-20260908T113914Z/validation/unittest-final.log",
+    "sha256": "cc676a130d90e91b602e0bec801048c726ad1fe42b9f2cca4446f6515a915dbb"
+  },
+  "original_files_verified_unchanged": 2060,
+  "new_experiment_model_calls": 0,
+  "claude_confirmation": {
+    "status": "paused",
+    "pending_sessions": 7,
+    "valid_confirmations": 0,
+    "observed_target_model": "claude-opus-5"
+  },
+  "regrade": {
+    "path": "bench/results/handoff-2026-09-08-verified",
+    "summary_sha256": "00aecd8af558e0e81119ac9cf66414d98139d6dd1aa573b08fc6f0a2f191a622",
+    "summary_reproduced_byte_for_byte": true
+  },
+  "other_checks": [
+    "generated viewer current",
+    "copy-deck source match",
+    "skill zip build and 7980-character prompt pack",
+    "skill and persona fixtures unchanged versus 8126037",
+    "retry canary dry-run and regrade dry-run without model calls",
+    "pipeline custom result root/label isolation regressions"
+  ]
+}

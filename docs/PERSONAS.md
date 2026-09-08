@@ -20,6 +20,11 @@ python3 bench/personas.py --matrix pilot                  # the pilot, for real
 Designed by Claude (Fable 5.1) and GPT-6 Astra (Codex) for Hsien Hao (Jacky) Chen,
 2026-09-06. The two raw design notes are kept unedited under `docs/personas/`.
 
+**Status, 2026-09-08:** the two 32-session matrices are complete. The seven-session
+second-fix confirmation batch ended with seven provider errors and no graded result;
+Claude-dependent runs are paused. See the [handoff record](handoff/2026-09-08-experiment-status.md)
+for current results, corrected metric definitions and the bounded resume plan.
+
 ---
 
 ## What the research allows us to claim
@@ -193,8 +198,15 @@ first of these:
 2. the persona abandons the conversation explicitly;
 3. the card's `patience_turns` is reached;
 4. two exchanges pass with no new information;
-5. 120 seconds pass without usable output — 60 for P4, who has no patience;
-6. 12 minutes of wall time in one session.
+5. an agent reply takes at least 300 seconds;
+6. 30 minutes of wall time in one session.
+
+The original 120-second reply allowance (60 for P4) and 12-minute session allowance
+are impatience marks, logged as breaches while the run continues; they are not the
+hard limits used by the current runner. The CLI launch timeout is a separate ceiling
+and can be longer than the reply stopping rule, which is evaluated when the call returns.
+A provider refusal is recorded as `provider_error`, has no grade, and stops the batch;
+it must never be averaged into model performance.
 
 **First value** is the first assistant reply carrying an evidenced decision or an
 executable next step. Not a greeting, not an intake form.

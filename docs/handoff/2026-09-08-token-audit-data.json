@@ -1,0 +1,228 @@
+{
+  "audited_at": "2026-09-08",
+  "observed_window": "2026-09-03 through last local response on 2026-09-08; UTC dates",
+  "no_model_calls": true,
+  "source_files": 669,
+  "isolated_source_files": 602,
+  "raw_usage_message_rows": 36215,
+  "globally_deduplicated_requests": 14964,
+  "definition": "processed_tokens = fresh input + cache creation + cache read + output; not billing or subscription usage units",
+  "deduplication": "Global (requestId, message.id); synthetic errors excluded; max of each top-level token component across repeated content blocks. Do not add output thinking or iterations again.",
+  "scope_warning": "The Documents orchestrator and its subagents are mixed-project and are kept separate from isolated vetflat/project folders. Do not present their totals as project-only.",
+  "scopes": {
+    "observed_2026_09_03_to_08": {
+      "by_role": {
+        "orchestrator": {
+          "input_tokens": 34660,
+          "cache_creation_input_tokens": 15174262,
+          "cache_read_input_tokens": 558427805,
+          "output_tokens": 1491157,
+          "requests": 1097,
+          "processed_tokens": 575127884
+        },
+        "orchestrator subagent": {
+          "input_tokens": 8600,
+          "cache_creation_input_tokens": 16555472,
+          "cache_read_input_tokens": 643943181,
+          "output_tokens": 1899486,
+          "requests": 4221,
+          "processed_tokens": 662406739
+        },
+        "persona bench": {
+          "input_tokens": 678,
+          "cache_creation_input_tokens": 2324840,
+          "cache_read_input_tokens": 10040614,
+          "output_tokens": 1058980,
+          "requests": 339,
+          "processed_tokens": 13425112
+        },
+        "flat AB bench": {
+          "input_tokens": 40809,
+          "cache_creation_input_tokens": 23159210,
+          "cache_read_input_tokens": 599819615,
+          "output_tokens": 9061416,
+          "requests": 6751,
+          "processed_tokens": 632081050
+        },
+        "docs bench": {
+          "input_tokens": 1950,
+          "cache_creation_input_tokens": 3400654,
+          "cache_read_input_tokens": 30735216,
+          "output_tokens": 960534,
+          "requests": 975,
+          "processed_tokens": 35098354
+        },
+        "journey/persona chat bench": {
+          "input_tokens": 1864,
+          "cache_creation_input_tokens": 5196345,
+          "cache_read_input_tokens": 52182207,
+          "output_tokens": 1693320,
+          "requests": 932,
+          "processed_tokens": 59073736
+        },
+        "project CLI/other bench": {
+          "input_tokens": 80,
+          "cache_creation_input_tokens": 613697,
+          "cache_read_input_tokens": 727476,
+          "output_tokens": 8282,
+          "requests": 40,
+          "processed_tokens": 1349535
+        },
+        "pipeline bench": {
+          "input_tokens": 1218,
+          "cache_creation_input_tokens": 2141905,
+          "cache_read_input_tokens": 63280090,
+          "output_tokens": 863895,
+          "requests": 609,
+          "processed_tokens": 66287108
+        }
+      },
+      "isolated_project_by_model": {
+        "claude-opus-5": {
+          "input_tokens": 15674,
+          "cache_creation_input_tokens": 27911261,
+          "cache_read_input_tokens": 636416027,
+          "output_tokens": 11127008,
+          "requests": 7837,
+          "processed_tokens": 675469970
+        },
+        "claude-sonnet-5": {
+          "input_tokens": 2960,
+          "cache_creation_input_tokens": 6082382,
+          "cache_read_input_tokens": 80265943,
+          "output_tokens": 1552696,
+          "requests": 1480,
+          "processed_tokens": 87903981
+        },
+        "claude-fable-5-1": {
+          "input_tokens": 27965,
+          "cache_creation_input_tokens": 2843008,
+          "cache_read_input_tokens": 40103248,
+          "output_tokens": 966723,
+          "requests": 329,
+          "processed_tokens": 43940944
+        }
+      }
+    },
+    "inferred_week_2026_09_04_04_00Z_onward": {
+      "by_role": {
+        "orchestrator": {
+          "input_tokens": 18608,
+          "cache_creation_input_tokens": 12706478,
+          "cache_read_input_tokens": 450217535,
+          "output_tokens": 1149271,
+          "requests": 856,
+          "processed_tokens": 464091892
+        },
+        "orchestrator subagent": {
+          "input_tokens": 4694,
+          "cache_creation_input_tokens": 9536610,
+          "cache_read_input_tokens": 381747594,
+          "output_tokens": 1160642,
+          "requests": 2347,
+          "processed_tokens": 392449540
+        },
+        "persona bench": {
+          "input_tokens": 678,
+          "cache_creation_input_tokens": 2324840,
+          "cache_read_input_tokens": 10040614,
+          "output_tokens": 1058980,
+          "requests": 339,
+          "processed_tokens": 13425112
+        },
+        "flat AB bench": {
+          "input_tokens": 12254,
+          "cache_creation_input_tokens": 12743402,
+          "cache_read_input_tokens": 433231383,
+          "output_tokens": 5216830,
+          "requests": 4192,
+          "processed_tokens": 451203869
+        },
+        "docs bench": {
+          "input_tokens": 1950,
+          "cache_creation_input_tokens": 3400654,
+          "cache_read_input_tokens": 30735216,
+          "output_tokens": 960534,
+          "requests": 975,
+          "processed_tokens": 35098354
+        },
+        "journey/persona chat bench": {
+          "input_tokens": 1864,
+          "cache_creation_input_tokens": 5196345,
+          "cache_read_input_tokens": 52182207,
+          "output_tokens": 1693320,
+          "requests": 932,
+          "processed_tokens": 59073736
+        },
+        "project CLI/other bench": {
+          "input_tokens": 12,
+          "cache_creation_input_tokens": 80762,
+          "cache_read_input_tokens": 83936,
+          "output_tokens": 5560,
+          "requests": 6,
+          "processed_tokens": 170270
+        },
+        "pipeline bench": {
+          "input_tokens": 1218,
+          "cache_creation_input_tokens": 2141905,
+          "cache_read_input_tokens": 63280090,
+          "output_tokens": 863895,
+          "requests": 609,
+          "processed_tokens": 66287108
+        }
+      },
+      "isolated_project_by_model": {
+        "claude-opus-5": {
+          "input_tokens": 11434,
+          "cache_creation_input_tokens": 20006556,
+          "cache_read_input_tokens": 505228741,
+          "output_tokens": 8100691,
+          "requests": 5717,
+          "processed_tokens": 533347422
+        },
+        "claude-sonnet-5": {
+          "input_tokens": 2394,
+          "cache_creation_input_tokens": 4714434,
+          "cache_read_input_tokens": 62120925,
+          "output_tokens": 1210446,
+          "requests": 1197,
+          "processed_tokens": 68048199
+        },
+        "claude-fable-5-1": {
+          "input_tokens": 4148,
+          "cache_creation_input_tokens": 1166918,
+          "cache_read_input_tokens": 22203780,
+          "output_tokens": 487982,
+          "requests": 139,
+          "processed_tokens": 23862828
+        }
+      }
+    }
+  },
+  "orchestrator_context": {
+    "requests": 1097,
+    "median": 531375,
+    "p90": 833027,
+    "maximum": 966788
+  },
+  "monitor_attribution": {
+    "method": "assistant requests since latest plain-text non-tool user event, until next such event",
+    "all_user_events": 335,
+    "all_unique_requests": {
+      "input_tokens": 14291,
+      "cache_creation_input_tokens": 5210368,
+      "cache_read_input_tokens": 318642511,
+      "output_tokens": 611271,
+      "requests": 623
+    },
+    "inferred_week_user_events": 260,
+    "inferred_week_unique_requests": {
+      "input_tokens": 10057,
+      "cache_creation_input_tokens": 4520701,
+      "cache_read_input_tokens": 260626559,
+      "output_tokens": 561524,
+      "requests": 523
+    },
+    "caveat": "Attribution includes useful work triggered by callbacks; this is not an exact wasted-token estimate. Monitors are subsets of orchestrator, not additive."
+  }
+}

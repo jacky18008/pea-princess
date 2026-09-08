@@ -1,0 +1,1131 @@
+{
+  "scope": "Read-only local Claude response metadata; no conversations copied. Synthetic errors excluded. Unique (requestId,message.id).",
+  "records": [
+    {
+      "dataset": "personas-2026-09-06",
+      "session": "C1-baseline-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 13
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-C1-l38e3d9h/580cfe14-23fb-4d07-860e-919841c10d87.jsonl",
+          "sha256": "1594e9812fbe509999caf6ad330ba961cd198df10f61f28e13e341a2b39669f5"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-06",
+      "session": "C4-probe-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 12
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-C4-65kr15yo/57e3ea1a-2efc-4eb3-b10a-17bd735af1fe.jsonl",
+          "sha256": "d5af996159b9a8392c29f941ca1897f1d3f3505402e8318def96bd5ffb06ac6a"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-06",
+      "session": "C6-baseline-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 10
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-C6-i18ptade/864d5e05-590f-43d2-af13-627efba43eae.jsonl",
+          "sha256": "c7bf847cfaf970f4cfec6cee0d456dc78b36b4466dc3f5e7d538b37b15061533"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-06",
+      "session": "P3-baseline-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 5
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-P3-trzuccp0/a81058a3-1a34-4c0e-8437-db21d49a8059.jsonl",
+          "sha256": "e96ca6358089709a9dbc03fa6c2f64c7cda09475e62a17b2ac9810d595b7e1fc"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-06",
+      "session": "P4-baseline-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 5
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-P4-q9luzvo5/8b07952d-50e5-4374-b706-82df7955cbe2.jsonl",
+          "sha256": "dd97db28bcea8960488efcc047a328c2ae13209be64cd09152f4254a80f035b2"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-06",
+      "session": "P5-probe-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 4
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-P5-0hc8q1gh/4d67bee1-1415-4283-a6d3-071cea653398.jsonl",
+          "sha256": "a16aaef79e9cd70f5c7c2157bee316a594f4ae30cd4dc58ef644dd54ccadad20"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07",
+      "session": "C1-baseline-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 12
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-C1-qn7ysopo/e8536e91-1475-47bf-b02f-cfa67e8f6ac7.jsonl",
+          "sha256": "97aff50d6f843667576a189ed032ad6685cb2e766fdab09ec83e2311240faffe"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07",
+      "session": "C1-probe-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 11
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-C1-fy5o8281/e85e4fe4-87f3-4a6f-8854-a087006a3118.jsonl",
+          "sha256": "22023ad8b10f24e53647863785a230511bd1d874d0945e6661294ade1e2a16dc"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07",
+      "session": "C2-baseline-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 34
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-journey-C2-evp6cq9c/71ff63cc-e1e7-4da8-b765-31c43c9d9dfd.jsonl",
+          "sha256": "a5f9758041e34c03ca3cb028300e99333c647a7f66a06e0fb4b13559d3341b3e"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07",
+      "session": "C2-probe-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 33
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-journey-C2--mlxz1n6/3f3a6e75-98cc-4652-ae00-3d94aa6dee6a.jsonl",
+          "sha256": "0e8d6bae219232a9e0ddc107f7df0fe963dc8541bbda57e746b897dfdf483694"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07",
+      "session": "C3-baseline-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 13
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-C3-qqn0s4ng/993016cb-d034-465b-8f55-3900e86d0bcf.jsonl",
+          "sha256": "837a2850644562780fe179dea5722b04700321c33a8fc21084abdea7a32f8d8f"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07",
+      "session": "C3-probe-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 16
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-C3-19aaq9e5/7bc5b71d-fdda-44d9-a27b-bf754d201bdb.jsonl",
+          "sha256": "eba309484a7d93abd51286bca8ff8dc38dce442683eb99c61b574166414f7e5b"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07",
+      "session": "C4-baseline-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 10
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-C4-st4d9ice/da2788bc-75f6-49cc-a9e0-d82a84e556b8.jsonl",
+          "sha256": "e993f91a4f95b6f8731eef4d0d25127967097ae6f866bb261d50088caa6b75f8"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07",
+      "session": "C4-probe-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 11
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-C4-bk8c4r2v/faf50b68-766e-423e-80bf-02bc07e1cb52.jsonl",
+          "sha256": "46c9afe40167c3846180d8c10cf0ef20c72cb3a27ed08d58fdce981bd8fa0f2b"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07",
+      "session": "C5-baseline-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 28
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-journey-C5-3u2ed35r/182f6b98-bba1-4437-87e7-71f0f3e9fa14.jsonl",
+          "sha256": "f6c7447cf87929cd304000366b6b356d2be8382cd78e8906aa5086ac4376df83"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07",
+      "session": "C5-probe-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 32
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-journey-C5-cj2c4hta/a0d17e34-2c1c-4dfa-a6ca-e8717b5cf3d6.jsonl",
+          "sha256": "7eb98e46674404ee685db0479de8875cce3b560cf98a08d7c78a68273c658130"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07",
+      "session": "C6-baseline-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 10
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-C6-dkrpww0d/eef5840f-5481-4803-80a7-cab103ed095c.jsonl",
+          "sha256": "c5ea013922e2f7032e0f98659c77b709c9d592fa75c5c79294282116bc557d37"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07",
+      "session": "C6-probe-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 10
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-C6-u17tgytc/d03fe305-9626-4019-a0d4-3847b20fa45a.jsonl",
+          "sha256": "557416a10acd8d12812a3858ac8934aad4c4a92c5125eb2f1a257e66cb0bee9f"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07",
+      "session": "C7-baseline-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 6
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-C7-b0398a47/799c1c8d-322b-409a-9441-a9a6c9984927.jsonl",
+          "sha256": "d9fc11b126a635d8c8448a22763b158c3051d6dbc9df24eabc681599ad0a5d87"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07",
+      "session": "C7-probe-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 5
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-C7-8a67j9b9/350dfddd-7dce-4685-aa44-2cdd538137b6.jsonl",
+          "sha256": "15e362d514b69fa07cbd77401e17394972a81464a45329a1dfa60b63768c65c7"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07",
+      "session": "C8-baseline-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 17
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-journey-C8-dgg0uht5/add2c56b-cc4a-4a21-a0ba-a9fcbbf4eedc.jsonl",
+          "sha256": "d235cd9bf3de287717ae296f3cae7c08f3a76e8ecb8763ebd9454fb1889a4194"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07",
+      "session": "C8-probe-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 19
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-journey-C8-azev2e63/445bb11c-1d2e-40a4-a579-da40b704f13a.jsonl",
+          "sha256": "5a0a50f733df4b56db755491121488cb5b41796aeaca644ad386b84fc182f119"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07",
+      "session": "P1-baseline-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 21
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-journey-P1-r87jl1-b/2bfa1c2c-eab3-4f87-8676-bbdeca2d3893.jsonl",
+          "sha256": "6e84541d9eadd7aa669e6e7dbd54116d2ea260dcfe116250ce3434815d54b1fd"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07",
+      "session": "P1-probe-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 42
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-journey-P1-jefidq37/79a29507-25ae-49fb-9370-17cc42d9f18d.jsonl",
+          "sha256": "dd92deda23fe28a048c0c602f66623b22e75c35d5160fc2e3fb99d93629842ab"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07",
+      "session": "P2-baseline-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 18
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-journey-P2-ihcq6h4w/da437c99-a93d-401a-bd7b-6e8b5bf8531b.jsonl",
+          "sha256": "8a59282caa1e7fac2e390d006ead4e413d899d351fbe8984c1d8602002711ff6"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07",
+      "session": "P2-probe-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 16
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-journey-P2-2u5jn1ue/fd71787c-9a38-4470-8095-d97c3d4e07fc.jsonl",
+          "sha256": "a2682fcad2426df9089a8586d4b5c3840493e9b6b46e94e4826de8e11fbc9ee5"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07",
+      "session": "P3-baseline-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 5
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-P3-2dvbp-4c/1c802e99-87ef-4a35-861b-3fd7c52871cd.jsonl",
+          "sha256": "96834f1bf13b1bc510460775ef37d20dea87e852f96158e4494504f1dfd1bfa3"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07",
+      "session": "P3-probe-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 4
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-P3-h6jum-b6/d0870df3-598d-4dc6-910c-63fd62b99f82.jsonl",
+          "sha256": "40b0efad87bf8fdfa28b96c1534d398698da79db13e44f2cb111f5e1950f82df"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07",
+      "session": "P4-baseline-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 3
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-P4-ku9qctd1/09c13af4-eee2-467c-92ba-c6b0dcaa207a.jsonl",
+          "sha256": "5d8457ad3de17b225a5dcef89034064104a6b295a33b49d38597d4b8f1681852"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07",
+      "session": "P4-probe-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 7
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-P4-erzvewr1/03ff415d-1eb8-42f9-84aa-d67eef675499.jsonl",
+          "sha256": "a3529689bb3568ae100c6bcb42a5727a57d26ff27da60e23ca41924b22fc590e"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07",
+      "session": "P5-baseline-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 4
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-P5-m6ehs2ud/e5ffdc52-bd66-4ae2-b580-ac3ec8ce5a1d.jsonl",
+          "sha256": "146693b722a3e2136a3878461366117e302ee9ded77a877a3b6ae4edf3fac2d9"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07",
+      "session": "P5-probe-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 3
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-P5-yuz339g0/bcab8700-31f9-44dd-b817-363cece0e38e.jsonl",
+          "sha256": "61e41b85b4a4b6ae67eb02ea70248427e5e8e5022c069d559488247a24199db6"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07",
+      "session": "P6-baseline-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 34
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-journey-P6-nd05743q/33d39b89-f229-4b55-927c-2fa31afb5ca8.jsonl",
+          "sha256": "6b04ed8a50f3d8f8434801216864e397eea9fd953d0ebcf582ccac439cbdf4d6"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07",
+      "session": "P6-probe-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 37
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-journey-P6-k47gdwvi/44ee46cb-3246-405d-ab21-85955c1233b5.jsonl",
+          "sha256": "0fff3e5743869d6689918010567bac7394cb8e322908b342940e74e384572b0e"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07",
+      "session": "P7-baseline-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 7
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-journey-P7-r-8-59qq/f9e5d094-59ad-4efc-8f5a-73dab376ff3c.jsonl",
+          "sha256": "31bc169fbdf5ef16e0a757eac1eabbdc6f4e278bd8181f9f2355f0000d21eaf3"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07",
+      "session": "P7-probe-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 11
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-journey-P7-hv1f-xb0/94211e56-fe83-4649-95fe-226253e52ee2.jsonl",
+          "sha256": "a01b0fd2ac04c348971453b5c73fa96facb2c5b01ce9070a40f2a37943647dae"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07",
+      "session": "P8-baseline-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 10
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-journey-P8-wz36tj4j/7a17d068-77e9-4efd-b214-a9849ba7f8ed.jsonl",
+          "sha256": "c1bc7dae40ec786977e19f7323364dceebead43e4614b291b290a79d70e9fa1b"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07",
+      "session": "P8-probe-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 32
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-journey-P8-qwbwcdaj/c7e10add-e651-4eef-9824-b8077092d981.jsonl",
+          "sha256": "3703101434d23180a8944a97f3ac21b48fd0d988bdf384532768a7a1fa0245c6"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07-fixed",
+      "session": "C1-baseline-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 12
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-C1-ncp48pnq/2d1e220b-d538-49e5-bd94-864bb205bf49.jsonl",
+          "sha256": "f7aba8aab5e52635bd4bb97f5f5b24af159ecef8f5fd92ae93aa4a5a6b9c0911"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07-fixed",
+      "session": "C1-probe-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 16
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-C1-a7j2qp56/81023c23-3538-4c78-b118-c414a5a365ec.jsonl",
+          "sha256": "16ecef3af6005d2cd6d8c9d9f9dd2f0a8c32f670bfc5effb5218e76778e7fd47"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07-fixed",
+      "session": "C2-baseline-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 16
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-journey-C2-ky23m5y8/27c4105e-a92c-449a-83d5-cd0f6a5e8754.jsonl",
+          "sha256": "e40206ea6ccc1a3b184a1040965f0370cf1fde068229ba9f1247f7c9ef88ee2e"
+        },
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-journey-C2-ky23m5y8/c3d5f5c2-f8f2-4e93-9abb-2b84a27e9020.jsonl",
+          "sha256": "663480dc5ecfd8ffa9ca3c61af839b9a683c412d02ade4d2df7852849a431f6b"
+        },
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-journey-C2-ky23m5y8/e519aff7-fca1-42db-9bfb-afcb28095190.jsonl",
+          "sha256": "557f55edc187c9a5e407b66927252fefca41c53007ddb5c2ab263e2170daf296"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07-fixed",
+      "session": "C2-probe-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 46
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-journey-C2-qp4m5-gn/441e4110-1668-4387-9288-7c2152348187.jsonl",
+          "sha256": "aad2f999d233b7ca77b27414fa3b13a3e030fb2620b00184093225afdf6cd8d4"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07-fixed",
+      "session": "C3-baseline-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 16
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-C3-ll2ap325/43afa6ea-4c3d-4ce8-a566-e29abf9d34e2.jsonl",
+          "sha256": "e37e2810b55497b7571af2141629001bc5b4aa40e24aa130b5650587094a0768"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07-fixed",
+      "session": "C3-probe-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 13
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-C3-la7t541r/ab362d02-8119-4746-ab0c-0088f966cdd6.jsonl",
+          "sha256": "a557e8b585e4908adb9b9b9ff75768a9e92842d8f4fcdeaa3d01be620cefed0a"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07-fixed",
+      "session": "C4-baseline-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 8
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-C4-qmnu-c6q/b954924c-fca4-4ffa-b2e8-3a40efaa5527.jsonl",
+          "sha256": "8022344ce85bd7c4bd9a60cea09ae9f03085bb55fa8481dc5df977d5b2afa188"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07-fixed",
+      "session": "C4-probe-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 8
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-C4-atyvdy0q/e34415ec-17dc-4a2b-b74c-90c7e6b68380.jsonl",
+          "sha256": "ebfb8bf4bd4cf3ad9e0c8bc428d8b74da6ce667524a3dd3d20df62ecb3275b71"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07-fixed",
+      "session": "C5-baseline-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 24
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-journey-C5-7ve--k61/b3d3ea28-558a-4eae-bd0e-ec36729af1ed.jsonl",
+          "sha256": "7a682861e37b97e94052ac9f2238103462693d3c9a937dc663ed9db4efc225e1"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07-fixed",
+      "session": "C5-probe-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 29
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-journey-C5-j93wfai0/cf87c48a-6537-44dc-87c1-f2cad5782430.jsonl",
+          "sha256": "f472191e51526ebf5c1af021cfb788ac0068020c614254f6b8c069cfb2f02a02"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07-fixed",
+      "session": "C6-baseline-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 10
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-C6-z4gknnaq/3e613a21-22c8-4f77-95be-12d5605c805a.jsonl",
+          "sha256": "e1f1c084250a057a03decde07059c0f0258711f25ef8ddeda49295fa089f4b41"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07-fixed",
+      "session": "C6-probe-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 10
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-C6-xld1diki/239908f1-ddda-45f7-9145-1fa7a433e590.jsonl",
+          "sha256": "81676cf39e1aecef66b60ad3c583c2a21570913596c26d6044df4d1e1e1101d0"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07-fixed",
+      "session": "C7-baseline-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 6
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-C7-1086e3q9/09404fa6-bb1d-4322-8a0a-5ca30fb757ba.jsonl",
+          "sha256": "b2464a3d554365ecf3353d35234d7467f2b3cfe2335bd1387b4d83aeae08c894"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07-fixed",
+      "session": "C7-probe-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 7
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-C7-hcr1i0-y/5b7a7d9f-3803-485b-8881-ae38b9614e9f.jsonl",
+          "sha256": "b5d4eecd415b2809f7823cc7e99f3da153d8872d37a68c3ae5ac881d289464c6"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07-fixed",
+      "session": "C8-baseline-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 18
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-journey-C8-r0dy1se-/21672aab-6fa2-4f54-9b35-76b5ab2e49f6.jsonl",
+          "sha256": "bbde51516c3e6c93d53610b77ec3362f2f26cebb40b3269dcc5e46dbc1c09342"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07-fixed",
+      "session": "C8-probe-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 19
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-journey-C8-uvh-urr9/47a0b894-5bcd-44f4-8e3d-ccd3139f977f.jsonl",
+          "sha256": "ba8dfbb64c8d9229ca566d7cdc654a38305a45650df23977ce3ad7eab50de931"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07-fixed",
+      "session": "P1-baseline-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 26
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-journey-P1-m0b0ajwf/e176301a-a04a-45ec-9da9-09b14befd5b7.jsonl",
+          "sha256": "0ad0a81cfd61ecb6f624ba0d92a77086b48ea2fd67b07b05bafa24364e4d63a2"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07-fixed",
+      "session": "P1-probe-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 30
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-journey-P1-h4b81p7n/5c7ff0ef-031c-4ffb-b617-3a607974b658.jsonl",
+          "sha256": "1d8ebcc6ec87000ec4865648d080f8418509dbd10e50a350702d91d812d99ea0"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07-fixed",
+      "session": "P2-baseline-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 9
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-journey-P2-t6eq97px/fb9c50ab-9615-4d27-9326-86b0e7bf4fd3.jsonl",
+          "sha256": "cb35cf553126836bacdb4eab28025f2c7bf3fbaf16152a138955f080ef4eb6ce"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07-fixed",
+      "session": "P2-probe-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 22
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-journey-P2-4xbo-4vk/1c85435c-5cea-4155-84de-92b3f596fd57.jsonl",
+          "sha256": "13074f36d089f7217fe42afe72babc0eaa63d26c7f5add28a657b9b0dba8c47d"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07-fixed",
+      "session": "P3-baseline-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 1
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-P3-mwprkvyn/452083ac-2af9-452c-9fed-d8bca030d679.jsonl",
+          "sha256": "d931189ab14f26161aaa6c1766565e8b1cd8ac6926b4dc0141d33154339b2fc3"
+        },
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-P3-mwprkvyn/ebfa92d7-5055-4519-a77a-bfb8b5203696.jsonl",
+          "sha256": "68a89973d60f6a46ffbc9140641004e0a62eda0d98f768ce7a90cf3665f90c16"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07-fixed",
+      "session": "P3-probe-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 5
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-P3-zf7jnzrr/2f164769-6e3d-4b1b-9e61-9cd71c092b1b.jsonl",
+          "sha256": "dafcf0a287aaf18d3eb623bf4fdaa56fb67b7a70edf86c34ff6abe5543e498d4"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07-fixed",
+      "session": "P4-baseline-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 3
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-P4-b-zb4xc3/6f4c47f8-0ef0-4a16-9be6-ce8883dd653d.jsonl",
+          "sha256": "48cbbdee15ca1ba6075abd48f812df0243c87517880e3c0963f2fc6919f7b621"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07-fixed",
+      "session": "P4-probe-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 3
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-P4-mcrigyek/21bba733-6fd9-4383-9246-c74c580a4e67.jsonl",
+          "sha256": "bb8dabae27a85bfad3d4d56e5c73b6259296743d7b01bd939fac9de8d42f78b4"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07-fixed",
+      "session": "P5-baseline-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 4
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-P5-soes5wzv/6f5c117a-6d38-4ac0-98a1-e5fb6fef8761.jsonl",
+          "sha256": "396f06ad91ccc6c6ae20d71c7c3d95e2cc9e271406e39e8c4574c304b994d67e"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07-fixed",
+      "session": "P5-probe-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 4
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-P5-zeyul-ty/da7faf82-ea07-47eb-9ee3-a1ac6d05182e.jsonl",
+          "sha256": "92269e66c0657ef1c57fd0c6b7f4010fd267c7b8affa769399bd0f476aaa94d5"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07-fixed",
+      "session": "P6-baseline-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 39
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-journey-P6-icmgbhgh/186a70f6-ac48-4a72-beeb-e09965ee7c8b.jsonl",
+          "sha256": "8a2b732a91e780aa9794bb37e7cec3d12efcc723a86de769398e1f6da7ef510a"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07-fixed",
+      "session": "P6-probe-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 33
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-journey-P6-7xnfn0an/50ba620c-f320-4479-b82f-cfae552d7e2b.jsonl",
+          "sha256": "7c609c67c2b33d17861a129209d2068272fb5b36667fde771ecd232c76e2c7f0"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07-fixed",
+      "session": "P7-baseline-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 6
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-journey-P7-atwax0kb/318af8a6-ae2f-41c9-b732-4ef4d7b986f5.jsonl",
+          "sha256": "f72bfebfc0bcb066711db9f4735cc1660f349d81b3ca13aa273810debc2c2421"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07-fixed",
+      "session": "P7-probe-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 12
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-journey-P7-4clbzhi3/16282161-9d46-4cf0-8b05-fccb13127f48.jsonl",
+          "sha256": "f7341535050f775bf55b3fd6e876b5b54884e7beb4fccd1cff42670e45a18cc2"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07-fixed",
+      "session": "P8-baseline-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 36
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-journey-P8-pvixpzcc/a985d1f8-a78e-46d0-ae91-7f28714e126a.jsonl",
+          "sha256": "f89544f1d04ef1a9a0b10faef0101563fb7094351975bd2c1c967f2513e3ff5f"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07-fixed",
+      "session": "P8-probe-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 20
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-journey-P8-i--3gsbu/aaea8827-8291-4577-95b2-1f58d3cfa39b.jsonl",
+          "sha256": "12b5aaaad9e0aa121f32da1946a3b6cbdd4779084ab419be2da10d9d8a68f869"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07-fix2",
+      "session": "P1-baseline-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {
+        "claude-opus-5": 10
+      },
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-journey-P1--obkxc8l/fd5665c0-38b7-4440-bb02-cfde570d3600.jsonl",
+          "sha256": "6ea389774acc868905ab8364a4dcebc9777876e9a47eebd774341f65294acbe2"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07-fix2",
+      "session": "P3-baseline-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {},
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-P3-bc6wdshf/1829bfb1-ab10-4611-89c9-b4436c83863c.jsonl",
+          "sha256": "3d8e0f5e90e05cfd9d9770a89a82b79e6889c5404c14c31a1a81caceacd69869"
+        },
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-P3-bc6wdshf/2bfdef39-b441-425d-a5cc-bc64118d10ab.jsonl",
+          "sha256": "a9bb5c10058da97a1d57fe34c4ae28c580391d1efa869dfbfa8726043d000c0f"
+        },
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-P3-bc6wdshf/90c33c73-3e72-4103-87e4-bd82e541dbb7.jsonl",
+          "sha256": "675fcc5866d3acb012bb6c1d9ea298464cff966868d4b17bd9ce78f7183e956a"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07-fix2",
+      "session": "P4-baseline-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {},
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-P4-84p68eg9/37358dd5-3aeb-4290-a084-ad61386d0f87.jsonl",
+          "sha256": "5e04ecfc72a7824080d0e71048a5ffa7a31d02e70b2e486ef94e09c03f441433"
+        },
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-P4-84p68eg9/860c4c22-3fa0-41a1-b58e-51eab76db10e.jsonl",
+          "sha256": "11be468f0c3df558e55d556de0cb4066768e418d502bbbf0b9a36c2d02b81526"
+        },
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-P4-84p68eg9/a06f55fb-3140-4843-b152-fb45cb1f5609.jsonl",
+          "sha256": "f89d237474ee0a902a721e5ba73e2a5cd83edad3cbd78a4bb55132e0f88e840b"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07-fix2",
+      "session": "P4-probe-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {},
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-P4-todakht8/13739769-e743-4dc8-80b1-c59b326a96aa.jsonl",
+          "sha256": "ee74660767583da09b59f640436579cc5e0b9951eb541c9aaa0e0f80c4058bc4"
+        },
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-P4-todakht8/361fd54f-10ba-4ad6-b422-9cdf98efebed.jsonl",
+          "sha256": "69f43549ac2d8c8a60fa74df5196bf34d90f0ce003a42a37254374e072896202"
+        },
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-P4-todakht8/4f603605-88c7-4953-bade-c2b5465beacc.jsonl",
+          "sha256": "73214fe1598a9f5cd387e7fe6bf17d24820c4eff443b031b4885b0beaba2ec61"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07-fix2",
+      "session": "P5-baseline-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {},
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-P5-a6vmmd3b/0270ea06-ea9f-4475-a9ca-1d06dec311a9.jsonl",
+          "sha256": "bef44237ba07c030ddef7d72e0ceac9fa21e798f45a0c43fa7ec840abf296c3a"
+        },
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-P5-a6vmmd3b/e4d7201c-09a0-4e57-874a-d87db8524a0c.jsonl",
+          "sha256": "5369d5b3fc82c5d5480a199503244785fd108464ae38ada41a51041c9c30489d"
+        },
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-P5-a6vmmd3b/e983c7f5-e3a0-49fd-9fee-a941c023beea.jsonl",
+          "sha256": "881b01963717b01b2b89a0e0ee031af0b30cb9f9245cede957f06eaa8422365b"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07-fix2",
+      "session": "P5-probe-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {},
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-P5-co46n-v8/404f16c7-b81f-475f-97a7-205b0bb695cc.jsonl",
+          "sha256": "fc01b2f3cc5e9421d041521ee756c037fe4a543ca7b21366053362df712b4af6"
+        },
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-P5-co46n-v8/d228d5a5-2920-46e8-906d-f19fdc3bcbc3.jsonl",
+          "sha256": "1de4af62c9218c0be6a45b52d9d3100f61da706f77947bff089af3e27a940867"
+        },
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-persona-P5-co46n-v8/e2284d38-12a2-4e44-9199-1878c009e1c2.jsonl",
+          "sha256": "9fdb603e5cb652669da6ac527377db951516cf2a14c16475d5c5ec6ca9646bc1"
+        }
+      ]
+    },
+    {
+      "dataset": "personas-2026-09-07-fix2",
+      "session": "P8-baseline-s1",
+      "recorded_model": null,
+      "resolved_model_requests": {},
+      "source_logs": [
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-journey-P8-ps-x3gz6/04b4e42a-7776-4c67-998d-43bf550b2d53.jsonl",
+          "sha256": "db9cd0df873f2e727aa7fa6ffb1c30a42ef66af3530dc2f375ad294f7a33ad13"
+        },
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-journey-P8-ps-x3gz6/628d5c72-8fc6-4930-94ce-089f4e9803ec.jsonl",
+          "sha256": "d2ef14710dfe2654cec06c4f3b2dd2d00029ea28e65108c697995feba809f858"
+        },
+        {
+          "relative_to_claude_projects": "-private-var-folders-fj-rp6vbc-x79j6xvb13hdgnc7h0000gn-T-vetflat-journey-P8-ps-x3gz6/a8082a86-941c-4f8f-9ff5-18f3e698fd42.jsonl",
+          "sha256": "4a3dd0cc436e567de0041b30a0c37325532ff9c21631c4e00fad6644c4b0de36"
+        }
+      ]
+    }
+  ]
+}

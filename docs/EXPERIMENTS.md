@@ -249,10 +249,16 @@ The finding is a text finding: the same persona misses the same sentence in both
 variants, and most capped sessions had the judge's criteria met. **The A/B** (the skill
 fixes merged, the same thirty-two sessions with the same seeds, the same rules): capped
 sessions 16 → 7, the legal date missing 5 → 0, the viewing warning missing 9 → 3, median
-grade 0.39 → 0.62, fifteen sessions better and seven worse in pairs; but the judge's
-criteria fell from 2.47 to 2.19 of 3 and the first reply is no shorter (4,100 characters
-against 4,200). A second fix for the seven sessions still capped (the compare-and-vet path
-and the short-let path) is under test. Sixteen invented people can find a broken flow;
+grade 0.39 → 0.625, fifteen sessions better and seven worse in pairs; but the mean count
+of criteria met fell from 2.47 to 2.19 (each criterion must score at least 2), and mean
+criterion scores fell from 2.17 to 2.03 of 3. First replies were only 4.8% shorter
+(median 4,108.5 characters against 4,316.5). The September 8 offline audit corrected
+the earlier count-as-score label: cards have either three or four criteria. A second fix
+for the seven sessions still capped (the compare-and-vet path and the short-let path)
+was merged at `8126037`; all seven confirmation attempts then hit provider DNS errors,
+leaving **zero graded confirmations**. Claude runs are paused for quota recovery.
+The [handoff record](handoff/2026-09-08-experiment-status.md) contains the preserved
+artifacts, exact pending sessions and resume commands. Sixteen invented people can find a broken flow;
 they cannot say a real person would have signed.
 
 ### Role pipeline: measured, and not recommended (2026-09-07)
