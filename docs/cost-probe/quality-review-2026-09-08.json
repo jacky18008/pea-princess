@@ -1,0 +1,695 @@
+{
+  "reviewed_at_utc": "2026-09-08T16:26:25.439514+00:00",
+  "trial_commit": "c6f1aa0ee52d7223a34922d3d10fd9ef61ca57cd",
+  "new_benchmark_model_calls_for_review": 0,
+  "scope": "Fixed-schema reporting over existing scorecards; not rental-agent or narrative quality.",
+  "method": "Recompute expected facts from raw scorecard rows without calling cost_probe.facts; compare saved rubric, supplied aggregates and all answers using preregistered grade tolerance; inspect raw events; compare final answer bytes. Independent collaborator separately reconstructed all facts.",
+  "plan_sha256": "5a071aae9f934e3ccd51a4ee6dbe738c2fd1a388e8f3e2523024a464f3f352e3",
+  "summary_sha256": "8d1ba26143e9bedc3f3e0b49a761da458047987aafc08bac1a54aef9c83207f3",
+  "source_hashes_match_plan": true,
+  "all_calls_pass": 10,
+  "final_pairs_byte_equal": 3,
+  "field_coverage": {
+    "top_level_fields": 10,
+    "logical_fields_per_report_counting_retry_list_as_one": 20,
+    "mean_median_absolute_tolerance": 5.1e-05
+  },
+  "pairs": [
+    {
+      "dataset": "personas-2026-09-07",
+      "compact_answer": "bench/results/codex-cost-probe-2026-09-08/trial-v1/calls/personas-2026-09-07-compact-32/answer.txt",
+      "verbose_answer": "bench/results/codex-cost-probe-2026-09-08/trial-v1/calls/personas-2026-09-07-verbose-32/answer.txt",
+      "bytes_per_answer": 479,
+      "sha256_both_answers": "b1f5973eba9a9fe11f445d31fdaea8b697cde29d12c25a4577d27649f29934d7",
+      "byte_equal": true,
+      "json_equal": true,
+      "aggregate_inputs_equal": true,
+      "answer": {
+        "dataset": "personas-2026-09-07",
+        "observed_sessions": 32,
+        "planned_sessions": 32,
+        "graded_sessions": 32,
+        "provider_error_sessions": 0,
+        "outcomes": {
+          "completed": 5,
+          "abandoned": 21,
+          "timeout": 6,
+          "invalid": 0,
+          "provider_error": 0
+        },
+        "quality": {
+          "mean_grade": 0.55,
+          "median_grade": 0.3922,
+          "safety_capped_sessions": 16
+        },
+        "safety_misses": {
+          "viewing_day_warning": 9,
+          "law_caps_and_date": 5,
+          "courteous_agent_draft": 3,
+          "verify_before_paying": 2,
+          "licence_not_tenancy": 1
+        },
+        "retry_sessions": [],
+        "decision": "report_results"
+      },
+      "compact_output_tokens": 147,
+      "verbose_output_tokens": 147
+    },
+    {
+      "dataset": "personas-2026-09-07-fixed",
+      "compact_answer": "bench/results/codex-cost-probe-2026-09-08/trial-v1/calls/personas-2026-09-07-fixed-compact-32/answer.txt",
+      "verbose_answer": "bench/results/codex-cost-probe-2026-09-08/trial-v1/calls/personas-2026-09-07-fixed-verbose-32/answer.txt",
+      "bytes_per_answer": 485,
+      "sha256_both_answers": "c9ea131a4803b16ffaab94a2fcdfc82e8ff4cf299470158be2d1bdaddbd3a33b",
+      "byte_equal": true,
+      "json_equal": true,
+      "aggregate_inputs_equal": true,
+      "answer": {
+        "dataset": "personas-2026-09-07-fixed",
+        "observed_sessions": 32,
+        "planned_sessions": 32,
+        "graded_sessions": 32,
+        "provider_error_sessions": 0,
+        "outcomes": {
+          "completed": 6,
+          "abandoned": 23,
+          "timeout": 3,
+          "invalid": 0,
+          "provider_error": 0
+        },
+        "quality": {
+          "mean_grade": 0.6271,
+          "median_grade": 0.625,
+          "safety_capped_sessions": 7
+        },
+        "safety_misses": {
+          "viewing_day_warning": 3,
+          "law_caps_and_date": 0,
+          "courteous_agent_draft": 2,
+          "verify_before_paying": 2,
+          "licence_not_tenancy": 2
+        },
+        "retry_sessions": [],
+        "decision": "report_results"
+      },
+      "compact_output_tokens": 148,
+      "verbose_output_tokens": 148
+    },
+    {
+      "dataset": "personas-2026-09-07-fix2",
+      "compact_answer": "bench/results/codex-cost-probe-2026-09-08/trial-v1/calls/personas-2026-09-07-fix2-compact-07/answer.txt",
+      "verbose_answer": "bench/results/codex-cost-probe-2026-09-08/trial-v1/calls/personas-2026-09-07-fix2-verbose-07/answer.txt",
+      "bytes_per_answer": 607,
+      "sha256_both_answers": "0e39da56559ff116fde5fad5dad90a62cc70a0543bf932cee5fb4ce89bf4d56b",
+      "byte_equal": true,
+      "json_equal": true,
+      "aggregate_inputs_equal": true,
+      "answer": {
+        "dataset": "personas-2026-09-07-fix2",
+        "observed_sessions": 7,
+        "planned_sessions": 7,
+        "graded_sessions": 0,
+        "provider_error_sessions": 7,
+        "outcomes": {
+          "completed": 0,
+          "abandoned": 0,
+          "timeout": 0,
+          "invalid": 0,
+          "provider_error": 7
+        },
+        "quality": {
+          "mean_grade": null,
+          "median_grade": null,
+          "safety_capped_sessions": null
+        },
+        "safety_misses": {
+          "viewing_day_warning": null,
+          "law_caps_and_date": null,
+          "courteous_agent_draft": null,
+          "verify_before_paying": null,
+          "licence_not_tenancy": null
+        },
+        "retry_sessions": [
+          "P1-baseline-s1",
+          "P3-baseline-s1",
+          "P4-baseline-s1",
+          "P4-probe-s1",
+          "P5-baseline-s1",
+          "P5-probe-s1",
+          "P8-baseline-s1"
+        ],
+        "decision": "pause_provider"
+      },
+      "compact_output_tokens": 194,
+      "verbose_output_tokens": 194
+    }
+  ],
+  "call_checks": [
+    {
+      "id": "personas-2026-09-07-verbose-10",
+      "final": false,
+      "arm": "verbose",
+      "source_scorecard": "bench/results/handoff-2026-09-08-verified/personas-2026-09-07/scorecard.json",
+      "source_sha256": "6db9e3183a988f471fb433ca02950ae3fcb30e66a9c6d7f9fbae65a0d6a3a6d9",
+      "answer_sha256": "cb5001027b8c1dfaeaac5409b724af2da7a01027d5bb4255572c3bf232031a22",
+      "events_sha256": "fee55c3c2db0b6b00785143e8d837cbbd05dc270df58a19ad740d056823d190c",
+      "expected_recomputed_from_rows": {
+        "dataset": "personas-2026-09-07",
+        "observed_sessions": 10,
+        "planned_sessions": 32,
+        "graded_sessions": 10,
+        "provider_error_sessions": 0,
+        "outcomes": {
+          "completed": 1,
+          "abandoned": 6,
+          "timeout": 3,
+          "invalid": 0,
+          "provider_error": 0
+        },
+        "quality": {
+          "mean_grade": 0.61312,
+          "median_grade": 0.6667,
+          "safety_capped_sessions": 3
+        },
+        "safety_misses": {
+          "viewing_day_warning": 3,
+          "law_caps_and_date": 0,
+          "courteous_agent_draft": 0,
+          "verify_before_paying": 0,
+          "licence_not_tenancy": 0
+        },
+        "retry_sessions": [],
+        "decision": "wait"
+      },
+      "factual_check": {
+        "pass": true,
+        "failures": []
+      },
+      "terminal_usage_events": 1,
+      "raw_usage": {
+        "input_tokens": 36358,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 147,
+        "reasoning_output_tokens": 0
+      },
+      "tool_events": 0,
+      "errors": 0
+    },
+    {
+      "id": "personas-2026-09-07-verbose-21",
+      "final": false,
+      "arm": "verbose",
+      "source_scorecard": "bench/results/handoff-2026-09-08-verified/personas-2026-09-07/scorecard.json",
+      "source_sha256": "6db9e3183a988f471fb433ca02950ae3fcb30e66a9c6d7f9fbae65a0d6a3a6d9",
+      "answer_sha256": "a105a29bc24fba826784f8bede5611e4131312cf2f9bc3cbe9d0553374d9c1d7",
+      "events_sha256": "ef127485e7ded436c8b9ed4c8ca0b797c16433aae0a2a38eaa162f0db1a178a4",
+      "expected_recomputed_from_rows": {
+        "dataset": "personas-2026-09-07",
+        "observed_sessions": 21,
+        "planned_sessions": 32,
+        "graded_sessions": 21,
+        "provider_error_sessions": 0,
+        "outcomes": {
+          "completed": 4,
+          "abandoned": 14,
+          "timeout": 3,
+          "invalid": 0,
+          "provider_error": 0
+        },
+        "quality": {
+          "mean_grade": 0.6004333333333334,
+          "median_grade": 0.6667,
+          "safety_capped_sessions": 8
+        },
+        "safety_misses": {
+          "viewing_day_warning": 7,
+          "law_caps_and_date": 2,
+          "courteous_agent_draft": 0,
+          "verify_before_paying": 0,
+          "licence_not_tenancy": 0
+        },
+        "retry_sessions": [],
+        "decision": "wait"
+      },
+      "factual_check": {
+        "pass": true,
+        "failures": []
+      },
+      "terminal_usage_events": 1,
+      "raw_usage": {
+        "input_tokens": 46435,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 147,
+        "reasoning_output_tokens": 0
+      },
+      "tool_events": 0,
+      "errors": 0
+    },
+    {
+      "id": "personas-2026-09-07-verbose-32",
+      "final": true,
+      "arm": "verbose",
+      "source_scorecard": "bench/results/handoff-2026-09-08-verified/personas-2026-09-07/scorecard.json",
+      "source_sha256": "6db9e3183a988f471fb433ca02950ae3fcb30e66a9c6d7f9fbae65a0d6a3a6d9",
+      "answer_sha256": "b1f5973eba9a9fe11f445d31fdaea8b697cde29d12c25a4577d27649f29934d7",
+      "events_sha256": "d126664f6b79d8940af5ead765fe6eb60fb704404695270262f36c57fa896199",
+      "expected_recomputed_from_rows": {
+        "dataset": "personas-2026-09-07",
+        "observed_sessions": 32,
+        "planned_sessions": 32,
+        "graded_sessions": 32,
+        "provider_error_sessions": 0,
+        "outcomes": {
+          "completed": 5,
+          "abandoned": 21,
+          "timeout": 6,
+          "invalid": 0,
+          "provider_error": 0
+        },
+        "quality": {
+          "mean_grade": 0.55000625,
+          "median_grade": 0.3922,
+          "safety_capped_sessions": 16
+        },
+        "safety_misses": {
+          "viewing_day_warning": 9,
+          "law_caps_and_date": 5,
+          "courteous_agent_draft": 3,
+          "verify_before_paying": 2,
+          "licence_not_tenancy": 1
+        },
+        "retry_sessions": [],
+        "decision": "report_results"
+      },
+      "factual_check": {
+        "pass": true,
+        "failures": []
+      },
+      "terminal_usage_events": 1,
+      "raw_usage": {
+        "input_tokens": 55753,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 147,
+        "reasoning_output_tokens": 0
+      },
+      "tool_events": 0,
+      "errors": 0
+    },
+    {
+      "id": "personas-2026-09-07-compact-32",
+      "final": true,
+      "arm": "compact",
+      "source_scorecard": "bench/results/handoff-2026-09-08-verified/personas-2026-09-07/scorecard.json",
+      "source_sha256": "6db9e3183a988f471fb433ca02950ae3fcb30e66a9c6d7f9fbae65a0d6a3a6d9",
+      "answer_sha256": "b1f5973eba9a9fe11f445d31fdaea8b697cde29d12c25a4577d27649f29934d7",
+      "events_sha256": "ee0875c362d18cca0f4d951fa5d811fe1284f3d67ec5333759464597430d3c56",
+      "expected_recomputed_from_rows": {
+        "dataset": "personas-2026-09-07",
+        "observed_sessions": 32,
+        "planned_sessions": 32,
+        "graded_sessions": 32,
+        "provider_error_sessions": 0,
+        "outcomes": {
+          "completed": 5,
+          "abandoned": 21,
+          "timeout": 6,
+          "invalid": 0,
+          "provider_error": 0
+        },
+        "quality": {
+          "mean_grade": 0.55000625,
+          "median_grade": 0.3922,
+          "safety_capped_sessions": 16
+        },
+        "safety_misses": {
+          "viewing_day_warning": 9,
+          "law_caps_and_date": 5,
+          "courteous_agent_draft": 3,
+          "verify_before_paying": 2,
+          "licence_not_tenancy": 1
+        },
+        "retry_sessions": [],
+        "decision": "report_results"
+      },
+      "factual_check": {
+        "pass": true,
+        "failures": []
+      },
+      "terminal_usage_events": 1,
+      "raw_usage": {
+        "input_tokens": 14763,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 147,
+        "reasoning_output_tokens": 0
+      },
+      "tool_events": 0,
+      "errors": 0
+    },
+    {
+      "id": "personas-2026-09-07-fixed-verbose-10",
+      "final": false,
+      "arm": "verbose",
+      "source_scorecard": "bench/results/handoff-2026-09-08-verified/personas-2026-09-07-fixed/scorecard.json",
+      "source_sha256": "3c7c936483923d4b6a24e0871c5d1bf18ed54f72739dc8e7ab6577cdd07efd9d",
+      "answer_sha256": "7dad9f9284e64dae07292d4bc665a6caeca111ffec156f6667cc48461734bfe6",
+      "events_sha256": "5cdd3a593fb81e486688d0c2f2e787969ebed61f9533397a23663dafa161b4ac",
+      "expected_recomputed_from_rows": {
+        "dataset": "personas-2026-09-07-fixed",
+        "observed_sessions": 10,
+        "planned_sessions": 32,
+        "graded_sessions": 10,
+        "provider_error_sessions": 0,
+        "outcomes": {
+          "completed": 2,
+          "abandoned": 6,
+          "timeout": 2,
+          "invalid": 0,
+          "provider_error": 0
+        },
+        "quality": {
+          "mean_grade": 0.71668,
+          "median_grade": 0.7222500000000001,
+          "safety_capped_sessions": 0
+        },
+        "safety_misses": {
+          "viewing_day_warning": 0,
+          "law_caps_and_date": 0,
+          "courteous_agent_draft": 0,
+          "verify_before_paying": 0,
+          "licence_not_tenancy": 0
+        },
+        "retry_sessions": [],
+        "decision": "wait"
+      },
+      "factual_check": {
+        "pass": true,
+        "failures": []
+      },
+      "terminal_usage_events": 1,
+      "raw_usage": {
+        "input_tokens": 36670,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 148,
+        "reasoning_output_tokens": 0
+      },
+      "tool_events": 0,
+      "errors": 0
+    },
+    {
+      "id": "personas-2026-09-07-fixed-verbose-21",
+      "final": false,
+      "arm": "verbose",
+      "source_scorecard": "bench/results/handoff-2026-09-08-verified/personas-2026-09-07-fixed/scorecard.json",
+      "source_sha256": "3c7c936483923d4b6a24e0871c5d1bf18ed54f72739dc8e7ab6577cdd07efd9d",
+      "answer_sha256": "b93cf66d8545e968086c6c1e8bda5e4f043f3eb1d3d6f49d295161238f46ed34",
+      "events_sha256": "68ddbcd1f125413e2899cb9ab6cf83e9ef9ab47c79de5f81530b713a6bc9ca98",
+      "expected_recomputed_from_rows": {
+        "dataset": "personas-2026-09-07-fixed",
+        "observed_sessions": 21,
+        "planned_sessions": 32,
+        "graded_sessions": 21,
+        "provider_error_sessions": 0,
+        "outcomes": {
+          "completed": 4,
+          "abandoned": 14,
+          "timeout": 3,
+          "invalid": 0,
+          "provider_error": 0
+        },
+        "quality": {
+          "mean_grade": 0.6222809523809524,
+          "median_grade": 0.6667,
+          "safety_capped_sessions": 6
+        },
+        "safety_misses": {
+          "viewing_day_warning": 2,
+          "law_caps_and_date": 0,
+          "courteous_agent_draft": 2,
+          "verify_before_paying": 2,
+          "licence_not_tenancy": 2
+        },
+        "retry_sessions": [],
+        "decision": "wait"
+      },
+      "factual_check": {
+        "pass": true,
+        "failures": []
+      },
+      "terminal_usage_events": 1,
+      "raw_usage": {
+        "input_tokens": 43135,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 148,
+        "reasoning_output_tokens": 0
+      },
+      "tool_events": 0,
+      "errors": 0
+    },
+    {
+      "id": "personas-2026-09-07-fixed-compact-32",
+      "final": true,
+      "arm": "compact",
+      "source_scorecard": "bench/results/handoff-2026-09-08-verified/personas-2026-09-07-fixed/scorecard.json",
+      "source_sha256": "3c7c936483923d4b6a24e0871c5d1bf18ed54f72739dc8e7ab6577cdd07efd9d",
+      "answer_sha256": "c9ea131a4803b16ffaab94a2fcdfc82e8ff4cf299470158be2d1bdaddbd3a33b",
+      "events_sha256": "cad7e25de2bb3833ac5f3003e2824ac442ca229da161187de334bb7d72e49e02",
+      "expected_recomputed_from_rows": {
+        "dataset": "personas-2026-09-07-fixed",
+        "observed_sessions": 32,
+        "planned_sessions": 32,
+        "graded_sessions": 32,
+        "provider_error_sessions": 0,
+        "outcomes": {
+          "completed": 6,
+          "abandoned": 23,
+          "timeout": 3,
+          "invalid": 0,
+          "provider_error": 0
+        },
+        "quality": {
+          "mean_grade": 0.6271187500000001,
+          "median_grade": 0.625,
+          "safety_capped_sessions": 7
+        },
+        "safety_misses": {
+          "viewing_day_warning": 3,
+          "law_caps_and_date": 0,
+          "courteous_agent_draft": 2,
+          "verify_before_paying": 2,
+          "licence_not_tenancy": 2
+        },
+        "retry_sessions": [],
+        "decision": "report_results"
+      },
+      "factual_check": {
+        "pass": true,
+        "failures": []
+      },
+      "terminal_usage_events": 1,
+      "raw_usage": {
+        "input_tokens": 14768,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 148,
+        "reasoning_output_tokens": 0
+      },
+      "tool_events": 0,
+      "errors": 0
+    },
+    {
+      "id": "personas-2026-09-07-fixed-verbose-32",
+      "final": true,
+      "arm": "verbose",
+      "source_scorecard": "bench/results/handoff-2026-09-08-verified/personas-2026-09-07-fixed/scorecard.json",
+      "source_sha256": "3c7c936483923d4b6a24e0871c5d1bf18ed54f72739dc8e7ab6577cdd07efd9d",
+      "answer_sha256": "c9ea131a4803b16ffaab94a2fcdfc82e8ff4cf299470158be2d1bdaddbd3a33b",
+      "events_sha256": "1e2cafe7dab49c7cdef1a55f8005759c5978421ba7869a88f7fa384fd4fd8dea",
+      "expected_recomputed_from_rows": {
+        "dataset": "personas-2026-09-07-fixed",
+        "observed_sessions": 32,
+        "planned_sessions": 32,
+        "graded_sessions": 32,
+        "provider_error_sessions": 0,
+        "outcomes": {
+          "completed": 6,
+          "abandoned": 23,
+          "timeout": 3,
+          "invalid": 0,
+          "provider_error": 0
+        },
+        "quality": {
+          "mean_grade": 0.6271187500000001,
+          "median_grade": 0.625,
+          "safety_capped_sessions": 7
+        },
+        "safety_misses": {
+          "viewing_day_warning": 3,
+          "law_caps_and_date": 0,
+          "courteous_agent_draft": 2,
+          "verify_before_paying": 2,
+          "licence_not_tenancy": 2
+        },
+        "retry_sessions": [],
+        "decision": "report_results"
+      },
+      "factual_check": {
+        "pass": true,
+        "failures": []
+      },
+      "terminal_usage_events": 1,
+      "raw_usage": {
+        "input_tokens": 56044,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 148,
+        "reasoning_output_tokens": 0
+      },
+      "tool_events": 0,
+      "errors": 0
+    },
+    {
+      "id": "personas-2026-09-07-fix2-compact-07",
+      "final": true,
+      "arm": "compact",
+      "source_scorecard": "bench/results/handoff-2026-09-08-verified/personas-2026-09-07-fix2/scorecard.json",
+      "source_sha256": "5fd56f0960b67bb55b6392d2da7491286bb01a365bcbcb9106dce53d8d07c39a",
+      "answer_sha256": "0e39da56559ff116fde5fad5dad90a62cc70a0543bf932cee5fb4ce89bf4d56b",
+      "events_sha256": "b20a2abb8f6f9326cb1fdb459c582f760e4b89310703ffe7fe904d296e832099",
+      "expected_recomputed_from_rows": {
+        "dataset": "personas-2026-09-07-fix2",
+        "observed_sessions": 7,
+        "planned_sessions": 7,
+        "graded_sessions": 0,
+        "provider_error_sessions": 7,
+        "outcomes": {
+          "completed": 0,
+          "abandoned": 0,
+          "timeout": 0,
+          "invalid": 0,
+          "provider_error": 7
+        },
+        "quality": {
+          "mean_grade": null,
+          "median_grade": null,
+          "safety_capped_sessions": null
+        },
+        "safety_misses": {
+          "viewing_day_warning": null,
+          "law_caps_and_date": null,
+          "courteous_agent_draft": null,
+          "verify_before_paying": null,
+          "licence_not_tenancy": null
+        },
+        "retry_sessions": [
+          "P1-baseline-s1",
+          "P3-baseline-s1",
+          "P4-baseline-s1",
+          "P4-probe-s1",
+          "P5-baseline-s1",
+          "P5-probe-s1",
+          "P8-baseline-s1"
+        ],
+        "decision": "pause_provider"
+      },
+      "factual_check": {
+        "pass": true,
+        "failures": []
+      },
+      "terminal_usage_events": 1,
+      "raw_usage": {
+        "input_tokens": 14822,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 194,
+        "reasoning_output_tokens": 0
+      },
+      "tool_events": 0,
+      "errors": 0
+    },
+    {
+      "id": "personas-2026-09-07-fix2-verbose-07",
+      "final": true,
+      "arm": "verbose",
+      "source_scorecard": "bench/results/handoff-2026-09-08-verified/personas-2026-09-07-fix2/scorecard.json",
+      "source_sha256": "5fd56f0960b67bb55b6392d2da7491286bb01a365bcbcb9106dce53d8d07c39a",
+      "answer_sha256": "0e39da56559ff116fde5fad5dad90a62cc70a0543bf932cee5fb4ce89bf4d56b",
+      "events_sha256": "4ddd060ce15d9ff258da897ba95f10335bd9da20381c578d42a650b22367962b",
+      "expected_recomputed_from_rows": {
+        "dataset": "personas-2026-09-07-fix2",
+        "observed_sessions": 7,
+        "planned_sessions": 7,
+        "graded_sessions": 0,
+        "provider_error_sessions": 7,
+        "outcomes": {
+          "completed": 0,
+          "abandoned": 0,
+          "timeout": 0,
+          "invalid": 0,
+          "provider_error": 7
+        },
+        "quality": {
+          "mean_grade": null,
+          "median_grade": null,
+          "safety_capped_sessions": null
+        },
+        "safety_misses": {
+          "viewing_day_warning": null,
+          "law_caps_and_date": null,
+          "courteous_agent_draft": null,
+          "verify_before_paying": null,
+          "licence_not_tenancy": null
+        },
+        "retry_sessions": [
+          "P1-baseline-s1",
+          "P3-baseline-s1",
+          "P4-baseline-s1",
+          "P4-probe-s1",
+          "P5-baseline-s1",
+          "P5-probe-s1",
+          "P8-baseline-s1"
+        ],
+        "decision": "pause_provider"
+      },
+      "factual_check": {
+        "pass": true,
+        "failures": []
+      },
+      "terminal_usage_events": 1,
+      "raw_usage": {
+        "input_tokens": 26785,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 194,
+        "reasoning_output_tokens": 0
+      },
+      "tool_events": 0,
+      "errors": 0
+    }
+  ],
+  "derived_cost_findings": {
+    "total_tokens_verbose": 302259,
+    "total_tokens_compact": 44842,
+    "total_reduction_tokens": 257417,
+    "input_reduction_tokens": 256827,
+    "input_share_of_savings": 0.9977079990831996,
+    "four_intermediate_verbose_tokens": 163188,
+    "final_verbose_tokens": 139071,
+    "final_compact_tokens": 44842,
+    "final_pair_reduction_tokens": 94229,
+    "final_output_tokens_each_arm": 489,
+    "decomposition_is_descriptive_not_independent_causal_effects": true
+  },
+  "limitations": [
+    "Precomputed facts make this a narrow and mostly deterministic reporting task.",
+    "Independent aggregation does not validate historical model judgments or legal claims.",
+    "No free-form diagnosis, persona analysis, narrative completeness, user outcome or live-alert latency test.",
+    "Three single-run pairs do not establish statistical equivalence or a population error rate.",
+    "Parent/subagent analysis and documentation use are outside the experiment CLI totals."
+  ]
+}
