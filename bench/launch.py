@@ -86,7 +86,7 @@ USAGE_KEYS = ("input_tokens", "output_tokens", "cache_read_input_tokens",
               "cache_creation_input_tokens")
 # codex exec --json, across the versions that have named these differently
 TOKEN_KEYS = ("input_tokens", "output_tokens", "cached_input_tokens",
-              "reasoning_output_tokens", "total_tokens", "prompt_tokens",
+              "cache_write_input_tokens", "reasoning_output_tokens", "total_tokens", "prompt_tokens",
               "completion_tokens", "cache_read_input_tokens")
 
 _FIELDS = ("text usage note seconds attempts provider_error stdout_tail stderr_tail "
@@ -387,9 +387,15 @@ def claude_answer(stdout):
 
 
 def usage_from_events(stdout):
-    """Token counts out of the codex --json event stream, whatever the version calls
-    them. The last count wins: Codex reports cumulative totals."""
+    """Read the last terminal usage snapshot from a codex --json event stream.
+
+    Codex emits cumulative thread totals in ``turn.completed.usage``. Prefer that
+    complete snapshot over nested records; older streams without it retain the
+    recursive, last-count fallback. Cached input and reasoning output are breakdowns
+    of input and output respectively, never additional tokens.
+    """
     totals = collections.OrderedDict()
+    completed = None
     shapes = []
     for line in (stdout or "").splitlines():
         line = line.strip()
@@ -400,37 +406,41 @@ def usage_from_events(stdout):
         except ValueError:
             continue
         for holder in walk_usage(event):
-            keys = tuple(sorted(k for k in holder if isinstance(holder[k], int)))
+            keys = tuple(sorted(k for k in holder if type(holder[k]) is int))
             if keys and keys not in shapes:
                 shapes.append(keys)
             for key in TOKEN_KEYS:
-                if isinstance(holder.get(key), int):
+                if type(holder.get(key)) is int:
                     totals[key] = holder[key]
+        if isinstance(event, dict) and event.get("type") == "turn.completed":
+            usage = event.get("usage")
+            if isinstance(usage, dict):
+                snapshot = collections.OrderedDict(
+                    (key, usage[key]) for key in TOKEN_KEYS if type(usage.get(key)) is int)
+                if snapshot:
+                    completed = snapshot
+    if completed is not None:
+        totals = completed
     if not totals:
         return None
     if "total_tokens" not in totals:
-        total = sum(v for k, v in totals.items()
-                    if k in ("input_tokens", "output_tokens", "reasoning_output_tokens"))
-        if total:
-            totals["total_tokens"] = total
+        input_tokens = totals.get("input_tokens", totals.get("prompt_tokens"))
+        output_tokens = totals.get("output_tokens", totals.get("completion_tokens"))
+        if input_tokens is not None or output_tokens is not None:
+            totals["total_tokens"] = (input_tokens or 0) + (output_tokens or 0)
     totals["usage_shapes_seen"] = ["+".join(s) for s in shapes]
     return totals
 
 
 def walk_usage(node):
-    """Every dict under a key that looks like a usage block."""
+    """Every dict carrying token counters, once per occurrence in the JSON tree."""
     out = []
     if isinstance(node, dict):
-        for key, value in node.items():
-            if isinstance(value, dict) and ("usage" in key or "token" in key):
-                out.append(value)
-                for k2, v2 in value.items():
-                    if isinstance(v2, dict):
-                        out.append(v2)
-            elif isinstance(value, (dict, list)):
-                out.extend(walk_usage(value))
         if any(k in node for k in TOKEN_KEYS):
             out.append(node)
+        for value in node.values():
+            if isinstance(value, (dict, list)):
+                out.extend(walk_usage(value))
     elif isinstance(node, list):
         for item in node:
             out.extend(walk_usage(item))

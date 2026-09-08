@@ -245,6 +245,65 @@ class TestReadingTheReply(unittest.TestCase):
         self.assertIn("cached_input_tokens+input_tokens+output_tokens",
                       usage["usage_shapes_seen"])
 
+    def test_codex_cache_and_reasoning_are_subsets_not_extra_tokens(self):
+        raw = json.dumps({"type": "turn.completed", "usage": {
+            "input_tokens": 1500, "cached_input_tokens": 1000,
+            "cache_write_input_tokens": 200, "output_tokens": 220,
+            "reasoning_output_tokens": 180}})
+        usage = launch.usage_from_events(raw)
+        self.assertEqual(1720, usage["total_tokens"])
+        self.assertEqual(1000, usage["cached_input_tokens"])
+        self.assertEqual(200, usage["cache_write_input_tokens"])
+        self.assertEqual(180, usage["reasoning_output_tokens"])
+
+    def test_codex_terminal_snapshot_wins_over_nested_and_later_records(self):
+        # An internal last-request record is not the completed turn's cumulative usage.
+        raw = "\n".join([json.dumps({"type": "turn.completed", "usage": {
+            "input_tokens": 1500, "output_tokens": 220,
+            "details": {"usage": {"input_tokens": 90, "output_tokens": 10,
+                                  "reasoning_output_tokens": 8, "total_tokens": 100}}}}),
+            json.dumps({"type": "debug", "usage": {"input_tokens": 90}})])
+        usage = launch.usage_from_events(raw)
+        self.assertEqual(1500, usage["input_tokens"])
+        self.assertEqual(220, usage["output_tokens"])
+        self.assertEqual(1720, usage["total_tokens"])
+        self.assertNotIn("reasoning_output_tokens", usage)
+
+    def test_codex_last_snapshot_does_not_inherit_earlier_breakdowns(self):
+        raw = "\n".join([
+            json.dumps({"type": "turn.completed", "usage": {
+                "input_tokens": 900, "output_tokens": 100, "total_tokens": 1000,
+                "reasoning_output_tokens": 80}}),
+            json.dumps({"type": "turn.completed", "usage": {
+                "input_tokens": 1500, "output_tokens": 220}})])
+        usage = launch.usage_from_events(raw)
+        self.assertEqual(1720, usage["total_tokens"])
+        self.assertNotIn("reasoning_output_tokens", usage)
+
+    def test_codex_legacy_nested_usage_keeps_aliases_and_explicit_totals(self):
+        raw = json.dumps({"event": {"token_usage": {
+            "prompt_tokens": 200, "completion_tokens": 50,
+            "cache_read_input_tokens": 100, "reasoning_output_tokens": 40}}})
+        usage = launch.usage_from_events(raw)
+        self.assertEqual(200, usage["prompt_tokens"])
+        self.assertEqual(50, usage["completion_tokens"])
+        self.assertEqual(250, usage["total_tokens"])
+        explicit = json.dumps({"usage": {"total_tokens": 275}})
+        self.assertEqual(275, launch.usage_from_events(explicit)["total_tokens"])
+
+    def test_codex_duplicate_nested_records_are_never_added(self):
+        counters = {"input_tokens": 200, "output_tokens": 50,
+                    "reasoning_output_tokens": 40}
+        raw = json.dumps({"usage": counters, "mirror": {"usage": counters}})
+        self.assertEqual(250, launch.usage_from_events(raw)["total_tokens"])
+        # Wrappers should not duplicate the one counter object they contain.
+        self.assertEqual([counters], launch.walk_usage({"wrapper": counters}))
+
+    def test_codex_reported_zero_usage_has_a_zero_total(self):
+        raw = json.dumps({"type": "turn.completed", "usage": {
+            "input_tokens": 0, "output_tokens": 0, "cached_input_tokens": 0}})
+        self.assertEqual(0, launch.usage_from_events(raw)["total_tokens"])
+
     def test_an_event_stream_with_no_usage_reports_none(self):
         self.assertIsNone(launch.usage_from_events("no json here\n"))
         self.assertIsNone(launch.usage_from_events(""))
