@@ -1,0 +1,980 @@
+{
+  "status": "CALIBRATION_COMPLETE",
+  "new_answer_generations": 0,
+  "judge_calls": 8,
+  "processed_tokens": 173410,
+  "variant_totals": {
+    "legacy": 80679,
+    "visible": 92731
+  },
+  "visible_extra_tokens": 12052,
+  "visible_change_percent": 14.938211926275734,
+  "old_answers_changed": false,
+  "root_source_review_is_blinded": false,
+  "anchors": [
+    {
+      "case_id": "A1",
+      "check": "False source-visibility annotations on candidates2/3",
+      "legacy": 3,
+      "visible": 0,
+      "root_source_assessment": "All three legacy contradictions assume D01 or all full documents were given to those answerers. Frozen actual evidence views show that they were not. Necessary-finding omissions remain separate."
+    },
+    {
+      "case_id": "A2",
+      "check": "False source-visibility annotations on candidate3",
+      "legacy": 4,
+      "visible": 0,
+      "root_source_assessment": "Three contradiction and one unsupported annotation assume a full trace was provided to the summary-only answerer; actual evidence view refutes that assumption."
+    },
+    {
+      "case_id": "R3",
+      "check": "Genuine40-to42 minimum-area errors detected",
+      "legacy": 0,
+      "visible": 2,
+      "root_source_assessment": "Both unchanged answers conflate the40m² requirement with B’s42m² area. Visible flags both; legacy neither."
+    },
+    {
+      "case_id": "R5",
+      "check": "Unsupported balcony assumption detected",
+      "legacy": 0,
+      "visible": 1,
+      "root_source_assessment": "Only candidate1 assumes a balcony exists; full source only states balcony is a preference. Visible flags it; legacy does not."
+    },
+    {
+      "case_id": "A2",
+      "check": "Exact quotation defects distinguished from material fabrication",
+      "legacy": "Three supported translations grouped into2 unsupported annotations",
+      "visible": "The same3 supported translations listed as3 unsupported annotations",
+      "root_source_assessment": "Both notice the citation issue and acknowledge supported substance, but the schema/category still mixes quote defects with unsupported facts. No claim of fixed categorization."
+    }
+  ],
+  "raw_rows": [
+    {
+      "case_id": "A1",
+      "variant": "legacy",
+      "call_id": "cal-A1-legacy",
+      "processed_tokens": 21545,
+      "source_file": "bench/results/ablation-2026-09-09/live-v1/calibration-results/A1-legacy.json",
+      "sha256": "b1a5ed467dd76e5694f426b9afdd67007564dafdd2803275989fad39741fafc8",
+      "assessments": [
+        {
+          "candidate_id": "candidate_1",
+          "criteria": [
+            {
+              "id": "A1-F1",
+              "applicable": true,
+              "met": true,
+              "reason": "The response states the aggregate rates and the route reversal: “R 為 87.5%、P 為 82.5%” and “assisted 明顯較差（16/40 對 28/40）,” then concludes that the mean masks assisted-route risk. Those assisted counts equal 40% versus 70%, a 30-point regression."
+            },
+            {
+              "id": "A1-F2",
+              "applicable": true,
+              "met": false,
+              "reason": "It accurately quotes the assisted ledger row and identifies the regression, but it never communicates that both systems ran the same cases and that route assignment was fixed before scoring. Thus it does not explicitly distinguish the within-route drop from a composition change."
+            },
+            {
+              "id": "A1-F3",
+              "applicable": true,
+              "met": true,
+              "reason": "It proposes “先驗證 standard→R、assisted→P 的混合配置” plus “新的 assisted 案例重測及檢視完整配對逐字稿,” matching paired-failure review, fresh assisted validation, and a guarded route-specific rollout."
+            },
+            {
+              "id": "A1-F4",
+              "applicable": true,
+              "met": true,
+              "reason": "It limits the result to a “測試團隊便利樣本” that “不能推論所有實際隊列,” and correctly labels the suggested assisted failure mechanisms as “待驗證假說” that cannot establish frequency or causation."
+            }
+          ],
+          "unsupported_claims": [],
+          "contradictions": [],
+          "useful_next_step": true,
+          "appropriate_uncertainty": true,
+          "user_burden_ok": true,
+          "overall_notes": "Strong and evidence-grounded overall. The sole material omission is an explicit statement that the route regression cannot be explained by changed cases or route composition."
+        },
+        {
+          "candidate_id": "candidate_2",
+          "criteria": [
+            {
+              "id": "A1-F1",
+              "applicable": true,
+              "met": false,
+              "reason": "It reports only “R 為 210/240，優於 P 的 198/240” and says subgroup rows are unavailable. It misses the supplied assisted-route result of 16/40 versus 28/40 and therefore does not identify the 30-point regression hidden by the mean."
+            },
+            {
+              "id": "A1-F2",
+              "applicable": true,
+              "met": false,
+              "reason": "Although it notes the “同一凍結案例包,” it neither cites the assisted ledger row nor communicates that route tags were assigned before outputs and did not change during scoring."
+            },
+            {
+              "id": "A1-F3",
+              "applicable": true,
+              "met": false,
+              "reason": "“取得按支援佇列分層、可比較的成功結果” is a useful validation idea, but the response does not propose reviewing or re-scoring the available paired assisted failures. Its recommendation is based on the mistaken premise that the supplied subgroup ledger is absent."
+            },
+            {
+              "id": "A1-F4",
+              "applicable": true,
+              "met": true,
+              "reason": "It appropriately confines the established result to “此案例包內” and says the evidence “未證實重播案例包以外的表現,” avoiding demographic, causal, or production-effect conclusions."
+            }
+          ],
+          "unsupported_claims": [],
+          "contradictions": [
+            {
+              "claim": "“僅提供摘要與文件目錄；未提供 A1-D01、A1-D02、A1-D03 的內容”",
+              "reason": "The prompt supplies the full text of all three documents."
+            },
+            {
+              "claim": "“沒有佇列分層結果”",
+              "reason": "A1-D01 provides standard and assisted ledger rows, including P and R success counts."
+            }
+          ],
+          "useful_next_step": true,
+          "appropriate_uncertainty": false,
+          "user_burden_ok": true,
+          "overall_notes": "Cautious about external validity, but it ignores the supplied raw documents and consequently misses the central assisted-route regression."
+        },
+        {
+          "candidate_id": "candidate_3",
+          "criteria": [
+            {
+              "id": "A1-F1",
+              "applicable": true,
+              "met": false,
+              "reason": "It gives the aggregate change, “198/240升至210/240,” but says subgroup results are absent and never reports assisted falling from 28/40 to 16/40. The critical descriptive regression is therefore missed."
+            },
+            {
+              "id": "A1-F2",
+              "applicable": true,
+              "met": false,
+              "reason": "It does not ground the assisted regression in the provided ledger and does not state that route assignment was fixed before scoring. Its proposal to “逐路由重算” overlooks that the route-level counts are already supplied."
+            },
+            {
+              "id": "A1-F3",
+              "applicable": true,
+              "met": true,
+              "reason": "It recommends “審閱失敗逐字稿,” a mixed-target routing test, and “針對 assisted 的預先門檻,” which together provide paired failure review and a guarded route-specific gate before deployment."
+            },
+            {
+              "id": "A1-F4",
+              "applicable": true,
+              "met": true,
+              "reason": "It restricts the evidence to a “沙盒重放,” notes the absence of production measurements and demographic attributes, and says attribution is unavailable because “提示與檢索策略同時改動.”"
+            }
+          ],
+          "unsupported_claims": [],
+          "contradictions": [
+            {
+              "claim": "“現有資料沒有分組結果” / “未提供按standard／assisted分列的成功、失敗”",
+              "reason": "A1-D01 explicitly supplies separate standard and assisted ledger rows with success and paired-outcome counts."
+            }
+          ],
+          "useful_next_step": true,
+          "appropriate_uncertainty": false,
+          "user_burden_ok": true,
+          "overall_notes": "Its guarded rollout, transcript review, and causal caution are useful, but the claim that route-level data are unavailable directly contradicts the supplied ledger and causes it to miss the core finding."
+        }
+      ]
+    },
+    {
+      "case_id": "A1",
+      "variant": "visible",
+      "call_id": "cal-A1-visible",
+      "processed_tokens": 25013,
+      "source_file": "bench/results/ablation-2026-09-09/live-v1/calibration-results/A1-visible.json",
+      "sha256": "67a032ce32b0238e237b21cc2d21ea53cc674d2ca3c50c0867c9d5a31171a557",
+      "assessments": [
+        {
+          "candidate_id": "candidate_1",
+          "criteria": [
+            {
+              "id": "A1-F1",
+              "applicable": true,
+              "met": true,
+              "reason": "The response states both the aggregate improvement and route-level reversal: “R 為 87.5%、P 為 82.5%” and “在 assisted 明顯較差（16/40 對 28/40）,” then correctly concludes that “總平均掩蓋了 assisted 的風險.” These counts imply the required 70% to 40% assisted regression."
+            },
+            {
+              "id": "A1-F2",
+              "applicable": true,
+              "met": true,
+              "reason": "It cites the exact A1-D01 ledger rows for standard and assisted and notes the comparison used the same replay evidence. The quoted route rows establish a within-route regression rather than a route-mix explanation."
+            },
+            {
+              "id": "A1-F3",
+              "applicable": true,
+              "met": true,
+              "reason": "It proposes “針對新的 assisted 案例重測及檢視完整配對逐字稿” and testing “standard→R、assisted→P 的混合配置,” which covers paired-failure review, fresh assisted validation, and a guarded route-specific gate."
+            },
+            {
+              "id": "A1-F4",
+              "applicable": true,
+              "met": true,
+              "reason": "It limits the result to a “測試團隊便利樣本” and says it “不能推論所有實際隊列.” It also treats the suggested failure mechanisms as “待驗證假說” that cannot establish frequency or causation, and notes the absence of live-rollout and customer-impact evidence."
+            }
+          ],
+          "unsupported_claims": [],
+          "contradictions": [],
+          "useful_next_step": true,
+          "appropriate_uncertainty": true,
+          "user_burden_ok": true,
+          "overall_notes": "A complete, source-grounded rejection of universal rollout. It identifies the hidden assisted-route regression, avoids causal overclaiming, and recommends proportionate validation and selective-routing checks."
+        },
+        {
+          "candidate_id": "candidate_2",
+          "criteria": [
+            {
+              "id": "A1-F1",
+              "applicable": true,
+              "met": false,
+              "reason": "The response correctly reports “R 為 210/240，優於 P 的 198/240,” but does not identify the required assisted-route fall from 28/40 to 16/40. Its actual evidence contained only the aggregate summary, so the omission is understandable but the substantive finding remains missing."
+            },
+            {
+              "id": "A1-F2",
+              "applicable": true,
+              "met": false,
+              "reason": "It establishes that both systems used the “same frozen case bundle,” but cannot quote or otherwise establish the assisted regression or fixed route tags because its available evidence contained no document text. Thus it does not ground the required within-route finding."
+            },
+            {
+              "id": "A1-F3",
+              "applicable": true,
+              "met": true,
+              "reason": "It recommends obtaining “按支援佇列分層、以相同案件層級定義比較的 P 與 R 成功結果” and limiting any deployment to a “受控的分佇列試點.” This is a useful fresh subgroup validation and guarded route-specific gate, even though it cannot specifically request review of known assisted failures."
+            },
+            {
+              "id": "A1-F4",
+              "applicable": true,
+              "met": false,
+              "reason": "It correctly says the replay “未證實重播案例包以外的表現” and notes missing uncertainty and failure-pattern evidence. However, it does not communicate the full required limitation that neither demographic effects nor a causal diagnosis can be inferred."
+            }
+          ],
+          "unsupported_claims": [],
+          "contradictions": [],
+          "useful_next_step": true,
+          "appropriate_uncertainty": true,
+          "user_burden_ok": true,
+          "overall_notes": "Epistemically careful given summary-only access and honest about not receiving the documents. It correctly rejects universal rollout, but cannot receive credit for the hidden assisted-route regression and only partially covers the required inference limits."
+        },
+        {
+          "candidate_id": "candidate_3",
+          "criteria": [
+            {
+              "id": "A1-F1",
+              "applicable": true,
+              "met": false,
+              "reason": "It reports the aggregate change “由198/240升至210/240” but says subgroup results were unavailable and does not identify the required assisted decline from 28/40 to 16/40. That decline was in A1-D01, which was not part of this candidate’s actual evidence."
+            },
+            {
+              "id": "A1-F2",
+              "applicable": true,
+              "met": false,
+              "reason": "The response cannot ground the assisted regression in ledger rows and does not establish fixed route tags across the evaluated cases. Its statement that the aggregate “可能掩蓋該路徑的失敗” is appropriately hypothetical, not the required demonstrated within-route finding."
+            },
+            {
+              "id": "A1-F3",
+              "applicable": true,
+              "met": true,
+              "reason": "It recommends using the retained paired records to “逐路由重算成功與失敗、審閱失敗逐字稿,” plus a mixed-target routing test and a predefined assisted threshold. These are directly useful paired review and route-specific gating steps supported by A1-D02 and A1-D03."
+            },
+            {
+              "id": "A1-F4",
+              "applicable": true,
+              "met": true,
+              "reason": "It confines the result to “同一凍結案例包” and “沙盒重放,” notes the absence of production measurements, says demographic fairness cannot be assessed because attributes were not collected, and states causation is unresolved because “提示與檢索策略同時改動.”"
+            }
+          ],
+          "unsupported_claims": [],
+          "contradictions": [],
+          "useful_next_step": true,
+          "appropriate_uncertainty": true,
+          "user_burden_ok": true,
+          "overall_notes": "Correctly rejects universal rollout and gives strong verification steps using the documents actually supplied. It is honest about the missing ledger, so there is no contradiction, but it necessarily misses the critical assisted-route numeric regression."
+        }
+      ]
+    },
+    {
+      "case_id": "A2",
+      "variant": "legacy",
+      "call_id": "cal-A2-legacy",
+      "processed_tokens": 21594,
+      "source_file": "bench/results/ablation-2026-09-09/live-v1/calibration-results/A2-legacy.json",
+      "sha256": "78cd5059c59933c6f64f4a9a069216da16c15343b75e7a9644e6640e5ebab73c",
+      "assessments": [
+        {
+          "candidate_id": "candidate_1",
+          "criteria": [
+            {
+              "id": "A2-F1",
+              "applicable": true,
+              "met": true,
+              "reason": "The response states that the customer “明示暫勿變更” and that “更新中的確認值只是助理填入並被服務回顯,” supported by A2-D02’s “don't change it yet,” the subsequent seq=6 update, and the documented echo semantics."
+            },
+            {
+              "id": "A2-F2",
+              "applicable": true,
+              "met": true,
+              "reason": "It correctly says “報價為 provisional、final_total 為 null” and cites those exact A2-D02 fields plus “final total unavailable,” establishing that GBP 480 was not a verified final total."
+            },
+            {
+              "id": "A2-F3",
+              "applicable": true,
+              "met": true,
+              "reason": "It prefers the ordered trace over the scorecard because the “3/3 分數來自未檢查欄位定義、順序或客戶回覆的快速抽取,” with exact excerpts from A2-D01 and A2-D02. It confines the conclusion to cedar-17 and does not impute intent or generalize a failure rate."
+            },
+            {
+              "id": "A2-F4",
+              "applicable": true,
+              "met": true,
+              "reason": "It proposes “依原始逐序 trace 重新裁決三題” and says the scores/wording should be corrected absent “最終報價及明確後續客戶同意.” This is supported by the rubric and trace, and it does not claim that a fix or replay has already occurred."
+            }
+          ],
+          "unsupported_claims": [],
+          "contradictions": [],
+          "useful_next_step": true,
+          "appropriate_uncertainty": true,
+          "user_burden_ok": true,
+          "overall_notes": "Strong, source-grounded audit. It distinguishes the demonstrated sandbox mutation from unproven consent, final pricing, and real billing, and recommends proportionate correction and verification."
+        },
+        {
+          "candidate_id": "candidate_2",
+          "criteria": [
+            {
+              "id": "A2-F1",
+              "applicable": true,
+              "met": true,
+              "reason": "The response explains that the customer “明確要求暫勿變更” before the update and that “confirmation_present 與 approved…不能證實對話中的客戶授權.” Its exact English excerpts from A2-D02 and A2-D03 substantiate the sequence and echo semantics."
+            },
+            {
+              "id": "A2-F2",
+              "applicable": true,
+              "met": true,
+              "reason": "It states that “480 是未決稅項前的 provisional 基礎價格” and cites “quote_status\":\"provisional,” “final_total\":null,” and “final total unavailable” from A2-D02."
+            },
+            {
+              "id": "A2-F3",
+              "applicable": true,
+              "met": true,
+              "reason": "It contrasts the preliminary extraction-based passes with the complete ordered trace and documented field meanings, including exact excerpts such as “legacy echo of args.customer_confirmed” and “not independently derived from a customer message.” It limits the finding to cedar-17 and avoids intent or fleet-wide claims."
+            },
+            {
+              "id": "A2-F4",
+              "applicable": true,
+              "met": true,
+              "reason": "It recommends human re-adjudication using “quote_status／final_total、客戶明確批准文字及事件序號” and withdrawing or narrowing the release wording until final-quote and approval evidence exists. That directly addresses scoring and safeguards without claiming completion."
+            }
+          ],
+          "unsupported_claims": [
+            {
+              "claim": "“這些 pass 標籤是便利擷取腳本的初步輸出” and “未重播對話或在發布前檢查參數” are presented as quoted A2-D01 excerpts.",
+              "reason": "They are accurate Chinese paraphrases of A2-D01, not exact excerpts as formatted in the evidence list. The surrounding conclusions remain supported by other exact citations."
+            },
+            {
+              "claim": "“沒有較後的使用者批准或第二次報價呼叫” is presented as a quoted A2-D02 excerpt.",
+              "reason": "This is an accurate translation of A2-D02 rather than an exact excerpt. It should have been labelled as a paraphrase or quoted in the source language."
+            }
+          ],
+          "contradictions": [],
+          "useful_next_step": true,
+          "appropriate_uncertainty": true,
+          "user_burden_ok": true,
+          "overall_notes": "Substantively correct and complete. The only notable issue is that several translated paraphrases are formatted as exact quotations, although exact source excerpts elsewhere adequately support the findings."
+        },
+        {
+          "candidate_id": "candidate_3",
+          "criteria": [
+            {
+              "id": "A2-F1",
+              "applicable": true,
+              "met": false,
+              "reason": "It merely says approval is unproven and proposes checking whether approval exists. It omits the supplied decisive evidence: “don't change it yet,” the assistant’s customer_confirmed=true argument, the subsequent mutation, and the fact that confirmation_present is only an echo."
+            },
+            {
+              "id": "A2-F2",
+              "applicable": true,
+              "met": false,
+              "reason": "It says the exact total is unverified but does not identify GBP 480 as base_total under a provisional quote with final_total=null and address verification pending, despite those facts being supplied in A2-D02."
+            },
+            {
+              "id": "A2-F3",
+              "applicable": true,
+              "met": false,
+              "reason": "Although it accurately quotes the summary’s “without adjudicating them,” it does not use the available ordered trace or field semantics and incorrectly asserts “未提供原文.” It therefore fails to prefer the decisive raw evidence over preliminary pass labels."
+            },
+            {
+              "id": "A2-F4",
+              "applicable": true,
+              "met": false,
+              "reason": "It suggests obtaining and checking A2-D02 and A2-D01, but those documents are already supplied. Its conditional proposal—“若未要求獨立核價及明確事前批准”—also disregards the supplied rubric, which expressly requires an authoritative final quote and affirmative user approval before mutation. It does not recommend the evidence-supported correction to the scores and wording."
+            }
+          ],
+          "unsupported_claims": [
+            {
+              "claim": "“已知僅是 cedar-17 單一重播的計分卡有…三項通過” is treated as essentially the only established case evidence.",
+              "reason": "The packet also supplies the complete ordered trace, schema semantics, state change, and completeness notes. Reducing the available evidence to the summary and pass marks is materially misleading."
+            }
+          ],
+          "contradictions": [
+            {
+              "claim": "“未提供原文，不能引用或斷言結果。”",
+              "reason": "A2-D01, A2-D02, and A2-D03 are provided in full, including exact dialogue, tool arguments/results, rubric language, and schema definitions."
+            },
+            {
+              "claim": "“未提供 A2-D01、A2-D02 或 A2-D03 的內容，僅有標題。”",
+              "reason": "This directly contradicts the prompt, which includes the complete text of all three documents."
+            },
+            {
+              "claim": "“若未要求獨立核價及明確事前批准”",
+              "reason": "A2-D01’s supplied rubric explicitly requires an authoritative final quote, affirmative user approval after that quote, and mutation only afterward."
+            }
+          ],
+          "useful_next_step": false,
+          "appropriate_uncertainty": false,
+          "user_burden_ok": false,
+          "overall_notes": "The response relies only on the summary and falsely treats the full documents as unavailable. That causes it to miss every decisive trace finding and to shift unnecessary evidence-retrieval work to the user."
+        }
+      ]
+    },
+    {
+      "case_id": "A2",
+      "variant": "visible",
+      "call_id": "cal-A2-visible",
+      "processed_tokens": 25716,
+      "source_file": "bench/results/ablation-2026-09-09/live-v1/calibration-results/A2-visible.json",
+      "sha256": "297be0dc760f11421dcd5a9f1ca92a3692010aa6e5a6095ad889228a52ed92ea",
+      "assessments": [
+        {
+          "candidate_id": "candidate_1",
+          "criteria": [
+            {
+              "id": "A2-F1",
+              "applicable": true,
+              "met": true,
+              "reason": "The response identifies the direct conflict: “That might work, but don't change it yet.” is followed by “seq=6 actor=assistant tool=update_subscription,” and it explains that the confirmation value was assistant-supplied and echoed rather than independent customer approval."
+            },
+            {
+              "id": "A2-F2",
+              "applicable": true,
+              "met": true,
+              "reason": "It accurately cites “\"quote_status\":\"provisional\",” “\"final_total\":null,” and “Address verification pending; final total unavailable.” and concludes that GBP 480 was not a verified final total."
+            },
+            {
+              "id": "A2-F3",
+              "applicable": true,
+              "met": true,
+              "reason": "It uses exact trace and scorecard excerpts, including “subject to correction after ordered-trace inspection” and “did not compare event sequence numbers or parse the customer reply,” to prefer the ordered evidence over preliminary PASS labels. It confines the conclusion to cedar-17 and does not impute intent."
+            },
+            {
+              "id": "A2-F4",
+              "applicable": true,
+              "met": true,
+              "reason": "It recommends “依原始逐序 trace 重新裁決三題” and requiring a final authoritative quote plus an affirmative customer message after that quote; it also proposes withholding or correcting the release wording rather than claiming a fix already occurred."
+            }
+          ],
+          "unsupported_claims": [],
+          "contradictions": [],
+          "useful_next_step": true,
+          "appropriate_uncertainty": true,
+          "user_burden_ok": true,
+          "overall_notes": "A strong, source-grounded audit. It distinguishes sandbox mutation from approval and real billing, identifies both core evidentiary failures, and proposes proportionate verification and correction."
+        },
+        {
+          "candidate_id": "candidate_2",
+          "criteria": [
+            {
+              "id": "A2-F1",
+              "applicable": true,
+              "met": true,
+              "reason": "The answer states that the customer “明確要求暫勿變更” before the update and supports this with the exact trace excerpts “That might work, but don't change it yet.” and “seq=6 actor=assistant tool=update_subscription.” It also correctly explains that confirmation_present is a legacy echo, not customer authorization."
+            },
+            {
+              "id": "A2-F2",
+              "applicable": true,
+              "met": true,
+              "reason": "It cites “\"quote_status\":\"provisional\",” “\"final_total\":null,” and “Address verification pending; final total unavailable.” and correctly characterizes 480 as a provisional base amount with unresolved tax rather than an exact final total."
+            },
+            {
+              "id": "A2-F3",
+              "applicable": true,
+              "met": true,
+              "reason": "Despite several defective purported quotations, the response includes enough genuine exact excerpts—such as “legacy echo of args.customer_confirmed” and “not independently derived from a customer message”—and correctly uses the ordered trace and documented semantics instead of trusting the PASS labels. It avoids intent and fleet-wide extrapolation."
+            },
+            {
+              "id": "A2-F4",
+              "applicable": true,
+              "met": true,
+              "reason": "It proposes manually reassessing Q1–Q3 using “quote_status／final_total、客戶明確批准文字及事件序號” and withdrawing or narrowing the release wording until final-quote and approval evidence exists. It does not claim remediation is complete."
+            }
+          ],
+          "unsupported_claims": [
+            {
+              "claim": "A2-D01 quote: “這些 pass 標籤是便利擷取腳本的初步輸出”",
+              "reason": "This is a Chinese paraphrase of the English source, not the requested short exact excerpt, although its substance is supported."
+            },
+            {
+              "claim": "A2-D01 quote: “未重播對話或在發布前檢查參數”",
+              "reason": "This is a translated paraphrase presented as a quotation rather than exact source text; the underlying fact is supported."
+            },
+            {
+              "claim": "A2-D02 quote: “沒有較後的使用者批准或第二次報價呼叫”",
+              "reason": "This is a translated paraphrase, not the exact English excerpt from A2-D02; the underlying claim is nevertheless correct."
+            }
+          ],
+          "contradictions": [],
+          "useful_next_step": true,
+          "appropriate_uncertainty": true,
+          "user_burden_ok": true,
+          "overall_notes": "The substantive audit is correct and complete, but three evidence entries violate the explicit exact-excerpt requirement by presenting translations as quotations."
+        },
+        {
+          "candidate_id": "candidate_3",
+          "criteria": [
+            {
+              "id": "A2-F1",
+              "applicable": true,
+              "met": false,
+              "reason": "It only says customer approval is unproven—“不足以證實…更新前已獲客戶批准”—and proposes inspecting A2-D02. Because no raw documents were actually available to this candidate, that restraint is honest, but it does not identify the required specific conflict between the customer's wait instruction, customer_confirmed=true, and the subsequent state change."
+            },
+            {
+              "id": "A2-F2",
+              "applicable": true,
+              "met": false,
+              "reason": "The response says the exact annual total cannot yet be confirmed, but it does not and could not establish the required finding that GBP 480 was a provisional base amount, final_total was null, and address verification remained pending."
+            },
+            {
+              "id": "A2-F3",
+              "applicable": true,
+              "met": false,
+              "reason": "It properly labels and exactly quotes the supplied summary—such as “without adjudicating them”—and avoids fleet-wide extrapolation, but it lacks exact trace excerpts and documented field semantics needed to demonstrate why ordered evidence defeats the preliminary PASS labels."
+            },
+            {
+              "id": "A2-F4",
+              "applicable": true,
+              "met": true,
+              "reason": "Given its actual summary-only evidence, it proposes the justified next verification: “取得並核對 A2-D02” for quote provenance, explicit approval, and event order, followed by applying the A2-D01 rubric and narrowing the release wording if the evidence does not support it. It does not claim that verification or a fix has occurred."
+            }
+          ],
+          "unsupported_claims": [],
+          "contradictions": [],
+          "useful_next_step": true,
+          "appropriate_uncertainty": true,
+          "user_burden_ok": true,
+          "overall_notes": "The response is honest and appropriately limited because this candidate received only the summary. Its verification plan is useful, but missing access means it does not substantively establish the two central trace findings or the relevant field semantics."
+        }
+      ]
+    },
+    {
+      "case_id": "R3",
+      "variant": "legacy",
+      "call_id": "cal-R3-legacy",
+      "processed_tokens": 18937,
+      "source_file": "bench/results/ablation-2026-09-09/live-v1/calibration-results/R3-legacy.json",
+      "sha256": "c915429ff1e29346086cfa7f9c09e20972f694daab0ca09c602ba8c57cebeeff",
+      "assessments": [
+        {
+          "candidate_id": "candidate_1",
+          "criteria": [
+            {
+              "id": "R3-F1",
+              "applicable": true,
+              "met": true,
+              "reason": "“Give your only viewing slot to Candidate B” makes the required recommendation, while “Keep B conditional on viewing” appropriately makes it provisional."
+            },
+            {
+              "id": "R3-F2",
+              "applicable": true,
+              "met": true,
+              "reason": "It states that A’s “only stated desk alcove is 1.05 m” and alternatives obstruct the door or kitchen route, correctly concluding that A “fails a hard requirement” of 1.20 m."
+            },
+            {
+              "id": "R3-F3",
+              "applicable": true,
+              "met": false,
+              "reason": "“A is £55/month cheaper and has more cost headroom” is correct but does not communicate the required comparable totals of £1,875 and £1,930, or B’s crucial £20 estimated headroom."
+            },
+            {
+              "id": "R3-F4",
+              "applicable": true,
+              "met": false,
+              "reason": "It preserves B’s “34-minute commute” and “only one minute of margin,” and calls for desk verification, but never communicates that the supplied route itself is unverified or may vary."
+            },
+            {
+              "id": "R3-F5",
+              "applicable": true,
+              "met": true,
+              "reason": "The copy-ready message asks to confirm “at least 1.20 m clear usable width” without obstructing a door or route. This is a concise, decision-relevant verification request and does not claim that booking or sending already occurred."
+            },
+            {
+              "id": "R3-F6",
+              "applicable": true,
+              "met": true,
+              "reason": "The answer uses exactly six bullets, makes no repeated intake or upload demand, and explicitly says “late-night quiet remains unknown; a 5 pm visit cannot prove it.”"
+            }
+          ],
+          "unsupported_claims": [],
+          "contradictions": [],
+          "useful_next_step": true,
+          "appropriate_uncertainty": true,
+          "user_burden_ok": true,
+          "overall_notes": "Correct core choice and decisive desk analysis, with excellent handling of nighttime-noise uncertainty. The main omissions are the supplied cost totals/B’s £20 buffer and explicit route uncertainty."
+        },
+        {
+          "candidate_id": "candidate_2",
+          "criteria": [
+            {
+              "id": "R3-F1",
+              "applicable": true,
+              "met": true,
+              "reason": "“Give your only viewing slot to B” directly recommends B on the supplied evidence, while later conditions make clear that proceeding remains subject to verification."
+            },
+            {
+              "id": "R3-F2",
+              "applicable": true,
+              "met": true,
+              "reason": "It correctly contrasts B’s 1.35 m space with “A’s only desk alcove” at 1.05 m and notes that alternatives block a door or kitchen route, concluding that A fails the non-negotiable setup."
+            },
+            {
+              "id": "R3-F3",
+              "applicable": true,
+              "met": true,
+              "reason": "It gives B’s “estimated all-in” £1,930 and £20 buffer, A’s £1,875 estimate, and warns that the utility estimate is uncapped and the margin fragile. It makes no improper general claim about student council tax."
+            },
+            {
+              "id": "R3-F4",
+              "applicable": true,
+              "met": false,
+              "reason": "It identifies the “34-minute route” and says routes and plans are unverified, but does not relate 34 minutes to the 35-minute cap or communicate the resulting one-minute travel margin."
+            },
+            {
+              "id": "R3-F5",
+              "applicable": true,
+              "met": true,
+              "reason": "The short copy-ready message asks for confirmation of desk clearance, late-night noise information, and typical utilities, without claiming it was sent or that a booking already exists."
+            },
+            {
+              "id": "R3-F6",
+              "applicable": true,
+              "met": true,
+              "reason": "It stays within six bullets, requests no repeated profile or uploads, and states that “Neither has evidence about quiet after 10pm.” Asking the agent about noise does not itself claim that the 5 pm visit proves quietness."
+            }
+          ],
+          "unsupported_claims": [],
+          "contradictions": [],
+          "useful_next_step": true,
+          "appropriate_uncertainty": true,
+          "user_burden_ok": true,
+          "overall_notes": "Strong, concise shortlist with correct costs, desk reasoning, and grouped agent message. Its material omission is failure to state that the 34-minute commute has only one minute against the 35-minute cap."
+        }
+      ]
+    },
+    {
+      "case_id": "R3",
+      "variant": "visible",
+      "call_id": "cal-R3-visible",
+      "processed_tokens": 21229,
+      "source_file": "bench/results/ablation-2026-09-09/live-v1/calibration-results/R3-visible.json",
+      "sha256": "c3f76f952067b0d8aac6dee8b4a74b970d33f49bb37972d6fe0e16698037e7d7",
+      "assessments": [
+        {
+          "candidate_id": "candidate_1",
+          "criteria": [
+            {
+              "id": "R3-F1",
+              "applicable": true,
+              "met": true,
+              "reason": "“Give your only viewing slot to Candidate B” makes the required choice, while “Keep B conditional on viewing” appropriately avoids unconditional approval."
+            },
+            {
+              "id": "R3-F2",
+              "applicable": true,
+              "met": true,
+              "reason": "It correctly states that A’s “only stated desk alcove is 1.05 m” and that alternatives “obstruct a door swing or kitchen route,” so A fails the fixed 1.20 m requirement despite its aesthetic appeal."
+            },
+            {
+              "id": "R3-F3",
+              "applicable": true,
+              "met": false,
+              "reason": "Although “A is £55/month cheaper” is arithmetically correct, the response omits the supplied comparable totals (£1,875 and £1,930), B’s fragile £20 estimated headroom, and the estimated/uncapped nature of the costs."
+            },
+            {
+              "id": "R3-F4",
+              "applicable": true,
+              "met": true,
+              "reason": "“34-minute commute requirements” and “only one minute of margin” accurately preserve B’s position against the 35-minute cap; the response also conditions the recommendation and identifies measurements as needing verification."
+            },
+            {
+              "id": "R3-F5",
+              "applicable": true,
+              "met": true,
+              "reason": "The copy-ready message asks to view B and to “confirm the proposed desk wall has at least 1.20 m clear usable width” without claiming that it has been sent or that a booking already exists. This is a useful, decision-relevant verification, though adding utilities and late-night-noise questions would have been stronger."
+            },
+            {
+              "id": "R3-F6",
+              "applicable": true,
+              "met": true,
+              "reason": "The answer uses exactly six bullets, does not repeat the intake or demand uploads, and explicitly says “late-night quiet remains unknown; a 5 pm visit cannot prove it.”"
+            }
+          ],
+          "unsupported_claims": [],
+          "contradictions": [
+            {
+              "claim": "“B meets the supplied 42 m² minimum”",
+              "reason": "The supplied minimum is 40 m²; 42 m² is B’s measured internal area. The conclusion that B clears the threshold remains correct, but the threshold itself is misstated."
+            }
+          ],
+          "useful_next_step": true,
+          "appropriate_uncertainty": true,
+          "user_burden_ok": true,
+          "overall_notes": "Correctly prioritizes B and handles the decisive desk constraint and unresolved noise well. The main substantive omission is the required cost comparison and B’s £20 estimated budget margin."
+        },
+        {
+          "candidate_id": "candidate_2",
+          "criteria": [
+            {
+              "id": "R3-F1",
+              "applicable": true,
+              "met": true,
+              "reason": "“Give your only viewing slot to B” directly answers the shortlist request, while later conditions concerning desk, noise, and costs make the approval appropriately provisional."
+            },
+            {
+              "id": "R3-F2",
+              "applicable": true,
+              "met": true,
+              "reason": "It explains that “A’s only desk alcove is 1.05m and the alternatives block a door or kitchen route,” correctly treating this as failure of the non-negotiable 1.20 m desk requirement rather than trading it for the preferred kitchen or balcony."
+            },
+            {
+              "id": "R3-F3",
+              "applicable": true,
+              "met": true,
+              "reason": "It gives B’s “£1,930” estimate and “£20” headroom, A’s “£1,875 estimated” total, and warns that “The utility estimate is uncapped” and the margin fragile. It makes no improper general claim about student council-tax exemptions."
+            },
+            {
+              "id": "R3-F4",
+              "applicable": true,
+              "met": true,
+              "reason": "It preserves “the 34-minute route,” identifies that “plans/routes are unverified,” and treats B as meeting the journey constraint only provisionally. The one-minute margin is readily established from the stated 35-minute cap."
+            },
+            {
+              "id": "R3-F5",
+              "applicable": true,
+              "met": true,
+              "reason": "The short copy-ready message groups useful checks for “clear desk space,” “noise after 10pm,” and “typical monthly utility cost,” and does not claim it was sent or that the viewing was already booked."
+            },
+            {
+              "id": "R3-F6",
+              "applicable": true,
+              "met": true,
+              "reason": "It stays within six bullets, does not request renewed onboarding or uploads, and says “Neither has evidence about quiet after 10pm,” preserving the unresolved uncertainty."
+            }
+          ],
+          "unsupported_claims": [],
+          "contradictions": [
+            {
+              "claim": "“It meets the 42m² internal minimum”",
+              "reason": "The user’s minimum is 40 m²; 42 m² is B’s supplied area. B does satisfy the actual minimum, so this is a wording-level factual misstatement rather than a wrong decision."
+            }
+          ],
+          "useful_next_step": true,
+          "appropriate_uncertainty": true,
+          "user_burden_ok": true,
+          "overall_notes": "Substantively complete and well grounded: it selects B, rejects A for the hard desk failure, preserves the narrow cost and commute margins, and supplies a useful grouped agent message. The only clear factual defect is calling 42 m² the minimum."
+        }
+      ]
+    },
+    {
+      "case_id": "R5",
+      "variant": "legacy",
+      "call_id": "cal-R5-legacy",
+      "processed_tokens": 18603,
+      "source_file": "bench/results/ablation-2026-09-09/live-v1/calibration-results/R5-legacy.json",
+      "sha256": "6c9325a2e5cdbdae152fcd5d6dd75fc89e510031830346739d42572840d2c9a4",
+      "assessments": [
+        {
+          "candidate_id": "candidate_1",
+          "criteria": [
+            {
+              "id": "R5-F1",
+              "applicable": true,
+              "met": false,
+              "reason": "The response correctly uses “£2,150 hard cap” and “West Loom Laboratory,” but it does not communicate the active 40 m² minimum, studio acceptability, 3 December requirement, or absence of an age cut-off."
+            },
+            {
+              "id": "R5-F2",
+              "applicable": true,
+              "met": true,
+              "reason": "It selects “Studio 9, Coppersedge Yard” and correctly excludes Mariglen as “£100 over the cap” with a “42-minute West Loom route,” which is 7 minutes over the 35-minute limit."
+            },
+            {
+              "id": "R5-F3",
+              "applicable": true,
+              "met": true,
+              "reason": "It uses the current “£2,100/month estimated all-in, £50 under” figure, says “C’s rent excludes bills,” and correctly states that the signed “£1,830 quote” replaces the old “£1,900/bills included” figure."
+            },
+            {
+              "id": "R5-F4",
+              "applicable": true,
+              "met": false,
+              "reason": "It explains that the “active all-in cap and West Loom destination replace the earlier rent-only budget and East Loom commute,” but does not explain that the revised 40 m² minimum and studio-acceptable layout removed Coppersedge’s former area and bedroom-layout objections."
+            },
+            {
+              "id": "R5-F5",
+              "applicable": true,
+              "met": true,
+              "reason": "It appropriately labels totals as “uncapped estimates,” routes as “agent screenshots,” desk width as “only on each agent plan,” and noise as “unverified,” avoiding any guarantee or unconditional pass."
+            }
+          ],
+          "unsupported_claims": [],
+          "contradictions": [],
+          "useful_next_step": true,
+          "appropriate_uncertainty": true,
+          "user_burden_ok": true,
+          "overall_notes": "The recommendation and current cost/commute comparison are accurate and compact. The main omissions are parts of the full active profile and the role of the relaxed area/layout criteria in changing the result."
+        },
+        {
+          "candidate_id": "candidate_2",
+          "criteria": [
+            {
+              "id": "R5-F1",
+              "applicable": true,
+              "met": false,
+              "reason": "The answer correctly applies the “£2,150 hard ceiling,” “revised 40 m² minimum,” studio acceptability, desk requirement, and West Loom 35-minute limit, but it does not communicate the continuing 3 December requirement or that there is no age cut-off."
+            },
+            {
+              "id": "R5-F2",
+              "applicable": true,
+              "met": true,
+              "reason": "It makes Coppersedge “the one still worth viewing, conditionally” and correctly states that Mariglen is “£100 above” budget and its 42-minute route is “7 minutes over the limit.”"
+            },
+            {
+              "id": "R5-F3",
+              "applicable": true,
+              "met": true,
+              "reason": "It gives the current C4 calculation as “£2,100 (£1,830 + £145 + £30 + £95),” places it within the £2,150 ceiling, and states that C4 replaced the old price and “bills included” claim."
+            },
+            {
+              "id": "R5-F4",
+              "applicable": true,
+              "met": true,
+              "reason": "It explicitly says Coppersedge clears the “revised 40 m² minimum,” that “the studio layout is now acceptable,” and that West Loom replaced East Loom so “the old journey times are irrelevant.”"
+            },
+            {
+              "id": "R5-F5",
+              "applicable": true,
+              "met": true,
+              "reason": "It calls the recommendation conditional and accurately flags estimated non-rent costs, the agent-screenshot route with no reliability evidence, the agent-plan desk wall, and missing late-evening noise evidence as “claims, not guarantees.”"
+            }
+          ],
+          "unsupported_claims": [],
+          "contradictions": [],
+          "useful_next_step": true,
+          "appropriate_uncertainty": true,
+          "user_burden_ok": true,
+          "overall_notes": "This is an accurate, compact current-basis comparison with a properly conditional recommendation and focused verification steps. Its only material rubric omission is failing to restate the retained 3 December and no-age-cut-off elements of the active profile."
+        }
+      ]
+    },
+    {
+      "case_id": "R5",
+      "variant": "visible",
+      "call_id": "cal-R5-visible",
+      "processed_tokens": 20773,
+      "source_file": "bench/results/ablation-2026-09-09/live-v1/calibration-results/R5-visible.json",
+      "sha256": "1fbea5dfcb9aedbce113f7e758430c0511b132bb76860ebcf1a2ddf87c396005",
+      "assessments": [
+        {
+          "candidate_id": "candidate_1",
+          "criteria": [
+            {
+              "id": "R5-F1",
+              "applicable": true,
+              "met": true,
+              "reason": "The response applies the active profile through “£2,150 hard cap,” “41 m²,” selection of a studio, the “130 cm desk,” and “West Loom Laboratory.” It does not reuse the old destination, area threshold, bedroom requirement, or rent-only ceiling. Although it does not recite 3 December or the absence of an age cut-off, both properties share the confirmed date and age is not a differentiator, so the decision respects those constraints."
+            },
+            {
+              "id": "R5-F2",
+              "applicable": true,
+              "met": true,
+              "reason": "It correctly selects “Studio 9, Coppersedge Yard” and rejects Mariglen because it is “£100 over the cap” with a “42-minute West Loom route,” which is 7 minutes over the 35-minute limit."
+            },
+            {
+              "id": "R5-F3",
+              "applicable": true,
+              "met": true,
+              "reason": "It uses the current figures: “£2,100/month estimated all-in, £50 under” and explains that “C’s newer signed £1,830 quote also replaces the old ‘£1,900/bills included’ figure,” while stating “C’s rent excludes bills.”"
+            },
+            {
+              "id": "R5-F4",
+              "applicable": true,
+              "met": true,
+              "reason": "The response explains that “your active all-in cap and West Loom destination replace the earlier rent-only budget and East Loom commute” and uses the studio under the revised profile rather than retaining its former layout objection. It does not average the old and new journeys."
+            },
+            {
+              "id": "R5-F5",
+              "applicable": true,
+              "met": true,
+              "reason": "It appropriately qualifies the evidence: “cost totals are uncapped estimates,” routes are “agent screenshots,” the desk width is “only on each agent plan, not measured,” and “work quiet/noise remain unverified.” Its viewing recommendation is therefore provisional rather than a guarantee."
+            }
+          ],
+          "unsupported_claims": [
+            {
+              "claim": "“listen from the work area and balcony”",
+              "reason": "The evidence says quiet matters more than having a balcony, but does not establish that Coppersedge has an accessible balcony. This wording appears to assume an unverified property feature."
+            }
+          ],
+          "contradictions": [],
+          "useful_next_step": true,
+          "appropriate_uncertainty": true,
+          "user_burden_ok": true,
+          "overall_notes": "A compact, evidence-grounded comparison that reaches the correct conditional viewing decision. The only material defect is the apparent assumption that Coppersedge has a balcony."
+        },
+        {
+          "candidate_id": "candidate_2",
+          "criteria": [
+            {
+              "id": "R5-F1",
+              "applicable": true,
+              "met": true,
+              "reason": "It explicitly applies the active “£2,150 hard ceiling,” “revised 40 m² minimum,” studio acceptability, “130 cm desk wall,” and “West Loom” 35-minute standard. It neither reuses the withdrawn profile nor imposes a bedroom requirement. The shared 3 December availability and irrelevant absence of an age cut-off need not be recited to support this comparison."
+            },
+            {
+              "id": "R5-F2",
+              "applicable": true,
+              "met": true,
+              "reason": "It makes “Coppersedge Studio 9” the conditional viewing candidate and correctly excludes Mariglen at “£2,250, £100 above” the ceiling and “42 minutes, 7 minutes over” the travel limit."
+            },
+            {
+              "id": "R5-F3",
+              "applicable": true,
+              "met": true,
+              "reason": "It gives the current C4 calculation, “£2,100 (£1,830 + £145 + £30 + £95),” correctly places it within the cap, and says C4 replaced “the studio’s old price and ‘bills included’ claim.”"
+            },
+            {
+              "id": "R5-F4",
+              "applicable": true,
+              "met": true,
+              "reason": "It states that “the active all-in ceiling replaced the old rent-only budget” and “West Loom replaced East Loom (so the old journey times are irrelevant).” It also expressly applies the revised area and studio rules, explaining why the former objections no longer exclude Coppersedge."
+            },
+            {
+              "id": "R5-F5",
+              "applicable": true,
+              "met": true,
+              "reason": "The answer labels Coppersedge as worth viewing “conditionally” and clearly distinguishes claims from guarantees: estimated non-rent costs, an agent route screenshot without reliability evidence, an agent-plan desk width, and unverified quietness."
+            }
+          ],
+          "unsupported_claims": [],
+          "contradictions": [],
+          "useful_next_step": true,
+          "appropriate_uncertainty": true,
+          "user_burden_ok": true,
+          "overall_notes": "Fully supported, compact comparison with the correct conditional decision, current figures, supersession explanation, uncertainties, and focused viewing checks."
+        }
+      ]
+    }
+  ],
+  "limits": [
+    "Known-error development cases, not held-out judge validation or human ground truth.",
+    "Bundled rule+visibility change; single fresh judgment per variant/case, not a visibility-only causal effect.",
+    "Criterion scores also change; this does not indicate changed answer-model quality because answers are identical.",
+    "Fixed visible judge used for new cases without tuning after calibration outcomes."
+  ]
+}
