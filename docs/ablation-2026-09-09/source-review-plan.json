@@ -1,0 +1,18 @@
+{
+  "created_at_utc": "2026-09-09T14:39:50.423764+00:00",
+  "new_case_answers_present": 0,
+  "calibration_results_present": 2,
+  "plan_sha256": "6bb1925057b23ff898723aa17fefabb8f10c4b30f20128d7c2e4e6296d561f43",
+  "review_groups": [
+    "S1-r1-T2-group",
+    "S2-r2-T1-group",
+    "S3-r1-T2-group",
+    "E1-long",
+    "E2-short",
+    "E3-long"
+  ],
+  "sampling_rule": "Prospectively fixed one group per new source case before any new-case answer; all six anonymous candidates in each selected group. Covers both rental turns across cases and both retrieval lengths. This is a36-answer source audit, not an independent rescore of all108 answers.",
+  "blinding": "Reviewers see source truth, actual evidence views, rubric and anonymous final answers; no arm names, cost, primary judge output or generator status. Representation treatment may be inferable from evidence format. Reviewers do not author their reviewed fixtures.",
+  "additional_review": "Inspect all deterministic mismatches and primary material-error annotations separately as targeted post-hoc checks; label targeted selection and root unblinding explicitly.",
+  "cost_scope": "Parent/subagent source review is outside measured CLI usage; no additional benchmark model calls."
+}
