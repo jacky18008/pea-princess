@@ -23,7 +23,7 @@
 - [x] 實作 public options／local note 的 stage 1。
 - [x] 完成跨模組審查、完整回歸與 lifecycle validation。
 - [x] 初始化此專案私人 state，保存既有品質報告與關鍵結論。
-- [ ] 保存交付 commits／backup／驗證數字。
+- [x] 保存交付 commits／backup／驗證數字；見 [交付紀錄](session-harness-delivery.md) 與私人 `COMPLETED.json`。
 
 ## 保留界線與後續實驗
 

@@ -1,0 +1,65 @@
+{
+  "date": "2026-09-09",
+  "status": "PASS",
+  "implementation_commit": "739ccca141922629784f06b7cad724a3285c0953",
+  "full_suite": {
+    "tests": 1846,
+    "seconds": 43.553,
+    "status": "PASS",
+    "command": "python3 -m unittest discover -s tests -p 'test_*.py'",
+    "log_sha256": "840eed40eced1d5e3903ace701516727bd6c6d349d93fcf657432e4abe8887db"
+  },
+  "focused_counts_in_full_suite": {
+    "state": 34,
+    "runner_and_hooks": 27,
+    "lifecycle": 8,
+    "community": 18
+  },
+  "lifecycle": {
+    "checkpoints": 12,
+    "unique_semantic_facts": 38,
+    "repeated_fact_checks": 401,
+    "fact_errors": 0,
+    "safety_checks": 24,
+    "safety_passed": 24,
+    "model_quality": "not_measured",
+    "tokens": "not_measured",
+    "comparator": "last-four-records deterministic proxy, not native compact"
+  },
+  "public_build": {
+    "archive_members": 79,
+    "instructions_chars": 7799,
+    "private_state_excluded": true,
+    "deployed": false
+  },
+  "private_backup": {
+    "directory_name": "pea-princess-harness-20260909T185125Z",
+    "final_manifest": "COMPLETED.json",
+    "preparation_commit": "739ccca141922629784f06b7cad724a3285c0953",
+    "historical_raw_files_verified_unchanged": 4162,
+    "operational_files_verified": 4220,
+    "fresh_clone_and_fsck": "PASS",
+    "fresh_state_restore": "PASS",
+    "final_commit_and_state_receipt": "See private COMPLETED.json; excludes the circular self-referencing commit hash from this tracked report."
+  },
+  "new_experiment_model_calls": 0,
+  "coding_and_collaboration_usage": "not included in experiment call count; not measured here",
+  "claude": "paused",
+  "native_hooks": "templates provided; not activated or granted trust",
+  "source_manifest": {
+    "skills/vet-flat/scripts/session_state.py": "09e97b552d9d4910ba98a00f71e24d8ba4cd7d91c0db74a576420ad05247b261",
+    "skills/vet-flat/references/session-harness.md": "8f5e70faa4a66a32580fda18a89d535770dd26eecd7c610a84353d99cea87288",
+    "tools/session_runner.py": "e1ec5fc6392f6be467805c087f071146da8d8ebc8291676dfa653c1287222734",
+    "tools/session_hook.py": "9ad2b14eac6a36e7ec1bcd1ef59122c532e227c4235c6e20b2f7b12c4818d07c",
+    "evals/session_harness/run_scenarios.py": "f4c78e0770df221dabfc357fde9dcff736ce76f9bb48656441f423002ab28334",
+    "evals/session_harness/lifecycle.json": "fd0af557feb076bae1705451203838ac97d93a63c3414c0871a488aae557cb8d",
+    "community/core.py": "01318b347697f497996663ded5c1f30fd1f1b464cf9924156e73441fbab5ebf6",
+    "community/feedback.py": "e7f017f53acee62fae99441c590ef0087bba377d1478faa83b1d02e3b26a22f0",
+    "community/build.py": "5cd515714546fb76600e938f6fc9364c84ecad5aa89983cb7855d3131812b260",
+    "community/form.html": "66455c9804347abbffe05991eda5874836d0f1ebaa7b824d1e371f67082896ad",
+    "community/form.js": "1dcf6ef9e0738879b366c43277f49161678043f50d3b870d43af324efdc7b90c",
+    "community/index.html": "5f18edfbc06f0f36be7ab36f3e33ee0ab026299e0460f1671484bff7458ce3df",
+    "community/catalog.json": "97d5452bf0887d4b9eef8eb0259aa809c5e90f5e5d4a6bdbb0f038cdad7e711f",
+    "community/public-schema.json": "61e8f048eabf699e6ca275329d6e5b42a7d32007114f892c75bb90dc4eb76397"
+  }
+}

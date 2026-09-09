@@ -9,5 +9,5 @@ Keep this file short; details and evidence live in the linked files.
 5. Keep `.pea-state/`, user documents and optional feedback notes private. Stage 1 is public options only: `docs/community-feedback-stage1.md`.
 
 Tests: `python3 -m unittest discover -s tests -p 'test_*.py'`.
-Delivery plan: `docs/session-harness-plan.md`. Validation: `docs/session-harness-validation.md`.
+Delivery plan: `docs/session-harness-plan.md`. Validation: `docs/session-harness-validation.md`. Delivery record: `docs/session-harness-delivery.md`.
 Hooks and host limitations: `docs/session-hook-examples.md`. Official-source comparison: `docs/harness-source-notes-2026-09-09.md`.
