@@ -1,0 +1,2641 @@
+{
+  "version": 1,
+  "synthetic": true,
+  "llm_calls": 0,
+  "model_quality": "not_measured",
+  "tokens": "not_measured",
+  "cost": "not_measured",
+  "recent_records": 4,
+  "design": {
+    "input_records": 21,
+    "checkpoints": 12,
+    "unique_semantic_facts": 38,
+    "fact_checks_are_repeated_checkpoint_assertions": true
+  },
+  "fixture_sha256": "8f46d9c98eaffe917be84b6fc2740a4f91183bae76270560710839a934d175a7",
+  "source_manifest": {
+    "evals/session_harness/run_scenarios.py": "f4c78e0770df221dabfc357fde9dcff736ce76f9bb48656441f423002ab28334",
+    "evals/session_harness/lifecycle.json": "fd0af557feb076bae1705451203838ac97d93a63c3414c0871a488aae557cb8d",
+    "skills/vet-flat/scripts/session_state.py": "09e97b552d9d4910ba98a00f71e24d8ba4cd7d91c0db74a576420ad05247b261"
+  },
+  "summary": {
+    "full_history_oracle": {
+      "checks": 401,
+      "errors": 0,
+      "reference_only": true
+    },
+    "naive_recent_records": {
+      "checks": 401,
+      "errors": 297
+    },
+    "durable_resume": {
+      "checks": 401,
+      "errors": 0
+    },
+    "safety": {
+      "checks": 24,
+      "passed": 24
+    }
+  },
+  "checkpoints": [
+    {
+      "id": "initial-complete-state",
+      "revision": 10,
+      "checks": 27,
+      "expected_facts": {
+        "budgets.rent.limit": 1800,
+        "budgets.rent.scope": "rental",
+        "budgets.rent.unit": "GBP/month",
+        "budgets.tokens.limit": 40000,
+        "budgets.tokens.scope": "api_tokens",
+        "budgets.tokens.unit": "tokens",
+        "budgets.spend.limit": 3,
+        "budgets.spend.scope": "execution_spend",
+        "budgets.spend.unit": "USD",
+        "requirements.area.status": "active",
+        "requirements.area.strength": "must",
+        "requirements.area.text": "Every candidate must be in the fictional Demo district.",
+        "requirements.area.scope": "all-properties",
+        "requirements.active_ids": [
+          "area",
+          "balcony",
+          "floor"
+        ],
+        "requirements.floor.status": "active",
+        "requirements.floor.strength": "prohibit",
+        "requirements.floor.text": "Do not accept any ground-floor apartment.",
+        "requirements.floor.scope": "all-properties",
+        "requirements.balcony.status": "active",
+        "requirements.balcony.strength": "prefer",
+        "requirements.balcony.text": "I prefer a balcony.",
+        "requirements.balcony.scope": "all-properties",
+        "tasks.research.kind": "workflow",
+        "tasks.research.status": "pending",
+        "tasks.review.kind": "task",
+        "tasks.review.status": "pending",
+        "documents.current_ids": [
+          "listing-v1"
+        ]
+      },
+      "naive_errors": [
+        {
+          "fact": "budgets.rent.limit",
+          "expected": 1800,
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.rent.scope",
+          "expected": "rental",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.rent.unit",
+          "expected": "GBP/month",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.spend.limit",
+          "expected": 3,
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.spend.scope",
+          "expected": "execution_spend",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.spend.unit",
+          "expected": "USD",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.tokens.limit",
+          "expected": 40000,
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.tokens.scope",
+          "expected": "api_tokens",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.tokens.unit",
+          "expected": "tokens",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.area.scope",
+          "expected": "all-properties",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.area.status",
+          "expected": "active",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.area.strength",
+          "expected": "must",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.area.text",
+          "expected": "Every candidate must be in the fictional Demo district.",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor.scope",
+          "expected": "all-properties",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor.status",
+          "expected": "active",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor.strength",
+          "expected": "prohibit",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor.text",
+          "expected": "Do not accept any ground-floor apartment.",
+          "actual": null,
+          "missing": true
+        }
+      ],
+      "durable_errors": [],
+      "characters": {
+        "full_input": 1615,
+        "naive_facts": 395,
+        "durable_packet": 3703
+      }
+    },
+    {
+      "id": "raise-housing-budget-only",
+      "revision": 11,
+      "checks": 27,
+      "expected_facts": {
+        "budgets.rent.limit": 2100,
+        "budgets.rent.scope": "rental",
+        "budgets.rent.unit": "GBP/month",
+        "budgets.tokens.limit": 40000,
+        "budgets.tokens.scope": "api_tokens",
+        "budgets.tokens.unit": "tokens",
+        "budgets.spend.limit": 3,
+        "budgets.spend.scope": "execution_spend",
+        "budgets.spend.unit": "USD",
+        "requirements.area.status": "active",
+        "requirements.area.strength": "must",
+        "requirements.area.text": "Every candidate must be in the fictional Demo district.",
+        "requirements.area.scope": "all-properties",
+        "requirements.active_ids": [
+          "area",
+          "balcony",
+          "floor"
+        ],
+        "requirements.floor.status": "active",
+        "requirements.floor.strength": "prohibit",
+        "requirements.floor.text": "Do not accept any ground-floor apartment.",
+        "requirements.floor.scope": "all-properties",
+        "requirements.balcony.status": "active",
+        "requirements.balcony.strength": "prefer",
+        "requirements.balcony.text": "I prefer a balcony.",
+        "requirements.balcony.scope": "all-properties",
+        "tasks.research.kind": "workflow",
+        "tasks.research.status": "needs_review",
+        "tasks.review.kind": "task",
+        "tasks.review.status": "needs_review",
+        "documents.current_ids": [
+          "listing-v1"
+        ]
+      },
+      "naive_errors": [
+        {
+          "fact": "budgets.rent.scope",
+          "expected": "rental",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.rent.unit",
+          "expected": "GBP/month",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.spend.limit",
+          "expected": 3,
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.spend.scope",
+          "expected": "execution_spend",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.spend.unit",
+          "expected": "USD",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.tokens.limit",
+          "expected": 40000,
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.tokens.scope",
+          "expected": "api_tokens",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.tokens.unit",
+          "expected": "tokens",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.active_ids",
+          "expected": [
+            "area",
+            "balcony",
+            "floor"
+          ],
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.area.scope",
+          "expected": "all-properties",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.area.status",
+          "expected": "active",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.area.strength",
+          "expected": "must",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.area.text",
+          "expected": "Every candidate must be in the fictional Demo district.",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.balcony.scope",
+          "expected": "all-properties",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.balcony.status",
+          "expected": "active",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.balcony.strength",
+          "expected": "prefer",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.balcony.text",
+          "expected": "I prefer a balcony.",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor.scope",
+          "expected": "all-properties",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor.status",
+          "expected": "active",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor.strength",
+          "expected": "prohibit",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor.text",
+          "expected": "Do not accept any ground-floor apartment.",
+          "actual": null,
+          "missing": true
+        }
+      ],
+      "durable_errors": [],
+      "characters": {
+        "full_input": 1820,
+        "naive_facts": 202,
+        "durable_packet": 3933
+      }
+    },
+    {
+      "id": "lower-budget-and-retain-other-scopes",
+      "revision": 12,
+      "checks": 27,
+      "expected_facts": {
+        "budgets.rent.limit": 1700,
+        "budgets.rent.scope": "rental",
+        "budgets.rent.unit": "GBP/month",
+        "budgets.tokens.limit": 40000,
+        "budgets.tokens.scope": "api_tokens",
+        "budgets.tokens.unit": "tokens",
+        "budgets.spend.limit": 3,
+        "budgets.spend.scope": "execution_spend",
+        "budgets.spend.unit": "USD",
+        "requirements.area.status": "active",
+        "requirements.area.strength": "must",
+        "requirements.area.text": "Every candidate must be in the fictional Demo district.",
+        "requirements.area.scope": "all-properties",
+        "requirements.active_ids": [
+          "area",
+          "balcony",
+          "floor"
+        ],
+        "requirements.floor.status": "active",
+        "requirements.floor.strength": "prohibit",
+        "requirements.floor.text": "Do not accept any ground-floor apartment.",
+        "requirements.floor.scope": "all-properties",
+        "requirements.balcony.status": "active",
+        "requirements.balcony.strength": "prefer",
+        "requirements.balcony.text": "I prefer a balcony.",
+        "requirements.balcony.scope": "all-properties",
+        "tasks.research.kind": "workflow",
+        "tasks.research.status": "needs_review",
+        "tasks.review.kind": "task",
+        "tasks.review.status": "needs_review",
+        "documents.current_ids": [
+          "listing-v1"
+        ]
+      },
+      "naive_errors": [
+        {
+          "fact": "budgets.rent.scope",
+          "expected": "rental",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.rent.unit",
+          "expected": "GBP/month",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.spend.limit",
+          "expected": 3,
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.spend.scope",
+          "expected": "execution_spend",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.spend.unit",
+          "expected": "USD",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.tokens.limit",
+          "expected": 40000,
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.tokens.scope",
+          "expected": "api_tokens",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.tokens.unit",
+          "expected": "tokens",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.active_ids",
+          "expected": [
+            "area",
+            "balcony",
+            "floor"
+          ],
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.area.scope",
+          "expected": "all-properties",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.area.status",
+          "expected": "active",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.area.strength",
+          "expected": "must",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.area.text",
+          "expected": "Every candidate must be in the fictional Demo district.",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.balcony.scope",
+          "expected": "all-properties",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.balcony.status",
+          "expected": "active",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.balcony.strength",
+          "expected": "prefer",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.balcony.text",
+          "expected": "I prefer a balcony.",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor.scope",
+          "expected": "all-properties",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor.status",
+          "expected": "active",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor.strength",
+          "expected": "prohibit",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor.text",
+          "expected": "Do not accept any ground-floor apartment.",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "tasks.research.kind",
+          "expected": "workflow",
+          "actual": null,
+          "missing": true
+        }
+      ],
+      "durable_errors": [],
+      "characters": {
+        "full_input": 2016,
+        "naive_facts": 169,
+        "durable_packet": 3924
+      }
+    },
+    {
+      "id": "retire-without-forgetting-history",
+      "revision": 13,
+      "checks": 27,
+      "expected_facts": {
+        "budgets.rent.limit": 1700,
+        "budgets.rent.scope": "rental",
+        "budgets.rent.unit": "GBP/month",
+        "budgets.tokens.limit": 40000,
+        "budgets.tokens.scope": "api_tokens",
+        "budgets.tokens.unit": "tokens",
+        "budgets.spend.limit": 3,
+        "budgets.spend.scope": "execution_spend",
+        "budgets.spend.unit": "USD",
+        "requirements.area.status": "active",
+        "requirements.area.strength": "must",
+        "requirements.area.text": "Every candidate must be in the fictional Demo district.",
+        "requirements.area.scope": "all-properties",
+        "requirements.active_ids": [
+          "area",
+          "floor"
+        ],
+        "requirements.floor.status": "active",
+        "requirements.floor.strength": "prohibit",
+        "requirements.floor.text": "Do not accept any ground-floor apartment.",
+        "requirements.floor.scope": "all-properties",
+        "requirements.balcony.status": "retired",
+        "requirements.balcony.strength": "prefer",
+        "requirements.balcony.text": "I prefer a balcony.",
+        "requirements.balcony.scope": "all-properties",
+        "tasks.research.kind": "workflow",
+        "tasks.research.status": "needs_review",
+        "tasks.review.kind": "task",
+        "tasks.review.status": "needs_review",
+        "documents.current_ids": [
+          "listing-v1"
+        ]
+      },
+      "naive_errors": [
+        {
+          "fact": "budgets.rent.scope",
+          "expected": "rental",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.rent.unit",
+          "expected": "GBP/month",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.spend.limit",
+          "expected": 3,
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.spend.scope",
+          "expected": "execution_spend",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.spend.unit",
+          "expected": "USD",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.tokens.limit",
+          "expected": 40000,
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.tokens.scope",
+          "expected": "api_tokens",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.tokens.unit",
+          "expected": "tokens",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.area.scope",
+          "expected": "all-properties",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.area.status",
+          "expected": "active",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.area.strength",
+          "expected": "must",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.area.text",
+          "expected": "Every candidate must be in the fictional Demo district.",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.balcony.scope",
+          "expected": "all-properties",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.balcony.strength",
+          "expected": "prefer",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.balcony.text",
+          "expected": "I prefer a balcony.",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor.scope",
+          "expected": "all-properties",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor.status",
+          "expected": "active",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor.strength",
+          "expected": "prohibit",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor.text",
+          "expected": "Do not accept any ground-floor apartment.",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "tasks.research.kind",
+          "expected": "workflow",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "tasks.review.kind",
+          "expected": "task",
+          "actual": null,
+          "missing": true
+        }
+      ],
+      "durable_errors": [],
+      "characters": {
+        "full_input": 2153,
+        "naive_facts": 225,
+        "durable_packet": 3648
+      }
+    },
+    {
+      "id": "add-scoped-requirement",
+      "revision": 14,
+      "checks": 31,
+      "expected_facts": {
+        "budgets.rent.limit": 1700,
+        "budgets.rent.scope": "rental",
+        "budgets.rent.unit": "GBP/month",
+        "budgets.tokens.limit": 40000,
+        "budgets.tokens.scope": "api_tokens",
+        "budgets.tokens.unit": "tokens",
+        "budgets.spend.limit": 3,
+        "budgets.spend.scope": "execution_spend",
+        "budgets.spend.unit": "USD",
+        "requirements.area.status": "active",
+        "requirements.area.strength": "must",
+        "requirements.area.text": "Every candidate must be in the fictional Demo district.",
+        "requirements.area.scope": "all-properties",
+        "requirements.active_ids": [
+          "area",
+          "elevator",
+          "floor"
+        ],
+        "requirements.floor.status": "active",
+        "requirements.floor.strength": "prohibit",
+        "requirements.floor.text": "Do not accept any ground-floor apartment.",
+        "requirements.floor.scope": "all-properties",
+        "requirements.balcony.status": "retired",
+        "requirements.balcony.strength": "prefer",
+        "requirements.balcony.text": "I prefer a balcony.",
+        "requirements.balcony.scope": "all-properties",
+        "tasks.research.kind": "workflow",
+        "tasks.research.status": "needs_review",
+        "tasks.review.kind": "task",
+        "tasks.review.status": "needs_review",
+        "documents.current_ids": [
+          "listing-v1"
+        ],
+        "requirements.elevator.status": "active",
+        "requirements.elevator.strength": "must",
+        "requirements.elevator.text": "An upper-floor apartment must have a working elevator.",
+        "requirements.elevator.scope": "upper-floors"
+      },
+      "naive_errors": [
+        {
+          "fact": "budgets.rent.scope",
+          "expected": "rental",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.rent.unit",
+          "expected": "GBP/month",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.spend.limit",
+          "expected": 3,
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.spend.scope",
+          "expected": "execution_spend",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.spend.unit",
+          "expected": "USD",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.tokens.limit",
+          "expected": 40000,
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.tokens.scope",
+          "expected": "api_tokens",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.tokens.unit",
+          "expected": "tokens",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "documents.current_ids",
+          "expected": [
+            "listing-v1"
+          ],
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.area.scope",
+          "expected": "all-properties",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.area.status",
+          "expected": "active",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.area.strength",
+          "expected": "must",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.area.text",
+          "expected": "Every candidate must be in the fictional Demo district.",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.balcony.scope",
+          "expected": "all-properties",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.balcony.strength",
+          "expected": "prefer",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.balcony.text",
+          "expected": "I prefer a balcony.",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor.scope",
+          "expected": "all-properties",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor.status",
+          "expected": "active",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor.strength",
+          "expected": "prohibit",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor.text",
+          "expected": "Do not accept any ground-floor apartment.",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "tasks.research.kind",
+          "expected": "workflow",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "tasks.review.kind",
+          "expected": "task",
+          "actual": null,
+          "missing": true
+        }
+      ],
+      "durable_errors": [],
+      "characters": {
+        "full_input": 2331,
+        "naive_facts": 408,
+        "durable_packet": 4009
+      }
+    },
+    {
+      "id": "prohibit-to-scoped-conditional",
+      "revision": 16,
+      "checks": 36,
+      "expected_facts": {
+        "budgets.rent.limit": 1700,
+        "budgets.rent.scope": "rental",
+        "budgets.rent.unit": "GBP/month",
+        "budgets.tokens.limit": 40000,
+        "budgets.tokens.scope": "api_tokens",
+        "budgets.tokens.unit": "tokens",
+        "budgets.spend.limit": 3,
+        "budgets.spend.scope": "execution_spend",
+        "budgets.spend.unit": "USD",
+        "requirements.area.status": "active",
+        "requirements.area.strength": "must",
+        "requirements.area.text": "Every candidate must be in the fictional Demo district.",
+        "requirements.area.scope": "all-properties",
+        "requirements.active_ids": [
+          "area",
+          "elevator",
+          "floor",
+          "floor-elsewhere"
+        ],
+        "requirements.floor.status": "active",
+        "requirements.floor.strength": "conditional",
+        "requirements.floor.text": "For property-demo only, a ground-floor apartment is acceptable if a documented inspection verifies step-free access. This does not authorize ground-floor apartments elsewhere.",
+        "requirements.floor.scope": "property-demo-only",
+        "requirements.balcony.status": "retired",
+        "requirements.balcony.strength": "prefer",
+        "requirements.balcony.text": "I prefer a balcony.",
+        "requirements.balcony.scope": "all-properties",
+        "tasks.research.kind": "workflow",
+        "tasks.research.status": "needs_review",
+        "tasks.review.kind": "task",
+        "tasks.review.status": "needs_review",
+        "documents.current_ids": [
+          "listing-v1"
+        ],
+        "requirements.elevator.status": "active",
+        "requirements.elevator.strength": "must",
+        "requirements.elevator.text": "An upper-floor apartment must have a working elevator.",
+        "requirements.elevator.scope": "upper-floors",
+        "requirements.floor.predicate": "A documented inspection verifies step-free access.",
+        "requirements.floor-elsewhere.status": "active",
+        "requirements.floor-elsewhere.strength": "prohibit",
+        "requirements.floor-elsewhere.text": "Do not accept ground-floor apartments other than property-demo.",
+        "requirements.floor-elsewhere.scope": "all-other-properties"
+      },
+      "naive_errors": [
+        {
+          "fact": "budgets.rent.scope",
+          "expected": "rental",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.rent.unit",
+          "expected": "GBP/month",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.spend.limit",
+          "expected": 3,
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.spend.scope",
+          "expected": "execution_spend",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.spend.unit",
+          "expected": "USD",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.tokens.limit",
+          "expected": 40000,
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.tokens.scope",
+          "expected": "api_tokens",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.tokens.unit",
+          "expected": "tokens",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "documents.current_ids",
+          "expected": [
+            "listing-v1"
+          ],
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.area.scope",
+          "expected": "all-properties",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.area.status",
+          "expected": "active",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.area.strength",
+          "expected": "must",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.area.text",
+          "expected": "Every candidate must be in the fictional Demo district.",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.balcony.scope",
+          "expected": "all-properties",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.balcony.strength",
+          "expected": "prefer",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.balcony.text",
+          "expected": "I prefer a balcony.",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor.status",
+          "expected": "active",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "tasks.research.kind",
+          "expected": "workflow",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "tasks.research.status",
+          "expected": "needs_review",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "tasks.review.kind",
+          "expected": "task",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "tasks.review.status",
+          "expected": "needs_review",
+          "actual": null,
+          "missing": true
+        }
+      ],
+      "durable_errors": [],
+      "characters": {
+        "full_input": 2710,
+        "naive_facts": 990,
+        "durable_packet": 4888
+      }
+    },
+    {
+      "id": "new-document-supersedes-old-fact",
+      "revision": 17,
+      "checks": 36,
+      "expected_facts": {
+        "budgets.rent.limit": 1700,
+        "budgets.rent.scope": "rental",
+        "budgets.rent.unit": "GBP/month",
+        "budgets.tokens.limit": 40000,
+        "budgets.tokens.scope": "api_tokens",
+        "budgets.tokens.unit": "tokens",
+        "budgets.spend.limit": 3,
+        "budgets.spend.scope": "execution_spend",
+        "budgets.spend.unit": "USD",
+        "requirements.area.status": "active",
+        "requirements.area.strength": "must",
+        "requirements.area.text": "Every candidate must be in the fictional Demo district.",
+        "requirements.area.scope": "all-properties",
+        "requirements.active_ids": [
+          "area",
+          "elevator",
+          "floor",
+          "floor-elsewhere"
+        ],
+        "requirements.floor.status": "active",
+        "requirements.floor.strength": "conditional",
+        "requirements.floor.text": "For property-demo only, a ground-floor apartment is acceptable if a documented inspection verifies step-free access. This does not authorize ground-floor apartments elsewhere.",
+        "requirements.floor.scope": "property-demo-only",
+        "requirements.balcony.status": "retired",
+        "requirements.balcony.strength": "prefer",
+        "requirements.balcony.text": "I prefer a balcony.",
+        "requirements.balcony.scope": "all-properties",
+        "tasks.research.kind": "workflow",
+        "tasks.research.status": "needs_review",
+        "tasks.review.kind": "task",
+        "tasks.review.status": "needs_review",
+        "documents.current_ids": [
+          "listing-v2"
+        ],
+        "requirements.elevator.status": "active",
+        "requirements.elevator.strength": "must",
+        "requirements.elevator.text": "An upper-floor apartment must have a working elevator.",
+        "requirements.elevator.scope": "upper-floors",
+        "requirements.floor.predicate": "A documented inspection verifies step-free access.",
+        "requirements.floor-elsewhere.status": "active",
+        "requirements.floor-elsewhere.strength": "prohibit",
+        "requirements.floor-elsewhere.text": "Do not accept ground-floor apartments other than property-demo.",
+        "requirements.floor-elsewhere.scope": "all-other-properties"
+      },
+      "naive_errors": [
+        {
+          "fact": "budgets.rent.limit",
+          "expected": 1700,
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.rent.scope",
+          "expected": "rental",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.rent.unit",
+          "expected": "GBP/month",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.spend.limit",
+          "expected": 3,
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.spend.scope",
+          "expected": "execution_spend",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.spend.unit",
+          "expected": "USD",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.tokens.limit",
+          "expected": 40000,
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.tokens.scope",
+          "expected": "api_tokens",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.tokens.unit",
+          "expected": "tokens",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.area.scope",
+          "expected": "all-properties",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.area.status",
+          "expected": "active",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.area.strength",
+          "expected": "must",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.area.text",
+          "expected": "Every candidate must be in the fictional Demo district.",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.balcony.scope",
+          "expected": "all-properties",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.balcony.strength",
+          "expected": "prefer",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.balcony.text",
+          "expected": "I prefer a balcony.",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor.status",
+          "expected": "active",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "tasks.research.kind",
+          "expected": "workflow",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "tasks.research.status",
+          "expected": "needs_review",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "tasks.review.kind",
+          "expected": "task",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "tasks.review.status",
+          "expected": "needs_review",
+          "actual": null,
+          "missing": true
+        }
+      ],
+      "durable_errors": [],
+      "characters": {
+        "full_input": 3080,
+        "naive_facts": 1003,
+        "durable_packet": 5579
+      }
+    },
+    {
+      "id": "pending-exact-user-request",
+      "revision": 18,
+      "checks": 38,
+      "expected_facts": {
+        "budgets.rent.limit": 1700,
+        "budgets.rent.scope": "rental",
+        "budgets.rent.unit": "GBP/month",
+        "budgets.tokens.limit": 40000,
+        "budgets.tokens.scope": "api_tokens",
+        "budgets.tokens.unit": "tokens",
+        "budgets.spend.limit": 3,
+        "budgets.spend.scope": "execution_spend",
+        "budgets.spend.unit": "USD",
+        "requirements.area.status": "active",
+        "requirements.area.strength": "must",
+        "requirements.area.text": "Every candidate must be in the fictional Demo district.",
+        "requirements.area.scope": "all-properties",
+        "requirements.active_ids": [
+          "area",
+          "elevator",
+          "floor",
+          "floor-elsewhere"
+        ],
+        "requirements.floor.status": "active",
+        "requirements.floor.strength": "conditional",
+        "requirements.floor.text": "For property-demo only, a ground-floor apartment is acceptable if a documented inspection verifies step-free access. This does not authorize ground-floor apartments elsewhere.",
+        "requirements.floor.scope": "property-demo-only",
+        "requirements.balcony.status": "retired",
+        "requirements.balcony.strength": "prefer",
+        "requirements.balcony.text": "I prefer a balcony.",
+        "requirements.balcony.scope": "all-properties",
+        "tasks.research.kind": "workflow",
+        "tasks.research.status": "needs_review",
+        "tasks.review.kind": "task",
+        "tasks.review.status": "needs_review",
+        "documents.current_ids": [
+          "listing-v2"
+        ],
+        "requirements.elevator.status": "active",
+        "requirements.elevator.strength": "must",
+        "requirements.elevator.text": "An upper-floor apartment must have a working elevator.",
+        "requirements.elevator.scope": "upper-floors",
+        "requirements.floor.predicate": "A documented inspection verifies step-free access.",
+        "requirements.floor-elsewhere.status": "active",
+        "requirements.floor-elsewhere.strength": "prohibit",
+        "requirements.floor-elsewhere.text": "Do not accept ground-floor apartments other than property-demo.",
+        "requirements.floor-elsewhere.scope": "all-other-properties",
+        "requests.pending_ids": [
+          "request-pending"
+        ],
+        "requests.request-pending.text": "把那個限制調高一點；原本不能放寬的先不要動。\nKeep this exact line, punctuation, and Unicode: £ → ？"
+      },
+      "naive_errors": [
+        {
+          "fact": "budgets.rent.limit",
+          "expected": 1700,
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.rent.scope",
+          "expected": "rental",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.rent.unit",
+          "expected": "GBP/month",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.spend.limit",
+          "expected": 3,
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.spend.scope",
+          "expected": "execution_spend",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.spend.unit",
+          "expected": "USD",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.tokens.limit",
+          "expected": 40000,
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.tokens.scope",
+          "expected": "api_tokens",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.tokens.unit",
+          "expected": "tokens",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.area.scope",
+          "expected": "all-properties",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.area.status",
+          "expected": "active",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.area.strength",
+          "expected": "must",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.area.text",
+          "expected": "Every candidate must be in the fictional Demo district.",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.balcony.scope",
+          "expected": "all-properties",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.balcony.status",
+          "expected": "retired",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.balcony.strength",
+          "expected": "prefer",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.balcony.text",
+          "expected": "I prefer a balcony.",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor.status",
+          "expected": "active",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "tasks.research.kind",
+          "expected": "workflow",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "tasks.research.status",
+          "expected": "needs_review",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "tasks.review.kind",
+          "expected": "task",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "tasks.review.status",
+          "expected": "needs_review",
+          "actual": null,
+          "missing": true
+        }
+      ],
+      "durable_errors": [],
+      "characters": {
+        "full_input": 3250,
+        "naive_facts": 1118,
+        "durable_packet": 5806
+      }
+    },
+    {
+      "id": "resolved-request-preserves-budgets",
+      "revision": 19,
+      "checks": 38,
+      "expected_facts": {
+        "budgets.rent.limit": 1700,
+        "budgets.rent.scope": "rental",
+        "budgets.rent.unit": "GBP/month",
+        "budgets.tokens.limit": 40000,
+        "budgets.tokens.scope": "api_tokens",
+        "budgets.tokens.unit": "tokens",
+        "budgets.spend.limit": 3,
+        "budgets.spend.scope": "execution_spend",
+        "budgets.spend.unit": "USD",
+        "requirements.area.status": "active",
+        "requirements.area.strength": "must",
+        "requirements.area.text": "Every candidate must be in the fictional Demo district.",
+        "requirements.area.scope": "all-properties",
+        "requirements.active_ids": [
+          "area",
+          "elevator",
+          "floor",
+          "floor-elsewhere"
+        ],
+        "requirements.floor.status": "active",
+        "requirements.floor.strength": "conditional",
+        "requirements.floor.text": "For property-demo only, a ground-floor apartment is acceptable if a documented inspection verifies step-free access. This does not authorize ground-floor apartments elsewhere.",
+        "requirements.floor.scope": "property-demo-only",
+        "requirements.balcony.status": "retired",
+        "requirements.balcony.strength": "prefer",
+        "requirements.balcony.text": "I prefer a balcony.",
+        "requirements.balcony.scope": "all-properties",
+        "tasks.research.kind": "workflow",
+        "tasks.research.status": "needs_review",
+        "tasks.review.kind": "task",
+        "tasks.review.status": "needs_review",
+        "documents.current_ids": [
+          "listing-v2"
+        ],
+        "requirements.elevator.status": "active",
+        "requirements.elevator.strength": "must",
+        "requirements.elevator.text": "An upper-floor apartment must have a working elevator.",
+        "requirements.elevator.scope": "upper-floors",
+        "requirements.floor.predicate": "A documented inspection verifies step-free access.",
+        "requirements.floor-elsewhere.status": "active",
+        "requirements.floor-elsewhere.strength": "prohibit",
+        "requirements.floor-elsewhere.text": "Do not accept ground-floor apartments other than property-demo.",
+        "requirements.floor-elsewhere.scope": "all-other-properties",
+        "requests.pending_ids": [],
+        "requests.request-pending.text": "把那個限制調高一點；原本不能放寬的先不要動。\nKeep this exact line, punctuation, and Unicode: £ → ？"
+      },
+      "naive_errors": [
+        {
+          "fact": "budgets.rent.limit",
+          "expected": 1700,
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.rent.scope",
+          "expected": "rental",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.rent.unit",
+          "expected": "GBP/month",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.spend.limit",
+          "expected": 3,
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.spend.scope",
+          "expected": "execution_spend",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.spend.unit",
+          "expected": "USD",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.tokens.limit",
+          "expected": 40000,
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.tokens.scope",
+          "expected": "api_tokens",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.tokens.unit",
+          "expected": "tokens",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.area.scope",
+          "expected": "all-properties",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.area.status",
+          "expected": "active",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.area.strength",
+          "expected": "must",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.area.text",
+          "expected": "Every candidate must be in the fictional Demo district.",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.balcony.scope",
+          "expected": "all-properties",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.balcony.status",
+          "expected": "retired",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.balcony.strength",
+          "expected": "prefer",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.balcony.text",
+          "expected": "I prefer a balcony.",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.elevator.scope",
+          "expected": "upper-floors",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.elevator.status",
+          "expected": "active",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.elevator.strength",
+          "expected": "must",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.elevator.text",
+          "expected": "An upper-floor apartment must have a working elevator.",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor.status",
+          "expected": "active",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "tasks.research.kind",
+          "expected": "workflow",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "tasks.research.status",
+          "expected": "needs_review",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "tasks.review.kind",
+          "expected": "task",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "tasks.review.status",
+          "expected": "needs_review",
+          "actual": null,
+          "missing": true
+        }
+      ],
+      "durable_errors": [],
+      "characters": {
+        "full_input": 3417,
+        "naive_facts": 890,
+        "durable_packet": 5601
+      }
+    },
+    {
+      "id": "paused-workflow-survives-steering-and-restart",
+      "revision": 21,
+      "checks": 38,
+      "expected_facts": {
+        "budgets.rent.limit": 1650,
+        "budgets.rent.scope": "rental",
+        "budgets.rent.unit": "GBP/month",
+        "budgets.tokens.limit": 40000,
+        "budgets.tokens.scope": "api_tokens",
+        "budgets.tokens.unit": "tokens",
+        "budgets.spend.limit": 3,
+        "budgets.spend.scope": "execution_spend",
+        "budgets.spend.unit": "USD",
+        "requirements.area.status": "active",
+        "requirements.area.strength": "must",
+        "requirements.area.text": "Every candidate must be in the fictional Demo district.",
+        "requirements.area.scope": "all-properties",
+        "requirements.active_ids": [
+          "area",
+          "elevator",
+          "floor",
+          "floor-elsewhere"
+        ],
+        "requirements.floor.status": "active",
+        "requirements.floor.strength": "conditional",
+        "requirements.floor.text": "For property-demo only, a ground-floor apartment is acceptable if a documented inspection verifies step-free access. This does not authorize ground-floor apartments elsewhere.",
+        "requirements.floor.scope": "property-demo-only",
+        "requirements.balcony.status": "retired",
+        "requirements.balcony.strength": "prefer",
+        "requirements.balcony.text": "I prefer a balcony.",
+        "requirements.balcony.scope": "all-properties",
+        "tasks.research.kind": "workflow",
+        "tasks.research.status": "paused",
+        "tasks.review.kind": "task",
+        "tasks.review.status": "needs_review",
+        "documents.current_ids": [
+          "listing-v2"
+        ],
+        "requirements.elevator.status": "active",
+        "requirements.elevator.strength": "must",
+        "requirements.elevator.text": "An upper-floor apartment must have a working elevator.",
+        "requirements.elevator.scope": "upper-floors",
+        "requirements.floor.predicate": "A documented inspection verifies step-free access.",
+        "requirements.floor-elsewhere.status": "active",
+        "requirements.floor-elsewhere.strength": "prohibit",
+        "requirements.floor-elsewhere.text": "Do not accept ground-floor apartments other than property-demo.",
+        "requirements.floor-elsewhere.scope": "all-other-properties",
+        "requests.pending_ids": [],
+        "requests.request-pending.text": "把那個限制調高一點；原本不能放寬的先不要動。\nKeep this exact line, punctuation, and Unicode: £ → ？"
+      },
+      "naive_errors": [
+        {
+          "fact": "budgets.rent.scope",
+          "expected": "rental",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.rent.unit",
+          "expected": "GBP/month",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.spend.limit",
+          "expected": 3,
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.spend.scope",
+          "expected": "execution_spend",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.spend.unit",
+          "expected": "USD",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.tokens.limit",
+          "expected": 40000,
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.tokens.scope",
+          "expected": "api_tokens",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.tokens.unit",
+          "expected": "tokens",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "documents.current_ids",
+          "expected": [
+            "listing-v2"
+          ],
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.active_ids",
+          "expected": [
+            "area",
+            "elevator",
+            "floor",
+            "floor-elsewhere"
+          ],
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.area.scope",
+          "expected": "all-properties",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.area.status",
+          "expected": "active",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.area.strength",
+          "expected": "must",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.area.text",
+          "expected": "Every candidate must be in the fictional Demo district.",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.balcony.scope",
+          "expected": "all-properties",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.balcony.status",
+          "expected": "retired",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.balcony.strength",
+          "expected": "prefer",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.balcony.text",
+          "expected": "I prefer a balcony.",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.elevator.scope",
+          "expected": "upper-floors",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.elevator.status",
+          "expected": "active",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.elevator.strength",
+          "expected": "must",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.elevator.text",
+          "expected": "An upper-floor apartment must have a working elevator.",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor-elsewhere.scope",
+          "expected": "all-other-properties",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor-elsewhere.status",
+          "expected": "active",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor-elsewhere.strength",
+          "expected": "prohibit",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor-elsewhere.text",
+          "expected": "Do not accept ground-floor apartments other than property-demo.",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor.predicate",
+          "expected": "A documented inspection verifies step-free access.",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor.scope",
+          "expected": "property-demo-only",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor.status",
+          "expected": "active",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor.strength",
+          "expected": "conditional",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor.text",
+          "expected": "For property-demo only, a ground-floor apartment is acceptable if a documented inspection verifies step-free access. This does not authorize ground-floor apartments elsewhere.",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "tasks.research.kind",
+          "expected": "workflow",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "tasks.review.kind",
+          "expected": "task",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "tasks.review.status",
+          "expected": "needs_review",
+          "actual": null,
+          "missing": true
+        }
+      ],
+      "durable_errors": [],
+      "characters": {
+        "full_input": 3713,
+        "naive_facts": 198,
+        "durable_packet": 5566
+      }
+    },
+    {
+      "id": "workflow-resume-retains-full-state",
+      "revision": 22,
+      "checks": 38,
+      "expected_facts": {
+        "budgets.rent.limit": 1650,
+        "budgets.rent.scope": "rental",
+        "budgets.rent.unit": "GBP/month",
+        "budgets.tokens.limit": 40000,
+        "budgets.tokens.scope": "api_tokens",
+        "budgets.tokens.unit": "tokens",
+        "budgets.spend.limit": 3,
+        "budgets.spend.scope": "execution_spend",
+        "budgets.spend.unit": "USD",
+        "requirements.area.status": "active",
+        "requirements.area.strength": "must",
+        "requirements.area.text": "Every candidate must be in the fictional Demo district.",
+        "requirements.area.scope": "all-properties",
+        "requirements.active_ids": [
+          "area",
+          "elevator",
+          "floor",
+          "floor-elsewhere"
+        ],
+        "requirements.floor.status": "active",
+        "requirements.floor.strength": "conditional",
+        "requirements.floor.text": "For property-demo only, a ground-floor apartment is acceptable if a documented inspection verifies step-free access. This does not authorize ground-floor apartments elsewhere.",
+        "requirements.floor.scope": "property-demo-only",
+        "requirements.balcony.status": "retired",
+        "requirements.balcony.strength": "prefer",
+        "requirements.balcony.text": "I prefer a balcony.",
+        "requirements.balcony.scope": "all-properties",
+        "tasks.research.kind": "workflow",
+        "tasks.research.status": "pending",
+        "tasks.review.kind": "task",
+        "tasks.review.status": "needs_review",
+        "documents.current_ids": [
+          "listing-v2"
+        ],
+        "requirements.elevator.status": "active",
+        "requirements.elevator.strength": "must",
+        "requirements.elevator.text": "An upper-floor apartment must have a working elevator.",
+        "requirements.elevator.scope": "upper-floors",
+        "requirements.floor.predicate": "A documented inspection verifies step-free access.",
+        "requirements.floor-elsewhere.status": "active",
+        "requirements.floor-elsewhere.strength": "prohibit",
+        "requirements.floor-elsewhere.text": "Do not accept ground-floor apartments other than property-demo.",
+        "requirements.floor-elsewhere.scope": "all-other-properties",
+        "requests.pending_ids": [],
+        "requests.request-pending.text": "把那個限制調高一點；原本不能放寬的先不要動。\nKeep this exact line, punctuation, and Unicode: £ → ？"
+      },
+      "naive_errors": [
+        {
+          "fact": "budgets.rent.scope",
+          "expected": "rental",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.rent.unit",
+          "expected": "GBP/month",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.spend.limit",
+          "expected": 3,
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.spend.scope",
+          "expected": "execution_spend",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.spend.unit",
+          "expected": "USD",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.tokens.limit",
+          "expected": 40000,
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.tokens.scope",
+          "expected": "api_tokens",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.tokens.unit",
+          "expected": "tokens",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "documents.current_ids",
+          "expected": [
+            "listing-v2"
+          ],
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requests.request-pending.text",
+          "expected": "把那個限制調高一點；原本不能放寬的先不要動。\nKeep this exact line, punctuation, and Unicode: £ → ？",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.active_ids",
+          "expected": [
+            "area",
+            "elevator",
+            "floor",
+            "floor-elsewhere"
+          ],
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.area.scope",
+          "expected": "all-properties",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.area.status",
+          "expected": "active",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.area.strength",
+          "expected": "must",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.area.text",
+          "expected": "Every candidate must be in the fictional Demo district.",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.balcony.scope",
+          "expected": "all-properties",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.balcony.status",
+          "expected": "retired",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.balcony.strength",
+          "expected": "prefer",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.balcony.text",
+          "expected": "I prefer a balcony.",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.elevator.scope",
+          "expected": "upper-floors",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.elevator.status",
+          "expected": "active",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.elevator.strength",
+          "expected": "must",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.elevator.text",
+          "expected": "An upper-floor apartment must have a working elevator.",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor-elsewhere.scope",
+          "expected": "all-other-properties",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor-elsewhere.status",
+          "expected": "active",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor-elsewhere.strength",
+          "expected": "prohibit",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor-elsewhere.text",
+          "expected": "Do not accept ground-floor apartments other than property-demo.",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor.predicate",
+          "expected": "A documented inspection verifies step-free access.",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor.scope",
+          "expected": "property-demo-only",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor.status",
+          "expected": "active",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor.strength",
+          "expected": "conditional",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor.text",
+          "expected": "For property-demo only, a ground-floor apartment is acceptable if a documented inspection verifies step-free access. This does not authorize ground-floor apartments elsewhere.",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "tasks.research.kind",
+          "expected": "workflow",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "tasks.review.kind",
+          "expected": "task",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "tasks.review.status",
+          "expected": "needs_review",
+          "actual": null,
+          "missing": true
+        }
+      ],
+      "durable_errors": [],
+      "characters": {
+        "full_input": 3801,
+        "naive_facts": 87,
+        "durable_packet": 5567
+      }
+    },
+    {
+      "id": "explicit-token-budget-change",
+      "revision": 23,
+      "checks": 38,
+      "expected_facts": {
+        "budgets.rent.limit": 1650,
+        "budgets.rent.scope": "rental",
+        "budgets.rent.unit": "GBP/month",
+        "budgets.tokens.limit": 70000,
+        "budgets.tokens.scope": "api_tokens",
+        "budgets.tokens.unit": "tokens",
+        "budgets.spend.limit": 3,
+        "budgets.spend.scope": "execution_spend",
+        "budgets.spend.unit": "USD",
+        "requirements.area.status": "active",
+        "requirements.area.strength": "must",
+        "requirements.area.text": "Every candidate must be in the fictional Demo district.",
+        "requirements.area.scope": "all-properties",
+        "requirements.active_ids": [
+          "area",
+          "elevator",
+          "floor",
+          "floor-elsewhere"
+        ],
+        "requirements.floor.status": "active",
+        "requirements.floor.strength": "conditional",
+        "requirements.floor.text": "For property-demo only, a ground-floor apartment is acceptable if a documented inspection verifies step-free access. This does not authorize ground-floor apartments elsewhere.",
+        "requirements.floor.scope": "property-demo-only",
+        "requirements.balcony.status": "retired",
+        "requirements.balcony.strength": "prefer",
+        "requirements.balcony.text": "I prefer a balcony.",
+        "requirements.balcony.scope": "all-properties",
+        "tasks.research.kind": "workflow",
+        "tasks.research.status": "needs_review",
+        "tasks.review.kind": "task",
+        "tasks.review.status": "needs_review",
+        "documents.current_ids": [
+          "listing-v2"
+        ],
+        "requirements.elevator.status": "active",
+        "requirements.elevator.strength": "must",
+        "requirements.elevator.text": "An upper-floor apartment must have a working elevator.",
+        "requirements.elevator.scope": "upper-floors",
+        "requirements.floor.predicate": "A documented inspection verifies step-free access.",
+        "requirements.floor-elsewhere.status": "active",
+        "requirements.floor-elsewhere.strength": "prohibit",
+        "requirements.floor-elsewhere.text": "Do not accept ground-floor apartments other than property-demo.",
+        "requirements.floor-elsewhere.scope": "all-other-properties",
+        "requests.pending_ids": [],
+        "requests.request-pending.text": "把那個限制調高一點；原本不能放寬的先不要動。\nKeep this exact line, punctuation, and Unicode: £ → ？"
+      },
+      "naive_errors": [
+        {
+          "fact": "budgets.rent.scope",
+          "expected": "rental",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.rent.unit",
+          "expected": "GBP/month",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.spend.limit",
+          "expected": 3,
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.spend.scope",
+          "expected": "execution_spend",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.spend.unit",
+          "expected": "USD",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.tokens.scope",
+          "expected": "api_tokens",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "budgets.tokens.unit",
+          "expected": "tokens",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "documents.current_ids",
+          "expected": [
+            "listing-v2"
+          ],
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requests.pending_ids",
+          "expected": [],
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requests.request-pending.text",
+          "expected": "把那個限制調高一點；原本不能放寬的先不要動。\nKeep this exact line, punctuation, and Unicode: £ → ？",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.active_ids",
+          "expected": [
+            "area",
+            "elevator",
+            "floor",
+            "floor-elsewhere"
+          ],
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.area.scope",
+          "expected": "all-properties",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.area.status",
+          "expected": "active",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.area.strength",
+          "expected": "must",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.area.text",
+          "expected": "Every candidate must be in the fictional Demo district.",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.balcony.scope",
+          "expected": "all-properties",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.balcony.status",
+          "expected": "retired",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.balcony.strength",
+          "expected": "prefer",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.balcony.text",
+          "expected": "I prefer a balcony.",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.elevator.scope",
+          "expected": "upper-floors",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.elevator.status",
+          "expected": "active",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.elevator.strength",
+          "expected": "must",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.elevator.text",
+          "expected": "An upper-floor apartment must have a working elevator.",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor-elsewhere.scope",
+          "expected": "all-other-properties",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor-elsewhere.status",
+          "expected": "active",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor-elsewhere.strength",
+          "expected": "prohibit",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor-elsewhere.text",
+          "expected": "Do not accept ground-floor apartments other than property-demo.",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor.predicate",
+          "expected": "A documented inspection verifies step-free access.",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor.scope",
+          "expected": "property-demo-only",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor.status",
+          "expected": "active",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor.strength",
+          "expected": "conditional",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "requirements.floor.text",
+          "expected": "For property-demo only, a ground-floor apartment is acceptable if a documented inspection verifies step-free access. This does not authorize ground-floor apartments elsewhere.",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "tasks.research.kind",
+          "expected": "workflow",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "tasks.review.kind",
+          "expected": "task",
+          "actual": null,
+          "missing": true
+        },
+        {
+          "fact": "tasks.review.status",
+          "expected": "needs_review",
+          "actual": null,
+          "missing": true
+        }
+      ],
+      "durable_errors": [],
+      "characters": {
+        "full_input": 4057,
+        "naive_facts": 95,
+        "durable_packet": 5657
+      }
+    }
+  ],
+  "safety_checks": [
+    {
+      "id": "stale-writer-rejected",
+      "passed": true,
+      "detail": "A second writer cannot commit using an earlier revision; journal unchanged."
+    },
+    {
+      "id": "stale-decision-rejected",
+      "passed": true,
+      "detail": "Current write revision cannot launder an older reasoning receipt."
+    },
+    {
+      "id": "every-active-requirement-covered",
+      "passed": true,
+      "detail": "Even a preferred requirement must be acknowledged; unmet preference alone need not block PASS."
+    },
+    {
+      "id": "conditional-pass-requires-predicate-evidence",
+      "passed": true,
+      "detail": "The word met cannot silently satisfy an exception predicate."
+    },
+    {
+      "id": "unknown-hard-condition-cannot-pass",
+      "passed": true,
+      "detail": "An unknown hard requirement keeps PASS unavailable."
+    },
+    {
+      "id": "source-bound-quote-must-be-verbatim",
+      "passed": true,
+      "detail": "A fabricated quote cannot become checked document evidence."
+    },
+    {
+      "id": "raw-document-hash-and-exact-retrieval",
+      "passed": true,
+      "detail": "Both source versions retain byte hashes; retrieval ignores later edits to the original file."
+    },
+    {
+      "id": "damaged-source-snapshot-rejected",
+      "passed": true,
+      "detail": "Hash verification detects modified retained bytes before state use."
+    },
+    {
+      "id": "source-supersession-invalidates-dependent-work",
+      "passed": true,
+      "detail": "A new source invalidates direct and derived facts, decisions and prior task completion."
+    },
+    {
+      "id": "retired-fact-invalidates-transitive-evidence",
+      "passed": true,
+      "detail": "Retiring a cited fact also invalidates copied downstream facts, even when not labelled derived."
+    },
+    {
+      "id": "pending-request-blocks-dispatch",
+      "passed": true,
+      "detail": "Exact raw steering must be reconciled before a new dispatch."
+    },
+    {
+      "id": "pause-persists-through-steering",
+      "passed": true,
+      "detail": "A pause survives capture/reconciliation and still prevents workflow dispatch."
+    },
+    {
+      "id": "mid-call-steering-rejects-stale-result",
+      "passed": true,
+      "detail": "An earlier physical response cannot complete against newer user requirements."
+    },
+    {
+      "id": "unsettled-stale-call-blocks-next-dispatch",
+      "passed": true,
+      "detail": "Reconciled user text does not settle the old physical call or its usage."
+    },
+    {
+      "id": "unknown-usage-is-not-zero",
+      "passed": true,
+      "detail": "Unknown token usage pauses new spending."
+    },
+    {
+      "id": "overspend-prevents-followup",
+      "passed": true,
+      "detail": "A measured ceiling overrun remains recorded and prevents another call."
+    },
+    {
+      "id": "housing-budget-cannot-become-api-credit",
+      "passed": true,
+      "detail": "Stable budget IDs cannot change economic scope or unit."
+    },
+    {
+      "id": "task-bound-budget-cannot-be-omitted",
+      "passed": true,
+      "detail": "A caller cannot bypass an unknown task-bound budget with an empty dispatch list."
+    },
+    {
+      "id": "usage-recovery-is-idempotent",
+      "passed": true,
+      "detail": "Same dispatch usage is counted once; conflicting telemetry is rejected."
+    },
+    {
+      "id": "paused-goal-blocks-descendant-work",
+      "passed": true,
+      "detail": "A paused parent goal also pauses its prerequisite work, not just its own dispatch."
+    },
+    {
+      "id": "goal-needs-current-complete-dependencies",
+      "passed": true,
+      "detail": "A saved source document cannot bypass an unfinished prerequisite task."
+    },
+    {
+      "id": "blocking-question-prevents-final-receipt",
+      "passed": true,
+      "detail": "An unresolved material question prevents a current decision receipt for affected work."
+    },
+    {
+      "id": "small-context-fails-without-truncation",
+      "passed": true,
+      "detail": "Insufficient context capacity is an explicit failure, not omitted requirements."
+    },
+    {
+      "id": "restart-prefers-journal-over-stale-checkpoint",
+      "passed": true,
+      "detail": "Fresh recovery exposes pending input that arrived after the saved checkpoint."
+    }
+  ],
+  "ok": true
+}

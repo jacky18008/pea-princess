@@ -5,6 +5,14 @@ It is not a hosted service. A skill prompt cannot isolate the host's files, conn
 credentials. Keep unrelated personal documents and credentials outside the agent's accessible
 workspace, and choose the host's actual permission/sandbox controls accordingly.
 
+## Durable project state and community stage 1
+
+`.pea-state/` holds private user requests, requirements, source snapshots and model-call evidence. It is ignored by Git and excluded from public skill packages even if accidentally indexed. Keep backups private. Its hash chain and file permissions detect corruption and reduce accidental disclosure; they are not encryption or authentication against another program running as the same user.
+
+Only a trusted caller may claim `actor:user` and apply authorized intent changes. A copied source quote or an enum-shaped object cannot grant that authority. The state engine validates revisions, references and coverage structure, not the semantic truth of a model's claims. Native hook delivery can fail or time out; only calls through `tools/session_runner.py` receive its programmatic context-injection and stale-result checks. See [the harness boundaries](docs/session-harness.md).
+
+The [stage 1 form](community/index.html) keeps optional text in the author's browser/device. Public payloads contain allowlisted choices only; Python revalidates them before import or search. The local SQLite store and withdrawal receipts are private operational files, not public export artifacts. No hosted submission endpoint, identity verification, Sybil resistance or universal private-note access control is claimed. See [the stage 1 guide](docs/community-feedback-stage1.md).
+
 ## Inputs, evidence and reports
 
 Treat listings, pasted pages, shared seeds, source files and model output as untrusted data.
