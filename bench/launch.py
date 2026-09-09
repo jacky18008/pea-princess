@@ -93,7 +93,7 @@ TOKEN_KEYS = ("input_tokens", "output_tokens", "cached_input_tokens",
               "completion_tokens", "cache_read_input_tokens")
 
 _FIELDS = ("text usage note seconds attempts provider_error stdout_tail stderr_tail "
-           "exit_code session_id attempt_records")
+           "exit_code session_id attempt_records stdout stderr")
 
 
 class LaunchResult(collections.namedtuple("LaunchResult", _FIELDS)):
@@ -106,10 +106,10 @@ class LaunchResult(collections.namedtuple("LaunchResult", _FIELDS)):
 
     def __new__(cls, text="", usage=None, note=None, seconds=0.0, attempts=1,
                 provider_error=False, stdout_tail="", stderr_tail="", exit_code=None,
-                session_id=None, attempt_records=None):
+                session_id=None, attempt_records=None, stdout="", stderr=""):
         return super(LaunchResult, cls).__new__(
             cls, text, usage, note, seconds, attempts, bool(provider_error),
-            stdout_tail, stderr_tail, exit_code, session_id, attempt_records)
+            stdout_tail, stderr_tail, exit_code, session_id, attempt_records, stdout, stderr)
 
     def tail_note(self, prefix=""):
         """The note with the captured tails appended, for a row someone has to diagnose.
@@ -465,7 +465,7 @@ def run(cmd, cwd, timeout, family, attempts=MAX_ATTEMPTS, waits=RETRY_WAITS,
                                 note="timed out after %d s" % timeout,
                                 seconds=round(time.time() - started, 2), attempts=attempt,
                                 provider_error=False, stdout_tail=stdout[-TAIL_CHARS:], stderr_tail=stderr[-TAIL_CHARS:],
-                                exit_code=None, session_id=session_used, attempt_records=records)
+                                exit_code=None, session_id=session_used, attempt_records=records, stdout=stdout, stderr=stderr)
         except OSError as exc:
             records.append({"attempt": attempt, "usage": None, "exit_code": None,
                             "start_error": str(exc), "timeout": False})
@@ -473,7 +473,7 @@ def run(cmd, cwd, timeout, family, attempts=MAX_ATTEMPTS, waits=RETRY_WAITS,
                                 note="could not start %r: %s" % (cmd[0], exc),
                                 seconds=round(time.time() - started, 2), attempts=attempt,
                                 provider_error=False, stdout_tail="", stderr_tail="",
-                                exit_code=None, session_id=session_used, attempt_records=records)
+                                exit_code=None, session_id=session_used, attempt_records=records, stdout=stdout, stderr=stderr)
         except BaseException:
             if proc is not None:
                 stop_process(proc)
@@ -512,7 +512,7 @@ def run(cmd, cwd, timeout, family, attempts=MAX_ATTEMPTS, waits=RETRY_WAITS,
                                 seconds=round(time.time() - started, 2), attempts=attempt,
                                 provider_error=True, stdout_tail=stdout[-TAIL_CHARS:],
                                 stderr_tail=stderr[-TAIL_CHARS:], exit_code=exit_code, session_id=session_used,
-                                attempt_records=records)
+                                attempt_records=records, stdout=stdout, stderr=stderr)
         pause = waits[min(attempt - 1, len(waits) - 1)] if waits else 0
         echo("  %s%s; retry %d of %d in %d s"
              % (("%s: " % label) if label else "", why, attempt, max(1, attempts) - 1,
@@ -526,7 +526,7 @@ def run(cmd, cwd, timeout, family, attempts=MAX_ATTEMPTS, waits=RETRY_WAITS,
                         seconds=round(time.time() - started, 2), attempts=attempt,
                         provider_error=False, stdout_tail=stdout[-TAIL_CHARS:],
                         stderr_tail=stderr[-TAIL_CHARS:], exit_code=exit_code, session_id=session_used,
-                        attempt_records=records)
+                        attempt_records=records, stdout=stdout, stderr=stderr)
 
 
 # ------------------------------------------------------------ reading the reply --

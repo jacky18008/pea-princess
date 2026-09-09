@@ -1,14 +1,18 @@
 """Offline regression checks for consequential pilot isolation and cost accounting."""
 import copy
 import json
+import io
 from pathlib import Path
 import sys
 import tempfile
+import types
 import unittest
+from contextlib import redirect_stdout
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "bench"))
 import context_quality as q
+from call_control import CallControl, CallControlPaused, PendingCallError
 
 
 class ContextQualityTests(unittest.TestCase):
@@ -50,7 +54,7 @@ class ContextQualityTests(unittest.TestCase):
             final = copy.deepcopy(first)
             final.update(id="A1-adaptive-retrieved", answer={"request_documents": [], "answer": "supported", "findings": []})
             job = {"id": "A1-adaptive", "experiment": "analysis", "case_id": "A1", "arm": "adaptive"}
-            with patch.object(q, "case_for", return_value=self.case), patch.object(q, "invoke", side_effect=[first, final]) as invoke:
+            with patch.object(q, "case_for", return_value=self.case), patch.object(q, "controlled_call", side_effect=[first, final]) as invoke:
                 result = q.answer_job(out, job, {})
             self.assertEqual(invoke.call_count, 2)
             self.assertEqual(result["usage"]["total_tokens"], 220)
@@ -61,8 +65,8 @@ class ContextQualityTests(unittest.TestCase):
             record = {"id": "A1-adaptive-initial", "answer": {"request_documents": ["outside"], "answer": "unknown", "findings": []},
                       "usage": {"input_tokens": 100, "output_tokens": 10, "total_tokens": 110}, "seconds": 1}
             job = {"id": "A1-adaptive", "experiment": "analysis", "case_id": "A1", "arm": "adaptive"}
-            with patch.object(q, "case_for", return_value=self.case), patch.object(q, "invoke", return_value=record) as invoke:
-                result = q.answer_job(Path(tmp), job, {})
+            with patch.object(q, "case_for", return_value=self.case), patch.object(q, "controlled_call", return_value=record) as invoke:
+                result = q.answer_job(Path(tmp), job, {"planned_call_ids": [job["id"] + "-initial", job["id"] + "-retrieved"]})
             self.assertEqual(invoke.call_count, 1)
             self.assertIsNotNone(result["protocol_violation"])
 
@@ -114,6 +118,119 @@ class ContextQualityTests(unittest.TestCase):
         self.assertFalse(q.valid_terminal_usage([{"usage": parsed}], parsed))
         parsed["cached_input_tokens"] = False
         self.assertFalse(q.valid_terminal_usage([{"usage": parsed}], parsed))
+
+
+class DurableContextQualityTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.output = Path(self.temp.name) / "pilot"
+        q.prepare(self.output)
+        self.plan = q.read(self.output / "plan.json")
+        self.started = []
+
+    def start(self, command, stdin, stdout, stderr, request_documents=False, terminal=True):
+        directory = Path(command[command.index("--cd") + 1])
+        call_id = directory.name
+        self.assertEqual([call_id], CallControl(self.output / "control", self.plan["planned_call_ids"]).report()["pending_call_ids"])
+        self.started.append(call_id)
+        fields = q.read(directory / "schema.json")["properties"]
+        if "assessments" in fields:
+            properties = fields["assessments"]["items"]["properties"]
+            criteria = properties["criteria"]["items"]["properties"]["id"]["enum"]
+            answer = {"assessments": [{"candidate_id": label,
+                "criteria": [{"id": key, "applicable": True, "met": False, "reason": "offline stub"} for key in criteria],
+                "unsupported_claims": [], "contradictions": [], "useful_next_step": False,
+                "appropriate_uncertainty": True, "user_burden_ok": True, "overall_notes": "offline stub"}
+                for label in properties["candidate_id"]["enum"]]}
+        elif "findings" in fields:
+            requested = []
+            if request_documents and call_id.endswith("adaptive-initial"):
+                case = next(c for c in q.read(self.output / "analysis-cases.json")["cases"] if c["id"] == call_id.split("-")[0])
+                requested = [case["documents"][0]["id"]]
+            answer = {"answer": "Unverified offline stub.", "request_documents": requested,
+                      "findings": [], "limitations": [], "next_steps": []}
+        else:
+            answer = {"answer": "Unverified offline stub."}
+        q.write(directory / "answer.txt", answer)
+        events = [{"type": "item.completed", "item": {"type": "agent_message", "text": json.dumps(answer)}}]
+        if terminal:
+            events.append({"type": "turn.completed", "usage": {"input_tokens": 10, "cached_input_tokens": 4, "output_tokens": 2}})
+        stdout.write("\n".join(json.dumps(event) for event in events))
+        stdout.flush()
+        return types.SimpleNamespace(wait=lambda timeout: 0, returncode=0)
+
+    def first_call(self):
+        job = self.plan["jobs"][0]
+        return q.answer_job(self.output, job, self.plan)
+
+    def test_entire_pilot_durable_dispatch_skip_and_idempotent_replay(self):
+        with patch.object(q.launch, "start_process", side_effect=self.start), patch.object(q.launch, "finish_process"), redirect_stdout(io.StringIO()):
+            q.run(self.output)
+            q.run(self.output)
+        self.assertEqual(34, len(self.started))
+        summary = q.read(self.output / "summary.json")
+        self.assertTrue(summary["complete"])
+        self.assertEqual(4, summary["controller"]["skipped_calls"])
+        self.assertEqual(408, summary["controller"]["usage"]["total_tokens"])
+        self.assertTrue(summary["usage_coverage_complete"])
+        self.assertEqual([], summary["raw_artifact_integrity_failures"])
+        self.assertTrue({"bench/call_control.py", "bench/report_control.py"}.issubset(self.plan["source_sha256"]))
+        for path in (self.output / "calls").glob("*/*"):
+            self.assertEqual(0, path.stat().st_mode & 0o077)
+
+    def test_adaptive_second_round_has_its_own_durable_dispatch(self):
+        def start(*args, **kwargs):
+            return self.start(*args, **kwargs, request_documents=True)
+        with patch.object(q.launch, "start_process", side_effect=start), patch.object(q.launch, "finish_process"), redirect_stdout(io.StringIO()):
+            q.run(self.output)
+        summary = q.read(self.output / "summary.json")
+        self.assertTrue(summary["complete"])
+        self.assertEqual(38, len(self.started))
+        self.assertEqual(0, summary["controller"]["skipped_calls"])
+
+    def test_missing_telemetry_pauses_and_retains_failed_record(self):
+        def start(*args, **kwargs):
+            return self.start(*args, **kwargs, terminal=False)
+        with patch.object(q.launch, "start_process", side_effect=start), patch.object(q.launch, "finish_process"), redirect_stdout(io.StringIO()):
+            with self.assertRaises(CallControlPaused):
+                self.first_call()
+            with self.assertRaises(CallControlPaused):
+                q.answer_job(self.output, self.plan["jobs"][1], self.plan)
+        self.assertEqual(1, len(self.started))
+        self.assertTrue(CallControl(self.output / "control", self.plan["planned_call_ids"]).report()["paused"])
+
+    def test_pending_dispatch_blocks_every_later_call(self):
+        control = CallControl(self.output / "control", self.plan["planned_call_ids"])
+        control.dispatch(self.plan["planned_call_ids"][0], "job", "answer", "answer")
+        with patch.object(q.launch, "start_process") as start, self.assertRaises(PendingCallError):
+            q.answer_job(self.output, self.plan["jobs"][1], self.plan)
+        start.assert_not_called()
+        self.assertEqual(1, control.report()["dispatched_calls"])
+
+    def test_budget_stop_does_not_create_a_dispatch(self):
+        self.plan["reported_token_stop_threshold"] = 0
+        with patch.object(q.launch, "start_process") as start, self.assertRaisesRegex(ValueError, "threshold"):
+            self.first_call()
+        start.assert_not_called()
+        self.assertEqual(0, CallControl(self.output / "control", self.plan["planned_call_ids"]).report()["dispatched_calls"])
+
+    def test_missing_raw_result_cannot_replay_controller_record(self):
+        with patch.object(q.launch, "start_process", side_effect=self.start), patch.object(q.launch, "finish_process"), redirect_stdout(io.StringIO()):
+            answer = self.first_call()
+            (self.output / "calls" / answer["call_ids"][0] / "result.json").unlink()
+            with self.assertRaisesRegex(ValueError, "missing its raw result"):
+                self.first_call()
+        self.assertEqual(1, len(self.started))
+
+    def test_tampered_raw_events_are_rejected_before_replay(self):
+        with patch.object(q.launch, "start_process", side_effect=self.start), patch.object(q.launch, "finish_process"), redirect_stdout(io.StringIO()):
+            answer = self.first_call()
+            (self.output / "calls" / answer["call_ids"][0] / "events.jsonl").write_text("changed")
+            with self.assertRaisesRegex(ValueError, "artifact differs"):
+                self.first_call()
+        self.assertEqual(1, len(self.started))
+        self.assertEqual(1, len(q.summarize(self.output)["raw_artifact_integrity_failures"]))
 
 
 if __name__ == "__main__":

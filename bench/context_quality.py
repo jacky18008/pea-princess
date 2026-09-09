@@ -12,11 +12,11 @@ import os
 from pathlib import Path
 import random
 import re
-import signal
 import subprocess
 import time
 
 import launch
+from call_control import CallControl, CallControlError
 
 ROOT = Path(__file__).resolve().parent.parent
 ANSWER_MODEL = "gpt-5.6-terra"
@@ -27,7 +27,8 @@ TIMEOUT = 180
 CONDITIONAL_CRITERIA = {"R1-F6", "R2-F6"}
 SOURCES = ("bench/context_quality.py", "bench/launch.py",
            "evals/context-quality/analysis-cases.json", "evals/context-quality/rental-cases.json",
-           "dist/prompt-pack/INSTRUCTIONS.md", "docs/context-quality/protocol-2026-09-08.md")
+           "dist/prompt-pack/INSTRUCTIONS.md", "docs/context-quality/protocol-2026-09-08.md",
+           "bench/call_control.py", "bench/report_control.py")
 
 
 def read(path):
@@ -37,7 +38,16 @@ def read(path):
 def write(path, value):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    private_text(path, json.dumps(value, ensure_ascii=False, indent=2) + "\n")
+
+
+def private_open(path):
+    return open(path, "w", encoding="utf-8", opener=lambda name, flags: os.open(name, flags, 0o600))
+
+
+def private_text(path, text):
+    with private_open(path) as stream:
+        stream.write(text)
 
 
 def digest(path):
@@ -131,7 +141,7 @@ def prepare(output):
     analysis = read(ROOT / SOURCES[2])
     rental = read(ROOT / SOURCES[3])
     assert len(analysis["cases"]) == 4 and len(rental["cases"]) == 6
-    output.mkdir(parents=True)
+    output.mkdir(parents=True, mode=0o700)
     write(output / "analysis-cases.json", analysis)
     write(output / "rental-cases.json", rental)
     (output / "target-instructions.md").write_bytes((ROOT / SOURCES[4]).read_bytes())
@@ -150,12 +160,18 @@ def prepare(output):
         random.Random("context-quality-20260908-" + case["id"]).shuffle(ids)
         masks[case["id"]] = {"candidate_%d" % (i + 1): job_id for i, job_id in enumerate(ids)}
     copied = {p.name: digest(p) for p in output.iterdir() if p.is_file()}
-    plan = {"version": 1, "source_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=str(ROOT), text=True).strip(),
+    calls = []
+    for job in jobs:
+        calls.append(job["id"] + "-initial")
+        if job["arm"] == "adaptive":
+            calls.append(job["id"] + "-retrieved")
+    calls += [case["id"] + "-judge" for case in analysis["cases"] + rental["cases"]]
+    plan = {"version": 2, "source_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=str(ROOT), text=True).strip(),
             "source_sha256": hashes, "prepared_sha256": copied, "answer_model": ANSWER_MODEL,
             "judge_model": JUDGE_MODEL, "effort": EFFORT, "maximum_cli_calls": 38,
             "reported_token_stop_threshold": LIMIT, "timeout_seconds_per_call": TIMEOUT,
             "maximum_retrieval_rounds": 1, "maximum_documents_per_retrieval": 2,
-            "jobs": jobs, "judge_masks": masks,
+            "jobs": jobs, "judge_masks": masks, "planned_call_ids": calls,
             "scope": "Authored synthetic exploratory analysis and fixed rental next-turn pilots; no Claude, no end-to-end rental trial"}
     write(output / "plan.json", plan)
     return {"prepared": str(output), "answer_tasks": len(jobs), "max_calls_including_judges": 38, "live_calls": 0}
@@ -209,11 +225,14 @@ def valid_terminal_usage(terminal, parsed):
 
 
 def invoke(output, call_id, prompt, schema, model, purpose, plan):
+    """Physical transport; live orchestration must use controlled_call."""
     directory = output / "calls" / call_id
     if directory.exists():
         record = read(directory / "result.json")
         if record["status"] != "complete":
             raise ValueError("failed/interrupted call retained; no automatic retry: " + call_id)
+        if (record.get("requested_model"), record.get("purpose"), record.get("effort")) != (model, purpose, plan["effort"]):
+            raise ValueError("resumed call settings differ: " + call_id)
         if record["prompt_sha256"] != hashlib.sha256(prompt.encode()).hexdigest():
             raise ValueError("resumed prompt differs: " + call_id)
         if record["schema_sha256"] != hashlib.sha256((json.dumps(schema, ensure_ascii=False, indent=2) + "\n").encode()).hexdigest():
@@ -222,13 +241,9 @@ def invoke(output, call_id, prompt, schema, model, purpose, plan):
             if digest(directory / name) != record[key]:
                 raise ValueError("resumed artifact differs: " + call_id + "/" + name)
         return record
-    previous = all_calls(output)
-    if any(c["status"] != "complete" or c["usage"] is None for c in previous):
-        raise ValueError("a previous call is incomplete or has unknown usage")
-    if len(previous) >= plan["maximum_cli_calls"] or sum(c["usage"]["total_tokens"] for c in previous) >= plan["reported_token_stop_threshold"]:
-        raise ValueError("predeclared call/token stop threshold reached")
-    directory.mkdir(parents=True)
-    (directory / "prompt.txt").write_text(prompt, encoding="utf-8")
+    check_budget(output, plan)
+    directory.mkdir(parents=True, mode=0o700)
+    private_text(directory / "prompt.txt", prompt)
     write(directory / "schema.json", schema)
     cmd = ["codex", "exec", "--ignore-user-config", "--ephemeral", "--cd", str(directory),
            "--sandbox", "read-only", "--skip-git-repo-check", "--model", model,
@@ -238,24 +253,30 @@ def invoke(output, call_id, prompt, schema, model, purpose, plan):
     write(directory / "command.json", cmd)
     start = time.monotonic()
     timeout = False
-    with (directory / "events.jsonl").open("w") as stdout, (directory / "stderr.txt").open("w") as stderr:
-        process = subprocess.Popen(cmd, stdin=subprocess.DEVNULL, stdout=stdout, stderr=stderr, start_new_session=True)
+    with private_open(directory / "events.jsonl") as stdout, private_open(directory / "stderr.txt") as stderr:
+        process = launch.start_process(cmd, stdin=subprocess.DEVNULL, stdout=stdout, stderr=stderr)
         try:
             code = process.wait(timeout=plan["timeout_seconds_per_call"])
         except subprocess.TimeoutExpired:
             timeout = True
-            os.killpg(process.pid, signal.SIGTERM)
-            try:
-                code = process.wait(timeout=5)
-            except subprocess.TimeoutExpired:
-                os.killpg(process.pid, signal.SIGKILL)
-                code = process.wait()
+            launch.stop_process(process)
+            code = process.returncode
+        except BaseException:
+            launch.stop_process(process)
+            raise
+        finally:
+            launch.finish_process(process)
+    if (directory / "answer.txt").exists():
+        (directory / "answer.txt").chmod(0o600)
     raw = (directory / "events.jsonl").read_text(encoding="utf-8")
     usage = launch.usage_from_events(raw)
     events, malformed = [], 0
     for line in raw.splitlines():
         try:
-            events.append(json.loads(line))
+            event = json.loads(line)
+            if not isinstance(event, dict) or (event.get("item") is not None and not isinstance(event["item"], dict)):
+                raise ValueError("event must be an object with an object item")
+            events.append(event)
         except ValueError:
             malformed += bool(line.strip())
     terminal = [e for e in events if e.get("type") == "turn.completed"]
@@ -285,6 +306,48 @@ def invoke(output, call_id, prompt, schema, model, purpose, plan):
     if status != "complete":
         raise ValueError("call failed; retained without retry: " + call_id)
     return record
+
+
+def check_budget(output, plan):
+    previous = all_calls(output)
+    if any(c["status"] != "complete" or c["usage"] is None for c in previous):
+        raise ValueError("a previous call is incomplete or has unknown usage")
+    if len(previous) >= plan["maximum_cli_calls"] or sum(c["usage"]["total_tokens"] for c in previous) >= plan["reported_token_stop_threshold"]:
+        raise ValueError("predeclared call/token stop threshold reached")
+
+
+def controlled_call(output, call_id, prompt, schema, model, purpose, plan,
+                    control=None, job_id=None, phase=None):
+    """Persist dispatch first; replay verifies raw artifacts and the durable record."""
+    control = control or CallControl(output / "control", plan["planned_call_ids"])
+    existing = output / "calls" / call_id / "result.json"
+    saved = control.record(call_id)
+    if saved is not None and not existing.exists():
+        raise ValueError("saved call is missing its raw result: " + call_id)
+    if existing.exists():
+        record = invoke(output, call_id, prompt, schema, model, purpose, plan)
+        if saved is None or saved != record:
+            raise ValueError("raw result does not match durable call record: " + call_id)
+        return control.run(call_id, job_id or call_id, purpose, phase or purpose, lambda: record)
+
+    state = control.report()
+    if state["paused"] or state["pending_call_ids"]:
+        # dispatch raises the controller's durable pause/pending exception here.
+        control.dispatch(call_id, job_id or call_id, purpose, phase or purpose)
+    if existing.parent.exists():
+        raise FileExistsError("interrupted raw call directory retained: " + call_id)
+    check_budget(output, plan)
+
+    def physical_call():
+        try:
+            return invoke(output, call_id, prompt, schema, model, purpose, plan)
+        except ValueError:
+            # Preserve a terminal failure's exact raw telemetry in the controller.
+            if existing.exists():
+                return read(existing)
+            raise
+
+    return control.run(call_id, job_id or call_id, purpose, phase or purpose, physical_call)
 
 
 def validate_request(case, arm, answer, final=False):
@@ -333,7 +396,7 @@ def answer_job(output, job, plan):
     case = case_for(output, job)
     analysis = job["experiment"] == "analysis"
     prompt = analysis_prompt(case, job["arm"]) if analysis else rental_prompt(output, case, job["arm"])
-    first = invoke(output, job["id"] + "-initial", prompt, ANALYSIS_SCHEMA if analysis else RENTAL_SCHEMA, ANSWER_MODEL, "answer", plan)
+    first = controlled_call(output, job["id"] + "-initial", prompt, ANALYSIS_SCHEMA if analysis else RENTAL_SCHEMA, ANSWER_MODEL, "answer", plan, job_id=job["id"])
     records = [first]
     requested, violation = [], None
     supplied = [d["id"] for d in case["documents"]] if analysis and job["arm"] == "full" else []
@@ -344,8 +407,11 @@ def answer_job(output, job, plan):
             if requested:
                 supplied = requested
                 followup = analysis_prompt(case, job["arm"], requested, first["answer"])
-                records.append(invoke(output, job["id"] + "-retrieved", followup, ANALYSIS_SCHEMA, ANSWER_MODEL, "retrieval_answer", plan))
+                records.append(controlled_call(output, job["id"] + "-retrieved", followup, ANALYSIS_SCHEMA, ANSWER_MODEL, "retrieval_answer", plan, job_id=job["id"]))
                 violation = validate_request(case, job["arm"], records[-1]["answer"], final=True)
+        if job["arm"] == "adaptive" and len(records) == 1:
+            CallControl(output / "control", plan["planned_call_ids"]).skip(
+                job["id"] + "-retrieved", "invalid document request" if violation else "initial answer requested no documents")
     final = records[-1]["answer"]
     if not isinstance(final.get("answer"), str) or not final["answer"].strip():
         violation = violation or "empty final natural-language answer"
@@ -384,7 +450,7 @@ def judge_case(output, experiment, case, plan):
     packet = {"source_case_and_frozen_rubric": case, "candidates": candidates}
     # The case packet includes neutral summary and gold for the judge, but does not
     # identify which input treatment any anonymous candidate received.
-    record = invoke(output, case["id"] + "-judge", JUDGE_RULES + "\n" + json.dumps(packet, ensure_ascii=False, indent=2),
+    record = controlled_call(output, case["id"] + "-judge", JUDGE_RULES + "\n" + json.dumps(packet, ensure_ascii=False, indent=2),
                     judge_schema(case, list(mask)), JUDGE_MODEL, "judge", plan)
     assessed = validate_assessments(record["answer"], case, mask)
     critical = {c["id"] for c in case["gold"]["required_findings"] if c["severity"] == "critical"}
@@ -424,11 +490,31 @@ def summarize(output):
                 "invalid_citations": sum((a["citation_check"] or {}).get("invalid", 0) for a in rows),
                 "format_failures": sum(a.get("format_check") is not None and not a["format_check"]["pass"] for a in rows),
                 "protocol_violations": sum(a["protocol_violation"] is not None for a in rows)}
+    control = CallControl(output / "control", plan["planned_call_ids"]) if (output / "control/checkpoint.json").exists() else None
+    controller = control.report() if control else None
+    integrity_failures = []
+    if plan.get("version", 1) >= 2:
+        for call in calls:
+            try:
+                if control is None or control.record(call["id"]) != call:
+                    raise ValueError("durable result differs")
+                for name, key in (("prompt.txt", "prompt_sha256"), ("schema.json", "schema_sha256"),
+                                  ("events.jsonl", "events_sha256"), ("answer.txt", "answer_sha256")):
+                    if digest(output / "calls" / call["id"] / name) != call.get(key):
+                        raise ValueError(name + " differs")
+            except (KeyError, OSError, ValueError) as error:
+                integrity_failures.append({"call_id": call.get("id"), "error": str(error)})
+    attempted = {p.name for p in (output / "calls").glob("*") if p.is_dir()} | {c["call_id"] for c in (controller or {}).get("calls", [])}
+    coverage = len(attempted) == len(calls) and all(c.get("usage") is not None for c in calls)
     total_known = sum((c.get("usage") or {}).get("total_tokens", 0) for c in calls)
-    value = {"complete": len(answers) == 24 and len(judgments) == 10 and all(c["status"] == "complete" for c in calls),
+    complete = len(answers) == 24 and len(judgments) == 10 and all(c["status"] == "complete" for c in calls)
+    if plan.get("version", 1) >= 2:
+        complete = complete and controller is not None and controller["plan_complete"] and not controller["paused"] and coverage and not integrity_failures
+    value = {"complete": complete,
              "source_commit": plan["source_commit"], "plan_sha256": digest(output / "plan.json"),
-             "claude_calls": 0, "calls": len(calls), "known_cli_processed_tokens": total_known,
-             "usage_coverage_complete": all(c.get("usage") is not None for c in calls),
+             "claude_calls": 0, "calls": len(attempted), "known_cli_processed_tokens": total_known,
+             "controller": controller, "usage_coverage_complete": coverage,
+             "raw_artifact_integrity_failures": integrity_failures,
              "judge_processed_tokens": sum((c.get("usage") or {}).get("total_tokens", 0) for c in calls if c["purpose"] == "judge"),
              "arms": arms, "answers": answers, "judgments": judgments,
              "limitations": ["Authored synthetic exploratory cases, not real-user holdout or statistical equivalence.",
@@ -443,6 +529,8 @@ def summarize(output):
 
 def run(output):
     plan = read(output / "plan.json")
+    if plan.get("version") != 2 or not plan.get("planned_call_ids"):
+        raise ValueError("live execution requires a freshly prepared durable plan; historical artifacts remain readable")
     if (plan["answer_model"], plan["judge_model"], plan["effort"]) != (ANSWER_MODEL, JUDGE_MODEL, EFFORT):
         raise ValueError("model settings changed")
     for name, checksum in plan["source_sha256"].items():
@@ -472,7 +560,7 @@ def main():
         result = action(args.output.resolve())
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 0
-    except (OSError, ValueError) as error:
+    except (OSError, ValueError, CallControlError) as error:
         print("stopped: " + str(error))
         return 2
 

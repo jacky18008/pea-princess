@@ -71,13 +71,13 @@ def _atomic_json(path, value):
             temporary.unlink()
 
 
-def failure_kind(record):
+def failure_kind(record, allow_tools=False):
     """A complete wrapper status cannot override failed events or bad telemetry."""
     if record.get("errors"):
         return "provider_error"
     if record.get("timeout"):
         return "timeout"
-    if record.get("tool_events"):
+    if record.get("tool_events") and not allow_tools:
         return "unexpected_tool_use"
     if record.get("malformed_event_lines"):
         return "malformed_events"
@@ -105,8 +105,11 @@ class CallControl:
     at most one unresolved physical invocation is permitted.
     """
 
-    def __init__(self, output_dir, planned_call_ids):
+    def __init__(self, output_dir, planned_call_ids, allow_tools=False):
         self.output_dir = Path(output_dir)
+        if type(allow_tools) is not bool:
+            raise ValueError("allow_tools must be boolean")
+        self.allow_tools = allow_tools
         if isinstance(planned_call_ids, (str, bytes)):
             raise ValueError("planned call IDs must be a sequence, not a string")
         self.planned_call_ids = list(planned_call_ids)
@@ -125,7 +128,8 @@ class CallControl:
 
     def _initial(self):
         return {"version": VERSION, "planned_call_ids": self.planned_call_ids,
-                "reducer_sha256": self.reducer_sha256, "revision": 0, "calls": {}, "skipped": {},
+                "reducer_sha256": self.reducer_sha256, "allow_tools": self.allow_tools,
+                "revision": 0, "calls": {}, "skipped": {},
                 "reducer_state": report_control.initial_state(self.planned_call_ids)}
 
     @contextmanager
@@ -140,6 +144,8 @@ class CallControl:
                         raise CallControlError("checkpoint checksum differs")
                     if state["version"] != VERSION or state["reducer_sha256"] != self.reducer_sha256:
                         raise CallControlError("checkpoint controller/reducer version differs")
+                    if state.get("allow_tools", False) != self.allow_tools:
+                        raise CallControlError("checkpoint tool policy differs")
                     if state["planned_call_ids"] != self.planned_call_ids:
                         raise CallControlError("checkpoint planned call IDs differ")
                     if set(state["calls"]) != set(state["reducer_state"]["requests"]):
@@ -268,7 +274,7 @@ class CallControl:
                 if row["record_sha256"] != original_digest:
                     raise ConflictingCallError("different terminal record for existing call: " + call_id)
                 return copy.deepcopy(row["record"])
-            kind = failure_kind(original)
+            kind = failure_kind(original, self.allow_tools)
             direct = original.get("direct_terminal_usage")
             usage = {key: direct[key] for key in FIELDS if key in direct} if isinstance(direct, dict) else {}
             # The frozen reducer has one stop event. The adapter maps all guarded
@@ -302,13 +308,13 @@ class CallControl:
                 stopped = {"id": call_id, "status": "stopped", "terminal_usage_events": 0,
                            "direct_terminal_usage": None,
                            "callback_exception": {"type": type(error).__name__, "message": str(error)}}
-            elif failure_kind(stopped) is None:
+            elif failure_kind(stopped, self.allow_tools) is None:
                 stopped = dict(stopped, status="stopped",
                                callback_exception={"type": type(error).__name__, "message": str(error)})
             self.complete(call_id, stopped)
             raise
         self.complete(call_id, result)
-        if failure_kind(result):
+        if failure_kind(result, self.allow_tools):
             with self._locked() as state:
                 self._raise_paused(state)
         return copy.deepcopy(result)
