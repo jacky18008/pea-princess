@@ -125,12 +125,14 @@ def _codex_invoke(request, folder):
 
 
 def run_step(project, call_id, task_id, model, prompt, token_budget_id,
-             max_chars=24000, timeout=180, invoke=None):
+             max_chars=24000, timeout=180, invoke=None, max_prompt_chars=MAX_PROMPT_CHARS):
     if not isinstance(model, str) or not model.strip() or model.startswith("-"):
         raise ValueError("an explicit model is required")
     if "claude" in model.lower():
         raise ValueError("Claude calls remain paused")
-    if not isinstance(prompt, str) or not prompt.strip() or len(prompt) > MAX_PROMPT_CHARS:
+    if type(max_prompt_chars) is not int or not 1 <= max_prompt_chars <= 256000:
+        raise ValueError("prompt capacity must be 1..256000 characters")
+    if not isinstance(prompt, str) or not prompt.strip() or len(prompt) > max_prompt_chars:
         raise ValueError("step prompt is missing or exceeds limit")
     if type(timeout) is not int or not 1 <= timeout <= 600:
         raise ValueError("timeout must be 1..600 seconds")

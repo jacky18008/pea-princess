@@ -11,6 +11,8 @@ workspace, and choose the host's actual permission/sandbox controls accordingly.
 
 Only a trusted caller may claim `actor:user` and apply authorized intent changes. A copied source quote or an enum-shaped object cannot grant that authority. The state engine validates revisions, references and coverage structure, not the semantic truth of a model's claims. Native hook delivery can fail or time out; only calls through `tools/session_runner.py` receive its programmatic context-injection and stale-result checks. See [the harness boundaries](docs/session-harness.md).
 
+The local [persona lab](docs/persona-playground.md) binds only to 127.0.0.1, checks Host/Origin and custom API headers, and serves an exact static allowlist. `.pea-playground/` contains private UI inboxes and per-session state; exports are private. Codex runs in a separate temporary directory with prompt text on stdin and additional project-document loading disabled. This remains a same-user local prototype, not a tenant boundary or a hosted credential-sharing service. Model requests leave the device through the user's Codex login; browser refresh never authorizes a model call.
+
 The [stage 1 form](community/index.html) keeps optional text in the author's browser/device. Public payloads contain allowlisted choices only; Python revalidates them before import or search. The local SQLite store and withdrawal receipts are private operational files, not public export artifacts. No hosted submission endpoint, identity verification, Sybil resistance or universal private-note access control is claimed. See [the stage 1 guide](docs/community-feedback-stage1.md).
 
 ## Inputs, evidence and reports
