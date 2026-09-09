@@ -1,0 +1,36 @@
+{
+  "complete": true,
+  "scope": "Every primary material flag/critical omission and deterministic mismatch is source reviewed; prospective blind sample is audited separately. Identity coverage is not semantic validation or human ground truth.",
+  "checks": {
+    "primary_unsupported_and_contradiction_flags": {
+      "items": 16,
+      "missing_or_extra": [],
+      "complete": true
+    },
+    "primary_critical_omissions": {
+      "items": 37,
+      "missing_or_extra": [],
+      "complete": true
+    },
+    "invalid_answer_citations": {
+      "items": 5,
+      "missing_or_extra": [],
+      "complete": true
+    },
+    "scalar_mismatches": {
+      "items": 99,
+      "missing_or_extra": [],
+      "complete": true
+    },
+    "invalid_memory_quotes": {
+      "items": 8,
+      "missing_or_extra": [],
+      "complete": true
+    }
+  },
+  "review_sha256": {
+    "targeted-source-review.json": "a5a260b9dad81fb80879fd5ad8703cc8d9f2340ed55bc909ca58f2ce2aed746f",
+    "scalar-source-review.json": "1ccb4f293b7ab9307e0f7707e1998b3d97b3d18ff781fb3d021676156d9fe0ff",
+    "memory-source-review.json": "17e1097cd36f06dfc5a328fe850ad6c342e312f51d37f4a632472bd5f9b612b3"
+  }
+}

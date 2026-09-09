@@ -86,6 +86,18 @@ def main():
     command("git", "bundle", "create", str(bundle), "--all")
     verify = command("git", "bundle", "verify", str(bundle))
     (destination / "bundle-verification.txt").write_text(verify.stdout + verify.stderr)
+    (destination / "README.md").write_text(
+        "# Completed ablation study backup\n\n"
+        "COMPLETED.json records the exact result commit and verified archive hashes. "
+        "raw-artifacts.tar.gz contains this study's raw artifacts; repository.bundle retains Git history. "
+        "Earlier studies remain in their separate backups listed in preservation-checks.json; "
+        "those historical raw files are not duplicated inside this tar.\n\n"
+        "To restore into a NEW directory, clone repository.bundle, then extract raw-artifacts.tar.gz "
+        "into that clone. Do not overwrite an existing working tree. "
+        "The source-HEAD.tar.gz archive is an additional exact snapshot of the committed files.\n\n"
+        "Offline reproduction commands are in docs/ablation-2026-09-09/results.md. "
+        "No Claude calls were made; the original seven Claude confirmations remain paused.\n"
+    )
     write(destination / "COMPLETED.json", {
         "completed_at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         "repository": str(ROOT), "source_commit": source_commit,

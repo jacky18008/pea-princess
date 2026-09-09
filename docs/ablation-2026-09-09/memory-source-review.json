@@ -1,0 +1,757 @@
+{
+  "reviewer_type": "Post-hoc selective AI source review, not human ground truth",
+  "review_date": "2026-09-09",
+  "scope": "Inspected exact-quote check results for all 12 rental memories; semantically reviewed only the eight records whose stored exact_user_source_quote check is false. This is not a complete memory recall, semantic accuracy, summary accuracy, qualification, status or supersession audit.",
+  "selection": "Parent identified eight invalid exact-quote occurrences; the stored flags and direct source-string membership independently reproduce exactly those eight. Selection is post hoc and targeted, not a new random or blinded sample.",
+  "source_policy": {
+    "canonical_fixture": "evals/ablation-2026-09-09/rental-cases.json",
+    "allowed_sources": "Canonical role=user history; prior T1 text additionally allowed only for T2-stage generation. Assistant history, previous model answers, gold and future T2 text are not used to support these judgments.",
+    "temporal_warning": "T2 in a memory call name denotes preparation for the T2 response, not permission to use the user’s future T2 corrections. Earlier absence values here are assessed at memory-generation time."
+  },
+  "execution_scope": "Offline source inspection and deterministic validation only. No benchmark model CLI/API or external-model calls; current AI review is outside benchmark CLI token totals. No raw, frozen or blinded-review records were edited and no commit was made.",
+  "inputs": {
+    "memory_files": [
+      "bench/results/ablation-2026-09-09/live-v1/memories/S1-r1-T1-group.json",
+      "bench/results/ablation-2026-09-09/live-v1/memories/S1-r1-T2-group.json",
+      "bench/results/ablation-2026-09-09/live-v1/memories/S1-r2-T1-group.json",
+      "bench/results/ablation-2026-09-09/live-v1/memories/S1-r2-T2-group.json",
+      "bench/results/ablation-2026-09-09/live-v1/memories/S2-r1-T1-group.json",
+      "bench/results/ablation-2026-09-09/live-v1/memories/S2-r1-T2-group.json",
+      "bench/results/ablation-2026-09-09/live-v1/memories/S2-r2-T1-group.json",
+      "bench/results/ablation-2026-09-09/live-v1/memories/S2-r2-T2-group.json",
+      "bench/results/ablation-2026-09-09/live-v1/memories/S3-r1-T1-group.json",
+      "bench/results/ablation-2026-09-09/live-v1/memories/S3-r1-T2-group.json",
+      "bench/results/ablation-2026-09-09/live-v1/memories/S3-r2-T1-group.json",
+      "bench/results/ablation-2026-09-09/live-v1/memories/S3-r2-T2-group.json"
+    ],
+    "canonical_user_source_fixture": "evals/ablation-2026-09-09/rental-cases.json"
+  },
+  "summary": {
+    "memory_files_checked": 12,
+    "fact_record_occurrences_checked_for_exact_quote": 552,
+    "invalid_exact_quote_occurrences": 8,
+    "memory_calls_with_invalid_occurrences": 6,
+    "original_defective_fact_records": 4,
+    "original_memory_calls_containing_defects": 3,
+    "propagated_unchanged_occurrences": 4,
+    "distinct_quote_source_patterns": 3,
+    "semantically_supported_among_selected_occurrences": 8,
+    "unsupported_facts_among_selected_occurrences": 0,
+    "wrong_source_attributions_among_selected_occurrences": 0,
+    "interpretation": "Eight invalid occurrences are four original fact-record defects plus four unchanged dependency-linked copies. Two separate initial S3 calls contain the same relationship-ellipsis pattern, so there are three distinct textual/source patterns but four originating records. These counts are not eight independent generation errors and are not a complete semantic error rate."
+  },
+  "inventory": [
+    {
+      "call_id": "S1-r1-T1-group-memory",
+      "memory_path": "bench/results/ablation-2026-09-09/live-v1/memories/S1-r1-T1-group.json",
+      "fact_record_count": 48,
+      "stored_invalid_exact_quote_count": 0,
+      "recomputed_invalid_exact_quote_count": 0,
+      "input_dependency_call_ids": []
+    },
+    {
+      "call_id": "S1-r1-T2-group-memory",
+      "memory_path": "bench/results/ablation-2026-09-09/live-v1/memories/S1-r1-T2-group.json",
+      "fact_record_count": 48,
+      "stored_invalid_exact_quote_count": 0,
+      "recomputed_invalid_exact_quote_count": 0,
+      "input_dependency_call_ids": [
+        "S1-r1-T1-group-memory"
+      ]
+    },
+    {
+      "call_id": "S1-r2-T1-group-memory",
+      "memory_path": "bench/results/ablation-2026-09-09/live-v1/memories/S1-r2-T1-group.json",
+      "fact_record_count": 48,
+      "stored_invalid_exact_quote_count": 0,
+      "recomputed_invalid_exact_quote_count": 0,
+      "input_dependency_call_ids": []
+    },
+    {
+      "call_id": "S1-r2-T2-group-memory",
+      "memory_path": "bench/results/ablation-2026-09-09/live-v1/memories/S1-r2-T2-group.json",
+      "fact_record_count": 47,
+      "stored_invalid_exact_quote_count": 0,
+      "recomputed_invalid_exact_quote_count": 0,
+      "input_dependency_call_ids": [
+        "S1-r2-T1-group-memory"
+      ]
+    },
+    {
+      "call_id": "S2-r1-T1-group-memory",
+      "memory_path": "bench/results/ablation-2026-09-09/live-v1/memories/S2-r1-T1-group.json",
+      "fact_record_count": 46,
+      "stored_invalid_exact_quote_count": 1,
+      "recomputed_invalid_exact_quote_count": 1,
+      "input_dependency_call_ids": []
+    },
+    {
+      "call_id": "S2-r1-T2-group-memory",
+      "memory_path": "bench/results/ablation-2026-09-09/live-v1/memories/S2-r1-T2-group.json",
+      "fact_record_count": 47,
+      "stored_invalid_exact_quote_count": 1,
+      "recomputed_invalid_exact_quote_count": 1,
+      "input_dependency_call_ids": [
+        "S2-r1-T1-group-memory"
+      ]
+    },
+    {
+      "call_id": "S2-r2-T1-group-memory",
+      "memory_path": "bench/results/ablation-2026-09-09/live-v1/memories/S2-r2-T1-group.json",
+      "fact_record_count": 40,
+      "stored_invalid_exact_quote_count": 0,
+      "recomputed_invalid_exact_quote_count": 0,
+      "input_dependency_call_ids": []
+    },
+    {
+      "call_id": "S2-r2-T2-group-memory",
+      "memory_path": "bench/results/ablation-2026-09-09/live-v1/memories/S2-r2-T2-group.json",
+      "fact_record_count": 43,
+      "stored_invalid_exact_quote_count": 0,
+      "recomputed_invalid_exact_quote_count": 0,
+      "input_dependency_call_ids": [
+        "S2-r2-T1-group-memory"
+      ]
+    },
+    {
+      "call_id": "S3-r1-T1-group-memory",
+      "memory_path": "bench/results/ablation-2026-09-09/live-v1/memories/S3-r1-T1-group.json",
+      "fact_record_count": 48,
+      "stored_invalid_exact_quote_count": 2,
+      "recomputed_invalid_exact_quote_count": 2,
+      "input_dependency_call_ids": []
+    },
+    {
+      "call_id": "S3-r1-T2-group-memory",
+      "memory_path": "bench/results/ablation-2026-09-09/live-v1/memories/S3-r1-T2-group.json",
+      "fact_record_count": 46,
+      "stored_invalid_exact_quote_count": 2,
+      "recomputed_invalid_exact_quote_count": 2,
+      "input_dependency_call_ids": [
+        "S3-r1-T1-group-memory"
+      ]
+    },
+    {
+      "call_id": "S3-r2-T1-group-memory",
+      "memory_path": "bench/results/ablation-2026-09-09/live-v1/memories/S3-r2-T1-group.json",
+      "fact_record_count": 46,
+      "stored_invalid_exact_quote_count": 1,
+      "recomputed_invalid_exact_quote_count": 1,
+      "input_dependency_call_ids": []
+    },
+    {
+      "call_id": "S3-r2-T2-group-memory",
+      "memory_path": "bench/results/ablation-2026-09-09/live-v1/memories/S3-r2-T2-group.json",
+      "fact_record_count": 45,
+      "stored_invalid_exact_quote_count": 1,
+      "recomputed_invalid_exact_quote_count": 1,
+      "input_dependency_call_ids": [
+        "S3-r2-T1-group-memory"
+      ]
+    }
+  ],
+  "original_defects": [
+    {
+      "original_defect_id": "D1",
+      "quote_pattern_id": "Q1",
+      "original_occurrence_id": "S2-r1-T1-group-memory:F46",
+      "propagated_occurrence_ids": [
+        "S2-r1-T2-group-memory:F46"
+      ],
+      "semantic_supported": true,
+      "verdict": "non_verbatim_negative_coordination_paraphrase"
+    },
+    {
+      "original_defect_id": "D2",
+      "quote_pattern_id": "Q2",
+      "original_occurrence_id": "S3-r1-T1-group-memory:f34",
+      "propagated_occurrence_ids": [
+        "S3-r1-T2-group-memory:f34"
+      ],
+      "semantic_supported": true,
+      "verdict": "non_verbatim_joined_excerpts_with_ellipsis"
+    },
+    {
+      "original_defect_id": "D3",
+      "quote_pattern_id": "Q3",
+      "original_occurrence_id": "S3-r1-T1-group-memory:f40",
+      "propagated_occurrence_ids": [
+        "S3-r1-T2-group-memory:f40"
+      ],
+      "semantic_supported": true,
+      "verdict": "non_verbatim_joined_excerpts_with_ellipsis"
+    },
+    {
+      "original_defect_id": "D4",
+      "quote_pattern_id": "Q2",
+      "original_occurrence_id": "S3-r2-T1-group-memory:F33",
+      "propagated_occurrence_ids": [
+        "S3-r2-T2-group-memory:F33"
+      ],
+      "semantic_supported": true,
+      "verdict": "non_verbatim_joined_excerpts_with_ellipsis"
+    }
+  ],
+  "occurrences": [
+    {
+      "occurrence_id": "S2-r1-T1-group-memory:F46",
+      "call_id": "S2-r1-T1-group-memory",
+      "memory_path": "bench/results/ablation-2026-09-09/live-v1/memories/S2-r1-T1-group.json",
+      "fact_id": "F46",
+      "fact_key": "building.lift_guaranteed_repair_date",
+      "original_check": {
+        "id": "F46",
+        "source_id": "U5",
+        "exact_user_source_quote": false,
+        "valid_supersedes_ids": true
+      },
+      "quote": "no guaranteed repair date",
+      "value": "none in packet",
+      "qualification": "confirmed_in_source",
+      "status": "current",
+      "source_id": "U5",
+      "source_boundary": {
+        "memory_stage": "T1",
+        "allowed_user_source_ids": [
+          "U1",
+          "U2",
+          "U3",
+          "U4",
+          "U5"
+        ],
+        "latest_prior_turn": null,
+        "target_T2_used": false,
+        "note": "T1-stage memory is assessed against canonical user history only; T2-stage memory against that history plus prior T1. The future T2 update is excluded."
+      },
+      "source_anchors": [
+        {
+          "source_id": "U5",
+          "exact_text": "My current packet contains no agreed accessibility work or guaranteed repair date, and I do not want a promise invented from the agent's optimism.",
+          "start_char_0_based": 489,
+          "end_char_0_based_exclusive": 635
+        }
+      ],
+      "exact_component_anchors": [
+        {
+          "source_id": "U5",
+          "exact_text": "no agreed accessibility work or guaranteed repair date",
+          "start_char_0_based": 516,
+          "end_char_0_based_exclusive": 570
+        }
+      ],
+      "recomputed_exact_quote_match": false,
+      "semantic_supported": true,
+      "source_attribution_supported": true,
+      "unsupported_fact": false,
+      "wrong_source_attribution": false,
+      "verdict": "non_verbatim_negative_coordination_paraphrase",
+      "reason": "The source’s “no” governs both coordinated objects: agreed accessibility work and guaranteed repair date. The memory correctly records absence of a guaranteed repair date but combines “no” with a later non-adjacent phrase. “no guaranteed repair date” is a supported paraphrase, not an exact contiguous quote.",
+      "prior_turn_consistency": "No later user turn is admitted to the T1-stage memory’s source boundary.",
+      "lineage": {
+        "original_defect_id": "D1",
+        "quote_pattern_id": "Q1",
+        "original_call_id": "S2-r1-T1-group-memory",
+        "original_fact_id": "F46",
+        "occurrence_kind": "original_in_initial_memory",
+        "record_identical_to_original": true,
+        "direct_dependency_on_original": false,
+        "basis": "First occurrence in this case/replicate’s initial memory; no prior memory dependency is declared."
+      }
+    },
+    {
+      "occurrence_id": "S2-r1-T2-group-memory:F46",
+      "call_id": "S2-r1-T2-group-memory",
+      "memory_path": "bench/results/ablation-2026-09-09/live-v1/memories/S2-r1-T2-group.json",
+      "fact_id": "F46",
+      "fact_key": "building.lift_guaranteed_repair_date",
+      "original_check": {
+        "id": "F46",
+        "source_id": "U5",
+        "exact_user_source_quote": false,
+        "valid_supersedes_ids": true
+      },
+      "quote": "no guaranteed repair date",
+      "value": "none in packet",
+      "qualification": "confirmed_in_source",
+      "status": "current",
+      "source_id": "U5",
+      "source_boundary": {
+        "memory_stage": "T2",
+        "allowed_user_source_ids": [
+          "U1",
+          "U2",
+          "U3",
+          "U4",
+          "U5",
+          "T1"
+        ],
+        "latest_prior_turn": "T1",
+        "target_T2_used": false,
+        "note": "T1-stage memory is assessed against canonical user history only; T2-stage memory against that history plus prior T1. The future T2 update is excluded."
+      },
+      "source_anchors": [
+        {
+          "source_id": "U5",
+          "exact_text": "My current packet contains no agreed accessibility work or guaranteed repair date, and I do not want a promise invented from the agent's optimism.",
+          "start_char_0_based": 489,
+          "end_char_0_based_exclusive": 635
+        }
+      ],
+      "exact_component_anchors": [
+        {
+          "source_id": "U5",
+          "exact_text": "no agreed accessibility work or guaranteed repair date",
+          "start_char_0_based": 516,
+          "end_char_0_based_exclusive": 570
+        }
+      ],
+      "recomputed_exact_quote_match": false,
+      "semantic_supported": true,
+      "source_attribution_supported": true,
+      "unsupported_fact": false,
+      "wrong_source_attribution": false,
+      "verdict": "non_verbatim_negative_coordination_paraphrase",
+      "reason": "The source’s “no” governs both coordinated objects: agreed accessibility work and guaranteed repair date. The memory correctly records absence of a guaranteed repair date but combines “no” with a later non-adjacent phrase. “no guaranteed repair date” is a supported paraphrase, not an exact contiguous quote.",
+      "prior_turn_consistency": "Prior T1 finalises the zero-step requirement and says a later repair is unacceptable; it supplies no guaranteed repair date and does not replace U5’s absence statement.",
+      "lineage": {
+        "original_defect_id": "D1",
+        "quote_pattern_id": "Q1",
+        "original_call_id": "S2-r1-T1-group-memory",
+        "original_fact_id": "F46",
+        "occurrence_kind": "propagated_unchanged",
+        "record_identical_to_original": true,
+        "direct_dependency_on_original": true,
+        "basis": "Identical fact object and declared direct input dependency establish unchanged carry-forward at the record level; no inference about hidden model reasoning is required."
+      }
+    },
+    {
+      "occurrence_id": "S3-r1-T1-group-memory:f34",
+      "call_id": "S3-r1-T1-group-memory",
+      "memory_path": "bench/results/ablation-2026-09-09/live-v1/memories/S3-r1-T1-group.json",
+      "fact_id": "f34",
+      "fact_key": "reservation_invoice.payee_company_relationship",
+      "original_check": {
+        "id": "f34",
+        "source_id": "U3",
+        "exact_user_source_quote": false,
+        "valid_supersedes_ids": true
+      },
+      "quote": "does not ... explain how this person is related to the company",
+      "value": "unexplained",
+      "qualification": "confirmed_in_source",
+      "status": "current",
+      "source_id": "U3",
+      "source_boundary": {
+        "memory_stage": "T1",
+        "allowed_user_source_ids": [
+          "U1",
+          "U2",
+          "U3",
+          "U4",
+          "U5"
+        ],
+        "latest_prior_turn": null,
+        "target_T2_used": false,
+        "note": "T1-stage memory is assessed against canonical user history only; T2-stage memory against that history plus prior T1. The future T2 update is excluded."
+      },
+      "source_anchors": [
+        {
+          "source_id": "U3",
+          "exact_text": "The packet does not name the owner, provide letting authority or explain how this person is related to the company.",
+          "start_char_0_based": 222,
+          "end_char_0_based_exclusive": 337
+        }
+      ],
+      "exact_component_anchors": [
+        {
+          "source_id": "U3",
+          "exact_text": "does not",
+          "start_char_0_based": 233,
+          "end_char_0_based_exclusive": 241
+        },
+        {
+          "source_id": "U3",
+          "exact_text": "explain how this person is related to the company",
+          "start_char_0_based": 287,
+          "end_char_0_based_exclusive": 336
+        }
+      ],
+      "recomputed_exact_quote_match": false,
+      "semantic_supported": true,
+      "source_attribution_supported": true,
+      "unsupported_fact": false,
+      "wrong_source_attribution": false,
+      "verdict": "non_verbatim_joined_excerpts_with_ellipsis",
+      "reason": "Both sides of the displayed ellipsis occur in the same cited sentence. Removing the intervening coordinated items preserves the source’s negation of an explanation of the person–company relationship. The inserted “ ... ” is not in the source, so the quotation fails exact membership even though the value and source attribution are supported.",
+      "prior_turn_consistency": "No later user turn is admitted to the T1-stage memory’s source boundary.",
+      "lineage": {
+        "original_defect_id": "D2",
+        "quote_pattern_id": "Q2",
+        "original_call_id": "S3-r1-T1-group-memory",
+        "original_fact_id": "f34",
+        "occurrence_kind": "original_in_initial_memory",
+        "record_identical_to_original": true,
+        "direct_dependency_on_original": false,
+        "basis": "First occurrence in this case/replicate’s initial memory; no prior memory dependency is declared."
+      }
+    },
+    {
+      "occurrence_id": "S3-r1-T1-group-memory:f40",
+      "call_id": "S3-r1-T1-group-memory",
+      "memory_path": "bench/results/ablation-2026-09-09/live-v1/memories/S3-r1-T1-group.json",
+      "fact_id": "f40",
+      "fact_key": "agent.promised_updated_certificate",
+      "original_check": {
+        "id": "f40",
+        "source_id": "U4",
+        "exact_user_source_quote": false,
+        "valid_supersedes_ids": true
+      },
+      "quote": "updated certificate ... being prepared, but neither has arrived",
+      "value": "not received",
+      "qualification": "confirmed_in_source",
+      "status": "current",
+      "source_id": "U4",
+      "source_boundary": {
+        "memory_stage": "T1",
+        "allowed_user_source_ids": [
+          "U1",
+          "U2",
+          "U3",
+          "U4",
+          "U5"
+        ],
+        "latest_prior_turn": null,
+        "target_T2_used": false,
+        "note": "T1-stage memory is assessed against canonical user history only; T2-stage memory against that history plus prior T1. The future T2 update is excluded."
+      },
+      "source_anchors": [
+        {
+          "source_id": "U4",
+          "exact_text": "The agent says an updated certificate and an owner letter are being prepared, but neither has arrived.",
+          "start_char_0_based": 307,
+          "end_char_0_based_exclusive": 409
+        }
+      ],
+      "exact_component_anchors": [
+        {
+          "source_id": "U4",
+          "exact_text": "updated certificate",
+          "start_char_0_based": 325,
+          "end_char_0_based_exclusive": 344
+        },
+        {
+          "source_id": "U4",
+          "exact_text": "being prepared, but neither has arrived",
+          "start_char_0_based": 369,
+          "end_char_0_based_exclusive": 408
+        }
+      ],
+      "recomputed_exact_quote_match": false,
+      "semantic_supported": true,
+      "source_attribution_supported": true,
+      "unsupported_fact": false,
+      "wrong_source_attribution": false,
+      "verdict": "non_verbatim_joined_excerpts_with_ellipsis",
+      "reason": "The source explicitly says neither the updated certificate nor the owner letter has arrived. The memory’s “not received” value is supported. Its quote elides “and an owner letter are” and inserts an ellipsis, making a joined excerpt rather than one exact contiguous source string.",
+      "prior_turn_consistency": "No later user turn is admitted to the T1-stage memory’s source boundary.",
+      "lineage": {
+        "original_defect_id": "D3",
+        "quote_pattern_id": "Q3",
+        "original_call_id": "S3-r1-T1-group-memory",
+        "original_fact_id": "f40",
+        "occurrence_kind": "original_in_initial_memory",
+        "record_identical_to_original": true,
+        "direct_dependency_on_original": false,
+        "basis": "First occurrence in this case/replicate’s initial memory; no prior memory dependency is declared."
+      }
+    },
+    {
+      "occurrence_id": "S3-r1-T2-group-memory:f34",
+      "call_id": "S3-r1-T2-group-memory",
+      "memory_path": "bench/results/ablation-2026-09-09/live-v1/memories/S3-r1-T2-group.json",
+      "fact_id": "f34",
+      "fact_key": "reservation_invoice.payee_company_relationship",
+      "original_check": {
+        "id": "f34",
+        "source_id": "U3",
+        "exact_user_source_quote": false,
+        "valid_supersedes_ids": true
+      },
+      "quote": "does not ... explain how this person is related to the company",
+      "value": "unexplained",
+      "qualification": "confirmed_in_source",
+      "status": "current",
+      "source_id": "U3",
+      "source_boundary": {
+        "memory_stage": "T2",
+        "allowed_user_source_ids": [
+          "U1",
+          "U2",
+          "U3",
+          "U4",
+          "U5",
+          "T1"
+        ],
+        "latest_prior_turn": "T1",
+        "target_T2_used": false,
+        "note": "T1-stage memory is assessed against canonical user history only; T2-stage memory against that history plus prior T1. The future T2 update is excluded."
+      },
+      "source_anchors": [
+        {
+          "source_id": "U3",
+          "exact_text": "The packet does not name the owner, provide letting authority or explain how this person is related to the company.",
+          "start_char_0_based": 222,
+          "end_char_0_based_exclusive": 337
+        }
+      ],
+      "exact_component_anchors": [
+        {
+          "source_id": "U3",
+          "exact_text": "does not",
+          "start_char_0_based": 233,
+          "end_char_0_based_exclusive": 241
+        },
+        {
+          "source_id": "U3",
+          "exact_text": "explain how this person is related to the company",
+          "start_char_0_based": 287,
+          "end_char_0_based_exclusive": 336
+        }
+      ],
+      "recomputed_exact_quote_match": false,
+      "semantic_supported": true,
+      "source_attribution_supported": true,
+      "unsupported_fact": false,
+      "wrong_source_attribution": false,
+      "verdict": "non_verbatim_joined_excerpts_with_ellipsis",
+      "reason": "Both sides of the displayed ellipsis occur in the same cited sentence. Removing the intervening coordinated items preserves the source’s negation of an explanation of the person–company relationship. The inserted “ ... ” is not in the source, so the quotation fails exact membership even though the value and source attribution are supported.",
+      "prior_turn_consistency": "Prior T1 adds a payment deadline but explicitly says “No new document accompanied the deadline.” It does not supply the missing recipient relationship evidence.",
+      "lineage": {
+        "original_defect_id": "D2",
+        "quote_pattern_id": "Q2",
+        "original_call_id": "S3-r1-T1-group-memory",
+        "original_fact_id": "f34",
+        "occurrence_kind": "propagated_unchanged",
+        "record_identical_to_original": true,
+        "direct_dependency_on_original": true,
+        "basis": "Identical fact object and declared direct input dependency establish unchanged carry-forward at the record level; no inference about hidden model reasoning is required."
+      }
+    },
+    {
+      "occurrence_id": "S3-r1-T2-group-memory:f40",
+      "call_id": "S3-r1-T2-group-memory",
+      "memory_path": "bench/results/ablation-2026-09-09/live-v1/memories/S3-r1-T2-group.json",
+      "fact_id": "f40",
+      "fact_key": "agent.promised_updated_certificate",
+      "original_check": {
+        "id": "f40",
+        "source_id": "U4",
+        "exact_user_source_quote": false,
+        "valid_supersedes_ids": true
+      },
+      "quote": "updated certificate ... being prepared, but neither has arrived",
+      "value": "not received",
+      "qualification": "confirmed_in_source",
+      "status": "current",
+      "source_id": "U4",
+      "source_boundary": {
+        "memory_stage": "T2",
+        "allowed_user_source_ids": [
+          "U1",
+          "U2",
+          "U3",
+          "U4",
+          "U5",
+          "T1"
+        ],
+        "latest_prior_turn": "T1",
+        "target_T2_used": false,
+        "note": "T1-stage memory is assessed against canonical user history only; T2-stage memory against that history plus prior T1. The future T2 update is excluded."
+      },
+      "source_anchors": [
+        {
+          "source_id": "U4",
+          "exact_text": "The agent says an updated certificate and an owner letter are being prepared, but neither has arrived.",
+          "start_char_0_based": 307,
+          "end_char_0_based_exclusive": 409
+        }
+      ],
+      "exact_component_anchors": [
+        {
+          "source_id": "U4",
+          "exact_text": "updated certificate",
+          "start_char_0_based": 325,
+          "end_char_0_based_exclusive": 344
+        },
+        {
+          "source_id": "U4",
+          "exact_text": "being prepared, but neither has arrived",
+          "start_char_0_based": 369,
+          "end_char_0_based_exclusive": 408
+        }
+      ],
+      "recomputed_exact_quote_match": false,
+      "semantic_supported": true,
+      "source_attribution_supported": true,
+      "unsupported_fact": false,
+      "wrong_source_attribution": false,
+      "verdict": "non_verbatim_joined_excerpts_with_ellipsis",
+      "reason": "The source explicitly says neither the updated certificate nor the owner letter has arrived. The memory’s “not received” value is supported. Its quote elides “and an owner letter are” and inserts an ellipsis, making a joined excerpt rather than one exact contiguous source string.",
+      "prior_turn_consistency": "Prior T1 states no new document accompanied the deadline and refers to documents still promised; it does not establish receipt of the updated certificate.",
+      "lineage": {
+        "original_defect_id": "D3",
+        "quote_pattern_id": "Q3",
+        "original_call_id": "S3-r1-T1-group-memory",
+        "original_fact_id": "f40",
+        "occurrence_kind": "propagated_unchanged",
+        "record_identical_to_original": true,
+        "direct_dependency_on_original": true,
+        "basis": "Identical fact object and declared direct input dependency establish unchanged carry-forward at the record level; no inference about hidden model reasoning is required."
+      }
+    },
+    {
+      "occurrence_id": "S3-r2-T1-group-memory:F33",
+      "call_id": "S3-r2-T1-group-memory",
+      "memory_path": "bench/results/ablation-2026-09-09/live-v1/memories/S3-r2-T1-group.json",
+      "fact_id": "F33",
+      "fact_key": "reservation_payment.recipient_relationship_evidence",
+      "original_check": {
+        "id": "F33",
+        "source_id": "U3",
+        "exact_user_source_quote": false,
+        "valid_supersedes_ids": true
+      },
+      "quote": "does not ... explain how this person is related to the company",
+      "value": "absent",
+      "qualification": "confirmed_in_source",
+      "status": "current",
+      "source_id": "U3",
+      "source_boundary": {
+        "memory_stage": "T1",
+        "allowed_user_source_ids": [
+          "U1",
+          "U2",
+          "U3",
+          "U4",
+          "U5"
+        ],
+        "latest_prior_turn": null,
+        "target_T2_used": false,
+        "note": "T1-stage memory is assessed against canonical user history only; T2-stage memory against that history plus prior T1. The future T2 update is excluded."
+      },
+      "source_anchors": [
+        {
+          "source_id": "U3",
+          "exact_text": "The packet does not name the owner, provide letting authority or explain how this person is related to the company.",
+          "start_char_0_based": 222,
+          "end_char_0_based_exclusive": 337
+        }
+      ],
+      "exact_component_anchors": [
+        {
+          "source_id": "U3",
+          "exact_text": "does not",
+          "start_char_0_based": 233,
+          "end_char_0_based_exclusive": 241
+        },
+        {
+          "source_id": "U3",
+          "exact_text": "explain how this person is related to the company",
+          "start_char_0_based": 287,
+          "end_char_0_based_exclusive": 336
+        }
+      ],
+      "recomputed_exact_quote_match": false,
+      "semantic_supported": true,
+      "source_attribution_supported": true,
+      "unsupported_fact": false,
+      "wrong_source_attribution": false,
+      "verdict": "non_verbatim_joined_excerpts_with_ellipsis",
+      "reason": "Both sides of the displayed ellipsis occur in the same cited sentence. Removing the intervening coordinated items preserves the source’s negation of an explanation of the person–company relationship. The inserted “ ... ” is not in the source, so the quotation fails exact membership even though the value and source attribution are supported.",
+      "prior_turn_consistency": "No later user turn is admitted to the T1-stage memory’s source boundary.",
+      "lineage": {
+        "original_defect_id": "D4",
+        "quote_pattern_id": "Q2",
+        "original_call_id": "S3-r2-T1-group-memory",
+        "original_fact_id": "F33",
+        "occurrence_kind": "original_in_initial_memory",
+        "record_identical_to_original": true,
+        "direct_dependency_on_original": false,
+        "basis": "First occurrence in this case/replicate’s initial memory; no prior memory dependency is declared."
+      }
+    },
+    {
+      "occurrence_id": "S3-r2-T2-group-memory:F33",
+      "call_id": "S3-r2-T2-group-memory",
+      "memory_path": "bench/results/ablation-2026-09-09/live-v1/memories/S3-r2-T2-group.json",
+      "fact_id": "F33",
+      "fact_key": "reservation_payment.recipient_relationship_evidence",
+      "original_check": {
+        "id": "F33",
+        "source_id": "U3",
+        "exact_user_source_quote": false,
+        "valid_supersedes_ids": true
+      },
+      "quote": "does not ... explain how this person is related to the company",
+      "value": "absent",
+      "qualification": "confirmed_in_source",
+      "status": "current",
+      "source_id": "U3",
+      "source_boundary": {
+        "memory_stage": "T2",
+        "allowed_user_source_ids": [
+          "U1",
+          "U2",
+          "U3",
+          "U4",
+          "U5",
+          "T1"
+        ],
+        "latest_prior_turn": "T1",
+        "target_T2_used": false,
+        "note": "T1-stage memory is assessed against canonical user history only; T2-stage memory against that history plus prior T1. The future T2 update is excluded."
+      },
+      "source_anchors": [
+        {
+          "source_id": "U3",
+          "exact_text": "The packet does not name the owner, provide letting authority or explain how this person is related to the company.",
+          "start_char_0_based": 222,
+          "end_char_0_based_exclusive": 337
+        }
+      ],
+      "exact_component_anchors": [
+        {
+          "source_id": "U3",
+          "exact_text": "does not",
+          "start_char_0_based": 233,
+          "end_char_0_based_exclusive": 241
+        },
+        {
+          "source_id": "U3",
+          "exact_text": "explain how this person is related to the company",
+          "start_char_0_based": 287,
+          "end_char_0_based_exclusive": 336
+        }
+      ],
+      "recomputed_exact_quote_match": false,
+      "semantic_supported": true,
+      "source_attribution_supported": true,
+      "unsupported_fact": false,
+      "wrong_source_attribution": false,
+      "verdict": "non_verbatim_joined_excerpts_with_ellipsis",
+      "reason": "Both sides of the displayed ellipsis occur in the same cited sentence. Removing the intervening coordinated items preserves the source’s negation of an explanation of the person–company relationship. The inserted “ ... ” is not in the source, so the quotation fails exact membership even though the value and source attribution are supported.",
+      "prior_turn_consistency": "Prior T1 adds a payment deadline but explicitly says “No new document accompanied the deadline.” It does not supply the missing recipient relationship evidence.",
+      "lineage": {
+        "original_defect_id": "D4",
+        "quote_pattern_id": "Q2",
+        "original_call_id": "S3-r2-T1-group-memory",
+        "original_fact_id": "F33",
+        "occurrence_kind": "propagated_unchanged",
+        "record_identical_to_original": true,
+        "direct_dependency_on_original": true,
+        "basis": "Identical fact object and declared direct input dependency establish unchanged carry-forward at the record level; no inference about hidden model reasoning is required."
+      }
+    }
+  ]
+}

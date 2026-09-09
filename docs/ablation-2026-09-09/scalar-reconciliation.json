@@ -1,0 +1,194 @@
+{
+  "scope": "Post-hoc source-reviewed semantic sensitivity for all exact scalar mismatches. Primary scores and preregistered adoption gates remain unchanged.",
+  "limits": "AI source review, not human truth. Context-resolved dates may preserve the fact while failing requested formatting. Correct fields do not prove correct prose, provenance or decisions.",
+  "complete_mismatch_coverage": true,
+  "mismatch_count": 99,
+  "classification_counts": {
+    "exact_format_or_wording_equivalent": 86,
+    "missing_or_unknown_information": 9,
+    "context_resolvable_abbreviated_date": 3,
+    "actual_wrong_value": 1
+  },
+  "semantic_equivalent_mismatches": 89,
+  "source_review_sha256": "1ccb4f293b7ab9307e0f7707e1998b3d97b3d18ff781fb3d021676156d9fe0ff",
+  "arms": {
+    "rental/full": {
+      "answers": 12,
+      "scalar_total": 72,
+      "exact_passed": 59,
+      "supported_equivalent_mismatches": 12,
+      "remaining_non_equivalent": 1,
+      "posthoc_semantic_passed": 71
+    },
+    "rental/prose": {
+      "answers": 12,
+      "scalar_total": 72,
+      "exact_passed": 63,
+      "supported_equivalent_mismatches": 8,
+      "remaining_non_equivalent": 1,
+      "posthoc_semantic_passed": 71
+    },
+    "rental/state": {
+      "answers": 12,
+      "scalar_total": 72,
+      "exact_passed": 59,
+      "supported_equivalent_mismatches": 12,
+      "remaining_non_equivalent": 1,
+      "posthoc_semantic_passed": 71
+    },
+    "rental/state_neither": {
+      "answers": 12,
+      "scalar_total": 72,
+      "exact_passed": 58,
+      "supported_equivalent_mismatches": 14,
+      "remaining_non_equivalent": 0,
+      "posthoc_semantic_passed": 72
+    },
+    "rental/state_no_sources": {
+      "answers": 12,
+      "scalar_total": 72,
+      "exact_passed": 58,
+      "supported_equivalent_mismatches": 13,
+      "remaining_non_equivalent": 1,
+      "posthoc_semantic_passed": 71
+    },
+    "rental/state_no_updates": {
+      "answers": 12,
+      "scalar_total": 72,
+      "exact_passed": 58,
+      "supported_equivalent_mismatches": 14,
+      "remaining_non_equivalent": 0,
+      "posthoc_semantic_passed": 72
+    },
+    "retrieval/adaptive": {
+      "answers": 6,
+      "scalar_total": 36,
+      "exact_passed": 32,
+      "supported_equivalent_mismatches": 4,
+      "remaining_non_equivalent": 0,
+      "posthoc_semantic_passed": 36
+    },
+    "retrieval/full": {
+      "answers": 6,
+      "scalar_total": 36,
+      "exact_passed": 34,
+      "supported_equivalent_mismatches": 2,
+      "remaining_non_equivalent": 0,
+      "posthoc_semantic_passed": 36
+    },
+    "retrieval/lexical": {
+      "answers": 6,
+      "scalar_total": 36,
+      "exact_passed": 32,
+      "supported_equivalent_mismatches": 2,
+      "remaining_non_equivalent": 2,
+      "posthoc_semantic_passed": 34
+    },
+    "retrieval/oracle": {
+      "answers": 6,
+      "scalar_total": 36,
+      "exact_passed": 34,
+      "supported_equivalent_mismatches": 2,
+      "remaining_non_equivalent": 0,
+      "posthoc_semantic_passed": 36
+    },
+    "retrieval/raw_full": {
+      "answers": 6,
+      "scalar_total": 36,
+      "exact_passed": 34,
+      "supported_equivalent_mismatches": 2,
+      "remaining_non_equivalent": 0,
+      "posthoc_semantic_passed": 36
+    },
+    "retrieval/summary": {
+      "answers": 6,
+      "scalar_total": 36,
+      "exact_passed": 28,
+      "supported_equivalent_mismatches": 4,
+      "remaining_non_equivalent": 4,
+      "posthoc_semantic_passed": 32
+    }
+  },
+  "non_equivalent_values": [
+    {
+      "answer_id": "E1-long-lexical",
+      "key": "baseline_accepted_runs",
+      "expected": "46",
+      "got": "unknown",
+      "classification": "missing_or_unknown_information",
+      "reason": "The original ledger records 46 accepted Larch runs, and the actual visible summary explicitly says Larch accepted 46/48. D02 is absent from the lexical documents, but the answerer was supplied the correct count in its summary and may report it as summary evidence. Calling the scalar unknown therefore loses an available fact; it is an answer-level omission, not generator loss or a truly unknown source value. The limitation about lacking the raw ledger can remain valid without discarding what the supplied summary reports. Minor severity is specific to the missing requested baseline count; it does not independently overturn the candidate acceptance gate."
+    },
+    {
+      "answer_id": "E1-short-lexical",
+      "key": "baseline_accepted_runs",
+      "expected": "46",
+      "got": "unknown",
+      "classification": "missing_or_unknown_information",
+      "reason": "The complete source ledger knows the Larch total (46), but the generated short summary omits it and retains only 10/12 in repeated-delivery cases. That category result and the two named duplicate-acknowledgement failures do not establish accepted counts in every other category. The lexical arm additionally supplies D01 and D03, which describe the candidate gate and corpus composition without reporting the overall baseline accepted count; the required ledger D02 is not supplied. Thus unknown is honest for the answerer’s actual evidence, while still failing the end-to-end requested source-fact recovery check. This is upstream information loss, not a true-source unknown and not a fabricated or incorrect answer value. The omission is minor for this scalar: it loses the exact baseline comparison count without itself disproving the candidate acceptance gate."
+    },
+    {
+      "answer_id": "E1-short-summary",
+      "key": "baseline_accepted_runs",
+      "expected": "46",
+      "got": "unknown",
+      "classification": "missing_or_unknown_information",
+      "reason": "The complete source ledger knows the Larch total (46), but the generated short summary omits it and retains only 10/12 in repeated-delivery cases. That category result and the two named duplicate-acknowledgement failures do not establish accepted counts in every other category. The summary arm supplies no original documents. Thus unknown is honest for the answerer’s actual evidence, while still failing the end-to-end requested source-fact recovery check. This is upstream information loss, not a true-source unknown and not a fabricated or incorrect answer value. The omission is minor for this scalar: it loses the exact baseline comparison count without itself disproving the candidate acceptance gate."
+    },
+    {
+      "answer_id": "E2-short-summary",
+      "key": "dispatch_enabled",
+      "expected": "false",
+      "got": "unknown",
+      "classification": "missing_or_unknown_information",
+      "reason": "The original source explicitly records dispatch_enabled=false. The summary-only arm supplies no documents and drops that literal configuration key/value, while retaining that the benchmark was preview-only and no dispatch or inventory mutation occurred. Thus the source is not unknown and the execution boundary is still known; only the exact flag/readback is absent. An unknown scalar does not equal the source’s false value. On a literal configuration-field reading, withholding an unquoted flag is defensible: no dispatch event by itself does not prove which configuration mechanism prevented it. On a looser operational reading the supplied preview-only boundary already communicates disabled execution. This review therefore attributes the failed exact field to summary loss of the explicit flag, records the preserved semantic boundary, and does not classify the answer as fabricated or as claiming real dispatch. Minor severity is specific to this field; the answer retains the blocking identifier mismatch and does not authorize or perform dispatch."
+    },
+    {
+      "answer_id": "E3-short-summary",
+      "key": "rendered_page_count",
+      "expected": "18",
+      "got": "unknown",
+      "classification": "missing_or_unknown_information",
+      "reason": "The retained source job record reports 18 rendered pages. This is known metadata, not a claim that 18 pages of table content were inspected or verified against R7. The generated summary discusses page count only generically and omits 18; the answerer receives no documents. Unknown is therefore justified for the exact count from its visible evidence, but it still fails recovery of a known requested source field. The loss occurs in summary generation, not because the original page count is unknown. The answer correctly treats completion/count metadata as insufficient to certify actual table revision, a separate question."
+    },
+    {
+      "answer_id": "E3-short-summary",
+      "key": "retained_preview_page_count",
+      "expected": "1",
+      "got": "unknown",
+      "classification": "missing_or_unknown_information",
+      "reason": "The original packet explicitly identifies page 1 and says no other page preview is retained, so the exact retained-page count is 1. The generated summary retains a cover-only preview but drops the page number and the explicit no-other-page statement. The singular preview description supplies useful partial evidence; it is not a direct archived page-count record. On a strict count-field reading, unknown avoids inventing an omitted number, while still losing a source-known scalar. This is summary loss of explicit count detail, not proof that no preview exists and not a true-source unknown. A retained cover-only image also does not verify the equipment tables."
+    },
+    {
+      "answer_id": "S2-r2-T1-prose",
+      "key": "flat10_estimated_all_in_gbp",
+      "expected": "2010",
+      "got": "2050",
+      "classification": "actual_wrong_value",
+      "reason": "The original unit packet gives Flat 10’s estimate as £2,010, while £2,050 is the user’s budget ceiling. The generated prose memory omits the exact Flat 10 amount, retains the £2,050 ceiling, and says only that the units meet the estimated all-in criterion. The latest question asks for the estimate without supplying it. Thus the generator loses the requested exact fact; the answer then substitutes the retained ceiling as an unsupported exact estimate in both prose and scalar. This is a real £40/month overstatement, not formatting. Returning unknown would have respected the answerer’s visible evidence. This is a requested cost-fact error; it does not by itself reverse the access decision."
+    },
+    {
+      "answer_id": "S2-r2-T1-state",
+      "key": "provisional_contractor_date",
+      "expected": "2027-02-19",
+      "got": "unknown",
+      "classification": "missing_or_unknown_information",
+      "reason": "The source and the actual visible memory separately preserve a provisional contractor visit of 19 February and an unknown repair-completion date. The answer’s own prose explicitly gives the provisional 19 February visit, but the requested date scalar says unknown. This is an answer-level scalar omission/inconsistency, not an unavailable contractor date or a generator omission. A cautious refusal to invent a completion date does not justify discarding the known provisional visit date. Minor severity is specific to this scalar defect because the prose preserves the date and does not promise completion."
+    },
+    {
+      "answer_id": "S2-r2-T1-state_no_sources",
+      "key": "provisional_contractor_date",
+      "expected": "2027-02-19",
+      "got": "unknown",
+      "classification": "missing_or_unknown_information",
+      "reason": "The source and the actual visible memory separately preserve a provisional contractor visit of 19 February and an unknown repair-completion date. The answer’s own prose explicitly gives the provisional 19 February visit, but the requested date scalar says unknown. This is an answer-level scalar omission/inconsistency, not an unavailable contractor date or a generator omission. A cautious refusal to invent a completion date does not justify discarding the known provisional visit date. Minor severity is specific to this scalar defect because the prose preserves the date and does not promise completion."
+    },
+    {
+      "answer_id": "S3-r2-T2-full",
+      "key": "threadleaf_refund_deadline",
+      "expected": "2027-03-03 15:00",
+      "got": "2027-03-03",
+      "classification": "missing_or_unknown_information",
+      "reason": "The requested refund cutoff is a date and time. The original source and the directly visible latest T2 question explicitly give 3 March 2027 at 15:00. The scalar retains only 2027-03-03, losing the decisive time; a date alone does not identify the same precise cutoff. The answer prose correctly states 2027-03-03 15:00, so the defect is an answer-level scalar omission/inconsistency rather than missing source information or generator loss. Minor severity is specific to this field because the usable complete cutoff remains in prose. This differs from the earlier context-resolvable missing-year dates: 15:00 is an explicit requested precision component, not a year inferable from a shared narrative timeline."
+    }
+  ]
+}

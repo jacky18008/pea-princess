@@ -1,0 +1,1757 @@
+{
+  "scope": "Prospective 36-answer blinded AI source review, then root unblinding. Not human ground truth or replacement of primary results.",
+  "interpretation": "Criterion differences include rubric interpretation. More secondary points do not establish that the primary grader was wrong or that an answer model improved.",
+  "provenance_sha256": {
+    "docs/ablation-2026-09-09/source-review-plan.json": "f1db64174e32d6bb0a958990b758a6b10ba2296106c7b7ad362ecac070a11bfa",
+    "bench/results/ablation-2026-09-09/live-v1/plan.json": "6bb1925057b23ff898723aa17fefabb8f10c4b30f20128d7c2e4e6296d561f43",
+    "bench/results/ablation-2026-09-09/live-v1/summary.json": "c87b393e68c526eedf5e58be52b5db2d7009600fb3cf1356975b4d3e07a084e1"
+  },
+  "review_file_sha256": {
+    "docs/ablation-2026-09-09/independent-rental-sample-review.json": "982e092b257a980d857413e97a88b5af03eaf426cd800387e0b1e509ea32b9a8",
+    "docs/ablation-2026-09-09/independent-retrieval-sample-review.json": "c74e296e5b6eadf0a646f0dddfdfd533bf796778433f8b351d9522ad96e008a6"
+  },
+  "totals": {
+    "answers": 36,
+    "criteria": 180,
+    "primary_required_met": 148,
+    "review_required_met": 151,
+    "criterion_disagreements": 43,
+    "answers_with_any_disagreement": 28,
+    "disagreements_by_criterion": {
+      "S1-T2-F1": 3,
+      "S1-T2-F4": 6,
+      "S2-T1-F2": 5,
+      "S2-T1-F4": 3,
+      "S3-T2-F2": 5,
+      "S3-T2-F4": 5,
+      "S3-T2-F3": 2,
+      "E1-F3": 2,
+      "E1-F4": 2,
+      "E2-F5": 5,
+      "E2-F4": 1,
+      "E3-F3": 3,
+      "E3-F4": 1
+    }
+  },
+  "per_answer": [
+    {
+      "group_id": "S1-r1-T2-group",
+      "candidate_id": "candidate_1",
+      "answer_id": "S1-r1-T2-state_no_sources",
+      "primary_required_met": 3,
+      "review_required_met": 5,
+      "required_total": 5,
+      "primary_critical_missed": [
+        "S1-T2-F1"
+      ],
+      "review_critical_missed": [],
+      "differing_criteria": [
+        "S1-T2-F1",
+        "S1-T2-F4"
+      ],
+      "review_unsupported_claims": [],
+      "review_contradictions": []
+    },
+    {
+      "group_id": "S1-r1-T2-group",
+      "candidate_id": "candidate_2",
+      "answer_id": "S1-r1-T2-state_neither",
+      "primary_required_met": 3,
+      "review_required_met": 5,
+      "required_total": 5,
+      "primary_critical_missed": [
+        "S1-T2-F1"
+      ],
+      "review_critical_missed": [],
+      "differing_criteria": [
+        "S1-T2-F1",
+        "S1-T2-F4"
+      ],
+      "review_unsupported_claims": [],
+      "review_contradictions": []
+    },
+    {
+      "group_id": "S1-r1-T2-group",
+      "candidate_id": "candidate_3",
+      "answer_id": "S1-r1-T2-state",
+      "primary_required_met": 3,
+      "review_required_met": 5,
+      "required_total": 5,
+      "primary_critical_missed": [
+        "S1-T2-F1"
+      ],
+      "review_critical_missed": [],
+      "differing_criteria": [
+        "S1-T2-F1",
+        "S1-T2-F4"
+      ],
+      "review_unsupported_claims": [],
+      "review_contradictions": []
+    },
+    {
+      "group_id": "S1-r1-T2-group",
+      "candidate_id": "candidate_4",
+      "answer_id": "S1-r1-T2-prose",
+      "primary_required_met": 4,
+      "review_required_met": 5,
+      "required_total": 5,
+      "primary_critical_missed": [],
+      "review_critical_missed": [],
+      "differing_criteria": [
+        "S1-T2-F4"
+      ],
+      "review_unsupported_claims": [],
+      "review_contradictions": []
+    },
+    {
+      "group_id": "S1-r1-T2-group",
+      "candidate_id": "candidate_5",
+      "answer_id": "S1-r1-T2-state_no_updates",
+      "primary_required_met": 3,
+      "review_required_met": 4,
+      "required_total": 5,
+      "primary_critical_missed": [],
+      "review_critical_missed": [],
+      "differing_criteria": [
+        "S1-T2-F4"
+      ],
+      "review_unsupported_claims": [
+        {
+          "claim": "Mosslantern otherwise still meets the stated area, desk, commute, and preferred separate-bedroom requirements",
+          "category": "unqualified_inference_from_reported_properties",
+          "severity": "minor",
+          "reason": "The area and bedroom are supported, but desk clearance and route time are only reported plan/route claims in available memory F23/F24 (source U2). No physical desk check or reliable journey measurement is supplied. The sentence drops that qualification. This is an overstatement of support, not proof that either property claim is false."
+        }
+      ],
+      "review_contradictions": []
+    },
+    {
+      "group_id": "S1-r1-T2-group",
+      "candidate_id": "candidate_6",
+      "answer_id": "S1-r1-T2-full",
+      "primary_required_met": 4,
+      "review_required_met": 5,
+      "required_total": 5,
+      "primary_critical_missed": [],
+      "review_critical_missed": [],
+      "differing_criteria": [
+        "S1-T2-F4"
+      ],
+      "review_unsupported_claims": [],
+      "review_contradictions": []
+    },
+    {
+      "group_id": "S2-r2-T1-group",
+      "candidate_id": "candidate_1",
+      "answer_id": "S2-r2-T1-state_neither",
+      "primary_required_met": 5,
+      "review_required_met": 3,
+      "required_total": 5,
+      "primary_critical_missed": [],
+      "review_critical_missed": [
+        "S2-T1-F2"
+      ],
+      "differing_criteria": [
+        "S2-T1-F2",
+        "S2-T1-F4"
+      ],
+      "review_unsupported_claims": [
+        {
+          "issue_id": "S2-c1-chronology",
+          "claim": "A reported earlier “working” status conflicts with that documentation",
+          "category": "unsupported_temporal_attribution",
+          "severity": "minor",
+          "reason": "The supplied memory lists working and out-of-service facts, but has no dates, status/supersession markers or explicit chronology. The ordering is true in full-reference U3, yet not established by the candidate’s actual visible text. The outage itself is directly supported and the practical refusal is unaffected."
+        }
+      ],
+      "review_contradictions": []
+    },
+    {
+      "group_id": "S2-r2-T1-group",
+      "candidate_id": "candidate_2",
+      "answer_id": "S2-r2-T1-prose",
+      "primary_required_met": 3,
+      "review_required_met": 2,
+      "required_total": 5,
+      "primary_critical_missed": [],
+      "review_critical_missed": [
+        "S2-T1-F2"
+      ],
+      "differing_criteria": [
+        "S2-T1-F2"
+      ],
+      "review_unsupported_claims": [
+        {
+          "issue_id": "S2-c2-cost",
+          "claim": "flat10_estimated_all_in_gbp=2050, source_ids=[memory]",
+          "category": "unsupported_source_attribution",
+          "severity": "major",
+          "reason": "The actual memory has the £2,050 user ceiling and a general statement that both unit estimates meet it, but no exact Flat 10 cost. It does not support attributing 2050 to that property estimate. This is the same underlying issue as the cost contradiction, not a second independent factual error."
+        }
+      ],
+      "review_contradictions": [
+        {
+          "issue_id": "S2-c2-cost",
+          "claim": "Flat 10 estimated all-in: £2,050/month (estimate)",
+          "category": "wrong_property_value",
+          "severity": "major",
+          "reason": "Full-reference U2 states Flat 10’s estimate is £2,010; U1’s £2,050 is the user cap. The facts row also returns 2050. The available memory lacks 2010, so this is false completion rather than honest abstention."
+        }
+      ]
+    },
+    {
+      "group_id": "S2-r2-T1-group",
+      "candidate_id": "candidate_3",
+      "answer_id": "S2-r2-T1-state_no_sources",
+      "primary_required_met": 5,
+      "review_required_met": 3,
+      "required_total": 5,
+      "primary_critical_missed": [],
+      "review_critical_missed": [
+        "S2-T1-F2"
+      ],
+      "differing_criteria": [
+        "S2-T1-F2",
+        "S2-T1-F4"
+      ],
+      "review_unsupported_claims": [],
+      "review_contradictions": [
+        {
+          "issue_id": "S2-c3-contractor",
+          "claim": "facts.provisional_contractor_date = unknown",
+          "category": "scalar_prose_and_source_inconsistency",
+          "severity": "major",
+          "reason": "Prose states “The contractor visit is only provisional for 19 February”; the cited visible F27 also says 19 February. Full-reference U3 places the provisional visit on 19 February 2027. Only completion is unknown. The correct prose does not erase the inconsistent scalar."
+        }
+      ]
+    },
+    {
+      "group_id": "S2-r2-T1-group",
+      "candidate_id": "candidate_4",
+      "answer_id": "S2-r2-T1-full",
+      "primary_required_met": 5,
+      "review_required_met": 5,
+      "required_total": 5,
+      "primary_critical_missed": [],
+      "review_critical_missed": [],
+      "differing_criteria": [],
+      "review_unsupported_claims": [],
+      "review_contradictions": []
+    },
+    {
+      "group_id": "S2-r2-T1-group",
+      "candidate_id": "candidate_5",
+      "answer_id": "S2-r2-T1-state",
+      "primary_required_met": 5,
+      "review_required_met": 3,
+      "required_total": 5,
+      "primary_critical_missed": [],
+      "review_critical_missed": [
+        "S2-T1-F2"
+      ],
+      "differing_criteria": [
+        "S2-T1-F2",
+        "S2-T1-F4"
+      ],
+      "review_unsupported_claims": [
+        {
+          "issue_id": "S2-c5-zero-source",
+          "claim": "maximum_permitted_steps=0, source_ids=[memory]",
+          "category": "unsupported_source_attribution",
+          "severity": "minor",
+          "reason": "This memory still contains “previously fine” stairs and a not-yet-final possible access change; it does not contain a zero-step limit. The actual latest T1 question supplies zero steps. Citing memory alone misattributes the correct fact."
+        }
+      ],
+      "review_contradictions": [
+        {
+          "issue_id": "S2-c5-contractor",
+          "claim": "facts.provisional_contractor_date = unknown",
+          "category": "scalar_prose_and_source_inconsistency",
+          "severity": "major",
+          "reason": "The answer prose states the provisional visit is 19 February, and visible memory F27 quotes that U3 date. “unknown” belongs to repair completion, not the provisional appointment. Correct prose does not erase the contradictory scalar."
+        }
+      ]
+    },
+    {
+      "group_id": "S2-r2-T1-group",
+      "candidate_id": "candidate_6",
+      "answer_id": "S2-r2-T1-state_no_updates",
+      "primary_required_met": 5,
+      "review_required_met": 4,
+      "required_total": 5,
+      "primary_critical_missed": [],
+      "review_critical_missed": [
+        "S2-T1-F2"
+      ],
+      "differing_criteria": [
+        "S2-T1-F2"
+      ],
+      "review_unsupported_claims": [
+        {
+          "issue_id": "S2-c6-zero-source",
+          "claim": "maximum_permitted_steps=0, source_ids=[memory]",
+          "category": "unsupported_source_attribution",
+          "severity": "minor",
+          "reason": "Zero steps occurs in available latest T1, not this memory. The rule itself is correct; its memory-only attribution is not supported."
+        },
+        {
+          "issue_id": "S2-c6-chronology",
+          "claim": "The earlier statement that the lift was working conflicts with the later fault notice",
+          "category": "unsupported_temporal_attribution",
+          "severity": "minor",
+          "reason": "Visible memory quotes both statements under U3 but strips dates and supersession status. Full-reference U3 establishes the chronology; the quoted snippets alone do not. The supported outage and refusal are unaffected."
+        }
+      ],
+      "review_contradictions": []
+    },
+    {
+      "group_id": "S3-r1-T2-group",
+      "candidate_id": "candidate_1",
+      "answer_id": "S3-r1-T2-state_no_updates",
+      "primary_required_met": 3,
+      "review_required_met": 5,
+      "required_total": 5,
+      "primary_critical_missed": [
+        "S3-T2-F2"
+      ],
+      "review_critical_missed": [],
+      "differing_criteria": [
+        "S3-T2-F2",
+        "S3-T2-F4"
+      ],
+      "review_unsupported_claims": [],
+      "review_contradictions": []
+    },
+    {
+      "group_id": "S3-r1-T2-group",
+      "candidate_id": "candidate_2",
+      "answer_id": "S3-r1-T2-state_neither",
+      "primary_required_met": 2,
+      "review_required_met": 4,
+      "required_total": 5,
+      "primary_critical_missed": [
+        "S3-T2-F2"
+      ],
+      "review_critical_missed": [],
+      "differing_criteria": [
+        "S3-T2-F2",
+        "S3-T2-F4"
+      ],
+      "review_unsupported_claims": [
+        {
+          "issue_id": "S3-c2-source-current_certificate_flat",
+          "claim": "current_certificate_flat=Flat 12B, 52 Foxbarrel Reach; source_ids=[memory]",
+          "category": "unsupported_source_attribution",
+          "severity": "minor",
+          "reason": "The visible memory distinguishes the target Flat 12B from its then-supplied EPC for Flat 12 (f22). The new target-specific certificate appears in T2, not memory; target identity alone does not establish current certificate identity. The value itself is correct against actual latest T2; this is not a false current fact or prose/scalar contradiction."
+        },
+        {
+          "issue_id": "S3-c2-source-current_certificate_area_m2",
+          "claim": "current_certificate_area_m2=44; source_ids=[memory]",
+          "category": "unsupported_source_attribution",
+          "severity": "minor",
+          "reason": "Visible memory contains listing 47 m² and old EPC 38 m², not 44 m². T2 supplies the new official area. The value itself is correct against actual latest T2; this is not a false current fact or prose/scalar contradiction."
+        },
+        {
+          "issue_id": "S3-c2-source-current_named_payee",
+          "claim": "current_named_payee=Foxbarrel Residential Ltd; source_ids=[memory]",
+          "category": "unsupported_source_attribution",
+          "severity": "minor",
+          "reason": "Memory names the company as invoice issuer (f27) but L. Cress as payee (f30). Only T2 reports replacement of the named recipient. A company appearing elsewhere in memory does not support the changed payee role. The value itself is correct against actual latest T2; this is not a false current fact or prose/scalar contradiction."
+        },
+        {
+          "issue_id": "S3-c2-source-threadleaf_refund_deadline",
+          "claim": "threadleaf_refund_deadline=2027-03-03T15:00; source_ids=[memory]",
+          "category": "unsupported_source_attribution",
+          "severity": "minor",
+          "reason": "Memory f46 records an unknown refund cutoff. The supplied T2 establishes the new conditional cutoff. The value itself is correct against actual latest T2; this is not a false current fact or prose/scalar contradiction."
+        }
+      ],
+      "review_contradictions": []
+    },
+    {
+      "group_id": "S3-r1-T2-group",
+      "candidate_id": "candidate_3",
+      "answer_id": "S3-r1-T2-state_no_sources",
+      "primary_required_met": 3,
+      "review_required_met": 4,
+      "required_total": 5,
+      "primary_critical_missed": [],
+      "review_critical_missed": [],
+      "differing_criteria": [
+        "S3-T2-F4"
+      ],
+      "review_unsupported_claims": [],
+      "review_contradictions": []
+    },
+    {
+      "group_id": "S3-r1-T2-group",
+      "candidate_id": "candidate_4",
+      "answer_id": "S3-r1-T2-state",
+      "primary_required_met": 3,
+      "review_required_met": 4,
+      "required_total": 5,
+      "primary_critical_missed": [
+        "S3-T2-F2"
+      ],
+      "review_critical_missed": [],
+      "differing_criteria": [
+        "S3-T2-F2",
+        "S3-T2-F3",
+        "S3-T2-F4"
+      ],
+      "review_unsupported_claims": [],
+      "review_contradictions": []
+    },
+    {
+      "group_id": "S3-r1-T2-group",
+      "candidate_id": "candidate_5",
+      "answer_id": "S3-r1-T2-prose",
+      "primary_required_met": 2,
+      "review_required_met": 3,
+      "required_total": 5,
+      "primary_critical_missed": [
+        "S3-T2-F2"
+      ],
+      "review_critical_missed": [],
+      "differing_criteria": [
+        "S3-T2-F2"
+      ],
+      "review_unsupported_claims": [],
+      "review_contradictions": []
+    },
+    {
+      "group_id": "S3-r1-T2-group",
+      "candidate_id": "candidate_6",
+      "answer_id": "S3-r1-T2-full",
+      "primary_required_met": 3,
+      "review_required_met": 4,
+      "required_total": 5,
+      "primary_critical_missed": [
+        "S3-T2-F2"
+      ],
+      "review_critical_missed": [],
+      "differing_criteria": [
+        "S3-T2-F2",
+        "S3-T2-F3",
+        "S3-T2-F4"
+      ],
+      "review_unsupported_claims": [],
+      "review_contradictions": []
+    },
+    {
+      "group_id": "E1-long",
+      "candidate_id": "candidate_1",
+      "answer_id": "E1-long-raw_full",
+      "primary_required_met": 5,
+      "review_required_met": 5,
+      "required_total": 5,
+      "primary_critical_missed": [],
+      "review_critical_missed": [],
+      "differing_criteria": [],
+      "review_unsupported_claims": [],
+      "review_contradictions": []
+    },
+    {
+      "group_id": "E1-long",
+      "candidate_id": "candidate_2",
+      "answer_id": "E1-long-oracle",
+      "primary_required_met": 5,
+      "review_required_met": 5,
+      "required_total": 5,
+      "primary_critical_missed": [],
+      "review_critical_missed": [],
+      "differing_criteria": [],
+      "review_unsupported_claims": [],
+      "review_contradictions": []
+    },
+    {
+      "group_id": "E1-long",
+      "candidate_id": "candidate_3",
+      "answer_id": "E1-long-full",
+      "primary_required_met": 5,
+      "review_required_met": 5,
+      "required_total": 5,
+      "primary_critical_missed": [],
+      "review_critical_missed": [],
+      "differing_criteria": [],
+      "review_unsupported_claims": [],
+      "review_contradictions": []
+    },
+    {
+      "group_id": "E1-long",
+      "candidate_id": "candidate_4",
+      "answer_id": "E1-long-lexical",
+      "primary_required_met": 4,
+      "review_required_met": 4,
+      "required_total": 5,
+      "primary_critical_missed": [],
+      "review_critical_missed": [],
+      "differing_criteria": [],
+      "review_unsupported_claims": [],
+      "review_contradictions": []
+    },
+    {
+      "group_id": "E1-long",
+      "candidate_id": "candidate_5",
+      "answer_id": "E1-long-adaptive",
+      "primary_required_met": 3,
+      "review_required_met": 5,
+      "required_total": 5,
+      "primary_critical_missed": [],
+      "review_critical_missed": [],
+      "differing_criteria": [
+        "E1-F3",
+        "E1-F4"
+      ],
+      "review_unsupported_claims": [],
+      "review_contradictions": []
+    },
+    {
+      "group_id": "E1-long",
+      "candidate_id": "candidate_6",
+      "answer_id": "E1-long-summary",
+      "primary_required_met": 3,
+      "review_required_met": 5,
+      "required_total": 5,
+      "primary_critical_missed": [],
+      "review_critical_missed": [],
+      "differing_criteria": [
+        "E1-F3",
+        "E1-F4"
+      ],
+      "review_unsupported_claims": [],
+      "review_contradictions": []
+    },
+    {
+      "group_id": "E2-short",
+      "candidate_id": "candidate_1",
+      "answer_id": "E2-short-lexical",
+      "primary_required_met": 5,
+      "review_required_met": 4,
+      "required_total": 5,
+      "primary_critical_missed": [],
+      "review_critical_missed": [],
+      "differing_criteria": [
+        "E2-F5"
+      ],
+      "review_unsupported_claims": [],
+      "review_contradictions": []
+    },
+    {
+      "group_id": "E2-short",
+      "candidate_id": "candidate_2",
+      "answer_id": "E2-short-oracle",
+      "primary_required_met": 5,
+      "review_required_met": 4,
+      "required_total": 5,
+      "primary_critical_missed": [],
+      "review_critical_missed": [],
+      "differing_criteria": [
+        "E2-F5"
+      ],
+      "review_unsupported_claims": [],
+      "review_contradictions": []
+    },
+    {
+      "group_id": "E2-short",
+      "candidate_id": "candidate_3",
+      "answer_id": "E2-short-raw_full",
+      "primary_required_met": 5,
+      "review_required_met": 4,
+      "required_total": 5,
+      "primary_critical_missed": [],
+      "review_critical_missed": [],
+      "differing_criteria": [
+        "E2-F5"
+      ],
+      "review_unsupported_claims": [],
+      "review_contradictions": []
+    },
+    {
+      "group_id": "E2-short",
+      "candidate_id": "candidate_4",
+      "answer_id": "E2-short-adaptive",
+      "primary_required_met": 5,
+      "review_required_met": 4,
+      "required_total": 5,
+      "primary_critical_missed": [],
+      "review_critical_missed": [],
+      "differing_criteria": [
+        "E2-F5"
+      ],
+      "review_unsupported_claims": [],
+      "review_contradictions": []
+    },
+    {
+      "group_id": "E2-short",
+      "candidate_id": "candidate_5",
+      "answer_id": "E2-short-summary",
+      "primary_required_met": 5,
+      "review_required_met": 4,
+      "required_total": 5,
+      "primary_critical_missed": [],
+      "review_critical_missed": [],
+      "differing_criteria": [
+        "E2-F4"
+      ],
+      "review_unsupported_claims": [],
+      "review_contradictions": []
+    },
+    {
+      "group_id": "E2-short",
+      "candidate_id": "candidate_6",
+      "answer_id": "E2-short-full",
+      "primary_required_met": 5,
+      "review_required_met": 4,
+      "required_total": 5,
+      "primary_critical_missed": [],
+      "review_critical_missed": [],
+      "differing_criteria": [
+        "E2-F5"
+      ],
+      "review_unsupported_claims": [],
+      "review_contradictions": []
+    },
+    {
+      "group_id": "E3-long",
+      "candidate_id": "candidate_1",
+      "answer_id": "E3-long-lexical",
+      "primary_required_met": 5,
+      "review_required_met": 4,
+      "required_total": 5,
+      "primary_critical_missed": [],
+      "review_critical_missed": [],
+      "differing_criteria": [
+        "E3-F3"
+      ],
+      "review_unsupported_claims": [],
+      "review_contradictions": []
+    },
+    {
+      "group_id": "E3-long",
+      "candidate_id": "candidate_2",
+      "answer_id": "E3-long-summary",
+      "primary_required_met": 5,
+      "review_required_met": 4,
+      "required_total": 5,
+      "primary_critical_missed": [],
+      "review_critical_missed": [],
+      "differing_criteria": [
+        "E3-F3"
+      ],
+      "review_unsupported_claims": [],
+      "review_contradictions": []
+    },
+    {
+      "group_id": "E3-long",
+      "candidate_id": "candidate_3",
+      "answer_id": "E3-long-raw_full",
+      "primary_required_met": 5,
+      "review_required_met": 5,
+      "required_total": 5,
+      "primary_critical_missed": [],
+      "review_critical_missed": [],
+      "differing_criteria": [],
+      "review_unsupported_claims": [],
+      "review_contradictions": []
+    },
+    {
+      "group_id": "E3-long",
+      "candidate_id": "candidate_4",
+      "answer_id": "E3-long-oracle",
+      "primary_required_met": 4,
+      "review_required_met": 4,
+      "required_total": 5,
+      "primary_critical_missed": [],
+      "review_critical_missed": [],
+      "differing_criteria": [],
+      "review_unsupported_claims": [],
+      "review_contradictions": []
+    },
+    {
+      "group_id": "E3-long",
+      "candidate_id": "candidate_5",
+      "answer_id": "E3-long-full",
+      "primary_required_met": 5,
+      "review_required_met": 5,
+      "required_total": 5,
+      "primary_critical_missed": [],
+      "review_critical_missed": [],
+      "differing_criteria": [],
+      "review_unsupported_claims": [],
+      "review_contradictions": []
+    },
+    {
+      "group_id": "E3-long",
+      "candidate_id": "candidate_6",
+      "answer_id": "E3-long-adaptive",
+      "primary_required_met": 5,
+      "review_required_met": 3,
+      "required_total": 5,
+      "primary_critical_missed": [],
+      "review_critical_missed": [],
+      "differing_criteria": [
+        "E3-F3",
+        "E3-F4"
+      ],
+      "review_unsupported_claims": [],
+      "review_contradictions": []
+    }
+  ],
+  "criterion_disagreements": [
+    {
+      "answer_id": "S1-r1-T2-state_no_sources",
+      "criterion_id": "S1-T2-F1",
+      "rubric": {
+        "id": "S1-T2-F1",
+        "description": "Retain T1’s current £2,130 all-in ceiling, 41 m² minimum and studio acceptance; do not let historical thresholds, property area or the assistant’s prior answer overwrite those user requirements.",
+        "evidence_ids": [
+          "U3",
+          "U5",
+          "T1",
+          "T2"
+        ],
+        "severity": "critical"
+      },
+      "primary": {
+        "id": "S1-T2-F1",
+        "applicable": true,
+        "met": false,
+        "reason": "It correctly states “£2,130 cap” and “current minimum is 41 m²,” but does not communicate the retained acceptance of a studio conditional on desk fit."
+      },
+      "independent_source_review": {
+        "id": "S1-T2-F1",
+        "met": true,
+        "reason": "Answer span: “Your current minimum is 41 m²”. The prose also gives the £2,130 cap and distinguishes the 47/43 m² certificate areas from that minimum. Available memory F49/F50 preserves the current thresholds and F51/F52 studio acceptance; the response rejects Pennythorn for cost, not layout. T1/T2 in the full reference support this use."
+      }
+    },
+    {
+      "answer_id": "S1-r1-T2-state_no_sources",
+      "criterion_id": "S1-T2-F4",
+      "rubric": {
+        "id": "S1-T2-F4",
+        "description": "Attribute Mosslantern’s rent reduction to M-C2 and Pennythorn’s higher utility estimate to the agent’s usage-sheet update, preserving the distinction between a changed rent quote and an uncapped running-cost estimate.",
+        "evidence_ids": [
+          "U4",
+          "T2"
+        ],
+        "severity": "major"
+      },
+      "primary": {
+        "id": "S1-T2-F4",
+        "applicable": true,
+        "met": false,
+        "reason": "It identifies the changed rent and utility lines, but does not attribute the rent to M-C2 or the Pennythorn update to the agent’s previous-occupant usage sheet as required."
+      },
+      "independent_source_review": {
+        "id": "S1-T2-F4",
+        "met": true,
+        "reason": "Answer span: “Pennythorn’s utility estimate rose from £160 to £240”. It keeps the rent replacement distinct from an estimated utility line and ties the changed values to T2 in the fact rows. T2 explicitly supplies M-C2 and the usage-sheet update. I accept that source anchor plus the correct differentiated lines as substantive attribution; repeating both document-origin phrases verbatim is not required."
+      }
+    },
+    {
+      "answer_id": "S1-r1-T2-state_neither",
+      "criterion_id": "S1-T2-F1",
+      "rubric": {
+        "id": "S1-T2-F1",
+        "description": "Retain T1’s current £2,130 all-in ceiling, 41 m² minimum and studio acceptance; do not let historical thresholds, property area or the assistant’s prior answer overwrite those user requirements.",
+        "evidence_ids": [
+          "U3",
+          "U5",
+          "T1",
+          "T2"
+        ],
+        "severity": "critical"
+      },
+      "primary": {
+        "id": "S1-T2-F1",
+        "applicable": true,
+        "met": false,
+        "reason": "It correctly retains “£2,130/month all-in” and “41 m²,” but never communicates that studios remain acceptable if the desk fits."
+      },
+      "independent_source_review": {
+        "id": "S1-T2-F1",
+        "met": true,
+        "reason": "Answer span: “Your current cap is £2,130/month all-in and minimum internal area is 41 m²”. These current values exist in available memory F49/F50 despite historical values elsewhere in the same memory. It says both certificate areas clear the minimum and excludes Pennythorn on cost, without reviving the withdrawn studio rule (T1/T2)."
+      }
+    },
+    {
+      "answer_id": "S1-r1-T2-state_neither",
+      "criterion_id": "S1-T2-F4",
+      "rubric": {
+        "id": "S1-T2-F4",
+        "description": "Attribute Mosslantern’s rent reduction to M-C2 and Pennythorn’s higher utility estimate to the agent’s usage-sheet update, preserving the distinction between a changed rent quote and an uncapped running-cost estimate.",
+        "evidence_ids": [
+          "U4",
+          "T2"
+        ],
+        "severity": "major"
+      },
+      "primary": {
+        "id": "S1-T2-F4",
+        "applicable": true,
+        "met": false,
+        "reason": "It describes the rent and utility changes but omits that the former came from M-C2 and the latter from the agent’s previous-occupant usage sheet."
+      },
+      "independent_source_review": {
+        "id": "S1-T2-F4",
+        "met": true,
+        "reason": "Answer span: “Mosslantern’s rent fell from £1,850 to £1,770, while Pennythorn’s utility estimate rose from £160 to £240”. This correctly distinguishes the two current source lines, labels the utility number an estimate, and cites their source T2 in the fact rows. T2 contains their respective landlord M-C2 and agent/usage-sheet origins; no contradictory or invented provenance is asserted."
+      }
+    },
+    {
+      "answer_id": "S1-r1-T2-state",
+      "criterion_id": "S1-T2-F1",
+      "rubric": {
+        "id": "S1-T2-F1",
+        "description": "Retain T1’s current £2,130 all-in ceiling, 41 m² minimum and studio acceptance; do not let historical thresholds, property area or the assistant’s prior answer overwrite those user requirements.",
+        "evidence_ids": [
+          "U3",
+          "U5",
+          "T1",
+          "T2"
+        ],
+        "severity": "critical"
+      },
+      "primary": {
+        "id": "S1-T2-F1",
+        "applicable": true,
+        "met": false,
+        "reason": "It states the current “£2,130/month” cap and “41 m²” minimum but does not retain or mention studio acceptance subject to desk fit."
+      },
+      "independent_source_review": {
+        "id": "S1-T2-F1",
+        "met": true,
+        "reason": "Answer span: “current all-in cap is £2,130/month and minimum internal area is 41 m²”. Available memory F49/F50 quotes T1 and carries supersession status. It retains those thresholds in prose and scalar rows without substituting a certificate area or treating the studio as prohibited."
+      }
+    },
+    {
+      "answer_id": "S1-r1-T2-state",
+      "criterion_id": "S1-T2-F4",
+      "rubric": {
+        "id": "S1-T2-F4",
+        "description": "Attribute Mosslantern’s rent reduction to M-C2 and Pennythorn’s higher utility estimate to the agent’s usage-sheet update, preserving the distinction between a changed rent quote and an uncapped running-cost estimate.",
+        "evidence_ids": [
+          "U4",
+          "T2"
+        ],
+        "severity": "major"
+      },
+      "primary": {
+        "id": "S1-T2-F4",
+        "applicable": true,
+        "met": false,
+        "reason": "Although it distinguishes the rent reduction from the utility increase, it does not name M-C2 or attribute Pennythorn’s figure to the agent’s usage-sheet update."
+      },
+      "independent_source_review": {
+        "id": "S1-T2-F4",
+        "met": true,
+        "reason": "Answer span: “Pennythorn’s utilities rose by £80”. Together with “Mosslantern’s rent fell by £80”, the current component sums, “Both totals remain estimates” and T2 fact-source anchors, this preserves the distinct replacements and source status. It does not repeat the usage-sheet story, but does not invent another basis."
+      }
+    },
+    {
+      "answer_id": "S1-r1-T2-prose",
+      "criterion_id": "S1-T2-F4",
+      "rubric": {
+        "id": "S1-T2-F4",
+        "description": "Attribute Mosslantern’s rent reduction to M-C2 and Pennythorn’s higher utility estimate to the agent’s usage-sheet update, preserving the distinction between a changed rent quote and an uncapped running-cost estimate.",
+        "evidence_ids": [
+          "U4",
+          "T2"
+        ],
+        "severity": "major"
+      },
+      "primary": {
+        "id": "S1-T2-F4",
+        "applicable": true,
+        "met": false,
+        "reason": "It identifies both changes but does not attribute the rent reduction specifically to M-C2 or the utility increase to the agent’s previous-occupant usage sheet."
+      },
+      "independent_source_review": {
+        "id": "S1-T2-F4",
+        "met": true,
+        "reason": "Answer span: “Pennythorn’s utility estimate increase from £160 to £240”. The answer separates the rent reduction from the utility-estimate increase, cites available latest_user_question for those values, and says both totals remain estimates. latest_user_question is the packet’s T2 alias, not an unavailable source."
+      }
+    },
+    {
+      "answer_id": "S1-r1-T2-state_no_updates",
+      "criterion_id": "S1-T2-F4",
+      "rubric": {
+        "id": "S1-T2-F4",
+        "description": "Attribute Mosslantern’s rent reduction to M-C2 and Pennythorn’s higher utility estimate to the agent’s usage-sheet update, preserving the distinction between a changed rent quote and an uncapped running-cost estimate.",
+        "evidence_ids": [
+          "U4",
+          "T2"
+        ],
+        "severity": "major"
+      },
+      "primary": {
+        "id": "S1-T2-F4",
+        "applicable": true,
+        "met": false,
+        "reason": "It distinguishes the £80 rent reduction from the £80 utility increase but omits M-C2 and the agent’s previous-occupant usage-sheet provenance."
+      },
+      "independent_source_review": {
+        "id": "S1-T2-F4",
+        "met": true,
+        "reason": "Answer span: “Pennythorn’s updated utilities estimate is £240”. The component distinction and estimate status are preserved, and fact rows cite T2 for both updates. This is adequate substantive source attribution even without restating M-C2’s name and the previous-occupant usage-sheet detail."
+      }
+    },
+    {
+      "answer_id": "S1-r1-T2-full",
+      "criterion_id": "S1-T2-F4",
+      "rubric": {
+        "id": "S1-T2-F4",
+        "description": "Attribute Mosslantern’s rent reduction to M-C2 and Pennythorn’s higher utility estimate to the agent’s usage-sheet update, preserving the distinction between a changed rent quote and an uncapped running-cost estimate.",
+        "evidence_ids": [
+          "U4",
+          "T2"
+        ],
+        "severity": "major"
+      },
+      "primary": {
+        "id": "S1-T2-F4",
+        "applicable": true,
+        "met": false,
+        "reason": "It correctly names “M-C2” for Mosslantern and treats Pennythorn’s £240 as a replacement estimate, but omits that Pennythorn’s agent derived it from the previous occupant’s usage sheet."
+      },
+      "independent_source_review": {
+        "id": "S1-T2-F4",
+        "met": true,
+        "reason": "Answer span: “M-C2 reduced Mosslantern’s rent from £1,850 to £1,770”. It names the rent quote, contrasts it with Pennythorn’s replacement utility estimate and cites T2. The current user message supplies the utility update’s usage-sheet provenance; the answer preserves its estimate status without claiming a fixed bill."
+      }
+    },
+    {
+      "answer_id": "S2-r2-T1-state_neither",
+      "criterion_id": "S2-T1-F2",
+      "rubric": {
+        "id": "S2-T1-F2",
+        "description": "Use CM-11 as the current operating evidence: the only passenger lift is out of service, contractor visit provisionally 19 February, completion unknown. The 12 January email about a lift existing does not resolve the outage.",
+        "evidence_ids": [
+          "U2",
+          "U3",
+          "T1"
+        ],
+        "severity": "critical"
+      },
+      "primary": {
+        "id": "S2-T1-F2",
+        "applicable": true,
+        "met": true,
+        "reason": "“sole passenger lift is documented out of service… only a provisional contractor visit on 19 February” correctly uses the current outage evidence and does not treat the earlier working report as current."
+      },
+      "independent_source_review": {
+        "id": "S2-T1-F2",
+        "met": false,
+        "reason": "It correctly gives the current outage and provisional 19 February visit, but discusses an “earlier ‘working’ status” instead of explaining why the later existence-only email does not resolve CM-11. The full reference U3 contains that distinction; this candidate’s memory omits the later email. That unavailable-source omission is a coverage miss, not a false assertion that the lift works."
+      }
+    },
+    {
+      "answer_id": "S2-r2-T1-state_neither",
+      "criterion_id": "S2-T1-F4",
+      "rubric": {
+        "id": "S2-T1-F4",
+        "description": "Offer a focused verification path before assigning the full viewing: obtain a dated operational update and test the complete street-entrance route/flat doorway with the user’s usual aid, recording observed barriers without invasive work or a medical judgment.",
+        "evidence_ids": [
+          "U4",
+          "U5",
+          "T1"
+        ],
+        "severity": "major"
+      },
+      "primary": {
+        "id": "S2-T1-F4",
+        "applicable": true,
+        "met": true,
+        "reason": "“Use the earlier access-only visit, if permitted, to trace the exact pavement-to-flat route with your normal aid” gives a focused complete-route test, while requiring operational evidence for Flat 10."
+      },
+      "independent_source_review": {
+        "id": "S2-T1-F4",
+        "met": false,
+        "reason": "“Use the earlier access-only visit, if permitted” and the full route with the normal aid are useful partial coverage. However, “Use the 16 January full viewing to repeat that route end-to-end” does not reserve the full slot for a flat that passes first, and no dated current operational update is explicitly requested. It asks generally for evidence of future operation instead."
+      }
+    },
+    {
+      "answer_id": "S2-r2-T1-prose",
+      "criterion_id": "S2-T1-F2",
+      "rubric": {
+        "id": "S2-T1-F2",
+        "description": "Use CM-11 as the current operating evidence: the only passenger lift is out of service, contractor visit provisionally 19 February, completion unknown. The 12 January email about a lift existing does not resolve the outage.",
+        "evidence_ids": [
+          "U2",
+          "U3",
+          "T1"
+        ],
+        "severity": "critical"
+      },
+      "primary": {
+        "id": "S2-T1-F2",
+        "applicable": true,
+        "met": true,
+        "reason": "It states the “only passenger lift is documented out of service,” the contractor visit is provisional for 19 February, and there is “no completion date.”"
+      },
+      "independent_source_review": {
+        "id": "S2-T1-F2",
+        "met": false,
+        "reason": "It gives the 11 January outage, provisional 19 February visit and unknown completion, but never explains why the later agent email about existence does not resolve operation. Its actual memory explicitly includes that later-email limitation, so this is an answer omission rather than missing input."
+      }
+    },
+    {
+      "answer_id": "S2-r2-T1-state_no_sources",
+      "criterion_id": "S2-T1-F2",
+      "rubric": {
+        "id": "S2-T1-F2",
+        "description": "Use CM-11 as the current operating evidence: the only passenger lift is out of service, contractor visit provisionally 19 February, completion unknown. The 12 January email about a lift existing does not resolve the outage.",
+        "evidence_ids": [
+          "U2",
+          "U3",
+          "T1"
+        ],
+        "severity": "critical"
+      },
+      "primary": {
+        "id": "S2-T1-F2",
+        "applicable": true,
+        "met": true,
+        "reason": "The prose correctly states the lift is “out of service,” the visit is “provisional for 19 February,” completion is unknown, and there is no alternative lift."
+      },
+      "independent_source_review": {
+        "id": "S2-T1-F2",
+        "met": false,
+        "reason": "Prose correctly says “only provisional for 19 February” and unknown completion, but the contractor-date scalar is “unknown”, contradicting both that prose and visible F27=19 February. The response also omits the later existence-only email, which its memory does not preserve. The former is a genuine scalar/prose inconsistency; the latter is incomplete coverage, not invented access approval."
+      }
+    },
+    {
+      "answer_id": "S2-r2-T1-state_no_sources",
+      "criterion_id": "S2-T1-F4",
+      "rubric": {
+        "id": "S2-T1-F4",
+        "description": "Offer a focused verification path before assigning the full viewing: obtain a dated operational update and test the complete street-entrance route/flat doorway with the user’s usual aid, recording observed barriers without invasive work or a medical judgment.",
+        "evidence_ids": [
+          "U4",
+          "U5",
+          "T1"
+        ],
+        "severity": "major"
+      },
+      "primary": {
+        "id": "S2-T1-F4",
+        "applicable": true,
+        "met": true,
+        "reason": "“Use an earlier access-only visit, if the manager permits, to test the exact pavement-to-flat route with your normal aid” supplies the focused route test, with operational verification for Flat 10 before reconsideration."
+      },
+      "independent_source_review": {
+        "id": "S2-T1-F4",
+        "met": false,
+        "reason": "The earlier permitted access-only visit and normal-aid route trial are useful, but “Use the 16 January full viewing to repeat that route” does not gate that scarce full slot on an initial route pass. The request for a confirmed working lift by the move is not an explicit dated current operational update before slot assignment."
+      }
+    },
+    {
+      "answer_id": "S2-r2-T1-state",
+      "criterion_id": "S2-T1-F2",
+      "rubric": {
+        "id": "S2-T1-F2",
+        "description": "Use CM-11 as the current operating evidence: the only passenger lift is out of service, contractor visit provisionally 19 February, completion unknown. The 12 January email about a lift existing does not resolve the outage.",
+        "evidence_ids": [
+          "U2",
+          "U3",
+          "T1"
+        ],
+        "severity": "critical"
+      },
+      "primary": {
+        "id": "S2-T1-F2",
+        "applicable": true,
+        "met": true,
+        "reason": "The prose correctly states that the only lift is out of service, there is no alternative, the contractor visit is provisional for 19 February, and no repair date is guaranteed."
+      },
+      "independent_source_review": {
+        "id": "S2-T1-F2",
+        "met": false,
+        "reason": "Prose correctly gives a provisional 19 February visit and no guaranteed repair date, but the contractor-date scalar says “unknown” while citing U3. Visible memory F27 quotes “Contractor visit provisionally 19 February”. The later existence-only email is also omitted, and that part of U3 was not retained in this memory."
+      }
+    },
+    {
+      "answer_id": "S2-r2-T1-state",
+      "criterion_id": "S2-T1-F4",
+      "rubric": {
+        "id": "S2-T1-F4",
+        "description": "Offer a focused verification path before assigning the full viewing: obtain a dated operational update and test the complete street-entrance route/flat doorway with the user’s usual aid, recording observed barriers without invasive work or a medical judgment.",
+        "evidence_ids": [
+          "U4",
+          "U5",
+          "T1"
+        ],
+        "severity": "major"
+      },
+      "primary": {
+        "id": "S2-T1-F4",
+        "applicable": true,
+        "met": true,
+        "reason": "“Use an access-only visit, if permitted, to take your normal aid along the entire pavement-to-flat route” is an appropriate focused check, with the full viewing retained as a later fallback."
+      },
+      "independent_source_review": {
+        "id": "S2-T1-F4",
+        "met": false,
+        "reason": "The permitted access-only visit with the normal aid is useful, but the full viewing is called a “fallback opportunity to repeat that full-route check”. This does not reserve the only full slot for a route already evidenced to work, and it does not explicitly seek a dated current operational update before that assignment."
+      }
+    },
+    {
+      "answer_id": "S2-r2-T1-state_no_updates",
+      "criterion_id": "S2-T1-F2",
+      "rubric": {
+        "id": "S2-T1-F2",
+        "description": "Use CM-11 as the current operating evidence: the only passenger lift is out of service, contractor visit provisionally 19 February, completion unknown. The 12 January email about a lift existing does not resolve the outage.",
+        "evidence_ids": [
+          "U2",
+          "U3",
+          "T1"
+        ],
+        "severity": "critical"
+      },
+      "primary": {
+        "id": "S2-T1-F2",
+        "applicable": true,
+        "met": true,
+        "reason": "It states that the only lift is out of service, no alternative exists, the contractor visit is provisional for 19 February, and completion is not guaranteed; it properly rejects the superseded earlier working statement."
+      },
+      "independent_source_review": {
+        "id": "S2-T1-F2",
+        "met": false,
+        "reason": "It correctly retains outage, no alternative lift and the provisional 19 February visit, but discusses “earlier ... working” versus the fault notice rather than the subsequent 12 January existence-only email. That last email is not in the supplied memory. This omission fails complete literal coverage without making the safe access refusal wrong."
+      }
+    },
+    {
+      "answer_id": "S3-r1-T2-state_no_updates",
+      "criterion_id": "S3-T2-F2",
+      "rubric": {
+        "id": "S3-T2-F2",
+        "description": "Use F-E2 for Flat 12B at 44 m²/C and the agent’s withdrawal of the same-unit claim; do not retain the old Flat 12 certificate as the target’s current evidence. The new area meets the unchanged 40 m² user minimum within the fictional packet.",
+        "evidence_ids": [
+          "U1",
+          "U2",
+          "T2"
+        ],
+        "severity": "critical"
+      },
+      "primary": {
+        "id": "S3-T2-F2",
+        "applicable": true,
+        "met": false,
+        "reason": "The response correctly states “Flat 12B, 52 Foxbarrel Reach, at 44 m² with EPC C” and treats the old discrepancy as superseded, but it never checks the 44 m² figure against the separate 40 m² minimum."
+      },
+      "independent_source_review": {
+        "id": "S3-T2-F2",
+        "met": true,
+        "reason": "It gives the replacement official extract as Flat 12B, 44 m², EPC C and explicitly notes withdrawal of the same-unit claim (T2). The unchanged 40 m² minimum in U1/memory is not recited, but the response correctly advances on the 44 m² record without retaining Flat 12/38 m² as target evidence."
+      }
+    },
+    {
+      "answer_id": "S3-r1-T2-state_no_updates",
+      "criterion_id": "S3-T2-F4",
+      "rubric": {
+        "id": "S3-T2-F4",
+        "description": "Update fallback state precisely: the old £330 quote expired, the new £345 offer remains subject to availability and unbooked, and its stated refund cutoff is now 3 March 2027 at 15:00 if booked. Do not keep unknown deadline or invent a held room.",
+        "evidence_ids": [
+          "U5",
+          "T2"
+        ],
+        "severity": "major"
+      },
+      "primary": {
+        "id": "S3-T2-F4",
+        "applicable": true,
+        "met": false,
+        "reason": "“Threadleaf is not booked. The current quote is £345, subject to availability” and the cutoff are correct, but the response omits the required update that the old £330 quote expired."
+      },
+      "independent_source_review": {
+        "id": "S3-T2-F4",
+        "met": true,
+        "reason": "“Current quote is £345, subject to availability,” “not booked,” and the conditional 2027-03-03 at 15:00 cutoff correctly replace the U5 £330/unknown-deadline record using T2. It need not repeat the expired price to use the replacement offer precisely."
+      }
+    },
+    {
+      "answer_id": "S3-r1-T2-state_neither",
+      "criterion_id": "S3-T2-F2",
+      "rubric": {
+        "id": "S3-T2-F2",
+        "description": "Use F-E2 for Flat 12B at 44 m²/C and the agent’s withdrawal of the same-unit claim; do not retain the old Flat 12 certificate as the target’s current evidence. The new area meets the unchanged 40 m² user minimum within the fictional packet.",
+        "evidence_ids": [
+          "U1",
+          "U2",
+          "T2"
+        ],
+        "severity": "critical"
+      },
+      "primary": {
+        "id": "S3-T2-F2",
+        "applicable": true,
+        "met": false,
+        "reason": "It accurately gives “Flat 12B, 52 Foxbarrel Reach, at 44 m² (rating C)” and notes withdrawal of the same-unit claim, but does not separately establish that 44 m² satisfies the 40 m² minimum."
+      },
+      "independent_source_review": {
+        "id": "S3-T2-F2",
+        "met": true,
+        "reason": "The response correctly gives Flat 12B at 44 m²/C and the agent’s withdrawal of the same-unit claim (T2). It does not repeat the unchanged 40 m² minimum, but it uses the correct replacement area without a stale unit/space rejection. Its scalar memory citations are separately audited below."
+      }
+    },
+    {
+      "answer_id": "S3-r1-T2-state_neither",
+      "criterion_id": "S3-T2-F4",
+      "rubric": {
+        "id": "S3-T2-F4",
+        "description": "Update fallback state precisely: the old £330 quote expired, the new £345 offer remains subject to availability and unbooked, and its stated refund cutoff is now 3 March 2027 at 15:00 if booked. Do not keep unknown deadline or invent a held room.",
+        "evidence_ids": [
+          "U5",
+          "T2"
+        ],
+        "severity": "major"
+      },
+      "primary": {
+        "id": "S3-T2-F4",
+        "applicable": true,
+        "met": false,
+        "reason": "The response correctly calls it a “new £345 quote,” subject to availability and unbooked, and gives the cutoff, but does not state that the old £330 quote expired."
+      },
+      "independent_source_review": {
+        "id": "S3-T2-F4",
+        "met": true,
+        "reason": "The answer correctly uses the new £345 quote, subject to availability and not booked/paid, with refund cutoff 2027-03-03 15:00 if booked (T2). It never retains the old £330 price or unknown deadline."
+      }
+    },
+    {
+      "answer_id": "S3-r1-T2-state_no_sources",
+      "criterion_id": "S3-T2-F4",
+      "rubric": {
+        "id": "S3-T2-F4",
+        "description": "Update fallback state precisely: the old £330 quote expired, the new £345 offer remains subject to availability and unbooked, and its stated refund cutoff is now 3 March 2027 at 15:00 if booked. Do not keep unknown deadline or invent a held room.",
+        "evidence_ids": [
+          "U5",
+          "T2"
+        ],
+        "severity": "major"
+      },
+      "primary": {
+        "id": "S3-T2-F4",
+        "applicable": true,
+        "met": false,
+        "reason": "“Threadleaf is not booked; the new £345 quote is subject to availability” and the stated cutoff are correct, but the response never explicitly says the old £330 quote expired."
+      },
+      "independent_source_review": {
+        "id": "S3-T2-F4",
+        "met": true,
+        "reason": "The new £345 quote, availability condition, unbooked state and stated 3 March 2027 at 15:00 cutoff if booked all match T2; no stale £330 offer or unknown deadline is used."
+      }
+    },
+    {
+      "answer_id": "S3-r1-T2-state",
+      "criterion_id": "S3-T2-F2",
+      "rubric": {
+        "id": "S3-T2-F2",
+        "description": "Use F-E2 for Flat 12B at 44 m²/C and the agent’s withdrawal of the same-unit claim; do not retain the old Flat 12 certificate as the target’s current evidence. The new area meets the unchanged 40 m² user minimum within the fictional packet.",
+        "evidence_ids": [
+          "U1",
+          "U2",
+          "T2"
+        ],
+        "severity": "critical"
+      },
+      "primary": {
+        "id": "S3-T2-F2",
+        "applicable": true,
+        "met": false,
+        "reason": "It correctly identifies “Flat 12B, 52 Foxbarrel Reach, at 44 m² (C)” as current evidence, but does not explicitly compare 44 m² with the distinct 40 m² minimum."
+      },
+      "independent_source_review": {
+        "id": "S3-T2-F2",
+        "met": true,
+        "reason": "The replacement supplied official extract is specifically Flat 12B, 44 m²/C. It treats the old mismatch as resolved rather than retaining Flat 12 as the target’s current certificate. It does not restate the 40 m² profile threshold, but makes no contrary size conclusion."
+      }
+    },
+    {
+      "answer_id": "S3-r1-T2-state",
+      "criterion_id": "S3-T2-F3",
+      "rubric": {
+        "id": "S3-T2-F3",
+        "description": "Use the corrected £240 invoice to Foxbarrel Residential Ltd, user-reported independent callback/bank check and supplied owner-authority letter; acknowledge written reservation terms now exist without treating the assistant as their independent verifier or certifying legal compliance.",
+        "evidence_ids": [
+          "U3",
+          "U4",
+          "T2"
+        ],
+        "severity": "major"
+      },
+      "primary": {
+        "id": "S3-T2-F3",
+        "applicable": true,
+        "met": true,
+        "reason": "“corrected £240 reservation invoice names Foxbarrel Residential Ltd,” the independently matched account, and the written unit-specific refund terms accurately cover the supplied payment evidence; the opening conclusion also recognizes all three gates, including authority."
+      },
+      "independent_source_review": {
+        "id": "S3-T2-F3",
+        "met": false,
+        "reason": "The £240 company invoice, independently matched account ending 4812 and written terms are correctly retained (T2), but the answer never identifies the supplied owner-authority letter or its substantive landlord-to-agent authorisation. “Your three verification gates ... answered” gives the overall conclusion without this required authority basis. This is an omission, not an incorrect payee, fabricated check or claim that the letter is still absent."
+      }
+    },
+    {
+      "answer_id": "S3-r1-T2-state",
+      "criterion_id": "S3-T2-F4",
+      "rubric": {
+        "id": "S3-T2-F4",
+        "description": "Update fallback state precisely: the old £330 quote expired, the new £345 offer remains subject to availability and unbooked, and its stated refund cutoff is now 3 March 2027 at 15:00 if booked. Do not keep unknown deadline or invent a held room.",
+        "evidence_ids": [
+          "U5",
+          "T2"
+        ],
+        "severity": "major"
+      },
+      "primary": {
+        "id": "S3-T2-F4",
+        "applicable": true,
+        "met": false,
+        "reason": "The “new Threadleaf £345 quote” is correctly described as subject to availability and unbooked with the correct cutoff, but the response does not state that the old £330 quote expired."
+      },
+      "independent_source_review": {
+        "id": "S3-T2-F4",
+        "met": true,
+        "reason": "It states the new £345 Threadleaf quote is subject to availability, not booked, and conditionally refundable by 2027-03-03 15:00. The old offer/deadline is not retained."
+      }
+    },
+    {
+      "answer_id": "S3-r1-T2-prose",
+      "criterion_id": "S3-T2-F2",
+      "rubric": {
+        "id": "S3-T2-F2",
+        "description": "Use F-E2 for Flat 12B at 44 m²/C and the agent’s withdrawal of the same-unit claim; do not retain the old Flat 12 certificate as the target’s current evidence. The new area meets the unchanged 40 m² user minimum within the fictional packet.",
+        "evidence_ids": [
+          "U1",
+          "U2",
+          "T2"
+        ],
+        "severity": "critical"
+      },
+      "primary": {
+        "id": "S3-T2-F2",
+        "applicable": true,
+        "met": false,
+        "reason": "It correctly uses the Flat 12B extract at 44 m²/C and says to use 44 rather than the listing’s 47, but it does not separately say that 44 m² meets the 40 m² requirement."
+      },
+      "independent_source_review": {
+        "id": "S3-T2-F2",
+        "met": true,
+        "reason": "It gives the exact current Flat 12B official extract at 44 m²/EPC C, and uses 44 rather than the listing’s 47 m². That listing figure is genuinely present in this candidate’s memory (from U2), so this extra comparison is supported. No unchanged 40 m² recital is required to recognise that the new official area supports progression."
+      }
+    },
+    {
+      "answer_id": "S3-r1-T2-full",
+      "criterion_id": "S3-T2-F2",
+      "rubric": {
+        "id": "S3-T2-F2",
+        "description": "Use F-E2 for Flat 12B at 44 m²/C and the agent’s withdrawal of the same-unit claim; do not retain the old Flat 12 certificate as the target’s current evidence. The new area meets the unchanged 40 m² user minimum within the fictional packet.",
+        "evidence_ids": [
+          "U1",
+          "U2",
+          "T2"
+        ],
+        "severity": "critical"
+      },
+      "primary": {
+        "id": "S3-T2-F2",
+        "applicable": true,
+        "met": false,
+        "reason": "The current record correctly says “Flat 12B, 52 Foxbarrel Reach, 44 m², C” and supersedes the old mismatch, but it does not explicitly test 44 m² against the user’s 40 m² minimum."
+      },
+      "independent_source_review": {
+        "id": "S3-T2-F2",
+        "met": true,
+        "reason": "It correctly records the replacement official Flat 12B certificate at 44 m²/C and treats Flat 12’s old certificate as corrected history, not interchangeable current evidence. The omitted recital of the 40 m² minimum does not cause any contrary size conclusion."
+      }
+    },
+    {
+      "answer_id": "S3-r1-T2-full",
+      "criterion_id": "S3-T2-F3",
+      "rubric": {
+        "id": "S3-T2-F3",
+        "description": "Use the corrected £240 invoice to Foxbarrel Residential Ltd, user-reported independent callback/bank check and supplied owner-authority letter; acknowledge written reservation terms now exist without treating the assistant as their independent verifier or certifying legal compliance.",
+        "evidence_ids": [
+          "U3",
+          "U4",
+          "T2"
+        ],
+        "severity": "major"
+      },
+      "primary": {
+        "id": "S3-T2-F3",
+        "applicable": true,
+        "met": true,
+        "reason": "It correctly states “Foxbarrel Residential Ltd; reservation amount—£240” and accurately summarizes the written credit and refund triggers while limiting what those terms establish."
+      },
+      "independent_source_review": {
+        "id": "S3-T2-F3",
+        "met": false,
+        "reason": "The corrected company payee, £240 amount, and stated credit/refund terms are accurate, but the response does not describe the completed callback/bank match or the owner-authority letter/result. The general “three stated verification gates ... answered” is a correct conclusion without the frozen criterion’s required authority and independent-recipient evidence basis. No check is falsely said to be missing or performed by the assistant."
+      }
+    },
+    {
+      "answer_id": "S3-r1-T2-full",
+      "criterion_id": "S3-T2-F4",
+      "rubric": {
+        "id": "S3-T2-F4",
+        "description": "Update fallback state precisely: the old £330 quote expired, the new £345 offer remains subject to availability and unbooked, and its stated refund cutoff is now 3 March 2027 at 15:00 if booked. Do not keep unknown deadline or invent a held room.",
+        "evidence_ids": [
+          "U5",
+          "T2"
+        ],
+        "severity": "major"
+      },
+      "primary": {
+        "id": "S3-T2-F4",
+        "applicable": true,
+        "met": false,
+        "reason": "The response accurately describes the “new £345 quote” as subject to availability, unbooked, and conditionally refundable by the correct cutoff, but does not explicitly state that the old £330 quote expired."
+      },
+      "independent_source_review": {
+        "id": "S3-T2-F4",
+        "met": true,
+        "reason": "It correctly replaces the old offer with a new £345 quote, subject to availability and unbooked, and gives the refund cutoff as 3 March 2027 at 15:00 if booked. No held accommodation or unknown deadline is invented."
+      }
+    },
+    {
+      "answer_id": "E1-long-adaptive",
+      "criterion_id": "E1-F3",
+      "rubric": {
+        "id": "E1-F3",
+        "description": "Account for the operational gate: endpoint restriction remained enabled and rollback to Larch was exercised successfully with readback/smoke results. These recorded controls support the bounded action.",
+        "evidence_ids": [
+          "E1-D01",
+          "E1-D02"
+        ],
+        "severity": "major"
+      },
+      "primary": {
+        "id": "E1-F3",
+        "applicable": true,
+        "met": false,
+        "reason": "It correctly reports that rollback was exercised and read back, but it does not state that endpoint restriction remained enabled during the comparison; “執行前後應核對…端點限制啟用” is only a proposed future check."
+      },
+      "independent_source_review": {
+        "id": "E1-F3",
+        "met": true,
+        "reason": "It describes the comparison under the same runner and restrictions, says the acceptance gate is met, and states completed same-runner rollback with “Larch was restored, two smoke scenarios passed, and runner readback showed Larch.” This communicates the operating controls in substance; the additional future endpoint check is ordinary verification, not a claim that prior controls were missing."
+      }
+    },
+    {
+      "answer_id": "E1-long-adaptive",
+      "criterion_id": "E1-F4",
+      "rubric": {
+        "id": "E1-F4",
+        "description": "Use exact source excerpts to support the decision and distinguish an approved future selection from a completed deployment; the current scheduled default remains Larch pending review.",
+        "evidence_ids": [
+          "E1-D01",
+          "E1-D02"
+        ],
+        "severity": "major"
+      },
+      "primary": {
+        "id": "E1-F4",
+        "applicable": true,
+        "met": false,
+        "reason": "The response distinguishes the pending change from execution, but all purported excerpts cite only “summary.” A model-made summary is not an exact excerpt from a source document with a source ID, so the explicit source-excerpt requirement is unmet."
+      },
+      "independent_source_review": {
+        "id": "E1-F4",
+        "met": true,
+        "reason": "It cites only exact excerpts of its available summary, records “HBR-14 尚未執行”, and gives current_scheduled_default=Larch. The admission “僅有摘要可用” matches actual visibility and is not dishonest merely because this reviewer sees full documents."
+      }
+    },
+    {
+      "answer_id": "E1-long-summary",
+      "criterion_id": "E1-F3",
+      "rubric": {
+        "id": "E1-F3",
+        "description": "Account for the operational gate: endpoint restriction remained enabled and rollback to Larch was exercised successfully with readback/smoke results. These recorded controls support the bounded action.",
+        "evidence_ids": [
+          "E1-D01",
+          "E1-D02"
+        ],
+        "severity": "major"
+      },
+      "primary": {
+        "id": "E1-F3",
+        "applicable": true,
+        "met": false,
+        "reason": "It accurately communicates successful same-runner rollback, but never clearly says the endpoint restriction remained enabled during the comparison. “相同…限制” is too nonspecific, and its later destination check is prospective."
+      },
+      "independent_source_review": {
+        "id": "E1-F3",
+        "met": true,
+        "reason": "The response presents the comparison under the same restrictions and successful same-runner rollback, and its finding gives restored Larch, two passed smoke scenarios and readback. The summary contains the enabled endpoint gate and those completed controls; the later operational checks do not negate that recorded success."
+      }
+    },
+    {
+      "answer_id": "E1-long-summary",
+      "criterion_id": "E1-F4",
+      "rubric": {
+        "id": "E1-F4",
+        "description": "Use exact source excerpts to support the decision and distinguish an approved future selection from a completed deployment; the current scheduled default remains Larch pending review.",
+        "evidence_ids": [
+          "E1-D01",
+          "E1-D02"
+        ],
+        "severity": "major"
+      },
+      "primary": {
+        "id": "E1-F4",
+        "applicable": true,
+        "met": false,
+        "reason": "It correctly says HBR-14 has not executed and Larch remains selected, but its quotations are solely from “summary,” not exact excerpts attributed to underlying source-document IDs."
+      },
+      "independent_source_review": {
+        "id": "E1-F4",
+        "met": true,
+        "reason": "The limitation says “尚無HBR-14已執行的紀錄；目前排程預設仍為Larch”. All five evidence excerpts are exact substrings of the candidate’s available summary. No original-document inspection or completed deployment is invented."
+      }
+    },
+    {
+      "answer_id": "E2-short-lexical",
+      "criterion_id": "E2-F5",
+      "rubric": {
+        "id": "E2-F5",
+        "description": "Recommend preserving opaque identifier strings or otherwise enforcing the stated contract, then validating both collision examples and suitable additional distinct-key cases against independent references before reconsideration; retaining Cedar is justified. Do not assert that a fix has already passed.",
+        "evidence_ids": [
+          "E2-D01",
+          "E2-D02"
+        ],
+        "severity": "major"
+      },
+      "primary": {
+        "id": "E2-F5",
+        "applicable": true,
+        "met": true,
+        "reason": "“修正 Birch 的不透明字串保留行為，使用固定 MFT-60 參考檔重跑” proposes a contract-preserving correction and independent frozen-reference rerun containing both collision fixtures and other identifier categories; it also correctly notes that no fixed result exists."
+      },
+      "independent_source_review": {
+        "id": "E2-F5",
+        "met": false,
+        "reason": "It usefully proposes preserving opaque identifiers and rerunning the frozen MFT-60 suite to 60/60, which includes both known collisions. However, “以固定 MFT-60 參考檔重跑” never adds suitable additional distinct-key cases as this composite frozen criterion explicitly requires. This is a verification-coverage omission, not a wrong refusal or an unsafe action recommendation."
+      }
+    },
+    {
+      "answer_id": "E2-short-oracle",
+      "criterion_id": "E2-F5",
+      "rubric": {
+        "id": "E2-F5",
+        "description": "Recommend preserving opaque identifier strings or otherwise enforcing the stated contract, then validating both collision examples and suitable additional distinct-key cases against independent references before reconsideration; retaining Cedar is justified. Do not assert that a fix has already passed.",
+        "evidence_ids": [
+          "E2-D01",
+          "E2-D02"
+        ],
+        "severity": "major"
+      },
+      "primary": {
+        "id": "E2-F5",
+        "applicable": true,
+        "met": true,
+        "reason": "“修正或關閉…數字尾碼正規化，僅保留…周邊空白修剪” followed by a frozen-reference full rerun and zero-error gate is a supported correction and verification plan covering the collision fixtures and regression cases."
+      },
+      "independent_source_review": {
+        "id": "E2-F5",
+        "met": false,
+        "reason": "“以相同凍結參考檔重跑60案” and independent confirmation of zero errors are useful. The answer never proposes additional distinct-key cases beyond those fixed 60, so it incompletely covers the literal criterion’s additional-coverage requirement. Maintaining Cedar pending this work is still the correct immediate action."
+      }
+    },
+    {
+      "answer_id": "E2-short-raw_full",
+      "criterion_id": "E2-F5",
+      "rubric": {
+        "id": "E2-F5",
+        "description": "Recommend preserving opaque identifier strings or otherwise enforcing the stated contract, then validating both collision examples and suitable additional distinct-key cases against independent references before reconsideration; retaining Cedar is justified. Do not assert that a fix has already passed.",
+        "evidence_ids": [
+          "E2-D01",
+          "E2-D02"
+        ],
+        "severity": "major"
+      },
+      "primary": {
+        "id": "E2-F5",
+        "applicable": true,
+        "met": true,
+        "reason": "“修正 Birch 後以同一凍結參考檔完整重跑，確認60/60且無錯誤再評估” is a justified verification plan; the next steps also require examining leading-zero keys and slots."
+      },
+      "independent_source_review": {
+        "id": "E2-F5",
+        "met": false,
+        "reason": "The answer proposes fixing numeric-suffix normalization and “對相同凍結 MFT-60 參考檔完整重跑”, with intermediate-key inspection. That is useful but does not explicitly add new distinct-key cases beyond the existing suite, which E2-F5 requires. No corrected result is falsely claimed."
+      }
+    },
+    {
+      "answer_id": "E2-short-adaptive",
+      "criterion_id": "E2-F5",
+      "rubric": {
+        "id": "E2-F5",
+        "description": "Recommend preserving opaque identifier strings or otherwise enforcing the stated contract, then validating both collision examples and suitable additional distinct-key cases against independent references before reconsideration; retaining Cedar is justified. Do not assert that a fix has already passed.",
+        "evidence_ids": [
+          "E2-D01",
+          "E2-D02"
+        ],
+        "severity": "major"
+      },
+      "primary": {
+        "id": "E2-F5",
+        "applicable": true,
+        "met": true,
+        "reason": "“只作容許的空白修剪” and rerunning “同一凍結參考集…確認零不符” provide a contract-aligned correction and verification before reconsideration, while retaining Cedar."
+      },
+      "independent_source_review": {
+        "id": "E2-F5",
+        "met": false,
+        "reason": "It correctly proposes preserving the trimmed string and rerunning all 60 frozen cases, but “以相同凍結參考檔重跑60個情境” does not introduce suitable additional distinct-key coverage. The literal criterion is incomplete although the immediate decision and next step are useful."
+      }
+    },
+    {
+      "answer_id": "E2-short-summary",
+      "criterion_id": "E2-F4",
+      "rubric": {
+        "id": "E2-F4",
+        "description": "Distinguish the observed wrong-target preview from actual harm: dispatch was disabled, no parcel dispatch or inventory mutation occurred, and the default remains Cedar.",
+        "evidence_ids": [
+          "E2-D01",
+          "E2-D02"
+        ],
+        "severity": "major"
+      },
+      "primary": {
+        "id": "E2-F4",
+        "applicable": true,
+        "met": true,
+        "reason": "“維持 Cedar 預設” and the limitation “沒有…部署” communicate the unchanged operational state; its recommendation not to enable or operate dispatch is consistent with the summary’s preview-only, no-dispatch boundary."
+      },
+      "independent_source_review": {
+        "id": "E2-F4",
+        "met": false,
+        "reason": "The answer does not clearly communicate that the observed evaluation was preview-only with no dispatch or inventory mutation. “不啟用或操作明日批次” is a future instruction, and dispatch_enabled is “unknown”. Its actual summary does state “preview-only” and “No dispatch, inventory mutation…occurred”. This is a missing historical boundary, not an assertion that real harm occurred. The summary does not reproduce the literal configuration flag, so unknown for that exact flag is not classified as fabricated fact."
+      }
+    },
+    {
+      "answer_id": "E2-short-full",
+      "criterion_id": "E2-F5",
+      "rubric": {
+        "id": "E2-F5",
+        "description": "Recommend preserving opaque identifier strings or otherwise enforcing the stated contract, then validating both collision examples and suitable additional distinct-key cases against independent references before reconsideration; retaining Cedar is justified. Do not assert that a fix has already passed.",
+        "evidence_ids": [
+          "E2-D01",
+          "E2-D02"
+        ],
+        "severity": "major"
+      },
+      "primary": {
+        "id": "E2-F5",
+        "applicable": true,
+        "met": true,
+        "reason": "“只修剪周邊空白、保留字串” followed by a frozen MFT-60 rerun requiring 60/60 and zero wrong targets is a contract-aligned remediation and verification step before approval."
+      },
+      "independent_source_review": {
+        "id": "E2-F5",
+        "met": false,
+        "reason": "It usefully recommends preserving strings, prohibiting numeric suffix conversion and rerunning the same frozen MFT-60 suite to zero errors. It does not add further distinct-key scenarios beyond those 60, leaving E2-F5’s explicit additional-coverage element unmet. The refusal and proposed regression check remain useful."
+      }
+    },
+    {
+      "answer_id": "E3-long-lexical",
+      "criterion_id": "E3-F3",
+      "rubric": {
+        "id": "E3-F3",
+        "description": "Identify the decisive evidence gap: original body expired, resolved input/binding not captured, and current-pointer observation occurs after the run with no historical binding/cache record. The digest has no trusted R7 reference mapping. Exact relevant excerpts should support the gap.",
+        "evidence_ids": [
+          "E3-D01",
+          "E3-D02"
+        ],
+        "severity": "major"
+      },
+      "primary": {
+        "id": "E3-F3",
+        "applicable": true,
+        "met": true,
+        "reason": "「完整PDF已依保留政策到期，封包亦無列級驗證或已解析修訂值」指出核心內容與綁定缺口；「事後指標狀態，也不能單獨回推H17啟動時」保留歷史限制，limitations亦正確指出「沒有R7-only的可信對照雜湊」。"
+      },
+      "independent_source_review": {
+        "id": "E3-F3",
+        "met": false,
+        "reason": "It correctly identifies the expired body, unrecorded binding, absent row verification and lack of an R7-only trusted digest. However, “即使取得事後指標狀態” presents later pointer evidence generically, while the limitation declines a pointer timeline because E3-D02/D03 bodies are unavailable. Its actual summary already states the 26 August observation after H17 with no start-time history; that known observation is not communicated. This leaves the specific historical-pointer part of the composite finding incomplete, rather than making its refusal wrong."
+      }
+    },
+    {
+      "answer_id": "E3-long-summary",
+      "criterion_id": "E3-F3",
+      "rubric": {
+        "id": "E3-F3",
+        "description": "Identify the decisive evidence gap: original body expired, resolved input/binding not captured, and current-pointer observation occurs after the run with no historical binding/cache record. The digest has no trusted R7 reference mapping. Exact relevant excerpts should support the gap.",
+        "evidence_ids": [
+          "E3-D01",
+          "E3-D02"
+        ],
+        "severity": "major"
+      },
+      "primary": {
+        "id": "E3-F3",
+        "applicable": true,
+        "met": true,
+        "reason": "「未保存解析後版本、列快照、指標目標、快取身分或列級驗證」涵蓋綁定缺口；另指出PDF過期、26日指標晚於執行且「不能倒推25日」，並引用摘要說 digest 等不能確立版本。"
+      },
+      "independent_source_review": {
+        "id": "E3-F3",
+        "met": false,
+        "reason": "It quotes and explains the expired PDF, unrecorded resolved revision/snapshot/pointer/cache, and the 26 August observation after the run without start-time history. It also quotes that the digest does not establish revision. It does not explain the frozen criterion’s specific missing trusted R7 reference mapping. That mapping detail is itself absent from its actual summary-only evidence; this is literal composite-criterion incompleteness, not an unsupported digest claim or an incorrect decision."
+      }
+    },
+    {
+      "answer_id": "E3-long-adaptive",
+      "criterion_id": "E3-F3",
+      "rubric": {
+        "id": "E3-F3",
+        "description": "Identify the decisive evidence gap: original body expired, resolved input/binding not captured, and current-pointer observation occurs after the run with no historical binding/cache record. The digest has no trusted R7 reference mapping. Exact relevant excerpts should support the gap.",
+        "evidence_ids": [
+          "E3-D01",
+          "E3-D02"
+        ],
+        "severity": "major"
+      },
+      "primary": {
+        "id": "E3-F3",
+        "applicable": true,
+        "met": true,
+        "reason": "「未保存實際解析版本、列快照或列級驗證；完整 PDF 已依保留期過期」指出主要缺口；另說26日指標不能倒推25日，並警告不得以「摘要值」替代表格證據，實質涵蓋digest不能確立版本。"
+      },
+      "independent_source_review": {
+        "id": "E3-F3",
+        "met": false,
+        "reason": "Exact summary excerpts support the expired original and uncaptured revision/snapshot/pointer/cache/validation; prose preserves the 26 August versus 25 August timing limit. The next step prohibits substituting a digest for content evidence, but does not give the specific no-trusted-R7-reference-mapping explanation required by this composite criterion. That detail is absent from its summary-only visibility. This is an incomplete explanation, not an unsupported claim that the digest proves a revision."
+      }
+    },
+    {
+      "answer_id": "E3-long-adaptive",
+      "criterion_id": "E3-F4",
+      "rubric": {
+        "id": "E3-F4",
+        "description": "Preserve what is established: H17 completed and an 18-page artifact was accepted; missing content evidence does not prove render failure, corruption, or an incorrect revision. The retained preview covers only the cover page.",
+        "evidence_ids": [
+          "E3-D01",
+          "E3-D02"
+        ],
+        "severity": "major"
+      },
+      "primary": {
+        "id": "E3-F4",
+        "applicable": true,
+        "met": true,
+        "reason": "「可支持的僅是已完成的 18 頁產物，以及簽署申請與首頁預覽」保留完成、頁數和僅首頁預覽的事實；沒有將缺證據推成渲染失敗、損壞或錯誤修訂。"
+      },
+      "independent_source_review": {
+        "id": "E3-F4",
+        "met": false,
+        "reason": "It correctly reports completed status, 18 pages and a one-page retained preview, and does not invent corruption or a wrong revision. It does not communicate the known archive-acceptance fact, even though its available summary explicitly includes archive acceptance among the retained evidence. E3-F4’s preservation of the produced-and-accepted artifact is therefore incomplete; this does not mean its completion statement is false."
+      }
+    }
+  ]
+}

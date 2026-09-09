@@ -1,0 +1,1549 @@
+{
+  "reviewer_type": "Blinded AI source review, not human ground truth",
+  "review_date": "2026-09-09",
+  "reviewed_group_ids": [
+    "S1-r1-T2-group",
+    "S2-r2-T1-group",
+    "S3-r1-T2-group"
+  ],
+  "scope": "Complete: all three separately supplied preregistered rental source-audit groups reviewed, six anonymous answers each (18 total). Previous 12 assessment objects are preserved. This bounded sample is not a review of every ablation answer.",
+  "blinding": {
+    "read_inputs": [
+      "bench/results/ablation-2026-09-09/live-v1/review-packets/S1-r1-T2-group.json",
+      "bench/results/ablation-2026-09-09/live-v1/review-packets/S2-r2-T1-group.json",
+      "bench/results/ablation-2026-09-09/live-v1/review-packets/S3-r1-T2-group.json"
+    ],
+    "reference_and_availability": "Read the full reference history/question/gold and each candidate’s actual available_evidence, including its memory/history and non-authoritative previous answer.",
+    "not_read": [
+      "plan",
+      "masks",
+      "costs",
+      "call records",
+      "primary judgments",
+      "experiment summaries",
+      "result-analysis documents"
+    ],
+    "authorship": "Reviewer did not author these rental fixtures.",
+    "cost_scope": "Current agent/parent source review is outside CLI totals; no benchmark model CLI/API, external model or Claude call was made for this review."
+  },
+  "criterion_interpretation": {
+    "F1": "Correct active constraints and no obsolete studio exclusion suffice; no recital of every unchanged profile fact is required.",
+    "F2": "Correct replacement values and recomputed totals in prose satisfy the calculation criterion; explicit addition formatting is optional. Scalar rows are also checked and do not override contrary prose.",
+    "F4": "Substantive attribution is accepted when the response distinguishes the specific current rent versus utility-estimate replacements and anchors them to supplied T2 (or its alias). The exact M-C2/usage-sheet wording need not be repeated if the source relationship and estimate status are preserved. This interpretive choice is explicit for later adjudication.",
+    "F5": "A focused relevant remaining check or explicit provisional/source-qualified conclusion is enough; a complete repeated due-diligence list is unnecessary. An unqualified pass of reported desk/commute facts is flagged separately."
+  },
+  "assessments": [
+    {
+      "group_id": "S1-r1-T2-group",
+      "candidate_id": "candidate_1",
+      "criteria": [
+        {
+          "id": "S1-T2-F1",
+          "met": true,
+          "reason": "Answer span: “Your current minimum is 41 m²”. The prose also gives the £2,130 cap and distinguishes the 47/43 m² certificate areas from that minimum. Available memory F49/F50 preserves the current thresholds and F51/F52 studio acceptance; the response rejects Pennythorn for cost, not layout. T1/T2 in the full reference support this use."
+        },
+        {
+          "id": "S1-T2-F2",
+          "met": true,
+          "reason": "Answer span: “Mosslantern’s rent fell from £1,850 to £1,770”. Both replacements and recomputed totals are correct: £2,080 and £2,175. The response describes the £80 changes and resulting old-to-new totals without keeping or averaging the old lines. T2 alone contains all current components; the cited memory also supplies the old comparison."
+        },
+        {
+          "id": "S1-T2-F3",
+          "met": true,
+          "reason": "Answer span: “Switch the viewing to Mosslantern”. It states £50 below versus £45 above the current cap and attributes the reversal to the changed rent/utility lines. This is the provisional choice supported by T1/T2, not a reinstated studio objection."
+        },
+        {
+          "id": "S1-T2-F4",
+          "met": true,
+          "reason": "Answer span: “Pennythorn’s utility estimate rose from £160 to £240”. It keeps the rent replacement distinct from an estimated utility line and ties the changed values to T2 in the fact rows. T2 explicitly supplies M-C2 and the usage-sheet update. I accept that source anchor plus the correct differentiated lines as substantive attribution; repeating both document-origin phrases verbatim is not required."
+        },
+        {
+          "id": "S1-T2-F5",
+          "met": true,
+          "reason": "Answer span: “The non-rent charges remain estimates, so confirm them at the viewing”. A relevant remaining check accompanies a viewing recommendation. It claims no booking or comprehensive pass. The request is a narrow updated-cost choice, so omitting a repeated list of all other unchanged requirements is not a failure."
+        }
+      ],
+      "unsupported_claims": [],
+      "contradictions": [],
+      "useful_next_step": true,
+      "appropriate_uncertainty": true,
+      "notes": "All six requested scalar values and the current prose cap/minimum/totals are correct. The actual available evidence supports those values; the previous assistant answer is explicitly non-source context and was not needed to establish them. A focused remaining check is sufficient; no penalty is applied for omitting unchanged profile details or a comprehensive property checklist.",
+      "source_attribution_audit": {
+        "unsupported_attribution_found": false,
+        "reason": "The fact rows cite actual available memory, quoted source anchors within that memory, or the current T2 message. latest_user_question is an available alias; M-C2 is explicitly named and quoted within available T2. No response claims an external lookup, full-document inspection, or reliance on the prior assistant answer as authority."
+      }
+    },
+    {
+      "group_id": "S1-r1-T2-group",
+      "candidate_id": "candidate_2",
+      "criteria": [
+        {
+          "id": "S1-T2-F1",
+          "met": true,
+          "reason": "Answer span: “Your current cap is £2,130/month all-in and minimum internal area is 41 m²”. These current values exist in available memory F49/F50 despite historical values elsewhere in the same memory. It says both certificate areas clear the minimum and excludes Pennythorn on cost, without reviving the withdrawn studio rule (T1/T2)."
+        },
+        {
+          "id": "S1-T2-F2",
+          "met": true,
+          "reason": "Answer span: “£1,770 + £180 + £32 + £98”. The response also computes £1,810+£240+£30+£95. Both totals and all replacement components match T2; there is no averaging or double counting. T2 is a sufficient cited source for these new totals."
+        },
+        {
+          "id": "S1-T2-F3",
+          "met": true,
+          "reason": "Answer span: “Switch to Mosslantern”. It gives £2,080/£50 under and £2,175/£45 over, then explains the changed lines. This follows the new quotes rather than an obsolete threshold. The closing “Keep the viewing for Mosslantern” is advice about this revised choice, not a claim that a booking already exists."
+        },
+        {
+          "id": "S1-T2-F4",
+          "met": true,
+          "reason": "Answer span: “Mosslantern’s rent fell from £1,850 to £1,770, while Pennythorn’s utility estimate rose from £160 to £240”. This correctly distinguishes the two current source lines, labels the utility number an estimate, and cites their source T2 in the fact rows. T2 contains their respective landlord M-C2 and agent/usage-sheet origins; no contradictory or invented provenance is asserted."
+        },
+        {
+          "id": "S1-T2-F5",
+          "met": true,
+          "reason": "Answer span: “both estimates remain non-fixed”. It gives the user a concrete viewing choice and flags evening noise/cost uncertainty. Those are relevant checks; a full repeated property checklist is unnecessary. No contact, booking or completed due-diligence claim appears."
+        }
+      ],
+      "unsupported_claims": [],
+      "contradictions": [],
+      "useful_next_step": true,
+      "appropriate_uncertainty": true,
+      "notes": "All six requested scalar values and the current prose cap/minimum/totals are correct. The actual available evidence supports those values; the previous assistant answer is explicitly non-source context and was not needed to establish them. A focused remaining check is sufficient; no penalty is applied for omitting unchanged profile details or a comprehensive property checklist.",
+      "source_attribution_audit": {
+        "unsupported_attribution_found": false,
+        "reason": "The fact rows cite actual available memory, quoted source anchors within that memory, or the current T2 message. latest_user_question is an available alias; M-C2 is explicitly named and quoted within available T2. No response claims an external lookup, full-document inspection, or reliance on the prior assistant answer as authority."
+      }
+    },
+    {
+      "group_id": "S1-r1-T2-group",
+      "candidate_id": "candidate_3",
+      "criteria": [
+        {
+          "id": "S1-T2-F1",
+          "met": true,
+          "reason": "Answer span: “current all-in cap is £2,130/month and minimum internal area is 41 m²”. Available memory F49/F50 quotes T1 and carries supersession status. It retains those thresholds in prose and scalar rows without substituting a certificate area or treating the studio as prohibited."
+        },
+        {
+          "id": "S1-T2-F2",
+          "met": true,
+          "reason": "Answer span: “£2,080 all-in (£1,770 + £180 + £32 + £98)”. The Pennythorn sum is also explicitly £1,810+£240+£30+£95=£2,175. The amounts and both £80 replacements come directly from available T2 and are arithmetically correct."
+        },
+        {
+          "id": "S1-T2-F3",
+          "met": true,
+          "reason": "Answer span: “moving it from £30 above the cap to below it”. The response explains both crossings of the unchanged cap, recommends switching to Mosslantern and gives the resulting £50/£45 margins. Old totals are used only to explain the transition, not retained as current."
+        },
+        {
+          "id": "S1-T2-F4",
+          "met": true,
+          "reason": "Answer span: “Pennythorn’s utilities rose by £80”. Together with “Mosslantern’s rent fell by £80”, the current component sums, “Both totals remain estimates” and T2 fact-source anchors, this preserves the distinct replacements and source status. It does not repeat the usage-sheet story, but does not invent another basis."
+        },
+        {
+          "id": "S1-T2-F5",
+          "met": true,
+          "reason": "Answer span: “check that the 140 cm wall takes your 130 cm desk without obstructing access”. This uses the supplied memory’s reported desk wall and actual desk constraint as a verification task, not a guarantee. Evening noise remains to be assessed; no booking or overall pass is claimed."
+        }
+      ],
+      "unsupported_claims": [],
+      "contradictions": [],
+      "useful_next_step": true,
+      "appropriate_uncertainty": true,
+      "notes": "All six requested scalar values and the current prose cap/minimum/totals are correct. The actual available evidence supports those values; the previous assistant answer is explicitly non-source context and was not needed to establish them. A focused remaining check is sufficient; no penalty is applied for omitting unchanged profile details or a comprehensive property checklist.",
+      "source_attribution_audit": {
+        "unsupported_attribution_found": false,
+        "reason": "The fact rows cite actual available memory, quoted source anchors within that memory, or the current T2 message. latest_user_question is an available alias; M-C2 is explicitly named and quoted within available T2. No response claims an external lookup, full-document inspection, or reliance on the prior assistant answer as authority."
+      }
+    },
+    {
+      "group_id": "S1-r1-T2-group",
+      "candidate_id": "candidate_4",
+      "criteria": [
+        {
+          "id": "S1-T2-F1",
+          "met": true,
+          "reason": "Answer span: “47 m² against your 41 m² minimum”. The available prose memory supplies the current £2,130 cap, 41 m² minimum and studio acceptance. The answer distinguishes property areas from the threshold, calls the separate bedroom a preference and keeps Pennythorn eligible on layout pending checks."
+        },
+        {
+          "id": "S1-T2-F2",
+          "met": true,
+          "reason": "Answer span: “Mosslantern’s rent reduction from £1,850 to £1,770”. It identifies the £160→£240 utility replacement and gives £2,080/£2,175 correctly. T2 contains every current component, so an explicit expanded addition is not necessary to demonstrate the correct recomputation."
+        },
+        {
+          "id": "S1-T2-F3",
+          "met": true,
+          "reason": "Answer span: “Switch your viewing to Mosslantern”. It states £50 below and £45 above and explains the changed source lines. The source reason for switching is cost, not area or studio exclusion (T1/T2)."
+        },
+        {
+          "id": "S1-T2-F4",
+          "met": true,
+          "reason": "Answer span: “Pennythorn’s utility estimate increase from £160 to £240”. The answer separates the rent reduction from the utility-estimate increase, cites available latest_user_question for those values, and says both totals remain estimates. latest_user_question is the packet’s T2 alias, not an unavailable source."
+        },
+        {
+          "id": "S1-T2-F5",
+          "met": true,
+          "reason": "Answer span: “Check the desk position and evening noise at the viewing”. The reported desk wall remains to be checked, and the answer is explicitly a viewing recommendation. It does not claim to book or certify the whole rental. Mentioning the supplied layout fit is qualified by “reported” and this subsequent check."
+        }
+      ],
+      "unsupported_claims": [],
+      "contradictions": [],
+      "useful_next_step": true,
+      "appropriate_uncertainty": true,
+      "notes": "All six requested scalar values and the current prose cap/minimum/totals are correct. The actual available evidence supports those values; the previous assistant answer is explicitly non-source context and was not needed to establish them. A focused remaining check is sufficient; no penalty is applied for omitting unchanged profile details or a comprehensive property checklist.",
+      "source_attribution_audit": {
+        "unsupported_attribution_found": false,
+        "reason": "The fact rows cite actual available memory, quoted source anchors within that memory, or the current T2 message. latest_user_question is an available alias; M-C2 is explicitly named and quoted within available T2. No response claims an external lookup, full-document inspection, or reliance on the prior assistant answer as authority."
+      }
+    },
+    {
+      "group_id": "S1-r1-T2-group",
+      "candidate_id": "candidate_5",
+      "criteria": [
+        {
+          "id": "S1-T2-F1",
+          "met": true,
+          "reason": "Answer span: “current cap is £2,130/month all-in and minimum internal area is 41 m²”. Available memory F49/F50 quotes T1, and the response uses the corrected values rather than old thresholds. Separate bedroom is called preferred, not mandatory; Pennythorn is excluded for its updated cost."
+        },
+        {
+          "id": "S1-T2-F2",
+          "met": true,
+          "reason": "Answer span: “recomputed total is £2,175/month (1,810 + 240 + 30 + 95)”. Both current sums, the £1,770 rent and £240 utility line match T2. Cited U4 excerpts are actually present in memory and T2 provides the replacements; no unseen-source inference is needed for the arithmetic."
+        },
+        {
+          "id": "S1-T2-F3",
+          "met": true,
+          "reason": "Answer span: “Mosslantern’s rent fell by £80, while Pennythorn’s utilities estimate rose by £80”. It gives the correct revised priority and £50/£45 margins, tying the reversal to the two changed quotes rather than an obsolete studio objection."
+        },
+        {
+          "id": "S1-T2-F4",
+          "met": true,
+          "reason": "Answer span: “Pennythorn’s updated utilities estimate is £240”. The component distinction and estimate status are preserved, and fact rows cite T2 for both updates. This is adequate substantive source attribution even without restating M-C2’s name and the previous-occupant usage-sheet detail."
+        },
+        {
+          "id": "S1-T2-F5",
+          "met": false,
+          "reason": "Answer span: “Mosslantern otherwise still meets the stated area, desk, commute, and preferred separate-bedroom requirements”. The final sentence gives an unqualified desk/commute pass where available memory F23/F24 marks those values only reported. No focused verification or “on supplied claims” qualification follows. The opening viewing choice and estimated totals are useful partial coverage, but the requirement to keep the recommendation provisional is incompletely met."
+        }
+      ],
+      "unsupported_claims": [
+        {
+          "claim": "Mosslantern otherwise still meets the stated area, desk, commute, and preferred separate-bedroom requirements",
+          "category": "unqualified_inference_from_reported_properties",
+          "severity": "minor",
+          "reason": "The area and bedroom are supported, but desk clearance and route time are only reported plan/route claims in available memory F23/F24 (source U2). No physical desk check or reliable journey measurement is supplied. The sentence drops that qualification. This is an overstatement of support, not proof that either property claim is false."
+        }
+      ],
+      "contradictions": [],
+      "useful_next_step": true,
+      "appropriate_uncertainty": false,
+      "notes": "All six requested scalar values and the current prose cap/minimum/totals are correct. The actual available evidence supports those values; the previous assistant answer is explicitly non-source context and was not needed to establish them. F5 is marked incomplete because the final broad “meets” statement is not tied to supplied claims or a future verification. The recommendation to switch remains useful and the cost arithmetic is sound; the unsupported part is the certainty of desk/commute fit, not the decision or numeric scalars.",
+      "source_attribution_audit": {
+        "unsupported_attribution_found": false,
+        "reason": "The fact rows cite actual available memory, quoted source anchors within that memory, or the current T2 message. latest_user_question is an available alias; M-C2 is explicitly named and quoted within available T2. No response claims an external lookup, full-document inspection, or reliance on the prior assistant answer as authority."
+      }
+    },
+    {
+      "group_id": "S1-r1-T2-group",
+      "candidate_id": "candidate_6",
+      "criteria": [
+        {
+          "id": "S1-T2-F1",
+          "met": true,
+          "reason": "Answer span: “current hard cap is £2,130 all-in per month and your minimum is 41 m²”. The full available history includes T1’s exact replacements and studio acceptance. The answer uses them, treats the bedroom as a preference, and does not copy the historical assistant’s erroneous 43 m² minimum."
+        },
+        {
+          "id": "S1-T2-F2",
+          "met": true,
+          "reason": "Answer span: “£1,770 rent + £180 utilities + £32 broadband + £98 tax provision”. Both current sums and replacement values are correct. T2 names M-C2 and supplies all components, so M-C2/T2 source anchors support the rent and total without claiming to have retrieved a separate document."
+        },
+        {
+          "id": "S1-T2-F3",
+          "met": true,
+          "reason": "Answer span: “Switch your one viewing slot to Mosslantern”. The answer gives £50 below versus £45 above and explains why the updated lines reverse the prior choice. It retains the same cap/minimum and does not exclude studios."
+        },
+        {
+          "id": "S1-T2-F4",
+          "met": true,
+          "reason": "Answer span: “M-C2 reduced Mosslantern’s rent from £1,850 to £1,770”. It names the rent quote, contrasts it with Pennythorn’s replacement utility estimate and cites T2. The current user message supplies the utility update’s usage-sheet provenance; the answer preserves its estimate status without claiming a fixed bill."
+        },
+        {
+          "id": "S1-T2-F5",
+          "met": true,
+          "reason": "Answer span: “Confirm the desk wall is unobstructed and off the circulation route”. This is a relevant focused remaining check, along with evening noise. “shorter supplied journey” keeps that source qualified. The choice remains viewing advice with no claimed booking or comprehensive pass."
+        }
+      ],
+      "unsupported_claims": [],
+      "contradictions": [],
+      "useful_next_step": true,
+      "appropriate_uncertainty": true,
+      "notes": "All six requested scalar values and the current prose cap/minimum/totals are correct. The actual available evidence supports those values; the previous assistant answer is explicitly non-source context and was not needed to establish them. A focused remaining check is sufficient; no penalty is applied for omitting unchanged profile details or a comprehensive property checklist.",
+      "source_attribution_audit": {
+        "unsupported_attribution_found": false,
+        "reason": "The fact rows cite actual available memory, quoted source anchors within that memory, or the current T2 message. latest_user_question is an available alias; M-C2 is explicitly named and quoted within available T2. No response claims an external lookup, full-document inspection, or reliance on the prior assistant answer as authority."
+      }
+    },
+    {
+      "group_id": "S2-r2-T1-group",
+      "candidate_id": "candidate_1",
+      "criteria": [
+        {
+          "id": "S2-T1-F1",
+          "met": true,
+          "reason": "“independent, zero-step route ... on 15 February 2027” and “do not rely on a later repair or carrying” apply the current T1 rule rather than the historical tolerance. T1 is actually available."
+        },
+        {
+          "id": "S2-T1-F2",
+          "met": false,
+          "reason": "It correctly gives the current outage and provisional 19 February visit, but discusses an “earlier ‘working’ status” instead of explaining why the later existence-only email does not resolve CM-11. The full reference U3 contains that distinction; this candidate’s memory omits the later email. That unavailable-source omission is a coverage miss, not a false assertion that the lift works."
+        },
+        {
+          "id": "S2-T1-F3",
+          "met": true,
+          "reason": "“Neither flat is currently evidenced” is supported by the only lift being out and Flat 2’s “80 mm raised entrance threshold and no agreed or installed ramp.” Available memory F20/F26/F29/F31/F34 contains these facts. Entrance-floor status is not treated as proof of access."
+        },
+        {
+          "id": "S2-T1-F4",
+          "met": false,
+          "reason": "“Use the earlier access-only visit, if permitted” and the full route with the normal aid are useful partial coverage. However, “Use the 16 January full viewing to repeat that route end-to-end” does not reserve the full slot for a flat that passes first, and no dated current operational update is explicitly requested. It asks generally for evidence of future operation instead."
+        },
+        {
+          "id": "S2-T1-F5",
+          "met": true,
+          "reason": "The response’s facts row gives flat10_estimated_all_in_gbp=2010 with source F13, whose available entry is explicitly estimated. The move and contractor dates are correctly separated, and no booking is claimed. Cost is absent from prose but supplied under the requested estimated-cost key; there is no contrary prose to excuse."
+        }
+      ],
+      "unsupported_claims": [
+        {
+          "issue_id": "S2-c1-chronology",
+          "claim": "A reported earlier “working” status conflicts with that documentation",
+          "category": "unsupported_temporal_attribution",
+          "severity": "minor",
+          "reason": "The supplied memory lists working and out-of-service facts, but has no dates, status/supersession markers or explicit chronology. The ordering is true in full-reference U3, yet not established by the candidate’s actual visible text. The outage itself is directly supported and the practical refusal is unaffected."
+        }
+      ],
+      "contradictions": [],
+      "useful_next_step": true,
+      "appropriate_uncertainty": true,
+      "notes": "All six scalar values are semantically correct; the longer lift-status string is an accurate qualification, not a different status. The access refusal is sound. Missing later-email detail in actual memory limits conflict explanation. The full-viewing allocation is less useful than a clear access-first gate.",
+      "scalar_audit": [
+        {
+          "key": "required_move_date",
+          "expected": "2027-02-15",
+          "actual": "2027-02-15",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "F01"
+          ]
+        },
+        {
+          "key": "maximum_permitted_steps",
+          "expected": "0",
+          "actual": "0",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "latest_user_question"
+          ]
+        },
+        {
+          "key": "current_documented_lift_status",
+          "expected": "out of service",
+          "actual": "out of service following door fault",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "F26"
+          ]
+        },
+        {
+          "key": "provisional_contractor_date",
+          "expected": "2027-02-19",
+          "actual": "2027-02-19",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "F27",
+            "F01"
+          ]
+        },
+        {
+          "key": "flat2_threshold_mm",
+          "expected": "80",
+          "actual": "80",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "F20"
+          ]
+        },
+        {
+          "key": "flat10_estimated_all_in_gbp",
+          "expected": "2010",
+          "actual": "2010",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "F13"
+          ]
+        }
+      ]
+    },
+    {
+      "group_id": "S2-r2-T1-group",
+      "candidate_id": "candidate_2",
+      "criteria": [
+        {
+          "id": "S2-T1-F1",
+          "met": true,
+          "reason": "“final zero-step, independent-access requirement for 15 February 2027” applies T1, and neither flat is accepted. No stairs or carrying fallback is proposed."
+        },
+        {
+          "id": "S2-T1-F2",
+          "met": false,
+          "reason": "It gives the 11 January outage, provisional 19 February visit and unknown completion, but never explains why the later agent email about existence does not resolve operation. Its actual memory explicitly includes that later-email limitation, so this is an answer omission rather than missing input."
+        },
+        {
+          "id": "S2-T1-F3",
+          "met": true,
+          "reason": "“Neither flat is evidenced” and the explanation of the 80 mm threshold/no ramp plus second-floor lift dependence preserve the two separate blockers. Calling Flat 2 the “nearer candidate” does not certify it, because the same sentence says it fails the evidence test."
+        },
+        {
+          "id": "S2-T1-F4",
+          "met": false,
+          "reason": "“Use the 16 January viewing/access check” merges the full viewing with the separately available earlier access-only visit. Although it asks for a full-route test and written repair evidence, it does not perform the requested access-first allocation before assigning the only full slot."
+        },
+        {
+          "id": "S2-T1-F5",
+          "met": false,
+          "reason": "Both prose and the scalar row say Flat 10 costs £2,050 estimated all-in. Full-reference U2 gives £2,010; £2,050 is the user ceiling in U1. Actual memory omits the unit cost, so a bounded “not supplied in my evidence” would have been honest incompleteness; substituting the cap is a wrong fact and unsupported attribution."
+        }
+      ],
+      "unsupported_claims": [
+        {
+          "issue_id": "S2-c2-cost",
+          "claim": "flat10_estimated_all_in_gbp=2050, source_ids=[memory]",
+          "category": "unsupported_source_attribution",
+          "severity": "major",
+          "reason": "The actual memory has the £2,050 user ceiling and a general statement that both unit estimates meet it, but no exact Flat 10 cost. It does not support attributing 2050 to that property estimate. This is the same underlying issue as the cost contradiction, not a second independent factual error."
+        }
+      ],
+      "contradictions": [
+        {
+          "issue_id": "S2-c2-cost",
+          "claim": "Flat 10 estimated all-in: £2,050/month (estimate)",
+          "category": "wrong_property_value",
+          "severity": "major",
+          "reason": "Full-reference U2 states Flat 10’s estimate is £2,010; U1’s £2,050 is the user cap. The facts row also returns 2050. The available memory lacks 2010, so this is false completion rather than honest abstention."
+        }
+      ],
+      "useful_next_step": true,
+      "appropriate_uncertainty": false,
+      "notes": "The main access decision is safe and the route checks are useful, but the exact requested unit cost is invented from an available ceiling. The identical error appears in prose and the scalar row; no correct scalar can rescue it. Missing input does not justify filling the field with the cap.",
+      "scalar_audit": [
+        {
+          "key": "required_move_date",
+          "expected": "2027-02-15",
+          "actual": "2027-02-15",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "memory"
+          ]
+        },
+        {
+          "key": "maximum_permitted_steps",
+          "expected": "0",
+          "actual": "0",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "memory",
+            "latest_user_question"
+          ]
+        },
+        {
+          "key": "current_documented_lift_status",
+          "expected": "out of service",
+          "actual": "out of service",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "memory"
+          ]
+        },
+        {
+          "key": "provisional_contractor_date",
+          "expected": "2027-02-19",
+          "actual": "2027-02-19",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "memory"
+          ]
+        },
+        {
+          "key": "flat2_threshold_mm",
+          "expected": "80",
+          "actual": "80",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "memory"
+          ]
+        },
+        {
+          "key": "flat10_estimated_all_in_gbp",
+          "expected": "2010",
+          "actual": "2050",
+          "semantically_correct": false,
+          "claimed_source_ids": [
+            "memory"
+          ]
+        }
+      ]
+    },
+    {
+      "group_id": "S2-r2-T1-group",
+      "candidate_id": "candidate_3",
+      "criteria": [
+        {
+          "id": "S2-T1-F1",
+          "met": true,
+          "reason": "“zero steps, independent use of your normal mobility aid ... on 15 February 2027” and rejection of planned repair/carrying implement the new T1 rule."
+        },
+        {
+          "id": "S2-T1-F2",
+          "met": false,
+          "reason": "Prose correctly says “only provisional for 19 February” and unknown completion, but the contractor-date scalar is “unknown”, contradicting both that prose and visible F27=19 February. The response also omits the later existence-only email, which its memory does not preserve. The former is a genuine scalar/prose inconsistency; the latter is incomplete coverage, not invented access approval."
+        },
+        {
+          "id": "S2-T1-F3",
+          "met": true,
+          "reason": "It rejects both units on current evidence, names the 80 mm/no-ramp obstruction and the sole-lift outage, and notes no continuous route evidence. These are supplied in F20/F26/F29/F31/F34."
+        },
+        {
+          "id": "S2-T1-F4",
+          "met": false,
+          "reason": "The earlier permitted access-only visit and normal-aid route trial are useful, but “Use the 16 January full viewing to repeat that route” does not gate that scarce full slot on an initial route pass. The request for a confirmed working lift by the move is not an explicit dated current operational update before slot assignment."
+        },
+        {
+          "id": "S2-T1-F5",
+          "met": true,
+          "reason": "Prose gives “Flat 10’s estimated all-in cost is £2,010 per month”, with a matching F13-backed scalar; booking is not claimed. Move date remains distinct from the provisional contractor appointment. The inconsistent appointment scalar is already recorded under F2 and contradictions rather than counted again as a cost/booking error."
+        }
+      ],
+      "unsupported_claims": [],
+      "contradictions": [
+        {
+          "issue_id": "S2-c3-contractor",
+          "claim": "facts.provisional_contractor_date = unknown",
+          "category": "scalar_prose_and_source_inconsistency",
+          "severity": "major",
+          "reason": "Prose states “The contractor visit is only provisional for 19 February”; the cited visible F27 also says 19 February. Full-reference U3 places the provisional visit on 19 February 2027. Only completion is unknown. The correct prose does not erase the inconsistent scalar."
+        }
+      ],
+      "useful_next_step": true,
+      "appropriate_uncertainty": false,
+      "notes": "The access refusal and prose are substantively sound. Five of six scalar values are correct; “unknown” is wrong for the provisional appointment, while unknown repair completion would be correct. A missing year qualification would not justify claiming the supplied day/month is unknown. The later-email explanation cannot be recovered from this memory.",
+      "scalar_audit": [
+        {
+          "key": "required_move_date",
+          "expected": "2027-02-15",
+          "actual": "2027-02-15",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "F01"
+          ]
+        },
+        {
+          "key": "maximum_permitted_steps",
+          "expected": "0",
+          "actual": "0",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "latest_user_question"
+          ]
+        },
+        {
+          "key": "current_documented_lift_status",
+          "expected": "out of service",
+          "actual": "out of service following door fault",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "F26"
+          ]
+        },
+        {
+          "key": "provisional_contractor_date",
+          "expected": "2027-02-19",
+          "actual": "unknown",
+          "semantically_correct": false,
+          "claimed_source_ids": [
+            "F27"
+          ]
+        },
+        {
+          "key": "flat2_threshold_mm",
+          "expected": "80",
+          "actual": "80",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "F20"
+          ]
+        },
+        {
+          "key": "flat10_estimated_all_in_gbp",
+          "expected": "2010",
+          "actual": "2010",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "F13"
+          ]
+        }
+      ]
+    },
+    {
+      "group_id": "S2-r2-T1-group",
+      "candidate_id": "candidate_4",
+      "criteria": [
+        {
+          "id": "S2-T1-F1",
+          "met": true,
+          "reason": "“continuous, independently usable, zero-step ... with your normal mobility aid on 15 February 2027” and “Do not rely on carrying, stairs, or an uncompleted repair” preserve T1 exactly."
+        },
+        {
+          "id": "S2-T1-F2",
+          "met": true,
+          "reason": "It names “CM-11 (11 January)”, the outage, only lift, provisional 19 February visit and unknown completion, and explicitly distinguishes the advertised/later existence email from operation. Full available U3 supports all of those temporal and subject distinctions."
+        },
+        {
+          "id": "S2-T1-F3",
+          "met": true,
+          "reason": "It keeps both units unapproved, treats the “80 mm raised threshold” as an unresolved barrier without an installed/agreed ramp, and retains Flat 10’s lift and route gaps. It explicitly rejects the two-step courtyard as the qualifying route (U3/U4)."
+        },
+        {
+          "id": "S2-T1-F4",
+          "met": true,
+          "reason": "“Use the earlier access-only visit, if permitted” for the complete street route with the usual aid, then “Use the 16 January full viewing only for the flat that passes the access route first.” It also requests current date-specific operating evidence. This is the requested sequence and does not require invasive work or medical certification."
+        },
+        {
+          "id": "S2-T1-F5",
+          "met": true,
+          "reason": "All requested scalar fields are accurate, including flat10_estimated_all_in_gbp=2010 attributed to available U2. The cost is only in the estimated-cost scalar field, but there is no false cost statement in prose. The move/repair dates remain separate and no booking is performed or claimed."
+        }
+      ],
+      "unsupported_claims": [],
+      "contradictions": [],
+      "useful_next_step": true,
+      "appropriate_uncertainty": true,
+      "notes": "Complete literal criterion coverage and sound actual consequence. The full reference history in actual availability is identical to the reference history inspected for this audit. The response is longer than the others, but its score follows supported content and correct sequence, not length. Cost is supplied only in the scalar section, a presentation limitation rather than a contradiction.",
+      "scalar_audit": [
+        {
+          "key": "required_move_date",
+          "expected": "2027-02-15",
+          "actual": "2027-02-15",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "U1",
+            "U5",
+            "latest_user_question"
+          ]
+        },
+        {
+          "key": "maximum_permitted_steps",
+          "expected": "0",
+          "actual": "0",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "latest_user_question"
+          ]
+        },
+        {
+          "key": "current_documented_lift_status",
+          "expected": "out of service",
+          "actual": "out of service",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "U3"
+          ]
+        },
+        {
+          "key": "provisional_contractor_date",
+          "expected": "2027-02-19",
+          "actual": "2027-02-19",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "U3"
+          ]
+        },
+        {
+          "key": "flat2_threshold_mm",
+          "expected": "80",
+          "actual": "80",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "U4"
+          ]
+        },
+        {
+          "key": "flat10_estimated_all_in_gbp",
+          "expected": "2010",
+          "actual": "2010",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "U2"
+          ]
+        }
+      ]
+    },
+    {
+      "group_id": "S2-r2-T1-group",
+      "candidate_id": "candidate_5",
+      "criteria": [
+        {
+          "id": "S2-T1-F1",
+          "met": true,
+          "reason": "The answer applies “zero steps ... independently with your usual mobility aid” on 15 February 2027 from available T1. Its prose does not revert to the older stairs tolerance. The correct rule is nevertheless misattributed in the scalar row, recorded separately."
+        },
+        {
+          "id": "S2-T1-F2",
+          "met": false,
+          "reason": "Prose correctly gives a provisional 19 February visit and no guaranteed repair date, but the contractor-date scalar says “unknown” while citing U3. Visible memory F27 quotes “Contractor visit provisionally 19 February”. The later existence-only email is also omitted, and that part of U3 was not retained in this memory."
+        },
+        {
+          "id": "S2-T1-F3",
+          "met": true,
+          "reason": "“Neither flat is currently evidenced”, the only lift outage and the “80 mm raised front-door threshold and lack of an installed/agreed ramp” correctly preserve separate barriers. Entrance-floor status is not mistaken for continuous access."
+        },
+        {
+          "id": "S2-T1-F4",
+          "met": false,
+          "reason": "The permitted access-only visit with the normal aid is useful, but the full viewing is called a “fallback opportunity to repeat that full-route check”. This does not reserve the only full slot for a route already evidenced to work, and it does not explicitly seek a dated current operational update before that assignment."
+        },
+        {
+          "id": "S2-T1-F5",
+          "met": true,
+          "reason": "The facts row gives estimated Flat 10 cost 2010 with U2, whose quoted £2,010 source is actually in memory F13. “You make any booking” preserves the user role. The correct move date is not replaced by the contractor date; the appointment-scalar inconsistency is recorded under F2."
+        }
+      ],
+      "unsupported_claims": [
+        {
+          "issue_id": "S2-c5-zero-source",
+          "claim": "maximum_permitted_steps=0, source_ids=[memory]",
+          "category": "unsupported_source_attribution",
+          "severity": "minor",
+          "reason": "This memory still contains “previously fine” stairs and a not-yet-final possible access change; it does not contain a zero-step limit. The actual latest T1 question supplies zero steps. Citing memory alone misattributes the correct fact."
+        }
+      ],
+      "contradictions": [
+        {
+          "issue_id": "S2-c5-contractor",
+          "claim": "facts.provisional_contractor_date = unknown",
+          "category": "scalar_prose_and_source_inconsistency",
+          "severity": "major",
+          "reason": "The answer prose states the provisional visit is 19 February, and visible memory F27 quotes that U3 date. “unknown” belongs to repair completion, not the provisional appointment. Correct prose does not erase the contradictory scalar."
+        }
+      ],
+      "useful_next_step": true,
+      "appropriate_uncertainty": false,
+      "notes": "The practical refusal is correct. The incorrect “unknown” appointment scalar and the unsupported memory-only attribution for zero steps are separate issues. The latter is not a false zero-step rule: T1 really supplies it, but the claimed source does not.",
+      "scalar_audit": [
+        {
+          "key": "required_move_date",
+          "expected": "2027-02-15",
+          "actual": "2027-02-15",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "U1",
+            "U5"
+          ]
+        },
+        {
+          "key": "maximum_permitted_steps",
+          "expected": "0",
+          "actual": "0",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "memory"
+          ]
+        },
+        {
+          "key": "current_documented_lift_status",
+          "expected": "out of service",
+          "actual": "out of service following door fault",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "U3"
+          ]
+        },
+        {
+          "key": "provisional_contractor_date",
+          "expected": "2027-02-19",
+          "actual": "unknown",
+          "semantically_correct": false,
+          "claimed_source_ids": [
+            "U3"
+          ]
+        },
+        {
+          "key": "flat2_threshold_mm",
+          "expected": "80",
+          "actual": "80",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "U4"
+          ]
+        },
+        {
+          "key": "flat10_estimated_all_in_gbp",
+          "expected": "2010",
+          "actual": "2010",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "U2"
+          ]
+        }
+      ]
+    },
+    {
+      "group_id": "S2-r2-T1-group",
+      "candidate_id": "candidate_6",
+      "criteria": [
+        {
+          "id": "S2-T1-F1",
+          "met": true,
+          "reason": "The response applies the final zero-step independent-access rule on 15 February and explicitly excludes carrying, contractor attendance or later repair. That rule is supplied by the latest T1 question, though its scalar citation points to the wrong evidence container."
+        },
+        {
+          "id": "S2-T1-F2",
+          "met": false,
+          "reason": "It correctly retains outage, no alternative lift and the provisional 19 February visit, but discusses “earlier ... working” versus the fault notice rather than the subsequent 12 January existence-only email. That last email is not in the supplied memory. This omission fails complete literal coverage without making the safe access refusal wrong."
+        },
+        {
+          "id": "S2-T1-F3",
+          "met": true,
+          "reason": "It keeps both units unapproved and names Flat 2’s 80 mm/no-ramp obstruction, Flat 10’s lift dependence and the stepped courtyard to avoid. No independently passable route is invented."
+        },
+        {
+          "id": "S2-T1-F4",
+          "met": true,
+          "reason": "“Preserve the full viewing slot for only a flat whose access is first evidenced” explicitly gates allocation. A complete trial with the normal aid, documented restoration before move-in and a successful route trial are relevant evidence requests. Asking for a permanent zero-step solution is a proposed verification path, not a claim that work is already agreed."
+        },
+        {
+          "id": "S2-T1-F5",
+          "met": true,
+          "reason": "It states the £2,010 Flat 10 estimate in prose and scalars, calls both totals estimates rather than fixed caps, and separates move from contractor dates. Actual quoted U2 memory supports cost and no booking is claimed."
+        }
+      ],
+      "unsupported_claims": [
+        {
+          "issue_id": "S2-c6-zero-source",
+          "claim": "maximum_permitted_steps=0, source_ids=[memory]",
+          "category": "unsupported_source_attribution",
+          "severity": "minor",
+          "reason": "Zero steps occurs in available latest T1, not this memory. The rule itself is correct; its memory-only attribution is not supported."
+        },
+        {
+          "issue_id": "S2-c6-chronology",
+          "claim": "The earlier statement that the lift was working conflicts with the later fault notice",
+          "category": "unsupported_temporal_attribution",
+          "severity": "minor",
+          "reason": "Visible memory quotes both statements under U3 but strips dates and supersession status. Full-reference U3 establishes the chronology; the quoted snippets alone do not. The supported outage and refusal are unaffected."
+        }
+      ],
+      "contradictions": [],
+      "useful_next_step": true,
+      "appropriate_uncertainty": true,
+      "notes": "All scalar values are semantically correct, and access-first slot use is appropriate. Two source-support limitations remain: zero steps is sourced only from T1, not memory; the memory quotes working/outage statements but supplies no dates or supersession markers for the narrated earlier/later ordering. That ordering is true in the full reference, not established by the visible excerpts alone.",
+      "scalar_audit": [
+        {
+          "key": "required_move_date",
+          "expected": "2027-02-15",
+          "actual": "2027-02-15",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "U1",
+            "U5"
+          ]
+        },
+        {
+          "key": "maximum_permitted_steps",
+          "expected": "0",
+          "actual": "0",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "memory"
+          ]
+        },
+        {
+          "key": "current_documented_lift_status",
+          "expected": "out of service",
+          "actual": "out of service following door fault",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "U3"
+          ]
+        },
+        {
+          "key": "provisional_contractor_date",
+          "expected": "2027-02-19",
+          "actual": "2027-02-19",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "U3"
+          ]
+        },
+        {
+          "key": "flat2_threshold_mm",
+          "expected": "80",
+          "actual": "80",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "U4"
+          ]
+        },
+        {
+          "key": "flat10_estimated_all_in_gbp",
+          "expected": "2010",
+          "actual": "2010",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "U2"
+          ]
+        }
+      ]
+    },
+    {
+      "group_id": "S3-r1-T2-group",
+      "candidate_id": "candidate_1",
+      "criteria": [
+        {
+          "id": "S3-T2-F1",
+          "met": true,
+          "reason": "“Sufficiently answered to move to a review” and “not a recommendation to pay or sign” match T2’s expressly limited request. The historical mismatch is no longer treated as an active blocker."
+        },
+        {
+          "id": "S3-T2-F2",
+          "met": true,
+          "reason": "It gives the replacement official extract as Flat 12B, 44 m², EPC C and explicitly notes withdrawal of the same-unit claim (T2). The unchanged 40 m² minimum in U1/memory is not recited, but the response correctly advances on the 44 m² record without retaining Flat 12/38 m² as target evidence."
+        },
+        {
+          "id": "S3-T2-F3",
+          "met": true,
+          "reason": "“Supplied authority letter, accounts callback, landlord confirmation, and bank payee check” explicitly support the corrected £240 company recipient and written unit-specific credit/refund conditions (T2). “On the supplied updates” limits this to reported checks, not assistant authentication."
+        },
+        {
+          "id": "S3-T2-F4",
+          "met": true,
+          "reason": "“Current quote is £345, subject to availability,” “not booked,” and the conditional 2027-03-03 at 15:00 cutoff correctly replace the U5 £330/unknown-deadline record using T2. It need not repeat the expired price to use the replacement offer precisely."
+        },
+        {
+          "id": "S3-T2-F5",
+          "met": true,
+          "reason": "It gives final-pack review before any commitment as the next step and calls £2,160 “unchanged but not re-verified here,” preserving a practical cost limitation rather than certifying a fixed bill. The quote remains subject to availability; completed certificate/callback checks are not requested again."
+        }
+      ],
+      "unsupported_claims": [],
+      "contradictions": [],
+      "useful_next_step": true,
+      "appropriate_uncertainty": true,
+      "user_burden_ok": true,
+      "notes": "All six scalar values and T2 citations are supported. The current full address, “not booked,” and ISO T separator are semantic equivalents of the frozen values. F5 accepts explicit lack of cost re-verification as a substantive limitation even without repeating the word estimate. No comprehensive property or legal PASS is claimed.",
+      "scalar_audit": [
+        {
+          "key": "current_certificate_flat",
+          "expected": "Flat 12B",
+          "actual": "Flat 12B, 52 Foxbarrel Reach",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "T2"
+          ],
+          "source_attribution_supported": true
+        },
+        {
+          "key": "current_certificate_area_m2",
+          "expected": "44",
+          "actual": "44",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "T2"
+          ],
+          "source_attribution_supported": true
+        },
+        {
+          "key": "current_named_payee",
+          "expected": "Foxbarrel Residential Ltd",
+          "actual": "Foxbarrel Residential Ltd",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "T2"
+          ],
+          "source_attribution_supported": true
+        },
+        {
+          "key": "reservation_amount_gbp",
+          "expected": "240",
+          "actual": "240",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "T2"
+          ],
+          "source_attribution_supported": true
+        },
+        {
+          "key": "threadleaf_booking_status",
+          "expected": "unbooked",
+          "actual": "not booked",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "T2"
+          ],
+          "source_attribution_supported": true
+        },
+        {
+          "key": "threadleaf_refund_deadline",
+          "expected": "2027-03-03 15:00",
+          "actual": "2027-03-03T15:00",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "T2"
+          ],
+          "source_attribution_supported": true
+        }
+      ]
+    },
+    {
+      "group_id": "S3-r1-T2-group",
+      "candidate_id": "candidate_2",
+      "criteria": [
+        {
+          "id": "S3-T2-F1",
+          "met": true,
+          "reason": "It explicitly clears only final-pack review and denies permission or recommendation to pay/sign. “Old Flat 12 / 12B mismatch no longer blocks” acts on T2’s completed checks rather than the stale pre-T2 memory."
+        },
+        {
+          "id": "S3-T2-F2",
+          "met": true,
+          "reason": "The response correctly gives Flat 12B at 44 m²/C and the agent’s withdrawal of the same-unit claim (T2). It does not repeat the unchanged 40 m² minimum, but it uses the correct replacement area without a stale unit/space rejection. Its scalar memory citations are separately audited below."
+        },
+        {
+          "id": "S3-T2-F3",
+          "met": true,
+          "reason": "“Independent accounts and landlord checks, owner-authority letter, matching payee check, and written unit-specific credit/refund terms” supplies the relevant authority/recipient basis for £240 to Foxbarrel Residential Ltd. “On the supplied facts” and “stated” preserve user-reported verification; no assistant check or legal certification is invented."
+        },
+        {
+          "id": "S3-T2-F4",
+          "met": true,
+          "reason": "The answer correctly uses the new £345 quote, subject to availability and not booked/paid, with refund cutoff 2027-03-03 15:00 if booked (T2). It never retains the old £330 price or unknown deadline."
+        },
+        {
+          "id": "S3-T2-F5",
+          "met": false,
+          "reason": "It gives a useful review-only next step and warns that fallback availability is not guaranteed, but omits the still-estimated recurring costs entirely. T2 explicitly preserves the £2,160 estimate, and the frozen criterion requires that remaining limit. This is incomplete limit coverage, not a claim that the cost is fixed or all checks passed."
+        }
+      ],
+      "unsupported_claims": [
+        {
+          "issue_id": "S3-c2-source-current_certificate_flat",
+          "claim": "current_certificate_flat=Flat 12B, 52 Foxbarrel Reach; source_ids=[memory]",
+          "category": "unsupported_source_attribution",
+          "severity": "minor",
+          "reason": "The visible memory distinguishes the target Flat 12B from its then-supplied EPC for Flat 12 (f22). The new target-specific certificate appears in T2, not memory; target identity alone does not establish current certificate identity. The value itself is correct against actual latest T2; this is not a false current fact or prose/scalar contradiction."
+        },
+        {
+          "issue_id": "S3-c2-source-current_certificate_area_m2",
+          "claim": "current_certificate_area_m2=44; source_ids=[memory]",
+          "category": "unsupported_source_attribution",
+          "severity": "minor",
+          "reason": "Visible memory contains listing 47 m² and old EPC 38 m², not 44 m². T2 supplies the new official area. The value itself is correct against actual latest T2; this is not a false current fact or prose/scalar contradiction."
+        },
+        {
+          "issue_id": "S3-c2-source-current_named_payee",
+          "claim": "current_named_payee=Foxbarrel Residential Ltd; source_ids=[memory]",
+          "category": "unsupported_source_attribution",
+          "severity": "minor",
+          "reason": "Memory names the company as invoice issuer (f27) but L. Cress as payee (f30). Only T2 reports replacement of the named recipient. A company appearing elsewhere in memory does not support the changed payee role. The value itself is correct against actual latest T2; this is not a false current fact or prose/scalar contradiction."
+        },
+        {
+          "issue_id": "S3-c2-source-threadleaf_refund_deadline",
+          "claim": "threadleaf_refund_deadline=2027-03-03T15:00; source_ids=[memory]",
+          "category": "unsupported_source_attribution",
+          "severity": "minor",
+          "reason": "Memory f46 records an unknown refund cutoff. The supplied T2 establishes the new conditional cutoff. The value itself is correct against actual latest T2; this is not a false current fact or prose/scalar contradiction."
+        }
+      ],
+      "contradictions": [],
+      "useful_next_step": true,
+      "appropriate_uncertainty": true,
+      "user_burden_ok": true,
+      "notes": "All six scalar values agree with T2 and the prose. Four updated fields wrongly cite only stale memory; the unchanged £240 amount and unbooked status are also supported by that memory. Appropriate uncertainty is credited for the claims actually made, with the omitted cost limit recorded under F5. No stale blocker or unauthorised action remains.",
+      "scalar_audit": [
+        {
+          "key": "current_certificate_flat",
+          "expected": "Flat 12B",
+          "actual": "Flat 12B, 52 Foxbarrel Reach",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "memory"
+          ],
+          "source_attribution_supported": false
+        },
+        {
+          "key": "current_certificate_area_m2",
+          "expected": "44",
+          "actual": "44",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "memory"
+          ],
+          "source_attribution_supported": false
+        },
+        {
+          "key": "current_named_payee",
+          "expected": "Foxbarrel Residential Ltd",
+          "actual": "Foxbarrel Residential Ltd",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "memory"
+          ],
+          "source_attribution_supported": false
+        },
+        {
+          "key": "reservation_amount_gbp",
+          "expected": "240",
+          "actual": "240",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "memory"
+          ],
+          "source_attribution_supported": true
+        },
+        {
+          "key": "threadleaf_booking_status",
+          "expected": "unbooked",
+          "actual": "not booked or paid",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "memory"
+          ],
+          "source_attribution_supported": true
+        },
+        {
+          "key": "threadleaf_refund_deadline",
+          "expected": "2027-03-03 15:00",
+          "actual": "2027-03-03T15:00",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "memory"
+          ],
+          "source_attribution_supported": false
+        }
+      ]
+    },
+    {
+      "group_id": "S3-r1-T2-group",
+      "candidate_id": "candidate_3",
+      "criteria": [
+        {
+          "id": "S3-T2-F1",
+          "met": true,
+          "reason": "“All three gates ... sufficiently answered ... review the final tenancy pack,” “superseded rather than a block,” and “No payment or signature is implied” correctly follow the limited T2 instruction."
+        },
+        {
+          "id": "S3-T2-F2",
+          "met": true,
+          "reason": "It explicitly says Flat 12B meets the 40 m² minimum and then gives 44 m²/C, replacing the old mismatch. That uses T2’s exact-unit correction and U1’s unchanged threshold rather than retaining Flat 12’s certificate."
+        },
+        {
+          "id": "S3-T2-F3",
+          "met": true,
+          "reason": "It states that landlord authority and the corrected company payee/account were independently confirmed, then acknowledges the unit-specific £240 written credit/full-refund terms. “On the supplied account” and the explicit lack of its own independent verification make the source and scope clear. Repeating every document name is unnecessary where the authority and recipient results are expressed."
+        },
+        {
+          "id": "S3-T2-F4",
+          "met": true,
+          "reason": "The new £345 quote, availability condition, unbooked state and stated 3 March 2027 at 15:00 cutoff if booked all match T2; no stale £330 offer or unknown deadline is used."
+        },
+        {
+          "id": "S3-T2-F5",
+          "met": false,
+          "reason": "It appropriately limits the next step to reviewing a not-yet-seen final pack and does not claim a held fallback, but gives no remaining estimated-cost limitation. The £2,160 estimate is visible in T2; omitting it is incomplete frozen-criterion coverage, not an invented cost guarantee."
+        }
+      ],
+      "unsupported_claims": [],
+      "contradictions": [],
+      "useful_next_step": true,
+      "appropriate_uncertainty": true,
+      "user_burden_ok": true,
+      "notes": "All six scalar values and T2 source IDs are supported, without prose/scalar inconsistency. This is a useful narrow approval. The only criterion miss is omitted cost uncertainty; the quoted limits otherwise appropriately distinguish supplied verification, unseen final terms and an unbooked fallback.",
+      "scalar_audit": [
+        {
+          "key": "current_certificate_flat",
+          "expected": "Flat 12B",
+          "actual": "Flat 12B, 52 Foxbarrel Reach",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "T2"
+          ],
+          "source_attribution_supported": true
+        },
+        {
+          "key": "current_certificate_area_m2",
+          "expected": "44",
+          "actual": "44",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "T2"
+          ],
+          "source_attribution_supported": true
+        },
+        {
+          "key": "current_named_payee",
+          "expected": "Foxbarrel Residential Ltd",
+          "actual": "Foxbarrel Residential Ltd",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "T2"
+          ],
+          "source_attribution_supported": true
+        },
+        {
+          "key": "reservation_amount_gbp",
+          "expected": "240",
+          "actual": "240",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "T2"
+          ],
+          "source_attribution_supported": true
+        },
+        {
+          "key": "threadleaf_booking_status",
+          "expected": "unbooked",
+          "actual": "not booked",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "T2"
+          ],
+          "source_attribution_supported": true
+        },
+        {
+          "key": "threadleaf_refund_deadline",
+          "expected": "2027-03-03 15:00",
+          "actual": "2027-03-03T15:00",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "T2"
+          ],
+          "source_attribution_supported": true
+        }
+      ]
+    },
+    {
+      "group_id": "S3-r1-T2-group",
+      "candidate_id": "candidate_4",
+      "criteria": [
+        {
+          "id": "S3-T2-F1",
+          "met": true,
+          "reason": "The response says “only clearance to review the pack, not to pay or sign” and correctly removes the historical certificate mismatch as a blocker on that limited next step."
+        },
+        {
+          "id": "S3-T2-F2",
+          "met": true,
+          "reason": "The replacement supplied official extract is specifically Flat 12B, 44 m²/C. It treats the old mismatch as resolved rather than retaining Flat 12 as the target’s current certificate. It does not restate the 40 m² profile threshold, but makes no contrary size conclusion."
+        },
+        {
+          "id": "S3-T2-F3",
+          "met": false,
+          "reason": "The £240 company invoice, independently matched account ending 4812 and written terms are correctly retained (T2), but the answer never identifies the supplied owner-authority letter or its substantive landlord-to-agent authorisation. “Your three verification gates ... answered” gives the overall conclusion without this required authority basis. This is an omission, not an incorrect payee, fabricated check or claim that the letter is still absent."
+        },
+        {
+          "id": "S3-T2-F4",
+          "met": true,
+          "reason": "It states the new £345 Threadleaf quote is subject to availability, not booked, and conditionally refundable by 2027-03-03 15:00. The old offer/deadline is not retained."
+        },
+        {
+          "id": "S3-T2-F5",
+          "met": true,
+          "reason": "“Checking against these terms and the exact flat” gives a focused final-pack step, while “£2,160 ... remains an estimate” and the quote’s availability condition preserve the outstanding limits. It does not demand the already-completed certificate/callback again."
+        }
+      ],
+      "unsupported_claims": [],
+      "contradictions": [],
+      "useful_next_step": true,
+      "appropriate_uncertainty": true,
+      "user_burden_ok": true,
+      "notes": "All six scalar values and T2 attributions are correct. F3’s complete evidence-basis coverage is missing the owner-authority element, despite a correct and useful narrow approval. The introductory reference to the user’s gates and supplied extract does not claim the assistant performed verification.",
+      "scalar_audit": [
+        {
+          "key": "current_certificate_flat",
+          "expected": "Flat 12B",
+          "actual": "Flat 12B, 52 Foxbarrel Reach",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "T2"
+          ],
+          "source_attribution_supported": true
+        },
+        {
+          "key": "current_certificate_area_m2",
+          "expected": "44",
+          "actual": "44",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "T2"
+          ],
+          "source_attribution_supported": true
+        },
+        {
+          "key": "current_named_payee",
+          "expected": "Foxbarrel Residential Ltd",
+          "actual": "Foxbarrel Residential Ltd",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "T2"
+          ],
+          "source_attribution_supported": true
+        },
+        {
+          "key": "reservation_amount_gbp",
+          "expected": "240",
+          "actual": "240",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "T2"
+          ],
+          "source_attribution_supported": true
+        },
+        {
+          "key": "threadleaf_booking_status",
+          "expected": "unbooked",
+          "actual": "not booked",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "T2"
+          ],
+          "source_attribution_supported": true
+        },
+        {
+          "key": "threadleaf_refund_deadline",
+          "expected": "2027-03-03 15:00",
+          "actual": "2027-03-03T15:00",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "T2"
+          ],
+          "source_attribution_supported": true
+        }
+      ]
+    },
+    {
+      "group_id": "S3-r1-T2-group",
+      "candidate_id": "candidate_5",
+      "criteria": [
+        {
+          "id": "S3-T2-F1",
+          "met": true,
+          "reason": "It says the three gates are sufficiently answered to review the final pack, removes the old mismatch as a blocker, and expressly says reviewing is not a reason to pay or sign. The historical 47-versus-44 m² difference is a remaining recorded discrepancy, not an imposed stop."
+        },
+        {
+          "id": "S3-T2-F2",
+          "met": true,
+          "reason": "It gives the exact current Flat 12B official extract at 44 m²/EPC C, and uses 44 rather than the listing’s 47 m². That listing figure is genuinely present in this candidate’s memory (from U2), so this extra comparison is supported. No unchanged 40 m² recital is required to recognise that the new official area supports progression."
+        },
+        {
+          "id": "S3-T2-F3",
+          "met": true,
+          "reason": "It explicitly names the corrected £240 invoice/payee, authority letter, accounts callback, bank payee check and written reservation terms as resolving the stated concerns. The opening confines that conclusion to pack review, with no assistant authentication or general legal PASS."
+        },
+        {
+          "id": "S3-T2-F4",
+          "met": false,
+          "reason": "It correctly supplies unbooked status, availability qualification and the conditional 3 March 2027 at 15:00 cutoff, but never gives the new £345 quote or identifies the expired offer’s replacement. Neither prose nor scalars covers this price transition required by F4. There is no false old-price or held-room claim."
+        },
+        {
+          "id": "S3-T2-F5",
+          "met": false,
+          "reason": "Checking exact-flat and credit/refund terms is useful and the stay is expressly unsecured. However, it omits the remaining estimated-cost limitation despite T2 providing it. The supported listing/official-area comparison does not substitute for that distinct frozen limit."
+        }
+      ],
+      "unsupported_claims": [],
+      "contradictions": [],
+      "useful_next_step": true,
+      "appropriate_uncertainty": true,
+      "user_burden_ok": true,
+      "notes": "All six scalar values are correct; latest_user_question is an unambiguous alias for the supplied T2 object and supports each attribution. The response usefully advances with a focused check and no unauthorised action. F4 and F5 misses are omitted current quote price and cost-estimate limitation, not false facts or excessive certainty in the claims it does make.",
+      "scalar_audit": [
+        {
+          "key": "current_certificate_flat",
+          "expected": "Flat 12B",
+          "actual": "Flat 12B, 52 Foxbarrel Reach",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "latest_user_question"
+          ],
+          "source_attribution_supported": true
+        },
+        {
+          "key": "current_certificate_area_m2",
+          "expected": "44",
+          "actual": "44",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "latest_user_question"
+          ],
+          "source_attribution_supported": true
+        },
+        {
+          "key": "current_named_payee",
+          "expected": "Foxbarrel Residential Ltd",
+          "actual": "Foxbarrel Residential Ltd",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "latest_user_question"
+          ],
+          "source_attribution_supported": true
+        },
+        {
+          "key": "reservation_amount_gbp",
+          "expected": "240",
+          "actual": "240",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "latest_user_question"
+          ],
+          "source_attribution_supported": true
+        },
+        {
+          "key": "threadleaf_booking_status",
+          "expected": "unbooked",
+          "actual": "unbooked",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "latest_user_question"
+          ],
+          "source_attribution_supported": true
+        },
+        {
+          "key": "threadleaf_refund_deadline",
+          "expected": "2027-03-03 15:00",
+          "actual": "2027-03-03T15:00",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "latest_user_question"
+          ],
+          "source_attribution_supported": true
+        }
+      ]
+    },
+    {
+      "group_id": "S3-r1-T2-group",
+      "candidate_id": "candidate_6",
+      "criteria": [
+        {
+          "id": "S3-T2-F1",
+          "met": true,
+          "reason": "“Sufficiently answered ... reviewing the final tenancy pack,” “resolved record,” and “No payment or signature is implied” give the requested bounded advancement without carrying forward stale blockers."
+        },
+        {
+          "id": "S3-T2-F2",
+          "met": true,
+          "reason": "It correctly records the replacement official Flat 12B certificate at 44 m²/C and treats Flat 12’s old certificate as corrected history, not interchangeable current evidence. The omitted recital of the 40 m² minimum does not cause any contrary size conclusion."
+        },
+        {
+          "id": "S3-T2-F3",
+          "met": false,
+          "reason": "The corrected company payee, £240 amount, and stated credit/refund terms are accurate, but the response does not describe the completed callback/bank match or the owner-authority letter/result. The general “three stated verification gates ... answered” is a correct conclusion without the frozen criterion’s required authority and independent-recipient evidence basis. No check is falsely said to be missing or performed by the assistant."
+        },
+        {
+          "id": "S3-T2-F4",
+          "met": true,
+          "reason": "It correctly replaces the old offer with a new £345 quote, subject to availability and unbooked, and gives the refund cutoff as 3 March 2027 at 15:00 if booked. No held accommodation or unknown deadline is invented."
+        },
+        {
+          "id": "S3-T2-F5",
+          "met": true,
+          "reason": "It proposes checking exact flat, identities, rent and “all-in assumptions,” move-in date and differences from reservation conditions. Calling these assumptions to be reviewed retains the cost uncertainty without needing to repeat £2,160. It explicitly says reservation terms do not establish final tenancy terms and preserves the fallback availability condition."
+        }
+      ],
+      "unsupported_claims": [],
+      "contradictions": [],
+      "useful_next_step": true,
+      "appropriate_uncertainty": true,
+      "user_burden_ok": true,
+      "notes": "All six scalar values and T2 source IDs are supported. The focused final-pack checklist is useful and limited, with no needless repetition of completed verification. F3 is incomplete because it omits the concrete authority/callback/bank-check basis, not because advancing to review is unjustified.",
+      "scalar_audit": [
+        {
+          "key": "current_certificate_flat",
+          "expected": "Flat 12B",
+          "actual": "Flat 12B, 52 Foxbarrel Reach",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "T2"
+          ],
+          "source_attribution_supported": true
+        },
+        {
+          "key": "current_certificate_area_m2",
+          "expected": "44",
+          "actual": "44",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "T2"
+          ],
+          "source_attribution_supported": true
+        },
+        {
+          "key": "current_named_payee",
+          "expected": "Foxbarrel Residential Ltd",
+          "actual": "Foxbarrel Residential Ltd",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "T2"
+          ],
+          "source_attribution_supported": true
+        },
+        {
+          "key": "reservation_amount_gbp",
+          "expected": "240",
+          "actual": "240",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "T2"
+          ],
+          "source_attribution_supported": true
+        },
+        {
+          "key": "threadleaf_booking_status",
+          "expected": "unbooked",
+          "actual": "not booked",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "T2"
+          ],
+          "source_attribution_supported": true
+        },
+        {
+          "key": "threadleaf_refund_deadline",
+          "expected": "2027-03-03 15:00",
+          "actual": "2027-03-03T15:00",
+          "semantically_correct": true,
+          "claimed_source_ids": [
+            "T2"
+          ],
+          "source_attribution_supported": true
+        }
+      ]
+    }
+  ],
+  "criterion_interpretation_scope": "The original criterion_interpretation block applies to S1-r1-T2-group only and is preserved.",
+  "group_interpretations": {
+    "S2-r2-T1-group": {
+      "literal_F2": "Complete coverage includes the later existence-only email as well as the operating facts. If the candidate did not receive that detail, mark an omission without alleging an incorrect access conclusion. Conflicting appointment scalars count as inconsistencies even when prose is correct.",
+      "literal_F4": "A useful route checklist alone is partial: the requested sequence preserves the scarce full viewing until access is evidenced and seeks current operational evidence.",
+      "F5_and_scalar_visibility": "The estimated-cost field in the response facts section can supply the requested estimate when prose omits it, provided there is no contrary prose. Do not double-penalize an appointment inconsistency as a separate cost/booking failure.",
+      "source_support": "Accurate full-reference facts can still have unsupported source attribution against actual visible evidence. Date-stripped statement order is not treated as explicit temporal evidence.",
+      "consequence": "All six correctly decline to certify present access. A frozen critical composite criterion miss does not itself mean the response recommended unsafe access."
+    },
+    "S3-r1-T2-group": {
+      "F2_substance": "Using the correct replacement Flat 12B/44 m²/C evidence and removing the old mismatch as a blocker suffices without reciting the unchanged 40 m² profile minimum. No candidate implies that 44 is below that threshold. The resolved-mismatch formulation can express the withdrawal/correction without repeating its exact words.",
+      "F3_evidence_basis": "A correct general statement that all three gates are answered is not alone full coverage of the frozen authority/recipient evidence criterion. An explicit substantive authority result may stand for the letter; mere repetition of its title is unnecessary. Candidates 4 and 6 omit that result; candidate 6 also omits the completed independent recipient-check basis. These are omissions, not false verification claims.",
+      "F4_replacement": "A correctly identified current/new £345 conditional offer replaces the old quote without needing a recital of expired £330. Candidate 5 omits the new price as well as the replacement and therefore has incomplete update coverage, even though its booking/deadline facts are correct.",
+      "F5_limits": "Cost uncertainty is an express remaining limit, so its total omission is incomplete coverage. “Not re-verified here” for £2,160 (candidate 1), “remains an estimate” (candidate 4), and checking “all-in assumptions” (candidate 6) substantively retain it. Candidates 2, 3 and 5 say nothing about the cost limit.",
+      "scalar_and_source_support": "Full address versus Flat 12B, not booked/not booked or paid versus unbooked, and ISO T versus a space in the timestamp are semantically equivalent. Correct updated values citing memory that contains only superseded states are unsupported attributions, separately counted from false facts. latest_user_question unambiguously aliases T2 here.",
+      "uncertainty_and_consequence": "All six correctly advance only to final-pack review, preserve no-payment/no-signature scope and avoid stale blockers. Appropriate uncertainty marks the claims actually made; omitted requested limits remain explicit criterion misses. A composite criterion miss is not itself an unsafe commitment or a false fact."
+    }
+  },
+  "scope_complete": true,
+  "planned_group_count": 3,
+  "reviewed_answer_count": 18
+}

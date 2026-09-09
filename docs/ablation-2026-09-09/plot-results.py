@@ -11,7 +11,7 @@ from matplotlib.ticker import FuncFormatter
 HERE = Path(__file__).resolve().parent
 data = json.loads((HERE / "ablation-results.json").read_text())
 assert data["complete"]
-plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 10, "axes.spines.top": False, "axes.spines.right": False})
+plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 10, "axes.spines.top": False, "axes.spines.right": False, "svg.hashsalt": "pea-princess-ablation-2026-09-09"})
 labels = {"raw_full": "Direct full documents", "full": "Full context", "prose": "Automatic prose",
           "state": "State: both metadata types", "state_no_sources": "State: no source metadata",
           "state_no_updates": "State: no replacement metadata", "state_neither": "State: neither metadata type",
@@ -54,13 +54,15 @@ for index, experiment in enumerate(("rental", "retrieval")):
     right.grid(axis="x", alpha=.15)
     left.set_axisbelow(True)
     right.set_axisbelow(True)
-axes[0, 0].legend(loc="upper left", bbox_to_anchor=(0, 1.24), frameon=False, fontsize=9)
-axes[0, 1].legend(loc="upper left", bbox_to_anchor=(0, 1.24), frameon=False, fontsize=9)
+for axis, anchor in ((axes[0, 0], (.185, .935)), (axes[0, 1], (.625, .935))):
+    handles, legend_labels = axis.get_legend_handles_labels()
+    fig.legend(handles, legend_labels, loc="upper left", bbox_to_anchor=anchor, frameon=False, fontsize=9)
 fig.suptitle("Context ablations: whole-pipeline cost and observed quality", x=.03, ha="left", fontsize=17, fontweight="bold")
-fig.text(.03, .024, "Shared generation is charged once per standalone pipeline; arm totals overlap. Cost panels exclude judges/calibration.\nPrimary judge labels are provisional; source reviews are separate. Small synthetic study, not statistical equivalence or billing.", fontsize=9, color="#555555")
-fig.tight_layout(rect=(.015, .075, .99, .91), h_pad=3)
+fig.text(.03, .014, "Shared generation is charged once per standalone pipeline; arm totals overlap. Cost panels exclude judges/calibration.\nCritical counts are rubric omissions, not necessarily wrong actions; primary labels and source reviews remain separate.\nSmall synthetic study, not statistical equivalence or billing. Exact scalar scores also include formatting mismatches.", fontsize=9, color="#555555")
+fig.subplots_adjust(left=.185, right=.98, bottom=.13, top=.835, wspace=.04, hspace=.6)
 (HERE / "figures").mkdir(exist_ok=True)
 for suffix in ("png", "svg"):
-    fig.savefig(HERE / "figures" / ("cost-quality." + suffix), dpi=180, facecolor="white")
+    metadata = {"Date": "2026-09-09"} if suffix == "svg" else None
+    fig.savefig(HERE / "figures" / ("cost-quality." + suffix), dpi=180, facecolor="white", metadata=metadata)
 plt.close(fig)
 print(HERE / "figures/cost-quality.png")

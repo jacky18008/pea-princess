@@ -1,0 +1,756 @@
+{
+  "review_type": "Blinded AI source review; not human ground truth",
+  "review_date": "2026-09-09",
+  "scope": "Complete preregistered retrieval sample: E1-long, E2-short and E3-long; all three requested groups and all 18 anonymous candidates reviewed.",
+  "blinding": {
+    "read_for_this_review": [
+      "bench/results/ablation-2026-09-09/live-v1/review-packets/E1-long.json",
+      "bench/results/ablation-2026-09-09/live-v1/review-packets/E2-short.json",
+      "bench/results/ablation-2026-09-09/live-v1/review-packets/E3-long.json"
+    ],
+    "not_read": [
+      "plan",
+      "arm masks or mappings",
+      "costs",
+      "call records",
+      "primary judgments",
+      "analysis outputs",
+      "other reviewer files"
+    ],
+    "representation_limit": "Candidate evidence representations can be inferred from available_evidence; labels remain anonymous. This is not a claim of perfect treatment blinding.",
+    "authorship": "Reviewer authored separate rental fixtures, not retrieval fixtures. Reviewer previously performed a pre-run read-only structure/feasibility check of retrieval fixtures; the present outcome review uses only the authorized anonymous packet."
+  },
+  "method": [
+    "Read complete source reference/gold and all six response objects, then compare support with each candidate’s actual available_evidence.",
+    "Evaluate substance across prose, findings, limitations, next steps and scalar facts; noncontradictory fact rows can communicate a required count, but cannot excuse contradictory prose.",
+    "Distinguish missing available findings, justified limited-evidence uncertainty, unsupported factual assertions, wrong decisions and exact-quote defects. Equivalent justified next steps and semantically equivalent statuses are acceptable.",
+    "Do not require one preferred excerpt where an alternative exact supplied excerpt supports the same fact.",
+    "No benchmark CLI/API/model calls, external requests, frozen-source edits or commits were made. Current parent/subagent review reasoning is outside measured CLI totals."
+  ],
+  "source_packet_sha256": {
+    "E1-long": "097c7cd80c9d52e659bf8c8215cdac85fd897b56c7cc914550d40e241e4432fa",
+    "E2-short": "3334c7e4e1427de92694ff8900c69a56b1514fdac080a54ee974e29351874002",
+    "E3-long": "40e77b9ae2215745d03d37ae57561e900eada8e146795563395a3ae500e2d980"
+  },
+  "assessments": [
+    {
+      "group_id": "E1-long",
+      "candidate_id": "candidate_1",
+      "criteria": [
+        {
+          "id": "E1-F1",
+          "met": true,
+          "reason": "“建議核准 HBR-14，但僅核准…既有 harbor-48 rev.2 夜間沙箱重播工作” is a bounded affirmative decision consistent with E1-D01’s requested local job change; it expressly excludes production approval."
+        },
+        {
+          "id": "E1-F2",
+          "met": true,
+          "reason": "“48/48 接受、零錯誤記錄更新與零非沙箱寫入” states the functional results; facts also give baseline_accepted_runs=46 and scored_scenarios_per_parser=48. E1-D02’s total row is “total, 48, 46, 48”. The entire response, including noncontradictory fact rows, communicates the requested counts."
+        },
+        {
+          "id": "E1-F3",
+          "met": true,
+          "reason": "The finding says “沙箱端點限制持續啟用” and successful same-runner rollback, with E1-D02’s 18:43 Larch readback and both accepted smoke events quoted. These match E1-D01’s operational gate."
+        },
+        {
+          "id": "E1-F4",
+          "met": true,
+          "reason": "“目前尚未執行變更” and current_scheduled_default=Larch distinguish review approval from execution. Its exact E1-D04 excerpt “Scheduled default: Larch.\nPending request: HBR-14.” exists in available evidence, as do all other quoted excerpts."
+        },
+        {
+          "id": "E1-F5",
+          "met": true,
+          "reason": "“首次夜間啟動後記錄有效設定讀回…目的地稽核及封存位置” and reverting on a failed check are proportionate to E1-D04’s operating fields. The answer explicitly limits the single-pack evidence and does not demand universal reliability before approval."
+        }
+      ],
+      "unsupported_claims": [],
+      "contradictions": [],
+      "useful_next_step": true,
+      "appropriate_uncertainty": true,
+      "notes": [
+        "No wrong decision or unsupported material fact found. Exact citations were independently checked against this candidate’s actual available_evidence, not merely the full reference."
+      ]
+    },
+    {
+      "group_id": "E1-long",
+      "candidate_id": "candidate_2",
+      "criteria": [
+        {
+          "id": "E1-F1",
+          "met": true,
+          "reason": "“應有條件核准 HBR-14…僅…既有 harbor-48 夜間沙箱重播工作” approves the recorded narrow change. Its condition is ordinary gate/configuration verification, not an unsupported refusal or added universal-reliability hurdle; E1-D01 defines this bounded scope."
+        },
+        {
+          "id": "E1-F2",
+          "met": true,
+          "reason": "The answer gives “48/48 通過，零錯誤記錄更新及零非沙箱寫入”; the exact E1-D02 total row and facts baseline=46/scenarios=48 complete the numerical comparison on the same pack."
+        },
+        {
+          "id": "E1-F3",
+          "met": true,
+          "reason": "“端點限制與同組態回復亦有證據” is supported with exact E1-D02 excerpts for enabled restriction and “read effective configuration: nightly_default=Larch.” The completed rollback fact and this readback communicate successful operational rollback; requiring the preferred smoke excerpt too would add an exact-wording requirement."
+        },
+        {
+          "id": "E1-F4",
+          "met": true,
+          "reason": "“目前尚未執行 HBR-14，排程預設仍為 Larch” preserves current versus proposed state. All nine quoted source excerpts occur in the supplied E1-D01/D02 bodies; there is no claim of completed deployment."
+        },
+        {
+          "id": "E1-F5",
+          "met": true,
+          "reason": "The next steps request effective-configuration readback and first-nightly 48-case/destination checks, with rollback for deviation. The limitations state a single comparison rather than population or repeated reliability, matching E1-D02."
+        }
+      ],
+      "unsupported_claims": [],
+      "contradictions": [],
+      "useful_next_step": true,
+      "appropriate_uncertainty": true,
+      "notes": [
+        "No wrong decision or unsupported material fact found. Exact citations were independently checked against this candidate’s actual available_evidence, not merely the full reference."
+      ]
+    },
+    {
+      "group_id": "E1-long",
+      "candidate_id": "candidate_3",
+      "criteria": [
+        {
+          "id": "E1-F1",
+          "met": true,
+          "reason": "“建議核准 HBR-14 的有限範圍” selects only the existing local sandbox default and expressly avoids production/untested reliability conclusions, matching E1-D01."
+        },
+        {
+          "id": "E1-F2",
+          "met": true,
+          "reason": "“48/48 通過、零錯誤記錄更新及零非沙箱寫入” is supported by E1-D01/D02 quotes; facts give baseline=46 and scenarios=48. The response supplies concrete results rather than a bare pass label."
+        },
+        {
+          "id": "E1-F3",
+          "met": true,
+          "reason": "“端點限制啟用，且已復原 Larch 並通過兩個固定 smoke 情境” communicates the operating gate. Its exact E1-D01 enabled restriction, E1-D02 readback and accepted smoke excerpt substantiate the statement."
+        },
+        {
+          "id": "E1-F4",
+          "met": true,
+          "reason": "“目前不可視為已部署” and the limitation “目前排程預設仍是 Larch” preserve pending state. All ten citations are exact excerpts from actually available documents, including the E1-D03 production-scope statement."
+        },
+        {
+          "id": "E1-F5",
+          "met": true,
+          "reason": "It proposes operator readback and recording bundle, acceptance, wrong-record, destination and archive fields; broader changes require another review. That is a useful bounded operating check consistent with E1-D04, and the limitations preserve the single authored-run boundary."
+        }
+      ],
+      "unsupported_claims": [],
+      "contradictions": [],
+      "useful_next_step": true,
+      "appropriate_uncertainty": true,
+      "notes": [
+        "No wrong decision or unsupported material fact found. Exact citations were independently checked against this candidate’s actual available_evidence, not merely the full reference."
+      ]
+    },
+    {
+      "group_id": "E1-long",
+      "candidate_id": "candidate_4",
+      "criteria": [
+        {
+          "id": "E1-F1",
+          "met": true,
+          "reason": "“應核准，但僅核准 HBR-14 所界定…夜間沙箱工作” gives the correct bounded approval. E1-D01 plus the supplied summary establish the gate; lack of D02/D03 bodies does not itself make this decision unsupported."
+        },
+        {
+          "id": "E1-F2",
+          "met": false,
+          "reason": "The response covers candidate 48/48 and both zero-error gates, but baseline_accepted_runs is “unknown” and no prose supplies 46/48. Its actual available summary explicitly says “Larch accepted 46/48”. This is a missed available count, not an invented number or wrong approval decision."
+        },
+        {
+          "id": "E1-F3",
+          "met": true,
+          "reason": "It explicitly says “端點限制持續啟用” and same-runner restoration; the exact E1-D01 “Rollback exercise: completed, Larch restored and two fixed smoke scenarios accepted.” supports successful rollback. The summary also supplies readback. It need not inspect an unavailable D02 body to use those supplied records."
+        },
+        {
+          "id": "E1-F4",
+          "met": true,
+          "reason": "“目前仍是 Larch、請求未執行” and exact E1-D01/D04 excerpts separate approval from execution. Its limitation that D02/D03 bodies were unavailable is true for this candidate, not a contradiction with the reviewer’s full-source packet."
+        },
+        {
+          "id": "E1-F5",
+          "met": true,
+          "reason": "The first 02:00 nightly readback and acceptance/destination/archive checks are supported by available E1-D04; it limits inference to the authored pack. This is proportionate operating verification, not an unjustified hold."
+        }
+      ],
+      "unsupported_claims": [],
+      "contradictions": [],
+      "useful_next_step": true,
+      "appropriate_uncertainty": true,
+      "notes": [
+        "One required finding is incomplete: the available baseline count is omitted and its scalar is reported unknown despite 46/48 in the supplied summary. This is classified as omission/unnecessary abstention, not fabrication or a material contradictory factual assertion. The approval itself is justified. Its claim that D02/D03 bodies were unavailable is accurate."
+      ]
+    },
+    {
+      "group_id": "E1-long",
+      "candidate_id": "candidate_5",
+      "criteria": [
+        {
+          "id": "E1-F1",
+          "met": true,
+          "reason": "“建議核准此受限變更…嚴限既有 harbor-48 nightly sandbox replay 的本地預設” is the correct narrow affirmative decision. The available summary accurately supplies the gate and results; the answer does not claim independent inspection of original records."
+        },
+        {
+          "id": "E1-F2",
+          "met": true,
+          "reason": "The answer gives 48/48 and zero wrong-record/non-sandbox writes, while its finding states “Larch 僅通過46/48” with an exact summary excerpt. All required numerical facts agree with E1-D02 and the actual supplied summary."
+        },
+        {
+          "id": "E1-F3",
+          "met": true,
+          "reason": "It describes the comparison under the same runner and restrictions, says the acceptance gate is met, and states completed same-runner rollback with “Larch was restored, two smoke scenarios passed, and runner readback showed Larch.” This communicates the operating controls in substance; the additional future endpoint check is ordinary verification, not a claim that prior controls were missing."
+        },
+        {
+          "id": "E1-F4",
+          "met": true,
+          "reason": "It cites only exact excerpts of its available summary, records “HBR-14 尚未執行”, and gives current_scheduled_default=Larch. The admission “僅有摘要可用” matches actual visibility and is not dishonest merely because this reviewer sees full documents."
+        },
+        {
+          "id": "E1-F5",
+          "met": true,
+          "reason": "Its suggested pre/post-change endpoint, scope, readback and destination checks plus rollback on deviation are proportionate to the narrow operation. It explicitly rejects extrapolation to broader reliability and production."
+        }
+      ],
+      "unsupported_claims": [],
+      "contradictions": [],
+      "useful_next_step": true,
+      "appropriate_uncertainty": true,
+      "notes": [
+        "No wrong decision or unsupported material fact found. Exact citations were independently checked against this candidate’s actual available_evidence, not merely the full reference.",
+        "rollback_exercise_status=\"successful\" is semantically supported by the completed successful rollback; a literal mismatch with an expected \"completed\" scalar would be a presentation/normalization issue, not a factual or decision error. All citations explicitly name summary; none is a translated source passage presented as an exact English quote."
+      ]
+    },
+    {
+      "group_id": "E1-long",
+      "candidate_id": "candidate_6",
+      "criteria": [
+        {
+          "id": "E1-F1",
+          "met": true,
+          "reason": "“建議有條件核准 HBR-14 的狹義變更” approves only the existing sandbox job. Its conditions check the same scope/configuration before and after execution, which is supported by E1-D01/D04 rather than an added barrier to approval."
+        },
+        {
+          "id": "E1-F2",
+          "met": true,
+          "reason": "It states candidate 48/48, zero wrong-record/non-sandbox writes and baseline 46/48, with exact summary excerpts supporting the counts. The same frozen input/runner/restrictions comparison agrees with E1-D02."
+        },
+        {
+          "id": "E1-F3",
+          "met": true,
+          "reason": "The response presents the comparison under the same restrictions and successful same-runner rollback, and its finding gives restored Larch, two passed smoke scenarios and readback. The summary contains the enabled endpoint gate and those completed controls; the later operational checks do not negate that recorded success."
+        },
+        {
+          "id": "E1-F4",
+          "met": true,
+          "reason": "The limitation says “尚無HBR-14已執行的紀錄；目前排程預設仍為Larch”. All five evidence excerpts are exact substrings of the candidate’s available summary. No original-document inspection or completed deployment is invented."
+        },
+        {
+          "id": "E1-F5",
+          "met": true,
+          "reason": "It requests a scope check, immediate parser readback, sandbox-only destination audit and rollback on anomaly. Those are useful, bounded follow-ups; limitations preserve the single authored comparison and untested-workload uncertainty."
+        }
+      ],
+      "unsupported_claims": [],
+      "contradictions": [],
+      "useful_next_step": true,
+      "appropriate_uncertainty": true,
+      "notes": [
+        "No wrong decision or unsupported material fact found. Exact citations were independently checked against this candidate’s actual available_evidence, not merely the full reference.",
+        "rollback_exercise_status=\"successful\" is semantically supported by the completed successful rollback; a literal mismatch with an expected \"completed\" scalar would be a presentation/normalization issue, not a factual or decision error. All citations explicitly name summary; none is a translated source passage presented as an exact English quote."
+      ]
+    },
+    {
+      "group_id": "E2-short",
+      "candidate_id": "candidate_1",
+      "criteria": [
+        {
+          "id": "E2-F1",
+          "met": true,
+          "reason": "“不應批准 Birch…應維持 Cedar” is tied to the blocking exact-identity rule and 58/60 versus baseline 60/60, not generic caution. E2-D01 gives “A mismatch is a blocking error” and the total row; the fact rows also preserve baseline=60."
+        },
+        {
+          "id": "E2-F2",
+          "met": true,
+          "reason": "The answer explicitly gives A-007→A-7 and B-004→B-4, significant leading-zero normalization and different existing targets/slots. Its exact E2-D01 mismatch/different-entry excerpts support the collision; the actual supplied summary explicitly attributes numeric-suffix canonicalisation. No unavailable D02 inspection is claimed, and the mechanism is supported by available evidence despite the shorter source path."
+        },
+        {
+          "id": "E2-F3",
+          "met": true,
+          "reason": "“中位時間由145降至91毫秒…僅命中58/60…2次錯目標” keeps latency separate from identity correctness. Exact E2-D01 timing and no-waiver excerpts support the explanation; the response rejects extrapolation to real prevalence."
+        },
+        {
+          "id": "E2-F4",
+          "met": true,
+          "reason": "“這是預覽測試，未曾派送” and no inference of actual inventory/delivery accidents separate proposed route risk from observed harm. E2-D01’s exact “route preview only. dispatch_enabled=false.” and E2-D04’s current Cedar setting are available and quoted."
+        },
+        {
+          "id": "E2-F5",
+          "met": false,
+          "reason": "It usefully proposes preserving opaque identifiers and rerunning the frozen MFT-60 suite to 60/60, which includes both known collisions. However, “以固定 MFT-60 參考檔重跑” never adds suitable additional distinct-key cases as this composite frozen criterion explicitly requires. This is a verification-coverage omission, not a wrong refusal or an unsafe action recommendation."
+        }
+      ],
+      "unsupported_claims": [],
+      "contradictions": [],
+      "useful_next_step": true,
+      "appropriate_uncertainty": true,
+      "notes": [
+        "Correct supported refusal and collision diagnosis. No invented material fact, wrong immediate action, or actual-harm claim found. All quoted excerpts match evidence actually available to this anonymous candidate.",
+        "E2-F5 is marked unmet for the specific missing additional distinct-key coverage, while useful_next_step remains true: rerunning the fixed known suite after the proposed correction is useful but narrower than the frozen criterion. This distinction must not be reported as five unsafe decisions.",
+        "Mechanism support is available through the summary plus E2-D01’s exact collision records despite no D02 body. Do not penalize actual access limits or require citation to a body the candidate never received when an available source supports the same substantive finding."
+      ]
+    },
+    {
+      "group_id": "E2-short",
+      "candidate_id": "candidate_2",
+      "criteria": [
+        {
+          "id": "E2-F1",
+          "met": true,
+          "reason": "“不應批准 Birch 明日自動路由；應維持 Cedar” follows the no-mismatch requirement and stated 58/60 versus 60/60 comparison, supported by exact E2-D01 excerpts."
+        },
+        {
+          "id": "E2-F2",
+          "met": true,
+          "reason": "The finding explains numeric suffix conversion from A-007 to A-7 and quotes E2-D02’s numeric_suffix/join/lookup trace plus distinct east-07/east-70 entries. The response also preserves two failing leading-zero cases, satisfying the allowed one-fully-explained-example-plus-count formulation."
+        },
+        {
+          "id": "E2-F3",
+          "met": true,
+          "reason": "It states 91 versus 145 ms, candidate 58/60 and baseline 60/60, while saying a mismatch is blocking regardless of speed. The limitation that two authored examples do not establish future frequency matches E2-D01 and the supplied summary."
+        },
+        {
+          "id": "E2-F4",
+          "met": true,
+          "reason": "“尚未執行派送或升級，現行預設仍是 Cedar” and dispatch_enabled=false preserve the observed nonexecuted boundary. These are supported by exact E2-D01 excerpts; no real delivery or inventory harm is asserted."
+        },
+        {
+          "id": "E2-F5",
+          "met": false,
+          "reason": "“以相同凍結參考檔重跑60案” and independent confirmation of zero errors are useful. The answer never proposes additional distinct-key cases beyond those fixed 60, so it incompletely covers the literal criterion’s additional-coverage requirement. Maintaining Cedar pending this work is still the correct immediate action."
+        }
+      ],
+      "unsupported_claims": [],
+      "contradictions": [],
+      "useful_next_step": true,
+      "appropriate_uncertainty": true,
+      "notes": [
+        "Correct supported refusal and collision diagnosis. No invented material fact, wrong immediate action, or actual-harm claim found. All quoted excerpts match evidence actually available to this anonymous candidate.",
+        "E2-F5 is marked unmet for the specific missing additional distinct-key coverage, while useful_next_step remains true: rerunning the fixed known suite after the proposed correction is useful but narrower than the frozen criterion. This distinction must not be reported as five unsafe decisions."
+      ]
+    },
+    {
+      "group_id": "E2-short",
+      "candidate_id": "candidate_3",
+      "criteria": [
+        {
+          "id": "E2-F1",
+          "met": true,
+          "reason": "The answer refuses tomorrow’s promotion because Birch has 58/60 matches and the identity gate has no speed waiver, with exact E2-D01 support. It retains Cedar rather than merely requesting unspecified more evidence."
+        },
+        {
+          "id": "E2-F2",
+          "met": true,
+          "reason": "“將字尾轉數字後重組…A-7 而非 A-007” and the exact E2-D02 numeric_suffix and east-70 lookup excerpts explain the concrete collision. The response gives two wrong cases and distinct existing slots, meeting the permitted example/count formulation."
+        },
+        {
+          "id": "E2-F3",
+          "met": true,
+          "reason": "It gives 145→91 ms, 58/60 candidate and 60/60 baseline, and explicitly calls speed diagnostic rather than an identity waiver. Its two-case prevalence limitation matches the authored coverage in E2-D01/D03."
+        },
+        {
+          "id": "E2-F4",
+          "met": true,
+          "reason": "“評估未啟用派送，故沒有實際批次或庫存變更” and the statement to keep Cedar correctly distinguish preview output from harm. The exact E2-D01 disabled-dispatch excerpt and E2-D04 future dispatcher field use support this distinction."
+        },
+        {
+          "id": "E2-F5",
+          "met": false,
+          "reason": "The answer proposes fixing numeric-suffix normalization and “對相同凍結 MFT-60 參考檔完整重跑”, with intermediate-key inspection. That is useful but does not explicitly add new distinct-key cases beyond the existing suite, which E2-F5 requires. No corrected result is falsely claimed."
+        }
+      ],
+      "unsupported_claims": [],
+      "contradictions": [],
+      "useful_next_step": true,
+      "appropriate_uncertainty": true,
+      "notes": [
+        "Correct supported refusal and collision diagnosis. No invented material fact, wrong immediate action, or actual-harm claim found. All quoted excerpts match evidence actually available to this anonymous candidate.",
+        "E2-F5 is marked unmet for the specific missing additional distinct-key coverage, while useful_next_step remains true: rerunning the fixed known suite after the proposed correction is useful but narrower than the frozen criterion. This distinction must not be reported as five unsafe decisions."
+      ]
+    },
+    {
+      "group_id": "E2-short",
+      "candidate_id": "candidate_4",
+      "criteria": [
+        {
+          "id": "E2-F1",
+          "met": true,
+          "reason": "“不應將 Birch 提升…維持 Cedar” is justified by 58/60 under a blocking no-mismatch rule, with the baseline 60 preserved in facts. E2-D01’s rule and total row are quoted exactly."
+        },
+        {
+          "id": "E2-F2",
+          "met": true,
+          "reason": "The answer gives both A-007/B-004→A-7/B-4 and explains numeric conversion into different existing entries/slots. Exact E2-D02 numeric_suffix, distinct-slot and canonicalisation excerpts substantiate the mechanism rather than a cosmetic-display explanation."
+        },
+        {
+          "id": "E2-F3",
+          "met": true,
+          "reason": "The 145→91 ms median improvement and 58/60 outcome are explicit, and timing cannot waive correctness. Baseline=60 is in the fact rows; uncertainty about real leading-zero frequency is appropriately retained."
+        },
+        {
+          "id": "E2-F4",
+          "met": true,
+          "reason": "Its finding says “目前僅為預覽，Cedar 仍是預設” and quotes exact E2-D01 preview/dispatch-disabled/current-default sentences. This communicates that the error was in a retained preview, not an executed batch; no actual parcel or inventory harm is claimed."
+        },
+        {
+          "id": "E2-F5",
+          "met": false,
+          "reason": "It correctly proposes preserving the trimmed string and rerunning all 60 frozen cases, but “以相同凍結參考檔重跑60個情境” does not introduce suitable additional distinct-key coverage. The literal criterion is incomplete although the immediate decision and next step are useful."
+        }
+      ],
+      "unsupported_claims": [],
+      "contradictions": [],
+      "useful_next_step": true,
+      "appropriate_uncertainty": true,
+      "notes": [
+        "Correct supported refusal and collision diagnosis. No invented material fact, wrong immediate action, or actual-harm claim found. All quoted excerpts match evidence actually available to this anonymous candidate.",
+        "E2-F5 is marked unmet for the specific missing additional distinct-key coverage, while useful_next_step remains true: rerunning the fixed known suite after the proposed correction is useful but narrower than the frozen criterion. This distinction must not be reported as five unsafe decisions."
+      ]
+    },
+    {
+      "group_id": "E2-short",
+      "candidate_id": "candidate_5",
+      "criteria": [
+        {
+          "id": "E2-F1",
+          "met": true,
+          "reason": "“不應將 Birch 提升…維持 Cedar 預設” follows the exact-reference blocking condition and 58/60 outcome. Baseline=60 and wrong targets=2 are preserved in facts; the actual supplied summary supports them."
+        },
+        {
+          "id": "E2-F2",
+          "met": true,
+          "reason": "Its exact summary excerpts state “A-007 to A-7; B-004 to B-4”, distinct existing entries/different slots and numeric-suffix canonicalisation. This communicates the concrete opaque-string collision with available source support rather than inventing unseen raw-trace details."
+        },
+        {
+          "id": "E2-F3",
+          "met": true,
+          "reason": "The answer separates the timing gain from correctness, quotes 91 ms versus 145 ms and gives candidate=58/baseline=60 of 60. It expressly avoids inferring real frequency or proven post-fix safety from two examples."
+        },
+        {
+          "id": "E2-F4",
+          "met": false,
+          "reason": "The answer does not clearly communicate that the observed evaluation was preview-only with no dispatch or inventory mutation. “不啟用或操作明日批次” is a future instruction, and dispatch_enabled is “unknown”. Its actual summary does state “preview-only” and “No dispatch, inventory mutation…occurred”. This is a missing historical boundary, not an assertion that real harm occurred. The summary does not reproduce the literal configuration flag, so unknown for that exact flag is not classified as fabricated fact."
+        },
+        {
+          "id": "E2-F5",
+          "met": true,
+          "reason": "It proposes opaque strings with only surrounding-whitespace trimming and “加入前導零與回歸案例” for a repaired benchmark against frozen independent references, then zero mismatches before reconsideration. The instruction to add leading-zero/regression cases provides the additional coverage missing from several other candidates; it does not claim a completed fix."
+        }
+      ],
+      "unsupported_claims": [],
+      "contradictions": [],
+      "useful_next_step": true,
+      "appropriate_uncertainty": true,
+      "notes": [
+        "Correct supported refusal and collision diagnosis. No invented material fact, wrong immediate action, or actual-harm claim found. All quoted excerpts match evidence actually available to this anonymous candidate.",
+        "The source summary reports a preview-only run and no dispatch/inventory mutation, but does not spell out dispatch_enabled=false as a configuration field. The unknown scalar is therefore treated as cautious exact-field uncertainty, while failure to communicate the known no-operation outcome makes E2-F4 incomplete. No material contradiction or fabricated dispatch is alleged."
+      ]
+    },
+    {
+      "group_id": "E2-short",
+      "candidate_id": "candidate_6",
+      "criteria": [
+        {
+          "id": "E2-F1",
+          "met": true,
+          "reason": "“不應批准 Birch 明日自動路由” follows two wrong targets and a blocking identity rule, not generic conservatism. E2-D01 exact rule/count excerpts and baseline=60 in facts support retaining Cedar."
+        },
+        {
+          "id": "E2-F2",
+          "met": true,
+          "reason": "The answer explains numeric conversion of A-007 into the separate A-7 entry and different slot. Exact E2-D02 leading-zero significance, numeric_suffix and east-07/east-70 excerpts support the concrete mechanism; the two-case count is preserved."
+        },
+        {
+          "id": "E2-F3",
+          "met": true,
+          "reason": "It explicitly gives 145→91 ms, 58/60 and two errors, while stating speed cannot waive identity. Baseline=60 appears in facts and E2-D01’s total row; E2-D03 supports the nonrepresentative two-case limitation."
+        },
+        {
+          "id": "E2-F4",
+          "met": true,
+          "reason": "“評估僅為預覽” together with dispatch_enabled=false and preserving Cedar distinguishes the evaluated preview from future action. “未提供實際派送或庫存結果” is less direct than the source’s explicit no-operation wording, but does not assert that harm occurred or contradict the preview/disabled-dispatch boundary."
+        },
+        {
+          "id": "E2-F5",
+          "met": false,
+          "reason": "It usefully recommends preserving strings, prohibiting numeric suffix conversion and rerunning the same frozen MFT-60 suite to zero errors. It does not add further distinct-key scenarios beyond those 60, leaving E2-F5’s explicit additional-coverage element unmet. The refusal and proposed regression check remain useful."
+        }
+      ],
+      "unsupported_claims": [],
+      "contradictions": [],
+      "useful_next_step": true,
+      "appropriate_uncertainty": true,
+      "notes": [
+        "Correct supported refusal and collision diagnosis. No invented material fact, wrong immediate action, or actual-harm claim found. All quoted excerpts match evidence actually available to this anonymous candidate.",
+        "E2-F5 is marked unmet for the specific missing additional distinct-key coverage, while useful_next_step remains true: rerunning the fixed known suite after the proposed correction is useful but narrower than the frozen criterion. This distinction must not be reported as five unsafe decisions."
+      ]
+    },
+    {
+      "group_id": "E3-long",
+      "candidate_id": "candidate_1",
+      "criteria": [
+        {
+          "id": "E3-F1",
+          "met": true,
+          "reason": "“不能認證” and actual_table_catalog_revision_from_packet=unknown correctly leave the historical table revision unresolved. It asserts neither R7 throughout nor an R6 failure."
+        },
+        {
+          "id": "E3-F2",
+          "met": true,
+          "reason": "Exact E3-D01 excerpts distinguish the signed form copied to the cover from table-data binding, and completed rendering/archive acceptance from catalog rows. The answer and facts preserve 18 pages."
+        },
+        {
+          "id": "E3-F3",
+          "met": false,
+          "reason": "It correctly identifies the expired body, unrecorded binding, absent row verification and lack of an R7-only trusted digest. However, “即使取得事後指標狀態” presents later pointer evidence generically, while the limitation declines a pointer timeline because E3-D02/D03 bodies are unavailable. Its actual summary already states the 26 August observation after H17 with no start-time history; that known observation is not communicated. This leaves the specific historical-pointer part of the composite finding incomplete, rather than making its refusal wrong."
+        },
+        {
+          "id": "E3-F4",
+          "met": true,
+          "reason": "The first finding explicitly preserves completion and archive acceptance with the exact E3-D01 status definition; answer/facts give 18 pages and a single retained first-page preview with no equipment rows. It does not turn expiration or missing content into corruption or a wrong revision."
+        },
+        {
+          "id": "E3-F5",
+          "met": true,
+          "reason": "It conditionally seeks an independent PDF or BR-H17 run-specific configuration/binding, checks linkage to the 25 August run, and explicitly proposes digest identity followed by row-by-row comparison with approved R7. Exact E3-D04 excerpts support pending/open status and the historical limit of later exports."
+        }
+      ],
+      "unsupported_claims": [],
+      "contradictions": [],
+      "useful_next_step": true,
+      "appropriate_uncertainty": true,
+      "notes": [
+        "Correct supported refusal with a useful verification path. E3-F3 is a missing available historical-pointer finding, not an invented fact, false certification or unsafe action.",
+        "Actual visibility is summary plus E3-D01 and E3-D04. The statement that E3-D02/D03 bodies were not supplied is accurate; it must not be mistaken for absence of the pointer fact from the available summary.",
+        "All 10 quoted excerpts exactly match actually available documents. No supported translation was presented as a verbatim source quotation. Body availability false is semantically absent, not an incorrect archival status."
+      ]
+    },
+    {
+      "group_id": "E3-long",
+      "candidate_id": "candidate_2",
+      "criteria": [
+        {
+          "id": "E3-F1",
+          "met": true,
+          "reason": "It directly refuses certification of R7 throughout and leaves actual revision unknown, while describing R6/cache input only as possible alternatives rather than proven facts."
+        },
+        {
+          "id": "E3-F2",
+          "met": true,
+          "reason": "Its summary excerpts support copied cover/request labels separated from table binding and completion/page count/archive acceptance not establishing rows or revision. The substance is supported; the R7-label quotation has a punctuation-only exactness defect recorded in notes."
+        },
+        {
+          "id": "E3-F3",
+          "met": false,
+          "reason": "It quotes and explains the expired PDF, unrecorded resolved revision/snapshot/pointer/cache, and the 26 August observation after the run without start-time history. It also quotes that the digest does not establish revision. It does not explain the frozen criterion’s specific missing trusted R7 reference mapping. That mapping detail is itself absent from its actual summary-only evidence; this is literal composite-criterion incompleteness, not an unsupported digest claim or an incorrect decision."
+        },
+        {
+          "id": "E3-F4",
+          "met": true,
+          "reason": "Completed status, 18 pages and the one retained first-page preview are communicated in answer/facts; its first finding includes the exact summary excerpt preserving archive acceptance. Missing content is not labelled a renderer failure, corruption or proof of R6."
+        },
+        {
+          "id": "E3-F5",
+          "met": true,
+          "reason": "It conditionally follows pending BR-H17 or other copies, prioritizes the original run’s resolved revision, pointer/cache identity and row snapshot, and keeps certification withheld if unavailable. Examining those run-specific values addresses the R7 claim; it does not propose a new export or promise recovery. An explicit instruction to compare recovered rows with approved R7 would make the procedure clearer, but the proposed historical binding check is a useful equivalent verification path."
+        }
+      ],
+      "unsupported_claims": [],
+      "contradictions": [],
+      "useful_next_step": true,
+      "appropriate_uncertainty": true,
+      "notes": [
+        "Correct supported refusal; E3-F3 is limited to the uncommunicated reference-mapping explanation in a composite criterion. The available summary supports the digest-insufficiency conclusion without reproducing that underlying source detail.",
+        "Nine of 10 quotations are exact. The quote “signed request and retained first-page preview display “Catalog R7”” omits the comma inside the source wording “Catalog R7,”. This is a near-verbatim punctuation defect, not an invented label, mistranslation, inaccessible-source citation or changed factual meaning.",
+        "Actual visibility is summary only. The response accurately avoids treating document catalog titles as source bodies. The scalar no for body availability means absent in the reviewed archive; it does not mean the actual table revision is known or that all possible copies are absent."
+      ]
+    },
+    {
+      "group_id": "E3-long",
+      "candidate_id": "candidate_3",
+      "criteria": [
+        {
+          "id": "E3-F1",
+          "met": true,
+          "reason": "It rejects certification and describes R6/R7 only as possible schema-compatible inputs. The actual table revision remains unknown in its scalar facts; no incorrect-content conclusion is asserted."
+        },
+        {
+          "id": "E3-F2",
+          "met": true,
+          "reason": "Exact E3-D01 excerpts explain the cover label’s request provenance and its separation from table binding, plus the limited meaning of completed status and page count."
+        },
+        {
+          "id": "E3-F3",
+          "met": true,
+          "reason": "Exact E3-D01/D02 excerpts identify unrecorded revision, absent validation, expired body, uncaptured resolved input and binding manifest. Limitations explicitly state no independently validated R7-only digest/reference mapping and that the 26 August pointer observation postdates H17 and is not historical pointer evidence. The response supplies relevant exact support for the decisive gaps even though not every limitation repeats a preferred source excerpt."
+        },
+        {
+          "id": "E3-F4",
+          "met": true,
+          "reason": "The exact completed-status excerpt includes artifact production and archive acceptance; answer/facts retain 18 pages and only one cover preview without table rows. It does not infer render failure, corruption or an incorrect revision from retention loss."
+        },
+        {
+          "id": "E3-F5",
+          "met": true,
+          "reason": "It conditionally seeks original run configuration or independent binding evidence through BR-H17, checks date/provenance, and if an original copy is found links its identity by digest before row/source inspection. This checks the historical R7 question, while explicitly rejecting a new export as a replacement and acknowledging that the requested evidence may not exist."
+        }
+      ],
+      "unsupported_claims": [],
+      "contradictions": [],
+      "useful_next_step": true,
+      "appropriate_uncertainty": true,
+      "notes": [
+        "All five findings are met with a correct refusal and useful conditional verification. Actual visibility contains all four document bodies and no summary.",
+        "In this response, “摘要值” and “參考摘要” refer to the artifact digest/hash; they are supported translations of the source field, not claims that an unavailable narrative summary was inspected.",
+        "All 12 quotations match available source text exactly. Scalar false for body availability is semantically absent; no material unsupported claim or contradiction was found."
+      ]
+    },
+    {
+      "group_id": "E3-long",
+      "candidate_id": "candidate_4",
+      "criteria": [
+        {
+          "id": "E3-F1",
+          "met": true,
+          "reason": "It refuses certification and keeps actual revision unknown. “R6 亦是可行假設” is explicitly a possibility supported by schema compatibility, not a claim that H17 used R6."
+        },
+        {
+          "id": "E3-F2",
+          "met": true,
+          "reason": "Exact E3-D01 excerpts distinguish request/cover display from table binding and completed rendering/page count from checked revision. The answer also limits receipt/digest to produced-and-accepted artifact evidence."
+        },
+        {
+          "id": "E3-F3",
+          "met": false,
+          "reason": "The expired original, uncaptured binding/input, missing start-time pointer/cache state and post-run 26 August observation are clearly supported by exact E3-D01/D02 excerpts. The answer says the digest is not row verification, but omits the specific absence of a trusted R7 reference digest/mapping required by the composite criterion. That detail is available in its E3-D01 body; the omission narrows the explanation without creating a false digest claim."
+        },
+        {
+          "id": "E3-F4",
+          "met": true,
+          "reason": "It preserves completion, 18 pages and archive acceptance in answer/findings, with one retained preview in facts and no equipment rows in its cover excerpt. It does not equate expiration with corruption or wrong content."
+        },
+        {
+          "id": "E3-F5",
+          "met": true,
+          "reason": "It conditionally seeks pending BR-H17 and a provenance-linked original copy, checks binding and equipment-table content, and distinguishes later export from historical H17 evidence. Checking those materials addresses the R7 question; it does not promise another copy exists. The comparison target could be stated more explicitly, but the proposed original-content/binding verification is substantively useful."
+        }
+      ],
+      "unsupported_claims": [],
+      "contradictions": [],
+      "useful_next_step": true,
+      "appropriate_uncertainty": true,
+      "notes": [
+        "Correct refusal and useful original-evidence verification. E3-F3 is a specific missing digest-reference explanation, not a wrong approval or an unsupported factual assertion.",
+        "Actual visibility is summary plus E3-D01/D02. All 11 quotations are exact excerpts of those available bodies. The R6 possibility and the Chinese digest wording are supported interpretation/translation outside exact-quote fields.",
+        "The answer correctly scopes original-body unavailability to the reviewed archive and separately preserves uncertainty about independent copies elsewhere."
+      ]
+    },
+    {
+      "group_id": "E3-long",
+      "candidate_id": "candidate_5",
+      "criteria": [
+        {
+          "id": "E3-F1",
+          "met": true,
+          "reason": "It declines the proposed throughout-R7 statement and leaves actual revision unknown, describing R6/R7 compatibility and pointer/cache mechanisms as possibilities rather than observed H17 content."
+        },
+        {
+          "id": "E3-F2",
+          "met": true,
+          "reason": "Exact E3-D01 excerpts distinguish the copied signed-request cover label from actual binding, and completed rendering/archive acceptance plus 18 pages from table revision verification."
+        },
+        {
+          "id": "E3-F3",
+          "met": true,
+          "reason": "It supports unrecorded binding/no row validation and expired original body with exact excerpts; E3-D02 quotes identify the later 26 August pointer observation and missing cache identity. Limitations explicitly state no verified R7-only digest reference and no start-time binding evidence."
+        },
+        {
+          "id": "E3-F4",
+          "met": true,
+          "reason": "The first finding and exact status excerpt preserve completed production and archive acceptance; the count is 18, and the retained preview is only page 1 without equipment rows. Missing content is treated as an evidence gap rather than a rendering or content failure."
+        },
+        {
+          "id": "E3-F5",
+          "met": true,
+          "reason": "It conditionally follows pending BR-H17 and possible independent original copies, verifies run date/provenance and original digest identity, then explicitly compares equipment rows with R7/immutable binding. It says later exports cannot substitute for historical evidence and does not guarantee recovery."
+        }
+      ],
+      "unsupported_claims": [],
+      "contradictions": [],
+      "useful_next_step": true,
+      "appropriate_uncertainty": true,
+      "notes": [
+        "All five findings are met. The report wording is appropriately narrowed while the known completed artifact is preserved.",
+        "Actual visibility is summary plus all four document bodies. All 13 quotations exactly match available source text. No invented fact, material contradiction or supported translation in an exact-quote field was found.",
+        "The body-availability scalar false is semantically absent in this reviewed archive; the response separately preserves uncertainty about copies elsewhere."
+      ]
+    },
+    {
+      "group_id": "E3-long",
+      "candidate_id": "candidate_6",
+      "criteria": [
+        {
+          "id": "E3-F1",
+          "met": true,
+          "reason": "It directly refuses R7-throughout certification and gives actual revision unknown. The later pointer is treated as insufficient historical evidence, with no assertion of R6 or incorrect rows."
+        },
+        {
+          "id": "E3-F2",
+          "met": true,
+          "reason": "The answer and exact summary excerpts distinguish signed request/first-page display from actual binding and say the completed 18-page artifact does not establish the table version."
+        },
+        {
+          "id": "E3-F3",
+          "met": false,
+          "reason": "Exact summary excerpts support the expired original and uncaptured revision/snapshot/pointer/cache/validation; prose preserves the 26 August versus 25 August timing limit. The next step prohibits substituting a digest for content evidence, but does not give the specific no-trusted-R7-reference-mapping explanation required by this composite criterion. That detail is absent from its summary-only visibility. This is an incomplete explanation, not an unsupported claim that the digest proves a revision."
+        },
+        {
+          "id": "E3-F4",
+          "met": false,
+          "reason": "It correctly reports completed status, 18 pages and a one-page retained preview, and does not invent corruption or a wrong revision. It does not communicate the known archive-acceptance fact, even though its available summary explicitly includes archive acceptance among the retained evidence. E3-F4’s preservation of the produced-and-accepted artifact is therefore incomplete; this does not mean its completion statement is false."
+        },
+        {
+          "id": "E3-F5",
+          "met": true,
+          "reason": "It conditionally seeks pending BR-H17 or copies outside the reviewed archive and checks for run-time resolved revision, row snapshot or verifiable binding. This is a useful run-specific verification of the R7 question and preserves the historical pointer limitation. It neither proposes reconstruction nor guarantees recovery; comparing any recovered content explicitly with approved R7 would strengthen the instructions."
+        }
+      ],
+      "unsupported_claims": [],
+      "contradictions": [],
+      "useful_next_step": true,
+      "appropriate_uncertainty": true,
+      "notes": [
+        "Correct supported refusal with useful next verification. The two unmet findings concern the digest-reference explanation and omitted known archive acceptance; they are not false certification, invented damage or a promise to recover missing content.",
+        "Actual visibility is summary only. All four quotations exactly match that summary. The scalar no for reviewed-archive body availability is semantically absent, and is distinct from unknown actual revision or unknown existence of other copies.",
+        "The response identifies specific missing run evidence and known body expiration; its uncertainty is appropriate, despite the narrower completeness omissions."
+      ]
+    }
+  ],
+  "completion": {
+    "requested_groups": [
+      "E1-long",
+      "E2-short",
+      "E3-long"
+    ],
+    "completed_groups": [
+      "E1-long",
+      "E2-short",
+      "E3-long"
+    ],
+    "assessed_candidates": 18,
+    "complete": true
+  }
+}
