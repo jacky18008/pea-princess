@@ -4,7 +4,8 @@
 Every subcommand prints JSON with `inputs`, `formula`, `steps` and `result`, so the report can
 quote the working. England rules (Tenant Fees Act 2019; Renters' Rights Act 2025 from 2026-05-01):
 deposit cap 5 weeks' rent when annual rent < £50,000 (6 weeks at or above), holding deposit cap
-1 week, rent in advance at most 1 month. Weekly rent = monthly rent × 12 ÷ 52.
+1 week. The rent-in-advance figure assumes an in-scope monthly assured tenancy, after
+signing and before commencement; it does not classify the agreement. Weekly rent = monthly rent × 12 ÷ 52.
 
 Usage:
   calc.py deposit --rent-pcm 2400
@@ -51,7 +52,7 @@ def deposit(a):
              f"annual rent = {a.rent_pcm} × 12 = {r2(annual)} → cap is {weeks_cap} weeks",
              f"max deposit = {weeks_cap} × {r2(w)} = {r2(weeks_cap * w)}",
              f"max holding deposit = 1 × {r2(w)} = {r2(w)}",
-             "max rent in advance = 1 month = %s" % r2(a.rent_pcm)]
+             "pre-tenancy rent cap (in-scope monthly assured letting, after signing) = 1 month = %s" % r2(a.rent_pcm)]
     out("deposit", vars(a), "deposit cap = weeks_cap × (rent_pcm × 12 ÷ 52)", steps,
         {"weekly_rent": r2(w), "deposit_cap_weeks": weeks_cap, "max_deposit": r2(weeks_cap * w),
          "max_holding_deposit": r2(w), "max_rent_in_advance": r2(a.rent_pcm)})

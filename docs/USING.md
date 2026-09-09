@@ -4,7 +4,7 @@ Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen — https://github.com
 
 ## English
 
-**Everything in Pea Princess is done by typing sentences.** No code, no settings files to hand-edit, no programming ideas. The words "terminal", "Codex" and "Claude Code" in the install guide mean a text box where you type sentences to an assistant that can also run the checks for you. If you would rather not see a terminal at all, use a chat app instead (Claude, ChatGPT and others accept the same skill as an upload); you lose nothing except speed.
+**Everything in Pea Princess is done by typing sentences.** No code, no settings files to hand-edit, no programming ideas. The words "terminal", "Codex" and "Claude Code" in the install guide mean a text box where you type sentences to an assistant that can also run the checks for you. If you would rather not see a terminal at all, use a chat app instead (Claude, ChatGPT and others accept the same skill as an upload); the checks still apply, but independent fetching and automatic arithmetic require tools; otherwise you supply the source material and inspect the shown calculations.
 
 ### Five minutes, start to finish
 1. **Install** (one of): paste one line into the assistant's text box (the install guide shows it), or upload the zip in your chat app's Skills page. Done.

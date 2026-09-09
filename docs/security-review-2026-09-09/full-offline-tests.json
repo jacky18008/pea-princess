@@ -1,0 +1,20 @@
+{
+  "command": [
+    "python3",
+    "-W",
+    "ignore::ResourceWarning",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tests",
+    "-p",
+    "test_*.py"
+  ],
+  "exit_code": 0,
+  "elapsed_seconds": 37.05,
+  "summary": [
+    "Ran 1698 tests in 36.844s",
+    "OK"
+  ]
+}

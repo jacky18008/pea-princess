@@ -1,0 +1,63 @@
+{
+  "baseline_commit": "cb9ed3e",
+  "live_model_calls": 0,
+  "external_http_requests": 0,
+  "tests": [
+    {
+      "pattern": "test_launch.py",
+      "tests": 55,
+      "failures": 0,
+      "errors": 0,
+      "seconds": 11.906
+    },
+    {
+      "pattern": "test_ab.py",
+      "tests": 93,
+      "failures": 0,
+      "errors": 0,
+      "seconds": 0.158
+    },
+    {
+      "pattern": "test_journeys.py",
+      "tests": 74,
+      "failures": 0,
+      "errors": 0,
+      "seconds": 1.244
+    },
+    {
+      "pattern": "test_personas.py",
+      "tests": 105,
+      "failures": 0,
+      "errors": 0,
+      "seconds": 2.391
+    },
+    {
+      "pattern": "test_pipeline.py",
+      "tests": 85,
+      "failures": 0,
+      "errors": 0,
+      "seconds": 1.771
+    },
+    {
+      "pattern": "test_docs_bench.py",
+      "tests": 110,
+      "failures": 0,
+      "errors": 0,
+      "seconds": 1.912
+    }
+  ],
+  "total_tests": 522,
+  "all_passed": true,
+  "sources_sha256": {
+    "bench/launch.py": "6140dc396554d7952c3f7281e1231977c3261ff3a8eb5cb48b54bfe0ef0430e6",
+    "bench/run.py": "74f137b51e21153a6cdaa6bfe535b487473cc085d0acd9e763c9c6211c86f43c",
+    "bench/journeys.py": "cedf16cb0a5300b74a3a1b0dbd82bdc49775ee50326d14804b736af06cd92824",
+    "bench/personas.py": "eec1e615915e4b20b4027793c0d1011c163d923b43071fac584bd8369fb86ea6",
+    "bench/pipeline.py": "219179dad76c7a1ee8a8a513e0b5c717ad38d6d1d787d6e59b5ca1b9aea230b2",
+    "bench/docs_bench.py": "1413a955eb7aeeb657bfd5271ebc95b7ee4bd64a1ea01db04deca665d8110626",
+    "bench/ab/run_ab.py": "37eb657eca4128544f9b86bf083d6c7e5686dc3bc240eaf40d30e832663c8519",
+    "bench/ab/run_codex.py": "9da891421089fcbcca3ad6a9ce35b799f12146c5a1024a1965e236b6ad06387f",
+    "bench/ab/worker_eval.py": "acfda6611e41fd60768e92d0d8972bbbfe45c8ef1be08eb5fba9a1a041487f51"
+  },
+  "log_sha256": "e0e331e6d48d2468fa223f98bf2bdca4299972538e5be3853293729253368663"
+}

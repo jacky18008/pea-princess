@@ -51,7 +51,7 @@ Paying a third-party guarantor company is lawful, and a landlord may lawfully re
 Approved-provider lists are usually set at group level; the local lettings person cannot add a provider. Ask which providers are approved and what each charges, then choose.
 
 ### A route that no longer exists
-Offering to **pay six or twelve months' rent up front in place of a UK guarantor** was closed off by legislation. Treat any listing or FAQ that still asks for a year's rent in advance as an out-of-date page — and as a hint that the landlord's student policy is being rewritten, which is exactly when it is worth asking for the savings route.
+For an in-scope assured tenancy, **six or twelve months up front in place of a guarantor** is not a route around the pre-tenancy cap. Confirm the agreement and signing date first (axis 07); do not classify halls/PBSA or licences as unlawful from the payment schedule alone. Ask for the operator's current savings route.
 
 ## The savings route, in detail
 - Threshold seen in published rules: **36 × monthly rent** in savings. Whether it is offered at all is at the landlord's discretion.

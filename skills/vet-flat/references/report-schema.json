@@ -337,7 +337,7 @@
             "string",
             "null"
           ],
-          "description": "Write how the user plans to satisfy the landlord's income test, in plain words: a UK guarantor, rent guarantee insurance, an overseas guarantor, proof of funds only, or none needed. Paying more rent up front is not one of them: since 2026-05-01 nobody may ask for more than one month in advance.",
+          "description": "Write how the user plans to satisfy the landlord's income test, in plain words: a UK guarantor, rent guarantee insurance, an overseas guarantor, proof of funds only, or none needed. For in-scope assured tenancies signed from 2026-05-01, paying extra pre-tenancy rent is not a workaround. Identify the agreement and payment stage first; halls and licences differ (axis 07).",
           "maxLength": 160
         },
         "notes": {

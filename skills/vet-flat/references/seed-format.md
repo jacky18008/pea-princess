@@ -15,6 +15,10 @@ PP1.<base64url of the seed JSON, no padding>
 `PP1` is the format name and the version. A reader that sees a prefix it does not know says so
 and stops; it never guesses.
 
+The code is readable encoding, not encryption or proof of origin. Allowed free-text fields can
+contain identifying details; review the decoded JSON as well as the visible card before sharing.
+An allow-list of field names does not anonymize their contents.
+
 ## 1. The JSON
 
 The keys, all optional except `v`, are the whole allow-list. The schema is

@@ -2,9 +2,10 @@ Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen — https://github.com
 
 # Sharing a seed: the card, the code, the import
 
-A **seed** is what somebody is looking for in a home, small enough to post in public and precise
-enough that another agent can pick it up and start from it. It is not a report, not a listing and
-not a person: it carries preferences and bands, never an address, a name, a salary or a date.
+A **seed** carries home preferences and approximate bands so another agent can start from them.
+The exporter excludes structured identity fields; it does not anonymize arbitrary text. Names,
+addresses, contact details or financial details inside questions, labels and preferences can
+survive. Review the complete card and decoded code before sharing. Base64url is not encryption.
 
 Three things move:
 
@@ -47,12 +48,12 @@ questions they make every report answer**; the floor and light rules; whether qu
 how deep they run the checks; their plan for the first weeks; and the three-sentence summary of
 what makes a home good for them, if they have one.
 
-Never shared, even when the profile holds it: any address, postcode, building or flat number; any
-person's or company's name; where they work or study; their guarantor route (how they pass the
-landlord's income check); income;
-savings; the sentence they introduce themselves with; exact budget numbers; exact dates; the
-tenancy terms; how many people live with them; and anything about health, nationality, ethnicity,
-religion or immigration status. The skill will not put those in a seed even if asked to.
+Excluded as structured profile fields: full address/postcode, personal or company identity,
+employer/school, guarantor route, income, savings, introduction, exact dates, tenancy terms,
+household members and protected or health information. Budget figures are banded by default.
+This field allow-list cannot detect those details when written inside permitted free text.
+Read and remove them from the label, story summary, preferences, floor text, questions and
+journey descriptions before showing a public card. A postcode scrub is not an identity scrub.
 
 Two things worth saying out loud to the user:
 
@@ -132,8 +133,9 @@ underneath, or in a reply if the code is long.
 > 我要求每套房都回答的问题：〔你的问题〕
 > 结果：看了 14 套，2 套通过、3 套边缘、9 套淘汰。
 
-Say plainly that the code carries no address, no money and no identity, so nobody has to take that
-on trust; anyone can decode it and look.
+Say plainly that anyone can decode the code. Show its actual contents and the card together;
+never promise that excluding structured identity fields makes free text anonymous. Posting or
+sending it requires the user's instruction after they have seen what will be shared.
 
 ## 5. `journey.json` — the record of one search
 

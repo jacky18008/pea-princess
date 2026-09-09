@@ -231,12 +231,15 @@ class TestSharing(unittest.TestCase):
         self.assertIn("I found a flat in London with this Pea Princess seed", post)
         self.assertEqual(post.count("PP1."), 3, "each post carries the code")
 
-    def test_it_says_what_is_shared_and_what_never_is(self):
+    def test_it_distinguishes_excluded_fields_from_free_text_privacy(self):
         for shared in ("band", "district", "month", "deal-breakers", "must-haves", "priorities"):
             self.assertIn(shared, self.sharing, shared)
-        for never in ("address", "income", "savings", "guarantor route", "introduce themselves",
-                      "exact dates", "immigration status"):
+        for never in ("address", "income", "savings", "guarantor route", "introduction",
+                      "exact dates", "health"):
             self.assertIn(never, self.sharing, never)
+        for boundary in ("does not anonymize arbitrary text", "Base64url is not encryption",
+                         "complete card and decoded code", "A postcode scrub is not an identity scrub"):
+            self.assertIn(boundary, self.sharing)
 
     def test_it_tells_the_agent_what_to_do_with_and_without_a_shell(self):
         self.assertIn("scripts/seed.py export", self.sharing)

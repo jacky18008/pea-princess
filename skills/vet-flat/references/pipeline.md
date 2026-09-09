@@ -16,14 +16,18 @@ numbers are in `docs/EXPERIMENTS.md`. This file stays as the documented shape of
 for anyone who wants to re-test it; the default remains one agent with the whole skill.
 
 
-Run the pipeline when **any** of these is true:
+The original design proposed the following triggers. They are retained as research hypotheses,
+not automatic escalation rules; use this mode only when the user explicitly requests it or a
+new experiment is planned:
 
 - the model doing the judging is not the strongest one you have;
 - the flat is on the final shortlist of two or three;
 - the budget mode is `deep`;
 - the report will be shown to somebody who is going to sign something.
 
-Otherwise the single pass in `SKILL.md` is enough. The pipeline costs more calls and more wall time; it buys separation, and separation is only worth paying for when a wrong number would actually cost something.
+The single pass in `SKILL.md` remains the default. The pilot did not establish a quality benefit
+from the extra roles. Role names and separate files also do not themselves provide security
+isolation: the host must enforce filesystem, tool and network boundaries.
 
 ## The four roles in one line each
 
@@ -40,7 +44,10 @@ The one rule that holds the whole thing up: **the planner decides WHAT TO GET, n
 
 **With subagents** (Claude Code, Codex with collaborators, anything that can spawn a worker): each role is a subagent with its own tool list. The executors run in parallel, one per axis group. Four or more at once always use the cheap tier — that is the fan-out rule in `budget-modes.md`, and it applies here too.
 
-**Without subagents** (one chat window, one context): run the roles as phases, in order, **and write each phase's output to a file before the next phase starts.** Then start the next phase by reading that file and nothing else. Say out loud which phase you are in. The file is what makes the separation real: without it you are one agent again, remembering what you hoped to find.
+**Without subagents** (one chat window, one context): run the roles as phases and save each phase's
+output before the next. This creates an audit trail, but does not erase the same model's earlier
+context. Do not claim information isolation unless the next call starts in a fresh context and
+the runtime limits what it can read.
 
 If you have no file system either, put each phase's output in its own fenced block, in order, and begin the next phase with "Reading plan.json:" and quote it back. It is weaker, and it is still better than nothing.
 
@@ -131,7 +138,12 @@ A gap somebody tried to fill is a different thing from a gap nobody looked at, a
 python3 scripts/verify.py evidence.json --sources sources/ --tier standard --table
 ```
 
-It checks, with one answer each: the quote really is in the source (whitespace ignored, case ignored); the source id resolves; every number carries a unit; the number is about the thing it claims to be; every legal cap recomputed from the rent the evidence itself carries; items that claim the same thing and disagree; and whether the tier's fixed questions are all answered. It exits 1 if anything failed.
+It checks source IDs, units, heuristic referents, supported arithmetic and fixed-question coverage.
+It checks quotes against retained source text where available, ignoring whitespace and case.
+A recognized source without retained text can pass other rules while increasing
+`counts.quotes_unchecked`; this is not a verified quote or proof of factual correctness.
+Unknown IDs fail. It exits 1 if a rule failed. For a shareable report, retain the quoted source
+text and resolve unchecked quotes explicitly rather than treating an overall pass as proof.
 
 **Then read only what it flagged.** That is the point. A verifier that re-reads everything costs as much as the run it is checking and goes blind in the same places. Your job is the handful of items a rule could not settle.
 
@@ -153,7 +165,7 @@ Check these by hand, because they are where reports go wrong:
 
 1. **Quote in source.** Not "close enough". The words, in that order.
 2. **Referent.** A building-level number is not a flat-level number. A historical rating is not the current one. A sale price is never a year. The strike-day journey is not the commute. Another flat's area is another flat's area.
-3. **Rule adoption.** Every legal cap applied *with the right branch*: deposit five weeks where the annual rent is under £50,000 and six at or above it; holding deposit one week; rent in advance at most one month. The branch is the part people get wrong, because it turns on an annual figure nobody computes. Recompute it from the rent in the evidence: `scripts/calc.py deposit --rent-pcm <rent>`. The caps live in `references/thresholds.yaml`.
+3. **Rule adoption.** Every legal cap applied *with the right branch*: deposit five weeks where the annual rent is under £50,000 and six at or above it; holding deposit one week; apply the rent-in-advance limit only after checking agreement scope and payment stage (axis 07). The branch is the part people get wrong, because it turns on an annual figure nobody computes. Recompute it from the rent in the evidence: `scripts/calc.py deposit --rent-pcm <rent>`. The caps live in `references/thresholds.yaml`.
 4. **Contradictions.** The advert's area against the certificate's; the advert's energy letter against the register's. Two sources disagreeing is a finding, not a tie to break quietly.
 5. **The fixed form.** Every id the tier owes, in one of its three states.
 
@@ -175,7 +187,9 @@ The integrator does not go back for anything. If it finds itself wanting a fact,
 
 ## What this is expected to buy, and what it is not
 
-Nothing on this page is a measured result for flat vetting. The design comes from a different domain (a regulated-document question-answering system, 2026-07) where the same shape was measured, and **its findings do not transfer** — they were re-tested here from scratch. The arms are in `docs/EXPERIMENTS.md` under "Role pipeline (to be measured)" and the harness is `bench/pipeline.py`. Until those tables have numbers in them, treat this page as a design, not a recommendation, and say so if you quote it.
+The design originated in a different domain; those findings do not transfer automatically.
+The local flat-vetting pilot is now recorded in `docs/EXPERIMENTS.md`, and its results at the top
+of this page supersede the original expectations. The harness is `bench/pipeline.py`.
 
 Two things are worth knowing while the numbers are being collected:
 

@@ -32,15 +32,17 @@ Ask the user for:
 ## How to read the numbers
 - `deposit_cap_weeks` where annual rent is below `deposit_annual_rent_threshold_gbp`, otherwise `deposit_cap_weeks_high_rent`.
 - `holding_deposit_weeks` — the maximum holding deposit.
-- `rent_in_advance_max_months` — after the first payment, no more than this may be required in advance.
+- `rent_in_advance_max_months` — the usual monthly pre-tenancy cap, after signing and before commencement, for agreements within scope; not a universal payment rule.
 - `deposit_protection_days` — the deadline for the deposit to be placed in a protection scheme.
 - `tenant_notice_months` — the tenant's notice period, in writing; a shorter period can be agreed in writing, so agree it before signing if a short stay is possible.
 - `land_registry_title_fee_gbp`, `land_registry_document_fee_gbp`.
 
 ## Legal facts (England, as at 2026-09)
-- **Renters' Rights Act 2025 (c. 26)**, in force from **2026-05-01** for assured tenancies that are not social housing, by SI 2026/421. Assured tenancies are periodic; there are no fixed terms and no fixed end date; no more than one month's rent may be taken in advance after the first payment. Cite from `sources.yaml`.
+- **Renters' Rights Act 2025 (c. 26)**, in force from **2026-05-01** for assured tenancies that are not social housing, by SI 2026/421. In-scope assured tenancies are periodic. Identify the agreement before applying this rule: halls/PBSA, lodgers, licences and social housing can differ. Cite from `sources.yaml`.
 - Deposit caps and the holding-deposit cap come from the **Tenant Fees Act 2019**; the deposit-protection deadline from the **Housing Act 2004**.
-- There is no minimum contract length; a "minimum six months" claim is a myth.
+- For an assured periodic tenancy there is no fixed minimum term; do not apply this to excluded agreements.
+- **Rent timing matters.** For in-scope agreements signed from 2026-05-01, rent cannot be requested or accepted before both parties sign. Between signing and commencement, the usual cap is one month for monthly rent or 28 days for weekly rent. Once started, rent cannot be required before its agreed due date; voluntary early payments differ. Check transitional, social/supported-housing and council-arranged exceptions in `govuk_rent_in_advance_guidance`. Deposits are separate.
+- **Student halls are a separate branch.** University halls and qualifying code-member private PBSA usually use common law tenancies or licences; confirm status using `govuk_student_tenancies`, not the advert's label alone.
 - **Exclusive possession decides tenancy versus licence**, not the title on the document.
 - More than `short_let_nights_per_calendar_year` nights of short letting in Greater London needs planning permission (Deregulation Act 2015 s.44 and the provision it inserts).
 - A tenancy transfers with the property on a sale; the tenant keeps the tenancy, and the buyer never assessed the tenant.

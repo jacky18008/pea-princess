@@ -25,4 +25,4 @@ Each prints `inputs`, `formula`, `steps`, `result`; quote the formula in the rep
 4. Set `computed_by: "shown formula"` on the number.
 
 ## Constants (England)
-Weeks per year 52 · sq ft per m² 10.7639 · deposit cap 5 weeks (6 at or above £50,000 annual rent) · holding deposit 1 week · rent in advance 1 month · the affordability multiple is the landlord's published figure (commonly 2.5–3× for employed applicants; students and the self-employed follow the operator's table in `axes/16`).
+Weeks per year 52 · sq ft per m² 10.7639 · deposit cap 5 weeks (6 at or above £50,000 annual rent) · holding deposit 1 week · rent in advance normally 1 month only in the monthly, in-scope pre-tenancy case (after signing; see axis 07) · the affordability multiple is the landlord's published figure (commonly 2.5–3× for employed applicants; students and the self-employed follow the operator's table in `axes/16`).

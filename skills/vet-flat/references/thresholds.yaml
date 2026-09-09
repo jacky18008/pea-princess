@@ -244,9 +244,9 @@ holding_deposit_weeks:
 rent_in_advance_max_months:
   value: 1
   unit: months
-  meaning: "Maximum rent that may be required in advance after the first payment."
+  meaning: "Usual pre-tenancy rent cap for an in-scope monthly assured tenancy, after signing and before it starts."
   default_source: generic
-  note: "Renters' Rights Act 2025, in force 2026-05-01 in England. It removes paying six or twelve months up front as a substitute for a guarantor."
+  note: "England, 2026-05-01: confirm agreement scope and date. No rent before signing; after commencement it cannot be required before the agreed due date. Weekly pre-tenancy cap is 28 days; exceptions and voluntary early payment differ. See govuk_rent_in_advance_guidance."
 deposit_protection_days:
   value: 30
   unit: days

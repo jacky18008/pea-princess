@@ -21,7 +21,7 @@ Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen — https://github.com
 11. **What we could not find**, with the search strings and the blocked sources; **sources** with retrieval times; the arithmetic check; **About this report** with the configuration line again and the footer `Generated with vet-flat <version> — <source URL>`.
 
 ## The fixed form
-found = quote+source · asked = user said it · unknown = no quote, no number. How many: lite 8 · standard 14 · deep 18; `advanced.fixed_form` overrides. Gate (ask if missing): F1 deposit weeks (cap 5) · F2 holding (1 wk) · F3 advance rent (1 mo) · F4 tenancy/licence · F5 landlord · F6 deposit scheme · F7 redress+CMP · F8 council licence. Listing (if pasted): F9 area+source · F10 EPC letter · F11 bills · F12 min term · F13 break clause · F14 move-in. Extended: F15 tax band · F16 guarantor · F17 referencing · F18 furnished/inventory.
+found = quote+source · asked = user said it · unknown = no quote, no number. How many: lite 8 · standard 14 · deep 18; `advanced.fixed_form` overrides. Gate (ask if missing): F1 deposit cap 5/6 weeks · F2 holding (1 wk) · F3 advance (see scope) · F4 tenancy/licence · F5 landlord · F6 deposit scheme · F7 redress+CMP · F8 council licence. Listing (if pasted): F9 area+source · F10 EPC letter · F11 bills · F12 min term · F13 break clause · F14 move-in. Extended: F15 tax band · F16 guarantor · F17 referencing · F18 furnished/inventory.
 
 ## Plain-language rules (every text field)
 - Short sentences. No jargon or abbreviation without a gloss the first time.

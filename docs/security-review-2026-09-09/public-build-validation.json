@@ -1,0 +1,11 @@
+{
+  "build_stdout": "zip: 564451 bytes; INSTRUCTIONS.md: 7916 chars; files: 56",
+  "zip_members": 77,
+  "zip_sha256": "1e2a8a299c2226e5745ae6728ac627133f99ff0c2815f3df19744f401febf1c7",
+  "public_checksums_verified": true,
+  "unrelated_dist_files_preserved": 0,
+  "prompt_chars": 7916,
+  "fixed_questions_present": 18,
+  "untrusted_input_rule_present": true,
+  "published": false
+}

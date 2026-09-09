@@ -648,6 +648,36 @@ sources:
     last_tested: 2026-09-03
     note: "Exact title verified: a UK Public General Act of 2025, chapter 26. Earlier drafts of this skill named it as a 2026 Act; that was wrong."
 
+  - id: govuk_rent_in_advance_guidance
+    name: "Asking for rent in advance: guidance for local authorities"
+    url: "https://www.gov.uk/government/publications/asking-for-rent-in-advance-guidance-for-local-authorities/asking-for-rent-in-advance-guidance-for-local-authorities"
+    official: true
+    access: open
+    method: GET
+    needs_key: false
+    robots_note: "Not separately tested in this review."
+    tos_note: "Open Government Licence."
+    content_assertion: "Before a landlord and tenant sign the tenancy agreement"
+    used_by_scripts: []
+    used_for: [tenancy_law, rent_in_advance, agreement_scope]
+    last_tested: null
+    note: "Guidance reviewed 2026-09-09 (page updated 2026-05-08). Distinguishes signing, pre-tenancy and commenced-tenancy stages, monthly/weekly rent, transitional exclusions and exceptions. This is a content review, not a live fetcher test."
+
+  - id: govuk_student_tenancies
+    name: "Private renting: Renting as a university student"
+    url: "https://www.gov.uk/private-renting/student-tenancies"
+    official: true
+    access: open
+    method: GET
+    needs_key: false
+    robots_note: "Not separately tested in this review."
+    tos_note: "Open Government Licence."
+    content_assertion: "If you’re living in halls or private halls"
+    used_by_scripts: []
+    used_for: [tenancy_law, student_housing, agreement_scope]
+    last_tested: null
+    note: "Guidance reviewed 2026-09-09. University/private halls usually use common law tenancies or licences; private halls require the relevant National Code membership. Confirm the agreement rather than applying private assured-tenancy rules universally."
+
   - id: legislation_rra_commencement_no2
     name: "Renters' Rights Act 2025 (Commencement No. 2 and Transitional and Saving Provisions) Regulations 2026 (SI 2026/421)"
     url: "https://www.legislation.gov.uk/uksi/2026/421/regulation/2/made"
