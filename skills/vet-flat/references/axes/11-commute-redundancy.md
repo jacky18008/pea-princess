@@ -13,6 +13,14 @@ A journey time is only half the axis; the other half is what happens on the day 
 - **I** — any time you assembled from more than one query.
 - **U** — no journey could be planned.
 
+Keep both provenance and uncertainty when shortening an answer. A landlord's “estimated
+20 minutes” is a self-reported estimate, even when its quote has been checked against the
+message. Write “Landlord estimate: 20 min; journey not checked”, not “Commute: 20 min ✓”.
+An estimate below the user's limit can support a provisional comparison; it does not confirm
+that the door-to-door requirement is met. Keep that hard filter unknown until adequate route
+evidence exists. Official planner times remain predictions for the stated route, date and
+arrival time; do not promote them to guaranteed real-world travel times.
+
 ## Method in shell mode
 1. `python3 scripts/commute.py journey --from "<postcode or lat,lng>" --to "<destination address>" --arrive 09:00` — the destination is always an argument. Never build a destination into a script.
 2. `python3 scripts/commute.py stations --lat <lat> --lng <lng> --radius 800` — every rail, underground and light-rail station within the redundancy walk.
@@ -23,7 +31,8 @@ A journey time is only half the axis; the other half is what happens on the day 
 The journey planner answers plain GET requests with postcodes or coordinates and needs no key at this volume.
 
 ## Method in manual mode
-Ask the user for:
+Use supplied details first. Ask only the next essential missing detail, following the overall
+three-question limit; these are not three mandatory onboarding questions:
 1. The exact destination address and the time they need to arrive.
 2. Which door of the destination they actually use, so the entrance buffer is right.
 3. Whether they would rather sit still on one line for longer or change twice for a shorter total.
@@ -48,7 +57,8 @@ Ask the user for:
 - **Zero-wait samples.** Check the leg times: if arrival at the platform equals the departure time, the sample assumes a perfect connection. Report a five-minute and a ten-minute wait scenario alongside it.
 - **Walking legs can contain zero-time in-station segments.** A 709 m walk shown as five minutes included a moving-link segment counted at zero, so it is not evidence of a short station-to-door walk. Read the legs, not the total.
 - **The three speeds are not interchangeable.** The average-speed run is the value that goes in the table; the fast run is sensitivity; the entrance buffer is a third number. Never let one stand in for another.
-- **Advertised walk times are marketing.** A resident's correction overrides the listing.
+- **Advertised walk times are claims.** Record a resident's correction alongside the listing,
+  with its source and route scope; disagreement is a finding, not automatic proof either is true.
 - **A postcode centroid is not the door.** Record the coordinate provenance with the result, and say it is not a verified doorway.
 - **Say what you optimised.** Sitting still on one direct line for 55 minutes can be better than changing twice for 35, especially on a low-energy day. If the user's preference is a direct route, say that the ranking reflects it.
 - **Off-peak, night and weekend journeys are different journeys.** A grade earned at 09:00 on a weekday says nothing about getting home at midnight; check the last services on both families.

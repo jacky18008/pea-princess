@@ -145,6 +145,10 @@ A recognized source without retained text can pass other rules while increasing
 Unknown IDs fail. It exits 1 if a rule failed. For a shareable report, retain the quoted source
 text and resolve unchecked quotes explicitly rather than treating an overall pass as proof.
 
+Even a matching quote validates attribution, not the factual truth of the source. Preserve
+source class, estimate wording, date and scope when using a passed claim. A self-reported
+journey estimate remains an estimate; verifier `pass` is not a hard-filter pass.
+
 **Then read only what it flagged.** That is the point. A verifier that re-reads everything costs as much as the run it is checking and goes blind in the same places. Your job is the handful of items a rule could not settle.
 
 **Write the whole file, not just your part.** Start from what `verify.py` wrote and change
@@ -155,7 +159,7 @@ does not belong in `verified.json`.
 
 On each flagged item, decide one of three things and say why in one sentence:
 
-- **pass** — you looked, and it stands.
+- **pass** — the checks performed support using the claim with its original qualifiers; this does not certify the source's accuracy.
 - **fail** — and the reason a reader could act on. When you are agreeing with a `verify.py` failure, **quote its reason back** in your own `reason` and name its rule id in `rules`. A fail with no reason reads as an opinion and gets dropped.
 - **unknown** — the executor could not get it, or you looked and still cannot tell.
 
@@ -178,7 +182,8 @@ Then write a `replan` list: what is worth one more round of executor work, concr
 
 - **Verified items only.** An item that is not in `verified.json`, or is there as `fail` or `unknown`, is **unknown in the report**. Not "probably". Not quietly dropped. Unknown, with the line telling the reader what it costs not to know it.
 - **Cite the item ids** in `sources` and `computed_by`, so a reader can walk any number back to the sentence it came from.
-- **The first line names the tier and the pipeline**: `Configuration: <tier> — <reason>; pipeline: planner/executor/verifier`. A reader deserves to know how much machine was behind the words.
+- **Preserve qualifications** even in compact tables or checkmarks; quote validation never upgrades source class or turns an estimate into a confirmed condition.
+- **Lead with the recommendation.** Keep tier and role details in metadata; explain the scope of checks in plain words.
 - Everything else is the ordinary report contract: the verdict card, the hard filters, the fixed form, the landmines, the twelve checks, what only the user can tell, what could not be found.
 
 The integrator does not go back for anything. If it finds itself wanting a fact, that is a note for `not_found`, not a fetch.

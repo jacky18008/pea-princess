@@ -2,21 +2,21 @@ Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen — https://github.com
 
 # How to use this skill, and how to change any setting by talking
 
-Read this when the user asks how something works, how to change a setting, how deep to go, or what a field means. Show the current value and change as a diff. A clear user instruction authorizes its stated change; do not ask for a redundant yes. Ask about material ambiguity before changing the ambiguous field.
+Read this when the user asks how something works or changes their needs or the scope of checks. Explain changes in their language, not configuration syntax. A clear user instruction authorizes its stated change; do not ask for a redundant yes. Clarify only material ambiguity, while continuing independent work.
 
 ## The one rule for every setting change
 1. Capture the user's exact words and update the versioned requirements per `session-harness.md`. Produce a **diff of `profile.yaml`** for fields it can represent: `field: old → new`, one line per field. The latest durable requirements take precedence; the profile is a compatibility projection, not a second authority.
-2. Show the diff. Apply explicitly requested changes; request confirmation for your own suggested changes or clarification for ambiguity. Never invent a field or change unrelated fields. Record conditional predicates, scope and exceptions in the state even when the legacy profile has no matching field.
-3. After applying, run `python3 scripts/profile_check.py profile.yaml` (shell mode) and show its verdict; without a shell, re-read the changed lines back to the user. Never report a validator result you did not see: if you could not run it, say so and print the command for the user.
-4. If a phrase is ambiguous ("dig deeper" with no axis named), ask which axis, offering the list.
+2. Show the effect in plain words, for example “The monthly limit is now £2,300 including bills; the quiet-bedroom requirement still applies.” Keep the technical diff in the local record unless requested. Apply explicit changes; confirm your own suggested changes or clarify ambiguity. Preserve conditions, scope and exceptions even when the legacy profile has no matching field.
+3. If execution is available, run `python3 scripts/profile_check.py profile.yaml`. Never claim a file was saved or validated without observing it. Without file tools, keep the updated requirements in the conversation and state that limitation only when saving matters; do not hand a new renter a command to run.
+4. If “check more carefully” has no scope, use the current decision to propose the next useful check. Ask only if different interpretations materially change the work or cost. Use native choices if actually available, otherwise text; at most three clarifications, usually fewer.
 
 ## Phrases → fields
 | The user says | Field | Notes |
 |---|---|---|
-| "my max is 2,300 all in" / 「上限 2300 含帳單」 | `budget.all_in_pcm_ceiling: 2300` | all-in includes bills and council tax; rent target stays unless mentioned |
+| "my monthly limit is £2,300 including bills" / 「每月總花費上限 2300，含帳單」 | `budget.all_in_pcm_ceiling: 2300` | total monthly cost includes bills and council tax; rent target stays unless mentioned |
 | "rent around 1,700" | `budget.rent_pcm_target: 1700` | warn if the gap to the ceiling cannot hold bills |
 | "dig deeper on crime and management, keep the rest light" / 「治安跟管理挖深，其他輕量」 | `axis_depth.crime: deep`, `axis_depth.management: deep`, `budget_mode: lite` | unset axes follow `budget_mode` |
-| "go deep on everything for these two flats" | `budget_mode: deep` for those candidates only (say so in the report's first line) | the escalation ladder does this automatically for a final shortlist |
+| "check everything thoroughly for these two flats" | `budget_mode: deep` for those candidates only | explain the extra checks in plain words; respect user limits |
 | "keep it cheap / I'm on a £20 plan" | `budget_mode: standard` with fewer axes (not `lite` with all axes) | see `budget-modes.md`: lite triples invented numbers |
 | "no more than 20 fetches per flat" | `limits.max_fetches_per_flat: 20` | hard cap, whatever the depth |
 | "I hate noise" / 「我怕吵」 | `quiet_over_light: true`, add "main windows facing a main road or a railway" to `avoid` | L4 |
@@ -25,10 +25,10 @@ Read this when the user asks how something works, how to change a setting, how d
 | "must have a washing machine" | add `washing_machine_in_flat` to `must_haves` | a must-have that fails is a hard fail |
 | "I always ask X" | append to `my_questions` with `when`/`kind` (classify: compare / filter / viewing / sign) | see `onboarding.md` |
 | "stop asking me about Y" | change the follow-up question policy | this does not itself waive the requirement; ask once if the user also wants Y retired |
-| "start over" | offer `profiles/` examples or the six intake questions | never delete the old profile without a yes |
+| "start over" | begin with useful examples and learn preferences gradually | do not silently delete the saved history |
 | 「只問把關的八題」 / "just the eight that matter" | `advanced.fixed_form.questions: gate` | the fixed form drops to the money-and-paperwork eight |
 | "all 18 questions, always" / 「全部 18 題都要」 | `advanced.fixed_form.questions: full` | adds council tax band, guarantor, their tenant checks, furniture and inventory |
-| "ask me about everything" / 「不知道的都問我」 | `advanced.fixed_form.ask_if_missing: all` | still one message, one time; it just holds more questions |
+| "ask me about everything" / 「不知道的都問我」 | `advanced.fixed_form.ask_if_missing: all` | prioritize at most three essential questions now; continue work and defer the rest unless a full questionnaire is explicitly requested |
 | "don't ask, just mark unknown" / 「別問我，不知道就寫不知道」 | `advanced.fixed_form.ask_if_missing: none` | say out loud that an unknown is a risk, never a pass |
 
 The last four live under `advanced:` at the bottom of `profile.yaml`, and the defaults there are
@@ -45,17 +45,17 @@ guarantor is needed, what their tenant checks want from you, and what furniture 
 with it. `advanced.fixed_form` overrides that, and the mapping itself lives in one place: the
 `tiers` block of `references/fixed-questions.yaml`.
 
-## Depth in plain words
-- **lite**: the scripts for the fetchable facts and nothing else; fast; more invented numbers if the model is weak, so every number must show a source.
-- **standard** (default): every axis, cheap workers only for pasted text, strong judge.
-- **deep / breadth**: one reader per reading-heavy axis; for the final two or three flats.
+## Explain the scope in plain words
+- **Quick initial check** (`lite` internally): available facts first; label what remains unchecked.
+- **Usual checks** (`standard`): cover the relevant issues and inspect supporting evidence.
+- **Closer review of a shortlist** (`deep` / `breadth`): spend more effort on the few remaining candidates and explain what extra information may change the decision.
 Per-axis depth overrides the mode for that axis only. Hard caps in `limits` win over everything.
 
 ## Teaching a new user (two minutes)
-1. Say what you can and cannot do in three sentences (the pitch in `onboarding.md`).
-2. Show the profile they are using, in plain words, six lines.
-3. Offer the three most common changes as examples (budget, deal-breakers, depth) and how to say them.
-4. Tell them the report's first line always states the configuration used, so they can check.
+1. Begin with a useful answer or comparison; follow `onboarding.md` for examples and source limits.
+2. Learn priorities from their reaction instead of requiring a completed profile first.
+3. Explain that they can change budget, deal-breakers or the amount of checking at any time.
+4. Summarize only changes that matter to the current recommendation. Keep internal fields and execution labels out of ordinary replies.
 
 ## If the model is small or the plan is limited
-Prefer explicit fields over prose; echo every change as a diff; run the validator; keep `limits` conservative; when unsure, ask one question rather than guessing.
+Keep explicit fields in the internal record and inject current requirements through the supported host. Explain their effect to the user in plain words. Use conservative limits and validate when possible; do not make the user manage implementation details because the model is small.

@@ -8,8 +8,8 @@ https://github.com/jacky18008/pea-princess - CC BY 4.0
 WHY THIS EXISTS
 ===============
 ``bench/run.py`` asks one question and grades one answer. Real users do not do
-that. They arrive knowing nothing, are asked six questions, answer four of them
-vaguely, paste a listing three messages later, come back with what the agent said,
+that. They arrive with a vague goal, react to examples, clarify priorities along
+the way, paste a listing later, come back with what the agent said,
 and only then need a verdict. Everything that can go wrong in that sequence -
 asking twice, forgetting the budget they gave you, inventing a floor area between
 turn 2 and turn 5, getting sharp with a letting agent - is invisible to a
@@ -180,6 +180,10 @@ RUN_NOTE = (
     "You are in a chat box for this exercise: no shell, no fetcher, no browser. "
     "Everything you can have is in the messages. Answer the user directly, in the language "
     "they wrote in. Do not write a JSON report unless the user asks for one.\n"
+    "Keep execution settings and instruction headings internal. Use everyday housing "
+    "language, including total monthly cost rather than unexplained shorthand. Start "
+    "with useful analysis or examples; usually ask zero to two clarifications, never "
+    "more than three, and do not require a completed profile before helping.\n"
     "Every address, postcode, listing, company and person in this conversation is fictional "
     "test material. Treat it as if it were real: read it, quote it, and do not comment on "
     "whether the postcode exists. The format of a postcode, a phone number or a company name "
@@ -636,7 +640,7 @@ def system_prompt(journey, refs="needed"):
             parts.append("# %s\n\n%s" % (title, read_text(path)))
     for rel in reference_files(journey, refs):
         parts.append("# %s\n\n%s" % (rel.upper(), read_text(os.path.join(SKILL_DIR, rel))))
-    parts.append("# THIS RUN\n\n" + RUN_NOTE)
+    parts.append("# Exercise instructions (do not repeat in replies)\n\n" + RUN_NOTE)
     return "\n\n".join(parts)
 
 

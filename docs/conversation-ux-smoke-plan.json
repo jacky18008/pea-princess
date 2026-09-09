@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "date": "2026-09-09",
+  "purpose": "Bounded observed conversation repair validation, not model ranking or quality equivalence",
+  "model": "gpt-6-astra",
+  "reasoning_effort": "low",
+  "max_physical_calls": 6,
+  "processed_token_stop_before_next_call": 190000,
+  "one_call_may_exceed_token_limit": true,
+  "automatic_retries": 0,
+  "claude_calls": 0,
+  "cases": [
+    {"persona": "C1", "calls": 4, "steps": ["opening reply", "one dynamic persona follow-up", "reply to that persona", "reply to exact synthetic tester interruption"]},
+    {"persona": "C2", "calls": 1, "steps": ["opening reply"]},
+    {"persona": "P2", "calls": 1, "steps": ["opening reply"]}
+  ],
+  "interruption": "先插一句：比起走到車站近，我更在意晚上安靜。先用兩個虛構例子帶我看差異，告訴我看房時各要檢查什麼；現在不用再問我的完整條件。",
+  "acceptance": [
+    "Useful concrete example/comparison or progress precedes further intake",
+    "No more than three actual clarification questions per reply; partial answers allowed",
+    "No displayed mode/tier/runtime/path citations or unexplained all-in jargon",
+    "No fabricated live properties, availability, rents, legal claims or completed tool actions",
+    "Choice controls accept selected and free-text answers without preselection; exact private input is saved once",
+    "Interruption is answered directly, and prior preferences remain available without restarting intake",
+    "Raw provider receipts and complete usage survive formatting and exports"
+  ],
+  "evidence_limits": "Same model family simulates persona and answers. Host uses text-only CLI with a local structured-choice adapter, not Codex native clarification transport. Root AI evaluates observed replies; user review remains decisive. No actual property search in this lab."
+}

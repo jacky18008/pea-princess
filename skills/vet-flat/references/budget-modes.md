@@ -2,7 +2,9 @@ Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen — https://github.com
 
 # Budget modes: the same checks at three depths
 
-People on a £20-a-month plan share usage caps and smaller sandboxes; people with no tools at all paste pages by hand. The skill must still give them the basic functions: hard filters, a verdict, and the two killer questions. `profile.yaml: budget_mode` selects the depth. Default `standard`. It also selects how many of the fixed questions every flat has to answer — eight, fourteen or eighteen — and `advanced.fixed_form.questions` in the profile overrides that; the mapping itself lives in the `tiers` block of `references/fixed-questions.yaml`. The agent states the mode on the first line of the report and lists what was skipped. Depth also moves on its own during a run: see "The escalation ladder" below.
+The available tools and usage allowance determine how much can be checked. Always preserve the user's requirements, the recommendation and the important unknowns. `profile.yaml: budget_mode` selects the internal depth, default `standard`; `advanced.fixed_form.questions` can override coverage using the `tiers` block of `references/fixed-questions.yaml`. Explain scope through useful consequences: “I can compare these documents now; the journey and bills still need checking.” Do not announce mode names, model roles, configuration banners or question-count codes in ordinary replies. These settings govern work, not an intake form the user must complete.
+
+When explaining depth, say “quick initial check”, “usual checks”, or “closer review of the shortlist”. Ask about extra cost or scope only when the choice matters and is not already authorized. Use a native choice tool only when the host provides it; otherwise plain text. Prefer zero to two clarifications, with three as the upper bound, and make progress from current evidence while learning preferences.
 
 | | `lite` | `standard` | `deep` |
 |---|---|---|---|
@@ -20,10 +22,9 @@ People on a £20-a-month plan share usage caps and smaller sandboxes; people wit
 
 ## The escalation ladder (automatic)
 
-Depth is not chosen up front. Every candidate starts at tier 1, and moves up only when a stated
-trigger fires. Record where you ended up in the report: `generated_by.tier` and
-`generated_by.escalation_reason`. Both renderers print them as the first line under the title, so the
-reader can see how much machine was behind the words before reading a single finding.
+Start with the ordinary checks and add effort only when a stated trigger fires, within the user's
+limits and explicit configuration. Record `generated_by.tier` and `generated_by.escalation_reason`
+internally. Lead the answer with the recommendation; explain extra checks in the user's language.
 
 | Tier | Name | What runs | When |
 |---|---|---|---|
@@ -47,13 +48,12 @@ wasted on a flat a hard filter kills in one line.
 budget says. Fan-out, not depth, is what empties a subscription window: four parallel readers on the
 strongest model burn more in a minute than a whole `standard` run.
 
-**What the tier implies.** Tiers 1, 2 and `lite` run cheap workers with a strong judge; `manual` runs
-no workers at all. The renderers print `Configuration: <tier> — <reason or "default">; workers:
-<cheap|strong>; judge: <model_name>` under the title and again in "About this report". A report with no
-`tier` prints "not stated", which is itself a finding about the report.
+**What the tier implies internally.** Tiers 1, 2 and `lite` use workers with a stronger judge;
+`manual` has no workers. Preserve these details in metadata for technical review. They are not
+headings or explanations to copy into the user's housing conversation.
 
 ## What never gets cut
-Hard filters from the profile · evidence grades · the "not found" table · the attribution footer · "never sign on the viewing day" · asking the user once, in one list, for what cannot be fetched.
+Current requirements and their conditions · source and estimate qualifiers · important unknowns · attribution · advice against signing at the viewing when relevant · at most three essential clarifications while other work continues.
 
 ## Chat-only users on any plan
 The prompt pack (`INSTRUCTIONS.md` + references) plus `viewer.html` is the lite path: the user pastes the certificate page and the listing, the agent applies the filters and writes the report JSON, the viewer renders it. No fetch budget is consumed.
@@ -82,4 +82,3 @@ Full tables, method, caveats and the cost/recall chart: `docs/EXPERIMENTS.md` �
 
 ## What an upgrade buys (from `docs/EXPERIMENTS.md`, 5 flats, small sample)
 Going from a £20 setup (mid model, `lite`) to the default (strong judge, `standard`) found about 3.8× as many known landmines (0.15 → 0.57) and cut invented numbers by about 87% (2.3 → 0.3 per report) at roughly 10× the cost per run. `lite` → `standard` alone: +50% landmines, −85% invented numbers. A stronger judge adds a further +0.1–0.15 recall (within noise). Breadth (one reader per axis) adds +0.3 recall at about 5× cost. Worker models make no measurable difference. **Order of upgrades: mode first, then the judge, then breadth; never the workers.**
-

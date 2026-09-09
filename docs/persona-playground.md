@@ -13,15 +13,19 @@
 5. 「暫停」在目前呼叫結束後停止；「恢復已保存的結果」只讀取既有模型證據，不自動 retry。未知用量仍停止；不能把它當零。
 6. 匯出檔以 PRIVATE 命名，包含對話、插話、動作和每個 actor 的 usage。它不是公開回饋資料，也不會加入 Git。
 
+新版回答先給具體比較或可行的下一步，再漸進釐清偏好。需要澄清時，回答下方會顯示最多三題的選項；沒有預先勾選，可以只答部分問題，也能自行填寫。送出會保存完整題目與回答，接著由 Codex 回應。這是測試台的選項介面；正式 skill 使用原廠 host 實際提供的澄清工具，並非這裡已接上原生 Codex／Claude 互動工具。
+
+測試台沒有房源搜尋工具。新手開場可使用明確標成虛構的比較例子，引導討論安靜、距離與其他取捨；例子不是現在可租的房源，也不代表倫敦行情。真實研究與查房能力要在使用者自己的 agent 另外驗收。
+
 選項中的 gpt-6-astra 是這台電腦檢查到的設定模型；也提供 Terra／Sol。思考強度明確設為 low，沒有繼承本機的 ultra。不同帳號的模型可用性以實際呼叫為準；失敗不自動切模型。沒有任何 Claude 呼叫。
 
 ## 原 persona 哪些行為保持
 
-第一則為原卡片開場，後續由 `persona_prompt` 與 Codex 動態產生。重用 Controller 的文件釋出、trigger、friction、耐心、mood、learned、no-progress 與停止條件。文件由 fixture 原文展開；未釋出的文件不會提前送入回答者。UI 的 success 清單不會放入回答者或 persona prompt。
+第一則為目前版本卡片的開場，後續由 `persona_prompt` 與 Codex 動態產生。卡片 1.1.0 修正使用者話語中的術語及不合適的六題開場評分；舊對話保留當時卡片，不能視為同一版本重跑。重用 Controller 的文件釋出、trigger、friction、耐心、mood、learned、no-progress 與停止條件。文件由 fixture 原文展開；未釋出的文件不會提前送入回答者。UI 的 success 清單不會放入回答者或 persona prompt。
 
 回答者保存完整展開後的歷史；persona 保存含 PASTE 標記的獨立歷史，並在每次生成時收到目前已釋出文件的凍結原文，才能記得自己交出了什麼。未來才釋出的文件保持隱藏。測試者的介入另外標記，避免冒充 persona 自己說過的話。重新開啟不會重播首輪或重買模型呼叫。每次 request、來源版本、原始 terminal usage 與結果由 durable runner 保存。
 
-此版本明確採「按卡片配置執行」：只有 `budget_mode`、`fixed_form`、`ask_if_missing` 三個執行選项會顯示在畫面並傳給回答者。Persona 模型看不到這些設定，雙方都看不到 success／failure_modes 評分答案。這遵循 `docs/PERSONAS.md` 的 baseline 設定語義；如果要測「模型是否自行發現最適設定」，必須另定 discovery 實驗。舊 runner 的設定傳遞缺口及本輪修正前後版本差異詳見結果文件。
+此版本採「按卡片配置執行」：只有 `budget_mode`、`fixed_form`、`ask_if_missing` 三個執行選项傳給回答者，留在私人紀錄，不出現在使用者回答與主要對話標題。Persona 模型看不到這些設定，雙方都看不到 success／failure_modes 評分答案。如果要測「模型是否自行發現最適設定」，必須另定實驗。
 
 此介面將原本 shell／fetch 卡片也改以 chat 模式測試：沒有真實網路查詢、profile 寫檔或腳本執行。因此它測的是動態對話與補件行為，不是原 benchmark 的完整工具能力等效重跑。全部來源為既有虛構案例。人工插話或變更條件後會標示情境已改動。
 

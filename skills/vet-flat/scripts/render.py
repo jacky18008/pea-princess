@@ -786,11 +786,11 @@ FORMULAS = {
     "deposit_cap": "deposit cap = 5 weeks' rent when the year's rent is under £50,000, "
                    "6 weeks at or above it (Tenant Fees Act 2019)",
     "holding_deposit_cap": "holding deposit cap = one week's rent",
-    "all_in": "all-in = rent + bills + council tax + broadband",
+    "all_in": "total monthly cost = rent + bills + council tax + broadband",
     "price_per_sqft": "£ per square foot = rent ÷ (floor area in m² × 10.7639)",
     "price_per_sqft_sqft": "£ per square foot = rent ÷ floor area in square feet",
-    "break_even_rent": "break-even rent = your all-in ceiling − bills − council tax",
-    "bridge_total": "bridge total = weeks × weekly rate + months × all-in",
+    "break_even_rent": "break-even rent = your total monthly budget − bills − council tax",
+    "bridge_total": "bridge total = weeks × weekly rate + months × total monthly cost",
 }
 
 
@@ -1987,7 +1987,6 @@ class HtmlRenderer(object):
         self.w("<title>%s</title>" % esc(title))
         self.w("<style>%s</style></head><body><div class=\"wrap\">" % CSS)
         self.w("<h1>%s</h1>" % esc(L.label("ui.report_title")))
-        self.w("<p class=\"sub\"><strong>%s</strong></p>" % esc(configuration_line(self.d, L)))
         self.w('<p class="sub">%s &middot; %s</p>' % (esc(names), esc(self.d.get("generated_at", ""))))
         renderers = [self.s1_verdict, self.s2_hard_filters, self.s3_fixed, self.s3_comparison,
                      self.s4_worst_reviews, self.s5_landmines, self.s6_axes, self.s7_questions,
@@ -2067,8 +2066,6 @@ def render_markdown(data, L, schema=None):
 
     names = ", ".join(candidate_name(c) for c in data.get("candidates", []))
     o.append("# %s \u2014 %s" % (L.label("ui.report_title"), names))
-    o.append("")
-    o.append(configuration_line(data, L))
     o.append("")
     o.append("_%s_" % data.get("generated_at", ""))
 

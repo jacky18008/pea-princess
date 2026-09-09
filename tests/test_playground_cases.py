@@ -122,6 +122,32 @@ class PlaygroundCaseTests(unittest.TestCase):
         self.assertEqual(2, value['counts']['answered'])
         self.assertTrue(all(row['usage_ref'] is None for row in value['candidates']))
 
+    def test_valid_structured_raw_reply_matches_exact_visible_transcript_and_usage(self):
+        self.state['reply_format']='choices-v1'
+        reply={'message':'Use the supplied facts.','questions':[{'question':'Which priority?','options':['Quiet','Travel']}]}
+        self.add(self.intent(),answer=p.conversation_reply.transcript(reply))
+        self.state['messages'][-1].update(display_text=reply['message'],questions=reply['questions'])
+        self.state['calls'][0]['receipt']['answer']=json.dumps(reply)
+        _,value=self.extract()
+        ref=value['candidates'][0]['usage_ref']
+        self.assertEqual(0,ref['index']);self.assertEqual('unique_structured_reply_transcript_match',ref['association'])
+        self.assertEqual(json.dumps(reply),value['calls'][0]['receipt']['answer'])
+        self.assertEqual('choices-v1',value['source']['reply_format'])
+
+    def test_structured_match_refuses_ambiguous_malformed_or_different_display(self):
+        self.state['reply_format']='choices-v1'
+        reply={'message':'Same visible reply.','questions':[]}
+        self.add(self.intent(),answer=reply['message'])
+        self.state['calls'][0]['receipt']['answer']=json.dumps(reply)
+        second=copy.deepcopy(self.state['calls'][0]);second['id']='another-call';self.state['calls'].append(second)
+        _,value=self.extract('ambiguous.private.json');self.assertIsNone(value['candidates'][0]['usage_ref'])
+        self.state['calls'].pop();self.state['messages'][-1]['display_text']='Different UI text.'
+        _,value=self.extract('different.private.json');self.assertIsNone(value['candidates'][0]['usage_ref'])
+        self.state['messages'][-1].pop('display_text')
+        raw='{"message":"Wrong","message":"Same visible reply.","questions":[]}'
+        self.state['calls'][0]['receipt']['answer']=raw
+        _,value=self.extract('malformed.private.json');self.assertIsNone(value['candidates'][0]['usage_ref'])
+
     def test_explicit_future_ids_must_agree_and_can_bind_repeated_answer_usage(self):
         first, second = self.intent(), self.intent('Second question?')
         self.add(first, answer='Same answer.')
@@ -207,10 +233,13 @@ class PlaygroundCaseTests(unittest.TestCase):
         calls = []
         def invoke(request, folder):
             calls.append(request)
+            answer='The saved synthetic response to the tester.'
+            if request.get('response_schema') is not None:
+                answer=json.dumps({'message':answer,'questions':[]})
             return {'id': 'answer', 'status': 'complete', 'exit_code': 0, 'errors': [],
                     'tool_events': [], 'malformed_event_lines': 0, 'terminal_usage_events': 1,
                     'direct_terminal_usage': {'input_tokens': 14, 'output_tokens': 5, 'cached_input_tokens': 0},
-                    'answer': 'The saved synthetic response to the tester.'}
+                    'answer': answer}
         lab_root = self.root / 'lab'
         lab = lab_module.Lab(lab_root, invoke=invoke)
         try:
@@ -228,6 +257,7 @@ class PlaygroundCaseTests(unittest.TestCase):
             self.assertEqual({'answered': 1, 'queued': 0, 'unknown': 0}, value['counts'])
             self.assertEqual(data, value['candidates'][0]['intervention'])
             self.assertEqual(19, value['calls'][0]['receipt']['processed_tokens'])
+            self.assertEqual(0,value['candidates'][0]['usage_ref']['index'])
             self.assertEqual(original, (lab_root / sid / 'session.json').read_bytes())
         finally:
             if lab.worker:

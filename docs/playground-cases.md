@@ -43,6 +43,8 @@ Queue-time transcript boundaries were not recorded by this UI version. For a que
 
 If two physical receipts contain identical answer text, the extractor preserves both in `calls` and leaves the candidate's usage reference unknown unless an explicit call ID resolves the ambiguity. It never converts missing tokens into zero or treats an observed reply as quality acceptance.
 
+For `choices-v1` replies, the raw provider artifact is JSON. The extractor uses the versioned strict decoder to reconstruct the exact visible message and options before matching a receipt, and checks any saved display fields for agreement. It records the decoder hash. A malformed reply, disagreement or ambiguous duplicate still leaves the usage association unknown; original raw receipts remain intact.
+
 ## Privacy and integrity boundary
 
 Outputs contain the original private text and can contain personal details. They are not anonymized. Keep them in the ignored `.pea-playground/` directory or another private location. No public export or publication option exists. Promotion into a shared benchmark requires a separate deliberate curation step: define the desired behavior, evaluate evidence and remove identifying content before any authorized sharing. This tool does not claim to complete that work.

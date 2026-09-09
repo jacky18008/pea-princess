@@ -32,6 +32,7 @@ from session_state import SessionStore
 from call_control import _atomic_json, _digest
 from durable_run import cli_record
 import launch
+import conversation_reply
 
 MODELS = ('gpt-6-astra', 'gpt-5.6-terra', 'gpt-5.6-sol')
 STATE_FIELDS = ('turn', 'released', 'events', 'invalid', 'impatience', 'paste_misses',
@@ -69,7 +70,10 @@ def regular(path):
 def source_hashes():
     paths = [Path(__file__), ROOT/'tools/session_runner.py', ROOT/'bench/personas.py', ROOT/'bench/journeys.py',
              ROOT/'bench/durable_run.py', ROOT/'bench/call_control.py', ROOT/'bench/launch.py',
-             ROOT/'skills/vet-flat/scripts/session_state.py', ROOT/'evals/personas.json']
+             ROOT/'skills/vet-flat/scripts/session_state.py', ROOT/'evals/personas.json',
+             ROOT/'tools/conversation_reply.py', ROOT/'playground/conversation-policy.md']
+    paths += [ROOT/'dist/prompt-pack/INSTRUCTIONS.md']
+    paths += sorted((ROOT/'skills/vet-flat/references').rglob('*.md'))
     return {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in paths}
 
 def runtime_settings(card):
@@ -77,7 +81,7 @@ def runtime_settings(card):
     return {key:card['settings'][key] for key in ('budget_mode','fixed_form','ask_if_missing')}
 
 def configured_system(card):
-    return personas.system_prompt(card,'chat')+'\n\nACTIVE RUNTIME SETTINGS FOR THIS CHAT\n'+json.dumps(runtime_settings(card),ensure_ascii=False)+'''\nThese are the selected execution settings, overriding generic start-at-standard defaults above. fixed_form selects advanced.fixed_form.questions and overrides budget_mode for the required rows. ask_if_missing controls only unanswered fixed-form items: none keeps unknown rows visible but asks no follow-up questions for them; gate asks only gate items; all permits all missing items. Routing confirmation is separate. Give a truthful visible settings summary when relevant; do not claim to have written a profile. Later explicit tester changes override these settings within their stated scope.'''
+    return personas.system_prompt(card,'chat')+'\n\nINTERNAL EXECUTION SETTINGS (never cite or announce)\n'+json.dumps(runtime_settings(card),ensure_ascii=False)+'''\nThese settings override generic defaults: fixed_form chooses required report rows; ask_if_missing controls only missing fixed-form items. They do not require an onboarding questionnaire or visible configuration banner. Later user changes override within their scope. Do not claim unavailable tools or saved files.\n\n'''+(ROOT/'playground/conversation-policy.md').read_text()
 
 class FrozenController(personas.Controller):
     def __init__(self, card, seed, fixtures, saved=None):
@@ -117,6 +121,10 @@ def codex_invoke(request, folder):
                '--model', request['model'], '-c', 'model_reasoning_effort="low"',
                '-c', 'project_doc_max_bytes=0',
                '--json', '--output-last-message', str(answer), '--', '-']
+    if request.get('response_schema') is not None:
+        schema_path = work/'reply-schema.json'
+        schema_path.write_text(json.dumps(request['response_schema']))
+        command[-2:-2] = ['--output-schema', str(schema_path)]
     started = time.monotonic()
     proc = launch.start_process(command, cwd=str(work), stdin=subprocess.PIPE,
                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -247,6 +255,7 @@ class Lab:
             s={'schema_version':1,'id':sid,'revision':0,'created_at':time.time(),'creation':copy.deepcopy(data),
                'model':data['model'],'limits':{'max_calls':data['max_calls'],'max_tokens':data['max_tokens']},'seed':data['seed'],
                'card':card,'fixtures':fixtures,'system':configured_system(card),'runtime_settings':runtime_settings(card),'sources':source_hashes(),
+               'reply_format':'choices-v1',
                'controller':c.snapshot(),'persona_turn':1,'history':[['user',opening]],'persona_history':[['user',opening]],
                'messages':[{'role':'persona','text':opening,'turn':1}], 'interventions':[], 'amendments':[],
                'queue':[], 'calls':[], 'pending_call':None,'preparing_input':None,'next_actor':'assistant','auto':False,'pause_requested':False,
@@ -260,10 +269,11 @@ class Lab:
             tokens=None if any(u is None for u in usages) else sum(usages)
             phase=s['pending_call']['actor'] if s['pending_call'] else s['next_actor']
             notice=s['notice']
-            if s['sources']!=source_hashes(): notice=('這是舊版保存的對話；可以閱讀或匯出，請建立新對話測試新版。 '+notice).strip()
+            compatible=s['sources']==source_hashes()
+            if not compatible: notice=('這是舊版保存的對話；可以閱讀或匯出，請建立新對話測試新版。 '+notice).strip()
             if s['amendments']: notice=('此情境已被你的條件變更修改，不再是原始 benchmark。 '+notice).strip()
             return {'id':sid,'revision':s['revision'],'persona_id':s['card']['id'],'name':s['card']['name'],
-              'model':s['model'],'status':s['status'],'auto':s['auto'],'busy':self.busy==sid,'notice':notice,
+              'model':s['model'],'status':s['status'],'auto':s['auto'],'busy':self.busy==sid,'notice':notice,'compatible':compatible,
               'runtime_settings':copy.deepcopy(s.get('runtime_settings')),
               'phase_label':('Codex 正在回答' if phase=='assistant' else 'Persona 正在想下一個問題') if self.busy==sid else '',
               'persona_turn':s['persona_turn'],'patience_turns':s['card']['patience_turns'],'calls':len(s['calls']),
@@ -303,6 +313,7 @@ class Lab:
         with self.lock:
             s=self._load(sid)
             if self._dedupe(s,data): return {'ok':True,'duplicate':True}
+            if s['sources']!=source_hashes():raise LabError('這是舊版保存的對話；請建立新對話測試新版。')
             if self.busy is not None and self.busy != sid: raise LabError('另一段對話正在進行；請等它完成或暫停後再送出。')
             if s['status'] in ('error','interrupted','budget'): raise LabError('先處理目前停止原因，才能繼續花費。')
             if len(s['queue'])>=10: raise LabError('目前最多排隊 10 則問題。')
@@ -332,6 +343,7 @@ class Lab:
                 if s['status']=='running':s['status']='paused'
                 self._action(s,'recovered_without_model_call',{'call_id':pending['id']});self._save(s);return {'ok':True}
             if s['pending_call'] or s['status'] in ('error','interrupted','ended','budget'): raise LabError('這段對話已停止；請查看原因。')
+            if s['sources']!=source_hashes():raise LabError('這是舊版保存的對話；請建立新對話測試新版。')
             self._action(s,action,{});self._save(s);self._start(sid,auto=action=='run');return {'ok':True}
 
     def _start(self,sid,auto):
@@ -380,7 +392,7 @@ class Lab:
             pending_user=raw if origin=='human' else next(body for role,body in reversed(s['persona_history']) if role=='user')
             prompt=s['system']+'\n\nFULL CONVERSATION\n'+transcript+'\n\nCURRENT INPUT TO ANSWER\n'+pending_user
             if s['amendments']:prompt+='\n\nThe tester has changed the synthetic scenario. Apply these exact amendments in order, preserving their scope and conditional predicates; do not revert to older conflicting facts:\n'+json.dumps(s['amendments'],ensure_ascii=False)
-            prompt+='\n\nAnswer the current input directly. Do not narrate runtime metadata. No tools, file writes, browsing, external contact or unprovided facts. Preserve the conversation and make progress on the person’s actual needs.'
+            prompt+='\n\nAnswer the current input directly using the supplied response schema: message is useful plain-language progress, questions are optional choice controls (zero to three). Do not duplicate questions in message. No runtime metadata, internal source citations, tools, file writes, browsing or external contact. Preserve the conversation and make progress on the person’s actual needs.'
         if len(prompt)>160000:raise LabError('完整對話超出本輪 160,000 字元容量；已停止，未裁切。')
         call_id='call-%03d-%s'%(len(s['calls'])+1,actor)
         s['pending_call']={'id':call_id,'actor':actor,'origin':origin,'turn':turn,'started_at':time.time()}
@@ -396,7 +408,12 @@ class Lab:
         s['pending_call']=None
         if receipt['physical_status']!='complete' or receipt['status']!='recorded' or not receipt['current_for_requirements'] or not receipt['answer'].strip():
             s.update(status='error',auto=False,notice='模型呼叫未通過完整性／用量檢查。原始紀錄已保留，沒有自動重試。');return
-        answer=receipt['answer'];actor=pending['actor'];c=self._control(s)
+        answer=receipt['answer'];actor=pending['actor'];c=self._control(s);questions=[]
+        if actor=='assistant' and s.get('reply_format')=='choices-v1':
+            try: reply=conversation_reply.decode(answer)
+            except (ValueError,TypeError):
+                s.update(status='error',auto=False,notice='回答格式未通過檢查；原文及用量已保存，沒有自動重試。');return
+            answer=conversation_reply.transcript(reply);questions=reply['questions']
         if actor=='persona':
             # Reject unsupported numbers BEFORE purchasing another assistant reply.
             problems=c.check_numbers(answer,[m['text'] for m in s['messages'] if m['role'] in ('assistant','human')])
@@ -410,7 +427,9 @@ class Lab:
                 reason=c.message_stop(answer)
                 if reason:s.update(status='ended',auto=False,stop_reason='persona_ended' if reason=='completed' else reason,notice='Persona 已結束這段對話；這不是所有需求通過的品質判定。')
         else:
-            s['messages'].append({'role':'assistant','text':answer,'responding_to':pending['origin']});s['history'].append(['assistant',answer])
+            message={'role':'assistant','text':answer,'responding_to':pending['origin']}
+            if s.get('reply_format')=='choices-v1':message.update(display_text=reply['message'],questions=questions)
+            s['messages'].append(message);s['history'].append(['assistant',answer])
             if pending['origin']=='human':
                 s['interventions'].append({'role':'assistant_to_tester','text':answer})
                 if s['stop_reason']:s.update(status='ended',auto=False)
@@ -434,7 +453,9 @@ class Lab:
                     if prompt is None:self._save(s);break
                     pending=copy.deepcopy(s['pending_call'])
                 receipt=session_runner.run_step(self._folder(sid),pending['id'],'conversation',s['model'],prompt,'tokens',
-                       max_chars=96000,timeout=180,invoke=self.invoke,max_prompt_chars=160000)
+                       max_chars=96000,timeout=180,invoke=self.invoke,max_prompt_chars=160000,
+                       presentation='conversation',
+                       response_schema=conversation_reply.SCHEMA if pending['actor']=='assistant' and s.get('reply_format')=='choices-v1' else None)
                 with self.lock:
                     s=self._load(sid);self._finish(s,receipt);self._save(s)
                     if s['status'] in ('error','budget'):break

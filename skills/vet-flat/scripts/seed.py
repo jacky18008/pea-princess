@@ -319,7 +319,7 @@ def clean_list(value, limit=8, width=120):
     return out[:limit]
 
 
-def band(ceiling, exact=False, label="all-in"):
+def band(ceiling, exact=False, label="total per month"):
     if ceiling is None:
         return None
     try:

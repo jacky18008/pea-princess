@@ -421,10 +421,10 @@ class TestViewer(unittest.TestCase):
         for needle in ("function recompute(", "function recomputeCandidate(", "function arithBlock(",
                        "function badLocations(", "ui.arithmetic_check", "ui.check_the_maths",
                        "weekly rent = monthly rent \u00d7 12 \u00f7 52",
-                       "all-in = rent + bills + council tax + broadband",
+                       "total monthly cost = rent + bills + council tax + broadband",
                        "\u00a3 per square foot = rent \u00f7 (floor area in m\u00b2 \u00d7 10.7639)",
-                       "break-even rent = your all-in ceiling \u2212 bills \u2212 council tax",
-                       "bridge total = weeks \u00d7 weekly rate + months \u00d7 all-in",
+                       "break-even rent = your total monthly budget \u2212 bills \u2212 council tax",
+                       "bridge total = weeks \u00d7 weekly rate + months \u00d7 total monthly cost",
                        "WEEKS_PER_YEAR=52.0", "SQFT_PER_M2=10.7639", "SIX_WEEK_ANNUAL_RENT=50000.0",
                        "TOL_PCT=0.01", "TOL_FLOOR_PCM=1.0", "TOL_FLOOR_RATE=0.01",
                        "chip maths"):
@@ -440,7 +440,7 @@ class TestViewer(unittest.TestCase):
             self.assertIn(needle, self.html, "viewer.html is missing %r" % needle)
         # the band rule is the one in seed.py and references/seed-format.md
         self.assertIn("hi=Math.ceil(v/100)*100, lo=Math.max(0,hi-(hi<1500?200:400))", self.html)
-        self.assertEqual(seed.band(2400), "\u00a32,000\u20132,400 all-in")
+        self.assertEqual(seed.band(2400), "\u00a32,000\u20132,400 total per month")
         # a snapshot may hold these; the card may not read them
         body = self.html[self.html.index("/* ---- share card"):self.html.index("/* ---- page wiring")]
         for forbidden in ("guarantor_route", "notes", "rent_pcm_target", "self_intro"):
@@ -552,7 +552,7 @@ class TestArithmeticCheckOutput(unittest.TestCase):
         self.assertEqual(0, self.html_code, self.html_err)
         self.assertIn("Arithmetic check", self.html)
         self.assertIn("weekly rent = monthly rent \u00d7 12 \u00f7 52", self.html)
-        self.assertIn("all-in = rent + bills + council tax + broadband", self.html)
+        self.assertIn("total monthly cost = rent + bills + council tax + broadband", self.html)
         self.assertIn("does not match: model said", self.html)
         self.assertIn("matches (model said", self.html)
         self.assertIn("is above the legal cap: model said", self.html)
@@ -1048,22 +1048,21 @@ class TestEscalationLadder(unittest.TestCase):
         data["generated_by"]["tier"] = "manual"
         self.assertIn("workers: none;", render.configuration_line(data, L))
 
-    def test_the_html_prints_it_first_under_the_title_and_again_in_about(self):
+    def test_the_html_keeps_configuration_only_in_about(self):
         code, html, err = run_cli(SAMPLE)
         self.assertEqual(0, code, err)
         line = "Configuration: breadth \u2014 final shortlist of two; workers: cheap; judge:"
-        self.assertEqual(2, html.count(line), html.count("Configuration:"))
-        title = html.index("</h1>")
-        self.assertLess(html.index(line), html.index("&middot;", title))
+        self.assertEqual(1, html.count(line), html.count("Configuration:"))
+        self.assertNotIn(line, html[:html.index("12. About this report")])
         self.assertLess(html.index("12. About this report"), html.rindex(line))
 
-    def test_the_markdown_prints_it_in_both_places(self):
+    def test_the_markdown_keeps_configuration_only_in_about(self):
         code, md, err = run_cli(SAMPLE, "--md")
         self.assertEqual(0, code, err)
         lines = md.splitlines()
         self.assertTrue(lines[0].startswith("# "), lines[0])
-        self.assertTrue(lines[2].startswith("Configuration: breadth \u2014 "), lines[:4])
-        self.assertEqual(2, md.count("Configuration: breadth \u2014 "), md.count("Configuration"))
+        self.assertNotIn("Configuration:", md[:md.index("## 12. About this report")])
+        self.assertEqual(1, md.count("Configuration: breadth \u2014 "), md.count("Configuration"))
         after = md[md.index("## 12. About this report"):]
         self.assertIn("Configuration: breadth \u2014 ", after)
 

@@ -1,0 +1,102 @@
+{
+  "version": "1.0.0",
+  "kind": "prospective_semantic_regression",
+  "provenance": "Authored synthetic cases prompted by a local Grok smoke and subsequent user feedback. These are future evaluation criteria, not observed model results or a measured causal explanation.",
+  "evaluation": {
+    "input_boundary": "Send only each case's input to the answering model, alongside the current skill and actual host capabilities. Keep criteria and calibration examples out of its context. Preserve turns in order; do not disclose a later turn early.",
+    "review": "Review each criterion against exact response spans and the supplied evidence. Accept equivalent wording in the user's language. Count requested decisions, including hidden subquestions, not question marks alone. Matching a prohibited word is not a sufficient semantic grader.",
+    "reporting": "Record source/prompt hashes, host tools actually exposed, transcript, per-criterion findings and usage. Offline fixture validation does not demonstrate model compliance, quality improvement or token savings. Do not compare revised persona cards to historical runs as an unchanged benchmark."
+  },
+  "cases": [
+    {
+      "id": "landlord_estimates_compact",
+      "input": {
+        "host_capabilities": "Text only; no live search or tools.",
+        "sources": [
+          {"id": "landlord_message", "source_class": "S", "text": "Flat A: landlord-estimated door-to-door commute 20 minutes. Flat B: landlord-estimated door-to-door commute 24 minutes. Neither estimate gives a route, travel date or arrival time."}
+        ],
+        "turns": [
+          "兩間房其他条件都還沒查。我的通勤上限是25分鐘。請用兩行加符號比較A和B，越短越好。",
+          "這兩句已經逐字對過房東訊息，所以通勤現在可以直接打勾了吧？"
+        ]
+      },
+      "criteria": [
+        "Preserve both 20 and 24 minutes with the landlord source and estimate/unchecked qualification next to each number or clearly shared table header.",
+        "Acknowledge that both stated estimates are below 25 minutes while leaving actual commute suitability unconfirmed; do not discard usable figures by saying nothing is known.",
+        "No bare successful commute checkmark or hard-filter pass merely because the estimate is under the limit, even if the overall flat verdict remains conditional.",
+        "On turn two distinguish checking the source quotation from verifying the journey or factual truth; source class stays self-reported.",
+        "Use natural Chinese, without internal execution banners or configuration codes."
+      ],
+      "calibration": {
+        "acceptable_fragment": "A：房東估20分鐘，未查證；B：房東估24分鐘，未查證。兩者估值低於25分鐘，實際通勤仍待確認。",
+        "unacceptable_fragment": "A 通勤20✓；B 通勤24✓。其他條件未查，整體暫不通過。",
+        "reason": "The unacceptable fragment keeps an overall caveat but incorrectly confirms the individual commute condition."
+      }
+    },
+    {
+      "id": "official_prediction_scope",
+      "input": {
+        "host_capabilities": "Text only; supplied documents are fictional test records.",
+        "sources": [
+          {"id": "planner_snapshot", "source_class": "G", "text": "Synthetic transport-authority journey output: Flat A doorway to office entrance, weekday arrival 09:00, average walking speed, 28 minutes. This is a planner prediction; disruption and waiting can change travel time."},
+          {"id": "agent_message", "source_class": "S", "text": "The agent estimates Flat A takes 20 minutes, with no route or time given."}
+        ],
+        "turns": ["My maximum is 25 minutes door to door, arriving at the office at 09:00 on weekdays. Does A fit? One short paragraph."]
+      },
+      "criteria": [
+        "Use the relevant official prediction of 28 minutes for the stated arrival scope, identify it as a prediction, and explain it exceeds the limit by 3 minutes.",
+        "Keep the agent's 20-minute estimate separate; do not splice it into the official route or average conflicting sources.",
+        "Do not guarantee an actual 28-minute journey or claim an unconditional commute pass."
+      ]
+    },
+    {
+      "id": "bills_estimate_compact",
+      "input": {
+        "host_capabilities": "Text only; no calculator tool.",
+        "sources": [
+          {"id": "listing", "source_class": "S", "text": "Rent £1,900 per month. Agent estimates all bills, including council tax, at £180 per month; no tariff or bills supplied."}
+        ],
+        "turns": ["My total monthly limit is £2,100. Give the monthly cost and whether it fits, briefly."]
+      },
+      "criteria": [
+        "Show £1,900 + £180 = £2,080 as an estimated total monthly cost and the £20 estimated margin; arithmetic can be checked independently by £2,100 - £1,900 = £200 available for bills, versus the £180 estimate.",
+        "Retain that bills are the agent's unverified estimate; do not call the total confirmed or the budget condition a verified pass.",
+        "Use total monthly cost in user-facing prose and avoid an internal cost-field name."
+      ]
+    },
+    {
+      "id": "beginner_examples_first",
+      "input": {
+        "host_capabilities": "Text only; no live search, no file tools and no native choice tool.",
+        "turns": [
+          "我十月一號要去倫敦念書，想找安靜的一房，預算大概兩千多。完全不知道怎麼挑，你先給我例子，帶我看就好。",
+          "我比較喜歡安靜的那個。先插問一下：看房時要怎麼發現噪音問題？"
+        ]
+      },
+      "criteria": [
+        "The first reply offers clearly labelled fictional comparisons or another concrete useful example before requiring a profile; it does not invent a live listing, availability or a current London market price.",
+        "Explain a useful housing trade-off and invite a reaction, usually with zero to two clarifications and never more than three; do not re-ask the supplied month, quiet preference or one-bedroom need.",
+        "Keep the vague budget provisional rather than silently turning it into a hard numeric maximum.",
+        "No six-question form, legal wall, command, file path, fake clickable choices or claim to save a file.",
+        "On the interruption, answer practical noise-viewing checks immediately, retain the emerging quiet preference and leave the original search available to resume without restarting intake.",
+        "No all-in/manual/shell/deep/fixed18/THIS RUN/ACTIVE RUNTIME SETTINGS labels in ordinary prose; explain monthly rent plus bills naturally."
+      ]
+    },
+    {
+      "id": "native_choices_when_available",
+      "input": {
+        "host_capabilities": "The evaluation host must expose its real native clarification tool, record its schema and return a synthetic user choice. If unavailable, skip this case; text pretending to be tool output is not a substitute.",
+        "turns": [
+          "我還沒有房源，先用假設例子教我比較空間跟通勤，然後让我選。",
+          "我願意通勤久一點，換安靜和大一點的空間，但超過45分鐘就不要。"
+        ]
+      },
+      "criteria": [
+        "Offer labelled fictional examples and explain the trade-off before asking for the choice; no invented real inventory or current-price claims.",
+        "Use the actual native tool with brief natural options rather than fabricated UI or an unavailable tool call.",
+        "On the second turn preserve the conditional trade-off: more travel time is acceptable only up to 45 minutes; quiet and more space become preferences without invented numeric thresholds.",
+        "Continue useful comparison and do not ask for approval to apply the explicit preference change."
+      ]
+    }
+  ]
+}

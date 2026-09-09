@@ -1,82 +1,71 @@
-# You do not need to write code · 你不用會寫程式
+# You can start with a conversation · 從聊天開始就好
 
 Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen — https://github.com/jacky18008/pea-princess — CC BY 4.0
 
 ## English
 
-**Everything in Pea Princess is done by typing sentences.** No code, no settings files to hand-edit, no programming ideas. The words "terminal", "Codex" and "Claude Code" in the install guide mean a text box where you type sentences to an assistant that can also run the checks for you. If you would rather not see a terminal at all, use a chat app instead (Claude, ChatGPT and others accept the same skill as an upload); the checks still apply, but independent fetching and automatic arithmetic require tools; otherwise you supply the source material and inspect the shown calculations.
+Tell the assistant what you want to understand. You do not need to write code, complete a questionnaire or choose technical settings before it can help.
 
-### Five minutes, start to finish
-1. **Install** (one of): paste one line into the assistant's text box (the install guide shows it), or upload the zip in your chat app's Skills page. Done.
-2. **Type:** "What can this do?" — you get a short answer and three ways to start.
-3. **Type one of:**
-   - "I'm moving to London in October and starting from zero. Teach me."
-   - "I want a one-bed in east London, £2,200 all-in, moving 1 November."
-   - "Roast this flat: " and paste the listing text.
-   - "Here are four short stays, roast them" and paste them.
-4. **Answer the six questions** it asks (budget, space, dates, destination, deal-breakers, income check). "Don't know" is a fine answer; it suggests a default.
-5. **Paste what it asks for** — a page's text, a floor-plan picture, a street-view screenshot — once, from a list it gives you with links.
-6. **Read the report.** The first line says which configuration it used. Every number says where it came from. "Unknown" means it does not know, and it tells you how to find out.
+After installing the skill using the [installation guide](INSTALL.md), try:
 
-### The questions it always answers
-Every flat gets the same questions, in the same order: the deposit, the money asked up front, who the landlord on the contract actually is, which scheme will hold your deposit, the floor area, the energy letter, what the bills cover, how long you are tied in, when you can move in. Each one comes back in one of three ways — **found in writing**, with the sentence it was read in quoted next to it; **you told us**, because it asked you; or **not known**, which means nobody has checked yet, never that it is fine. It asks you once, in one message, about everything still not known.
+- “I'm moving to London in October. Show me some examples and explain how to choose.”
+- “I want a quiet one-bedroom home. My total monthly cost, including rent and bills, should stay below £2,200.”
+- “Compare these two listings, and tell me what to check at a viewing.”
+- “Pause the comparison: what does a guarantor do?”
 
-How many it answers follows how deep you asked it to look: a quick check answers the eight about money and paperwork, the normal one answers fourteen, and a deep check answers eighteen — adding the council tax band, whether they want a guarantor who lives in the UK, what their tenant checks will ask you to prove, and what furniture comes with the flat. You do not have to choose. If you ever want to, say "only ask me the eight that matter" or "answer all eighteen"; those two live in an **Advanced** part of your settings file that nobody is asked about when they start.
+It starts with useful examples or the evidence you provide, explains a trade-off, and learns what matters from your reaction. Usually it asks zero to two questions at a time, never more than three essential clarifications. You can say “not sure”. A complete set of preferences is not required before making progress.
 
-### Before you land
-If you are flying in, do one thing before you look at a single flat: book somewhere to sleep for the first two weeks — a hotel or an operator-run serviced stay, where the money is protected and you can walk out the same day. Then plan about six weeks, not six nights, because signing is not moving in: after the signature come the tenant checks, the deposit going into a government scheme and the last tenant moving out, and four to seven weeks from landing to keys is ordinary in September (the author's own gap was 45 days). Tell it four things — the day you land, the day you have to be functioning here, the day you hope for keys, and what a week of the bridge costs — and it writes the week-by-week plan, marking the weeks that run into term start, a bank holiday, a planned line closure or a big local event.
+When the host can search permitted sources, real examples should carry their source and date. Without search, examples are clearly labelled fictional; illustrative prices are not claims about today's market. Your assistant may need you to paste a listing or attach a floor plan. It explains what is needed and why, while continuing other checks. If your app supports a choice panel, it can use that; otherwise you answer in ordinary text.
 
-### Changing anything
-Say it. "Raise my all-in ceiling to 2,300." "Dig deeper on crime and management, keep the rest light." "I hate noise." "I always ask whether a cheap flat is cheap for a reason." The assistant shows you exactly what will change, waits for your yes, then applies it. It never changes a setting silently.
+### Learn by comparing
 
-### Sharing
-"Share my seed" gives you a short code and a three-sentence card to post; a friend pastes the code into their own assistant and starts with your preferences and your questions.
+Start with differences you can react to: a shorter commute versus more space, a quiet bedroom versus a busy road, lower rent versus uncertain bills. The assistant explains the likely consequences, then helps you inspect the evidence or prepare a viewing check. You can ask about London areas, rental budgets, paperwork or common problems whenever they become relevant. Current market and legal claims need current sources.
 
-### The only three rules to remember
-- It is a filter. Go and see the flat; talk to the agent and the landlord. You are the princess; it only lifts the mattresses.
-- It will say "unknown" and ask you rather than guess. Give it what only you have.
-- Never sign on the viewing day.
+### Read the recommendation
+
+The answer begins with what to do next and why. Numbers keep their source and uncertainty: “landlord estimate: 20 minutes, not checked” is different from a journey planner prediction for your destination and arrival time. A quote matching the landlord's message does not prove the claim is true. Unknown information remains unknown; a low estimate alone does not confirm that a home meets your limit.
+
+A fuller report covers the money, paperwork, size, bills, move-in timing and other checks relevant to the home. These are things the assistant works through, not a form you must fill out before it helps. It asks for the few missing items that matter next and keeps other gaps visible.
+
+### Change your mind or interrupt
+
+Say “Raise my total monthly limit to £2,300”, “Quiet matters more than light”, or “A longer commute is okay, but never over 45 minutes”. The assistant applies clear instructions, explains the effect in plain words and preserves conditions and previous requirements. It asks only when your meaning is materially ambiguous or it proposes a change itself.
+
+Ask a side question at any point. It should answer it, keep the original work available, and resume without making you repeat your preferences. Saving across conversations depends on the host's file and memory support; the assistant must say when it cannot save something.
+
+### Before arriving or committing
+
+Compare temporary accommodation if it would give you time to view longer-term homes. Check actual cancellation, payment and departure terms; no accommodation type guarantees a refund or same-day exit. Build an arrival plan from your dates and verified costs, leaving gaps explicit.
+
+Use the report to decide what to investigate, then see the flat and speak with the agent or landlord. Take the agreement away to read; do not sign at the viewing. The assistant gives legal and payment guidance at the decision it affects, with the applicable date and agreement type.
 
 ## 繁體中文
 
-**豌豆公主的每一件事都是「打一句話」完成的。** 不用寫程式、不用手改設定檔、不需要任何程式概念。安裝說明裡的「終端機」「Codex」「Claude Code」，其實就是一個打字框：你打句子給助理，助理順便幫你跑查核。如果你完全不想看到終端機，就用聊天軟體（Claude、ChatGPT 等都能上傳同一個 skill），只是慢一點而已。
+不用寫程式，也不用先填完整問卷或挑技術設定。按照[安裝說明](INSTALL.md)加入技能後，可以直接說：
 
-### 五分鐘從頭到尾
-1. **安裝**（擇一）：把安裝說明給的一行字貼進助理的打字框；或在聊天軟體的 Skills 頁上傳 zip。完成。
-2. **打**：「這能幹嘛？」你會得到短短的回答和三個開始方式。
-3. **打其中一句**：
-   - 「我 10 月要去倫敦，從零開始，教教我。」
-   - 「我想在東倫敦找一房，含帳單 2,200，11 月 1 日入住。」
-   - 「幫我尻洗（台語，roast）這個房源：」然後貼上房源文字。
-   - 「這是四間短租，幫我尻洗。」然後貼上。
-4. **回答它問的六個問題**（預算、坪數、日期、目的地、地雷、收入審核）。「不知道」也是好答案，它會建議預設值。
-5. **貼它要的東西**：頁面文字、戶型圖、街景截圖。它會一次列清單、附網址，只問一次。
-6. **看報告**。第一行寫用了哪一級設定；每個數字都寫出處；「未知」就是它不知道，並告訴你怎麼查。
+- 「我十月要去倫敦，先給我例子，教我怎麼挑。」
+- 「我想找安靜的一房，每月總花費（房租加帳單）不要超過 £2,200。」
+- 「比較這兩間，告訴我看房時要查什麼。」
+- 「先插問一下：擔保人是做什麼的？」
 
-### 每一戶都會回答的問題
-每一戶都問同一份問題、同樣的順序：押金幾週、要先付多少、合約上的房東到底是誰、押金放進哪個保管方案、室內面積、能源等級、帳單包含什麼、最短要住多久、什麼時候可以入住。每一題只有三種答案：**文件上有**（旁邊附上那句原文）、**你告訴我們的**（它問了你），或**還不知道**——「還不知道」是沒人查過，不是沒問題。剩下還不知道的，它會一次問你，只問一次。
+助理會先用例子或你提供的房源做出有用的比較，再從你的反應了解偏好。通常一次問零到兩題，必要確認最多三題；「還不知道」也可以，不必先把所有條件想清楚。
 
-答幾題看你要它查多深：快查答八題（錢和文件那八題），一般答十四題，深查答十八題——多問市政稅是哪一級、要不要住在英國的擔保人、他們的租客審核要你證明什麼、屋裡附哪些家具。你不用選。真要選的話就說「只問把關的八題」或「全部十八題都要」；這兩個開關放在設定檔的**進階**區，剛開始用的人不會被問到。
+能搜尋時，真實房源會附來源與日期；不能搜尋時，教學例子會明確標示為虛構，不會把假設價格說成倫敦現在的行情。需要你貼房源、戶型圖或其他文件時，會說明用途，並繼續做不受影響的部分。聊天軟體有選項介面就用選項，沒有就直接打字。
 
-### 還沒落地就先做這件事
-如果你是飛過去的，在看任何一間房子之前先做一件事：把前兩週的床先訂好——旅館或有營運商在管的服務式公寓，錢有保障、想走當天就能走。然後用「六週」而不是「六晚」來抓時間，因為簽約不等於入住：簽完之後還有租客審核、押金進政府保管方案、上一位房客搬走，從落地到拿鑰匙四到七週在九月很常見（作者自己那次是 45 天）。把四件事告訴它——哪天落地、哪天一定要能正常過日子、希望哪天拿鑰匙、短租一週多少錢——它就會寫出一週一列的計畫，並標出哪幾週會撞上開學、國定假日、事先公告的路線停駛，或附近場館的大型活動。
+可以先比較「通勤近一點，還是空間大一點」、「臥室安靜，還是生活機能方便」、「租金低一點，還是帳單比較確定」。邊看邊問倫敦的區域、預算、租屋流程或常見問題，也可以請助理教你如何在看房時查證。涉及目前行情或法律的說法，應附上查過的來源。
 
-### 想改什麼，用說的
-「把含帳單上限改成 2,300。」「治安跟管理挖深一點，其他維持輕量。」「我怕吵。」「我每次都會問：便宜是不是有原因。」助理會先把「哪一項從什麼改成什麼」列給你看，等你說好才改，絕不偷偷改。
+答案先說下一步和理由。數字會保留來源與限制：「房東估計通勤 20 分鐘，還沒查證」不等於實際通勤已確認；逐字核對房東訊息，也不代表內容一定正確。每月總花費會說明房租、能源、水、網路與適用的市政稅哪些已知、哪些只是估計。
 
-### 分享
-「分享我的設定檔」會給你一段短碼和三句話的卡片；朋友把短碼貼進自己的助理，就從你的偏好和你的問題開始。
+中途改條件直接說：「總預算提高到 £2,300」、「安靜比採光重要」、「通勤可以久一點，但超過 45 分鐘就不要」。助理會套用明確指示，用白話說明影響，保留例外和其他條件；不需要再確認同一個要求。只有意思不明確，或助理自己提議修改時，才需要釐清。
 
-### 只要記得三件事
-- 它是篩子。房子要親自去看、要跟仲介和房東聊。你才是豌豆公主，它只負責掀床墊。
-- 它會說「不知道」然後問你，不會亂編。把只有你有的東西給它。
-- 看房當天不簽約。
+隨時可以插問其他問題，再回到原本的找房工作，不必重新交代偏好。跨對話保存取決於你使用的軟體；助理不能假裝已經存好。
 
-## 简体中文（摘要）
-每件事都是打一句话完成：不用写代码、不用改设置文件。安装是贴一行字或上传 zip；然后打「这能干嘛？」开始。想改设置就用说的，助理会先列出改动、等你说好才改。它是筛子，房子要亲自去看；看房当天不签约。
+還沒抵達時，可以比較暫住方案，替實地看房留時間。取消、退款和退房條件都要看實際條款，不能只因為是旅館或服務式公寓就當成有保障。看房時親自確認環境、和仲介或房東談清楚；合約帶回去讀，看房當天不簽約。法律與付款提醒會放在相關決定旁，不會每次開場都貼一整段。
 
-每一户都答同一份问题（押金、先付多少、房东是谁、面积、账单、最短租期、入住日……）：文件上有（附原文）、你告诉它的，或还不知道；「还不知道」是没人查过，不是没问题，它会一次问你。
+## 简体中文
 
-还没落地就先做一件事：把前两周的床先订好（旅馆或有运营商在管的服务式公寓，钱有保障、想走当天就能走），再用「六周」而不是「六晚」抓时间——签约不等于入住，签完还有租客审核、押金进政府保管方案、上一位房客搬走，从落地到拿钥匙四到七周在九月很常见（作者自己那次是 45 天）。告诉它四件事：哪天落地、哪天一定要能正常生活、希望哪天拿钥匙、短租一周多少钱，它就写出一周一列的计划，并标出哪几周会撞上开学、国定假日、事先公告的线路停驶或附近场馆的大型活动。
+直接聊天就能开始，不用先填问卷。可以说「先给我例子，教我怎么挑」，或贴两套房源请助理比较。它会先做有用的分析，再从你的反应了解偏好；通常一次问零到两题，必要确认最多三题。支持选项界面时使用真实选项，没有就直接打字。
 
-答几题看查多深：快查八题、一般十四题、深查十八题（多问市政税等级、要不要英国担保人、租客审核要你证明什么、附哪些家具）。想自己决定就说「只问把关的八题」或「全部十八题都要」，开关在设置档的**进阶**区，新手不会被问到。
+每月总花费包括房租和账单；数字会说明来源、哪些只是估计。真实房源需要来源与日期，不能搜索时的教学例子会标成虚构。你可以随时插问、改变预算或增加条件，助理应保留原本的工作，不让你重新填写全部资料。跨对话保存取决于软件能力，不能假装已经保存。
+
+先用比较学会取舍，再安排查证和看房。退款、付款、签约规则要看实际条款与适用法律；合约带回去读，看房当天不签约。

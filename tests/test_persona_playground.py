@@ -20,15 +20,23 @@ def terminal(answer='Recorded synthetic answer with useful concrete next steps.'
             'direct_terminal_usage':None if tokens is None else {'input_tokens':tokens-5,'output_tokens':5,'cached_input_tokens':0},
             'answer':answer}
 
+def actor_terminal(request,answer='Recorded synthetic answer with useful concrete next steps.',tokens=20):
+    """Only schema-constrained assistant calls return a structured fake response."""
+    if request.get('response_schema') is not None:
+        answer=json.dumps(answer if isinstance(answer,dict) else {'message':answer,'questions':[]},ensure_ascii=False)
+    elif not isinstance(answer,str):
+        raise AssertionError('persona callback must stay plain text')
+    return terminal(answer,tokens)
+
 def intent(**data):return dict(client_id=str(uuid.uuid4()),**data)
 
 class LabTests(unittest.TestCase):
     def setUp(self):
         self.temp=tempfile.TemporaryDirectory();self.addCleanup(self.temp.cleanup)
-        self.path=Path(self.temp.name).resolve();self.prompts=[];self.answers=[]
+        self.path=Path(self.temp.name).resolve();self.prompts=[];self.answers=[];self.requests=[]
         def invoke(request,folder):
-            self.prompts.append(request['prompt'])
-            return terminal(self.answers.pop(0) if self.answers else 'Useful practical answer with independent verification, exact evidence and next steps.')
+            self.prompts.append(request['prompt']);self.requests.append(copy.deepcopy(request))
+            return actor_terminal(request,self.answers.pop(0) if self.answers else 'Useful practical answer with independent verification, exact evidence and next steps.')
         self.lab=p.Lab(self.path,invoke=invoke);self.addCleanup(self.close)
     def close(self):
         if self.lab.worker:self.lab.worker.join(10)
@@ -106,7 +114,7 @@ class LabTests(unittest.TestCase):
         def invoke(req,folder):
             seen.append(req['prompt'])
             if len(seen)==1:started.set();release.wait(5)
-            return terminal('First helpful answer.' if len(seen)==1 else 'Here is the requested comparison.')
+            return actor_terminal(req,'First helpful answer.' if len(seen)==1 else 'Here is the requested comparison.')
         self.lab.invoke=invoke;sid=self.create();self.control(sid,'step');self.assertTrue(started.wait(5))
         data=intent(text='Compare the options before continuing.',kind='question')
         self.lab.message(sid,data);self.lab.message(sid,data)
@@ -118,7 +126,7 @@ class LabTests(unittest.TestCase):
     def test_pause_while_persona_generates_keeps_question_without_purchasing_reply(self):
         self.answers=['Obtain written evidence and confirm identity independently.'];sid=self.create();self.control(sid,'step');self.join()
         started=threading.Event();release=threading.Event()
-        def invoke(req,folder):started.set();release.wait(5);return terminal('What should I do next?')
+        def invoke(req,folder):started.set();release.wait(5);return actor_terminal(req,'What should I do next?')
         self.lab.invoke=invoke;self.control(sid,'run');self.assertTrue(started.wait(5));self.control(sid,'pause');release.set();self.join()
         s=self.lab.snapshot(sid);self.assertEqual(2,s['calls']);self.assertEqual('persona',s['messages'][-1]['role']);self.assertEqual('paused',s['status'])
 
@@ -144,7 +152,7 @@ class LabTests(unittest.TestCase):
     def test_budget_and_unknown_telemetry_stop_further_calls(self):
         sid=self.create(max_calls=1);self.control(sid,'run');self.join();self.assertEqual('budget',self.lab.snapshot(sid)['status'])
         self.assertEqual(1,len(self.prompts))
-        sid2=self.create();self.lab.invoke=lambda *_:terminal(tokens=None);self.control(sid2,'run');self.join()
+        sid2=self.create();self.lab.invoke=lambda request,*_:actor_terminal(request,tokens=None);self.control(sid2,'run');self.join()
         s=self.lab.snapshot(sid2);self.assertIsNone(s['tokens']);self.assertEqual(1,s['calls']);self.assertEqual('error',s['status'])
 
     def test_restart_preserves_transcript_and_does_not_dispatch(self):
@@ -161,7 +169,7 @@ class LabTests(unittest.TestCase):
 
     def test_other_session_busy_rejected_and_queued_capacity_counts(self):
         started=threading.Event();release=threading.Event()
-        def invoke(*_):started.set();release.wait(5);return terminal()
+        def invoke(request,*_):started.set();release.wait(5);return actor_terminal(request)
         self.lab.invoke=invoke;a=self.create();b=self.create();self.control(a,'step');self.assertTrue(started.wait(5))
         with self.assertRaises(p.LabError):self.send(b)
         self.send(a,'a'*8000,'amendment');self.send(a,'b'*8000,'amendment')
@@ -177,8 +185,22 @@ class LabTests(unittest.TestCase):
 
     def test_source_change_stops_before_model(self):
         sid=self.create()
-        with mock.patch.object(p,'source_hashes',return_value={'changed':'yes'}):self.control(sid,'step');self.join()
-        self.assertFalse(self.prompts);self.assertEqual('error',self.lab.snapshot(sid)['status'])
+        with mock.patch.object(p,'source_hashes',return_value={'changed':'yes'}):
+            with self.assertRaises(p.LabError):self.control(sid,'step')
+        self.assertFalse(self.prompts);self.assertEqual('ready',self.lab.snapshot(sid)['status'])
+
+    def test_stale_source_rejects_new_message_and_control_without_persistent_mutation(self):
+        sid=self.create();session=self.path/sid/'session.json';journal=self.path/sid/'.pea-state/events.json'
+        before=session.read_bytes();state_before=journal.read_bytes()
+        with mock.patch.object(p,'source_hashes',return_value={'changed':'yes'}):
+            self.assertFalse(self.lab.snapshot(sid)['compatible'])
+            for action in ('step','run'):
+                with self.assertRaises(p.LabError):self.control(sid,action)
+            for kind in ('question','amendment'):
+                with self.assertRaises(p.LabError):self.send(sid,'Keep this pending change.',kind=kind)
+        self.assertEqual(before,session.read_bytes());self.assertEqual(state_before,journal.read_bytes())
+        self.assertFalse(self.prompts);self.assertIsNone(self.lab.worker)
+        s=self.lab._load(sid);self.assertEqual([],s['queue']);self.assertEqual({},s['client_ids'])
 
     def test_private_permissions_and_integrity(self):
         sid=self.create();folder=self.path/sid
@@ -197,10 +219,85 @@ class LabTests(unittest.TestCase):
         with self.assertRaises(ValueError):p.session_runner.run_step(self.path/sid,'oversize','conversation','gpt-6-astra','x'*32001,'tokens',invoke=self.lab.invoke)
         with self.assertRaises(ValueError):p.session_runner.run_step(self.path/sid,'oversize2','conversation','gpt-6-astra','x','tokens',invoke=self.lab.invoke,max_prompt_chars=256001)
 
+    def test_assistant_schema_is_frozen_in_both_manifests_persona_stays_plaintext(self):
+        self.answers=['Check the draft agreement first.','Thank you. [END]']
+        sid=self.create();self.control(sid,'run');self.join()
+        self.assertEqual(p.conversation_reply.SCHEMA,self.requests[0]['response_schema'])
+        self.assertNotIn('response_schema',self.requests[1])
+        self.assertIn('Keep internal source IDs',self.requests[0]['prompt'])
+        for number,actor in ((1,'assistant'),(2,'persona')):
+            folder=self.path/sid/'.pea-state/runs'/('call-%03d-%s'%(number,actor))
+            envelope=json.loads((folder/'manifest.json').read_text());manifest=envelope['value']
+            self.assertEqual(envelope['sha256'],p._digest(manifest))
+            self.assertEqual(manifest['request_hash'],p._digest(manifest['request']))
+            physical=json.loads(next((folder/'physical/requests').glob('*.json')).read_text())
+            self.assertEqual(physical['sha256'],p._digest(physical['value']))
+            self.assertEqual(manifest['request'],physical['value']['request'])
+        self.assertEqual('Thank you. [END]',self.lab.snapshot(sid)['messages'][-1]['text'])
+
+    def test_invalid_structured_reply_records_actual_usage_without_retry_or_display(self):
+        bad_replies=['not JSON', '{"message":"first","message":"second","questions":[]}',
+                     json.dumps({'message':'Choose a direction.','questions':[{'question':'Which?','options':['A','B']}]*4}),
+                     json.dumps({'message':'Choose a direction.','questions':[{'question':'Which?','options':['Same','Same']}]})]
+        for raw in bad_replies:
+            with self.subTest(raw=raw):
+                sid=self.create();seen=[]
+                def invoke(request,folder):seen.append(request);return terminal(raw,tokens=23)
+                self.lab.invoke=invoke;self.control(sid,'run');self.join()
+                s=self.lab._load(sid);state=self.lab._store(s).show()
+                self.assertEqual(1,len(seen));self.assertEqual('error',s['status']);self.assertFalse(s['auto'])
+                self.assertEqual(23,state['budgets']['tokens']['spent'])
+                self.assertEqual(raw,s['calls'][0]['receipt']['answer'])
+                self.assertEqual('complete',s['calls'][0]['status']);self.assertIsNone(s['pending_call'])
+                self.assertEqual(['persona'],[message['role'] for message in s['messages']])
+                with self.assertRaises(p.LabError):self.control(sid,'step')
+                self.assertEqual(1,len(seen))
+
+    def test_choice_display_and_full_transcript_survive_restart_and_next_persona_turn(self):
+        reply={'message':'Both examples could fit different priorities.','questions':[
+            {'question':'Which tradeoff matters more?','options':['Quieter courtyard','Shorter walk to transport']}]}
+        self.answers=[reply];sid=self.create();self.control(sid,'step');self.join()
+        before=self.lab.export(sid);message=before['messages'][-1]
+        expected=p.conversation_reply.transcript(reply)
+        self.assertEqual(reply['message'],message['display_text']);self.assertEqual(reply['questions'],message['questions'])
+        self.assertEqual(expected,message['text'])
+        saved=self.lab._load(sid)
+        self.assertEqual(['assistant',expected],saved['history'][-1]);self.assertEqual(['assistant',expected],saved['persona_history'][-1])
+        self.lab.close();seen=[]
+        def invoke(request,folder):seen.append(request);return actor_terminal(request,'That is enough. [END]')
+        self.lab=p.Lab(self.path,invoke=invoke)
+        self.assertEqual(before,self.lab.export(sid));self.assertEqual([],seen)
+        self.control(sid,'step');self.join()
+        self.assertEqual(1,len(seen));self.assertNotIn('response_schema',seen[0])
+        for text in (reply['message'],reply['questions'][0]['question'],*reply['questions'][0]['options']):
+            self.assertIn(text,seen[0]['prompt'])
+
+    def test_choice_answer_queued_once_during_call_does_not_waive_conditional_scope(self):
+        sid=self.create();s=self.lab._load(sid);store=self.lab._store(s)
+        p.event(store,'requirement.add',id='dryness',value='Ground floor can be considered',strength='conditional',
+                scope='candidate-a-only',predicate='Dryness verified at viewing',provenance=p.provenance('Only candidate A may be ground floor if dry.'))
+        original=copy.deepcopy(store.show()['requirements']['dryness'])
+        started=threading.Event();release=threading.Event();seen=[]
+        def invoke(request,folder):
+            seen.append(request)
+            if len(seen)==1:started.set();release.wait(5)
+            return actor_terminal(request,{'message':'Continue from your selected priority.','questions':[]})
+        self.lab.invoke=invoke;self.control(sid,'step');self.assertTrue(started.wait(5))
+        data=intent(text='Which tradeoff matters more?\nQuieter courtyard',kind='question')
+        self.lab.message(sid,data);self.assertTrue(self.lab.message(sid,data)['duplicate'])
+        self.assertEqual(1,self.lab.snapshot(sid)['pending_count'])
+        release.set();self.join();s=self.lab._load(sid);state=store.show()
+        self.assertEqual(2,len(seen));self.assertEqual([],s['queue'])
+        self.assertEqual([data['text']],[m['text'] for m in s['messages'] if m['role']=='human'])
+        self.assertEqual([],s['amendments']);self.assertEqual(original,state['requirements']['dryness'])
+        request=state['requests']['human-'+uuid.UUID(data['client_id']).hex]
+        self.assertEqual(data['text'],request['text']);self.assertEqual('no_change',request['resolution'])
+        self.assertIn(data['text'],seen[-1]['prompt']);self.assertIn('candidate-a-only',seen[-1]['prompt'])
+
 class HttpTests(unittest.TestCase):
     def setUp(self):
         self.temp=tempfile.TemporaryDirectory();self.addCleanup(self.temp.cleanup)
-        self.lab=p.Lab(Path(self.temp.name).resolve(),invoke=lambda *_:terminal());self.addCleanup(self.lab.close)
+        self.lab=p.Lab(Path(self.temp.name).resolve(),invoke=lambda request,*_:actor_terminal(request));self.addCleanup(self.lab.close)
         self.server=p.ThreadingHTTPServer(('127.0.0.1',0),p.Handler);self.server.lab=self.lab
         self.thread=threading.Thread(target=self.server.serve_forever,daemon=True);self.thread.start();self.addCleanup(self.shutdown)
     def shutdown(self):self.server.shutdown();self.server.server_close();self.thread.join(3)

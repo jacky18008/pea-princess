@@ -206,13 +206,13 @@ class TestScrub(SeedCase):
 
     def test_money_is_a_band_and_dates_are_a_month(self):
         sd = self.seed()
-        self.assertEqual(sd["budget_band"], "£2,000–2,400 all-in")
+        self.assertEqual(sd["budget_band"], "£2,000–2,400 total per month")
         self.assertEqual(sd["move_in_month"], "2026-10")
         self.assertEqual(sd["commute_area"], "WC2R")
 
     def test_exact_is_opt_in_only(self):
         exact = seed.shareable(seed.read_yaml(self.profile), exact=True)["budget_band"]
-        self.assertEqual(exact, "\u00a32,400 all-in (rent target \u00a32,200)")
+        self.assertEqual(exact, "\u00a32,400 total per month (rent target \u00a32,200)")
         self.assertNotIn("2,200", json.dumps(self.seed(), ensure_ascii=False))
 
     def test_the_commute_can_be_narrowed_by_hand_or_dropped(self):
@@ -220,9 +220,9 @@ class TestScrub(SeedCase):
         self.assertIsNone(self.seed(hide_commute=True)["commute_area"])
 
     def test_a_band_rounds_the_way_the_reference_says(self):
-        self.assertEqual(seed.band(2400), "£2,000–2,400 all-in")
-        self.assertEqual(seed.band(1250), "£1,100–1,300 all-in")
-        self.assertEqual(seed.band(2401), "£2,100–2,500 all-in")
+        self.assertEqual(seed.band(2400), "£2,000–2,400 total per month")
+        self.assertEqual(seed.band(1250), "£1,100–1,300 total per month")
+        self.assertEqual(seed.band(2401), "£2,100–2,500 total per month")
         self.assertIsNone(seed.band(None))
 
 
@@ -400,7 +400,7 @@ class TestCard(SeedCase):
             self.assertTrue(line.endswith(".") or line.endswith("”"), line)
         self.assertTrue(lines[0].startswith("I want "))
         self.assertIn("one-bedroom", lines[0])
-        self.assertIn("£2,000–2,400 all-in", lines[0])
+        self.assertIn("£2,000–2,400 total per month", lines[0])
         self.assertTrue(lines[1].startswith("I will not take:"))
         self.assertIn("heating with no written tariff", lines[1])
         self.assertIn("Price sits last", lines[2])
@@ -467,7 +467,7 @@ class TestImport(SeedCase):
     def test_the_band_and_the_district_come_back_as_comments_not_values(self):
         code, _, _ = seed.make_code(self.seed(), 0)
         text = seed.profile_yaml(seed.from_min_json(seed.decode(code)), code)
-        self.assertIn("# FILL IN — the seed said £2,000–2,400 all-in", text)
+        self.assertIn("# FILL IN — the seed said £2,000–2,400 total per month", text)
         self.assertIn("the seed only carried the district WC2R", text)
         self.assertIsNone(seed.parse_yaml(text)["budget"]["all_in_pcm_ceiling"])
 

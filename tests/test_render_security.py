@@ -72,6 +72,24 @@ const context = {document: {getElementById: get,
   querySelector() {return {textContent: ''};}}, navigator: {}, setTimeout() {}};
 vm.createContext(context);
 vm.runInContext(SCRIPT, context);
+const originalFinding = context.SAMPLE.candidates[0].axes.find(axis => axis.id === 10).finding;
+for (const lang of ['en', 'zh-TW', 'zh-CN']) {
+  const labels = new context.Labels(lang);
+  const output = context.renderBody(context.SAMPLE, labels);
+  const configuration = context.esc(context.configLine(context.SAMPLE, labels));
+  const about = output.indexOf('<h2 id="about">');
+  assert.ok(about >= 0);
+  assert.equal(output.split(configuration).length - 1, 1);
+  assert.ok(output.indexOf(configuration) > about);
+  assert.ok(output.includes(labels.label('ui.all_in_pcm')));
+  for (const key of ['axis.10', 'ui.all_in_pcm', 'ui.all_in_planning',
+                      'ui.arith_all_in_low', 'ui.arith_all_in_planning', 'ui.arith_all_in_stress']) {
+    assert.doesNotMatch(labels.label(key), /all-in/i);
+  }
+}
+assert.equal(context.SAMPLE.candidates[0].axes.find(axis => axis.id === 10).finding, originalFinding);
+assert.equal(context.sBand(2400), '£2,000–2,400 total per month');
+assert.equal(JSON.stringify(context.FORMULAS), JSON.stringify(FORMULAS));
 for (const bad of ['{', 'null', '[]', '{"candidates":[null]}',
                    JSON.stringify({...context.SAMPLE, candidates: [{}]})]) {
   get('json').value = JSON.stringify(context.SAMPLE);
@@ -91,7 +109,8 @@ assert.match(card, /free text is not anonymized/);
 assert.match(card, /Read the card below and remove personal details/);
 assert.ok(card.includes(privateText)); // no false claim of complete anonymization
 console.log('viewer import and sharing checks passed');
-'''.replace('SCRIPT', json.dumps(script))
+'''.replace('SCRIPT', json.dumps(script)).replace('JSON.stringify(FORMULAS)',
+                                                'JSON.stringify(' + json.dumps(render.FORMULAS) + ')')
         result = subprocess.run(['node', '-'], input=harness, text=True,
                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=20)
         self.assertEqual(0, result.returncode, result.stderr)

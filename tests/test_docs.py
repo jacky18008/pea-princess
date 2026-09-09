@@ -74,7 +74,8 @@ class TestSkillMd(unittest.TestCase):
 class TestOnboarding(unittest.TestCase):
     def test_sections_and_languages(self):
         s = read("references", "onboarding.md")
-        for h in ["## 1. The pitch", "## 2. Intake", "## 3. Primer", "## 4. Short answers"]:
+        for h in ["## 1. The pitch", "## 2. Start with at most three essential clarifications",
+                  "## 3. Primer", "## 4. Short answers"]:
             self.assertIn(h, s)
         for lang in ["**English**", "**繁體中文**", "**简体中文**"]:
             self.assertIn(lang, s)
@@ -194,12 +195,12 @@ class TestStoryIntake(unittest.TestCase):
                          "the worked example is meant to change eight lines")
         self.assertIn("(fictional)", self.section)
 
-    def test_the_seventh_question_is_asked_and_classified(self):
-        seventh = self.section[self.section.index("### The seventh question"):]
-        self.assertIn("Are there questions you always ask of every place?", seventh)
+    def test_recurring_personal_questions_are_offered_and_classified(self):
+        recurring = self.section[self.section.index("### Recurring personal questions"):]
+        self.assertIn("Are there questions you always ask of every place?", recurring)
         for word in ("compare", "filter", "viewing", "vet", "ask", "check", "trigger"):
-            self.assertIn(word, seventh, word)
-        self.assertIn("let\nthem correct it", seventh.replace("  ", " "))
+            self.assertIn(word, recurring, word)
+        self.assertIn("let\nthem correct it", recurring.replace("  ", " "))
 
 
 class TestSharing(unittest.TestCase):

@@ -3,6 +3,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('n
 class Element{
  constructor(tag='div'){this.tag=tag;this.children=[];this.textContent='';this.value='';this.style={};this.disabled=false;this.hidden=false;this.checked=false;this.scrollHeight=0;this.scrollTop=0;this.clientHeight=0;}
  append(...children){this.children.push(...children);}
+ setAttribute(name,value){this[name]=value;}
  replaceChildren(...children){this.children=children;if(this.tag==='select'&&!this.value&&children.length)this.value=children[0].value;}
  get firstChild(){return this.children[0];}
  set innerHTML(_){throw Error('Untrusted HTML must never be rendered');}
@@ -48,6 +49,22 @@ async function main(){
  handler=null;context.recoveredState={...state('B'),revision:2,status:'interrupted',pending_call:true};run('render(recoveredState)');
  assert.equal(elements.recover.hidden,false);assert.equal(elements.step.disabled,true);await elements.recover.onclick();
  assert.equal(captured.at(-1).data.action,'recover');
+ context.choiceState={...state('B'),revision:3,messages:[{role:'assistant',text:'Stored complete reply',display_text:'Two fictional examples: courtyard or station.',questions:[{question:'Which tradeoff fits you?',options:['Quiet courtyard','Closer station']},{question:'Which campus?',options:['I know the campus','Help me find it']}]}]};
+ run('render(choiceState)');let form=elements.messages.children[0].children[2];
+ assert.equal(form.children.length,4);assert.equal(form.children[0].children[1].children[0].checked,false);
+ assert.equal(form.children[0].children[2].children[0].checked,false);
+ form.children[0].children[1].children[0].onchange();
+ const custom=form.children[0].children.at(-1);custom.value='<img src=x onerror=alert(1)> but flexible';custom.oninput();
+ run('render(choiceState)');form=elements.messages.children[0].children[2];assert.equal(form.children[0].children[1].children[0].checked,true);
+ fail=true;handler=(url,opts)=>{if(url.endsWith('/message')&&opts.method==='POST'){if(fail){fail=false;throw Error('uncertain response');}return response({ok:true});}};
+ await form.onsubmit({preventDefault(){}});await form.onsubmit({preventDefault(){}});
+ const choiceSends=captured.filter(x=>x.url.endsWith('/message')).slice(-2);
+ assert.equal(choiceSends[0].data.client_id,choiceSends[1].data.client_id);
+ assert.equal(choiceSends[1].data.text,'Which tradeoff fits you?\nQuiet courtyard；<img src=x onerror=alert(1)> but flexible');
+ assert.equal(choiceSends[1].data.kind,'question');
+ context.choiceState.messages.push({role:'human',text:'I prefer the courtyard.'});run('render(choiceState)');
+ assert.equal(elements.messages.children[0].children[2].children[0].disabled,true);
+ assert.equal(elements.messages.children[0].children[2].children.length,2);
  console.log('playground UI functional checks passed');
 }
 main().catch(error=>{console.error(error);process.exitCode=1;});

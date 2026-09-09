@@ -53,7 +53,7 @@
         "state": {
           "type": "string",
           "enum": ["pass", "fail", "unknown"],
-          "description": "pass = the quote is in the source, the source resolves, the number carries a unit, it is about the thing it claims to be, and no rule or contradiction is broken. fail = one of those is false, and `reason` says which. unknown = the executor could not get it, or the check could not be run."
+          "description": "pass = the checks performed support using this claim with its original source class and qualifiers; retained-text quote checks may be unavailable (counts.quotes_unchecked). A quote match validates attribution, not factual truth, and pass never upgrades an estimate or proves a hard filter is met. fail = a check failed and reason says which. unknown = the executor could not get it, or the item could not be checked."
         },
         "reason": {
           "type": ["string", "null"],

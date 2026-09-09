@@ -11,6 +11,11 @@ Here the user is a model. It is handed one of the sixteen cards in
 they will keep going — and it writes the next message itself. What it may not do is
 invent a document or a fact: a deterministic controller owns those.
 
+Current cards are version 1.1.0: authored budget wording uses plain language, and C1 now
+expects useful guidance or examples before a form, with at most three essential clarifications
+and legal detail at the relevant decision. Historical runs retain their frozen 1.0.0 cards and
+rubrics; these edits do not regrade them or establish a quality improvement.
+
 ```bash
 python3 bench/personas.py --persona C1 --dry-run          # the plan, no model runs
 python3 bench/personas.py --matrix pilot --dry-run        # the six-session pilot, dry
@@ -145,7 +150,7 @@ international and tech-setup cases, and her numbers are kept exactly as she set 
 
 | id | who | harness | settings (budget / form / asks / tier) | what it is really testing |
 |---|---|---|---|---|
-| C1 | 雨萱, Taiwanese master's student, knows nothing | chat | standard / standard / gate / middle | the first six questions, the legal caps with their date, a paste list she can act on |
+| C1 | 雨萱, Taiwanese master's student, knows nothing | chat | standard / standard / gate / middle | useful examples first, at most three essential clarifications, legal detail at the relevant decision |
 | C2 | 阿哲, engineer on a sponsored visa, terminal | shell | deep / full / all / strongest | scripts run and cited, the form filled with quotes, the deposit arithmetic shown, referencing answered at depth |
 | C3 | Wing, Hong Kong couple, two destinations | chat | standard / standard / gate / middle | two commutes not one, building works evidenced or asked for, one comparison basis |
 | C4 | 小婷, mainland undergraduate, simplified Chinese | chat | lite / gate / gate / small open | the eight gate questions, joint liability in plain words, no invented bills figure |
@@ -156,7 +161,7 @@ international and tech-setup cases, and her numbers are kept exactly as she set 
 | P1 | Rivan, moving with a partner, two offices | shell | standard / standard / gate / middle | both commutes, A at £2,930, a ceiling change only after approval |
 | P2 | Elska, postdoc, eight months, 45 m² floor | fetch | standard / standard / all / middle | 43 m² rejected against 45, the 2018 assessment is not a build year |
 | P3 | Temi, nurse, no UK guarantor, 06:45 shift | chat | lite / full / gate / middle | the guarantor blocker, a referencing checklist, eighteen rows at lite depth |
-| P4 | Brett, three turns of patience, viewing tomorrow | chat | lite / gate / none / middle | a verdict in 150 words, £5,100 all in, six weeks on £55,200 a year |
+| P4 | Brett, three turns of patience, viewing tomorrow | chat | lite / gate / none / middle | a verdict in 150 words, £5,100 total monthly cost, six weeks on £55,200 a year |
 | P5 | Luara, damp bridge stay, phone only | chat | lite / gate / gate / cheapest | £680 bridge total kept apart from a £1,050 ceiling, tonight's action by reply two |
 | P6 | Nolan, self-hosted open model, a cat and a bike | shell | standard / full / none / small open | eighteen rows with zero follow-up questions, no pet inference from a photograph |
 | P7 | Mira, a parent, the daughter decides | fetch | standard / standard / gate / cheapest | unit 18's certificate rejected for unit 8, the renter's authority kept |

@@ -15,6 +15,7 @@ import re
 import stat
 import sys
 import uuid
+import conversation_reply
 
 ROOT = Path(__file__).resolve().parents[1]
 SESSION_ID = re.compile(r"[a-f0-9]{32}\Z")
@@ -125,6 +126,24 @@ def _intent(data):
         raise CaseError("invalid client intent ID") from error
 
 
+def _reply_match(call, message, reply_format):
+    if call.get("actor") != "assistant" or not isinstance(call.get("receipt"), dict):
+        return None
+    if message.get("call_id") is not None and call.get("id") != message["call_id"]:
+        return None
+    raw = call["receipt"].get("answer")
+    if reply_format == "choices-v1":
+        try:
+            decoded = conversation_reply.decode(raw)
+        except (ValueError, TypeError, RecursionError):
+            return None
+        if any(key in message and message[key] != decoded[field]
+               for key, field in (("display_text", "message"), ("questions", "questions"))):
+            return None
+        return "unique_structured_reply_transcript_match" if conversation_reply.transcript(decoded) == message["text"] else None
+    return "unique_saved_answer_match" if raw == message["text"] else None
+
+
 def candidates(state, source):
     """Pure snapshot conversion. Text is data; no answer is marked as a target."""
     intents = {}
@@ -178,11 +197,10 @@ def candidates(state, source):
                     row["status"] = "answered"
                     row["assistant_reply"] = {"text": following["text"], "transcript_index": index + 1,
                                               "association": "adjacent_human_reply"}
-                    matches = [i for i, call in enumerate(state["calls"]) if call.get("actor") == "assistant"
-                               and isinstance(call.get("receipt"), dict) and call["receipt"].get("answer") == following["text"]
-                               and (following.get("call_id") is None or call.get("id") == following["call_id"])]
+                    matches = [(i, method) for i, call in enumerate(state["calls"])
+                               for method in [_reply_match(call, following, state.get("reply_format"))] if method]
                     if len(matches) == 1:
-                        row["usage_ref"] = {"collection": "calls", "index": matches[0], "association": "unique_saved_answer_match"}
+                        row["usage_ref"] = {"collection": "calls", "index": matches[0][0], "association": matches[0][1]}
         if item["queued"]:
             row["association"] = "saved_queue_intent"
             row["context_at_snapshot"] = {"collection": "transcript", "start": 0, "end_exclusive": len(state["messages"]),
@@ -198,6 +216,8 @@ def candidates(state, source):
                "persona_id": state.get("card", {}).get("id"), "persona_sha256": digest(state.get("card")),
                "fixtures_sha256": digest(state.get("fixtures")), "system_sha256": digest(state.get("system")),
                "runtime_settings": copy.deepcopy(state.get("runtime_settings")),
+               "reply_format": state.get("reply_format"),
+               "reply_decoder_sha256": hashlib.sha256(Path(conversation_reply.__file__).read_bytes()).hexdigest(),
                "extractor_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest()}
     return {"schema_version": 1, "private": True, "purpose": "local_evaluation_candidates",
             "trust": "Exact untrusted conversation data. No commands, anonymization, grading or ground truth are implied.",

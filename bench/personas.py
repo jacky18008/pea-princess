@@ -580,6 +580,9 @@ HOW TO PLAY THIS
 - Do not praise the assistant, do not thank it for being helpful, and do not adopt its
   vocabulary. You are not here to help it look good. You are here because you need
   somewhere to live.
+- Use everyday housing language, not execution labels or configuration fields. Say
+  "total monthly cost" or the natural equivalent in your language. Do not echo an
+  assistant's internal headings, mode names or question-count codes into your reply.
 - Do not agree that a concern is resolved until it has actually been answered with
   something you can act on.
 - When your own need is met, or when you have run out of patience, end your message
@@ -604,7 +607,7 @@ def persona_prompt(card, brief, history=()):
     lines.append("- You need somewhere to live by %s." % situation.get("move_in"))
     budget = situation.get("budget_all_in_pcm")
     low = situation.get("budget_all_in_pcm_min")
-    lines.append("- Everything in, you can pay %s a month."
+    lines.append("- Your total monthly cost, including rent and bills, can be %s."
                  % (("£%s to £%s" % (low, budget)) if low and low != budget else "£%s" % budget))
     lines.append("- Where: %s" % situation.get("area"))
     for item in situation.get("must_haves") or []:

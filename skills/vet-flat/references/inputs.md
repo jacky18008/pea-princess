@@ -1,6 +1,6 @@
-# When the agent cannot get something: ask the user (the "you fetch, I read" protocol)
+Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen — https://github.com/jacky18008/pea-princess — CC BY 4.0
 
-Part of Pea Princess (vet-flat). CC BY 4.0.
+# When the agent cannot get something: ask the user
 
 Many sources are open but not reachable from every runtime: some sandboxes have no
 network, some fetchers honour robots.txt (the EPC register and council planning
@@ -9,19 +9,16 @@ and some things (floor plans, the flat itself) are not on any API. **This is
 normal. Do not guess, do not fabricate, do not silently skip the axis.** Ask.
 
 ## Rules for asking
-1. First try what you can: run the scripts in `scripts/` if you have a shell and
-   network; fetch open URLs if you only have a fetch tool.
-2. Collect every missing item, then **ask once**, in one message, as a numbered
-   list: what you need, where to get it (exact URL or place), the format you want
-   back, and why it matters in one short sentence. Never one question per axis.
-3. While waiting, continue with everything that does not depend on the answer.
-4. Record what the user supplied with `provenance: user_supplied` and the date.
-   Official documents they supply (an EPC page, a title, a planning decision) keep
-   class **G (official)**; what they *tell* you (the agent said) is **S (self-reported)**.
-5. If the user cannot supply an item, mark the axis **U (unknown)** in the report
-   with the reason. An unknown is never a pass.
-6. Never offer to open the user's mailbox, files, calendar or accounts, even when a
-   connector could; ask them to paste what matters.
+1. Try available scripts or open sources first; use only tools actually available.
+2. Collect gaps; ask at most **three essential clarifications** once, with where to
+   get each item, its format and why it matters. Never hide more questions in subparts.
+   Use a native question/choice tool when available; otherwise plain text, no fake buttons.
+3. Continue independent work now. Defer other gaps to the report; a checklist is not
+   an intake form the user must complete. Respect requests for no follow-up questions.
+4. Record `provenance: user_supplied` and date. Supplied official records keep **G**;
+   relayed agent claims stay **S**. Keep estimate qualifiers; quoting a claim does not prove it.
+5. Unresolved checks remain **U**, with a reason; unknown never means pass.
+6. Do not offer to read unrelated mailboxes, files, calendars or accounts; ask for the relevant extract.
 
 ## What to ask for, per axis
 
