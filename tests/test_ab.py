@@ -1122,6 +1122,11 @@ class WorkerEvalScoring(unittest.TestCase):
         self.assertEqual(cmd[cmd.index("--model") + 1], "sonnet")
         self.assertIn("--output-format", cmd)
         self.assertNotIn("--dangerously-skip-permissions", cmd)
+        self.assertEqual("", cmd[cmd.index("--tools") + 1])
+        self.assertEqual("", cmd[cmd.index("--setting-sources") + 1])
+        self.assertIn("--strict-mcp-config", cmd)
+        self.assertEqual({}, json.loads(cmd[cmd.index("--mcp-config") + 1])["mcpServers"])
+        self.assertEqual(["--", "p"], cmd[-2:])
 
 
 if __name__ == "__main__":

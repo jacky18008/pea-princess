@@ -57,6 +57,7 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
 import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -133,7 +134,8 @@ def build_prompt(task):
 
 
 def build_command(model, prompt):
-    return ["claude", "-p", prompt, "--model", model, "--output-format", "json"]
+    return (["claude", "-p", "--model", model, "--output-format", "json"]
+            + runner.launch.claude_tool_flags([]) + ["--", prompt])
 
 
 # ------------------------------------------------------------------ scoring --
@@ -211,16 +213,26 @@ def run_one(task, model, timeout):
     command = build_command(model, prompt)
     started = time.time()
     try:
-        proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        out, err_bytes = proc.communicate(timeout=timeout)
+        # A pasted-document worker has no reason to inherit the repo as its cwd.
+        with tempfile.TemporaryDirectory(prefix="vetflat-worker-") as workdir:
+            proc = runner.launch.start_process(command, cwd=workdir, stdin=subprocess.DEVNULL,
+                                              stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            try:
+                out, err_bytes = proc.communicate(timeout=timeout)
+            except BaseException:
+                runner.launch.stop_process(proc)
+                raise
+            finally:
+                if proc.poll() is not None:
+                    runner.launch.finish_process(proc)
         stdout = (out or b"").decode("utf-8", "replace")
         note = None
         if proc.returncode != 0:
             note = "exited %d: %s" % (proc.returncode,
                                       (err_bytes or b"").decode("utf-8", "replace")[-200:])
     except subprocess.TimeoutExpired:
-        proc.kill()
-        stdout, note = "", "timed out after %d s" % timeout
+        out, err_bytes = proc.communicate()
+        stdout, note = (out or b"").decode("utf-8", "replace"), "timed out after %d s" % timeout
     except OSError as exc:
         return collections.OrderedDict([("task", task["id"]), ("status", "miss"),
                                         ("detail", "could not start claude: %s" % exc),

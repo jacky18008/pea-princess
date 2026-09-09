@@ -30,6 +30,7 @@ import shutil
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, ".."))
@@ -42,6 +43,41 @@ SKILL_DIR = os.path.join(ROOT, "skills", "vet-flat")
 sys.path.insert(0, BENCH)
 import journeys as runner  # noqa: E402
 import launch  # noqa: E402  the shared launcher every runner goes through
+
+
+class AuthenticatedApiTransport(unittest.TestCase):
+    def setUp(self):
+        scripts = os.path.join(SKILL_DIR, "scripts")
+        if scripts not in sys.path:
+            sys.path.insert(0, scripts)
+        import _fetch
+        self.fetch = _fetch
+
+    def test_api_posts_are_uncached_and_use_the_shared_private_transport(self):
+        response = {"ok": True, "status": 200, "body": '{"choices":[]}'}
+        with mock.patch.object(self.fetch, "post_json", return_value=response) as post:
+            raw, note = runner.api_post("https://api.example.invalid/v1/chat/completions",
+                                        {"model": "test"}, "synthetic-test-token", 12)
+        self.assertEqual(response["body"], raw)
+        self.assertIsNone(note)
+        self.assertEqual(0, post.call_args.kwargs["cache_ttl"])
+        self.assertEqual(0, post.call_args.kwargs["min_gap"])
+        self.assertEqual(12, post.call_args.kwargs["timeout"])
+        self.assertEqual("Bearer synthetic-test-token", post.call_args.kwargs["headers"]["Authorization"])
+
+    def test_http_errors_keep_the_response_body_and_status(self):
+        response = {"ok": False, "status": 429, "body": '{"error":{"message":"limited"}}'}
+        with mock.patch.object(self.fetch, "post_json", return_value=response):
+            raw, note = runner.api_post("https://api.example.invalid", {}, "synthetic", 12)
+        self.assertEqual(response["body"], raw)
+        self.assertEqual("http error 429", note)
+
+    def test_transport_failure_does_not_echo_credentials_or_request_url(self):
+        response = {"ok": False, "status": 0, "body": "", "note": "synthetic-secret"}
+        with mock.patch.object(self.fetch, "post_json", return_value=response):
+            raw, note = runner.api_post("https://api.example.invalid", {}, "synthetic-secret", 12)
+        self.assertIsNone(raw)
+        self.assertNotIn("synthetic-secret", note)
 
 # Anything shaped like a UK postcode. Everything the dataset uses starts with X,
 # which no real postcode area does, so a hit outside the declared list is a leak.
@@ -658,13 +694,13 @@ class TestFileChecksAndRegrade(unittest.TestCase):
         self.assertLess(runner.cjk_share("see https://example.org/a/very/long/path/that/is/not/prose 好"), 1.0)
         self.assertEqual(0.0, runner.cjk_share("```\n中文 in code only\n```"))
 
-    def test_a_busy_provider_is_a_retry_not_a_failed_turn(self):
+    def test_a_busy_provider_is_recognized_without_automatic_replay(self):
         self.assertTrue(runner.transient_error("ERROR: Selected model is at capacity. Please try a different model."))
         self.assertTrue(runner.transient_error("HTTP 429 Too Many Requests"))
         self.assertTrue(runner.transient_error("rate_limit_error: overloaded"))
         self.assertFalse(runner.transient_error("the agent exited 1: SyntaxError in the reply"))
         self.assertFalse(runner.transient_error(""))
-        self.assertGreaterEqual(runner.MAX_ATTEMPTS, 2)
+        self.assertEqual(runner.MAX_ATTEMPTS, 1)
 
     def test_reply_yes_to_save_is_a_confirmation_ask(self):
         reply = ("Proposed change:\n\n```diff\n must_haves:\n   - washing_machine_in_flat\n"
@@ -739,7 +775,7 @@ class TestFileChecksAndRegrade(unittest.TestCase):
         for rel in ("bench/launch.py", "bench/run.py", "bench/ab/run_codex.py"):
             src = read_text(os.path.join(ROOT, rel))
             launches = [m.start() for m in re.finditer(
-                r"subprocess\.Popen\((?:cmd|command), cwd=", src)]
+                r"(?:subprocess\.Popen|(?:\w+\.)*start_process)\((?:cmd|command), cwd=", src)]
             self.assertTrue(launches, rel)
             for pos in launches:
                 self.assertIn("stdin=subprocess.DEVNULL", src[pos:pos + 300], "%s: an agent launch leaves stdin open" % rel)
@@ -1059,4 +1095,3 @@ class TestFileChecksAndRegrade(unittest.TestCase):
             self.assertEqual([("profile.yaml contains crime: deep", "pass")], files)
         finally:
             shutil.rmtree(folder, ignore_errors=True)
-

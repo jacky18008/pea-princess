@@ -20,9 +20,12 @@ import io
 import json
 import os
 import shutil
+import signal
 import sys
 import tempfile
+import time
 import unittest
+from unittest import mock
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, ".."))
@@ -214,8 +217,154 @@ class TestTheRetries(unittest.TestCase):
                      "--sandbox danger-full-access", "--bypass"):
             self.assertNotIn(flag, source)
 
+    def test_default_failure_does_not_replay_a_model_call(self):
+        res = self.run_fake(SILENT_FAILURE)
+        self.assertEqual(1, res.attempts)
+        self.assertEqual([], self.clock.waits)
+
+    def test_zero_exit_explicit_error_is_not_a_successful_answer(self):
+        obj = dict(CLAUDE_ENVELOPE, is_error=True, result="failed internally", padding="x" * 900)
+        res = self.run_fake(prints(json.dumps(obj)))
+        self.assertTrue(res.provider_error)
+        self.assertEqual(1, res.attempts)
+        self.assertEqual(1540, res.usage["total_tokens"])
+
+    def test_explicit_retry_counts_usage_from_the_failed_attempt(self):
+        marker = os.path.join(self.folder, "attempted")
+        first = {"result": "partial", "usage": {"input_tokens": 20, "output_tokens": 3}}
+        second = {"result": "ok", "usage": {"input_tokens": 30, "output_tokens": 4}}
+        script = ("import pathlib,sys\np=pathlib.Path(%r)\n"
+                  "if not p.exists():\n p.touch();print(%r);sys.exit(1)\nprint(%r)"
+                  % (marker, json.dumps(first), json.dumps(second)))
+        res = self.run_fake(script, attempts=2)
+        self.assertEqual(57, res.usage["total_tokens"])
+        self.assertEqual([23, 34], [r["usage"]["total_tokens"] for r in res.attempt_records])
+
+    def test_missing_failed_attempt_usage_makes_retry_total_unknown(self):
+        marker = os.path.join(self.folder, "attempted")
+        script = ("import pathlib,sys\np=pathlib.Path(%r)\n"
+                  "if not p.exists():\n p.touch();sys.exit(1)\nprint(%r)"
+                  % (marker, json.dumps(CLAUDE_ENVELOPE)))
+        res = self.run_fake(script, attempts=2)
+        self.assertIsNone(res.usage)
+        self.assertIsNone(res.attempt_records[0]["usage"])
+        self.assertEqual(1540, res.attempt_records[1]["usage"]["total_tokens"])
+        self.assertIn("unknown", res.note)
+
+    def test_timeout_stops_descendants_and_keeps_partial_usage(self):
+        marker = os.path.join(self.folder, "orphan-wrote")
+        child = "import time,pathlib;time.sleep(1.4);pathlib.Path(%r).touch()" % marker
+        script = ("import subprocess,sys,time;print(%r,flush=True);"
+                  "subprocess.Popen([sys.executable,'-c',%r]);time.sleep(10)"
+                  % (json.dumps(CLAUDE_ENVELOPE), child))
+        res = launch.run(fake_agent(script), self.folder, 1, "claude")
+        time.sleep(0.6)
+        self.assertFalse(os.path.exists(marker), "child outlived the timeout")
+        self.assertEqual(1540, res.usage["total_tokens"])
+        self.assertTrue(res.attempt_records[0]["timeout"])
+
+    def test_outer_timeout_reaches_a_nested_runner_session(self):
+        marker = os.path.join(self.folder, "nested-orphan-wrote")
+        child = ("import signal,time,pathlib;signal.signal(signal.SIGTERM,signal.SIG_IGN);"
+                 "time.sleep(1.5);pathlib.Path(%r).touch()" % marker)
+        nested = ("import sys;sys.path.insert(0,%r);import launch;"
+                  "launch.run([sys.executable,'-c',%r],%r,10,'claude')"
+                  % (BENCH, child, self.folder))
+        launch.run(fake_agent(nested), self.folder, 1, "claude")
+        time.sleep(0.7)
+        self.assertFalse(os.path.exists(marker), "outer timeout left the nested CLI running")
+
+    def test_cancellation_stops_multiple_nested_resistant_sessions(self):
+        for interrupted in (False, True):
+            marker = os.path.join(self.folder, "multi-orphan-%s" % interrupted)
+            ready = marker + ".ready"
+            child = ("import signal,time,pathlib;signal.signal(signal.SIGTERM,signal.SIG_IGN);"
+                     "time.sleep(1.5);pathlib.Path(%r).touch()" % marker)
+            # Each child is a new session, so killing the wrapper group is insufficient.
+            nested = ("import sys,time,pathlib;sys.path.insert(0,%r);import launch;"
+                      "[launch.start_process([sys.executable,'-c',%r]) for _ in range(6)];"
+                      "pathlib.Path(%r).touch();time.sleep(10)" % (BENCH, child, ready))
+            if interrupted:
+                outer = ("import sys;sys.path.insert(0,%r);import launch;"
+                         "launch.run([sys.executable,'-c',%r],%r,10,'claude')"
+                         % (BENCH, nested, self.folder))
+                process = launch.start_process(fake_agent(outer))
+                try:
+                    deadline = time.monotonic() + 3
+                    while not os.path.exists(ready) and time.monotonic() < deadline:
+                        time.sleep(0.01)
+                    self.assertTrue(os.path.exists(ready))
+                    os.kill(process.pid, signal.SIGTERM)
+                    process.wait(timeout=3)
+                finally:
+                    launch.finish_process(process)
+            else:
+                launch.run(fake_agent(nested), self.folder, 1, "claude")
+            time.sleep(1.6)
+            self.assertFalse(os.path.exists(marker), "cancellation left a nested session running")
+
+    def test_normal_nested_wrapper_exit_cleans_registered_child_sessions(self):
+        marker = os.path.join(self.folder, "normal-exit-orphan")
+        child = "import time,pathlib;time.sleep(0.8);pathlib.Path(%r).touch()" % marker
+        nested = ("import sys;sys.path.insert(0,%r);import launch;"
+                  "launch.start_process([sys.executable,'-c',%r]);print('done')" % (BENCH, child))
+        result = launch.run(fake_agent(nested), self.folder, 0.5, "claude")
+        time.sleep(0.9)
+        self.assertFalse(os.path.exists(marker))
+        self.assertIn("done", result.text)
+
+    def test_permission_denied_cleanup_is_reported_instead_of_claiming_success(self):
+        process = mock.Mock(pid=123456)
+        with mock.patch.object(launch, "_owned_groups", return_value={123456}), \
+                mock.patch.object(launch.os, "killpg", side_effect=PermissionError):
+            with self.assertRaisesRegex(launch.ProcessCleanupError, "permission denied"):
+                launch.stop_process(process, grace=0)
+
+    def test_retry_aggregate_rejects_nonfinite_counters(self):
+        for value in (float("nan"), float("inf"), -float("inf")):
+            rows = [{"usage": {"input_tokens": value, "output_tokens": 1}},
+                    {"usage": {"input_tokens": 2, "output_tokens": 3}}]
+            self.assertIsNone(launch.attempt_usage(rows))
+            self.assertIsNone(launch.attempt_usage(rows[:1]))
+
+    def test_partial_usage_is_preserved_without_inventing_a_complete_total(self):
+        raw = json.dumps({"result": "partial", "usage": {"input_tokens": 7}})
+        res = self.run_fake(prints(raw))
+        self.assertIsNone(res.usage)
+        self.assertEqual(7, res.attempt_records[0]["usage"]["input_tokens"])
+
+    def test_tool_availability_and_permission_rules_are_separate(self):
+        args = launch.claude_tool_flags(["Read", "Bash(python3:*)"])
+        self.assertEqual("Bash,Read", args[args.index("--tools") + 1])
+        self.assertEqual("Read,Bash(python3:*)", args[args.index("--allowedTools") + 1])
+        self.assertIn("--strict-mcp-config", args)
+        args = launch.claude_tool_flags([])
+        self.assertEqual("", args[args.index("--tools") + 1])
+        self.assertIn("--disable-slash-commands", args)
+
 
 class TestReadingTheReply(unittest.TestCase):
+    def test_partial_event_holders_cannot_be_combined_into_complete_usage(self):
+        raw = '\n'.join(json.dumps({"usage": usage}) for usage in
+                        ({"input_tokens": 10}, {"output_tokens": 3}))
+        parsed = launch.usage_from_events(raw)
+        self.assertNotIn("input_tokens", parsed)
+        self.assertNotIn("total_tokens", parsed)
+        self.assertIsNone(launch.attempt_usage([{"usage": parsed}]))
+
+    def test_contradictory_terminal_total_is_unaccepted_usage(self):
+        raw = json.dumps({"type": "turn.completed", "usage": {
+            "input_tokens": 10, "output_tokens": 3, "total_tokens": 1}})
+        parsed = launch.usage_from_events(raw)
+        self.assertEqual(1, parsed["total_tokens"], "keep the conflicting raw counter for diagnosis")
+        self.assertIn("usage_invalid_reason", parsed)
+        self.assertIsNone(launch.attempt_usage([{"usage": parsed}]))
+
+    def test_legacy_aliases_are_normalized_within_one_holder(self):
+        raw = json.dumps({"usage": {"prompt_tokens": 10, "completion_tokens": 3}})
+        parsed = launch.usage_from_events(raw)
+        self.assertEqual(13, launch.attempt_usage([{"usage": parsed}])["total_tokens"])
+
     def test_claude_usage_round_trips(self):
         text, usage = launch.answer(json.dumps(CLAUDE_ENVELOPE), "claude")
         self.assertEqual("五週押金上限。", text)

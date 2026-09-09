@@ -46,7 +46,7 @@ were read off the installed CLI (codex 0.151): `gpt-5.6-sol` (the default in
 `~/.codex/config.toml`), `gpt-5.6-terra`, `gpt-5.6-luna`.
 
 Nothing anywhere passes a permission-bypass flag. The Claude side is scoped by
-`--allowedTools`; the Codex side by `-s workspace-write` with the documented
+`--tools` plus `--allowedTools`, with inherited MCP/settings/hooks excluded; the Codex side by `-s workspace-write` with the documented
 `sandbox_workspace_write.network_access=true`. A test asserts it
 (`test_no_config_asks_for_a_permission_bypass`).
 

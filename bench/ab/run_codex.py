@@ -217,15 +217,19 @@ def main(argv=None):
         # stdin is closed on purpose: `claude -p` treats anything piped on stdin as part of the
         # prompt, and a runner launched from a shell heredoc hands that heredoc to every child.
         # On 2026-09-05 four journey runs and ten sweep rows carried a launcher script that way.
-        proc = subprocess.Popen(command, cwd=workdir, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
+        proc = runner.launch.start_process(command, cwd=workdir, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE)
         out, err = proc.communicate(timeout=args.timeout)
+        runner.launch.finish_process(proc)
         stdout = (out or b"").decode("utf-8", "replace")
         stderr = (err or b"").decode("utf-8", "replace")
         if proc.returncode != 0:
             note = "codex exited %d: %s" % (proc.returncode, stderr.strip()[-300:])
     except subprocess.TimeoutExpired:
-        proc.kill()
+        runner.launch.stop_process(proc)
+        out, err = proc.communicate()
+        stdout = (out or b"").decode("utf-8", "replace")
+        stderr = (err or b"").decode("utf-8", "replace")
         note = "timed out after %d s" % args.timeout
     except OSError as exc:
         note = "could not start codex: %s" % exc

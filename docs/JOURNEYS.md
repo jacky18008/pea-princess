@@ -97,7 +97,7 @@ its own history rather than a transcript of it. `bench/journeys.py` decides by r
 chose and why.
 
 The skill is copied into `.claude/skills/vet-flat` in the working directory. A
-manual or fetch journey runs with `--allowedTools Read` and nothing else — it is pasted
+manual or fetch journey runs with `--tools Read --allowedTools Read` plus MCP/settings/hook isolation — it is pasted
 material, so nothing needs a shell or the network. A **shell-mode** journey (the two
 that ask the agent to change settings) also gets `Edit`, `Write` and `Bash` limited to
 `profile_check.py`, because "apply the change" is graded on the file afterwards (see

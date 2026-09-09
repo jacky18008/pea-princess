@@ -1241,11 +1241,13 @@ def agent_command(agent, harness, prompt, workdir, model, system,
 
 
 def helper_command(family, prompt, workdir, model):
-    """The persona and the judge. No tools, no skill, no filesystem to touch."""
+    """Helper actors: Claude tools disabled; Codex read-only with prompt discipline.
+
+    Codex read-only prevents writes, not arbitrary reads or tool invocation. That
+    legacy helper is not an enforced source-isolation boundary.
+    """
     if family == "claude":
-        cmd = ["claude", "-p", "--allowedTools", "", "--output-format", "json",
-               "--setting-sources", "project", "--strict-mcp-config", "--mcp-config",
-               journeys.no_mcp_config(workdir)]
+        cmd = ["claude", "-p"] + launcher.claude_tool_flags([]) + ["--output-format", "json"]
         if model:
             cmd += ["--model", model]
         return cmd + ["--", prompt]
@@ -1390,7 +1392,8 @@ def play(card, args, variant, seed):
         launches.append(collections.OrderedDict([
             ("label", label), ("actor", actor), ("family", actor_family),
             ("usage", result.usage), ("wall_time_s", result.seconds),
-            ("attempts", result.attempts), ("provider_error", result.provider_error)]))
+            ("attempts", result.attempts), ("attempt_records", result.attempt_records),
+            ("provider_error", result.provider_error)]))
         if result.provider_error:
             provider_failures.append({"actor": actor, "label": label,
                                       "note": result.tail_note()})
@@ -1837,7 +1840,8 @@ def regrade(folder, args, doc=None):
             regrade_launches = cost.setdefault("regrade_launches", [])
             regrade_launches.append({"at": journeys.now(), "actor": "judge", "family": family,
                                     "model": model, "usage": res.usage, "wall_time_s": res.seconds,
-                                    "attempts": res.attempts, "provider_error": res.provider_error})
+                                    "attempts": res.attempts, "attempt_records": res.attempt_records,
+                                    "provider_error": res.provider_error})
             cost["regrade_usage_reported"] = sum_usage(regrade_launches)
             cost["all_regrade_launches_reported_usage"] = all(r["usage"] for r in regrade_launches)
             if provider_stopped:

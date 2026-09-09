@@ -767,9 +767,7 @@ def claude_command(prompt, workdir, model, system, session_id=None, resume=None,
         cmd += ["--append-system-prompt", system]
         if session_id:
             cmd += ["--session-id", session_id]
-    cmd += ["--allowedTools", tools, "--output-format", "json",
-            "--setting-sources", "project", "--add-dir", workdir,
-            "--strict-mcp-config", "--mcp-config", no_mcp_config(workdir)]
+    cmd += launch.claude_tool_flags(tools) + ["--output-format", "json", "--add-dir", workdir]
     if model:
         cmd += ["--model", model]
     # `--` ends the options, so a prompt that begins with a dash (a persona's pasted page
@@ -816,52 +814,26 @@ def api_url():
 
 
 def api_post(url, payload, key, timeout):
-    """urllib first; curl when TLS fails.
+    """Use the shared authenticated HTTP transport without persisting API bodies.
 
-    The macOS system Python links LibreSSL and fails the handshake against several
-    hosts that curl on the same machine handles fine - the reason every fetcher in
-    this repository goes through curl. urllib is fine for most endpoints, so it is
-    tried first and the fallback is silent except in the note it returns.
+    curl receives URL, headers and POST data privately on stdin. The shared helper
+    disables curlrc, limits protocols and refuses authenticated redirects, avoiding
+    the old urllib redirect/header behavior and the TLS fallback's secret argv.
     """
-    body = json.dumps(payload).encode("utf-8")
-    headers = {"Content-Type": "application/json", "Authorization": "Bearer " + key}
+    scripts = os.path.join(SKILL_DIR, "scripts")
+    if scripts not in sys.path:
+        sys.path.insert(0, scripts)
+    import _fetch
     try:
-        import ssl
-        import urllib.error
-        import urllib.request
-        req = urllib.request.Request(url, data=body, headers=headers, method="POST")
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
-            return resp.read().decode("utf-8", "replace"), None
-    except ImportError as exc:
-        note = "urllib unavailable (%s); used curl" % exc
-    except Exception as exc:  # noqa: BLE001 - the class we want is TLS-shaped, not one type
-        name = type(exc).__name__
-        text = str(exc)
-        if "ssl" not in name.lower() and "SSL" not in text and "certificate" not in text:
-            if hasattr(exc, "read"):
-                try:
-                    return exc.read().decode("utf-8", "replace"), "http error %s" % exc
-                except Exception:  # noqa: BLE001
-                    pass
-            return None, "%s: %s" % (name, text[:300])
-        note = "urllib TLS failure (%s: %s); fell back to curl, which is what the rest of " \
-               "this repository uses on macOS" % (name, text[:120])
-    handle, tmp = tempfile.mkstemp(prefix="vetflat-journey-post-")
-    try:
-        with io.open(handle, "w", encoding="utf-8") as fh:
-            fh.write(json.dumps(payload))
-        cmd = ["curl", "-sS", "-m", str(timeout), "-X", "POST", url,
-               "-H", "Content-Type: application/json",
-               "-H", "Authorization: Bearer " + key, "--data-binary", "@" + tmp]
-        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        out, err = proc.communicate(timeout=timeout + 10)
-        if proc.returncode != 0:
-            return None, note + "; curl exited %d: %s" % (
-                proc.returncode, (err or b"").decode("utf-8", "replace")[:200])
-        return (out or b"").decode("utf-8", "replace"), note
-    finally:
-        if os.path.exists(tmp):
-            os.unlink(tmp)
+        result = _fetch.post_json(url, payload, headers={"Authorization": "Bearer " + key},
+                                  cache_ttl=0, min_gap=0, timeout=timeout)
+    except (OSError, ValueError):
+        return None, "HTTP request rejected before a response"
+    if result["ok"]:
+        return result["body"], None
+    if result["status"]:
+        return result["body"], "http error %s" % result["status"]
+    return None, "HTTP transport failed before a response"
 
 
 def api_reply(messages, model, timeout):
@@ -995,6 +967,7 @@ def play(journey, args, variant_id=None):
         started = time.time()
         reply, usage, note = "", None, None
         attempts, provider_error = 1, False
+        attempt_records = None
         if agent == "api":
             messages = [{"role": "system", "content": system}]
             for role, content in history:
@@ -1020,6 +993,7 @@ def play(journey, args, variant_id=None):
             if getattr(res, "session_id", None):
                 session_id = res.session_id          # a retry may have minted a new one
             attempts = res.attempts
+            attempt_records = res.attempt_records
             provider_error = res.provider_error
             # The note the card always carried, plus the tails: a row that reads
             # "the agent exited 1: " with nothing behind it cannot be diagnosed later.
@@ -1036,6 +1010,7 @@ def play(journey, args, variant_id=None):
                 ("turn", index), ("user", turn["user"]), ("reply", reply or ""),
                 ("note", note), ("wall_time_s", wall), ("score", None), ("checks", []),
                 ("retries", (attempts - 1) if agent != "api" else 0),
+                ("usage", usage), ("attempt_records", attempt_records),
                 ("provider_error", provider_error)]))
             break
 
@@ -1046,6 +1021,7 @@ def play(journey, args, variant_id=None):
         card["note"] = note
         card["wall_time_s"] = wall
         card["usage"] = usage
+        card["attempt_records"] = attempt_records
         card["retries"] = (attempts - 1) if agent != "api" else 0
         card["provider_error"] = provider_error
         card.move_to_end("turn", last=False)

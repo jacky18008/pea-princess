@@ -332,11 +332,13 @@ def build_command(agent, case, model, workdir, prompt=None, config=None):
     if config.get("main_model") and not model:
         model = config["main_model"]
     if agent == "claude":
-        tools = config.get("allowed_tools") or ["Bash(python3:*)", "Read", "Write"]
+        tools = config.get("allowed_tools")
+        if tools is None:
+            tools = ["Bash(python3:*)", "Read", "Write"]
         cmd = ["claude", "-p"]
         if config.get("append_system_prompt"):
             cmd += ["--append-system-prompt", config["append_system_prompt"]]
-        cmd += ["--allowedTools"] + list(tools) + ["--output-format", "json", "--setting-sources", "project", "--add-dir", workdir]
+        cmd += launch.claude_tool_flags(tools) + ["--output-format", "json", "--add-dir", workdir]
         if model:
             cmd += ["--model", model]
         # `--` ends the options: a prompt that begins with a dash (a pasted page starting
@@ -969,15 +971,19 @@ def run_one(args, case, variant=None, prompt=None):
             # stdin is closed on purpose: `claude -p` treats anything piped on stdin as part of the
             # prompt, and a runner launched from a shell heredoc hands that heredoc to every child.
             # On 2026-09-05 four journey runs and ten sweep rows carried a launcher script that way.
-            proc = subprocess.Popen(command, cwd=workdir, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
+            proc = launch.start_process(command, cwd=workdir, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
                                     stderr=subprocess.PIPE)
             out, err = proc.communicate(timeout=args.timeout)
+            launch.finish_process(proc)
             stdout = (out or b"").decode("utf-8", "replace")
             stderr = (err or b"").decode("utf-8", "replace")
             if proc.returncode != 0:
                 note = "the agent exited %d: %s" % (proc.returncode, stderr.strip()[-300:])
         except subprocess.TimeoutExpired:
-            proc.kill()
+            launch.stop_process(proc)
+            out, err = proc.communicate()
+            stdout = (out or b"").decode("utf-8", "replace")
+            stderr = (err or b"").decode("utf-8", "replace")
             note = "timed out after %d s" % args.timeout
         except OSError as exc:
             note = "could not start %r: %s" % (command[0], exc)

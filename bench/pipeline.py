@@ -468,6 +468,7 @@ def record_role(roles, notes, role, conf, res, command, group=None, note_label=N
     note = res.tail_note()
     roles.append(role_row(role, conf, res.seconds, res.usage, note, command, group,
                           provider_error=res.provider_error))
+    roles[-1]["attempt_records"] = res.attempt_records
     if note:
         notes.append("%s: %s" % (note_label or role, note))
     return note

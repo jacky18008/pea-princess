@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""One launcher for every bench runner: retries, captured tails, a provider_error result.
+"""Shared benchmark launcher: owned processes, attempt evidence, provider status.
 
 Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen -
 https://github.com/jacky18008/pea-princess - CC BY 4.0
@@ -22,15 +22,15 @@ poisons every mean it lands in, and it cannot be told from a zero the model earn
 
 WHAT THIS DOES
 ==============
-``run()`` is the only place in bench/ that starts an agent. It
+``run()`` is the common launcher used by the multi-actor runners. It
 
   * closes stdin (``stdin=subprocess.DEVNULL``) for every launch, always. ``claude -p``
     reads anything piped on stdin as part of the prompt, and a runner started from a
     shell heredoc hands that heredoc to every child it spawns (2026-09-05: four journey
     runs and ten sweep rows went out that way);
   * captures stdout and stderr and keeps the last ``TAIL_CHARS`` of each;
-  * retries a launch that failed the way a busy provider fails - a non-zero exit, an
-    empty stdout, or provider language on stderr - with a growing pause;
+  * makes one attempt by default; an explicit retry budget retains all attempt usage,
+    including failures, and leaves the aggregate unknown when telemetry is missing;
   * after the last attempt returns ``provider_error=True`` with the tails and the exit
     code, so the row can be diagnosed months later instead of being read as a zero;
   * parses token usage for both CLIs: ``claude --output-format json`` and the ``codex
@@ -54,17 +54,20 @@ USAGE
 from __future__ import unicode_literals
 
 import collections
+import atexit
 import json
+import math
 import os
 import re
+import signal
 import subprocess
+import sys
+import threading
 import time
 import uuid
 
-# Growing pauses, in seconds, before attempt 2 and attempt 3. A usage window that has
-# just closed does not reopen in ten seconds; ten minutes is the last try worth making
-# inside one batch.
-MAX_ATTEMPTS = 3
+# Growing pauses for callers that explicitly opt into retries.
+MAX_ATTEMPTS = 1  # A new physical attempt must be an explicit caller decision.
 RETRY_WAITS = (60, 180, 600)
 TAIL_CHARS = 600          # of each stream, kept on the result
 SCAN_CHARS = 2000         # of stdout, scanned for provider language when a run failed
@@ -90,22 +93,23 @@ TOKEN_KEYS = ("input_tokens", "output_tokens", "cached_input_tokens",
               "completion_tokens", "cache_read_input_tokens")
 
 _FIELDS = ("text usage note seconds attempts provider_error stdout_tail stderr_tail "
-           "exit_code session_id")
+           "exit_code session_id attempt_records")
 
 
 class LaunchResult(collections.namedtuple("LaunchResult", _FIELDS)):
     """What one launch produced. ``text`` is the model's answer (claude: the ``.result``
     field; codex: the raw stdout, which the caller may replace with its last-message
-    file). ``provider_error`` says the run never reached the model."""
+    file). ``provider_error`` says the CLI did not complete successfully; it does not
+    prove that the provider performed no work or charged no tokens."""
 
     __slots__ = ()
 
     def __new__(cls, text="", usage=None, note=None, seconds=0.0, attempts=1,
                 provider_error=False, stdout_tail="", stderr_tail="", exit_code=None,
-                session_id=None):
+                session_id=None, attempt_records=None):
         return super(LaunchResult, cls).__new__(
             cls, text, usage, note, seconds, attempts, bool(provider_error),
-            stdout_tail, stderr_tail, exit_code, session_id)
+            stdout_tail, stderr_tail, exit_code, session_id, attempt_records)
 
     def tail_note(self, prefix=""):
         """The note with the captured tails appended, for a row someone has to diagnose.
@@ -122,6 +126,184 @@ class LaunchResult(collections.namedtuple("LaunchResult", _FIELDS)):
         parts.append("stdout tail: %s" % (self.stdout_tail.strip() or "(empty)"))
         parts.append("stderr tail: %s" % (self.stderr_tail.strip() or "(empty)"))
         return "; ".join(parts)
+
+
+_ACTIVE_PROCESSES = set()
+_PROCESS_LOCK = threading.RLock()
+_SIGNAL_HANDLERS = {}
+
+
+class ProcessCleanupError(RuntimeError):
+    """Cancellation could not establish that the owned processes were stopped."""
+
+
+def _signal_group(group, sig):
+    try:
+        os.killpg(group, sig)
+    except ProcessLookupError:
+        pass
+    except PermissionError:
+        return "permission denied for process group %s" % group
+
+
+def _owned_groups(processes):
+    """Snapshot descendant groups before a nested wrapper can exit/reparent them.
+
+    ps reads PID/PPID/PGID only, never command arguments or environment values.
+    An unavailable process table leaves the owned initial groups as a fallback.
+    """
+    roots = {process.pid for process in processes}
+    groups = set(roots)
+    try:
+        table = subprocess.run(["ps", "-ax", "-o", "pid=", "-o", "ppid=", "-o", "pgid="],
+                               stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
+                               stderr=subprocess.DEVNULL, text=True, timeout=2, check=True)
+        rows = [tuple(map(int, line.split())) for line in table.stdout.splitlines() if line.strip()]
+        descendants = set(roots)
+        while True:
+            extra = {pid for pid, parent, _group in rows if parent in descendants} - descendants
+            if not extra:
+                break
+            descendants.update(extra)
+        groups.update(group for pid, _parent, group in rows if pid in descendants)
+    except (OSError, ValueError, subprocess.SubprocessError):
+        pass  # The initial sessions still have their process-group cleanup.
+    return {group for group in groups if group > 1 and group != os.getpgrp()}
+
+
+def _stop_processes(processes, grace):
+    groups = _owned_groups(processes)
+    errors = []
+    for group in groups:
+        error = _signal_group(group, signal.SIGTERM)
+        if error:
+            errors.append(error)
+    deadline = time.monotonic() + grace
+    for process in processes:
+        try:
+            process.wait(timeout=max(0, deadline - time.monotonic()))
+        except subprocess.TimeoutExpired:
+            pass
+    # Kill captured nested sessions even if their wrapper already exited.
+    for group in groups:
+        error = _signal_group(group, signal.SIGKILL)
+        if error:
+            errors.append(error)
+    for process in processes:
+        try:
+            process.wait(timeout=1)
+        except subprocess.TimeoutExpired:
+            errors.append("process %s still running after cancellation" % process.pid)
+    with _PROCESS_LOCK:
+        _ACTIVE_PROCESSES.difference_update(processes)
+    if errors:
+        raise ProcessCleanupError("Process cleanup incomplete: " + "; ".join(sorted(set(errors))))
+
+
+def stop_process(process, grace=0.5):
+    """Stop owned descendants, including nested runners and output-pipe holders.
+
+    This is lifecycle cleanup, not an OS sandbox against code deliberately
+    daemonizing/reparenting before cancellation. The process snapshot is bounded.
+    """
+    _stop_processes([process], grace)
+
+
+def _cleanup_signal(signum, frame):
+    with _PROCESS_LOCK:
+        active = list(_ACTIVE_PROCESSES)
+    if active:
+        _stop_processes(active, grace=0.1)
+    previous = _SIGNAL_HANDLERS.get(signum)
+    if callable(previous):
+        previous(signum, frame)
+    raise SystemExit(128 + signum)
+
+
+def start_process(command, **kwargs):
+    """Start an owned session; nested benchmark runners forward cancellation.
+
+    The first launch in a runner's main thread installs signal cleanup. Executor
+    threads share that registry, so the outer sweep can stop their CLI sessions.
+    """
+    if threading.current_thread() is threading.main_thread():
+        for sig in (signal.SIGTERM, signal.SIGINT):
+            if signal.getsignal(sig) is not _cleanup_signal:
+                _SIGNAL_HANDLERS[sig] = signal.getsignal(sig)
+                signal.signal(sig, _cleanup_signal)
+    kwargs["start_new_session"] = True
+    kwargs.setdefault("stdin", subprocess.DEVNULL)
+    with _PROCESS_LOCK:
+        process = subprocess.Popen(command, **kwargs)
+        _ACTIVE_PROCESSES.add(process)
+    return process
+
+
+def finish_process(process):
+    """Reap a finished CLI and remove any remaining processes in its session."""
+    with _PROCESS_LOCK:
+        active = process in _ACTIVE_PROCESSES
+    if active:
+        stop_process(process, grace=0)
+
+
+def _cleanup_exit():
+    # A normally exiting nested wrapper must not reparent registered child sessions.
+    with _PROCESS_LOCK:
+        active = list(_ACTIVE_PROCESSES)
+    if active:
+        try:
+            _stop_processes(active, grace=0.1)
+        except ProcessCleanupError as error:
+            print(str(error), file=sys.stderr)
+
+
+atexit.register(_cleanup_exit)
+
+
+def attempt_usage(records):
+    """All-attempt numeric totals, or unknown when any attempt lacks telemetry.
+
+    Raw per-attempt usage stays in LaunchResult.attempt_records even when a total
+    cannot be established. An omitted field is never filled with zero.
+    """
+    usages = [r["usage"] for r in records]
+    if not usages or any(not isinstance(u, dict) or u.get("usage_invalid_reason") or any(
+            type(u.get(k)) not in (int, float) or not math.isfinite(u[k]) or u[k] < 0
+            for k in ("input_tokens", "output_tokens")) for u in usages):
+        return None
+    for usage in usages:
+        if any(type(value) not in (int, float) or not math.isfinite(value) or value < 0
+               for key, value in usage.items() if key in TOKEN_KEYS + USAGE_KEYS):
+            return None
+        if usage.get("cached_input_tokens", 0) > usage["input_tokens"]:
+            return None
+    if len(records) == 1:
+        return usages[0]
+    keys = set.intersection(*(set(u) for u in usages))
+    return {key: sum(u[key] for u in usages) for key in sorted(keys)
+            if all(type(u[key]) in (int, float) and math.isfinite(u[key]) for u in usages)}
+
+
+def claude_tool_flags(rules):
+    """Separate available built-ins from their auto-approval permission rules.
+
+    --allowedTools alone does not remove other tools. An empty rule list therefore
+    needs --tools "" as well. No benchmark actor inherits connectors or hooks.
+    These flags require the documented Claude Code 2.1 CLI interface.
+    """
+    if isinstance(rules, str):
+        rules = [rule.strip() for rule in rules.split(",") if rule.strip()]
+    rules = list(rules)
+    names = sorted({rule.split("(", 1)[0] for rule in rules})
+    if any(not re.fullmatch(r"[A-Za-z][A-Za-z0-9_]*", name) for name in names):
+        raise ValueError("benchmark tool rules must name built-in tools")
+    flags = ["--tools", ",".join(names), "--allowedTools", ",".join(rules),
+             "--setting-sources", "", "--settings", '{"disableAllHooks":true}',
+             "--strict-mcp-config", "--mcp-config", '{"mcpServers":{}}']
+    if not rules:
+        flags += ["--disable-slash-commands"]
+    return flags
 
 
 def transient_error(text):
@@ -181,9 +363,9 @@ def looks_like_provider_failure(exit_code, stdout, stderr):
 
     stdout is only scanned when the run already failed: a successful reply that happens
     to discuss a rent "rate" must never be thrown away and paid for twice."""
-    failed = exit_code != 0 or not (stdout or "").strip()
-    flagged = claude_error(stdout) if failed else None
-    if flagged and provider_language(flagged):
+    flagged = claude_error(stdout)
+    failed = exit_code != 0 or not (stdout or "").strip() or flagged is not None
+    if flagged:
         return True, "the CLI reported: %s" % flagged[:120]
     # stderr too is only read once the run has failed: codex writes its banner and its
     # progress there, and a successful reply about a "rate limit" clause in a tenancy is
@@ -248,6 +430,7 @@ def run(cmd, cwd, timeout, family, attempts=MAX_ATTEMPTS, waits=RETRY_WAITS,
     attempt, stdout, stderr, exit_code, note = 0, "", "", None, None
     cmd = list(cmd)
     session_used = session_id_in(cmd)
+    records = []
     while True:
         attempt += 1
         if attempt > 1 and session_used:
@@ -262,31 +445,50 @@ def run(cmd, cwd, timeout, family, attempts=MAX_ATTEMPTS, waits=RETRY_WAITS,
             # stdin is closed on purpose, for every actor. `claude -p` treats anything
             # piped on stdin as part of the prompt, and a runner started from a shell
             # heredoc hands that heredoc to every child (it happened on 2026-09-05).
-            proc = subprocess.Popen(cmd, cwd=cwd, stdout=subprocess.PIPE,
-                                    stderr=subprocess.PIPE, stdin=subprocess.DEVNULL)
+            proc = start_process(cmd, cwd=cwd, stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE, stdin=subprocess.DEVNULL)
             out, err = proc.communicate(timeout=timeout)
         except subprocess.TimeoutExpired:
             if proc is not None:
-                proc.kill()
-                proc.communicate()
+                stop_process(proc)
+                out, err = proc.communicate()
+            else:
+                out, err = b"", b""
+            stdout = (out or b"").decode("utf-8", "replace")
+            stderr = (err or b"").decode("utf-8", "replace")
+            records.append({"attempt": attempt, "usage": answer(stdout, family)[1],
+                            "exit_code": proc.returncode if proc else None, "timeout": True,
+                            "stdout_tail": stdout[-TAIL_CHARS:], "stderr_tail": stderr[-TAIL_CHARS:]})
             # The caller's ceiling, not the provider refusing. Not retried, not a
             # provider error: a runner shows a timeout to its reader as a timeout.
-            return LaunchResult(text="", usage=None,
+            return LaunchResult(text="", usage=attempt_usage(records),
                                 note="timed out after %d s" % timeout,
                                 seconds=round(time.time() - started, 2), attempts=attempt,
-                                provider_error=False, stdout_tail="", stderr_tail="",
-                                exit_code=None, session_id=session_used)
+                                provider_error=False, stdout_tail=stdout[-TAIL_CHARS:], stderr_tail=stderr[-TAIL_CHARS:],
+                                exit_code=None, session_id=session_used, attempt_records=records)
         except OSError as exc:
+            records.append({"attempt": attempt, "usage": None, "exit_code": None,
+                            "start_error": str(exc), "timeout": False})
             return LaunchResult(text="", usage=None,
                                 note="could not start %r: %s" % (cmd[0], exc),
                                 seconds=round(time.time() - started, 2), attempts=attempt,
                                 provider_error=False, stdout_tail="", stderr_tail="",
-                                exit_code=None, session_id=session_used)
+                                exit_code=None, session_id=session_used, attempt_records=records)
+        except BaseException:
+            if proc is not None:
+                stop_process(proc)
+            raise
+        finally:
+            if proc is not None and proc.poll() is not None:
+                finish_process(proc)
         stdout = (out or b"").decode("utf-8", "replace")
         stderr = (err or b"").decode("utf-8", "replace")
         exit_code = proc.returncode
+        records.append({"attempt": attempt, "usage": answer(stdout, family)[1],
+                        "exit_code": exit_code, "timeout": False, "session_id": session_used,
+                        "stdout_tail": stdout[-TAIL_CHARS:], "stderr_tail": stderr[-TAIL_CHARS:]})
         retry, why = looks_like_provider_failure(exit_code, stdout, stderr)
-        failed = exit_code != 0 or not stdout.strip()
+        failed = exit_code != 0 or not stdout.strip() or claude_error(stdout) is not None
         if not retry:
             # A run that answered is kept as it is, whatever stderr grumbled: paying twice
             # for a run that worked is the worse mistake. The grumble goes in the note.
@@ -306,10 +508,11 @@ def run(cmd, cwd, timeout, family, attempts=MAX_ATTEMPTS, waits=RETRY_WAITS,
             # run never completed - but a reader looking at this row months later
             # should not have to guess what the CLI managed to say.
             text, usage = answer(stdout, family)
-            return LaunchResult(text=text, usage=usage, note=note,
+            return LaunchResult(text=text, usage=attempt_usage(records), note=note,
                                 seconds=round(time.time() - started, 2), attempts=attempt,
                                 provider_error=True, stdout_tail=stdout[-TAIL_CHARS:],
-                                stderr_tail=stderr[-TAIL_CHARS:], exit_code=exit_code, session_id=session_used)
+                                stderr_tail=stderr[-TAIL_CHARS:], exit_code=exit_code, session_id=session_used,
+                                attempt_records=records)
         pause = waits[min(attempt - 1, len(waits) - 1)] if waits else 0
         echo("  %s%s; retry %d of %d in %d s"
              % (("%s: " % label) if label else "", why, attempt, max(1, attempts) - 1,
@@ -317,10 +520,13 @@ def run(cmd, cwd, timeout, family, attempts=MAX_ATTEMPTS, waits=RETRY_WAITS,
         sleep(pause)
 
     text, usage = answer(stdout, family)
-    return LaunchResult(text=text, usage=usage, note=note,
+    if len(records) > 1 and attempt_usage(records) is None:
+        note = (note + "; " if note else "") + "all-attempt usage unknown; inspect attempt_records"
+    return LaunchResult(text=text, usage=attempt_usage(records), note=note,
                         seconds=round(time.time() - started, 2), attempts=attempt,
                         provider_error=False, stdout_tail=stdout[-TAIL_CHARS:],
-                        stderr_tail=stderr[-TAIL_CHARS:], exit_code=exit_code, session_id=session_used)
+                        stderr_tail=stderr[-TAIL_CHARS:], exit_code=exit_code, session_id=session_used,
+                        attempt_records=records)
 
 
 # ------------------------------------------------------------ reading the reply --
@@ -391,7 +597,7 @@ def usage_from_events(stdout):
 
     Codex emits cumulative thread totals in ``turn.completed.usage``. Prefer that
     complete snapshot over nested records; older streams without it retain the
-    recursive, last-count fallback. Cached input and reasoning output are breakdowns
+    recursive, last-holder fallback without merging partial snapshots. Cached input and reasoning output are breakdowns
     of input and output respectively, never additional tokens.
     """
     totals = collections.OrderedDict()
@@ -409,25 +615,30 @@ def usage_from_events(stdout):
             keys = tuple(sorted(k for k in holder if type(holder[k]) is int))
             if keys and keys not in shapes:
                 shapes.append(keys)
-            for key in TOKEN_KEYS:
-                if type(holder.get(key)) is int:
-                    totals[key] = holder[key]
+            totals = collections.OrderedDict((key, holder[key]) for key in TOKEN_KEYS if key in holder)
         if isinstance(event, dict) and event.get("type") == "turn.completed":
             usage = event.get("usage")
             if isinstance(usage, dict):
                 snapshot = collections.OrderedDict(
-                    (key, usage[key]) for key in TOKEN_KEYS if type(usage.get(key)) is int)
+                    (key, usage[key]) for key in TOKEN_KEYS if key in usage)
                 if snapshot:
                     completed = snapshot
     if completed is not None:
         totals = completed
     if not totals:
         return None
-    if "total_tokens" not in totals:
-        input_tokens = totals.get("input_tokens", totals.get("prompt_tokens"))
-        output_tokens = totals.get("output_tokens", totals.get("completion_tokens"))
-        if input_tokens is not None or output_tokens is not None:
-            totals["total_tokens"] = (input_tokens or 0) + (output_tokens or 0)
+    for canonical, alias in (("input_tokens", "prompt_tokens"), ("output_tokens", "completion_tokens")):
+        if canonical not in totals and alias in totals:
+            totals[canonical] = totals[alias]
+        elif canonical in totals and alias in totals and totals[canonical] != totals[alias]:
+            totals["usage_invalid_reason"] = "conflicting token aliases"
+    input_tokens, output_tokens = totals.get("input_tokens"), totals.get("output_tokens")
+    if type(input_tokens) is int and type(output_tokens) is int:
+        expected = input_tokens + output_tokens
+        if "total_tokens" in totals and totals["total_tokens"] != expected:
+            totals["usage_invalid_reason"] = "total differs from input plus output"
+        else:
+            totals["total_tokens"] = expected
     totals["usage_shapes_seen"] = ["+".join(s) for s in shapes]
     return totals
 

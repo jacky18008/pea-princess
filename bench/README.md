@@ -411,7 +411,7 @@ python3 bench/run.py --agent claude --case se1-london-bridge-hotel-200 --model o
 python3 bench/run.py --agent claude --all-cases --timeout 900
 ```
 
-Dry-run output, verbatim:
+Historical dry-run shape (use the command above for current flags):
 
 ```
 case:     se1-london-bridge-hotel-200  (Flat 200, London Bridge Hotel, London Bridge Street, SE1 9SG, Southwark)
@@ -421,13 +421,15 @@ workdir:  /tmp/vetflat-bench/claude-se1
           copy evals/cases/se1-london-bridge-hotel-200/profile.yaml -> profile.yaml
           symlink skills/vet-flat -> .claude/skills/vet-flat
 prompt:   Vet this flat: Flat 200, London Bridge Hotel, London Bridge Street, SE1 9SG. Use profile.yaml. Write report.json following references/report-schema.json.
-command:  cd /tmp/vetflat-bench/claude-se1 && claude -p 'Vet this flat: Flat 200, London Bridge Hotel, London Bridge Street, SE1 9SG. Use profile.yaml. Write report.json following references/report-schema.json.' --allowedTools 'Bash(python3:*)' Read Write --output-format json
+command:  cd /tmp/vetflat-bench/claude-se1 && claude -p 'Vet this flat: Flat 200, London Bridge Hotel, London Bridge Street, SE1 9SG. Use profile.yaml. Write report.json following references/report-schema.json.' --tools Bash,Read,Write --allowedTools 'Bash(python3:*),Read,Write' --setting-sources '' --settings '{"disableAllHooks":true}' --strict-mcp-config --mcp-config '{"mcpServers":{}}' --output-format json
 ```
 
-`--allowedTools` names the only tools this run may use: `Bash(python3:*)` to run the
-fetchers, `Read` to read the skill and the profile, `Write` to write `report.json`.
-Everything else stays unavailable. `--output-format json` is what carries the token
-counts and `total_cost_usd` back into the scorecard.
+Current commands use `--tools` to restrict available built-ins and `--allowedTools` for
+auto-approval rules within that set. Python shell access is broad; it is not a script-only
+sandbox. Inherited MCP, settings and hooks are excluded. A no-tools actor gets `--tools ""`;
+an empty allow-rule alone is insufficient. `--output-format json` carries telemetry.
+The command examples below/above are historical shapes; use `--dry-run` for the complete
+current flags. See `../SECURITY.md` for filesystem and network boundaries.
 
 ### Codex
 
@@ -436,7 +438,7 @@ python3 bench/run.py --agent codex --case se1-london-bridge-hotel-200 --dry-run
 python3 bench/run.py --agent codex --case se1-london-bridge-hotel-200 --model gpt-5-codex
 ```
 
-Dry-run output, verbatim:
+Historical dry-run shape (use the command above for current flags):
 
 ```
 case:     se1-london-bridge-hotel-200  (Flat 200, London Bridge Hotel, London Bridge Street, SE1 9SG, Southwark)
@@ -471,7 +473,7 @@ workdir:  /tmp/vetflat-bench/claude-explain
           symlink skills/vet-flat -> .claude/skills/vet-flat
 prompt:   這能幹嘛？
 graded:   the plain-text answer, by the checks in expected_facts
-command:  cd /tmp/vetflat-bench/claude-explain && claude -p '這能幹嘛？' --allowedTools 'Bash(python3:*)' Read Write --output-format json
+command:  cd /tmp/vetflat-bench/claude-explain && claude -p '這能幹嘛？' --tools Bash,Read,Write --allowedTools 'Bash(python3:*),Read,Write' --setting-sources '' --settings '{"disableAllHooks":true}' --strict-mcp-config --mcp-config '{"mcpServers":{}}' --output-format json
 
 case:     explain-capabilities#en  (a conversation, no flat)
 agent:    claude
@@ -480,7 +482,7 @@ workdir:  /tmp/vetflat-bench/claude-explain
           symlink skills/vet-flat -> .claude/skills/vet-flat
 prompt:   What can this do?
 graded:   the plain-text answer, by the checks in expected_facts
-command:  cd /tmp/vetflat-bench/claude-explain && claude -p 'What can this do?' --allowedTools 'Bash(python3:*)' Read Write --output-format json
+command:  cd /tmp/vetflat-bench/claude-explain && claude -p 'What can this do?' --tools Bash,Read,Write --allowedTools 'Bash(python3:*),Read,Write' --setting-sources '' --settings '{"disableAllHooks":true}' --strict-mcp-config --mcp-config '{"mcpServers":{}}' --output-format json
 ```
 
 These two matter most in `api` mode, because a chat box is where a new user actually
@@ -673,3 +675,10 @@ block with the same summaries for the run as a whole, the artefacts kept, and
 `bench/run.py` refuses a config with a `pipeline:` block instead of running it as one
 agent: doing that would produce a row that looks like an arm and is a different
 experiment.
+
+## Security revision (2026-09-09)
+
+Shared launchers make one attempt by default. Explicit retries retain each attempt's usage
+and diagnostic tail; unknown telemetry stays unknown. Timeouts and cancellation clean up
+owned child processes, and parallel run deadlines count from actual launch. These changes
+do not retroactively recalculate old results. See `docs/security-review-2026-09-09/review.md`.

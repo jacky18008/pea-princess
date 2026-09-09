@@ -48,6 +48,7 @@ import json
 import os
 import subprocess
 import sys
+import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 BENCH = os.path.abspath(os.path.join(HERE, ".."))
@@ -273,19 +274,23 @@ def main(argv=None):
         for step in batch:
             print("run   r%d %s %s" % (step["run"], step["config"], step["case"]))
             try:
-                live.append((step, subprocess.Popen(step["command"], env=dict(os.environ, VETFLAT_RUN_TIMEOUT=str(args.timeout)))))
+                started = time.monotonic()
+                live.append((step, runner.launch.start_process(step["command"], stdin=subprocess.DEVNULL,
+                             env=dict(os.environ, VETFLAT_RUN_TIMEOUT=str(args.timeout))), started))
             except OSError as exc:
                 print("      could not start: %s" % exc, file=sys.stderr)
                 worst = 1
-        for step, proc in live:
+        for step, proc, started in live:
             try:
-                code = proc.wait(timeout=args.timeout)
+                code = proc.wait(timeout=max(0, args.timeout - (time.monotonic() - started)))
             except subprocess.TimeoutExpired:
-                proc.kill()
+                runner.launch.stop_process(proc)
                 print("      r%d %s %s timed out after %d s"
                       % (step["run"], step["config"], step["case"], args.timeout),
                       file=sys.stderr)
                 code = 1
+            finally:
+                runner.launch.finish_process(proc)
             worst = max(worst, 1 if code else 0)
         if not args.no_grade:
             run_grader(os.path.join(results_root, day), args.gold)

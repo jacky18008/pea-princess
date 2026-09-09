@@ -922,7 +922,7 @@ class TestDryRun(unittest.TestCase):
         # The launch itself moved to bench/launch.py, which every runner shares. The
         # rule did not move: stdin is closed, for every actor, at every launch.
         source = read_text(os.path.join(BENCH, "launch.py"))
-        launches = [m.start() for m in re.finditer(r"subprocess\.(?:Popen|run|call)\(", source)]
+        launches = [m.start() for m in re.finditer(r"start_process\(cmd, cwd=", source)]
         self.assertTrue(launches, "no launch found at all")
         for position in launches:
             self.assertIn("stdin=subprocess.DEVNULL", source[position:position + 300],

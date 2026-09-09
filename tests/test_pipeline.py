@@ -10,6 +10,7 @@ import io
 import json
 import os
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -331,17 +332,18 @@ class TheDryRun(unittest.TestCase):
                          "planner, verifier, integrator and one executor per group")
 
     def test_each_role_gets_its_own_tool_list(self):
-        for role, tools in (("planner", "--allowedTools Read --output-format"),
-                            ("executors", "--allowedTools Read 'Bash(python3:*)'"),
-                            ("integrator", "--allowedTools Read Write")):
+        for role, tools in (("planner", "--tools Read --allowedTools Read"),
+                            ("executors", "--tools 'Bash,Read' --allowedTools 'Read,Bash(python3:*)'"),
+                            ("integrator", "--tools 'Read,Write' --allowedTools 'Read,Write'")):
             self.assertIn(tools, self.out, role)
         self.assertIn("Bash(python3 .claude/skills/vet-flat/scripts/verify.py:*)", self.out)
         self.assertIn("Bash(python3 .claude/skills/vet-flat/scripts/calc.py:*)", self.out)
 
     def test_only_the_integrator_may_write(self):
         for line in self.commands():
-            tools = line.split("--allowedTools", 1)[1].split("--output-format", 1)[0]
-            if "Read Write" in tools:
+            args = shlex.split(line)
+            tools = args[args.index("--tools") + 1].split(",")
+            if "Write" in tools:
                 self.assertIn("WRITE report.json", line)
             else:
                 self.assertNotIn("Write", tools)
@@ -864,8 +866,9 @@ class TheReferenceDocument(unittest.TestCase):
                           self.text.index("## Tool discipline")]
         self.assertIn("**With subagents**", block)
         self.assertIn("**Without subagents**", block)
-        self.assertIn("write each phase's output to a file before the next phase starts",
-                      block)
+        self.assertIn("save each phase's", block)
+        self.assertIn("does not erase", block)
+        self.assertIn("fresh context", block)
 
     def test_it_says_when_to_use_it(self):
         block = self.text[self.text.index("## When to use it"):
@@ -904,11 +907,12 @@ class TheReferenceDocument(unittest.TestCase):
         self.assertIn("five weeks where the annual rent is under £50,000 and six at or "
                       "above it", self.text)
         self.assertIn("holding deposit one week", self.text)
-        self.assertIn("rent in advance at most one month", self.text)
+        self.assertIn("agreement scope and payment stage", self.text)
 
-    def test_it_claims_no_measured_result_yet(self):
-        self.assertIn("Role pipeline (to be measured)", self.text)
-        self.assertIn("treat this page as a design, not a recommendation", self.text)
+    def test_it_keeps_measured_findings_separate_from_original_expectations(self):
+        self.assertIn("Measured on 2026-09-07 and not recommended", self.text)
+        self.assertIn("supersede the original expectations", self.text)
+        self.assertIn("not automatic escalation rules", self.text)
 
     def test_the_prompt_pack_still_fits_after_this_page_was_added(self):
         import importlib.util

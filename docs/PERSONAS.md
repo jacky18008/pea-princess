@@ -109,7 +109,7 @@ under test is called `system-a`.
   and how terse the persona is asked to be. Every run records that fact rather than
   implying a temperature was set.
 - **The harness boundaries are enforced, not described.** `chat` is
-  `claude -p --allowedTools ""` with `dist/prompt-pack/INSTRUCTIONS.md` as the system
+  `claude -p --tools "" --allowedTools ""` with `dist/prompt-pack/INSTRUCTIONS.md` as the system
   prompt and **no skill folder** — a proxy for the phone app. `fetch` installs the
   skill and gives no shell. `shell` installs the skill and allows the profile
   validator. A chat-only card stays chat-only whichever launcher runs it.

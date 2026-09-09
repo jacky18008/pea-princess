@@ -930,6 +930,7 @@ def run_row(row, bed, args, glossary):
     record["commands_seen"] = [c[:200] for c in commands]
     record["discipline_violations"] = violations
     record["attempts"] = res.attempts
+    record["attempt_records"] = res.attempt_records
     record["exit_code"] = res.exit_code
     record["reply_chars"] = len(reply or "")
 
