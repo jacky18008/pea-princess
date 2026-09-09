@@ -12,6 +12,7 @@ from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "bench"))
 import cost_probe
+from call_control import CallControl, PendingCallError
 
 
 def row(session, outcome="completed", grade=0.5, failed=(), capped=()):
@@ -104,8 +105,7 @@ class PreparedPilotTests(unittest.TestCase):
             if dataset.endswith("fix2"):
                 rows = [row("P1", "provider_error", None), row("P3", "provider_error", None)]
             cost_probe.write_json(self.source / dataset / "scorecard.json", rows)
-        for name in cost_probe.BACKGROUND + ("bench/cost_probe.py", "bench/launch.py",
-                                              "docs/cost-probe/protocol-2026-09-08.md"):
+        for name in cost_probe.BACKGROUND + cost_probe.RUNNER_SOURCES:
             path = self.root / name
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text("Historical design context.", encoding="utf-8")
@@ -139,7 +139,7 @@ class PreparedPilotTests(unittest.TestCase):
             cost_probe.prepare(self.output)
 
     def fake_process(self, extra_items=(), include_usage=True):
-        def start(cmd, stdin, stdout, stderr, start_new_session):
+        def start(cmd, stdin, stdout, stderr):
             self.assertEqual("codex", cmd[0])
             self.assertIn("read-only", cmd)
             answer_file = Path(cmd[cmd.index("--output-last-message") + 1])
@@ -157,7 +157,8 @@ class PreparedPilotTests(unittest.TestCase):
         return start
 
     def measure(self, **kwargs):
-        with mock.patch.object(cost_probe.subprocess, "Popen", side_effect=self.fake_process(**kwargs)) as launch:
+        with mock.patch.object(cost_probe.launch, "start_process", side_effect=self.fake_process(**kwargs)) as launch, \
+                mock.patch.object(cost_probe.launch, "finish_process"):
             result = cost_probe.measure(self.output, self.plan["jobs"][0], self.plan)
         self.assertEqual(1, launch.call_count)
         return result
@@ -212,6 +213,80 @@ class PreparedPilotTests(unittest.TestCase):
             cost_probe.run(self.output)
         launch.assert_not_called()
         self.assertEqual("partial telemetry", (directory / "events.jsonl").read_text(encoding="utf-8"))
+
+    def durable_start(self, **options):
+        fake = self.fake_process(**options)
+        def start(cmd, stdin, stdout, stderr):
+            call_id = Path(cmd[cmd.index("--cd") + 1]).name
+            self.assertEqual([call_id], CallControl(self.output / "control", self.plan["planned_call_ids"]).report()["pending_call_ids"])
+            return fake(cmd, stdin, stdout, stderr)
+        return start
+
+    def test_all_ten_calls_dispatch_before_process_and_replay_without_models(self):
+        with mock.patch.object(cost_probe.launch, "start_process", side_effect=self.durable_start()) as start, \
+                mock.patch.object(cost_probe.launch, "finish_process"), redirect_stdout(io.StringIO()):
+            self.assertEqual(0, cost_probe.run(self.output))
+            self.assertEqual(0, cost_probe.run(self.output))
+        self.assertEqual(10, start.call_count)
+        summary = cost_probe.read_json(self.output / "summary.json")
+        self.assertTrue(summary["complete"])
+        self.assertEqual(2100, summary["controller"]["usage"]["total_tokens"])
+        self.assertTrue(summary["usage_coverage_complete"])
+        self.assertEqual([], summary["raw_artifact_integrity_failures"])
+        self.assertTrue({"bench/call_control.py", "bench/report_control.py"}.issubset(self.plan["source_sha256"]))
+        for path in (self.output / "calls").glob("*/*"):
+            self.assertEqual(0, path.stat().st_mode & 0o077)
+
+    def test_failed_telemetry_stops_the_durable_batch_without_retry(self):
+        with mock.patch.object(cost_probe.launch, "start_process", side_effect=self.durable_start(include_usage=False)) as start, \
+                mock.patch.object(cost_probe.launch, "finish_process"), redirect_stdout(io.StringIO()):
+            self.assertEqual(1, cost_probe.run(self.output))
+            self.assertEqual(1, cost_probe.run(self.output))
+        self.assertEqual(1, start.call_count)
+        summary = cost_probe.read_json(self.output / "summary.json")
+        self.assertFalse(summary["complete"])
+        self.assertTrue(summary["controller"]["paused"])
+        self.assertFalse(summary["usage_coverage_complete"])
+
+    def test_missing_raw_result_is_not_replayed_from_checkpoint(self):
+        with mock.patch.object(cost_probe.launch, "start_process", side_effect=self.durable_start()) as start, \
+                mock.patch.object(cost_probe.launch, "finish_process"), redirect_stdout(io.StringIO()):
+            self.assertEqual(0, cost_probe.run(self.output))
+            (self.output / "calls" / self.plan["jobs"][0]["id"] / "result.json").unlink()
+            with self.assertRaisesRegex(ValueError, "missing its raw result"):
+                cost_probe.run(self.output)
+        self.assertEqual(10, start.call_count)
+        summary = cost_probe.read_json(self.output / "summary.json")
+        self.assertFalse(summary["complete"])
+        self.assertFalse(summary["usage_coverage_complete"])
+
+    def test_tampered_raw_events_stop_replay_and_invalidate_summary(self):
+        with mock.patch.object(cost_probe.launch, "start_process", side_effect=self.durable_start()) as start, \
+                mock.patch.object(cost_probe.launch, "finish_process"), redirect_stdout(io.StringIO()):
+            self.assertEqual(0, cost_probe.run(self.output))
+            (self.output / "calls" / self.plan["jobs"][0]["id"] / "events.jsonl").write_text("changed")
+            with self.assertRaisesRegex(ValueError, "artifact differs"):
+                cost_probe.run(self.output)
+        self.assertEqual(10, start.call_count)
+        summary = cost_probe.read_json(self.output / "summary.json")
+        self.assertFalse(summary["complete"])
+        self.assertEqual(1, len(summary["raw_artifact_integrity_failures"]))
+
+    def test_pending_dispatch_blocks_every_later_call(self):
+        control = CallControl(self.output / "control", self.plan["planned_call_ids"])
+        control.dispatch(self.plan["planned_call_ids"][0], self.plan["planned_call_ids"][0], "reporter", "report")
+        with mock.patch.object(cost_probe.launch, "start_process") as start, redirect_stdout(io.StringIO()), self.assertRaises(PendingCallError):
+            cost_probe.run(self.output)
+        start.assert_not_called()
+        self.assertEqual(1, control.report()["dispatched_calls"])
+
+    def test_budget_stop_does_not_dispatch_a_call(self):
+        self.plan["reported_token_stop_threshold"] = 0
+        cost_probe.write_json(self.output / "plan.json", self.plan)
+        with mock.patch.object(cost_probe.launch, "start_process") as start, redirect_stdout(io.StringIO()):
+            self.assertEqual(1, cost_probe.run(self.output))
+        start.assert_not_called()
+        self.assertEqual(0, CallControl(self.output / "control", self.plan["planned_call_ids"]).report()["dispatched_calls"])
 
 
 if __name__ == "__main__":

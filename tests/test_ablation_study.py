@@ -111,7 +111,8 @@ class AblationTests(unittest.TestCase):
     def test_invocation_exception_retains_failed_usage_and_blocks_next_callback(self):
         with tempfile.TemporaryDirectory() as tmp:
             out = Path(tmp)
-            q.write(out / "plan.json", {"planned_call_ids": ["first", "second"], "answer_model": q.ANSWER_MODEL, "judge_model": q.JUDGE_MODEL})
+            q.write(out / "plan.json", {"planned_call_ids": ["first", "second"], "answer_model": q.ANSWER_MODEL, "judge_model": q.JUDGE_MODEL,
+                                         "maximum_cli_calls": 2, "reported_token_stop_threshold": 1000})
             study = a.Study(out)
             failed = {"id": "first", "status": "stopped", "errors": [{"type": "turn.failed"}], "terminal_usage_events": 1, "direct_terminal_usage": {"input_tokens": 90, "cached_input_tokens": 20, "output_tokens": 10}}
             def failing(output, call_id, *args):

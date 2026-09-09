@@ -279,19 +279,8 @@ class Study:
 
     def call(self, call_id, prompt, schema, purpose, job_id=None, phase=None):
         model = self.plan["judge_model"] if purpose in ("judge", "calibration") else self.plan["answer_model"]
-        # Always verify existing raw calls as well as the controller's durable record.
-        existing = self.output / "calls" / call_id / "result.json"
-        if existing.exists():
-            record = q.invoke(self.output, call_id, prompt, schema, model, purpose, self.plan)
-            return self.control.run(call_id, job_id or call_id, purpose, phase or purpose, lambda: record)
-        def invoke():
-            try:
-                return q.invoke(self.output, call_id, prompt, schema, model, purpose, self.plan)
-            except ValueError:
-                if existing.exists():
-                    return q.read(existing)
-                raise
-        return self.control.run(call_id, job_id or call_id, purpose, phase or purpose, invoke)
+        return q.controlled_call(self.output, call_id, prompt, schema, model, purpose,
+                                 self.plan, control=self.control, job_id=job_id, phase=phase)
 
     def judge(self, group, case, answers):
         mask = self.plan["judge_masks"][group["id"]]
