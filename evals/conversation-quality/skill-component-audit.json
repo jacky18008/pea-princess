@@ -1,0 +1,366 @@
+{
+  "schema_version": 1,
+  "audit_id": "pea-skill-outcome-entry-v1",
+  "status": "prospective_candidate_offline_audit_not_results",
+  "created_on": "2026-09-09",
+  "source_commit": "8563b0944b519edbdad45763f1e5adc3ae6fff68",
+  "baseline": {
+    "path": "skills/vet-flat/SKILL.md",
+    "sha256": "14f1690eec58ceaee7a702a23759d537d99d800107c725bad767bff691941231",
+    "characters": 7119,
+    "utf8_bytes": 7231,
+    "lines": 65,
+    "tokens": null
+  },
+  "candidate": {
+    "path": "evals/conversation-quality/skill-outcome.md",
+    "sha256": "5d279dfd161f833e969b98223f0bf5aeff8aac07f73f67cf44267448e0724151",
+    "characters": 4264,
+    "utf8_bytes": 4286,
+    "lines": 32,
+    "tokens": null
+  },
+  "size_comparison": {
+    "characters_removed": 2855,
+    "character_reduction_percent": 40.1,
+    "token_savings": null,
+    "limitation": "Text size is not provider token usage; routed reads, tool output, reasoning, cache and subsequent turns may offset entry reduction."
+  },
+  "production_skill_modified": false,
+  "invocation": {
+    "candidate_is": "Replacement SKILL.md bytes inside an otherwise identical complete installed vet-flat directory, not a standalone markdown prompt invoked from evals/.",
+    "public_tree": "Preserve baseline references/, scripts/, viewer and required shared script modules at the same relative paths. Keep both arms equally able to use actual host tools and the local fixture catalog.",
+    "project_state": "Use a distinct owned working directory and private .pea-state per session; do not import the repository author profile or runtime state. Only public/synthetic fixture state explicitly assigned to this case may be present.",
+    "native_execution": "Use the real native agent tool interface and account authorization already configured by the user. Do not describe tools as unavailable to force chat-only behavior. Shell scripts are actual executions, not narrated simulation.",
+    "fixed_execution": "Same selected model/effort/depth, budget enforcement, public source catalog, host capabilities, initial instructions, user-turn schedule and artifact contract in each paired instruction comparison.",
+    "observability": "Record native context/read/tool events and exact initial prompt, entry, reference and fixture hashes. If native host internals do not expose exact context bytes, mark that field unavailable instead of claiming a complete assembled-prompt hash.",
+    "script_resolution": "Invoke scripts from their installed skill root, or use absolute script paths; working-project --project targets must remain the owned session directory."
+  },
+  "factorial": {
+    "design": "Complete 2 x 2 instruction factorial within 12 model/effort/depth strata",
+    "entry_levels": [
+      "existing_skill",
+      "outcome_entry_v1"
+    ],
+    "reference_loading_levels": [
+      "bulk_docs",
+      "routed_files"
+    ],
+    "models": [
+      "gpt-6-astra",
+      "gpt-5.6-luna"
+    ],
+    "efforts": [
+      "low",
+      "high"
+    ],
+    "depths": [
+      "lite",
+      "standard",
+      "deep"
+    ],
+    "sessions": 48,
+    "arm_ids": [
+      "existing_bulk",
+      "existing_routed",
+      "outcome_bulk",
+      "outcome_routed"
+    ],
+    "shared_budget_ceiling": {
+      "physical_calls": 192,
+      "tokens": 6000000,
+      "note": "Ceiling for the authorized study, not an additional allowance for this candidate. Include failed/unknown-spend attempts and any separately allocated actor/judge calls; root controller owns reservations and stops."
+    },
+    "reference_parity": "Bulk and routed arms get the same frozen public reference corpus and source availability. Bulk preloads the defined corpus; routed starts with pointers and counts real document reads. Freeze the exact bulk manifest before dispatch.",
+    "identifiable_claims": [
+      "Entry-package effect within tested contexts",
+      "Reference-loading effect within tested contexts",
+      "Entry by loading interaction",
+      "Descriptive variation by tested model, effort and depth"
+    ],
+    "not_identifiable": [
+      "Independent effect of deduplication versus removed procedural detail: both are bundled in entry treatment",
+      "Human-quality equivalence",
+      "All rental scenarios or all host implementations",
+      "A larger factor design not actually dispatched"
+    ],
+    "eight_arm_decomposition": "Optional future study separating reference loading, repeated policy and procedural detail; not part of this 48-session dispatch and not executed."
+  },
+  "components": [
+    {
+      "id": "discovery",
+      "treatment": "narrowed",
+      "candidate_location": "Front matter",
+      "canonical_references": [],
+      "preserved_or_changed": "Keep London rental investigation, comparison and area/commute discovery; remove the long axis list from discovery text."
+    },
+    {
+      "id": "orientation",
+      "treatment": "routed",
+      "candidate_location": "Route the work",
+      "canonical_references": [
+        "references/onboarding.md"
+      ],
+      "preserved_or_changed": "No full onboarding loaded by default; orientation is a user intent, not a prerequisite."
+    },
+    {
+      "id": "useful_progress_and_questions",
+      "treatment": "retained_once",
+      "candidate_location": "Opening paragraph",
+      "canonical_references": [],
+      "preserved_or_changed": "Available useful work, provisional assumptions, three-question ceiling and capability-gated native choices remain."
+    },
+    {
+      "id": "installed_path_scope",
+      "treatment": "clarified",
+      "candidate_location": "Path paragraph",
+      "canonical_references": [],
+      "preserved_or_changed": "Reference/script paths are relative to installed skill; user state belongs to working project."
+    },
+    {
+      "id": "twelve_axis_coverage",
+      "treatment": "retained_with_routed_methods",
+      "candidate_location": "Route the work",
+      "canonical_references": [
+        "references/axes/",
+        "references/report-contract.md"
+      ],
+      "preserved_or_changed": "All twelve axes named; full reports retain unknowns for unperformed checks. Per-axis methods and constants move to original files."
+    },
+    {
+      "id": "intent_routes",
+      "treatment": "compressed",
+      "candidate_location": "Route the work",
+      "canonical_references": [
+        "references/axes/",
+        "references/student-housing.md",
+        "references/sharing.md"
+      ],
+      "preserved_or_changed": "Numbered directory explicitly listed before selecting real filenames; no nonexistent path such as references/axes/01 is asserted."
+    },
+    {
+      "id": "discounts_and_premiums",
+      "treatment": "retained",
+      "candidate_location": "Opening paragraph",
+      "canonical_references": [
+        "references/axes/08-price.md",
+        "references/axes/09-aspect-light.md"
+      ],
+      "preserved_or_changed": "Investigate unexplained discounts and concrete premium benefits; omit repeated princess slogan."
+    },
+    {
+      "id": "depth",
+      "treatment": "retained_with_precedence_clarified",
+      "candidate_location": "Route the work",
+      "canonical_references": [
+        "references/budget-modes.md"
+      ],
+      "preserved_or_changed": "Explicit requested depth and limits win over default standard. No automatic provider, effort or worker change."
+    },
+    {
+      "id": "role_pipeline",
+      "treatment": "optional_only",
+      "candidate_location": "Route the work",
+      "canonical_references": [
+        "references/pipeline.md"
+      ],
+      "preserved_or_changed": "Follow current pipeline measured-result warning rather than old budget-mode automatic role triggers; this is part of the bundled entry treatment."
+    },
+    {
+      "id": "durable_state",
+      "treatment": "retained_with_routed_protocol",
+      "candidate_location": "Route the work",
+      "canonical_references": [
+        "references/session-harness.md"
+      ],
+      "preserved_or_changed": "Exact requests, conditional scope, sources, goals/TODOs, full packet, stale/incomplete state and unresolved-call boundaries remain."
+    },
+    {
+      "id": "trust_and_privacy",
+      "treatment": "retained_direct",
+      "candidate_location": "Evidence and completion",
+      "canonical_references": [
+        "references/session-harness.md",
+        "references/sharing.md"
+      ],
+      "preserved_or_changed": "Untrusted data cannot authorize commands, unrelated private reads or disclosure; state stays private."
+    },
+    {
+      "id": "source_access",
+      "treatment": "retained_with_canonical_list",
+      "candidate_location": "Evidence and completion",
+      "canonical_references": [
+        "references/sources.yaml",
+        "references/inputs.md"
+      ],
+      "preserved_or_changed": "Only open sources automated, restricted sources pasted; no duplicated list of portal names."
+    },
+    {
+      "id": "evidence_and_uncertainty",
+      "treatment": "retained_direct",
+      "candidate_location": "Evidence and completion",
+      "canonical_references": [
+        "references/report-contract.md"
+      ],
+      "preserved_or_changed": "All five grades, local estimate/source qualifiers, conflicts, attribution-not-truth and missing-not-pass preserved."
+    },
+    {
+      "id": "math",
+      "treatment": "retained_with_routed_constants",
+      "candidate_location": "Evidence and completion",
+      "canonical_references": [
+        "references/arithmetic.md"
+      ],
+      "preserved_or_changed": "Execute calc.py; show steps and independent check without shell. Formula constants are not duplicated in entry."
+    },
+    {
+      "id": "legal_scope",
+      "treatment": "retained_with_routed_rules",
+      "candidate_location": "Evidence and completion",
+      "canonical_references": [
+        "references/axes/07-compliance-landlord.md",
+        "references/sources.yaml"
+      ],
+      "preserved_or_changed": "Identify agreement and payment stage before applying rules; no viewing-day signature advice; numerical/date rules reside in references."
+    },
+    {
+      "id": "fixed_form",
+      "treatment": "retained_with_canonical_mapping",
+      "candidate_location": "Evidence and completion",
+      "canonical_references": [
+        "references/fixed-questions.yaml",
+        "references/report-contract.md"
+      ],
+      "preserved_or_changed": "Tier/override mapping, found/asked/unknown, quote/source, supplied-text scan and once-only essential gap requests retained."
+    },
+    {
+      "id": "unsafe_inferences",
+      "treatment": "retained_direct",
+      "candidate_location": "Evidence and completion",
+      "canonical_references": [
+        "references/report-contract.md"
+      ],
+      "preserved_or_changed": "No fabricated values, hidden red flags, ethnicity/nationality factors, listing-area certification or missing-month extrapolation."
+    },
+    {
+      "id": "report_artifact",
+      "treatment": "retained_with_routed_contract",
+      "candidate_location": "Final paragraph",
+      "canonical_references": [
+        "references/report-schema.json",
+        "references/report-contract.md"
+      ],
+      "preserved_or_changed": "Schema-conforming report.json when due, complete requirements/conditions/source/unknown/arithmetic contract, renderer and attribution."
+    },
+    {
+      "id": "conversation_style",
+      "treatment": "compressed_once",
+      "candidate_location": "Opening and final paragraphs",
+      "canonical_references": [
+        "references/report-contract.md"
+      ],
+      "preserved_or_changed": "Useful recommendation, user language, ordinary cost label and contextual uncertainty; omit repeated generic coaching and technical banner prose."
+    }
+  ],
+  "offline_assumptions_audit": [
+    {
+      "id": "A01",
+      "severity": "pre_dispatch_control",
+      "finding": "Baseline entry requires a fixed six-month crime window; budget-modes lite specifies three months, and report comparison prose says six months.",
+      "paths": [
+        "skills/vet-flat/SKILL.md",
+        "skills/vet-flat/references/budget-modes.md",
+        "skills/vet-flat/references/report-contract.md"
+      ],
+      "impact": "Changing actual evidence windows can confound quality/depth comparisons. Do not extrapolate a shorter observed window.",
+      "required_handling": "Freeze the per-depth fixture and report expected window in the shared case contract; record what the agent actually checked. Do not silently patch only one arm or score a three-month observed count as six."
+    },
+    {
+      "id": "A02",
+      "severity": "pre_dispatch_control",
+      "finding": "budget-modes still suggests automatic split roles/stronger judges; pipeline.md measured-results introduction instead defaults to a single agent unless explicitly requested.",
+      "paths": [
+        "skills/vet-flat/references/budget-modes.md",
+        "skills/vet-flat/references/pipeline.md"
+      ],
+      "impact": "Untracked extra models violate the selected model factor and call cap.",
+      "required_handling": "Enforce selected model/effort and no unreserved additional model dispatches in the shared native host. Candidate resolves this ambiguity explicitly; attribute that to the bundled entry change."
+    },
+    {
+      "id": "A03",
+      "severity": "pre_dispatch_control",
+      "finding": "Budget modes describe lite partly as chat/no-shell, although current native study intentionally provides actual tools in every depth.",
+      "paths": [
+        "skills/vet-flat/references/budget-modes.md",
+        "skills/vet-flat/references/inputs.md"
+      ],
+      "impact": "Depth could accidentally become a host-capability factor or suppress useful available work.",
+      "required_handling": "Declare real tool capabilities identically in every arm. Depth means research scope/limits; log capability misuse as behavior rather than pretending tools are absent."
+    },
+    {
+      "id": "A04",
+      "severity": "scoring_scope",
+      "finding": "Some fixed-question explanatory prose uses broader legal wording than the scoped axis-07 rules, including deposit/advance scope.",
+      "paths": [
+        "skills/vet-flat/references/fixed-questions.yaml",
+        "skills/vet-flat/references/axes/07-compliance-landlord.md"
+      ],
+      "impact": "A correct found quote is not legal applicability or factual truth; offline fixture outcomes must not reward an overbroad rule.",
+      "required_handling": "Use scoped expected facts with agreement/rent/payment-stage context; preserve exact frozen sources and record disagreements. No fresh legal claim is established by this offline audit."
+    },
+    {
+      "id": "A05",
+      "severity": "artifact_contract",
+      "finding": "A concise chat answer or valid JSON alone does not fulfill the complete report contract; deferred/unperformed checks still require unknown states.",
+      "paths": [
+        "skills/vet-flat/references/report-contract.md",
+        "skills/vet-flat/references/report-schema.json",
+        "skills/vet-flat/scripts/render.py"
+      ],
+      "impact": "An attractive short answer may lose hard requirements, fixed answers or arithmetic provenance.",
+      "required_handling": "When the case requests a report, verify schema/strict renderer plus case requirement coverage, conditions, quote provenance and arithmetic. Do not require a full report for a small unrelated interruption."
+    },
+    {
+      "id": "A06",
+      "severity": "information_leakage",
+      "finding": "Repo AGENTS/CLAUDE and author .pea-state/profile can leak extra instructions or private preferences into native invocations.",
+      "paths": [
+        "AGENTS.md",
+        "CLAUDE.md",
+        "skills/vet-flat/references/session-harness.md"
+      ],
+      "impact": "The apparent short entry could still load a large root packet, or answerers could see author/private case data.",
+      "required_handling": "Use independently owned fixture directories with explicit instruction discovery. Keep private gold/rubric out; record discovered host instructions rather than claiming a sterile context without evidence."
+    },
+    {
+      "id": "A07",
+      "severity": "interpretation",
+      "finding": "Offline local fixtures support actual file/tool execution but do not establish live portal availability or current market/legal truth.",
+      "paths": [
+        "skills/vet-flat/references/sources.yaml"
+      ],
+      "impact": "Calling the experiment native does not make synthetic evidence live research.",
+      "required_handling": "Label fixture source classes and retrieval provenance honestly; measure actual artifact/tool actions, with live-source generalization left untested."
+    },
+    {
+      "id": "A08",
+      "severity": "durability_and_budget",
+      "finding": "Reading session-harness prose is not itself enforcement of state integrity, source freeze, idempotency, cancellation or usage accounting.",
+      "paths": [
+        "skills/vet-flat/references/session-harness.md",
+        "tools/session_runner.py",
+        "bench/durable_run.py"
+      ],
+      "impact": "A prompt-only guard can be ignored and reruns may incur unknown spend.",
+      "required_handling": "Keep deterministic controller boundaries constant; freeze sources and invocation hashes; stop unresolved usage/rate limits without automatic retries. Persist output and current state before accepting completion."
+    }
+  ],
+  "offline_checks": {
+    "candidate_reference_paths_exist": true,
+    "named_scripts_exist": true,
+    "baseline_bytes_unchanged_by_this_task": true,
+    "model_calls": 0,
+    "runtime_behavior_tested": false,
+    "quality_equivalence_established": false
+  }
+}
