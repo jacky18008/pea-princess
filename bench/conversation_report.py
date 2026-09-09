@@ -31,6 +31,8 @@ LIMITATIONS = [
     'Extension cost is T4–9 only; nine-turn totals also include T1–3 and must not be added to the other cost segments.',
     'First useful turn is not collected by the current rubric and remains unknown; no semantic scoring is performed here.',
     'Structural/hash validation does not establish source truth or judge correctness. No private quotations or rationale are included.',
+    'Execution deadlines are explicit request/invocation settings, not elapsed time. Missing settings remain unknown; unstarted slots have no observed deadline.',
+    'Deadline classifications describe observed settings and segment completeness, not identical runtime environments or causal comparability. Existing descriptive quality contrasts remain pooled unless separately analyzed.',
 ]
 
 
@@ -126,6 +128,10 @@ def _validate_plan(plan):
         pid = _label(row['id'])
         if pid in pairs:
             raise ReportError('duplicate pair ID')
+        mask = row.get('mask')
+        if (not isinstance(mask, dict) or set(mask) != {'A', 'B'}
+                or any(sid not in sessions for sid in mask.values()) or len(set(mask.values())) != 2):
+            raise ReportError('invalid pair candidate mapping')
         pairs[pid] = row
     for row in plan['calls']:
         cid = _label(row['id'])
@@ -197,11 +203,85 @@ def _tool_counts(record):
     return values
 
 
+def _deadline(request, invocation):
+    """Read declared settings only; hash bindings are validated before use."""
+    if invocation is not None:
+        if (not isinstance(invocation, dict) or type(invocation.get('version')) is not int
+                or invocation['version'] != 1 or invocation.get('request_sha256') != request['request_sha256']):
+            raise ReportError('native invocation is not bound to its frozen request')
+    values = {}
+    for source, value in (('hashed_request', request['request']), ('invocation_receipt', invocation)):
+        if value is not None and 'timeout_seconds' in value:
+            deadline = value['timeout_seconds']
+            if type(deadline) is not int or deadline <= 0:
+                raise ReportError('execution deadline must be an explicit positive integer')
+            values[source] = deadline
+    if len(set(values.values())) > 1:
+        raise ReportError('request and invocation execution deadlines disagree')
+    return (next(iter(values.values())) if values else None,
+            'hashed_request_and_invocation' if len(values) == 2 else next(iter(values), 'unknown'))
+
+
+def _execution_segment(rows):
+    """Retain the entire ordered vector, including missing and failed slots."""
+    if not rows:
+        return None  # An unplanned extension is not an incomplete experiment.
+    known = sorted({r['deadline_seconds'] for r in rows if r['deadline_seconds'] is not None})
+    finished = all(r['status'] == 'complete' for r in rows)
+    all_known = all(r['deadline_seconds'] is not None for r in rows)
+    classification = 'incomplete' if not finished or not all_known else ('same_uniform' if len(known) == 1 else 'mixed')
+    return {'classification': classification, 'planned_slots': len(rows),
+            'dispatched_slots': sum(r['status'] not in ('not_dispatched', 'skipped') for r in rows),
+            'complete_slots': sum(r['status'] == 'complete' for r in rows),
+            'outcomes_complete': finished, 'deadline_evidence_complete': all_known,
+            'observed_deadline_seconds': known, 'has_mixed_observed_deadlines': len(known) > 1,
+            'uniform_deadline_seconds': known[0] if classification == 'same_uniform' else None,
+            'slot_ids': [r['slot_id'] for r in rows],
+            'deadline_vector_seconds': [r['deadline_seconds'] for r in rows],
+            'status_vector': [r['status'] for r in rows],
+            'incomplete_slot_ids': [r['slot_id'] for r in rows if r['status'] != 'complete'],
+            'unknown_deadline_slot_ids': [r['slot_id'] for r in rows if r['deadline_seconds'] is None]}
+
+
+def _execution_policies(observations, sessions, pairs):
+    by_session = {sid: sorted((r for r in observations if r['session_id'] == sid), key=lambda r: r['turn'])
+                  for sid in sessions}
+    segment_rows = lambda rows: {'prefix_turns_1_3': [r for r in rows if r['turn'] <= 3],
+                                 'extension_turns_4_9': [r for r in rows if r['turn'] >= 4],
+                                 'configured_session': rows}
+    session_policies = []
+    for sid, session in sessions.items():
+        session_policies.append({'session_id': sid, 'configured_turns': session['turns'],
+                                 'segments': {key: _execution_segment(rows)
+                                              for key, rows in segment_rows(by_session[sid]).items()}})
+    pair_policies = []
+    for pid, pair in pairs.items():
+        candidates = {label: segment_rows(by_session[sid]) for label, sid in pair['mask'].items()}
+        segments = {}
+        for name in ('prefix_turns_1_3', 'extension_turns_4_9', 'configured_session'):
+            selected = {label: rows[name] for label, rows in candidates.items()}
+            combined = _execution_segment([r for rows in selected.values() for r in rows])
+            if combined is not None:
+                combined['candidates'] = {label: _execution_segment(rows) for label, rows in selected.items()}
+                same_length = len({len(rows) for rows in selected.values()}) == 1
+                if any(not rows for rows in selected.values()) or not same_length:
+                    combined['classification'] = 'incomplete'
+                    combined['uniform_deadline_seconds'] = None
+                combined['both_candidates_planned'] = all(bool(rows) for rows in selected.values())
+                combined['candidate_turn_counts_match'] = same_length
+            segments[name] = combined
+        judge = next(r for r in observations if r['pair_id'] == pid)
+        pair_policies.append({'pair_id': pid, 'candidate_session_ids': pair['mask'], 'segments': segments,
+                              'judge_slot_id': judge['slot_id'], 'judge_deadline_seconds': judge['deadline_seconds'],
+                              'judge_status': judge['status']})
+    return session_policies, pair_policies
+
+
 def _public_quality(judgments, plan, rubric):
     reduced = grading.summarize(judgments, plan, rubric)
     rows = []
     for row in reduced['rows']:
-        rows.append({key: row[key] for key in ('segment', 'condition', 'scores', 'quality_index',
+        rows.append({key: row[key] for key in ('session_id', 'pair_id', 'segment', 'condition', 'scores', 'quality_index',
                                              'gates', 'safe_task_success', 'task_outcome')})
     segments = {}
     for name in ('common_prefix', 'continuation'):
@@ -229,8 +309,8 @@ def aggregate(run):
     captured = {}
     def read(relative, optional=False):
         data = _read(run, relative, optional=optional)
+        captured[str(relative)] = hashlib.sha256(data).hexdigest() if data is not None else None
         if data is not None:
-            captured[str(relative)] = hashlib.sha256(data).hexdigest()
             return _parse(data)
         return None
     plan, frozen = read('plan.json'), read('frozen.json')
@@ -240,6 +320,7 @@ def aggregate(run):
     if captured['rubric.json'] != frozen['rubric_sha256']:
         raise ReportError('frozen rubric checksum differs')
     scenario = _read(run, 'scenario.json')  # Hash only; no conversation/scenario parsing.
+    captured['scenario.json'] = hashlib.sha256(scenario).hexdigest()
     if hashlib.sha256(scenario).hexdigest() != frozen['scenario_sha256']:
         raise ReportError('frozen scenario checksum differs')
     del scenario
@@ -257,8 +338,13 @@ def aggregate(run):
     observations, settled, candidate_judgments = [], set(), []
     for cid, call in calls.items():
         folder = 'records/' + cid + '/'
-        row = {'role': call['role'], 'status': 'skipped' if cid in skipped else 'not_dispatched',
+        row = {'slot_id': cid, 'attempt_id': cid if cid in ledger else None,
+               'session_id': call.get('session'), 'pair_id': call.get('pair'),
+               'role': call['role'], 'status': 'skipped' if cid in skipped else 'not_dispatched',
                'usage': dict.fromkeys(FIELDS), 'launcher_attempts': None, 'wall_seconds': None,
+               'deadline_seconds': None, 'deadline_source': 'unknown', 'request_sha256': None,
+               'invocation_receipt_sha256': None, 'receipt_sha256': None,
+               'timed_out': None, 'final_answer_present': None,
                **_tool_counts(None)}
         if call['role'] == 'answer':
             session = sessions[call['session']]
@@ -280,6 +366,12 @@ def aggregate(run):
                 raise ReportError('frozen request differs')
             if any(request['request'].get(k) != row[k] for k in ('model', 'effort')):
                 raise ReportError('invoked model/effort differs from condition')
+            invocation = read(folder + 'native-invocation.json', optional=True)
+            if captured[folder + 'native-invocation.json'] is not None and invocation is None:
+                raise ReportError('native invocation receipt must be an object, not null')
+            row['deadline_seconds'], row['deadline_source'] = _deadline(request, invocation)
+            row['request_sha256'] = request['request_sha256']
+            row['invocation_receipt_sha256'] = captured[folder + 'native-invocation.json']
             if record is None:
                 row['status'] = 'pending'
             else:
@@ -287,6 +379,11 @@ def aggregate(run):
                     raise ReportError('original receipt checksum or identity differs')
                 if record.get('request_sha256', request['request_sha256']) != request['request_sha256']:
                     raise ReportError('receipt request identity differs')
+                row['receipt_sha256'] = saved['record_sha256']
+                if type(record.get('timeout')) is bool:
+                    row['timed_out'] = record['timeout']
+                if isinstance(record.get('answer'), str):
+                    row['final_answer_present'] = bool(record['answer'].strip())
                 row['status'] = 'failed' if saved['failure_kind'] else 'complete_unsettled'
                 row.update(_tool_counts(record))
                 launch = record.get('launch_result', {})
@@ -342,13 +439,22 @@ def aggregate(run):
             grouped[('long_session_turns_1_9', *key)].append(row)
     costs = [dict(zip(('segment', 'model', 'effort', 'depth', 'arm'), key), **_totals(rows))
              for key, rows in sorted(grouped.items())]
+    for cost, (_key, rows) in zip(costs, sorted(grouped.items())):
+        cost['execution_deadline_summary'] = _execution_segment(rows)
+    by_deadline = defaultdict(list)
+    for row in observations:
+        by_deadline[row['deadline_seconds']].append(row)
+    deadline_costs = [{'deadline_seconds': deadline, **_totals(rows)} for deadline, rows in
+                      sorted(by_deadline.items(), key=lambda item: (item[0] is None, item[0] or 0))]
+    session_policies, pair_policies = _execution_policies(observations, sessions, pairs)
     totals = _totals(observations)
     complete = all(row['status'] == 'complete' for row in observations)
     # Refuse a mixed-time snapshot if the controller advanced while files were read.
     for name, digest in captured.items():
-        if hashlib.sha256(_read(run, name)).hexdigest() != digest:
+        current = _read(run, name, optional=digest is None)
+        if (hashlib.sha256(current).hexdigest() if current is not None else None) != digest:
             raise ReportError('run changed while reading; regenerate from a stable snapshot')
-    return {'schema_version': 1, 'report_kind': 'public_aggregate_no_private_text',
+    return {'schema_version': 2, 'report_kind': 'public_aggregate_no_private_text',
             'snapshot': {'source_commit': _label(plan['source_commit']),
                          'plan_sha256': frozen['plan_sha256'],
                          'controller_sha256': captured['controller/checkpoint.json'],
@@ -360,7 +466,10 @@ def aggregate(run):
             'observed_cost': totals,
             'full_run_processed_tokens': totals['usage']['processed_tokens'] if complete else None,
             'cost_by_role': {role: _totals([r for r in observations if r['role'] == role]) for role in ('answer', 'judge')},
-            'cost_by_condition': costs, 'quality': quality, 'limitations': LIMITATIONS}
+            'cost_by_condition': costs, 'cost_by_execution_deadline': deadline_costs,
+            'original_slots': observations, 'session_execution_policies': session_policies,
+            'pair_execution_policies': pair_policies,
+            'quality': quality, 'limitations': LIMITATIONS}
 
 
 def _cell(value):
@@ -394,6 +503,38 @@ def markdown(report):
         lines.append('| %s |' % ' | '.join(_cell(v) for v in cells))
     lines += ['', 'Judge processed tokens: %s (%s dispatched invocations).' %
               (_cell(report['cost_by_role']['judge']['usage']['processed_tokens']), report['cost_by_role']['judge']['dispatched_cli_invocations']), '',
+              '## Execution deadline strata', '',
+              'These are declared request/invocation settings, not elapsed time. Missing evidence stays unknown; unstarted slots are not assigned a future policy. Input includes cached input.', '',
+              '| Deadline seconds | Dispatched / planned slots | Complete / failed / pending | Processed | Known subtotal | Unknown input / output invocations |',
+              '| ---: | ---: | --- | ---: | ---: | --- |']
+    for row in report['cost_by_execution_deadline']:
+        usage = row['usage']; statuses = row['statuses']
+        cells = [_cell(row['deadline_seconds']), '%s / %s' % (row['dispatched_cli_invocations'], row['planned_cli_invocations']),
+                 '%s / %s / %s' % tuple(statuses.get(key, 0) for key in ('complete', 'failed', 'pending')),
+                 _cell(usage['processed_tokens']), _cell(usage['known_processed_tokens']),
+                 '%s / %s' % (usage['unknown_input_tokens_invocations'], usage['unknown_output_tokens_invocations'])]
+        lines.append('| %s |' % ' | '.join(cells))
+    vector = lambda segment: 'not planned' if segment is None else '[' + ', '.join('?' if v is None else str(v) for v in segment['deadline_vector_seconds']) + ']'
+    classification = lambda segment: 'not planned' if segment is None else segment['classification']
+    lines += ['', '## Session deadline vectors', '',
+              'Vectors preserve every original turn. `?` means no observed deadline. `incomplete` means an unfinished outcome or missing deadline evidence; observed mixtures remain visible in the vector. No final/max-deadline substitution.', '',
+              '| Session | Prefix T1–3 seconds | Extension T4–9 seconds | Configured session classification |',
+              '| --- | --- | --- | --- |']
+    for row in report['session_execution_policies']:
+        segments = row['segments']
+        lines.append('| %s | %s | %s | %s |' % (row['session_id'], vector(segments['prefix_turns_1_3']),
+                     vector(segments['extension_turns_4_9']), classification(segments['configured_session'])))
+    lines += ['', '## Pair deadline comparability', '',
+              '`same_uniform` requires both completed same-length segments and one shared known deadline; `mixed` requires complete observed same-length segments with differing deadlines. Unknown/incomplete cases are not uniform comparisons. Full vectors, statuses, hashes and every original slot are retained in report.json.', '',
+              '| Pair | Segment | Classification | A deadline vector | B deadline vector |',
+              '| --- | --- | --- | --- | --- |']
+    for row in report['pair_execution_policies']:
+        for name in ('prefix_turns_1_3', 'extension_turns_4_9'):
+            segment = row['segments'][name]
+            if segment is not None:
+                lines.append('| %s | %s | %s | %s | %s |' % (row['pair_id'], name, segment['classification'],
+                             vector(segment['candidates']['A']), vector(segment['candidates']['B'])))
+    lines += ['',
               '## Existing judge scores', '',
               '%s / %s planned pairs graded. Scores come only from conversation_grading.summarize; this report does not evaluate text.' %
               (quality['graded_pairs'], quality['planned_pairs']), '',
@@ -403,7 +544,7 @@ def markdown(report):
         success = row['safe_task_success']
         lines.append('| %s | %s | %s | %s / %s / %s | unknown (not collected) |' %
                      (name, row['graded_sessions'], _cell(row['quality_index_mean']), success['true'], success['false'], success['unknown']))
-    lines += ['', 'Condition-level scores and available descriptive matched contrasts are in report.json. Missing judgments and null scores are not zeros.', '',
+    lines += ['', 'Condition-level scores and available descriptive matched contrasts are in report.json. Missing judgments and null scores are not zeros. These existing score summaries are pooled; use session/pair deadline metadata to identify mixed-policy comparisons before attributing differences.', '',
               '## Limits', ''] + ['- ' + value for value in report['limitations']]
     lines += ['', 'Frozen plan hash: `%s`. Controller snapshot hash: `%s`.' %
               (report['snapshot']['plan_sha256'], report['snapshot']['controller_sha256']), '']

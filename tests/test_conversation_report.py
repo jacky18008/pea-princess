@@ -71,16 +71,24 @@ class ConversationReportTests(unittest.TestCase):
                                      'preferred': 'B', 'reason': SECRET}
         return value
 
-    def request(self, call):
+    def request(self, call, deadline=None):
         session = next((s for s in self.plan['sessions'] if s['id'] == call.get('session')), None)
         request = {'model': session['model'] if session else self.plan['judge_model'],
                    'effort': session['effort'] if session else self.plan['judge_effort'], 'prompt': SECRET}
+        if deadline is not None:
+            request['timeout_seconds'] = deadline
         frozen = {'request': request, 'request_sha256': _digest(request), 'call': call}
         self.write('records/' + call['id'] + '/request.json', frozen)
         return frozen
 
-    def add_call(self, call, finish=True, unknown=False, failed=False, tool_output=SECRET):
-        frozen = self.request(call)
+    def add_call(self, call, finish=True, unknown=False, failed=False, tool_output=SECRET,
+                 deadline=None, invocation=False, invocation_deadline=None):
+        frozen = self.request(call, deadline)
+        if invocation:
+            self.write('records/' + call['id'] + '/native-invocation.json', {
+                'version': 1, 'request_sha256': frozen['request_sha256'],
+                'timeout_seconds': deadline if invocation_deadline is None else invocation_deadline,
+                'command': [SECRET], 'workspace_before': {'private_field': SECRET}})
         answer = json.dumps(self.judgment(call['pair'])) if call['role'] == 'judge' else SECRET
         item = {'id': 'item-0', 'type': 'command_execution', 'command': SECRET,
                 'aggregated_output': tool_output, 'exit_code': 0}
@@ -295,6 +303,189 @@ class ConversationReportTests(unittest.TestCase):
         os.link(self.run / 'plan.json', output / 'report.json')
         with self.assertRaises(report.ReportError):
             report.publish(self.run, output, overwrite=True)
+
+    def test_old_missing_deadlines_stay_unknown_without_assuming240(self):
+        self.add_call(self.plan['calls'][0])
+        before = self.files()
+        value = report.aggregate(self.run)
+        self.assertEqual(2, value['schema_version'])
+        self.assertEqual(before, self.files())
+        slot = value['original_slots'][0]
+        self.assertEqual('s1-t01', slot['slot_id'])
+        self.assertEqual('s1-t01', slot['attempt_id'])
+        self.assertIsNone(slot['deadline_seconds'])
+        self.assertEqual('unknown', slot['deadline_source'])
+        self.assertIsNone(slot['invocation_receipt_sha256'])
+        self.assertEqual(1, len(value['cost_by_execution_deadline']))
+        self.assertIsNone(value['cost_by_execution_deadline'][0]['deadline_seconds'])
+        self.assertEqual(110, value['cost_by_execution_deadline'][0]['usage']['processed_tokens'])
+        session = value['session_execution_policies'][0]['segments']['prefix_turns_1_3']
+        self.assertEqual([None, None, None], session['deadline_vector_seconds'])
+        self.assertEqual('incomplete', session['classification'])
+
+    def test_hashed_deadline_evidence_and_unstarted_slots_do_not_expose_private_data(self):
+        call = self.plan['calls'][0]
+        self.add_call(call, deadline=240, invocation=True)
+        # A prepared request without a ledger dispatch is not an observed attempt.
+        self.request(self.plan['calls'][1], deadline=1200)
+        value = report.aggregate(self.run)
+        slot, unstarted = value['original_slots'][:2]
+        self.assertEqual(240, slot['deadline_seconds'])
+        self.assertEqual('hashed_request_and_invocation', slot['deadline_source'])
+        self.assertEqual(self.sha('records/s1-t01/native-invocation.json'), slot['invocation_receipt_sha256'])
+        self.assertEqual(self.control.record(call['id'])['request_sha256'], slot['request_sha256'])
+        self.assertEqual(1.25, slot['wall_seconds'])
+        self.assertFalse(slot['timed_out'])
+        self.assertTrue(slot['final_answer_present'])
+        self.assertEqual('not_dispatched', unstarted['status'])
+        self.assertIsNone(unstarted['attempt_id'])
+        self.assertIsNone(unstarted['deadline_seconds'])
+        self.assertIsNone(unstarted['request_sha256'])
+        text = json.dumps(value) + report.markdown(value)
+        self.assertNotIn(SECRET, text)
+        self.assertNotIn(str(self.run), text)
+        self.assertNotIn('private_field', text)
+        self.assertNotIn('recorded_at', text)
+
+    def test_request_only_and_invocation_only_deadlines_have_explicit_provenance(self):
+        self.add_call(self.plan['calls'][0], deadline=240)
+        self.add_call(self.plan['calls'][1], invocation=True, invocation_deadline=1200)
+        slots = report.aggregate(self.run)['original_slots']
+        self.assertEqual((240, 'hashed_request'), (slots[0]['deadline_seconds'], slots[0]['deadline_source']))
+        self.assertEqual((1200, 'invocation_receipt'), (slots[1]['deadline_seconds'], slots[1]['deadline_source']))
+
+    def test_mixed_session_and_pair_vectors_preserve_prefix_extension_and_judge_deadlines(self):
+        for call in self.plan['calls']:
+            deadline = 1200
+            if call['role'] == 'answer' and (call['session'] in ('s2', 's3') or (call['session'] == 's1' and call['turn'] <= 3)):
+                deadline = 240
+            self.add_call(call, deadline=deadline, invocation=True)
+        before = self.files()
+        value = report.aggregate(self.run)
+        self.assertEqual(before, self.files())
+        sessions = {row['session_id']: row['segments'] for row in value['session_execution_policies']}
+        s1 = sessions['s1']
+        self.assertEqual([240] * 3, s1['prefix_turns_1_3']['deadline_vector_seconds'])
+        self.assertEqual([1200] * 6, s1['extension_turns_4_9']['deadline_vector_seconds'])
+        self.assertEqual([240] * 3 + [1200] * 6, s1['configured_session']['deadline_vector_seconds'])
+        self.assertEqual('same_uniform', s1['prefix_turns_1_3']['classification'])
+        self.assertEqual('mixed', s1['configured_session']['classification'])
+        self.assertIsNone(sessions['s2']['extension_turns_4_9'])
+        pairs = {row['pair_id']: row for row in value['pair_execution_policies']}
+        prefix = pairs['j01']['segments']['prefix_turns_1_3']
+        self.assertEqual('mixed', prefix['classification'])
+        self.assertEqual([240] * 3, prefix['candidates']['A']['deadline_vector_seconds'])
+        self.assertEqual([1200] * 3, prefix['candidates']['B']['deadline_vector_seconds'])
+        self.assertEqual('same_uniform', pairs['j01']['segments']['extension_turns_4_9']['classification'])
+        self.assertEqual('same_uniform', pairs['j02']['segments']['prefix_turns_1_3']['classification'])
+        self.assertIsNone(pairs['j02']['segments']['extension_turns_4_9'])
+        self.assertEqual(1200, pairs['j01']['judge_deadline_seconds'])
+        costs = {row['deadline_seconds']: row for row in value['cost_by_execution_deadline']}
+        self.assertEqual(9 * 110, costs[240]['usage']['processed_tokens'])
+        self.assertEqual(17 * 110, costs[1200]['usage']['processed_tokens'])
+        self.assertEqual(26 * 110, value['observed_cost']['usage']['processed_tokens'])
+        self.assertEqual(4, value['quality']['segments']['common_prefix']['graded_sessions'])
+        self.assertEqual('s1', value['quality']['condition_rows'][0]['session_id'])
+        self.assertIn('mixed', report.markdown(value))
+        self.assertIn('[240, 240, 240]', report.markdown(value))
+
+    def test_unknown_failed_usage_and_incomplete_mixed_deadlines_remain_distinct(self):
+        first = next(c for c in self.plan['calls'] if c['id'] == 's1-t01')
+        second = next(c for c in self.plan['calls'] if c['id'] == 's1-t02')
+        self.add_call(first, deadline=240, invocation=True)
+        self.add_call(second, deadline=1200, invocation=True, unknown=True, failed=True)
+        value = report.aggregate(self.run)
+        session = value['session_execution_policies'][0]['segments']['prefix_turns_1_3']
+        self.assertEqual('incomplete', session['classification'])
+        self.assertTrue(session['has_mixed_observed_deadlines'])
+        self.assertEqual([240, 1200, None], session['deadline_vector_seconds'])
+        self.assertEqual(['complete', 'failed', 'not_dispatched'], session['status_vector'])
+        costs = {row['deadline_seconds']: row for row in value['cost_by_execution_deadline']}
+        self.assertIsNone(costs[1200]['usage']['processed_tokens'])
+        self.assertEqual(1, costs[1200]['usage']['unknown_input_tokens_invocations'])
+        self.assertEqual(110, costs[240]['usage']['processed_tokens'])
+        self.assertEqual(0, costs[None]['dispatched_cli_invocations'])
+        self.assertIsNone(value['observed_cost']['usage']['processed_tokens'])
+        failed = next(row for row in value['original_slots'] if row['slot_id'] == second['id'])
+        self.assertTrue(failed['timed_out'])
+        self.assertEqual(1200, failed['deadline_seconds'])
+
+    def test_pending_invocation_deadline_is_declared_without_inventing_elapsed_or_success(self):
+        call = self.plan['calls'][0]
+        self.request(call, deadline=1200)
+        self.control.dispatch(call['id'], call['session'], 'answer', 'native')
+        slot = report.aggregate(self.run)['original_slots'][0]
+        self.assertEqual('pending', slot['status'])
+        self.assertEqual(1200, slot['deadline_seconds'])
+        self.assertEqual('hashed_request', slot['deadline_source'])
+        self.assertIsNone(slot['wall_seconds'])
+        self.assertIsNone(slot['timed_out'])
+        self.assertIsNone(slot['final_answer_present'])
+
+    def test_invocation_deadline_hash_version_and_invalid_values_fail_closed(self):
+        self.add_call(self.plan['calls'][0], deadline=240, invocation=True)
+        path = self.run / 'records/s1-t01/native-invocation.json'
+        original = path.read_bytes()
+        changes = [{'timeout_seconds': 1200}, {'timeout_seconds': True}, {'timeout_seconds': 0},
+                   {'timeout_seconds': -1}, {'timeout_seconds': 2.5}, {'timeout_seconds': None},
+                   {'request_sha256': '0' * 64}, {'version': True}]
+        for change in changes:
+            with self.subTest(change=change):
+                path.write_text(json.dumps(json.loads(original) | change))
+                before = self.files()
+                with self.assertRaises(report.ReportError):
+                    report.aggregate(self.run)
+                self.assertEqual(before, self.files())
+        for malformed in (None, [], 'not-an-object', 42):
+            with self.subTest(malformed=malformed):
+                path.write_text(json.dumps(malformed))
+                with self.assertRaises(report.ReportError):
+                    report.aggregate(self.run)
+        path.write_bytes(original)
+
+    def test_different_length_configured_sessions_are_not_a_uniform_pair_comparison(self):
+        observations = []
+        sessions = {'short': {'turns': 3}, 'long': {'turns': 9}}
+        for sid, session in sessions.items():
+            for turn in range(1, session['turns'] + 1):
+                observations.append({'slot_id': sid + '-t' + str(turn), 'session_id': sid, 'pair_id': None,
+                                     'turn': turn, 'deadline_seconds': 240, 'status': 'complete'})
+        observations.append({'slot_id': 'judge', 'session_id': None, 'pair_id': 'pair',
+                             'deadline_seconds': 240, 'status': 'complete'})
+        _, pairs = report._execution_policies(observations, sessions, {'pair': {'mask': {'A': 'short', 'B': 'long'}}})
+        self.assertEqual('same_uniform', pairs[0]['segments']['prefix_turns_1_3']['classification'])
+        self.assertEqual('incomplete', pairs[0]['segments']['configured_session']['classification'])
+        self.assertFalse(pairs[0]['segments']['configured_session']['candidate_turn_counts_match'])
+        self.assertIsNone(pairs[0]['segments']['extension_turns_4_9']['candidates']['A'])
+
+    def test_changed_request_deadline_cannot_be_rebound_away_from_original_receipt(self):
+        self.add_call(self.plan['calls'][0], deadline=240)
+        path = self.run / 'records/s1-t01/request.json'
+        frozen = json.loads(path.read_text())
+        frozen['request']['timeout_seconds'] = 1200
+        frozen['request_sha256'] = _digest(frozen['request'])
+        path.write_text(json.dumps(frozen))
+        with self.assertRaises(report.ReportError):
+            report.aggregate(self.run)
+
+    def test_changing_or_new_invocation_receipt_during_read_is_rejected(self):
+        self.add_call(self.plan['calls'][0], deadline=240)
+        from unittest import mock
+        original = report._read
+        invocation_reads = 0
+        def read(root, relative, *args, **kwargs):
+            nonlocal invocation_reads
+            data = original(root, relative, *args, **kwargs)
+            if str(relative) == 'records/s1-t01/native-invocation.json':
+                invocation_reads += 1
+                if invocation_reads == 2:
+                    return b'{}'
+            return data
+        before = self.files()
+        with mock.patch.object(report, '_read', side_effect=read):
+            with self.assertRaises(report.ReportError):
+                report.aggregate(self.run)
+        self.assertEqual(before, self.files())
 
 
 if __name__ == '__main__':
