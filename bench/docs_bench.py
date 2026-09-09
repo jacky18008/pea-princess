@@ -61,11 +61,12 @@ USAGE
 
 WHEN THE PROVIDER REFUSES
 A row that never reached the model is not a row the model failed. Every launch goes
-through bench/launch.py, which retries a busy provider with a growing pause and, if it
+through bench/launch.py, which makes one physical attempt and, if it
 still will not serve, hands back the captured tails. That row is written with
 `outcome: provider_error` and a null `summary`: it shows as NOT RUN, it is left out of
-every mean, and `--retry-failed FOLDER` runs exactly those rows again and replaces them
-where they stand. Ten of the twenty-six rows in the 2026-09-07 pilot died that way and
+every mean. Durable failures now stop in the ledger before grading; a fresh
+`--retry-failed FOLDER` writes recovered rows to an owned copy under the new durable
+directory and preserves the historical source. Ten of the twenty-six rows in the 2026-09-07 pilot died that way and
 were averaged in as 0 facts.
 
 The private test bed is described in evals/docs/README.md; it is never committed. The
@@ -95,7 +96,8 @@ if HERE not in sys.path:
 
 import docs_grade  # noqa: E402
 import journeys  # noqa: E402  - shell(), shell_preview(), claude_command(), claude_answer()
-import launch  # noqa: E402  the one launcher: retries, captured tails, provider_error
+import legacy_control  # durable live-call boundary; offline modes remain local
+import launch  # noqa: E402  the shared launcher: one attempt, captured tails, provider_error
 
 RESULTS = os.path.join(HERE, "results")
 DEFAULT_CASES = os.path.join(HERE, "private", "docs")
@@ -525,6 +527,7 @@ def prepare_workdir(gold, doc, arm, agent, workdir=None, system=None, copy_skill
     land, but a dry run of the whole matrix would otherwise copy two megabytes of skill
     forty times to print forty commands.
     """
+    workdir = legacy_control.workdir(workdir)
     path = os.path.abspath(workdir) if workdir else tempfile.mkdtemp(
         prefix="vetflat-docs-%s-%s-" % (gold["id"], arm))
     if not os.path.isdir(path):
@@ -858,6 +861,7 @@ def matrix_combos(path):
 def run_row(row, bed, args, glossary):
     """One model call, or one printed command under --dry-run. Returns the record."""
     arm, agent, model = row["arm"], row["agent"], row["model"]
+    legacy_control.job(row_name(arm, agent, model, row["case"], row["run"]))
     gold, doc = load_case(bed, row["case"])
     questions = questions_for(gold, arm)
     if not questions:
@@ -905,7 +909,8 @@ def run_row(row, bed, args, glossary):
                                           else "(none: codex takes no allow-list; "
                                                "discipline_enforced=false)"))
         print("      cd %s && %s" % (workdir, journeys.shell_preview(command)))
-        shutil.rmtree(workdir, ignore_errors=True)
+        if not legacy_control.active():
+            shutil.rmtree(workdir, ignore_errors=True)
         record["dry_run"] = True
         return record, None
 
@@ -913,7 +918,7 @@ def run_row(row, bed, args, glossary):
     # provider retried with a growing pause, and the tails kept when it never let the
     # row through at all. Ten of the twenty-six rows in the 2026-09-07 pilot died here
     # and were written down as 0 facts; that mean was a fiction.
-    res = launch.run(command, workdir, args.timeout, agent, label=label)
+    res = legacy_control.run_cli(command, workdir, args.timeout, agent, label=label)
     stdout = res.text if agent == "codex" else ""
     reply, usage = res.text, res.usage
     if agent == "codex" and last_message and os.path.exists(last_message):
@@ -947,7 +952,7 @@ def run_row(row, bed, args, glossary):
         record["summary"] = None
         record["questions_graded"] = []
         record["answers"] = []
-        if not args.keep:
+        if not args.keep and not legacy_control.active():
             shutil.rmtree(workdir, ignore_errors=True)
         return record, None
 
@@ -962,7 +967,7 @@ def run_row(row, bed, args, glossary):
     record["summary"] = grade["summary"]
     record["questions_graded"] = grade["questions_graded"]
     record["answers"] = answers
-    if not args.keep:
+    if not args.keep and not legacy_control.active():
         shutil.rmtree(workdir, ignore_errors=True)
     return record, None
 
@@ -1091,7 +1096,7 @@ def write_results(record, root=None, day=None):
             os.makedirs(path)
     raw_path = os.path.join(raw_dir, record["row"] + ".json")
     index = 1
-    while os.path.exists(raw_path):
+    while not legacy_control.active() and os.path.exists(raw_path):
         index += 1
         raw_path = os.path.join(raw_dir, "%s#%d.json" % (record["row"], index))
     with io.open(raw_path, "w", encoding="utf-8") as fh:
@@ -1109,6 +1114,8 @@ def write_results(record, root=None, day=None):
                 rows = json.load(fh)
         except ValueError:
             rows = []
+    if legacy_control.active():
+        rows = [r for r in rows if r.get("row") != record.get("row")]
     rows.append(summary_of(record, raw_path, answers_path))
     write_scorecard(folder, rows)
     return raw_path, answers_path
@@ -1259,7 +1266,7 @@ def replace_scorecard_row(folder, raw_path, record, answers_path=None):
 
 
 def retry_failed(folder, bed, args):
-    """Re-run every row of FOLDER the provider refused, in place.
+    """Re-run refused rows in the working copy supplied by the durable entrypoint.
 
     The raw file and the scorecard row are replaced where they stand, so the folder ends
     up with one row per (arm, agent, model, case, run) and no zeros that were never
@@ -1291,6 +1298,8 @@ def retry_failed(folder, bed, args):
             print("  %s: %s" % (record.get("row"), problem or "nothing to ask this arm"),
                   file=sys.stderr)
             failures += 1
+            if legacy_control.active():
+                raise ValueError(problem or "no recovery result")
             continue
         fresh["retried_at"] = journeys.now()
         fresh["replaces"] = collections.OrderedDict([
@@ -1356,9 +1365,11 @@ def build_parser():
                          "provider_error, or a note that says the agent exited or gave "
                          "no answers array) and replace it where it stands. With "
                          "--dry-run it only says which rows it would re-run")
+    legacy_control.add_arguments(ap)
     return ap
 
 
+@legacy_control.entrypoint
 def main(argv=None):
     args = build_parser().parse_args(argv)
     bed = os.path.abspath(args.cases)
@@ -1408,6 +1419,8 @@ def main(argv=None):
         print("usage error: nothing to run", file=sys.stderr)
         return 2
 
+    for row in rows:
+        legacy_control.require_model(row.get("model"), row.get("agent"))
     glossary = glossary_wording()
     print("%s %d row(s) from %s%s"
           % ("planning" if args.dry_run else "running", len(rows), bed,
@@ -1424,6 +1437,8 @@ def main(argv=None):
         holds rows in completion order; the tables group them by arm anyway.
         """
         if problem:
+            if legacy_control.active():
+                raise ValueError(problem)
             print("  skipped: %s" % problem, file=sys.stderr)
             return 1
         if record is None:
@@ -1443,7 +1458,7 @@ def main(argv=None):
         sys.stdout.flush()
         return 0
 
-    if args.parallel > 1 and not args.dry_run:
+    if args.parallel > 1 and not args.dry_run and not legacy_control.active():
         from concurrent.futures import ThreadPoolExecutor, as_completed
         import threading
         lock = threading.Lock()

@@ -4,6 +4,15 @@ Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen — https://github.com
 
 **Different models may reach different verdicts. The facts they report must be correct.**
 
+**Execution update (2026-09-09):** live legacy runs now require explicit models,
+`--durable-dir`, `--max-calls` and `--max-processed-tokens`. Claude remains paused
+unless a new run explicitly supplies `--allow-claude`. Physical calls are serial,
+failures stop the batch, and replay uses the durable ledger rather than raw-file
+existence. Historical command examples below describe workloads; add the current
+execution controls before running them live. Dry runs and offline grading retain
+their previous interface. See the [migration guide](../docs/runner-unification-2026-09-09/migration.md)
+and [bounded quality rerun protocol](../docs/runner-unification-2026-09-09/protocol.md).
+
 That sentence is the whole design. A model that reads the same registers and writes
 KILL where another writes EDGE is not wrong; a model that says the flat is 62 square
 metres when the government certificate says 42 is wrong, and so is a model that

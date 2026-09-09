@@ -62,6 +62,7 @@ SKILL_DIR = os.path.join(ROOT, "skills", "vet-flat")
 sys.path.insert(0, BENCH)
 sys.path.insert(0, os.path.join(SKILL_DIR, "scripts"))
 import run as runner  # noqa: E402
+import legacy_control  # durable live-call boundary; offline modes remain local
 import grade as grader  # noqa: E402
 import launch  # noqa: E402  the one launcher owns both CLIs' token parsing
 
@@ -74,6 +75,7 @@ TOKEN_KEYS = launch.TOKEN_KEYS
 
 
 def prepare_workdir(case, cases_path, config, workdir=None):
+    workdir = legacy_control.workdir(workdir)
     if workdir:
         path = os.path.abspath(workdir)
         if not os.path.isdir(path):
@@ -168,9 +170,11 @@ def build_parser():
     ap.add_argument("--keep", action="store_true", help="do not delete the temp workdir")
     ap.add_argument("--results", help="results root; default bench/results")
     ap.add_argument("--dry-run", action="store_true", help="print the plan and command; stop")
+    legacy_control.add_arguments(ap)
     return ap
 
 
+@legacy_control.entrypoint
 def main(argv=None):
     args = build_parser().parse_args(argv)
     if args.results:
@@ -187,6 +191,7 @@ def main(argv=None):
         print("usage error: no case %r in %s" % (args.case, args.cases), file=sys.stderr)
         return 2
 
+    legacy_control.job("%s/%s/%s" % (config.get("name") or "codex", case["id"], args.run))
     workdir, plan = prepare_workdir(case, args.cases, config, args.workdir)
     command = build_command(config, case, workdir, args.model)
 
@@ -207,38 +212,17 @@ def main(argv=None):
             for line in fh.read().splitlines():
                 print("          %s" % line)
         print("command:  %s" % runner.shell(command))
-        if not args.keep and not args.workdir:
+        if not args.keep and not args.workdir and not legacy_control.active():
             shutil.rmtree(workdir, ignore_errors=True)
         return 0
 
     started = time.time()
-    stdout, note = "", None
-    try:
-        # stdin is closed on purpose: `claude -p` treats anything piped on stdin as part of the
-        # prompt, and a runner launched from a shell heredoc hands that heredoc to every child.
-        # On 2026-09-05 four journey runs and ten sweep rows carried a launcher script that way.
-        proc = runner.launch.start_process(command, cwd=workdir, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE)
-        out, err = proc.communicate(timeout=args.timeout)
-        runner.launch.finish_process(proc)
-        stdout = (out or b"").decode("utf-8", "replace")
-        stderr = (err or b"").decode("utf-8", "replace")
-        if proc.returncode != 0:
-            note = "codex exited %d: %s" % (proc.returncode, stderr.strip()[-300:])
-    except subprocess.TimeoutExpired:
-        runner.launch.stop_process(proc)
-        out, err = proc.communicate()
-        stdout = (out or b"").decode("utf-8", "replace")
-        stderr = (err or b"").decode("utf-8", "replace")
-        note = "timed out after %d s" % args.timeout
-    except OSError as exc:
-        note = "could not start codex: %s" % exc
-        print(note, file=sys.stderr)
-        return 1
+    res = legacy_control.run_cli(command, workdir, args.timeout, "codex", label=case["id"])
+    stdout, note = res.stdout, res.note
     wall = time.time() - started
 
-    raw_path = runner.write_raw(stdout, config.get("name"), case["id"], args.run)
-    usage = usage_from_events(stdout)
+    raw_path = runner.write_raw(stdout, config.get("name"), case["id"], args.run, results_root=args.results)
+    usage = res.usage
 
     report, path = runner.find_report(workdir, last_message(workdir, stdout))
     try:
@@ -250,7 +234,7 @@ def main(argv=None):
         row = runner.make_row("codex", args.model or config.get("main_model"), case, None,
                               wall, usage, workdir, runner.shell(command), note, None,
                               config, args.run, raw_path)
-        runner.append_scorecard(row)
+        runner.append_scorecard(row, results_root=args.results)
         print(note, file=sys.stderr)
         return 1
 
@@ -262,7 +246,7 @@ def main(argv=None):
     row = runner.make_row("codex", args.model or config.get("main_model"), case, card, wall,
                           usage, workdir, runner.shell(command), note, None,
                           config, args.run, raw_path)
-    runner.append_scorecard(row)
+    runner.append_scorecard(row, results_root=args.results)
     print(card["summary"])
     return 0
 

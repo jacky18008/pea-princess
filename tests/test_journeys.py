@@ -772,13 +772,19 @@ class TestFileChecksAndRegrade(unittest.TestCase):
     def test_every_agent_launch_closes_stdin(self):
         # claude -p reads piped stdin as prompt material; a runner started from a heredoc
         # would feed that heredoc to the model (it happened on 2026-09-05).
-        for rel in ("bench/launch.py", "bench/run.py", "bench/ab/run_codex.py"):
+        for rel in ("bench/launch.py",):
             src = read_text(os.path.join(ROOT, rel))
             launches = [m.start() for m in re.finditer(
                 r"(?:subprocess\.Popen|(?:\w+\.)*start_process)\((?:cmd|command), cwd=", src)]
             self.assertTrue(launches, rel)
             for pos in launches:
                 self.assertIn("stdin=subprocess.DEVNULL", src[pos:pos + 300], "%s: an agent launch leaves stdin open" % rel)
+
+    def test_legacy_runners_delegate_process_launches(self):
+        for rel in ("bench/run.py", "bench/ab/run_codex.py"):
+            src = read_text(os.path.join(ROOT, rel))
+            self.assertIn("legacy_control.run_cli(", src)
+            self.assertNotIn("subprocess.Popen(command,", src)
 
     def test_a_provider_error_turn_keeps_the_tails_it_was_given(self):
         """The docs pilot's failure, played through a journey: the CLI exits 1 and says
@@ -800,13 +806,13 @@ class TestFileChecksAndRegrade(unittest.TestCase):
             session_mode = "replay"
             timeout = 60
             results = None
-        real = runner.launch.run
+        real = runner.legacy_control.run_cli
         try:
-            runner.launch.run = lambda *a, **k: refused
+            runner.legacy_control.run_cli = lambda *a, **k: refused
             with contextlib.redirect_stdout(io.StringIO()):
                 record = runner.play(journey, Args(), "zh")
         finally:
-            runner.launch.run = real
+            runner.legacy_control.run_cli = real
         turn = record["turn_scores"][0]
         self.assertTrue(turn["provider_error"])
         self.assertIsNone(turn["score"], "a refused turn must never be scored")
@@ -823,7 +829,7 @@ class TestFileChecksAndRegrade(unittest.TestCase):
         # in the next.
         src = read_text(os.path.join(ROOT, "bench/journeys.py"))
         self.assertNotIn("subprocess.Popen(cmd, cwd=workdir", src)
-        self.assertIn("launch.run(cmd, workdir", src)
+        self.assertIn("legacy_control.run_cli(cmd, workdir", src)
 
     def test_multiples_of_the_rent_are_not_a_second_rent(self):
         doc = runner.load_journeys()

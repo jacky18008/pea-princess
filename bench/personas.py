@@ -118,9 +118,10 @@ ROOT = os.path.abspath(os.path.join(HERE, ".."))
 if HERE not in sys.path:
     sys.path.insert(0, HERE)
 import journeys  # noqa: E402  the journey runner is the library this file builds on
+import legacy_control  # durable live-call boundary; offline modes remain local
 # Imported under another name on purpose: this module's own launch() helper would
 # otherwise shadow the module and `launch.run` would resolve to the helper itself.
-import launch as launcher  # noqa: E402  retries, captured tails, provider_error
+import launch as launcher  # noqa: E402  one attempt, captured tails, provider_error
 
 PERSONAS_JSON = os.path.join(ROOT, "evals", "personas.json")
 FIXTURES = os.path.join(ROOT, "evals", "personas", "fixtures")
@@ -1217,6 +1218,7 @@ def codex_sandbox(harness):
 
 def prepare_workdir(card, agent, harness, workdir=None, system=None):
     """A folder for the run. The chat harness gets no skill folder: that is the point of it."""
+    workdir = legacy_control.workdir(workdir)
     if harness != "chat":
         return journeys.prepare_workdir({"id": card["id"], "mode": harness},
                                         launcher_of(agent), workdir, system)
@@ -1251,7 +1253,7 @@ def helper_command(family, prompt, workdir, model):
         if model:
             cmd += ["--model", model]
         return cmd + ["--", prompt]
-    cmd = ["codex", "exec", "--cd", workdir, "--sandbox", "read-only", "--skip-git-repo-check"]
+    cmd = ["codex", "exec", "--cd", workdir, "--sandbox", "read-only", "--skip-git-repo-check", "--json"]
     if model:
         cmd += ["--model", model]
     return cmd + ["--", prompt]
@@ -1260,18 +1262,19 @@ def helper_command(family, prompt, workdir, model):
 def launch(cmd, workdir, timeout, family="claude", label=None, **kwargs):
     """Run one actor's command and return a launch.LaunchResult.
 
-    Everything about the launch - stdin closed, both streams captured, the retries with
-    a growing pause, the tails kept when the provider never let it through - lives in
-    bench/launch.py, one copy for every runner in this directory. ``kwargs`` reaches
-    that launcher unchanged (``attempts``, ``waits``, ``sleep``, ``echo``).
+    The durable boundary records one physical attempt, captures both streams, and
+    pauses the batch on a failed or unresolved call. More than one attempt is
+    rejected; recovery is a new bounded invocation.
     """
     # Retrying an entire actor command may buy work again. A later, bounded invocation
     # is the recovery policy for this harness, including explicit provider outages.
     kwargs.setdefault("attempts", 1)
-    result = launcher.run(cmd, workdir, timeout,
+    result = legacy_control.run_cli(cmd, workdir, timeout,
                           "claude" if cmd[0] == "claude" else family, label=label,
                           **kwargs)
     # A structured Claude error is still a failed call when a CLI version exits 0.
+    if family == "codex":
+        result = result._replace(text=legacy_control.reply_text(result, family))
     flagged = launcher.claude_error(result.stdout_tail) if cmd[0] == "claude" else None
     if flagged:
         return result._replace(provider_error=True, note="the CLI reported: " + flagged)
@@ -1298,7 +1301,13 @@ def play(card, args, variant, seed):
     family, family_model = persona_family(agent, args.persona_agent)
     helper_model = args.persona_model or family_model
     judge_model = args.judge_model or JUDGE_FAMILY[agent][1]
+    if legacy_control.active():
+        legacy_control.require_model(args.model, launcher_of(agent))
+        legacy_control.require_model(args.persona_model, family)
+        if not args.rules_only:
+            legacy_control.require_model(args.judge_model, family)
     label = session_id(card, variant, seed)
+    legacy_control.job(label)
     system = system_prompt(card, harness)
     workdir, plan = prepare_workdir(card, agent, harness, args.workdir,
                                     system if launcher_of(agent) == "codex" else None)
@@ -1309,7 +1318,7 @@ def play(card, args, variant, seed):
     carry, how = (False, "n/a")
     if launcher_of(agent) == "claude":
         carry, how = journeys.claude_supports_resume(args.session_mode)
-    claude_session = str(uuid.uuid4())
+    claude_session = legacy_control.session_id()
     patience = int(card["patience_turns"])
 
     if args.dry_run:
@@ -1375,8 +1384,9 @@ def play(card, args, variant, seed):
         print("judge:    cd %s && %s" % (persona_dir, journeys.shell_preview(jcmd)))
         print("          %d criteria, %d safety line(s), vendor names blinded"
               % (len(card["success"]), len(card.get("safety_lines") or [])))
-        if not args.keep and not args.workdir:
-            shutil.rmtree(workdir, ignore_errors=True)
+        if not args.keep and not args.workdir and not legacy_control.active():
+            if not legacy_control.active():
+                shutil.rmtree(workdir, ignore_errors=True)
         return None
 
     profile_before = None
@@ -1443,7 +1453,7 @@ def play(card, args, variant, seed):
                           resume=claude_session if (carry and turn > 1) else None),
             workdir, args.timeout, launcher_of(agent), label="turn %d agent" % turn)
         if getattr(res, "session_id", None):
-            claude_session = res.session_id          # a retry may have minted a new one
+            claude_session = res.session_id          # the persisted CLI session identity
         reply, usage, seconds = res.text, res.usage, res.seconds
         note = res.tail_note()
         if note:
@@ -1468,8 +1478,9 @@ def play(card, args, variant, seed):
         print("  turn %d/%d  %d character reply, %d question(s), %.1f s"
               % (turn, patience, len(reply or ""), journeys.count_questions(reply or ""),
                  seconds))
-        control.note_latency(turn, seconds, time.time() - started)
-        stop = control.stop_reason(turn, reply, raw, time.time() - started, seconds)
+        elapsed = sum(r["wall_time_s"] for r in launches) if legacy_control.active() else time.time() - started
+        control.note_latency(turn, seconds, elapsed)
+        stop = control.stop_reason(turn, reply, raw, elapsed, seconds)
         if stop:
             outcome = stop
             break
@@ -1525,7 +1536,8 @@ def play(card, args, variant, seed):
 
     record = build_card(card, args, variant, seed, agent, harness, family, helper_model,
                         judge_model, dialogue, control, rules, criteria, outcome,
-                        satisfaction, judge_note, notes, round(time.time() - started, 2),
+                        satisfaction, judge_note, notes, round(sum(r["wall_time_s"] for r in launches)
+                            if legacy_control.active() else time.time() - started, 2),
                         profile_before, profile_after, workdir)
     # Keep the historical successful-agent-turn subtotal comparable. These additions
     # expose all actors, including failed calls, without turning missing usage into 0.
@@ -1536,7 +1548,7 @@ def play(card, args, variant, seed):
     record["cost"]["usage_missing_for"] = [r["label"] for r in launches if not r["usage"]]
     record["cost"]["all_launches_reported_usage"] = (
         bool(launches) and not record["cost"]["usage_missing_for"])
-    if not args.keep and not args.workdir:
+    if not args.keep and not args.workdir and not legacy_control.active():
         shutil.rmtree(workdir, ignore_errors=True)
     return record
 
@@ -1768,6 +1780,8 @@ def write_session(record, root=None, day=None):
                 rows = json.load(fh)
         except ValueError:
             rows = []
+    if legacy_control.active():
+        rows = [r for r in rows if r.get("session") != record.get("session")]
     rows.append(summary_of(record))
     write_scorecard(folder, rows)
     return transcript_path, card_path
@@ -1822,12 +1836,15 @@ def regrade(folder, args, doc=None):
         if not args.rules_only and dialogue and not provider_error_row(stored or meta):
             family = meta.get("persona_family") or persona_family(meta.get("agent") or "claude")[0]
             model = args.judge_model or meta.get("judge_model")
-            workdir = tempfile.mkdtemp(prefix="vetflat-regrade-")
+            legacy_control.job("regrade/" + name[:-3])
+            legacy_control.require_model(args.judge_model, family)
+            workdir = legacy_control.workdir() if legacy_control.active() else tempfile.mkdtemp(prefix="vetflat-regrade-")
             res = launch(
                 helper_command(family, judge_prompt(card, dialogue, rules), workdir, model),
                 workdir, args.timeout, family, label="judge")
             note = res.tail_note()
-            shutil.rmtree(workdir, ignore_errors=True)
+            if not legacy_control.active():
+                shutil.rmtree(workdir, ignore_errors=True)
             provider_stopped = res.provider_error
             parsed = (first_json(res.text) or {}) if not provider_stopped else {}
             for item in parsed.get("criteria") or []:
@@ -1953,7 +1970,9 @@ def retry_failed(folder, args, doc=None):
     """Play a fresh session for every card the provider refused.
 
     A session cannot be resumed - the conversation is the unit - so this is a new run
-    with the same persona, variant and seed. The refused card moves to superseded/ and
+    with the same persona, variant and seed. The durable entrypoint first copies the
+    historical source into its owned output directory. In that copy only, the refused
+    card moves to superseded/ and
     its scorecard row goes with it; the fresh session is written as a normal new row.
     """
     doc = doc or load_personas(args.personas)
@@ -2139,9 +2158,11 @@ def build_parser():
                          "rules bite long before it")
     ap.add_argument("--workdir", help="use this directory instead of a fresh temp one")
     ap.add_argument("--keep", action="store_true", help="do not delete the temp workdir")
+    legacy_control.add_arguments(ap)
     return ap
 
 
+@legacy_control.entrypoint
 def main(argv=None):
     args = build_parser().parse_args(argv)
     if args.regrade and (args.max_sessions is not None or args.skip_existing):
@@ -2162,7 +2183,7 @@ def main(argv=None):
     worst, first, started = 0, True, 0
     for card, variant, seed in sessions_for(args, doc):
         played = variant_of(card, variant == "probe")
-        if args.skip_existing:
+        if args.skip_existing and not legacy_control.active():
             try:
                 if existing_session_matches(played, variant, seed, args):
                     print("%s: saved matching session, skipped" % session_id(card, variant, seed))

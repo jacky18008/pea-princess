@@ -56,6 +56,7 @@ ROOT = os.path.abspath(os.path.join(BENCH, ".."))
 
 sys.path.insert(0, BENCH)
 import run as runner  # noqa: E402
+import legacy_control  # durable live-call boundary; offline modes remain local
 
 RUN_PY = os.path.join(BENCH, "run.py")
 RUN_CODEX_PY = os.path.join(HERE, "run_codex.py")
@@ -176,6 +177,7 @@ def build_parser():
     ap.add_argument("--results", help="results root, default bench/results")
     ap.add_argument("--dry-run", action="store_true",
                     help="print the exact command list and stop")
+    legacy_control.add_arguments(ap)
     return ap
 
 
@@ -198,6 +200,7 @@ def run_grader(results_dir, gold, quiet=True):
     return proc.returncode
 
 
+@legacy_control.entrypoint
 def main(argv=None):
     args = build_parser().parse_args(argv)
     if not args.configs and not args.phase:
@@ -230,10 +233,18 @@ def main(argv=None):
         print("usage error: no cases", file=sys.stderr)
         return 2
 
+    if legacy_control.active():
+        import pipeline
+        for config in configs:
+            if config.get("pipeline"):
+                for _role, conf in pipeline.steps_for(config):
+                    legacy_control.require_model(conf.get("model"), conf.get("agent"))
+            else:
+                legacy_control.require_model(config.get("main_model"), args.agent or config.get("agent") or "claude")
     results_root = args.results or runner.RESULTS
-    day = datetime.datetime.utcnow().strftime("%Y-%m-%d")
+    day = legacy_control.result_day(datetime.datetime.utcnow().strftime("%Y-%m-%d"))
     steps = plan(configs, cases, args.runs, args.agent, args.cases,
-                 results_root=results_root, day=day, resume=not args.no_resume,
+                 results_root=results_root, day=day, resume=not args.no_resume if args.dry_run else False,
                  budget_mode=args.budget_mode)
 
     if args.dry_run:
@@ -266,36 +277,29 @@ def main(argv=None):
             print("skip  r%d %s %s (raw output exists)"
                   % (step["run"], step["config"], step["case"]))
 
-    worst = 0
-    width = max(1, args.parallel)
-    for start in range(0, len(todo), width):
-        batch = todo[start:start + width]
-        live = []
-        for step in batch:
-            print("run   r%d %s %s" % (step["run"], step["config"], step["case"]))
-            try:
-                started = time.monotonic()
-                live.append((step, runner.launch.start_process(step["command"], stdin=subprocess.DEVNULL,
-                             env=dict(os.environ, VETFLAT_RUN_TIMEOUT=str(args.timeout))), started))
-            except OSError as exc:
-                print("      could not start: %s" % exc, file=sys.stderr)
-                worst = 1
-        for step, proc, started in live:
-            try:
-                code = proc.wait(timeout=max(0, args.timeout - (time.monotonic() - started)))
-            except subprocess.TimeoutExpired:
-                runner.launch.stop_process(proc)
-                print("      r%d %s %s timed out after %d s"
-                      % (step["run"], step["config"], step["case"], args.timeout),
-                      file=sys.stderr)
-                code = 1
-            finally:
-                runner.launch.finish_process(proc)
-            worst = max(worst, 1 if code else 0)
+    # Child mains run serially inside this invocation's durable ledger. A process
+    # wrapper is not a model call and must not get an independent spending budget.
+    import pipeline
+    import run_codex
+    entrypoints = {os.path.abspath(RUN_PY): runner.main,
+                   os.path.abspath(PIPELINE_PY): pipeline.main,
+                   os.path.abspath(RUN_CODEX_PY): run_codex.main}
+    for step in todo:
+        print("run   r%d %s %s" % (step["run"], step["config"], step["case"]))
+        command = step["command"]
+        entry = entrypoints[os.path.abspath(command[1])]
+        child_args = command[2:] + ["--timeout", str(args.timeout)]
+        if entry is pipeline.main:
+            child_args += ["--day", day]
+        code = entry(child_args)
+        if code:
+            print("batch stopped after failed child; resume from the durable ledger", file=sys.stderr)
+            return code
         if not args.no_grade:
             run_grader(os.path.join(results_root, day), args.gold)
     if todo and not args.no_grade:
         run_grader(os.path.join(results_root, day), args.gold, quiet=False)
+    worst = 0
     return worst
 
 

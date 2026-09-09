@@ -125,7 +125,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, ".."))
 if HERE not in sys.path:
     sys.path.insert(0, HERE)
-import launch  # noqa: E402  the one launcher: retries, captured tails, provider_error
+import launch  # noqa: E402  the shared launcher: one attempt, captured tails, provider_error
+import legacy_control  # durable live-call boundary; offline modes remain local
 
 SKILL_DIR = os.path.join(ROOT, "skills", "vet-flat")
 JOURNEYS_JSON = os.path.join(ROOT, "evals", "journeys.json")
@@ -140,9 +141,8 @@ SKILL_HOME = {"claude": os.path.join(".claude", "skills"),
 
 PASS_LINE = {"journey_score": 0.90, "fabrications": 0, "critical_failures": 0}
 # A provider saying "at capacity" or "rate limited" is not the model failing the turn.
-# The turn is retried, with a growing pause, before it is written off. The retry itself
-# lives in bench/launch.py now, with every other runner's; these names stay so that
-# anything importing them keeps working.
+# Each durable call makes one physical attempt and pauses the batch on failure.
+# These legacy constants remain importable for offline tooling.
 MAX_ATTEMPTS = launch.MAX_ATTEMPTS
 RETRY_WAITS = launch.RETRY_WAITS
 RETRY_WAIT_S = launch.RETRY_WAITS[0]
@@ -213,7 +213,7 @@ def now():
 
 
 def today():
-    return datetime.datetime.utcnow().strftime("%Y-%m-%d")
+    return legacy_control.result_day(datetime.datetime.utcnow().strftime("%Y-%m-%d"))
 
 
 def quote(part):
@@ -724,6 +724,7 @@ def materialise_attachments(turn, workdir, agent):
 
 def prepare_workdir(journey, agent, workdir=None, system=None):
     """A clean folder with the skill where this agent looks for skills."""
+    workdir = legacy_control.workdir(workdir)
     path = os.path.abspath(workdir) if workdir else tempfile.mkdtemp(
         prefix="vetflat-journey-%s-" % journey["id"])
     if not os.path.isdir(path):
@@ -778,7 +779,7 @@ def claude_command(prompt, workdir, model, system, session_id=None, resume=None,
 
 def codex_command(prompt, workdir, model, sandbox="read-only"):
     cmd = ["codex", "exec", "--cd", workdir, "--sandbox", sandbox,
-           "--skip-git-repo-check"]
+           "--skip-git-repo-check", "--json"]
     if model:
         cmd += ["--model", model]
     return cmd + ["--", prompt]
@@ -837,6 +838,11 @@ def api_post(url, payload, key, timeout):
 
 
 def api_reply(messages, model, timeout):
+    return legacy_control.run_api(lambda: _api_reply(messages, model, timeout), model,
+                                  {"messages": messages, "model": model, "timeout": timeout})
+
+
+def _api_reply(messages, model, timeout):
     url = api_url()
     key = os.environ.get("OPENAI_API_KEY") or ""
     if not url or not key:
@@ -892,10 +898,11 @@ def play(journey, args, variant_id=None):
     agent = args.agent
     tools, sandbox = claude_tools(journey), codex_sandbox(journey)
     label = journey["id"] + ("#" + variant_id if variant_id else "")
+    legacy_control.job(label)
     system = system_prompt(journey, args.refs)
     workdir, plan = prepare_workdir(journey, agent, args.workdir,
                                     system if agent == "codex" else None)
-    session_id = str(uuid.uuid4())
+    session_id = legacy_control.session_id()
     carry, how = (False, "n/a")
     if agent == "claude":
         carry, how = claude_supports_resume(args.session_mode)
@@ -984,14 +991,14 @@ def play(journey, args, variant_id=None):
                 cmd = codex_command(transcript(history, user) if history else user,
                                     workdir, args.model, sandbox)
             # One launcher for every runner: stdin closed, both streams captured, the
-            # busy-provider retries with a growing pause, and the tails kept when the
+            # one physical attempt, and the tails kept when the
             # provider never let the turn through at all.
-            res = launch.run(cmd, workdir, args.timeout, agent,
+            res = legacy_control.run_cli(cmd, workdir, args.timeout, agent,
                              attempts=MAX_ATTEMPTS, waits=RETRY_WAITS,
                              label="turn %d" % index)
-            reply, usage = res.text, res.usage
+            reply, usage = legacy_control.reply_text(res, agent), res.usage
             if getattr(res, "session_id", None):
-                session_id = res.session_id          # a retry may have minted a new one
+                session_id = res.session_id          # the persisted CLI session identity
             attempts = res.attempts
             attempt_records = res.attempt_records
             provider_error = res.provider_error
@@ -1036,7 +1043,7 @@ def play(journey, args, variant_id=None):
                  if card["critical_failures"] else ""))
 
     if args.dry_run:
-        if not args.keep and not args.workdir:
+        if not args.keep and not args.workdir and not legacy_control.active():
             shutil.rmtree(workdir, ignore_errors=True)
         return None
 
@@ -1067,7 +1074,7 @@ def play(journey, args, variant_id=None):
         ("outcome", journey.get("outcome")),
         ("turn_scores", turns),
     ])
-    if not args.keep and not args.workdir:
+    if not args.keep and not args.workdir and not legacy_control.active():
         shutil.rmtree(workdir, ignore_errors=True)
     return record
 
@@ -1100,7 +1107,7 @@ def write_results(record, root=None, day=None):
         os.makedirs(raw)
     safe = re.sub(r"[^A-Za-z0-9._#-]+", "-", "%s-%s" % (record["agent"], record["journey"]))
     index = 1
-    while os.path.exists(os.path.join(raw, "%s-%d.json" % (safe, index))):
+    while not legacy_control.active() and os.path.exists(os.path.join(raw, "%s-%d.json" % (safe, index))):
         index += 1
     raw_path = os.path.join(raw, "%s-%d.json" % (safe, index))
     with io.open(raw_path, "w", encoding="utf-8") as fh:
@@ -1114,6 +1121,8 @@ def write_results(record, root=None, day=None):
                 rows = json.load(fh)
         except ValueError:
             rows = []
+    if legacy_control.active():
+        rows = [r for r in rows if (r.get("agent"), r.get("journey")) != (record.get("agent"), record.get("journey"))]
     rows.append(summary_of(record, raw_path))
     write_scorecard(folder, rows)
     return raw_path, jpath
@@ -1233,9 +1242,11 @@ def build_parser():
                     help="seconds per turn, default 1200")
     ap.add_argument("--workdir", help="use this directory instead of a fresh temp one")
     ap.add_argument("--keep", action="store_true", help="do not delete the temp workdir")
+    legacy_control.add_arguments(ap)
     return ap
 
 
+@legacy_control.entrypoint
 def main(argv=None):
     args = build_parser().parse_args(argv)
     if args.regrade:

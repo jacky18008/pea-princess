@@ -409,7 +409,7 @@ class TheDryRun(unittest.TestCase):
                          "every role must launch through bench/launch.py, not its own "
                          "subprocess call")
         self.assertIn("import launch", source)
-        self.assertGreaterEqual(len(re.findall(r"launch\.run\(", source)), 2,
+        self.assertGreaterEqual(len(re.findall(r"legacy_control\.run_cli\(", source)), 2,
                                 "the single-role launch and the executors' launch_many "
                                 "both call launch.run")
 
@@ -657,10 +657,10 @@ class TheLauncher(unittest.TestCase):
 
     def setUp(self):
         self.results = tempfile.mkdtemp(prefix="vetflat-pipeline-test-results-")
-        self.real_run = PL.launch.run
+        self.real_run = PL.legacy_control.run_cli
 
     def tearDown(self):
-        PL.launch.run = self.real_run
+        PL.legacy_control.run_cli = self.real_run
         shutil.rmtree(self.results, ignore_errors=True)
 
     def fake(self, calls, provider_error_labels=()):
@@ -716,7 +716,7 @@ class TheLauncher(unittest.TestCase):
 
     def test_run_verifier_and_its_replan_round_both_go_through_the_launcher(self):
         calls = []
-        PL.launch.run = self.fake(calls, provider_error_labels=("P-test verifier-again",))
+        PL.legacy_control.run_cli = self.fake(calls, provider_error_labels=("P-test verifier-again",))
         workdir = tempfile.mkdtemp(prefix="vetflat-pipeline-test-verifier-")
         try:
             args = Args(results=self.results)
@@ -750,7 +750,7 @@ class TheLauncher(unittest.TestCase):
         groups = PL.groups_of(scaffold)
         failing_group = groups[0][0]
         calls = []
-        PL.launch.run = self.fake(
+        PL.legacy_control.run_cli = self.fake(
             calls, provider_error_labels=("P-test executors[%s]" % failing_group,))
         workdir = tempfile.mkdtemp(prefix="vetflat-pipeline-test-executors-")
         try:
@@ -784,12 +784,12 @@ class TheLauncher(unittest.TestCase):
             calls.append(label)
             return PL.launch.LaunchResult(text=label, seconds=0.01)
 
-        real = PL.launch.run
-        PL.launch.run = fake_run
+        real = PL.legacy_control.run_cli
+        PL.legacy_control.run_cli = fake_run
         try:
             results = PL.launch_many(commands, "/tmp", 5, 3, "claude", labels)
         finally:
-            PL.launch.run = real
+            PL.legacy_control.run_cli = real
         self.assertEqual([r.text for r in results], labels,
                          "results come back in command order, not completion order")
         self.assertEqual(sorted(calls), labels)
@@ -802,7 +802,7 @@ class TheLauncher(unittest.TestCase):
         config = PL.load_config("P1-claude")
         target = "%s planner" % config["name"]
         calls = []
-        PL.launch.run = self.fake(calls, provider_error_labels=(target,))
+        PL.legacy_control.run_cli = self.fake(calls, provider_error_labels=(target,))
         args = PL.build_parser().parse_args([
             "--config", "P1-claude", "--cases", cases_path, "--case", case["id"],
             "--run", "1", "--timeout", "5", "--results", self.results,

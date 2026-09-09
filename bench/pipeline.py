@@ -72,7 +72,7 @@ every launch (an open stdin becomes part of the prompt).
 
 Every role - planner, each executor, the verifier and any replan round of it, the
 integrator - launches through ``bench/launch.py``, the one launcher every runner in this
-directory shares. That is where the retry on a busy provider, the closed stdin and the
+directory shares. That is where the single physical attempt, the closed stdin and the
 token parsing for both CLIs live now; a role that never reached the model comes back with
 ``provider_error=True`` and is recorded as such on its own row and in the run's notes,
 not as an empty answer graded like a model's.
@@ -111,6 +111,7 @@ sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(HERE, "ab"))
 sys.path.insert(0, SCRIPTS)
 import run as runner  # noqa: E402
+import legacy_control  # durable live-call boundary; offline modes remain local
 import grade as grader  # noqa: E402
 import run_codex  # noqa: E402
 import plan as planner_tool  # noqa: E402
@@ -261,6 +262,7 @@ def replan_rounds(config):
 # ------------------------------------------------------------------- workdir --
 def prepare_workdir(case, config, cases_path, workdir=None):
     """profile.yaml, the pasted sources and a COPY of the skill, per agent home."""
+    workdir = legacy_control.workdir(workdir)
     if workdir:
         path = os.path.abspath(workdir)
         if not os.path.isdir(path):
@@ -441,18 +443,18 @@ def launch_many(commands, workdir, timeout, parallel, family, labels=None):
     The executors run concurrently in one shared workdir - each already writes to its own
     answer file, see `answer_file` - so this is a thread pool over the one launcher every
     role uses, the same shape bench/docs_bench.py uses for its own row-level concurrency.
-    Each call still gets bench/launch.py's retries, closed stdin and provider_error
+    Each call still gets bench/launch.py's closed stdin and provider_error
     outcome; only the fan-out is new here.
     """
     labels = list(labels or [None] * len(commands))
-    width = max(1, int(parallel or 1))
+    width = 1 if legacy_control.active() else max(1, int(parallel or 1))
     if width <= 1 or len(commands) <= 1:
-        return [launch.run(cmd, workdir, timeout, family, label=label)
+        return [legacy_control.run_cli(cmd, workdir, timeout, family, label=label)
                 for cmd, label in zip(commands, labels)]
     from concurrent.futures import ThreadPoolExecutor
     with ThreadPoolExecutor(max_workers=width) as pool:
         return list(pool.map(
-            lambda pair: launch.run(pair[0], workdir, timeout, family, label=pair[1]),
+            lambda pair: legacy_control.run_cli(pair[0], workdir, timeout, family, label=pair[1]),
             zip(commands, labels)))
 
 
@@ -580,11 +582,14 @@ def steps_for(config):
 # ----------------------------------------------------------------- the run --
 def run_pipeline(args, case, config):
     """Every role in turn, then the grader. Returns (exit code, scorecard row)."""
+    for _role, conf in steps_for(config):
+        legacy_control.require_model(conf.get("model"), conf.get("agent"))
     started = time.time()
     mode = args.budget_mode or config.get("budget_mode") or "standard"
     arm = config["name"] + ("-" + args.budget_mode if args.budget_mode else "")
     config = collections.OrderedDict(config)
     config["budget_mode"] = mode          # the prompts state the mode this run is in
+    legacy_control.job("%s/%s/%s" % (arm, case["id"], args.run))
     args.arm = arm                        # every raw file this run writes carries it
     del KEPT[:]                       # one list per run, not per process
     workdir, plan_lines = prepare_workdir(case, config, args.cases, args.workdir)
@@ -654,7 +659,7 @@ def run_pipeline(args, case, config):
         command = build_role_command(role, conf, config, case, workdir,
                                      role_prompt(role, config, case, prompt,
                                                  agent=conf["agent"]))
-        res = launch.run(command, workdir, args.timeout, conf["agent"],
+        res = legacy_control.run_cli(command, workdir, args.timeout, conf["agent"],
                          label="%s %s" % (arm, role))
         record_role(roles, notes, role, conf, res, command)
         write_raw(args, arm, case, role, res.text)
@@ -837,7 +842,7 @@ def run_verifier(args, case, config, conf, workdir, prompt, evidence_doc, roles,
     command = build_role_command("verifier", conf, config, case, workdir,
                                  role_prompt("verifier", config, case, prompt,
                                              agent=conf["agent"]))
-    res = launch.run(command, workdir, args.timeout, conf["agent"],
+    res = legacy_control.run_cli(command, workdir, args.timeout, conf["agent"],
                      label="%s verifier%s" % (config["name"], "-again" if again else ""))
     record_role(roles, notes, "verifier" + ("-again" if again else ""), conf, res, command,
                note_label="verifier")
@@ -1076,7 +1081,7 @@ def finish(args, case, config, arm, mode, workdir, roles, notes, wall, worst,
         print(card["summary"])
     for note in notes:
         print("note: %s" % note, file=sys.stderr)
-    if not args.keep and not args.workdir:
+    if not args.keep and not args.workdir and not legacy_control.active():
         shutil.rmtree(workdir, ignore_errors=True)
     return worst, row
 
@@ -1139,7 +1144,7 @@ def dry_run(args, case, config, arm, mode, workdir, plan_lines, steps, prompt, s
         text = role_prompt(role, config, case, prompt, agent=conf["agent"])
         command = build_role_command(role, conf, config, case, workdir, text)
         show_step(step_no, role, conf, command, text)
-    if not args.keep and not args.workdir:
+    if not args.keep and not args.workdir and not legacy_control.active():
         shutil.rmtree(workdir, ignore_errors=True)
     return 0, None
 
@@ -1181,9 +1186,11 @@ def build_parser():
     ap.add_argument("--keep", action="store_true", help="do not delete the temp workdir")
     ap.add_argument("--dry-run", action="store_true",
                     help="print every role's command and the first line of its prompt")
+    legacy_control.add_arguments(ap)
     return ap
 
 
+@legacy_control.entrypoint
 def main(argv=None):
     args = build_parser().parse_args(argv)
     if args.results:
@@ -1218,6 +1225,8 @@ def main(argv=None):
         args.case_row = case
         code, _row = run_pipeline(args, case, config)
         worst = max(worst, code)
+        if code and not args.dry_run:
+            return worst
     return worst
 
 

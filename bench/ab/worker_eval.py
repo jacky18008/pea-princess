@@ -66,6 +66,7 @@ ROOT = os.path.abspath(os.path.join(BENCH, ".."))
 
 sys.path.insert(0, BENCH)
 import run as runner  # noqa: E402
+import legacy_control  # durable live-call boundary; offline modes remain local
 
 TASKS = os.path.join(BENCH, "private", "worker_tasks.json")
 RESULTS = os.path.join(BENCH, "results")
@@ -192,55 +193,37 @@ def build_parser():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--tasks", default=TASKS)
-    ap.add_argument("--models", default="sonnet,opus",
-                    help="comma-separated Claude Code model aliases, default sonnet,opus. "
+    ap.add_argument("--models",
+                    help="comma-separated explicit model names required for live runs; dry-run defaults sonnet,opus. "
                          "Claude Code accepts %s as aliases for the latest model in each "
                          "family, or a full model name; see claude --help"
                          % ", ".join(MODEL_ALIASES))
     ap.add_argument("--task-ids", help="comma-separated task ids; default is every task")
     ap.add_argument("--timeout", type=int, default=300)
-    ap.add_argument("--results", default=RESULTS)
+    ap.add_argument("--results")
     ap.add_argument("--dry-run", action="store_true",
                     help="print the exact commands and stop")
+    legacy_control.add_arguments(ap)
     return ap
 
 
 def run_one(task, model, timeout):
     prompt, err = build_prompt(task)
     if prompt is None:
+        if legacy_control.active():
+            raise ValueError(err or "missing worker input")
         return collections.OrderedDict([("task", task["id"]), ("status", "miss"),
                                         ("detail", err), ("answer", None)])
+    legacy_control.job("worker/%s/%s" % (model, task["id"]))
     command = build_command(model, prompt)
     started = time.time()
-    try:
-        # A pasted-document worker has no reason to inherit the repo as its cwd.
-        with tempfile.TemporaryDirectory(prefix="vetflat-worker-") as workdir:
-            proc = runner.launch.start_process(command, cwd=workdir, stdin=subprocess.DEVNULL,
-                                              stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            try:
-                out, err_bytes = proc.communicate(timeout=timeout)
-            except BaseException:
-                runner.launch.stop_process(proc)
-                raise
-            finally:
-                if proc.poll() is not None:
-                    runner.launch.finish_process(proc)
-        stdout = (out or b"").decode("utf-8", "replace")
-        note = None
-        if proc.returncode != 0:
-            note = "exited %d: %s" % (proc.returncode,
-                                      (err_bytes or b"").decode("utf-8", "replace")[-200:])
-    except subprocess.TimeoutExpired:
-        out, err_bytes = proc.communicate()
-        stdout, note = (out or b"").decode("utf-8", "replace"), "timed out after %d s" % timeout
-    except OSError as exc:
-        return collections.OrderedDict([("task", task["id"]), ("status", "miss"),
-                                        ("detail", "could not start claude: %s" % exc),
-                                        ("answer", None)])
+    workdir = legacy_control.workdir()
+    res = legacy_control.run_cli(command, workdir, timeout, "claude", label=task["id"])
+    stdout, note = res.stdout, res.note
     wall = time.time() - started
     answer = answer_of(stdout)
     status, detail = score_answer(answer, task["expected"], task.get("tolerance"))
-    usage = runner.usage_from_stdout("claude", stdout) or {}
+    usage = res.usage or {}
     return collections.OrderedDict([
         ("task", task["id"]), ("kind", task.get("kind")), ("model", model),
         ("status", status), ("detail", detail),
@@ -283,6 +266,7 @@ def table(by_model, tasks):
     return "\n".join(lines)
 
 
+@legacy_control.entrypoint
 def main(argv=None):
     args = build_parser().parse_args(argv)
     if not os.path.exists(args.tasks):
@@ -293,7 +277,9 @@ def main(argv=None):
     if args.task_ids:
         wanted = set(t.strip() for t in args.task_ids.split(","))
         tasks = [t for t in tasks if t["id"] in wanted]
-    models = [m.strip() for m in args.models.split(",") if m.strip()]
+    models = [m.strip() for m in (args.models or ("sonnet,opus" if args.dry_run else "")).split(",") if m.strip()]
+    for model in models:
+        legacy_control.require_model(model, "claude")
     if not tasks or not models:
         print("usage error: no tasks or no models", file=sys.stderr)
         return 2
@@ -323,8 +309,8 @@ def main(argv=None):
             print("")
         return 0
 
-    day = datetime.datetime.utcnow().strftime("%Y-%m-%d")
-    folder = os.path.join(args.results, day)
+    day = legacy_control.result_day(datetime.datetime.utcnow().strftime("%Y-%m-%d"))
+    folder = os.path.join(args.results or RESULTS, day)
     if not os.path.isdir(folder):
         os.makedirs(folder)
 

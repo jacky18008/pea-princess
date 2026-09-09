@@ -1076,8 +1076,9 @@ class TestWhenTheProviderRefuses(unittest.TestCase):
         # shadowed by the helper that wraps it, for one.
         folder = tempfile.mkdtemp()
         try:
-            res = runner.launch(
-                [sys.executable, "-c", "import sys; sys.stderr.write('usage limit "
+            with mock.patch.object(runner.legacy_control, "run_cli", side_effect=launch.run):
+                res = runner.launch(
+                    [sys.executable, "-c", "import sys; sys.stderr.write('usage limit "
                                        "reached'); sys.exit(1)"],
                 folder, 30, "codex", label="turn 1 agent", attempts=2, waits=(0, 0),
                 sleep=lambda _s: None, echo=lambda _line: None)
@@ -1320,7 +1321,8 @@ class TestSessionSpendingGuards(unittest.TestCase):
                 "provider_failures": failures or []}
 
     def test_default_launch_makes_one_attempt_and_preserves_the_failure(self):
-        with tempfile.TemporaryDirectory() as folder:
+        with tempfile.TemporaryDirectory() as folder, mock.patch.object(
+                runner.legacy_control, "run_cli", side_effect=launch.run):
             result = runner.launch([sys.executable, "-c",
                                     "import sys; sys.stderr.write('429 usage limit reached'); "
                                     "sys.exit(1)"], folder, 5, "codex")
@@ -1345,7 +1347,7 @@ class TestSessionSpendingGuards(unittest.TestCase):
 
     def test_zero_exit_claude_error_envelope_is_still_a_failure(self):
         envelope = json.dumps({"is_error": True, "result": "authentication_error: invalid API key"})
-        with mock.patch.object(runner.launcher, "run", return_value=launch.LaunchResult(
+        with mock.patch.object(runner.legacy_control, "run_cli", return_value=launch.LaunchResult(
                 text="authentication_error", stdout_tail=envelope, exit_code=0)):
             result = runner.launch(["claude", "--"], ".", 5)
         self.assertTrue(result.provider_error)
@@ -1404,7 +1406,7 @@ class TestSessionSpendingGuards(unittest.TestCase):
             with io.open(path, "w", encoding="utf-8") as fh:
                 json.dump(self.record(), fh)
             args = ["--persona", "C1", "--agent", "chat", "--skip-existing",
-                    "--results", folder, "--day", "test", "--max-sessions", "1"]
+                    "--results", folder, "--day", "test", "--max-sessions", "1", "--dry-run"]
             with mock.patch.object(runner, "play") as play, \
                     contextlib.redirect_stdout(io.StringIO()), \
                     contextlib.redirect_stderr(io.StringIO()):

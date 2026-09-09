@@ -104,6 +104,8 @@ import time
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import launch  # noqa: E402  the shared launcher owns the Codex sandbox flags
+from pathlib import Path
+import legacy_control  # durable live-call boundary; offline modes remain local
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, ".."))
@@ -286,6 +288,7 @@ def now():
 # ------------------------------------------------------------------ workdir --
 def prepare_workdir(case, agent, evals_path, workdir=None, link=True):
     """profile.yaml plus the skill, in the folder this agent reads skills from."""
+    workdir = legacy_control.workdir(workdir)
     if workdir:
         path = os.path.abspath(workdir)
         if not os.path.isdir(path):
@@ -349,7 +352,7 @@ def build_command(agent, case, model, workdir, prompt=None, config=None):
                "--cd", workdir,
                "--sandbox", "workspace-write",
                "-c", "sandbox_workspace_write.network_access=true",
-               "--skip-git-repo-check"] + launch.codex_cache_flags()
+               "--skip-git-repo-check", "--json"] + launch.codex_cache_flags()
         if model:
             cmd += ["--model", model]
         return cmd + ["--", prompt]
@@ -492,17 +495,7 @@ def api_messages(case, profile_text, schema_text):
     return "\n\n".join(system), "\n".join(user)
 
 
-def run_api(case, model, profile_path, timeout, prompt=None, conversation=False):
-    import _fetch
-    base = os.environ.get("OPENAI_BASE_URL", "").rstrip("/")
-    key = os.environ.get("OPENAI_API_KEY", "")
-    if not key or not base:
-        print("api mode needs OPENAI_BASE_URL and OPENAI_API_KEY in the environment. "
-              "Set them and run again, or use --agent claude / codex for the shell agents.",
-              file=sys.stderr)
-        return None, None, "no OPENAI_API_KEY / OPENAI_BASE_URL"
-    if not model:
-        return None, None, "api mode needs --model"
+def _api_payload(case, model, profile_path, prompt=None, conversation=False):
     if conversation:
         system, user = api_messages_conversation(case, prompt or case["prompt"])
     else:
@@ -511,9 +504,30 @@ def run_api(case, model, profile_path, timeout, prompt=None, conversation=False)
         with io.open(grader.SCHEMA_PATH, encoding="utf-8") as fh:
             schema_text = fh.read()
         system, user = api_messages(case, profile_text, schema_text)
-    payload = {"model": model, "temperature": 0,
-               "messages": [{"role": "system", "content": system},
-                            {"role": "user", "content": user}]}
+    return {"model": model, "temperature": 0,
+            "messages": [{"role": "system", "content": system},
+                         {"role": "user", "content": user}]}
+
+
+def run_api(case, model, profile_path, timeout, prompt=None, conversation=False):
+    # Freeze the actual messages, including generated prompt pack, schema and fixtures.
+    # The callback submits these exact bytes; it never re-reads mutable prompt inputs.
+    payload = _api_payload(case, model, profile_path, prompt, conversation)
+    return legacy_control.run_api(lambda: _submit_api(payload, timeout), model,
+                                  {"payload": payload, "timeout": timeout})
+
+
+def _run_api(case, model, profile_path, timeout, prompt=None, conversation=False):
+    # Compatibility name; there is no untracked direct API entrypoint.
+    return run_api(case, model, profile_path, timeout, prompt, conversation)
+
+
+def _submit_api(payload, timeout):
+    import _fetch
+    base = os.environ.get("OPENAI_BASE_URL", "").rstrip("/")
+    key = os.environ.get("OPENAI_API_KEY", "")
+    if not key or not base:
+        return None, None, "no OPENAI_API_KEY / OPENAI_BASE_URL"
     url = base + ("" if base.endswith("/chat/completions") else "/chat/completions")
     res = _fetch.post_json(url, payload, headers={"Authorization": "Bearer " + key},
                            cache_ttl=0, timeout=timeout, min_gap=0,
@@ -610,6 +624,8 @@ def answer_text(agent, stdout):
         obj = first_json_object(stdout)
         if isinstance(obj, dict) and isinstance(obj.get("result"), str):
             return obj["result"]
+    if agent == "codex":
+        return legacy_control.reply_text(launch.LaunchResult(text=stdout, stdout=stdout), agent)
     return stdout or ""
 
 
@@ -665,7 +681,7 @@ def usage_from_stdout(agent, stdout):
 
 def write_raw(stdout, config_name, case_label, run_index, when=None, results_root=None, day=None):
     """bench/results/<date>/raw/<config>-<case>-<run>.json, verbatim."""
-    day = day or (when or datetime.datetime.utcnow()).strftime("%Y-%m-%d")
+    day = day or legacy_control.result_day((when or datetime.datetime.utcnow()).strftime("%Y-%m-%d"))
     folder = os.path.join(results_root or RESULTS, day, "raw")
     if not os.path.isdir(folder):
         os.makedirs(folder, exist_ok=True)
@@ -681,7 +697,7 @@ def persist_report(report, config_name, case_label, run_index, when=None, result
     Temp workdirs do not survive a Claude Code restart; the results tree must be self-contained."""
     if report is None:
         return None
-    day = day or (when or datetime.datetime.utcnow()).strftime("%Y-%m-%d")
+    day = day or legacy_control.result_day((when or datetime.datetime.utcnow()).strftime("%Y-%m-%d"))
     folder = os.path.join(results_root or RESULTS, day, "raw")
     os.makedirs(folder, exist_ok=True)
     path = os.path.join(folder, raw_name(config_name, case_label, run_index).replace(".json", ".report.json"))
@@ -773,7 +789,7 @@ def atomic_write(path, text):
 
 def append_scorecard(row, when=None, results_root=None, day=None):
     """Append within the same output root and run label as the raw artifacts."""
-    day = day or (when or datetime.datetime.utcnow()).strftime("%Y-%m-%d")
+    day = day or legacy_control.result_day((when or datetime.datetime.utcnow()).strftime("%Y-%m-%d"))
     folder = os.path.join(results_root or RESULTS, day)
     if not os.path.isdir(folder):
         os.makedirs(folder)
@@ -785,6 +801,9 @@ def append_scorecard(row, when=None, results_root=None, day=None):
                 rows = json.load(fh)
         except ValueError:
             rows = []
+    if legacy_control.active():
+        identity = lambda item: tuple(item.get(k) for k in ("agent", "config", "case", "variant", "run_index"))
+        rows = [item for item in rows if identity(item) != identity(row)]
     rows.append(row)
     return write_scorecard(rows, folder, day)
 
@@ -882,6 +901,7 @@ def build_parser():
     ap.add_argument("--copy-skill", action="store_true",
                     help="copy the skill into the workdir instead of symlinking it")
     ap.add_argument("--keep", action="store_true", help="do not delete the temp workdir")
+    legacy_control.add_arguments(ap)
     return ap
 
 
@@ -913,6 +933,7 @@ def run_one(args, case, variant=None, prompt=None):
     conversation = case.get("kind") == "conversation"
     prompt = prompt or case["prompt"]
     label = case["id"] + ("#" + variant if variant else "")
+    legacy_control.job("%s/%s/%s" % (config.get("name") or agent, label, args.run_index))
     workdir, plan = prepare_workdir(case, agent, args.evals, args.workdir,
                                     link=False)  # always copy: symlinked skills are unreachable inside the sandbox
     mode = apply_budget_mode(workdir, config.get("budget_mode"))
@@ -952,7 +973,7 @@ def run_one(args, case, variant=None, prompt=None):
                 print("          fixtures pasted: %d characters" % len(fixture_text(case)))
         else:
             print("command:  cd %s && %s" % (workdir, shell(command)))
-        if not args.keep and not args.workdir:
+        if not args.keep and not args.workdir and not legacy_control.active():
             shutil.rmtree(workdir, ignore_errors=True)
         return 0, None
 
@@ -967,30 +988,8 @@ def run_one(args, case, variant=None, prompt=None):
             return 1, make_row(agent, args.model, case, None, time.time() - started, None,
                                workdir, "api", note, variant, config, args.run_index)
     else:
-        try:
-            # stdin is closed on purpose: `claude -p` treats anything piped on stdin as part of the
-            # prompt, and a runner launched from a shell heredoc hands that heredoc to every child.
-            # On 2026-09-05 four journey runs and ten sweep rows carried a launcher script that way.
-            proc = launch.start_process(command, cwd=workdir, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
-                                    stderr=subprocess.PIPE)
-            out, err = proc.communicate(timeout=args.timeout)
-            launch.finish_process(proc)
-            stdout = (out or b"").decode("utf-8", "replace")
-            stderr = (err or b"").decode("utf-8", "replace")
-            if proc.returncode != 0:
-                note = "the agent exited %d: %s" % (proc.returncode, stderr.strip()[-300:])
-        except subprocess.TimeoutExpired:
-            launch.stop_process(proc)
-            out, err = proc.communicate()
-            stdout = (out or b"").decode("utf-8", "replace")
-            stderr = (err or b"").decode("utf-8", "replace")
-            note = "timed out after %d s" % args.timeout
-        except OSError as exc:
-            note = "could not start %r: %s" % (command[0], exc)
-            print(note, file=sys.stderr)
-            return 1, make_row(agent, args.model, case, None, time.time() - started, None,
-                               workdir, shell(command), note, variant, config, args.run_index)
-        usage = usage_from_stdout(agent, stdout)
+        res = legacy_control.run_cli(command, workdir, args.timeout, agent, label=label)
+        stdout, stderr, usage, note = res.stdout, res.stderr, res.usage, res.note
     wall = time.time() - started
     command_text = "api" if agent == "api" else shell(command)
     raw_path = write_raw(stdout, config.get("name") or agent, label, args.run_index)
@@ -1010,7 +1009,7 @@ def run_one(args, case, variant=None, prompt=None):
         card = grader.grade_conversation(text, case, variant)
         card["report"] = path
     else:
-        report, path = find_report(workdir, stdout)
+        report, path = find_report(workdir, answer_text(agent, stdout))
         try:
             persist_report(report, config.get('name') if isinstance(config, dict) else None, case['id'], args.run_index, results_root=getattr(args, 'results', None))
         except Exception as exc:  # never let bookkeeping kill a run
@@ -1036,6 +1035,7 @@ def run_one(args, case, variant=None, prompt=None):
     return 0, row
 
 
+@legacy_control.entrypoint
 def main(argv=None):
     args = build_parser().parse_args(argv)
     if getattr(args, "results", None):
@@ -1076,6 +1076,8 @@ def main(argv=None):
             first = False
             code, _row = run_one(args, case, variant, prompt)
             worst = max(worst, code)
+            if code and not args.dry_run:
+                return worst
     return worst
 
 

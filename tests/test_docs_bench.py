@@ -1297,7 +1297,9 @@ class TestWhenTheProviderRefuses(unittest.TestCase):
                                "result": "Here:\n```json\n%s\n```" % json.dumps(answers),
                                "usage": {"input_tokens": 40, "output_tokens": 9}})
         real = docs_bench.build_command
+        boundary = docs_bench.legacy_control.run_cli
         try:
+            docs_bench.legacy_control.run_cli = docs_bench.launch.run
             docs_bench.build_command = lambda *a, **k: [
                 sys.executable, "-c", "import sys; sys.stdout.write(%r)" % envelope]
 
@@ -1313,6 +1315,7 @@ class TestWhenTheProviderRefuses(unittest.TestCase):
                 record, problem = docs_bench.run_row(row, BED, Args(), {})
         finally:
             docs_bench.build_command = real
+            docs_bench.legacy_control.run_cli = boundary
         self.assertIsNone(problem)
         self.assertEqual("completed", record["outcome"])
         self.assertEqual(1, record["attempts"])
@@ -1325,9 +1328,9 @@ class TestWhenTheProviderRefuses(unittest.TestCase):
         refused = launch.LaunchResult(
             text="", note="exited 1: ", seconds=180.0, attempts=3, provider_error=True,
             stdout_tail="", stderr_tail="", exit_code=1)
-        real = docs_bench.launch.run
+        real = docs_bench.legacy_control.run_cli
         try:
-            docs_bench.launch.run = lambda *a, **k: refused
+            docs_bench.legacy_control.run_cli = lambda *a, **k: refused
 
             class Args(object):
                 dry_run = False
@@ -1340,7 +1343,7 @@ class TestWhenTheProviderRefuses(unittest.TestCase):
             with quiet():
                 record, problem = docs_bench.run_row(row, BED, Args(), {})
         finally:
-            docs_bench.launch.run = real
+            docs_bench.legacy_control.run_cli = real
         self.assertIsNone(problem)
         self.assertEqual("provider_error", record["outcome"])
         self.assertIsNone(record["summary"], "a refused row was graded anyway")
@@ -1356,7 +1359,7 @@ class TestWhenTheProviderRefuses(unittest.TestCase):
         # provider_error outcome cannot be had in one runner and missed in the next.
         source = read(os.path.join(ROOT, "bench", "docs_bench.py"))
         self.assertNotIn("subprocess.Popen(command", source)
-        self.assertIn("launch.run(command, workdir", source)
+        self.assertIn("legacy_control.run_cli(command, workdir", source)
         for flag in ("--dangerously-skip-permissions", "--yolo", "--full-auto",
                      "danger-full-access"):
             self.assertNotIn(flag, source)
