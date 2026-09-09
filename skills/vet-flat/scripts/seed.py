@@ -12,10 +12,11 @@ money into a band and the commute destination into a postcode district, and prin
      enough to paste into a social post. `references/seed-format.md` specifies it exactly, so an
      agent with no shell can write and read one by hand.
 
-What is shared is an allow-list, not a deny-list: a field that is not listed cannot leak,
-whatever the profile grows later. Never shared, even when present: any address, any person's or
-company's name, the guarantor route, income, savings, the self-introduction, exact dates,
-tenancy terms, and everything under `bridging` except the `first_weeks` choice.
+What is shared is an allow-list of fields. Structured address, name, guarantor, income,
+savings, self-introduction, exact-date and tenancy fields are excluded, as is everything
+under `bridging` except `first_weeks`. Free text inside allowed fields is not anonymized:
+apart from postcode removal, names, addresses and other personal details can remain there.
+Review the card and decoded fields before sharing. Base64url is encoding, not encryption.
 
 Shared: name (yours, for the seed), flat type, budget as a band, budget_mode, commute district,
 move-in month, must_haves, avoid, priorities, my_questions, floor rules, light rules,
@@ -124,11 +125,15 @@ def die(msg, code=1):
 # The same deliberately small subset the other scripts read: nested maps, `- ` lists,
 # scalars, `>-` and `|` blocks. Enough for profile.yaml and nothing more.
 def _strip_comment(line):
-    out, quote = [], None
+    out, quote, escaped = [], None, False
     for ch in line:
         if quote:
             out.append(ch)
-            if ch == quote:
+            if escaped:
+                escaped = False
+            elif quote == '"' and ch == "\\":
+                escaped = True
+            elif ch == quote:
                 quote = None
         elif ch in "\"'":
             quote = ch
@@ -145,6 +150,11 @@ def _scalar(text):
     if not text:
         return None
     if len(text) > 1 and text[0] == text[-1] and text[0] in "\"'":
+        if text[0] == '"':
+            try:
+                return json.loads(text)
+            except ValueError:
+                pass
         return text[1:-1]
     low = text.lower()
     if low in ("true", "yes"):
@@ -467,9 +477,45 @@ def to_min_json(seed):
 def from_min_json(obj):
     if not isinstance(obj, dict):
         raise ValueError("a seed must be a JSON object")
-    if int(obj.get("v", 0)) != SEED_VERSION:
+    if type(obj.get("v")) is not int or obj["v"] != SEED_VERSION:
         raise ValueError("this seed says version %r; this script reads version %d"
                          % (obj.get("v"), SEED_VERSION))
+    # Shared codes are untrusted input. Unknown keys are dropped, but known keys must
+    # have their documented shape; strings cannot silently become booleans or lists.
+    for short in ("n", "t", "b", "m", "c", "w", "fw", "s"):
+        if obj.get(short) is not None and not isinstance(obj[short], str):
+            raise ValueError("seed field %s must be a string" % short)
+    for short, allowed in (("t", FLAT_TYPES), ("m", ("lite", "standard", "deep")),
+                           ("fw", FIRST_WEEKS)):
+        if obj.get(short) not in (None, "") and obj[short] not in allowed:
+            raise ValueError("seed field %s has an unsupported value" % short)
+    if obj.get("w") and not re.fullmatch(r"\d{4}-(?:0[1-9]|1[0-2])", obj["w"]):
+        raise ValueError("seed field w must be a month in YYYY-MM form")
+    if obj.get("q") is not None and type(obj["q"]) is not bool:
+        raise ValueError("seed field q must be a boolean")
+    for short in ("mh", "av", "pr", "qs"):
+        if obj.get(short) is not None and not isinstance(obj[short], list):
+            raise ValueError("seed field %s must be an array" % short)
+        for value in obj.get(short) or []:
+            if short == "qs" and isinstance(value, dict):
+                if not isinstance(value.get("text"), str):
+                    raise ValueError("a seed question must have string text")
+            elif not isinstance(value, str):
+                raise ValueError("seed field %s must contain strings" % short)
+    for short, boolean in (("fl", "reject_ground_floor"), ("li", "reject_no_sky")):
+        block = obj.get(short)
+        if block is not None and not isinstance(block, dict):
+            raise ValueError("seed field %s must be an object" % short)
+        if block and block.get(boolean) is not None and type(block[boolean]) is not bool:
+            raise ValueError("seed field %s.%s must be a boolean" % (short, boolean))
+    floor_band = (obj.get("fl") or {}).get("prefer_floor_band")
+    if floor_band is not None and not isinstance(floor_band, str):
+        raise ValueError("seed floor band must be a string")
+    aspects = (obj.get("li") or {}).get("best_aspects")
+    if aspects is not None and (not isinstance(aspects, list) or any(
+            not isinstance(a, str) or a not in ("N", "NE", "E", "SE", "S", "SW", "W", "NW")
+            for a in aspects)):
+        raise ValueError("seed best_aspects must contain compass directions")
     seed = {"version": SEED_VERSION}
     for long_key, short in ALLOW:
         seed[long_key] = obj.get(short)
@@ -601,10 +647,20 @@ def yaml_scalar(value):
     if isinstance(value, bool):
         return "yes" if value else "no"
     text = str(value)
-    if text and (text[0] in "\"'&*#?|-<>=!%@`[{" or text[0].isdigit() or ":" in text
-                 or "–" in text or text.strip() != text):
-        return '"%s"' % text.replace("\\", "\\\\").replace('"', '\\"')
+    if (not text or text[0] in "\"'&*#?|-<>=!%@`[{" or text[0].isdigit() or ":" in text
+            or "–" in text or text.strip() != text or " #" in text
+            or any(ord(ch) < 32 or ch in "\x85\u2028\u2029" for ch in text)
+            or text.lower() in ("yes", "no", "true", "false", "null", "~")):
+        # JSON string syntax is valid YAML, and escapes every line separator. A shared
+        # seed is untrusted text; it must never be able to add another YAML setting.
+        return (json.dumps(text, ensure_ascii=False).replace("\x85", "\\u0085")
+                .replace("\u2028", "\\u2028").replace("\u2029", "\\u2029"))
     return text
+
+
+def comment_text(value):
+    """Keep untrusted hints on the comment line that owns them."""
+    return " ".join(str(value).split())
 
 
 def yaml_block(seed, indent="  "):
@@ -644,7 +700,7 @@ def yaml_block(seed, indent="  "):
             out.append("%s  reject_no_sky: yes" % indent)
         if light.get("best_aspects"):
             out.append("%s  best_aspects:" % indent)
-            out.extend("%s    - %s" % (indent, a) for a in light["best_aspects"])
+            out.extend("%s    - %s" % (indent, yaml_scalar(a)) for a in light["best_aspects"])
     out.append("%squiet_over_light: %s" % (indent, "yes" if seed.get("quiet_over_light") else "no"))
     if seed.get("first_weeks"):
         out.append("%sfirst_weeks: %s" % (indent, yaml_scalar(seed["first_weeks"])))
@@ -708,7 +764,7 @@ def card(seed, code, journey=None, reveal_address=False, trimmed=None):
     if seed.get("name"):
         title += " — %s" % seed["name"]
     out = [title,
-           "what I am looking for, and nothing about where I live, what I earn or who I am.",
+           "my search preferences; review the free text for personal details before sharing.",
            ""]
     out.extend(sentences(seed))
     out.append("")
@@ -759,10 +815,10 @@ def profile_yaml(seed, code, today=None):
         "",
         "min_floor_area_sqft:                    # FILL IN",
         "max_building_age_years:                 # FILL IN",
-        "flat_type: %s" % (seed.get("flat_type") or "one_bed"),
+        "flat_type: %s" % yaml_scalar(seed.get("flat_type") or "one_bed"),
         "separate_bedroom_required: true         # FILL IN if a studio is fine",
         "occupants: 1                            # FILL IN",
-        "budget_mode: %s" % (seed.get("budget_mode") or "standard"),
+        "budget_mode: %s" % yaml_scalar(seed.get("budget_mode") or "standard"),
         "experience: none",
         "",
     ]
@@ -789,22 +845,22 @@ def profile_yaml(seed, code, today=None):
     lines.append("")
     lines.append("budget:")
     lines.append("  rent_pcm_target:                      # FILL IN")
-    hint = (" — the seed said %s" % seed["budget_band"]) if seed.get("budget_band") else ""
+    hint = (" — the seed said %s" % comment_text(seed["budget_band"])) if seed.get("budget_band") else ""
     lines.append("  all_in_pcm_ceiling:                   # FILL IN%s" % hint)
     lines.append("  stretch_ceiling_and_conditions:       # FILL IN")
     lines.append("")
     lines.append("bridging:")
-    lines.append("  first_weeks: %s" % (seed.get("first_weeks") or "undecided"))
+    lines.append("  first_weeks: %s" % yaml_scalar(seed.get("first_weeks") or "undecided"))
     lines.append("")
     lines.append("move_in_window:")
-    hint = (" \u2014 the seed said %s" % pretty_month(seed["move_in_month"])) if seed.get("move_in_month") else ""
+    hint = (" \u2014 the seed said %s" % comment_text(pretty_month(seed["move_in_month"]))) if seed.get("move_in_month") else ""
     lines.append("  earliest:                             # FILL IN%s" % hint)
     lines.append("  latest:                               # FILL IN")
     lines.append("  tolerance_days: 0")
     lines.append("")
     lines.append("commute:")
     hint = (" \u2014 the seed only carried the district %s"
-            % seed["commute_area"]) if seed.get("commute_area") else ""
+            % comment_text(seed["commute_area"])) if seed.get("commute_area") else ""
     lines.append("  destination:                          # FILL IN%s" % hint)
     lines.append('  arrive_by: "09:00"')
     lines.append("  max_door_to_door_min:                 # FILL IN")
@@ -814,7 +870,7 @@ def profile_yaml(seed, code, today=None):
     lines.append("floors:")
     lines.append("  reject_ground_floor: %s" % ("true" if floors.get("reject_ground_floor") else "false"))
     lines.append("  prefer_floor_band: %s"
-                 % ('"%s"' % floors["prefer_floor_band"] if floors.get("prefer_floor_band") else ""))
+                 % (yaml_scalar(floors["prefer_floor_band"]) if floors.get("prefer_floor_band") else ""))
     lines.append("")
     light = seed.get("light") or {}
     lines.append("light:")
@@ -958,8 +1014,8 @@ def cmd_import(args):
     if args.json:
         json.dump({"command": "import", "seed_code": code, "seed": seed,
                    "written_to": args.out, "still_to_fill_in": [k for k, _ in BLANKS],
-                   "note": "a seed never carries budget numbers, dates, a destination or an "
-                           "income-check route"},
+                   "note": "structured personal budget, date, destination and income-check "
+                           "fields stay blank; review free text for personal details"},
                   sys.stdout, ensure_ascii=False, indent=1)
         print()
         return 0

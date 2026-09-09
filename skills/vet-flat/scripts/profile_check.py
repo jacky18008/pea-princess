@@ -10,6 +10,7 @@ profile uses (mappings, lists of strings or mappings, scalars, comments).
 """
 import argparse
 import json
+import math
 import re
 import sys
 
@@ -128,7 +129,8 @@ def load(path):
     text = open(path, encoding="utf-8").read()
     try:
         import yaml  # type: ignore
-        return yaml.safe_load(text) or {}
+        value = yaml.safe_load(text)
+        return {} if value is None else value
     except ImportError:
         return _mini_yaml(text)
 
@@ -144,6 +146,8 @@ def get(d, dotted):
 
 def check(profile):
     errors, warnings = [], []
+    if not isinstance(profile, dict):
+        return ["the profile must be a block of named settings, not a list or single value"], []
     for k in profile:
         if k not in KNOWN_TOP:
             errors.append(f"unknown field '{k}' — the agent may have invented it; remove or rename")
@@ -153,8 +157,17 @@ def check(profile):
             errors.append(f"'{key}' is '{v}'; allowed: {', '.join(sorted(allowed))}")
     for key, (lo, hi) in RANGES.items():
         v = get(profile, key)
-        if isinstance(v, (int, float)) and not (lo <= v <= hi):
+        if v is None or v == "":
+            continue
+        if (isinstance(v, bool) or not isinstance(v, (int, float))
+                or (isinstance(v, float) and not math.isfinite(v))):
+            errors.append(f"'{key}' must be a finite number, not text, a boolean or a list")
+        elif not (lo <= v <= hi):
             errors.append(f"'{key}' = {v} is outside the sensible range {lo}–{hi}")
+    for key in ("axis_depth", "limits", "budget", "bridging", "move_in_window", "commute",
+                "floors", "light", "tenancy", "models"):
+        if profile.get(key) is not None and not isinstance(profile[key], dict):
+            errors.append(f"'{key}' must be a block of settings, not a list or single value")
     adv = profile.get("advanced")
     if adv is not None:
         if not isinstance(adv, dict):

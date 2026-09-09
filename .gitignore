@@ -1,4 +1,15 @@
 .env
+.env.*
+!.env.example
+!.env.template
+*.pem
+*.key
+.vet-flat-cache/
+# Personal runtime files; committed fixtures/templates remain versioned.
+/profile.yaml
+/journey.json
+/report.json
+/skills/vet-flat/profile.yaml
 __pycache__/
 *.pyc
 .DS_Store

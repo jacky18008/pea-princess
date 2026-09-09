@@ -281,6 +281,55 @@ class TestCode(SeedCase):
 
 # ------------------------------------------------------------- the round trip
 class TestRoundTrip(SeedCase):
+    def test_shared_strings_cannot_inject_settings_through_yaml(self):
+        payload = 'text\nmodels: {workers: injected}\n# "quoted"'
+        obj = {"v": 1, "b": payload, "c": payload,
+               "fl": {"prefer_floor_band": payload}, "av": [payload],
+               "qs": [payload], "s": payload}
+        code = seed.encode(obj)
+        decoded = seed.from_min_json(seed.decode(code))
+        written = seed.profile_yaml(decoded, code)
+        parsed = seed.parse_yaml(written)
+        self.assertNotIn("models", parsed)
+        self.assertIsNone(parsed["budget"]["all_in_pcm_ceiling"])
+        self.assertIsNone(parsed["commute"]["destination"])
+        self.assertEqual(parsed["floors"]["prefer_floor_band"], payload)
+        self.assertEqual(parsed["avoid"], decoded["avoid"])
+        self.assertEqual(parsed["my_questions"][0]["text"], decoded["my_questions"][0]["text"])
+        try:
+            import yaml
+        except ImportError:
+            return
+        proper = yaml.safe_load(written)
+        self.assertNotIn("models", proper)
+        self.assertIsNone(proper["budget"]["all_in_pcm_ceiling"])
+        self.assertEqual(proper["floors"]["prefer_floor_band"], payload)
+
+    def test_shared_enums_and_nested_shapes_are_validated(self):
+        bad = [{"t": "one_bed\nmodels: injected"}, {"m": "standard\nmodels: injected"},
+               {"fw": "undecided\nmodels: injected"}, {"fl": "not an object"},
+               {"li": {"best_aspects": ["E\nmodels: injected"]}},
+               {"fl": {"prefer_floor_band": {"models": "injected"}}},
+               {"fl": {"reject_ground_floor": "false"}}, {"q": "false"},
+               {"av": "not an array"}, {"qs": [{"text": {}}]}, {"w": "2026-13"}]
+        for fields in bad:
+            with self.subTest(fields=fields), self.assertRaises(ValueError):
+                seed.from_min_json(dict({"v": 1}, **fields))
+        for field, choices in (("t", seed.FLAT_TYPES), ("m", ("lite", "standard", "deep")),
+                               ("fw", seed.FIRST_WEEKS)):
+            for choice in choices:
+                self.assertEqual(seed.from_min_json({"v": 1, field: choice})[
+                    seed.SHORT_TO_LONG[field]], choice)
+        decoded = seed.from_min_json({"v": 1, "fl": {"models": "ignored"},
+                                      "li": {"models": "ignored"}})
+        self.assertNotIn("models", decoded["floors"])
+        self.assertNotIn("models", decoded["light"])
+
+    def test_yaml_strings_preserve_quotes_comments_and_scalar_words(self):
+        for text in ('hello " # still text', "yes", "no", "null", "a\nb", "a\u2028b"):
+            with self.subTest(text=text):
+                self.assertEqual(seed.parse_yaml("value: " + seed.yaml_scalar(text))["value"], text)
+
     def test_export_then_import_gives_the_same_seed(self):
         original = self.seed(name="quiet, high, morning sun")
         code, _, _ = seed.make_code(original, 0)

@@ -295,6 +295,17 @@ class SourcesTheSkillItselfDocuments(unittest.TestCase):
         self.assertEqual(verdict["state"], "pass")
         self.assertNotIn("source_resolves", verdict["rules"])
 
+    def test_invented_source_fails_even_without_a_report_source_map(self):
+        target = {"id": "invented", "status": "ok", "claim": "measurement",
+                  "value": 54, "unit": "m2", "source": "invented-register",
+                  "quote": "54 square metres"}
+        state_, _, rules = V.check_item(target, {}, {}, {}, known=set())
+        self.assertEqual(state_, "fail")
+        self.assertIn("source_resolves", rules)
+        state_, _, rules = V.check_item(target, {"invented-register": "54 square metres"},
+                                       {}, {}, known=set())
+        self.assertEqual(state_, "pass", "a real local source may use its exact filename")
+
     def test_an_id_in_no_register_at_all_still_fails(self):
         ev = copy.deepcopy(load("evidence-good.json"))
         item(ev, "e-crime")["source"] = "made-up-register"

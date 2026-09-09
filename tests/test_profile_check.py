@@ -9,6 +9,8 @@ import unittest
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.join(HERE, "..")
 CHECK = os.path.join(ROOT, "skills", "vet-flat", "scripts", "profile_check.py")
+sys.path.insert(0, os.path.dirname(CHECK))
+import profile_check
 
 
 def run(text):
@@ -19,6 +21,26 @@ def run(text):
 
 
 class TestProfileCheck(unittest.TestCase):
+    def test_wrong_numeric_types_cannot_bypass_hard_constraint_validation(self):
+        for dotted in profile_check.RANGES:
+            for value in ("2100", "unlimited", True, [], float("inf"), float("nan")):
+                with self.subTest(field=dotted, value=value):
+                    profile = {}
+                    node = profile
+                    parts = dotted.split(".")
+                    for key in parts[:-1]:
+                        node = node.setdefault(key, {})
+                    node[parts[-1]] = value
+                    errors, _ = profile_check.check(profile)
+                    self.assertTrue(any(dotted in error for error in errors), errors)
+
+    def test_non_mapping_settings_are_invalid_without_crashing(self):
+        for profile in ([], "budget: 2100", True, {"budget": "unlimited"},
+                        {"limits": [100]}, {"axis_depth": "deep"}):
+            with self.subTest(profile=profile):
+                errors, _ = profile_check.check(profile)
+                self.assertTrue(errors)
+
     def test_shipped_profiles_are_valid(self):
         for name in sorted(os.listdir(os.path.join(ROOT, "skills", "vet-flat", "profiles"))):
             if not name.endswith(".yaml"):

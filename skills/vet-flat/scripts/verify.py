@@ -38,9 +38,10 @@ fixed_form          every fixed question the tier owes an answer to is answered
                     somewhere, in one of its three states. The tier mapping is read
                     from references/fixed-questions.yaml and never counted in code.
 
-Run with neither --sources nor --report and there is nothing to check a quote or a
-source id against, so every item comes back `unknown` rather than quietly passing. The
-cap, contradiction and fixed-form checks still run: they read the evidence itself.
+With neither --sources nor --report, documented source ids can resolve but their quotes
+remain unchecked. Those items can pass the other rules, and counts.quotes_unchecked must
+be inspected before describing them as verified facts. Invented source ids fail. The cap,
+contradiction and fixed-form checks still run: they read the evidence itself.
 
 AND, FOR THE BENCH ONLY: --gold runs an INFORMATION-SUFFICIENCY PROBE. Given this
 evidence and nothing else, is each known-good fact even derivable? It is deterministic
@@ -259,11 +260,13 @@ def check_item(item, pasted, source_ids, report_texts, flat=None, strict=False,
             reasons.append("no pasted file named %r" % source[len("pasted:"):])
     elif source and source in (known or ()):
         pass                       # a documented source in references/sources.yaml
-    elif source and source_ids and source not in source_ids:
+    elif source and source in pasted:
+        pass                       # the exact local name is also accepted without pasted:
+    elif source and source not in source_ids:
         rules.append("source_resolves")
         reasons.append("source id %r is in no sources[] entry and in no sources.yaml entry"
                        % source)
-    elif source and source_ids and not source_ids.get(source):
+    elif source and not source_ids.get(source):
         rules.append("source_resolves")
         reasons.append("source id %r has no url" % source)
 
