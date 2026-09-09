@@ -1,5 +1,5 @@
 {
-  "validated_at_utc": "2026-09-09T16:46:45.740278+00:00",
+  "validated_at_utc": "2026-09-09T16:52:58.661155+00:00",
   "reproducible_output_sha256": {
     "ablation-results.json": "b7fec385fe383f197450b159120754be856975c59dc00b044c2ec63f4181b380",
     "live-results.json": "c87b393e68c526eedf5e58be52b5db2d7009600fb3cf1356975b4d3e07a084e1",
@@ -10,7 +10,7 @@
     "source-review-reconciliation.md": "92b35c894b56a882af9cc67c036405afe96828a9d7b59420f8247f60943bee64",
     "review-coverage-audit.json": "9288d9eec927e100dbea9ddc3a2f2620a2fe26737b8741c36bc26a0b6d5ec771",
     "figures/cost-quality.png": "04733051d9bfc211e5beacacd63754dbcc7125175bb23240d4f36a9f51100123",
-    "figures/cost-quality.svg": "0e11c0f00de6f679ec2046ea9d5386540cbd747cd62dec4ed8d3c0a2a34ddff8"
+    "figures/cost-quality.svg": "e98616449f5e58426f52de40289a2abeb9bcccb65523921128717bc5f72774ed"
   },
   "json_files_parsed": 16,
   "local_markdown_links_checked": 33,
@@ -51,5 +51,11 @@
     "png_and_svg_visually_inspected": true,
     "stable_svg_metadata_and_ids": true
   },
-  "new_model_calls_for_final_validation": 0
+  "new_model_calls_for_final_validation": 0,
+  "formatting_cleanup": {
+    "svg": "Trailing whitespace normalized; exact equivalence to prior SVG after line-end normalization verified.",
+    "targeted_source_review": "48 empty blockquote markers normalized; review text and JSON unchanged.",
+    "plot_repeated_byte_identical": true,
+    "other_reproducible_output_hashes_unchanged": true
+  }
 }

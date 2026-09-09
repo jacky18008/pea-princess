@@ -63,6 +63,9 @@ fig.subplots_adjust(left=.185, right=.98, bottom=.13, top=.835, wspace=.04, hspa
 (HERE / "figures").mkdir(exist_ok=True)
 for suffix in ("png", "svg"):
     metadata = {"Date": "2026-09-09"} if suffix == "svg" else None
-    fig.savefig(HERE / "figures" / ("cost-quality." + suffix), dpi=180, facecolor="white", metadata=metadata)
+    output = HERE / "figures" / ("cost-quality." + suffix)
+    fig.savefig(output, dpi=180, facecolor="white", metadata=metadata)
+    if suffix == "svg":
+        output.write_text("\n".join(line.rstrip() for line in output.read_text().splitlines()) + "\n")
 plt.close(fig)
 print(HERE / "figures/cost-quality.png")

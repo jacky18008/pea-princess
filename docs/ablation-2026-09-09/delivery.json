@@ -1,7 +1,7 @@
 {
   "report": "docs/ablation-2026-09-09/results.md",
-  "backup_directory": "/Users/chenhsienhao/Documents/pea-princess-ablation-20260909T164537Z",
-  "verification_manifest": "/Users/chenhsienhao/Documents/pea-princess-ablation-20260909T164537Z/COMPLETED.json",
+  "backup_directory": "/Users/chenhsienhao/Documents/pea-princess-ablation-20260909T165258Z",
+  "verification_manifest": "/Users/chenhsienhao/Documents/pea-princess-ablation-20260909T165258Z/COMPLETED.json",
   "result_commit_location": "source_commit in the verification manifest (avoids a self-referential commit hash)",
   "frozen_source_commit": "7b7c3d4",
   "prospective_source_review_commit": "fe09e7c",
