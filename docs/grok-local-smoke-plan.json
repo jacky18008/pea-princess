@@ -1,0 +1,17 @@
+{
+  "date": "2026-09-09",
+  "surface": "Installed official Grok Bot native desktop UI",
+  "method": "User-directed native skill/document upload; no private session endpoints or credential access",
+  "bundle": "dist/vet-flat-skill.zip",
+  "bundle_sha256": "b3ab818b201f57faab7505b2c95bebc08f254d86e75b43bf03b22404e06cf8e5",
+  "max_test_prompts": 3,
+  "token_usage": "Not exposed by UI; unknown, not zero. Initial bot greeting is outside test prompt count.",
+  "data": "Public skill and synthetic housing scenarios only",
+  "claude_calls": 0,
+  "test_1": "Load attached skill locally; disclose capabilities and source files; no external connectors.",
+  "test_2": "Synthetic budget/conditions and two options; source-supported comparison.",
+  "test_3": "Budget reduced only for one option plus conditional permission; verify preservation and explain deltas.",
+  "quality": "Functional compatibility sample, no cross-model equivalence claim",
+  "bundle_skill_sha256": "ee9f59b5a29d57c441e7ad4c4a1a54176c2898d1029e6e484f8d9ca55baa3bbe",
+  "exact_prompts": "grok-smoke-prompts.json"
+}

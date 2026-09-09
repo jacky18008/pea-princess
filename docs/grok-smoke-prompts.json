@@ -1,0 +1,11 @@
+{
+  "date": "2026-09-09",
+  "plan": "grok-local-smoke-plan.json",
+  "privacy": "Synthetic test prompts; no user housing requirements or private files.",
+  "recording": "Prompts 1 and 2 copied exactly from the native UI submission; prompt 3 saved before submission.",
+  "prompts": [
+    "這是 Pea Princess 的相容性測試，附件是公開 skill，不含我的私人資料。請只在你自己的測試工作目錄解開附件，先讀 vet-flat/SKILL.md 及 references/session-harness.md，再依需要讀其引用文件。不要讀取或使用我的其他聊天、GitHub、連接器、個人檔案；不要聯絡任何人、上網查房或建立自動化。若你不能解 ZIP、讀檔或執行 Python，直接說明能力限制，不要假裝成功。請先回覆你實際讀到的檔案路徑、這個 skill 的用途、可運作的模式，以及持久保存條件的方法；不要把範例 profile 當成我的條件。這是最多三個測試 prompt 的第一個，先完成這一步就停。回覆繁體中文。",
+    "測試 2/3。以下全部是虛構測試資料，不是我的個人租屋條件。請在 /workspace/pea-princess-compat-test/scenario 建立私人 .pea-state，使用附件的 session_state.py 保存我的原話、條件與來源；只操作此測試目錄，不使用網路或任何連接器。設定 manual、budget_mode=lite、fixed_form=gate、ask_if_missing=none。條件：每月 all-in 上限 £2,400；10 月 1 日前入住；通勤最多 25 分鐘；私人浴室；不接受 ground floor。來源 listing-A（房東自述）：租金 £2,320/月、固定 bills £100/月、2 樓、私人浴室、9 月 25 日可入住、通勤估計 20 分鐘。來源 listing-B（房東自述）：租金 £2,150/月、固定 bills £160/月、ground floor、私人浴室、9 月 20 日可入住、通勤估計 24 分鐘、是否潮濕未知。其他沒有提供的證据全部未知，不能因這些條件符合就把整間房判 PASS。請回答 A/B 的費用和條件比較，並記錄哪些不符。另實際計算已讀 SKILL.md 的 SHA-256，執行 state verify 和 checkpoint，回報真實 revision 與驗證摘要。總回答盡量 350 字內；完成這一步就停。",
+    "測試 3/3，中途更改條件：只把 A 的 all-in 上限降到 £2,350；B 的上限仍是 £2,400。把『不接受 ground floor』改成『僅 B 可以 ground floor，但必須有獨立現場檢查證明乾燥』。目前沒有這份獨立證明，不得把房東說法當成它。其他條件及 listing 原始數字全部維持。請用既有 .pea-state 保存這段原話、更新相同的 requirement ID 或清楚建立有 scope 的 override，保留舊事件。先 checkpoint，再開新的 Python process 從磁碟執行 context／verify，證明恢復的是最新版本。請回覆新舊 delta、A/B 重判與尚未滿足條件，不能將 B 直接判 PASS。請把 scenario 的原始請求、來源、.pea-state 及 verify/context 輸出打包成 PRIVATE-grok-smoke-evidence.zip 附件供我下載；只打包這個虛構 scenario，不含其他 Bot 檔案或憑證。附上 archive SHA-256。這是最後一個測試，完成就停止，不建立 routine，也不要自動擴充測試。"
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "date": "2026-09-09",
+  "scope": "Downloadable skill/tool product clarification, official provider-policy review and private intervention evaluation candidates",
+  "offline_suite": {
+    "tests": 1886,
+    "seconds": 49.51,
+    "result": "PASS",
+    "log_sha256": "cc8bb13b0ba7a0d3f6584943ccbd1e3cd9adc0e02f655a562fff224f634e80ef"
+  },
+  "new_extractor_tests": 14,
+  "extractor_review": "Independent review found a FIFO-open hang; O_NONBLOCK and a bounded regression were added before the passing full suite.",
+  "intervention_snapshots": {
+    "saved_sessions": 2,
+    "answered_candidates": 1,
+    "queued_candidates": 0,
+    "unknown_candidates": 0,
+    "private": true
+  },
+  "candidate_limits": "Snapshots, not continuous uploads. Original session logs continue to capture later input; rerun extraction for later replies. Existing FIFO associations are labeled; observed replies are not ground truth.",
+  "provider_policy": "Official sources inspected on 2026-09-09. Claude/Codex interpretation independently reviewed; no individual vendor endorsement claimed.",
+  "claude_calls": 0,
+  "grok_test": "Separate native UI synthetic test, bounded to three submitted test prompts. Provider internal calls and token usage are unknown; see Grok smoke records.",
+  "source_changes": "The active persona backend and source fingerprints were not changed during the user's desktop test.",
+  "tested_sources": {
+    "tools/playground_cases.py": "96d4607f9351301e3890731483710f718f1c90b68dc9488e7410cd6d6456dbc3",
+    "tests/test_playground_cases.py": "0174059aa39d13e17627bde39ebd8dde974b57324405397897a78417985d64b6"
+  }
+}

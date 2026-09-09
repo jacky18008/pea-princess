@@ -31,16 +31,16 @@ On a phone
 
 | Surface | Blocks | Source |
 |---|---|---|
-| README — the front page | 14 | `README.md` |
+| README — the front page | 18 | `README.md` |
 | docs/USING.md — the plain-words walkthrough | 42 | `docs/USING.md` |
 | docs/INSTALL.md — install page | 9 | `docs/INSTALL.md` |
 | docs/EXPERIMENTS.md — which configuration to run | 7 | `docs/EXPERIMENTS.md` |
-| onboarding.md — what the skill says to a new user | 28 | `skills/vet-flat/references/onboarding.md` |
+| onboarding.md — what the skill says to a new user | 30 | `skills/vet-flat/references/onboarding.md` |
 | sharing.md — social posts and the card description | 6 | `skills/vet-flat/references/sharing.md` |
 | inputs.md — the one message that asks the user for what is missing | 1 | `skills/vet-flat/references/inputs.md` |
 | profiles/ — the sentences a profile carries | 14 | `skills/vet-flat/profiles/*.yaml` |
 | seed.py — the seed card sentences (read-only here) | 25 | `skills/vet-flat/scripts/seed.py` |
-| **Total** | **146** | |
+| **Total** | **152** | |
 
 ---
 
@@ -78,12 +78,23 @@ All prose paragraphs. Tables, headings and code blocks are not in the deck.
 - write-back: yes
 
 ```text
-> Status: **draft** (2026-09-03). Nine fetchers, the report schema, both renderers, 15 axis references, onboarding, the question bank, budget modes and the benchmark are in; the area-sweep orchestrator is in progress. Docs: `docs/INSTALL.md`, `docs/SCRIPTS.md`, `docs/CONVENTIONS.md`.
+> Status: **draft**. Local collection, area sweep, report rendering and experiment harnesses are implemented. Read [security and privacy boundaries](SECURITY.md) before handling personal data or building a release. Usage: `docs/INSTALL.md`, `docs/SCRIPTS.md`, `docs/CONVENTIONS.md`.
 ```
 
 ### deck:readme:4
 
-- source: `README.md` · L24
+- source: `README.md` · L9
+- under: # Pea Princess · 豌豆公主 (`vet-flat`)
+- lang: en
+- write-back: yes
+
+```text
+**Distribution:** download the skill/tool and run it with your own agent. Pea Princess does not host model workers or handle subscription credentials. The local persona lab is a testing companion. See [desktop/mobile boundaries, provider subscription policies, and release gates](docs/local-product-and-provider-policy.md).
+```
+
+### deck:readme:5
+
+- source: `README.md` · L26
 - under: # claude.ai / Claude Cowork / ChatGPT Skills: upload the zip from Releases
 - lang: en
 - write-back: yes
@@ -92,9 +103,9 @@ All prose paragraphs. Tables, headings and code blocks are not in the deck.
 Codex: enable sandbox network (`sandbox_workspace_write.network_access = true`) or use manual mode.
 ```
 
-### deck:readme:5
+### deck:readme:6
 
-- source: `README.md` · L27
+- source: `README.md` · L29
 - under: ## Scripts (Python 3.9 standard library only; network via curl)
 - lang: en
 - write-back: yes
@@ -103,9 +114,9 @@ Codex: enable sandbox network (`sandbox_workspace_write.network_access = true`) 
 All in `skills/vet-flat/scripts/`; each prints one JSON object with `source_url`, `retrieved_at`, `http_status`, `ok` and an evidence class. Usage details: `docs/SCRIPTS.md`.
 ```
 
-### deck:readme:6
+### deck:readme:7
 
-- source: `README.md` · L42
+- source: `README.md` · L44
 - under: ## Scripts (Python 3.9 standard library only; network via curl)
 - lang: en
 - write-back: yes
@@ -114,9 +125,9 @@ All in `skills/vet-flat/scripts/`; each prints one JSON object with `source_url`
 Report layout for people without a shell: open `viewer/viewer.html` in a browser and paste the JSON.
 ```
 
-### deck:readme:7
+### deck:readme:8
 
-- source: `README.md` · L45
+- source: `README.md` · L47
 - under: ## Why "Pea Princess"
 - lang: en
 - write-back: yes
@@ -125,9 +136,9 @@ Report layout for people without a shell: open `viewer/viewer.html` in a browser
 In the fairy tale only the real princess feels the pea through twenty mattresses. Here **you** are the princess. This tool lifts the mattresses one by one: it reads the registers, counts the crimes, checks the planning applications and the company filings, and tells you where the pea might be. Only you can feel it: go and see the flat, walk the street, talk to the agent and the landlord. The report is a filter, and when you are in a hurry it is only a filter. Its first duty is to say what it does not know and ask you for it.
 ```
 
-### deck:readme:8
+### deck:readme:9
 
-- source: `README.md` · L48
+- source: `README.md` · L50
 - under: ## No code required · 不用會寫程式
 - lang: en
 - write-back: yes
@@ -136,26 +147,15 @@ In the fairy tale only the real princess feels the pea through twenty mattresses
 Everything is done by typing sentences: install (one pasted line, or a zip upload in a chat app), then ask, paste what it asks for, read the report, and change any setting by saying it. `docs/USING.md` walks through it in five minutes, in English and Chinese.
 ```
 
-### deck:readme:9
+### deck:readme:10
 
-- source: `README.md` · L51
+- source: `README.md` · L53
 - under: ## Start here, on any platform
 - lang: en
 - write-back: yes
 
 ```text
 Ask **"What can this do?"** (or 這能幹嘛？). The answer comes from `skills/vet-flat/references/onboarding.md`: a short pitch, three starting points (a listing → vet it; an area or destination → sweep; no idea → a ten-fact primer and six questions with suggested defaults). Your rules live in `profile.yaml` (budget, size, flat type, deal-breakers, priorities, `budget_mode` lite/standard/deep for £20 plans and chat-only use). The hard follow-up questions the agent must ask are in `references/questions.md`.
-```
-
-### deck:readme:10
-
-- source: `README.md` · L54
-- under: ## Benchmark (facts must be right on every model; verdicts may differ)
-- lang: en
-- write-back: yes
-
-```text
-`evals/evals.json` has 8 real flats across 7 boroughs plus 2 conversation cases ("what can this do", "I have no idea"), with truth produced by the repo's own fetchers on 2026-09-03. `bench/grade.py` scores fact recall, fabrications, citations, unknown-honesty and hard-filter consistency; `bench/run.py --dry-run` prints the exact command for Claude Code, Codex, Gemini CLI or an OpenAI-compatible API. See `bench/README.md`.
 ```
 
 ### deck:readme:11
@@ -166,7 +166,7 @@ Ask **"What can this do?"** (or 這能幹嘛？). The answer comes from `skills/
 - write-back: yes
 
 ```text
-**Which configuration to run:** `docs/EXPERIMENTS.md` compares fifteen setups on five real flats against a human-built gold set of landmines, with a cost-versus-recall chart. The default it argues for is a cheap model for the extraction workers and the strongest model you have for the judgment — the tables are there so you can pick something else.
+`evals/evals.json` has 8 real flats across 7 boroughs plus 2 conversation cases ("what can this do", "I have no idea"), with truth produced by the repo's own fetchers on 2026-09-03. `bench/grade.py` scores fact recall, fabrications, citations, unknown-honesty and hard-filter consistency; `bench/run.py --dry-run` prints the exact command for Claude Code, Codex, Gemini CLI or an OpenAI-compatible API. See `bench/README.md`.
 ```
 
 ### deck:readme:12
@@ -177,12 +177,56 @@ Ask **"What can this do?"** (or 這能幹嘛？). The answer comes from `skills/
 - write-back: yes
 
 ```text
-**Whole conversations, not one answer:** `docs/JOURNEYS.md` scores nine scripted multi-turn journeys, and `docs/PERSONAS.md` goes one step further — sixteen fictional people played by a model, with a deterministic controller holding their documents so nothing can be invented, a judge that has to quote its evidence, and a paired probe per person that moves exactly one setting. `python3 bench/personas.py --matrix pilot --dry-run` prints the whole plan without calling a model.
+**Which configuration to run:** `docs/EXPERIMENTS.md` records the original flat-vetting comparisons. The [later context ablation](docs/ablation-2026-09-09/results.md) includes generation costs and source reviews: extra summarization, structured memory and multiple retrieval calls did not save tokens at the tested sizes. Keep one agent with full context as the starting point; the four-role pipeline remains experimental. These studies measure different tasks, not a universal model ranking.
 ```
 
 ### deck:readme:13
 
+- source: `README.md` · L60
+- under: ## Benchmark (facts must be right on every model; verdicts may differ)
+- lang: en
+- write-back: yes
+
+```text
+**Long-running projects and changing requirements:** the [session harness](docs/session-harness.md) saves exact user requests, revisioned requirements and conditional exceptions, source snapshots, goals, TODOs and execution state. The managed runner inserts the current packet itself and rejects stale results. Short `AGENTS.md` / `CLAUDE.md` files link to detailed rules; pointers alone cannot ensure reading. [Lifecycle validation](docs/session-harness-validation.md) tests recovery without new model calls, not quality equivalence or token savings.
+```
+
+### deck:readme:14
+
+- source: `README.md` · L62
+- under: ## Benchmark (facts must be right on every model; verdicts may differ)
+- lang: en
+- write-back: yes
+
+```text
+**Try a whole persona conversation:** run `python3 tools/persona_playground.py` and open the printed local URL. The [interactive lab](docs/persona-playground.md) uses your local Codex login for dynamic persona replies and assistant answers, with step/run/pause, queued human questions, scenario amendments, private history and shared usage ceilings. All 16 cards are available in a clearly labelled chat adaptation; this is a local alpha, with no public deployment or hidden model judge.
+```
+
+### deck:readme:15
+
+- source: `README.md` · L64
+- under: ## Benchmark (facts must be right on every model; verdicts may differ)
+- lang: en
+- write-back: yes
+
+```text
+**Community feedback, stage 1:** open the [local options form](community/index.html) and follow the [guide](docs/community-feedback-stage1.md). Public JSON contains controlled choices; optional text stays on the author's device. Local validation, import and search use a fictional demo catalog. There is no online submission service or real review dataset yet.
+```
+
+### deck:readme:16
+
 - source: `README.md` · L66
+- under: ## Benchmark (facts must be right on every model; verdicts may differ)
+- lang: en
+- write-back: yes
+
+```text
+**Whole conversations, not one answer:** `docs/JOURNEYS.md` scores nine scripted multi-turn journeys, and `docs/PERSONAS.md` goes one step further — sixteen fictional people played by a model, with a deterministic controller holding their documents so nothing can be invented, a judge that has to quote its evidence, and a paired probe per person that moves exactly one setting. `python3 bench/personas.py --matrix pilot --dry-run` prints the whole plan without calling a model.
+```
+
+### deck:readme:17
+
+- source: `README.md` · L74
 - under: ## Sources you will not find here
 - lang: en
 - write-back: yes
@@ -191,9 +235,9 @@ Ask **"What can this do?"** (or 這能幹嘛？). The answer comes from `skills/
 Rightmove, Zoopla, OnTheMarket, OpenRent, HomeViews, Trustpilot, Airbnb, Booking.com are listed by name only. Their terms forbid automated access, so this project gives no method for them; the skill asks you to paste the page.
 ```
 
-### deck:readme:14
+### deck:readme:18
 
-- source: `README.md` · L69
+- source: `README.md` · L77
 - under: ## Licence and attribution (proposed)
 - lang: en
 - write-back: yes
@@ -216,7 +260,7 @@ Every paragraph, step and bullet, in all three languages. Headings are not in th
 - write-back: yes
 
 ```text
-**Everything in Pea Princess is done by typing sentences.** No code, no settings files to hand-edit, no programming ideas. The words "terminal", "Codex" and "Claude Code" in the install guide mean a text box where you type sentences to an assistant that can also run the checks for you. If you would rather not see a terminal at all, use a chat app instead (Claude, ChatGPT and others accept the same skill as an upload); you lose nothing except speed.
+**Everything in Pea Princess is done by typing sentences.** No code, no settings files to hand-edit, no programming ideas. The words "terminal", "Codex" and "Claude Code" in the install guide mean a text box where you type sentences to an assistant that can also run the checks for you. If you would rather not see a terminal at all, use a chat app instead (Claude, ChatGPT and others accept the same skill as an upload); the checks still apply, but independent fetching and automatic arithmetic require tools; otherwise you supply the source material and inspect the shown calculations.
 ```
 
 ### deck:using:2
@@ -810,7 +854,7 @@ something else, and so you can see what that choice costs you.
 
 ### deck:experiments:3
 
-- source: `docs/EXPERIMENTS.md` · L297-L304
+- source: `docs/EXPERIMENTS.md` · L407-L414
 - under: ## What it means
 - lang: en
 - write-back: yes
@@ -828,7 +872,7 @@ something else, and so you can see what that choice costs you.
 
 ### deck:experiments:4
 
-- source: `docs/EXPERIMENTS.md` · L305-L310
+- source: `docs/EXPERIMENTS.md` · L415-L420
 - under: ## What it means
 - lang: en
 - write-back: yes
@@ -844,7 +888,7 @@ something else, and so you can see what that choice costs you.
 
 ### deck:experiments:5
 
-- source: `docs/EXPERIMENTS.md` · L311-L317
+- source: `docs/EXPERIMENTS.md` · L421-L427
 - under: ## What it means
 - lang: en
 - write-back: yes
@@ -861,7 +905,7 @@ something else, and so you can see what that choice costs you.
 
 ### deck:experiments:6
 
-- source: `docs/EXPERIMENTS.md` · L318-L322
+- source: `docs/EXPERIMENTS.md` · L428-L432
 - under: ## What it means
 - lang: en
 - write-back: yes
@@ -876,7 +920,7 @@ something else, and so you can see what that choice costs you.
 
 ### deck:experiments:7
 
-- source: `docs/EXPERIMENTS.md` · L323-L328
+- source: `docs/EXPERIMENTS.md` · L433-L438
 - under: ## What it means
 - lang: en
 - write-back: yes
@@ -1003,7 +1047,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 - write-back: yes
 
 ```text
-3. **The law since 2026-05-01** (Renters' Rights Act 2025): tenancies are periodic (no fixed term), the landlord cannot take more than **one month's rent in advance**, the deposit is capped at **five weeks' rent**, a holding deposit at **one week**, and the deposit must go into a government-approved protection scheme.
+3. **The law since 2026-05-01**: in-scope private assured tenancies are periodic. No rent before signing; normally **one month's rent in advance** between signing and commencement for monthly rent. Deposit cap **five weeks' rent** (six at £50,000 annual rent), holding deposit **one week**. Identify halls, licences and lodgers separately; axis 07 gives scope, timing and exceptions.
 ```
 
 ### deck:onboarding:11
@@ -1135,7 +1179,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 - write-back: yes
 
 ```text
-- **I have not landed yet. What first?** Book the bridge before you vet anything: a hotel or an operator-run serviced stay for the first two weeks, and plan for the gap between signing and keys — weeks, not nights (the maintainer's ran 45 days). Then start the search. Then give me four things — the day you land, the day you have to be functioning here, the day you hope for keys (or "no idea"), and what a week of the bridge costs — and I will write the week-by-week plan for the first six weeks, marking which weeks run into term start, a bank holiday, a planned line closure or a local event.
+- **I have not landed yet. What first?** Book the bridge before you vet anything: a hotel or an operator-run serviced stay for the first two weeks, and plan for the gap between signing and keys — weeks, not nights (the maintainer's ran 45 days). Then start the search. Two sentences hold whatever the calendar says: never sign or pay for a flat you have not seen, and never sign or pay at the viewing itself — take the agreement away and read it that evening. Then give me four things — the day you land, the day you have to be functioning here, the day you hope for keys (or "no idea"), and what a week of the bridge costs — and I will write the week-by-week plan for the first six weeks, marking which weeks run into term start, a bank holiday, a planned line closure or a local event, with the bridge cost and the cash you need before keys as numbers with their working.
 ```
 
 ### deck:onboarding:23
@@ -1157,7 +1201,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 - write-back: yes
 
 ```text
-- **I have just landed. Where do I sleep this week?** For the first one or two weeks a hotel or an operator-run serviced stay is the safer default: your money is protected, you can leave at once, and someone is responsible. A private short let is fine once you have seen it. It costs more per night and often has no kitchen; the skill will price both.
+- **My short let is bad (damp, mould, not as described) and I want out tonight.** One message, four parts: a stay of a few nights or weeks is a **licence, not a tenancy** — no deposit scheme, no notice period; your money comes back through the platform's refund route and, failing that, the card or consumer route, never by leaving quietly. Message the host on the platform now, with dated photos, asking for a move or a refund of the unused nights. Book tonight's bed at a hotel with free cancellation and pay at property. For the next stay of a week or more: **see it, or verify it live on video, before paying** — a stay nobody has seen is the bridge's most expensive mistake.
 ```
 
 ### deck:onboarding:25
@@ -1168,7 +1212,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 - write-back: yes
 
 ```text
-- **What can it not do?** It cannot smell the hallway, hear the road at 2 a.m., or feel whether the street is yours. It says "unknown" where it does not know and asks you for what only you can supply: the floor plan, a street-view screenshot, your impression on the day.
+- **I have just landed. Where do I sleep this week?** For the first one or two weeks a hotel or an operator-run serviced stay is the safer default: your money is protected, you can leave at once, and someone is responsible. A private short let is fine once you have seen it. It costs more per night and often has no kitchen; the skill will price both.
 ```
 
 ### deck:onboarding:26
@@ -1179,7 +1223,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 - write-back: yes
 
 ```text
-- **Does it decide for me?** No. It gives a verdict with the evidence behind it; you decide, after viewing the flat and meeting the people who let it. Landlords and agents are partners here, not opponents.
+- **What can it not do?** It cannot smell the hallway, hear the road at 2 a.m., or feel whether the street is yours. It says "unknown" where it does not know and asks you for what only you can supply: the floor plan, a street-view screenshot, your impression on the day.
 ```
 
 ### deck:onboarding:27
@@ -1190,12 +1234,34 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 - write-back: yes
 
 ```text
-- **How accurate is it?** Facts come from official registers and are graded; anything unknown is shown as unknown, never filled in.
+- **How does a reply end?** With the one thing still open for you — the question you asked that I could not answer yet and the one check that would settle it — never with another list of questions.
 ```
 
 ### deck:onboarding:28
 
 - source: `skills/vet-flat/references/onboarding.md` · L225
+- under: ## 4. Short answers to common questions
+- lang: en
+- write-back: yes
+
+```text
+- **Does it decide for me?** No. It gives a verdict with the evidence behind it; you decide, after viewing the flat and meeting the people who let it. Landlords and agents are partners here, not opponents.
+```
+
+### deck:onboarding:29
+
+- source: `skills/vet-flat/references/onboarding.md` · L226
+- under: ## 4. Short answers to common questions
+- lang: en
+- write-back: yes
+
+```text
+- **How accurate is it?** Facts come from official registers and are graded; anything unknown is shown as unknown, never filled in.
+```
+
+### deck:onboarding:30
+
+- source: `skills/vet-flat/references/onboarding.md` · L227
 - under: ## 4. Short answers to common questions
 - lang: en
 - write-back: yes
@@ -1212,7 +1278,7 @@ The three social posts, the two questions worth copying, and what to say to some
 
 ### deck:sharing:1
 
-- source: `skills/vet-flat/references/sharing.md` · L71-L72
+- source: `skills/vet-flat/references/sharing.md` · L72-L73
 - under: ## 3. Share your questions
 - lang: en
 - write-back: yes
@@ -1224,7 +1290,7 @@ The three social posts, the two questions worth copying, and what to say to some
 
 ### deck:sharing:2
 
-- source: `skills/vet-flat/references/sharing.md` · L74
+- source: `skills/vet-flat/references/sharing.md` · L75
 - under: ## 3. Share your questions
 - lang: en
 - write-back: yes
@@ -1235,7 +1301,7 @@ The three social posts, the two questions worth copying, and what to say to some
 
 ### deck:sharing:3
 
-- source: `skills/vet-flat/references/sharing.md` · L110-L115
+- source: `skills/vet-flat/references/sharing.md` · L111-L116
 - under: ## 4. The social post, ready to send
 - lang: en
 - write-back: yes
@@ -1251,7 +1317,7 @@ The three social posts, the two questions worth copying, and what to say to some
 
 ### deck:sharing:4
 
-- source: `skills/vet-flat/references/sharing.md` · L119-L124
+- source: `skills/vet-flat/references/sharing.md` · L120-L125
 - under: ## 4. The social post, ready to send
 - lang: zh-TW
 - write-back: yes
@@ -1267,7 +1333,7 @@ The three social posts, the two questions worth copying, and what to say to some
 
 ### deck:sharing:5
 
-- source: `skills/vet-flat/references/sharing.md` · L128-L133
+- source: `skills/vet-flat/references/sharing.md` · L129-L134
 - under: ## 4. The social post, ready to send
 - lang: zh-CN
 - write-back: yes
@@ -1283,7 +1349,7 @@ The three social posts, the two questions worth copying, and what to say to some
 
 ### deck:sharing:6
 
-- source: `skills/vet-flat/references/sharing.md` · L183-L187
+- source: `skills/vet-flat/references/sharing.md` · L185-L189
 - under: ## 6. Importing somebody else's seed
 - lang: en
 - write-back: yes
@@ -1501,7 +1567,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:1
 
-- source: `skills/vet-flat/scripts/seed.py` · L543
+- source: `skills/vet-flat/scripts/seed.py` · L589
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1512,7 +1578,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:2
 
-- source: `skills/vet-flat/scripts/seed.py` · L545
+- source: `skills/vet-flat/scripts/seed.py` · L591
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1523,7 +1589,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:3
 
-- source: `skills/vet-flat/scripts/seed.py` · L547
+- source: `skills/vet-flat/scripts/seed.py` · L593
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1534,7 +1600,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:4
 
-- source: `skills/vet-flat/scripts/seed.py` · L549
+- source: `skills/vet-flat/scripts/seed.py` · L595
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1545,7 +1611,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:5
 
-- source: `skills/vet-flat/scripts/seed.py` · L554
+- source: `skills/vet-flat/scripts/seed.py` · L600
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1556,7 +1622,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:6
 
-- source: `skills/vet-flat/scripts/seed.py` · L556
+- source: `skills/vet-flat/scripts/seed.py` · L602
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1567,7 +1633,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:7
 
-- source: `skills/vet-flat/scripts/seed.py` · L558
+- source: `skills/vet-flat/scripts/seed.py` · L604
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1578,7 +1644,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:8
 
-- source: `skills/vet-flat/scripts/seed.py` · L563
+- source: `skills/vet-flat/scripts/seed.py` · L609
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1589,7 +1655,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:9
 
-- source: `skills/vet-flat/scripts/seed.py` · L565
+- source: `skills/vet-flat/scripts/seed.py` · L611
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1600,7 +1666,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:10
 
-- source: `skills/vet-flat/scripts/seed.py` · L566
+- source: `skills/vet-flat/scripts/seed.py` · L612
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1611,7 +1677,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:11
 
-- source: `skills/vet-flat/scripts/seed.py` · L566
+- source: `skills/vet-flat/scripts/seed.py` · L612
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1622,7 +1688,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:12
 
-- source: `skills/vet-flat/scripts/seed.py` · L571
+- source: `skills/vet-flat/scripts/seed.py` · L617
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1633,7 +1699,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:13
 
-- source: `skills/vet-flat/scripts/seed.py` · L573-L574
+- source: `skills/vet-flat/scripts/seed.py` · L619-L620
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1645,7 +1711,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:14
 
-- source: `skills/vet-flat/scripts/seed.py` · L576-L577
+- source: `skills/vet-flat/scripts/seed.py` · L622-L623
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1657,7 +1723,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:15
 
-- source: `skills/vet-flat/scripts/seed.py` · L578
+- source: `skills/vet-flat/scripts/seed.py` · L624
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1668,7 +1734,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:16
 
-- source: `skills/vet-flat/scripts/seed.py` · L579
+- source: `skills/vet-flat/scripts/seed.py` · L625
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1679,7 +1745,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:17
 
-- source: `skills/vet-flat/scripts/seed.py` · L581
+- source: `skills/vet-flat/scripts/seed.py` · L627
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1690,7 +1756,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:18
 
-- source: `skills/vet-flat/scripts/seed.py` · L585
+- source: `skills/vet-flat/scripts/seed.py` · L631
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1701,7 +1767,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:19
 
-- source: `skills/vet-flat/scripts/seed.py` · L682
+- source: `skills/vet-flat/scripts/seed.py` · L738
 - under: def journey_lines(
 - lang: en
 - write-back: no (read-only)
@@ -1712,7 +1778,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:20
 
-- source: `skills/vet-flat/scripts/seed.py` · L690
+- source: `skills/vet-flat/scripts/seed.py` · L746
 - under: def journey_lines(
 - lang: en
 - write-back: no (read-only)
@@ -1723,7 +1789,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:21
 
-- source: `skills/vet-flat/scripts/seed.py` · L694
+- source: `skills/vet-flat/scripts/seed.py` · L750
 - under: def journey_lines(
 - lang: en
 - write-back: no (read-only)
@@ -1734,7 +1800,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:22
 
-- source: `skills/vet-flat/scripts/seed.py` · L707
+- source: `skills/vet-flat/scripts/seed.py` · L763
 - under: def card(
 - lang: en
 - write-back: no (read-only)
@@ -1745,18 +1811,18 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:23
 
-- source: `skills/vet-flat/scripts/seed.py` · L711
+- source: `skills/vet-flat/scripts/seed.py` · L767
 - under: def card(
 - lang: en
 - write-back: no (read-only)
 
 ```text
-"what I am looking for, and nothing about where I live, what I earn or who I am."
+"my search preferences; review the free text for personal details before sharing."
 ```
 
 ### deck:seed:24
 
-- source: `skills/vet-flat/scripts/seed.py` · L722-L723
+- source: `skills/vet-flat/scripts/seed.py` · L778-L779
 - under: def card(
 - lang: en
 - write-back: no (read-only)
@@ -1768,7 +1834,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:25
 
-- source: `skills/vet-flat/scripts/seed.py` · L726-L727
+- source: `skills/vet-flat/scripts/seed.py` · L782-L783
 - under: def card(
 - lang: en
 - write-back: no (read-only)
