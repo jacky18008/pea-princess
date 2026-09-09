@@ -180,6 +180,7 @@ class Lab:
         self.lock = threading.RLock(); self.busy = None; self.worker = None; self.stopping=False
         self.invoke = invoke or codex_invoke
         self.cards = {c['id']: c for c in personas.cards_of(personas.load_personas())}
+        self.runtime_sources = source_hashes()
         for p in self.root.glob('*/session.json'):
             s = self._load(p.parent.name)
             if s['pending_call'] or s.get('preparing_input') or s['auto'] or s['status']=='running':
@@ -229,6 +230,7 @@ class Lab:
              'original_harness': c['tech']['harness']} for c in self.cards.values()]}
 
     def create(self, data):
+        if self.runtime_sources != source_hashes():raise LabError('程式已更新，請等待測試台重新啟動後再建立對話。')
         if set(data) != {'persona_id','model','max_calls','max_tokens','seed','client_id'}: raise LabError('建立對話的欄位不完整。')
         for k, low, high in [('max_calls',1,80),('max_tokens',10000,2000000),('seed',1,10000)]:
             if type(data[k]) is not int or not low <= data[k] <= high: raise LabError('用量上限或 seed 超出允許範圍。')
@@ -269,8 +271,11 @@ class Lab:
             tokens=None if any(u is None for u in usages) else sum(usages)
             phase=s['pending_call']['actor'] if s['pending_call'] else s['next_actor']
             notice=s['notice']
-            compatible=s['sources']==source_hashes()
-            if not compatible: notice=('這是舊版保存的對話；可以閱讀或匯出，請建立新對話測試新版。 '+notice).strip()
+            current_sources=source_hashes()
+            compatible=s['sources']==current_sources and self.runtime_sources==current_sources
+            if self.runtime_sources!=current_sources:
+                notice=('程式已更新；既有紀錄仍可閱讀或匯出，請等待測試台重新啟動。 '+notice).strip()
+            elif not compatible: notice=('這是舊版保存的對話；可以閱讀或匯出，請建立新對話測試新版。 '+notice).strip()
             if s['amendments']: notice=('此情境已被你的條件變更修改，不再是原始 benchmark。 '+notice).strip()
             return {'id':sid,'revision':s['revision'],'persona_id':s['card']['id'],'name':s['card']['name'],
               'model':s['model'],'status':s['status'],'auto':s['auto'],'busy':self.busy==sid,'notice':notice,'compatible':compatible,
@@ -313,6 +318,7 @@ class Lab:
         with self.lock:
             s=self._load(sid)
             if self._dedupe(s,data): return {'ok':True,'duplicate':True}
+            if self.runtime_sources!=source_hashes():raise LabError('程式已更新，請等待測試台重新啟動。')
             if s['sources']!=source_hashes():raise LabError('這是舊版保存的對話；請建立新對話測試新版。')
             if self.busy is not None and self.busy != sid: raise LabError('另一段對話正在進行；請等它完成或暫停後再送出。')
             if s['status'] in ('error','interrupted','budget'): raise LabError('先處理目前停止原因，才能繼續花費。')
@@ -343,6 +349,7 @@ class Lab:
                 if s['status']=='running':s['status']='paused'
                 self._action(s,'recovered_without_model_call',{'call_id':pending['id']});self._save(s);return {'ok':True}
             if s['pending_call'] or s['status'] in ('error','interrupted','ended','budget'): raise LabError('這段對話已停止；請查看原因。')
+            if self.runtime_sources!=source_hashes():raise LabError('程式已更新，請等待測試台重新啟動。')
             if s['sources']!=source_hashes():raise LabError('這是舊版保存的對話；請建立新對話測試新版。')
             self._action(s,action,{});self._save(s);self._start(sid,auto=action=='run');return {'ok':True}
 
@@ -351,6 +358,7 @@ class Lab:
         self.busy=sid;self.worker=threading.Thread(target=self._work,args=(sid,),daemon=True);self.worker.start()
 
     def _prepare(self,s):
+        if self.runtime_sources!=source_hashes():raise LabError('程式已更新，請等待測試台重新啟動。')
         if s['sources']!=source_hashes(): raise LabError('實作已更新。這段紀錄保持原樣，請建立新對話使用新版。')
         store=self._store(s);budget=store.show()['budgets']['tokens']
         if len(s['calls'])>=s['limits']['max_calls'] or budget['spent']>=s['limits']['max_tokens'] or budget['unknown_spend']:

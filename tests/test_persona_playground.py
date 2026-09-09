@@ -1,6 +1,7 @@
 """Offline continuous-persona, interruption, persistence and loopback HTTP tests."""
 import copy
 import http.client
+import hashlib
 import json
 from pathlib import Path
 import sys
@@ -201,6 +202,28 @@ class LabTests(unittest.TestCase):
         self.assertEqual(before,session.read_bytes());self.assertEqual(state_before,journal.read_bytes())
         self.assertFalse(self.prompts);self.assertIsNone(self.lab.worker)
         s=self.lab._load(sid);self.assertEqual([],s['queue']);self.assertEqual({},s['client_ids'])
+
+    def test_disk_change_after_startup_blocks_create_and_marks_snapshot_incompatible(self):
+        marker=self.path/'test-runtime-source.txt';marker.write_text('startup source')
+        def hashes():return {'test-runtime-source.txt':hashlib.sha256(marker.read_bytes()).hexdigest()}
+        self.lab.close()
+        with mock.patch.object(p,'source_hashes',side_effect=hashes):
+            self.lab=p.Lab(self.path,invoke=lambda *_:self.fail('stale runtime must not dispatch'))
+            sid=self.create();self.assertTrue(self.lab.snapshot(sid)['compatible'])
+            source_at_start=copy.deepcopy(self.lab.runtime_sources)
+            session=self.path/sid/'session.json';before=session.read_bytes()
+            marker.write_text('updated source on disk')
+            view=self.lab.snapshot(sid)
+            self.assertFalse(view['compatible']);self.assertIn('重新啟動',view['notice'])
+            self.assertTrue(view['messages']);self.assertEqual(before,session.read_bytes())
+            with self.assertRaises(p.LabError):self.create()
+            self.assertEqual([sid],[path.parent.name for path in self.path.glob('*/session.json')])
+            self.assertEqual(source_at_start,self.lab.runtime_sources)
+            # A newer saved-session manifest cannot bless an older loaded server.
+            newer=self.lab._load(sid);newer['sources']=hashes()
+            with mock.patch.object(self.lab,'_load',return_value=newer):
+                self.assertFalse(self.lab.snapshot(sid)['compatible'])
+            self.assertEqual(before,session.read_bytes());self.assertIsNone(self.lab.worker)
 
     def test_private_permissions_and_integrity(self):
         sid=self.create();folder=self.path/sid

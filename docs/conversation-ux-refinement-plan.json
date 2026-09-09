@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "date": "2026-09-09",
+  "reason": "The six-call 5886d26 run improved interaction but retained repetitive missing-field recaps and overly generic examples. Refine the presentation instruction and test one new opening; preserve all previous output.",
+  "prior_run_processed_tokens": 150666,
+  "max_additional_physical_calls": 1,
+  "new_session_token_limit": 35000,
+  "model": "gpt-6-astra",
+  "reasoning_effort": "low",
+  "persona": "C1",
+  "automatic_retries": 0,
+  "claude_calls": 0,
+  "acceptance": ["Lead with useful examples rather than a missing-fields recap", "At most two short opening paragraphs, plus no more than three choice questions", "No invented real listing or unqualified estimate", "No internal labels or unrelated closing inventory of unknowns"],
+  "limits": "One observed opening cannot establish whole-conversation quality or prove that the unchanged Grok uncertainty case is fixed. The six-call multi-turn evidence remains attached to 5886d26. One call can exceed its token ceiling."
+}
