@@ -65,6 +65,63 @@ async function main(){
  context.choiceState.messages.push({role:'human',text:'I prefer the courtyard.'});run('render(choiceState)');
  assert.equal(elements.messages.children[0].children[2].children[0].disabled,true);
  assert.equal(elements.messages.children[0].children[2].children.length,2);
+ // A completed last slot must disable every path even before the backend
+ // changes status from paused to budget. Drafts and read/export remain available.
+ handler=null;
+ context.withChoices={...state('B'),revision:10,messages:[{role:'assistant',text:'Choose one',questions:[{question:'Next preference?',options:['Quiet','Central']}]}]};
+ run('render(withChoices)');let staleChoice=elements.messages.children[0].children[2];
+ staleChoice.children[0].children[1].children[0].onchange();
+ elements.message.value='Keep my unsent draft.';elements.amendment.checked=true;
+ context.callCap={...context.withChoices,revision:11,limits:{max_calls:1,max_tokens:400000}};
+ run('render(callCap)');
+ for(const key of ['run','step','message','send','amendment'])assert.equal(elements[key].disabled,true,key+' at call cap');
+ assert.equal(elements.export.disabled,false);assert.equal(elements.banner.hidden,false);assert.match(elements.banner.textContent,/執行次數上限/);
+ assert.equal(elements.message.value,'Keep my unsent draft.');assert.equal(elements.amendment.checked,true);
+ form=elements.messages.children[0].children[2];assert.equal(form.children[0].disabled,true);assert.equal(form.children[0].children[1].children[0].checked,true);
+ const beforeCap=captured.length;
+ await elements.composer.onsubmit({preventDefault(){}});await staleChoice.onsubmit({preventDefault(){}});
+ await run("action('step')");await run("action('run')");assert.equal(captured.length,beforeCap,'disabled handlers cannot POST through stale references');
+ let exported=0;handler=url=>{if(url==='/api/session/B/export'){exported++;return response({id:'B',persona_id:'P4'});}};
+ await elements.export.onclick();assert.equal(exported,1);
+ // The same guard uses known finite usage; null while pending is neither zero
+ // usage nor a new failure, and human interruptions remain possible under cap.
+ context.tokenCap={...state('B'),revision:12,tokens:100,limits:{max_calls:30,max_tokens:100}};run('render(tokenCap)');
+ assert.equal(elements.run.disabled,true);assert.equal(elements.step.disabled,true);assert.equal(elements.send.disabled,true);assert.match(elements.banner.textContent,/token 額度/);
+ const beforeTokens=captured.length;await elements.composer.onsubmit({preventDefault(){}});await run("action('run')");assert.equal(captured.length,beforeTokens);
+ context.unknownPending={...state('B'),revision:13,status:'running',busy:true,pending_call:true,tokens:null};run('render(unknownPending)');
+ assert.equal(elements.send.disabled,false);assert.equal(elements.message.disabled,false);assert.equal(elements.tokens.textContent,'計算中');assert.equal(elements['usage-bar'].hidden,true);
+ assert.equal(elements.banner.hidden,true);assert.equal(elements.run.disabled,true);
+ context.unknownIdle={...state('B'),revision:14,tokens:null};run('render(unknownIdle)');assert.equal(elements.send.disabled,false);assert.equal(elements.tokens.textContent,'用量未知');
+ for(const status of ['error','interrupted']){context.failedStatus={...context.unknownIdle,status};run('render(failedStatus)');assert.equal(elements.send.disabled,true);assert.equal(elements.step.disabled,true);}
+ context.ended={...state('B'),revision:15,status:'ended'};run('render(ended)');assert.equal(elements.run.disabled,true);assert.equal(elements.send.disabled,false);
+ handler=null;elements.message.value='A human follow-up after the persona ends.';
+ await elements.composer.onsubmit({preventDefault(){}});assert.equal(captured.at(-1).url,'/api/session/B/message');
+ // Successful submit -> refresh reaches the cap -> finally must not re-enable.
+ context.beforeLast={...state('B'),revision:16};run('render(beforeLast)');elements.message.value='Use the last remaining answer.';
+ handler=(url,opts)=>url==='/api/session/B'?response({...state('B'),revision:17,calls:30}):undefined;
+ await elements.composer.onsubmit({preventDefault(){}});assert.equal(elements.message.value,'');assert.equal(elements.send.disabled,true);assert.equal(elements.message.disabled,true);
+ // An uncertain POST arriving after the cap preserves the draft and stable
+ // intent; it must not enable a forbidden retry while the cap remains known.
+ handler=null;run('render(beforeLast)');elements.message.value='Keep this uncertain submission.';
+ let rejectMessage;handler=(url,opts)=>url.endsWith('/message')&&opts.method==='POST'?new Promise((resolve,reject)=>rejectMessage=reject):undefined;
+ const uncertain=elements.composer.onsubmit({preventDefault(){}});await settle();run('render(callCap)');
+ rejectMessage(Error('uncertain response after cap'));await uncertain;
+ assert.equal(elements.message.value,'Keep this uncertain submission.');assert.equal(elements.send.disabled,true);
+ const afterUncertain=captured.length;await elements.composer.onsubmit({preventDefault(){}});assert.equal(captured.length,afterUncertain);
+ // The same late-error rule applies to structured clarification choices.
+ handler=null;run('render(withChoices)');staleChoice=elements.messages.children[0].children[2];staleChoice.children[0].children[1].children[0].onchange();
+ let rejectChoice;handler=(url,opts)=>url.endsWith('/message')&&opts.method==='POST'?new Promise((resolve,reject)=>rejectChoice=reject):undefined;
+ const choosing=staleChoice.onsubmit({preventDefault(){}});await settle();run('render(callCap)');rejectChoice(Error('uncertain choice response'));await choosing;
+ form=elements.messages.children[0].children[2];assert.equal(form.children[0].disabled,true);assert.equal(form.children[0].children[1].children[0].checked,true);
+ // A response from B cannot clear or enable C's composer after selection changes.
+ handler=null;run('render(beforeLast)');elements.message.value='Older B request.';
+ let resolveMessage;handler=(url,opts)=>url==='/api/session/B/message'?new Promise(resolve=>resolveMessage=resolve):undefined;
+ const oldMessage=elements.composer.onsubmit({preventDefault(){}});await settle();await run("select('C')");
+ elements.message.value='New C draft stays here.';context.capC={...state('C'),revision:20,calls:30};run('render(capC)');
+ handler=url=>url==='/api/session/C'?response(context.capC):undefined;
+ resolveMessage(response({ok:true}));await oldMessage;
+ assert.equal(elements.title.textContent,'Person C');assert.equal(elements.message.value,'New C draft stays here.');assert.equal(elements.send.disabled,true);
+ assert.equal(elements.export.disabled,false);
  console.log('playground UI functional checks passed');
 }
 main().catch(error=>{console.error(error);process.exitCode=1;});
