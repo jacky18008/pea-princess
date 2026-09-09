@@ -1,0 +1,112 @@
+{
+  "date": "2026-09-09",
+  "status": "PASS_OFFLINE_ADAPTER_VALIDATION",
+  "implementation": "bench/call_control.py",
+  "tests": "tests/test_call_control.py",
+  "new_benchmark_model_calls": 0,
+  "callback_subprocess_invocations": 0,
+  "notification_deployments": 0,
+  "focused_tests_passed": 22,
+  "focused_test_command": "python3 -m unittest discover -s tests -p 'test_call_control.py' -v",
+  "api": {
+    "constructor": "CallControl(output_dir, planned_call_ids)",
+    "dispatch": "dispatch(call_id, job_id, role, phase) -> True for new durable dispatch; False for an identical already successful call; raises before execution when paused, pending, unplanned, skipped or conflicting.",
+    "complete": "complete(call_id, record) -> preserved result dict; records success/failure, direct usage and pause state. An identical repeated completion is idempotent; a changed terminal record is rejected.",
+    "run": "run(call_id, job_id, role, phase, invoke_callback) -> successful saved result dict; callback takes no arguments. A stopped/invalid result is saved then raises CallControlPaused with call_id, failure_kind and record attributes.",
+    "skip": "skip(call_id, reason) -> True for a newly skipped undispatched planned call; False for the identical prior skip. Different reason, dispatched or unplanned calls reject.",
+    "report": "report() -> fixed public call/usage/coverage report. Decisions are pause_calls, wait, report_results. No logical-job quality inference.",
+    "snapshot": "snapshot() -> defensive copy of checkpoint state.",
+    "record": "record(call_id) -> defensive copy of saved original result or None."
+  },
+  "integration_contract": [
+    "Keep existing runner stop guards, raw event capture and source/hash verification. The adapter adds a durable call boundary; it does not replace those checks.",
+    "Map each physical CLI call to one reducer session. Keep logical job, role and phase as separate metadata; adaptive selection/follow-up calls and batched judges are separate invocations.",
+    "Use a dedicated controller output directory and the same ordered planned_call_ids on restore. Optional retrieval calls can be explicitly skipped with a reason.",
+    "Persist dispatch before invoking the callback. A restored unresolved call blocks every new dispatch until explicitly reconciled outside this API; never infer that a crash means no provider call happened.",
+    "Return saved stopped result dictionaries from callback, or attach them to exception.record, so known failed-attempt direct usage is preserved. A generic exception without a saved result remains unknown and pauses.",
+    "Success requires status complete and one valid direct_terminal_usage record; absent direct fields are never filled from normalized/fallback usage.",
+    "Skip records are separate from the reducer request/event ledger and add no usage. Plan completion requires successful calls plus explicit skips to cover the plan; any pause takes precedence.",
+    "Restore is idempotent for already successful calls; metadata, plan and terminal-record conflicts fail closed. Existing caller verification of raw saved files should still occur before reuse."
+  ],
+  "persistent_files": [
+    "checkpoint.json",
+    "progress.json",
+    "controller.lock"
+  ],
+  "persistence": "JSON checkpoint replacement is atomic and fsynced before the callback. A POSIX file lock serializes ledger updates, and only one unresolved call may exist. Progress is derived and rebuilt from the authoritative checksum-verified checkpoint on restore.",
+  "saved_replay": {
+    "source_run": "bench/results/context-quality-2026-09-08/live-v1",
+    "physical_calls": 38,
+    "replay_callbacks": 38,
+    "restored_callbacks": 0,
+    "expected_from_raw_terminal_events": {
+      "input_tokens": 639639,
+      "cached_input_tokens": 132352,
+      "output_tokens": 30087,
+      "total_tokens": 669726
+    },
+    "original_input_files_rechecked_unchanged": 114
+  },
+  "boundary_checks": {
+    "failed_stub": {
+      "callback_ids": [
+        "first"
+      ],
+      "next_callback_invocations": 0,
+      "paused": true,
+      "known_processed_tokens": 13
+    },
+    "missing_direct_usage": {
+      "fallback_ignored": true,
+      "total_tokens": null,
+      "paused": true
+    },
+    "optional_skip": {
+      "physical_calls": 1,
+      "skipped_calls": 1,
+      "processed_tokens": 13,
+      "plan_complete": true
+    },
+    "nonfatal_catalog_warning": {
+      "completed_calls": 1,
+      "paused": false
+    },
+    "pending_restore": {
+      "same_call_blocked": true,
+      "next_call_blocked": true
+    }
+  },
+  "source_sha256": {
+    "bench/call_control.py": "2937ad5703097404b802bdab03cff498920d6ec4dd780254d7ba55eeb97776a7",
+    "tests/test_call_control.py": "5cf1751425c1747a01d3e5f6f3cefc7b8606541391697d755b83fc79ffd0e43a",
+    "bench/report_control.py": "c89635e22eba04e9fc6dfd3a0a38bbcf760b044840b1d1db54b2428a9a4d5f5a"
+  },
+  "validation_artifact": {
+    "path": "bench/results/ablation-2026-09-09/controller/validation.json",
+    "sha256": "390fede6d35b78cad42f838cd48cec2bdd04ba7b81bf5102c67fff58d5d863d4"
+  },
+  "artifacts": {
+    "bench/results/ablation-2026-09-09/controller/catalog-warning/checkpoint.json": "3a4073e3040546905edad7acd563e1e883a79f3942b482a662dd67bf3afcbaba",
+    "bench/results/ablation-2026-09-09/controller/catalog-warning/progress.json": "87bcb203308bd6be3ae47908bc792fda5b20f3f735e5932dd7aecaf0a00c36a0",
+    "bench/results/ablation-2026-09-09/controller/failed-stub/checkpoint.json": "9850c76eae63568bfbfb4eff119d8bb5aa22699ca2e23d14d9a2d49237d0c63d",
+    "bench/results/ablation-2026-09-09/controller/failed-stub/progress.json": "64af47bc286f96956627861aa7a3bd9a2ea1b6b8f7dfad01deedaf79d8cddc83",
+    "bench/results/ablation-2026-09-09/controller/missing-direct-usage/checkpoint.json": "dd5039721789a3b08ef072284992dd96854e43c97032ffa68296e16783be4b73",
+    "bench/results/ablation-2026-09-09/controller/missing-direct-usage/progress.json": "6072d9975cdd50f2d1b33889556003616bc8c5b07e257ddba18d0dd30bdec173",
+    "bench/results/ablation-2026-09-09/controller/optional-skip/checkpoint.json": "a46bae1c3f68bec20e4d435c7ef482110ce8be843bb4c1b1e9e09555d0b136b9",
+    "bench/results/ablation-2026-09-09/controller/optional-skip/progress.json": "17275eef03f6b29f222bb3ee9e2c9f5673d130446e78bf41066a81364906a63b",
+    "bench/results/ablation-2026-09-09/controller/pending-restore/checkpoint.json": "c80633ca92e0148d1e6f4b6da8acd0e722643ac17b9ae9543f9a3ab888bb9621",
+    "bench/results/ablation-2026-09-09/controller/pending-restore/progress.json": "e185975db5990d9e8fed42c41a8c59f374c3b2bbddf87d09e3b7ab67650883dc",
+    "bench/results/ablation-2026-09-09/controller/saved-live-replay/checkpoint.json": "650531ba536e0dd040377f75ac7e1a434521386351354a85e366b4d0a4c86290",
+    "bench/results/ablation-2026-09-09/controller/saved-live-replay/progress.json": "2b27bd406c96f2afda9aae11af59da5dd6a2008bfef41836b588f0ba7869d96d",
+    "bench/results/ablation-2026-09-09/controller/source-input-hashes.json": "ec7728d65b3143cdaabb3db3f582c47b452c23f4a5bb73ca3018169b31a01c4c",
+    "bench/results/ablation-2026-09-09/controller/validation.json": "390fede6d35b78cad42f838cd48cec2bdd04ba7b81bf5102c67fff58d5d863d4"
+  },
+  "limitations": [
+    "Serial local POSIX checkpoint adapter; no distributed worker or concurrent provider scheduling claim.",
+    "The frozen reducer quality/provider-retry fields are not exposed as benchmark quality. Job/role/phase metadata retains physical-call distinctions.",
+    "Skipped optional calls resolve plan coverage without producing request or usage events.",
+    "A restored in-flight call fails closed and needs explicit reconciliation; there is no automatic retry/resume.",
+    "An exception without an attached saved result has unknown usage. Callers should return a stopped saved result or attach exception.record to preserve known failed-attempt usage.",
+    "This offline validation does not measure notification delivery or real-time provider-error detection latency. Existing runner safeguards remain in place."
+  ]
+}

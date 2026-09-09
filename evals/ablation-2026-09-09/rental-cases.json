@@ -1,0 +1,913 @@
+{
+  "version": 1,
+  "provenance": "Three newly authored synthetic rental conversations prepared on 2026-09-09 for the authorised context ablation. All addresses, people, organisations, documents, prices, bank details, dates and observations are invented. A setup Codex agent authored histories, two sequential user turns, source-linked gold and scalar fact checks together before any target outputs. This is not an organic conversation sample, a blinded real-user holdout or a reuse of the previous six prefixes/persona cards. No handoff or target answer was authored. Live narrative/structured memory generation and updates belong to the separate measured runner. Fixture authorship/review computation is setup cost outside benchmark invocation totals. No target-model calls, Claude calls, real-world verification, payments, bookings or external messages were performed in fixture creation. Only original user messages and user turns are evidence; historical assistant statements are conversational context, not sources. T1 may replace prior facts, and T2 may replace prior facts or T1; gold for T2 may use history plus T1 and T2, never generated answers or memories.",
+  "cases": [
+    {
+      "id": "S1",
+      "history": [
+        {
+          "id": "U1",
+          "role": "user",
+          "text": "This is a fictional rental planning exercise: every address, person, source document and route I paste is invented. Please use this packet instead of searching real property sites. My two candidates are Flat 4, 23 Mosslantern Close, and Studio 6, 11 Pennythorn Yard. At this point I have a £2,250 rent-only ceiling, need at least 44 m² inside, and require a separate bedroom. I move on 9 April 2027, have no building-age cut-off, and need a maximum 35-minute journey to the fictional Reedglass Design Lab. I own a 130 cm-wide desk; an unobstructed place for that desk is essential. I have not asked either agent to reserve anything."
+        },
+        {
+          "id": "A1",
+          "role": "assistant",
+          "text": "I have recorded the two exact units separately, with your current budget basis as rent-only. Your area threshold, bedroom requirement, desk fit, move date and destination are different fields; a property's advertised size does not set your minimum. The initial comparison will need costs on a common basis and documents that name the correct unit. You can paste the packets together. I will distinguish an agent's description from your own requirements and from what a supplied certificate actually says."
+        },
+        {
+          "id": "U2",
+          "role": "user",
+          "text": "Mosslantern packet M-A, received Monday: rent £1,850 per month; one separate bedroom; available 9 April 2027; advertised internal area 49 m², with a 3 m² balcony listed separately. The supplied document labelled official EPC extract M-E names Flat 4, 23 Mosslantern Close and gives 47 m² internal area, rating C. Agent plan M-P labels a clear 140 cm desk wall with no door crossing it. A supplied route sheet gives 28 minutes to Reedglass Design Lab. There are no actual evening-noise observations. I like the bright kitchen, although that preference does not change the desk or commuting requirement."
+        },
+        {
+          "id": "A2",
+          "role": "assistant",
+          "text": "Mosslantern now has a marketing area and a different exact-flat certificate area, so those figures must remain attached to their sources. The balcony is separately described and is not part of internal space. Its desk wall and 28-minute journey are supplied claims that a viewing or a route check can examine. Your preference for the kitchen is useful context, but it does not establish any of the outstanding conditions. I have not treated the photographs as measurements or filled in a night-time noise result."
+        },
+        {
+          "id": "U3",
+          "role": "user",
+          "text": "Pennythorn packet P-A, also Monday: rent £1,810 per month; open-plan studio rather than a separate bedroom; available 9 April 2027. The advert says 45 m², but the exact-unit supplied official extract P-E names Studio 6, 11 Pennythorn Yard and says 43 m², rating B. Agent plan P-P also labels a clear 140 cm desk wall, away from the kitchen route. Its supplied trip to the same lab is 33 minutes. There is no resident account or recording of evening noise. The photographs show a simple kitchen and no labelled outdoor space. Do not assume it has a balcony just because the other candidate does."
+        },
+        {
+          "id": "A3",
+          "role": "assistant",
+          "text": "The Pennythorn packet identifies an open-plan studio, a claimed usable desk wall and a separate exact-unit area document. I have placed its route beside Mosslantern's using the same destination, while keeping the estimates unverified. The two listing figures are not interchangeable with the certificate figures. I have not inferred a bedroom division or outdoor space from photographs. If your funding or layout requirements change, the active version should be recorded explicitly rather than silently keeping whichever old value makes a candidate look better."
+        },
+        {
+          "id": "U4",
+          "role": "user",
+          "text": "Here are the monthly cost sheets so there is no reason to insert a generic allowance. Mosslantern M-C: rent £1,850, utilities estimated £180, broadband £32 and council tax provision £98; displayed total £2,160. Pennythorn P-C: rent £1,810, utilities estimated £160, broadband £30 and council tax provision £95; displayed total £2,095. Both sheets cover a twelve-month average and exclude no known recurring category. The utility numbers are estimates, not caps. There is no assumed student exemption. The agent has supplied no contract fixing these totals, and neither dwelling has been visited by me."
+        },
+        {
+          "id": "A4",
+          "role": "assistant",
+          "text": "The sheets can be compared on one basis: rent, estimated utilities, broadband and a tax provision. They do not guarantee a future bill or prove affordability against a different funding limit. I have the 43 m² minimum alongside the Pennythorn area in my working notes and will carry the cost components rather than only a headline total. The next version of the shortlist can distinguish your hard constraints from the property figures, with any known correction attached to the user message that supplies it."
+        },
+        {
+          "id": "U5",
+          "role": "user",
+          "text": "Please correct that note: 43 m² is Pennythorn's certificate area, not my minimum. My minimum is still 44 m² at this moment, and the rent-only ceiling is still £2,250 until I send you the revised funding decision. I am considering whether to accept a studio, but have not changed that requirement yet. Tomorrow I can use one viewing slot, not two, and I will book it myself. I cannot upload more photographs tonight. The existing desk cannot be reduced or placed across a route, and nothing about the attractive kitchen relaxes that. If costs change, I need you to use the actual new line item and show the resulting total, not average old and new quotes."
+        },
+        {
+          "id": "A5",
+          "role": "assistant",
+          "text": "Correction recorded: your present minimum remains 44 m²; the 43 m² number belongs to Pennythorn's supplied certificate. I will wait for your own funding and layout update rather than treating a possibility as an approved change. You have one viewing slot, will make the booking yourself, and cannot add photographs tonight. The available data are sufficient for a comparison once the active requirements are known, with the route, desk measurements, noise and running-cost uncertainty kept visible. No booking or contact has been made."
+        }
+      ],
+      "turns": [
+        {
+          "id": "T1",
+          "text": "Here is my final funding decision: replace £2,250 rent-only with a hard £2,130 ALL-IN monthly ceiling. Replace the 44 m² minimum with 41 m². I now accept a studio if my 130 cm desk fits; a separate bedroom is only a preference. All other requirements stay. Which candidate should get my one viewing slot on the current evidence? In a short explanation or table, explicitly give my current cap and minimum, each candidate's certificate area and each current all-in estimate; distinguish my thresholds from property values. Tell me the important remaining checks and draft one short agent message, but do not send or book anything.",
+          "gold": {
+            "required_findings": [
+              {
+                "id": "S1-T1-F1",
+                "description": "Use the user’s current £2,130 all-in ceiling and 41 m² minimum, keeping them distinct from Pennythorn’s 43 m² certificate area; the withdrawn rent-only and 44 m² limits must not drive the decision.",
+                "evidence_ids": [
+                  "U1",
+                  "U3",
+                  "U5",
+                  "T1"
+                ],
+                "severity": "critical"
+              },
+              {
+                "id": "S1-T1-F2",
+                "description": "Prioritise Pennythorn for the one viewing on this packet: its £2,095 estimated all-in total is £35 below the current cap, while Mosslantern’s £2,160 estimate is £30 above. Show the current total for each and retain estimate status.",
+                "evidence_ids": [
+                  "U4",
+                  "T1"
+                ],
+                "severity": "critical"
+              },
+              {
+                "id": "S1-T1-F3",
+                "description": "Use exact-unit supplied certificate areas Mosslantern 47 m² and Pennythorn 43 m², excluding listing/balcony figures; recognise studio acceptance now removes the earlier layout objection without claiming the desk is measured.",
+                "evidence_ids": [
+                  "U2",
+                  "U3",
+                  "T1"
+                ],
+                "severity": "major"
+              },
+              {
+                "id": "S1-T1-F4",
+                "description": "Keep the practical decision conditional on source-limited checks: 130 cm desk fit against an agent’s claimed 140 cm wall, variable utility spend and actual journey/noise conditions. Identify useful checks rather than postponing all choice for a fresh intake.",
+                "evidence_ids": [
+                  "U1",
+                  "U2",
+                  "U3",
+                  "U4",
+                  "U5",
+                  "T1"
+                ],
+                "severity": "major"
+              },
+              {
+                "id": "S1-T1-F5",
+                "description": "Complete a concise recommendation and one usable agent draft for the viewing/remaining checks, respecting one slot and user-only booking/contact; do not re-ask already supplied profile facts or claim any action completed.",
+                "evidence_ids": [
+                  "U5",
+                  "T1"
+                ],
+                "severity": "major"
+              }
+            ],
+            "forbidden_claims": [
+              "The active minimum is 43 m² or 44 m².",
+              "The active ceiling is £2,250 rent-only.",
+              "Mosslantern is within the current all-in ceiling using its current £2,160 estimate.",
+              "Pennythorn requires a separate bedroom or has verified outdoor space.",
+              "The utility estimates, desk dimensions or journeys are guaranteed.",
+              "A message has been sent or a viewing booked."
+            ],
+            "acceptable_actions": [
+              "Recommend Pennythorn provisionally for viewing, with current comparable totals and the narrow budget margin.",
+              "Draft one grouped, reviewable request for viewing and decision-relevant verification."
+            ],
+            "uncertainties": [
+              "Actual recurring utility spend and future affordability margin.",
+              "On-site desk clearance and route variability.",
+              "Evening noise and remaining rental checks outside the supplied packet."
+            ]
+          },
+          "fact_checks": [
+            {
+              "key": "current_all_in_cap_gbp",
+              "expected_value": "2130",
+              "source_ids": [
+                "T1"
+              ]
+            },
+            {
+              "key": "current_minimum_internal_area_m2",
+              "expected_value": "41",
+              "source_ids": [
+                "T1"
+              ]
+            },
+            {
+              "key": "mosslantern_certificate_area_m2",
+              "expected_value": "47",
+              "source_ids": [
+                "U2"
+              ]
+            },
+            {
+              "key": "pennythorn_certificate_area_m2",
+              "expected_value": "43",
+              "source_ids": [
+                "U3"
+              ]
+            },
+            {
+              "key": "mosslantern_estimated_all_in_gbp",
+              "expected_value": "2160",
+              "source_ids": [
+                "U4"
+              ]
+            },
+            {
+              "key": "pennythorn_estimated_all_in_gbp",
+              "expected_value": "2095",
+              "source_ids": [
+                "U4"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "T2",
+          "text": "There are two actual updates, not extra options. Mosslantern's landlord has issued M-C2: its rent is now £1,770, replacing £1,850; utilities £180, broadband £32 and council tax £98 are unchanged. Pennythorn's agent has replaced the £160 utility estimate with £240 after obtaining the previous occupant's usage sheet; its £1,810 rent, £30 broadband and £95 tax provision stay. Both remain estimates and available on 9 April. My latest funding and layout requirements from my previous message still apply; no further profile change. Should I keep the same viewing choice or switch? Give the current cap/minimum, Mosslantern's current rent, Pennythorn's current utility estimate and the two recomputed totals, explaining which source lines changed the choice. Keep this to advice; I will book.",
+          "gold": {
+            "required_findings": [
+              {
+                "id": "S1-T2-F1",
+                "description": "Retain T1’s current £2,130 all-in ceiling, 41 m² minimum and studio acceptance; do not let historical thresholds, property area or the assistant’s prior answer overwrite those user requirements.",
+                "evidence_ids": [
+                  "U3",
+                  "U5",
+                  "T1",
+                  "T2"
+                ],
+                "severity": "critical"
+              },
+              {
+                "id": "S1-T2-F2",
+                "description": "Apply both replacements and recompute: Mosslantern £1,770 + £180 + £32 + £98 = £2,080; Pennythorn £1,810 + £240 + £30 + £95 = £2,175. Do not keep, average or double-count replaced line items.",
+                "evidence_ids": [
+                  "U4",
+                  "T2"
+                ],
+                "severity": "critical"
+              },
+              {
+                "id": "S1-T2-F3",
+                "description": "Switch the provisional viewing priority to Mosslantern: £2,080 is £50 below the cap, Pennythorn £2,175 is £45 above. Explain that changed quotes, rather than a withdrawn studio objection or a new size rule, reverse the choice.",
+                "evidence_ids": [
+                  "U2",
+                  "U3",
+                  "T1",
+                  "T2"
+                ],
+                "severity": "major"
+              },
+              {
+                "id": "S1-T2-F4",
+                "description": "Attribute Mosslantern’s rent reduction to M-C2 and Pennythorn’s higher utility estimate to the agent’s usage-sheet update, preserving the distinction between a changed rent quote and an uncapped running-cost estimate.",
+                "evidence_ids": [
+                  "U4",
+                  "T2"
+                ],
+                "severity": "major"
+              },
+              {
+                "id": "S1-T2-F5",
+                "description": "Give concise actionable advice under the updated quotes, preserving the user’s booking role and qualifying the result as a viewing priority rather than a comprehensive rental PASS. A focused relevant remaining verification is sufficient; no recital of every unchanged requirement or unknown is required.",
+                "evidence_ids": [
+                  "U1",
+                  "U2",
+                  "U3",
+                  "U5",
+                  "T1",
+                  "T2"
+                ],
+                "severity": "major"
+              }
+            ],
+            "forbidden_claims": [
+              "Mosslantern’s current rent remains £1,850.",
+              "Pennythorn’s current utility estimate remains £160.",
+              "The current all-in totals remain £2,160 and £2,095.",
+              "Pennythorn should be excluded because studios are still prohibited.",
+              "The user’s minimum equals either property’s certificate area.",
+              "A viewing was booked or a complete due-diligence pass established."
+            ],
+            "acceptable_actions": [
+              "Switch to Mosslantern provisionally and show both replacement-line calculations and margins.",
+              "Keep quote provenance and cost uncertainty visible without refusing to decide which viewing to prioritise."
+            ],
+            "uncertainties": [
+              "Actual consumption and final recurring charges.",
+              "Desk measurement, route reliability and evening noise.",
+              "Remaining tenancy, property and compliance checks not covered by this viewing-choice task."
+            ]
+          },
+          "fact_checks": [
+            {
+              "key": "current_all_in_cap_gbp",
+              "expected_value": "2130",
+              "source_ids": [
+                "T1",
+                "T2"
+              ]
+            },
+            {
+              "key": "current_minimum_internal_area_m2",
+              "expected_value": "41",
+              "source_ids": [
+                "T1",
+                "T2"
+              ]
+            },
+            {
+              "key": "mosslantern_current_rent_gbp",
+              "expected_value": "1770",
+              "source_ids": [
+                "T2"
+              ]
+            },
+            {
+              "key": "pennythorn_current_utility_estimate_gbp",
+              "expected_value": "240",
+              "source_ids": [
+                "T2"
+              ]
+            },
+            {
+              "key": "mosslantern_estimated_all_in_gbp",
+              "expected_value": "2080",
+              "source_ids": [
+                "U4",
+                "T2"
+              ]
+            },
+            {
+              "key": "pennythorn_estimated_all_in_gbp",
+              "expected_value": "2175",
+              "source_ids": [
+                "U4",
+                "T2"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "S2",
+      "history": [
+        {
+          "id": "U1",
+          "role": "user",
+          "text": "Everything here is fictional test material, including the addresses, dates, records and organisations. I am comparing Flat 10 and Flat 2 at 38 Copperlark Court for a move on 15 February 2027. My ceiling is £2,050 per month all-in, minimum internal area 42 m², separate bedroom required, no building-age cut-off, and maximum 35 minutes to the fictional Snowglass Workshop. At first I told the agent stairs were fine; I liked Flat 10's higher view. I may have an access change to tell you about later, but it is not final yet. I want the units kept separate even though their brochures use the same building name."
+        },
+        {
+          "id": "A1",
+          "role": "assistant",
+          "text": "I have a shared building and destination, but two exact units with potentially different routes through the building. Your initial tolerance for stairs is recorded as the current user statement, and a possible later change is not yet an instruction to alter it. A building feature such as a lift has a location, an operating state and a date; those should not be collapsed into a single permanent yes/no label. Please paste the unit information and any dated access notices in their original order."
+        },
+        {
+          "id": "U2",
+          "role": "user",
+          "text": "Unit packets, dated 8 January: Flat 10 is on the second floor with a separate bedroom; the exact-unit supplied official EPC extract says 48 m², C. Its rent plus estimated utilities, broadband and tax provision total £2,010 a month. Flat 2 is on the entrance floor, separate bedroom, exact-unit supplied official extract 44 m², D, estimated all-in £2,035. Both state availability on 15 February. The shared agent journey sheet says 31 minutes to Snowglass Workshop. Flat 10's advert says 'passenger lift to all floors'. The booklet shows exactly one passenger lift; neither unit's total is a fixed bill cap."
+        },
+        {
+          "id": "A2",
+          "role": "assistant",
+          "text": "The two source packets contain distinct areas and monthly estimates, and the shared route is a supplied journey claim. Flat 10's higher-floor preference and Flat 2's entrance-floor description do not settle access by themselves. I have retained one passenger lift as the count in the booklet, without assuming there is a service lift or alternative route. Future availability and the current condition of access equipment should be tied to their own messages rather than inferred from the advertised tenancy start date."
+        },
+        {
+          "id": "U3",
+          "role": "user",
+          "text": "Dated messages: on 9 January the letting agent wrote, 'The lift is working; the upper flats are normally reached that way.' On 11 January the building manager issued notice CM-11: 'Only passenger lift out of service following door fault. Contractor visit provisionally 19 February. Completion date unknown. No alternative lift.' The notice concerns the same building, not a neighbouring block. On 12 January the agent sent a new email saying only, 'The advert is correct: a lift is included in this building.' That email does not mention operation, the fault, CM-11 or the appointment date. I have no engineer release or later operational report."
+        },
+        {
+          "id": "A3",
+          "role": "assistant",
+          "text": "The record now includes a dated operating statement, a later fault notice and a still-later statement about the presence of a lift. Those statements have different subjects, so arrival order alone does not turn the third message into a repair record. I have kept CM-11's appointment and unknown completion as separate fields. The documents do not describe an alternative lift, and no operation test has been reported. Any conclusion must use the relevant dated statement about the particular fact under discussion."
+        },
+        {
+          "id": "U4",
+          "role": "user",
+          "text": "Entrance details from the caretaker's route sheet C-R: the street door opens from the pavement onto a level hall; the courtyard entrance has two steps. The route sheet does not measure the pavement approach or Flat 10's threshold. For Flat 2, the agent supplied a close-up photo with a ruler showing an 80 mm raised front-door threshold. There is no ramp installed, and I have not agreed to a portable-ramp plan. Calling it 'entrance floor' does not tell us whether somebody can enter without a step. I have not tried either route myself, and no one has filmed a continuous pavement-to-flat trip."
+        },
+        {
+          "id": "A4",
+          "role": "assistant",
+          "text": "The route sheet and the threshold photograph answer different parts of the path. Street entrance, courtyard entrance, lift travel and the flat's own doorway need to retain their separate observations. The ruler image is evidence of a specific obstruction at Flat 2 rather than a generic assumption about ground-floor homes. For Flat 10, a supplied level hall does not cover the unseen pavement approach or doorway. I have not invented a ramp, a second lift or a completed route inspection to fill those gaps."
+        },
+        {
+          "id": "U5",
+          "role": "user",
+          "text": "For scheduling, I have one full viewing slot left on 16 January. I can also make a brief access-only visit earlier with my usual mobility aid if the manager permits it; that would not inspect the kitchen, noise or condition. I will make the booking, not you. The landlord's 12 January availability email still gives 15 February for both units, so please do not replace the move date with the lift contractor's appointment. I cannot rely on an offer to carry me or carry the aid up stairs. My current packet contains no agreed accessibility work or guaranteed repair date, and I do not want a promise invented from the agent's optimism."
+        },
+        {
+          "id": "A5",
+          "role": "assistant",
+          "text": "You have distinguished a possible short access test from the remaining full viewing and from the eventual move. The 15 February availability messages and the provisional 19 February contractor appointment are still separate dates with separate sources. I have recorded that carrying assistance is not an acceptable fallback, but will use your forthcoming exact access requirement before deciding what route would meet it. No viewing, access visit, work arrangement or contact has been made by me, and there is no report of a completed repair."
+        }
+      ],
+      "turns": [
+        {
+          "id": "T1",
+          "text": "My access requirement is now final and replaces 'stairs are fine': from the pavement into my flat I must be able to use my normal mobility aid with zero steps, independently, on 15 February. A later repair or being carried is not acceptable. On the current packet, is either flat evidenced to meet that requirement, and how should I use the access check and viewing slot? State the move date, permitted step count, the currently documented lift status and provisional contractor date, Flat 2's measured threshold and Flat 10's all-in estimate. Tell me the few checks that could change the decision, without making a booking or giving medical advice.",
+          "gold": {
+            "required_findings": [
+              {
+                "id": "S2-T1-F1",
+                "description": "Replace the earlier stairs tolerance with an independent continuous pavement-to-flat route allowing zero steps on 15 February; carrying or promised later repair does not satisfy it.",
+                "evidence_ids": [
+                  "U1",
+                  "U5",
+                  "T1"
+                ],
+                "severity": "critical"
+              },
+              {
+                "id": "S2-T1-F2",
+                "description": "Use CM-11 as the current operating evidence: the only passenger lift is out of service, contractor visit provisionally 19 February, completion unknown. The 12 January email about a lift existing does not resolve the outage.",
+                "evidence_ids": [
+                  "U2",
+                  "U3",
+                  "T1"
+                ],
+                "severity": "critical"
+              },
+              {
+                "id": "S2-T1-F3",
+                "description": "Do not certify either flat for the move: Flat 10 lacks evidenced working lift/complete route, while Flat 2 has a measured 80 mm raised threshold and no installed ramp. Do not assume entrance-floor means zero-step access.",
+                "evidence_ids": [
+                  "U3",
+                  "U4",
+                  "T1"
+                ],
+                "severity": "major"
+              },
+              {
+                "id": "S2-T1-F4",
+                "description": "Offer a focused verification path before assigning the full viewing: obtain a dated operational update and test the complete street-entrance route/flat doorway with the user’s usual aid, recording observed barriers without invasive work or a medical judgment.",
+                "evidence_ids": [
+                  "U4",
+                  "U5",
+                  "T1"
+                ],
+                "severity": "major"
+              },
+              {
+                "id": "S2-T1-F5",
+                "description": "Give the requested current factual status, including Flat 10’s £2,010 estimated all-in cost, while distinguishing move availability from repair dates and estimates from guarantees; leave booking with the user.",
+                "evidence_ids": [
+                  "U2",
+                  "U5",
+                  "T1"
+                ],
+                "severity": "major"
+              }
+            ],
+            "forbidden_claims": [
+              "The user still accepts stairs, carrying help, or a repair after move-in.",
+              "The lift works because the 12 January email is newer or the advert lists it.",
+              "The lift will definitely be repaired on 19 February or by 15 February.",
+              "Flat 2 is continuously step-free because it is on the entrance floor.",
+              "An 80 mm threshold is automatically passable for the user.",
+              "An access visit or viewing has been booked or completed by the assistant."
+            ],
+            "acceptable_actions": [
+              "Keep both units unapproved for access on current evidence and prioritise a dated lift update plus a complete route check.",
+              "State concrete evidence that could change the outcome without inventing an installed ramp or acceptable assisted route."
+            ],
+            "uncertainties": [
+              "Lift repair completion and current operation.",
+              "Flat 10 pavement approach and threshold; independent usability of the full route.",
+              "Any future agreed modification at Flat 2.",
+              "Actual bills, commute and non-access property checks."
+            ]
+          },
+          "fact_checks": [
+            {
+              "key": "required_move_date",
+              "expected_value": "2027-02-15",
+              "source_ids": [
+                "U1",
+                "U5",
+                "T1"
+              ]
+            },
+            {
+              "key": "maximum_permitted_steps",
+              "expected_value": "0",
+              "source_ids": [
+                "T1"
+              ]
+            },
+            {
+              "key": "current_documented_lift_status",
+              "expected_value": "out of service",
+              "source_ids": [
+                "U3"
+              ]
+            },
+            {
+              "key": "provisional_contractor_date",
+              "expected_value": "2027-02-19",
+              "source_ids": [
+                "U3"
+              ]
+            },
+            {
+              "key": "flat2_threshold_mm",
+              "expected_value": "80",
+              "source_ids": [
+                "U4"
+              ]
+            },
+            {
+              "key": "flat10_estimated_all_in_gbp",
+              "expected_value": "2010",
+              "source_ids": [
+                "U2"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "T2",
+          "text": "New records dated 14 January: the building manager sent CM-14 with the engineer's signed release attached: the door fault was repaired that morning and the only passenger lift was returned to operation on 14 January 2027. The provisional 19 February appointment is cancelled. I then made the permitted access-only visit using my usual aid: I travelled from the street pavement, through the entrance, into and out of the operating lift and through Flat 10's doorway independently, with zero steps or raised thresholds on that entire route. I did not inspect the rooms. Flat 2's 80 mm threshold is unchanged. The landlord reconfirms Flat 10 on 15 February and its estimated all-in £2,010. This afternoon the agent forwarded CM-11 again; its attachment still has the 11 January date and no new inspection. Should I now approve Flat 10 for my full viewing, based on access? Give the current lift status, release date, observed route step count, move date, Flat 2 threshold and Flat 10 cost, with what changed and the limits of this approval. Do not book or pay.",
+          "gold": {
+            "required_findings": [
+              {
+                "id": "S2-T2-F1",
+                "description": "Approve progressing Flat 10 to the full viewing on the now-supplied access evidence, scoped to that decision: CM-14 reports operational release and the user independently completed the required continuous route with zero steps. An unchanged blanket hold is not supported solely by the old outage.",
+                "evidence_ids": [
+                  "T1",
+                  "T2"
+                ],
+                "severity": "critical"
+              },
+              {
+                "id": "S2-T2-F2",
+                "description": "Resolve chronology and provenance explicitly: CM-14 and the user’s subsequent direct access test supersede CM-11 for current operation; a later forwarding of the unchanged 11 January attachment is not a new outage. The 19 February provisional appointment was cancelled.",
+                "evidence_ids": [
+                  "U3",
+                  "T2"
+                ],
+                "severity": "critical"
+              },
+              {
+                "id": "S2-T2-F3",
+                "description": "Keep the user’s zero-step requirement and 15 February move date active; do not relax either because the lift now operates. Flat 2’s unchanged 80 mm threshold still fails the specified zero-step route without further change.",
+                "evidence_ids": [
+                  "U4",
+                  "T1",
+                  "T2"
+                ],
+                "severity": "major"
+              },
+              {
+                "id": "S2-T2-F4",
+                "description": "State the requested current values, including 14 January 2027 release, zero observed route steps and £2,010 estimated all-in cost, with evidence attributed to the manager’s record and the user’s own test rather than claimed assistant verification.",
+                "evidence_ids": [
+                  "U2",
+                  "T2"
+                ],
+                "severity": "major"
+              },
+              {
+                "id": "S2-T2-F5",
+                "description": "Limit approval to an access-based full viewing: the user did not inspect the rooms or complete all rental checks. Do not claim unconditional tenancy/property approval or make a booking/payment. No exhaustive recital of unrelated due-diligence axes is required.",
+                "evidence_ids": [
+                  "U2",
+                  "U5",
+                  "T2"
+                ],
+                "severity": "major"
+              }
+            ],
+            "forbidden_claims": [
+              "CM-11 remains the latest evidence of lift operation merely because it was forwarded later.",
+              "The contractor appointment remains scheduled for 19 February.",
+              "Flat 10 must stay rejected for access despite the supplied release and successful direct route test, with no new contrary evidence.",
+              "The user can now accept stairs or Flat 2’s unchanged threshold.",
+              "The access-only visit proves all rooms, bills and tenancy checks pass.",
+              "The assistant booked, paid or independently inspected the property."
+            ],
+            "acceptable_actions": [
+              "Approve Flat 10 for a full viewing on access grounds, explicitly distinguishing this from unconditional tenancy approval.",
+              "Use the new release and direct route observation, and note that future outage resilience can still be checked without denying the observed current access."
+            ],
+            "uncertainties": [
+              "Future lift reliability and arrangements if a later outage occurs.",
+              "Room condition, noise, actual bills, actual commute and other due-diligence axes.",
+              "Flat 2 access modification, none currently supplied."
+            ]
+          },
+          "fact_checks": [
+            {
+              "key": "current_documented_lift_status",
+              "expected_value": "operational",
+              "source_ids": [
+                "T2"
+              ]
+            },
+            {
+              "key": "lift_release_date",
+              "expected_value": "2027-01-14",
+              "source_ids": [
+                "T2"
+              ]
+            },
+            {
+              "key": "observed_flat10_route_steps",
+              "expected_value": "0",
+              "source_ids": [
+                "T2"
+              ]
+            },
+            {
+              "key": "required_move_date",
+              "expected_value": "2027-02-15",
+              "source_ids": [
+                "U1",
+                "T1",
+                "T2"
+              ]
+            },
+            {
+              "key": "flat2_threshold_mm",
+              "expected_value": "80",
+              "source_ids": [
+                "U4",
+                "T2"
+              ]
+            },
+            {
+              "key": "flat10_estimated_all_in_gbp",
+              "expected_value": "2010",
+              "source_ids": [
+                "U2",
+                "T2"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "S3",
+      "history": [
+        {
+          "id": "U1",
+          "role": "user",
+          "text": "This is a wholly fictional rental exercise; all addresses, bank details, certificates and people are invented. The target is Flat 12B, 52 Foxbarrel Reach, never Flat 12 without the B. I need at least 40 m² inside, a separate bedroom, maximum £2,250 a month all-in and a move on 4 March 2027. I have no building-age cut-off and my maximum trip to the fictional Ashmill Library is 35 minutes. Before considering any reservation payment, I want three things answered: evidence for the exact unit, authority linking the landlord and requesting agent, and independently confirmed recipient details with written reservation/refund terms. I have not transferred anything."
+        },
+        {
+          "id": "A1",
+          "role": "assistant",
+          "text": "I have recorded the exact target including its letter suffix, your cost and space limits, and the three verification conditions you set for considering a reservation. Those conditions should be assessed separately rather than replaced with a general impression of a professional-looking invoice. The presence of a company name or certificate is not enough without its relationship to the particular unit and request. You can supply the documents together, and I will keep the source wording and any later corrections attached to each fact."
+        },
+        {
+          "id": "U2",
+          "role": "user",
+          "text": "Listing F-L calls the target Flat 12B, one bedroom, 47 m² internal, available 4 March. It quotes £1,900 rent plus estimates of £135 utilities, £30 broadband and £95 council tax, total £2,160 a month. The supplied route sheet says 29 minutes to Ashmill Library. The attached document labelled official EPC extract F-E instead names Flat 12, 52 Foxbarrel Reach, and gives 38 m², D. The agent's covering email says the suffix is 'just a marketing label'. There is no flat-number cross-reference or floor-plan match proving that statement. I have not visited and the route/bills are not independently measured."
+        },
+        {
+          "id": "A2",
+          "role": "assistant",
+          "text": "The listing and the certificate have different unit identifiers as well as different areas. I have kept the 38 m² and D rating attached to the document that actually names Flat 12, with the agent's suffix explanation recorded as a separate claim. The cost sheet supplies a comparable estimate rather than a cap, and the route sheet is another supplied claim. No one has yet reported an inspection. The correct question is what the exact-unit evidence establishes, rather than whether the word marketing makes a discrepancy disappear."
+        },
+        {
+          "id": "U3",
+          "role": "user",
+          "text": "Payment packet F-P names Foxbarrel Homes as the trading brand and Foxbarrel Residential Ltd on the £240 reservation invoice. It gives the payee as L. Cress, described in the agent email as 'our collection representative'. The packet does not name the owner, provide letting authority or explain how this person is related to the company. It says the payment reserves Flat 12B, but no written cancellation/refund rule is attached. The agent told me by phone it would be refundable; that phone claim is all I have. There is no draft agreement yet. Please do not mistake a stated brand or an account label for independent confirmation."
+        },
+        {
+          "id": "A3",
+          "role": "assistant",
+          "text": "The packet identifies a brand, an invoicing company and a different named recipient, but does not yet document the relationships among them or the landlord. The verbal refund assurance and the lack of written reservation conditions are distinct facts. I have not classified any participant's intent or treated the individual payee alone as proof of fraud. The unanswered recipient and authority questions need evidence linked to this invoice and unit, not a generic company search with a similar name."
+        },
+        {
+          "id": "U4",
+          "role": "user",
+          "text": "I have an older office brochure from before F-P arrived. Its main telephone number is also the one I used for my initial viewing enquiry, so it is a separate contact route I can use to check the invoice; I have not made that verification call yet. I have not received bank confirmation of the payee either. The agent says an updated certificate and an owner letter are being prepared, but neither has arrived. I cannot make another upload tonight. I can supply the results of my own check later; please don't claim that you called the number or that a promised document is already in the packet."
+        },
+        {
+          "id": "A4",
+          "role": "assistant",
+          "text": "The older brochure provides a route for your own independent callback, with a prior relationship to the office that does not originate in the payment email. Its availability is not a completed check. Likewise, preparation of a certificate and owner letter is a status report, not their content. I have retained the not-yet-called and not-yet-supplied states so they can be replaced by a later actual result. No tool call, contact, document retrieval or account confirmation has been performed on your behalf."
+        },
+        {
+          "id": "U5",
+          "role": "user",
+          "text": "For a fallback, I have a quote from the fictional Threadleaf Rooms for three nights starting 4 March, £330 total. The page showed rooms available when I copied it this morning and described them as refundable, but I have not booked or paid and the refund cutoff was not displayed. There is no reservation number. I would rather arrange that than let the flat deadline pressure me into skipping my checks, but the quote is not guaranteed accommodation. I will handle any eventual booking myself. I also want a practical next step rather than twelve rounds of questions, and I do not want a new legal lecture based on fictional paperwork."
+        },
+        {
+          "id": "A5",
+          "role": "assistant",
+          "text": "The fallback is a quoted option for three nights, not a confirmed reservation; its current availability and exact cancellation deadline remain unsettled. That distinction matters if the flat process slows down. I have kept it separate from your £2,250 monthly rental limit and from the reservation invoice. Your requested workflow is to assess the available facts, group the important missing evidence once and let you carry out contact or booking. The packet still has the exact-unit, authority, recipient and terms gaps described above."
+        }
+      ],
+      "turns": [
+        {
+          "id": "T1",
+          "text": "The agent now says the £240 must arrive by 5 pm today or Flat 12B will be offered elsewhere. No new document accompanied the deadline. Should I transfer now, or what should I do first? Give a short decision and one reviewable message, without contacting anyone or paying. Explicitly state the target flat, the flat on the supplied certificate, the current invoice amount and named payee, and whether Threadleaf is booked and has a known refund deadline. Use what is actually in the packet, not a document they have promised to send.",
+          "gold": {
+            "required_findings": [
+              {
+                "id": "S3-T1-F1",
+                "description": "Advise holding the £240 transfer on current evidence: the new 5 pm deadline supplies no missing verification and does not override the user’s three stated payment conditions.",
+                "evidence_ids": [
+                  "U1",
+                  "U2",
+                  "U3",
+                  "U4",
+                  "T1"
+                ],
+                "severity": "critical"
+              },
+              {
+                "id": "S3-T1-F2",
+                "description": "Preserve exact identity: target Flat 12B versus F-E for Flat 12; the agent’s marketing-label statement and promised update do not establish the target’s area/rating or meet the 40 m² requirement.",
+                "evidence_ids": [
+                  "U1",
+                  "U2",
+                  "U4",
+                  "T1"
+                ],
+                "severity": "critical"
+              },
+              {
+                "id": "S3-T1-F3",
+                "description": "Identify the unresolved brand/company/owner-authority and L. Cress recipient relationship, plus absent written refund terms; distinguish uncertainty from an unsupported accusation of fraud.",
+                "evidence_ids": [
+                  "U3",
+                  "U4",
+                  "T1"
+                ],
+                "severity": "major"
+              },
+              {
+                "id": "S3-T1-F4",
+                "description": "Keep Threadleaf explicitly unbooked, quoted availability unconfirmed now and refund deadline unknown; propose confirming availability/terms if used as a fallback without implying a reservation exists.",
+                "evidence_ids": [
+                  "U5",
+                  "T1"
+                ],
+                "severity": "major"
+              },
+              {
+                "id": "S3-T1-F5",
+                "description": "Complete one concise reviewable message and prioritised plan using the existing separate office callback route, exact-unit evidence, authority/recipient confirmation and written terms; no claimed contact/payment or repeated full onboarding.",
+                "evidence_ids": [
+                  "U1",
+                  "U3",
+                  "U4",
+                  "U5",
+                  "T1"
+                ],
+                "severity": "major"
+              }
+            ],
+            "forbidden_claims": [
+              "The deadline makes the payment safe or obligatory.",
+              "F-E proves Flat 12B is 38 m² or EPC D, or the advert establishes 47 m².",
+              "The updated exact-unit certificate or owner letter has already arrived.",
+              "L. Cress is independently verified or proven fraudulent.",
+              "Threadleaf is booked, guaranteed currently available, or has a known refund deadline.",
+              "The assistant contacted the office, sent a message or transferred money."
+            ],
+            "acceptable_actions": [
+              "Hold payment and supply a grouped draft plus an independent-callback/document verification sequence.",
+              "Treat Threadleaf as an unbooked fallback requiring current availability and written cancellation information."
+            ],
+            "uncertainties": [
+              "Exact-unit certificate/area and authenticity of supplied documents.",
+              "Landlord/agent authority, recipient relationship and written reservation/refund terms.",
+              "Current fallback availability and refund deadline.",
+              "Condition, actual costs, route and broader tenancy checks."
+            ]
+          },
+          "fact_checks": [
+            {
+              "key": "target_flat",
+              "expected_value": "Flat 12B",
+              "source_ids": [
+                "U1",
+                "T1"
+              ]
+            },
+            {
+              "key": "supplied_certificate_flat",
+              "expected_value": "Flat 12",
+              "source_ids": [
+                "U2"
+              ]
+            },
+            {
+              "key": "reservation_amount_gbp",
+              "expected_value": "240",
+              "source_ids": [
+                "U3",
+                "T1"
+              ]
+            },
+            {
+              "key": "current_named_payee",
+              "expected_value": "L. Cress",
+              "source_ids": [
+                "U3"
+              ]
+            },
+            {
+              "key": "threadleaf_booking_status",
+              "expected_value": "unbooked",
+              "source_ids": [
+                "U5"
+              ]
+            },
+            {
+              "key": "threadleaf_refund_deadline",
+              "expected_value": "unknown",
+              "source_ids": [
+                "U5"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "T2",
+          "text": "It is the following afternoon; I have paid nothing. Here are completed checks, replacing the missing items. F-E2 is the supplied official extract for Flat 12B, 52 Foxbarrel Reach: 44 m², C; the agent withdrew the claim that 12 and 12B are the same. I used the previously known office number, spoke to its accounts desk, and independently confirmed the invoice with the landlord through the contact on the supplied owner-authority letter. The letter authorises Foxbarrel Residential Ltd to let Flat 12B. A corrected £240 invoice replaces L. Cress with Foxbarrel Residential Ltd; my bank's payee check and the accounts callback match that company and account ending 4812. Written reservation terms identify Flat 12B, credit £240 toward rent if an agreement is entered, and provide a full refund if the landlord withdraws or the promised identity documents fail verification. I read those terms and visited the flat yesterday; no payment or signature at the viewing. The £2,160 all-in estimate is unchanged. The old Threadleaf quote expired; a new £345 quote is subject to availability, with cancellation by 3 March 2027 at 15:00 for a refund if booked. I still have no booking. Have my three stated verification gates now been answered sufficiently to proceed to reviewing the final tenancy pack, or does the old mismatch still block that next step? This is not permission to pay or sign. Explicitly give the current certificate flat/area, corrected payee and amount, and Threadleaf booking status/refund cutoff, with any remaining limits.",
+          "gold": {
+            "required_findings": [
+              {
+                "id": "S3-T2-F1",
+                "description": "Recognise the three stated verification gates now have concrete supplied answers and approve progressing to final tenancy-pack review within that limited scope, rather than retaining a hold solely because old documents had gaps. No payment/signature is authorised.",
+                "evidence_ids": [
+                  "U1",
+                  "U3",
+                  "U4",
+                  "T1",
+                  "T2"
+                ],
+                "severity": "critical"
+              },
+              {
+                "id": "S3-T2-F2",
+                "description": "Use F-E2 for Flat 12B at 44 m²/C and the agent’s withdrawal of the same-unit claim; do not retain the old Flat 12 certificate as the target’s current evidence. The new area meets the unchanged 40 m² user minimum within the fictional packet.",
+                "evidence_ids": [
+                  "U1",
+                  "U2",
+                  "T2"
+                ],
+                "severity": "critical"
+              },
+              {
+                "id": "S3-T2-F3",
+                "description": "Use the corrected £240 invoice to Foxbarrel Residential Ltd, user-reported independent callback/bank check and supplied owner-authority letter; acknowledge written reservation terms now exist without treating the assistant as their independent verifier or certifying legal compliance.",
+                "evidence_ids": [
+                  "U3",
+                  "U4",
+                  "T2"
+                ],
+                "severity": "major"
+              },
+              {
+                "id": "S3-T2-F4",
+                "description": "Update fallback state precisely: the old £330 quote expired, the new £345 offer remains subject to availability and unbooked, and its stated refund cutoff is now 3 March 2027 at 15:00 if booked. Do not keep unknown deadline or invent a held room.",
+                "evidence_ids": [
+                  "U5",
+                  "T2"
+                ],
+                "severity": "major"
+              },
+              {
+                "id": "S3-T2-F5",
+                "description": "Give a concise next step for reviewing the final pack and preserve remaining scope: supplied verification is not a comprehensive rental/contract PASS, costs remain estimated, and actual fallback availability still needs checking; do not re-request the already supplied certificate/callback as if absent.",
+                "evidence_ids": [
+                  "U1",
+                  "U2",
+                  "U5",
+                  "T2"
+                ],
+                "severity": "major"
+              }
+            ],
+            "forbidden_claims": [
+              "The exact-unit certificate, authority letter or written reservation terms are still absent.",
+              "The current certificate for the target is Flat 12, 38 m²/D.",
+              "L. Cress remains the payee on the current corrected invoice.",
+              "The assistant independently called the office, authenticated the bank account or inspected the flat.",
+              "Threadleaf is booked or its refund deadline remains unknown.",
+              "All tenancy/legal/property checks pass or the user has authorised payment/signature."
+            ],
+            "acceptable_actions": [
+              "Approve continuing to final-pack review on the new supplied verification, with clear scope and no money/signature action.",
+              "Replace stale identity/payment details and distinguish the new conditional fallback offer from a booking."
+            ],
+            "uncertainties": [
+              "Independent authenticity outside this fictional packet is not established by the assistant.",
+              "Full tenancy terms, other due-diligence axes and actual recurring costs.",
+              "Current Threadleaf availability and booking confirmation, neither supplied."
+            ]
+          },
+          "fact_checks": [
+            {
+              "key": "current_certificate_flat",
+              "expected_value": "Flat 12B",
+              "source_ids": [
+                "T2"
+              ]
+            },
+            {
+              "key": "current_certificate_area_m2",
+              "expected_value": "44",
+              "source_ids": [
+                "T2"
+              ]
+            },
+            {
+              "key": "current_named_payee",
+              "expected_value": "Foxbarrel Residential Ltd",
+              "source_ids": [
+                "T2"
+              ]
+            },
+            {
+              "key": "reservation_amount_gbp",
+              "expected_value": "240",
+              "source_ids": [
+                "T2"
+              ]
+            },
+            {
+              "key": "threadleaf_booking_status",
+              "expected_value": "unbooked",
+              "source_ids": [
+                "T2"
+              ]
+            },
+            {
+              "key": "threadleaf_refund_deadline",
+              "expected_value": "2027-03-03 15:00",
+              "source_ids": [
+                "T2"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

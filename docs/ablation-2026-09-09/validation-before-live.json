@@ -1,0 +1,58 @@
+{
+  "verified_at_utc": "2026-09-09T14:37:00.125643+00:00",
+  "live_benchmark_calls_before_freeze": 0,
+  "full_offline_suite": {
+    "command": "python3 -m unittest discover -s tests",
+    "passed": 1645,
+    "seconds": 25.055,
+    "log": "bench/results/ablation-2026-09-09/validation/full-offline-tests.log",
+    "sha256": "97f5254220953636beb187a9d9e449cb5677601a5a102350eaa6b523beca92f0"
+  },
+  "full_matrix_stub_replay": {
+    "attempts": 158,
+    "final_answers": 108,
+    "new_case_judges": 18,
+    "usage_matches_controller": true,
+    "network_or_model_calls": 0,
+    "note": "Mock-model integration test, not measured model results."
+  },
+  "previous_artifact_integrity": [
+    {
+      "inventory": "/Users/chenhsienhao/Documents/pea-princess-handoff-20260908T113914Z/artifact-inventory.json",
+      "files": 2060,
+      "changed_or_missing": []
+    },
+    {
+      "inventory": "/Users/chenhsienhao/Documents/pea-princess-cost-probe-20260908T122647Z/raw-file-inventory.json",
+      "files": 113,
+      "changed_or_missing": []
+    },
+    {
+      "inventory": "/Users/chenhsienhao/Documents/pea-princess-context-quality-20260908T173123Z/raw-file-inventory.json",
+      "files": 365,
+      "changed_or_missing": []
+    }
+  ],
+  "reviews": [
+    "Separate fixture author and reviewer checked nested retrieval evidence, scalar/gold references and affirmative controls.",
+    "Future-turn and gold isolation checked; two-turn memory scope and bundled judge calibration explicitly documented.",
+    "Orphan attempts remain unknown; known failed work retained before dispatch is blocked.",
+    "Counterfactual arm dependencies counted once and actual shared generations counted only once."
+  ],
+  "source_sha256": {
+    "bench/ablation_study.py": "934ded2c6476ce0d3557ba0c95504bebc2d02827da203b4218e86aa5f6e31786",
+    "bench/call_control.py": "2937ad5703097404b802bdab03cff498920d6ec4dd780254d7ba55eeb97776a7",
+    "bench/report_control.py": "c89635e22eba04e9fc6dfd3a0a38bbcf760b044840b1d1db54b2428a9a4d5f5a",
+    "bench/context_quality.py": "8b59cee65a36a9cf4ccefb415d35219601d7e73da9b4764daeb1b473740e5bf0",
+    "bench/launch.py": "97408a88f28756dbe1643e769836166eeb1497480486a5abee7da4d9cf69199c",
+    "tests/test_ablation_study.py": "db859c250e55d656d35ac3288b0f15a893552fad3b2b9a88c8ee881a47f169c6",
+    "tests/test_call_control.py": "5cf1751425c1747a01d3e5f6f3cefc7b8606541391697d755b83fc79ffd0e43a",
+    "evals/ablation-2026-09-09/rental-cases.json": "52eba1f2998a3da1bfe23a819af4cd439673afe180988976e5452a179e3c40c8",
+    "evals/ablation-2026-09-09/retrieval-cases.json": "434c78c5dd73d4e1224892a6701fd4197936e89ae1eab0885b3812e6a2649ae6",
+    "docs/ablation-2026-09-09/protocol.md": "f3235d80f0f2a07b7d80eb2fa967d8ef491b7c4b73d5ec4fbb37dad05896e13b",
+    "dist/prompt-pack/INSTRUCTIONS.md": "912ae34b83631dc1859881fc4b7243ddf3f9a9151570558c32ad733ff1d1bd78"
+  },
+  "planned_maximum_cli_calls": 158,
+  "reported_token_stop_threshold": 4200000,
+  "claude_calls_allowed": 0
+}
