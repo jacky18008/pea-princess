@@ -52,6 +52,8 @@ python3 bench/run.py --agent codex --case explain-capabilities \
 
 Removing `--dry-run` makes model calls. The models above are explicit benchmark requests, not a recommendation to migrate every application to that model. Multi-role configurations must pin each actual actor too.
 
+Persona sessions need explicit target/persona models and a judge model unless rules-only. A model-based persona `--regrade` requires `--judge-model` and the live bounds; rules-only regrading remains offline. Live `--skip-existing` cannot bypass the ledger. Recovery copies are capped at 2,000 files / 32 MiB, and the source must neither contain nor be contained by the new durable directory.
+
 Claude stays disabled by default. `--allow-claude` is an explicit opt-in for a new authorized experiment, not a rate-limit polling or automatic recovery mechanism. The seven earlier paused Claude confirmations are not resumed by this migration.
 
 Physical calls are serial so that the next call cannot race a failure in another one. Budget checks occur between calls; one call may exceed the token ceiling. A complete result with warning-only stderr is retained instead of bought again. Conversely, a failed result with partial usage remains a failure even if some useful text was produced.

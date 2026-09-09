@@ -1,0 +1,261 @@
+{
+  "version": 2,
+  "source_commit": "bbabe952ade14292c3ab7c2eb9febfe1e0b1fe57",
+  "source_sha256": {
+    "bench/context_quality.py": "0873f729f82995b24fc3e48a2764407905d82c8e4236fba4f52d8b743bd6052d",
+    "bench/launch.py": "6c4810e53b6a15a7f47f54d32a7034fde46a0c57e3d57023ce5dc65cd24e8574",
+    "evals/context-quality/analysis-cases.json": "805c48c58ce62de15bc41bd790539e52b9c4ac149621659f29a6a243e9609e0b",
+    "evals/context-quality/rental-cases.json": "dae426b9e28b5c9b207d2b21dcb6fdd23d670737aeae643f84fb608c167d40be",
+    "dist/prompt-pack/INSTRUCTIONS.md": "3af26800dbe3aa905d40d271d7a028950dbbc48201f68c64aabe85010eb384c2",
+    "docs/context-quality/protocol-2026-09-08.md": "40bb6254f0fa7ead6552c7ba665a70883eb7eeecca83e21e8c78a49595c5cf3c",
+    "bench/call_control.py": "bc079f0d4f0d255786c6add7cbb3c8ae42494396a3eb38766402e1d04c1fac95",
+    "bench/report_control.py": "c89635e22eba04e9fc6dfd3a0a38bbcf760b044840b1d1db54b2428a9a4d5f5a",
+    "docs/runner-unification-2026-09-09/protocol.md": "51f43c90fde4063af240b6a9c0da6f55d3321569f3f336cfe17a027f75f1dbc2"
+  },
+  "prepared_sha256": {
+    "analysis-cases.json": "805c48c58ce62de15bc41bd790539e52b9c4ac149621659f29a6a243e9609e0b",
+    "rental-cases.json": "dae426b9e28b5c9b207d2b21dcb6fdd23d670737aeae643f84fb608c167d40be",
+    "target-instructions.md": "3af26800dbe3aa905d40d271d7a028950dbbc48201f68c64aabe85010eb384c2"
+  },
+  "answer_model": "gpt-5.6-terra",
+  "judge_model": "gpt-5.6-sol",
+  "effort": "low",
+  "maximum_cli_calls": 38,
+  "reported_token_stop_threshold": 900000,
+  "timeout_seconds_per_call": 180,
+  "maximum_retrieval_rounds": 1,
+  "maximum_documents_per_retrieval": 2,
+  "jobs": [
+    {
+      "id": "A1-full",
+      "experiment": "analysis",
+      "case_id": "A1",
+      "arm": "full"
+    },
+    {
+      "id": "A1-summary",
+      "experiment": "analysis",
+      "case_id": "A1",
+      "arm": "summary"
+    },
+    {
+      "id": "A1-adaptive",
+      "experiment": "analysis",
+      "case_id": "A1",
+      "arm": "adaptive"
+    },
+    {
+      "id": "A2-summary",
+      "experiment": "analysis",
+      "case_id": "A2",
+      "arm": "summary"
+    },
+    {
+      "id": "A2-adaptive",
+      "experiment": "analysis",
+      "case_id": "A2",
+      "arm": "adaptive"
+    },
+    {
+      "id": "A2-full",
+      "experiment": "analysis",
+      "case_id": "A2",
+      "arm": "full"
+    },
+    {
+      "id": "A3-adaptive",
+      "experiment": "analysis",
+      "case_id": "A3",
+      "arm": "adaptive"
+    },
+    {
+      "id": "A3-full",
+      "experiment": "analysis",
+      "case_id": "A3",
+      "arm": "full"
+    },
+    {
+      "id": "A3-summary",
+      "experiment": "analysis",
+      "case_id": "A3",
+      "arm": "summary"
+    },
+    {
+      "id": "A4-full",
+      "experiment": "analysis",
+      "case_id": "A4",
+      "arm": "full"
+    },
+    {
+      "id": "A4-summary",
+      "experiment": "analysis",
+      "case_id": "A4",
+      "arm": "summary"
+    },
+    {
+      "id": "A4-adaptive",
+      "experiment": "analysis",
+      "case_id": "A4",
+      "arm": "adaptive"
+    },
+    {
+      "id": "R1-full",
+      "experiment": "rental",
+      "case_id": "R1",
+      "arm": "full"
+    },
+    {
+      "id": "R1-compact",
+      "experiment": "rental",
+      "case_id": "R1",
+      "arm": "compact"
+    },
+    {
+      "id": "R2-compact",
+      "experiment": "rental",
+      "case_id": "R2",
+      "arm": "compact"
+    },
+    {
+      "id": "R2-full",
+      "experiment": "rental",
+      "case_id": "R2",
+      "arm": "full"
+    },
+    {
+      "id": "R3-full",
+      "experiment": "rental",
+      "case_id": "R3",
+      "arm": "full"
+    },
+    {
+      "id": "R3-compact",
+      "experiment": "rental",
+      "case_id": "R3",
+      "arm": "compact"
+    },
+    {
+      "id": "R4-compact",
+      "experiment": "rental",
+      "case_id": "R4",
+      "arm": "compact"
+    },
+    {
+      "id": "R4-full",
+      "experiment": "rental",
+      "case_id": "R4",
+      "arm": "full"
+    },
+    {
+      "id": "R5-full",
+      "experiment": "rental",
+      "case_id": "R5",
+      "arm": "full"
+    },
+    {
+      "id": "R5-compact",
+      "experiment": "rental",
+      "case_id": "R5",
+      "arm": "compact"
+    },
+    {
+      "id": "R6-compact",
+      "experiment": "rental",
+      "case_id": "R6",
+      "arm": "compact"
+    },
+    {
+      "id": "R6-full",
+      "experiment": "rental",
+      "case_id": "R6",
+      "arm": "full"
+    }
+  ],
+  "judge_masks": {
+    "A1": {
+      "candidate_1": "A1-full",
+      "candidate_2": "A1-summary",
+      "candidate_3": "A1-adaptive"
+    },
+    "A2": {
+      "candidate_1": "A2-adaptive",
+      "candidate_2": "A2-full",
+      "candidate_3": "A2-summary"
+    },
+    "A3": {
+      "candidate_1": "A3-full",
+      "candidate_2": "A3-summary",
+      "candidate_3": "A3-adaptive"
+    },
+    "A4": {
+      "candidate_1": "A4-summary",
+      "candidate_2": "A4-full",
+      "candidate_3": "A4-adaptive"
+    },
+    "R1": {
+      "candidate_1": "R1-full",
+      "candidate_2": "R1-compact"
+    },
+    "R2": {
+      "candidate_1": "R2-full",
+      "candidate_2": "R2-compact"
+    },
+    "R3": {
+      "candidate_1": "R3-full",
+      "candidate_2": "R3-compact"
+    },
+    "R4": {
+      "candidate_1": "R4-compact",
+      "candidate_2": "R4-full"
+    },
+    "R5": {
+      "candidate_1": "R5-compact",
+      "candidate_2": "R5-full"
+    },
+    "R6": {
+      "candidate_1": "R6-compact",
+      "candidate_2": "R6-full"
+    }
+  },
+  "planned_call_ids": [
+    "A1-full-initial",
+    "A1-summary-initial",
+    "A1-adaptive-initial",
+    "A1-adaptive-retrieved",
+    "A2-summary-initial",
+    "A2-adaptive-initial",
+    "A2-adaptive-retrieved",
+    "A2-full-initial",
+    "A3-adaptive-initial",
+    "A3-adaptive-retrieved",
+    "A3-full-initial",
+    "A3-summary-initial",
+    "A4-full-initial",
+    "A4-summary-initial",
+    "A4-adaptive-initial",
+    "A4-adaptive-retrieved",
+    "R1-full-initial",
+    "R1-compact-initial",
+    "R2-compact-initial",
+    "R2-full-initial",
+    "R3-full-initial",
+    "R3-compact-initial",
+    "R4-compact-initial",
+    "R4-full-initial",
+    "R5-full-initial",
+    "R5-compact-initial",
+    "R6-compact-initial",
+    "R6-full-initial",
+    "A1-judge",
+    "A2-judge",
+    "A3-judge",
+    "A4-judge",
+    "R1-judge",
+    "R2-judge",
+    "R3-judge",
+    "R4-judge",
+    "R5-judge",
+    "R6-judge"
+  ],
+  "scope": "Authored synthetic exploratory analysis and fixed rental next-turn pilots; no Claude, no end-to-end rental trial"
+}

@@ -1,0 +1,33 @@
+{
+  "status": "PASS",
+  "complete_offline_suite": {
+    "command": "python3 -m unittest discover -s tests -p 'test_*.py'",
+    "tests": 1759,
+    "seconds": 42.755,
+    "exit_code": 0,
+    "log_path": "bench/results/durable-quality-2026-09-09/validation/all-tests.log",
+    "log_sha256": "a3dbe2f892e5d6f162c395f25e52306122b2a2395838f31a57ebd2029b4c423f"
+  },
+  "tested_source_content_committed_as": "523e49a86b300f4e6761f1ee507b9b605d2fd178",
+  "live_quality": {
+    "source_commit": "bbabe952ade14292c3ab7c2eb9febfe1e0b1fe57",
+    "calls": 38,
+    "failed": 0,
+    "claude_calls": 0,
+    "processed_tokens": 670825,
+    "raw_audit": "raw-quality-audit.json"
+  },
+  "replay": {
+    "status": "PASS",
+    "new_process_callbacks": 0,
+    "raw_files_verified": 266,
+    "raw_hashes_unchanged": true,
+    "controller_report_unchanged": true,
+    "complete": true
+  },
+  "historical_files_verified_unchanged": 3849,
+  "notes": [
+    "Focused suite counts overlap; do not add them to the complete suite count.",
+    "No additional legacy model calls or Claude confirmations were made."
+  ]
+}

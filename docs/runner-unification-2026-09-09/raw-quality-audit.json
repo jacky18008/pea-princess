@@ -1,0 +1,1005 @@
+{
+  "status": "PASS",
+  "problems": [],
+  "source_commit": "bbabe952ade14292c3ab7c2eb9febfe1e0b1fe57",
+  "plan_sha256": "b9fded982a4322ab49d89425603b51361c2c82006628cb407c95e44b4dd4cb06",
+  "calls": 38,
+  "requested_models": {
+    "gpt-5.6-terra": 28,
+    "gpt-5.6-sol": 10
+  },
+  "usage": {
+    "input_tokens": 639694,
+    "output_tokens": 31131,
+    "cached_input_tokens": 144384,
+    "total_tokens": 670825
+  },
+  "tokens_by_purpose": {
+    "answer": 401546,
+    "retrieval_answer": 67797,
+    "judge": 201482
+  },
+  "controllers": {
+    "control/progress.json": {
+      "version": 1,
+      "revision": 76,
+      "planned_calls": 38,
+      "dispatched_calls": 38,
+      "completed_calls": 38,
+      "failed_calls": 0,
+      "skipped_calls": 0,
+      "skipped_call_ids": [],
+      "skip_reasons": {},
+      "completed_or_skipped_calls": 38,
+      "resolved_planned_calls": 38,
+      "plan_complete": true,
+      "pending_call_ids": [],
+      "paused": false,
+      "decision": "report_results",
+      "usage": {
+        "known_input_tokens": 639694,
+        "unknown_input_tokens_requests": 0,
+        "known_cached_input_tokens": 144384,
+        "unknown_cached_input_tokens_requests": 0,
+        "known_output_tokens": 31131,
+        "unknown_output_tokens_requests": 0,
+        "total_tokens": 670825
+      },
+      "calls": [
+        {
+          "call_id": "A1-full-initial",
+          "job_id": "A1-full",
+          "role": "answer",
+          "phase": "answer",
+          "status": "complete",
+          "failure_kind": null
+        },
+        {
+          "call_id": "A1-summary-initial",
+          "job_id": "A1-summary",
+          "role": "answer",
+          "phase": "answer",
+          "status": "complete",
+          "failure_kind": null
+        },
+        {
+          "call_id": "A1-adaptive-initial",
+          "job_id": "A1-adaptive",
+          "role": "answer",
+          "phase": "answer",
+          "status": "complete",
+          "failure_kind": null
+        },
+        {
+          "call_id": "A1-adaptive-retrieved",
+          "job_id": "A1-adaptive",
+          "role": "retrieval_answer",
+          "phase": "retrieval_answer",
+          "status": "complete",
+          "failure_kind": null
+        },
+        {
+          "call_id": "A2-summary-initial",
+          "job_id": "A2-summary",
+          "role": "answer",
+          "phase": "answer",
+          "status": "complete",
+          "failure_kind": null
+        },
+        {
+          "call_id": "A2-adaptive-initial",
+          "job_id": "A2-adaptive",
+          "role": "answer",
+          "phase": "answer",
+          "status": "complete",
+          "failure_kind": null
+        },
+        {
+          "call_id": "A2-adaptive-retrieved",
+          "job_id": "A2-adaptive",
+          "role": "retrieval_answer",
+          "phase": "retrieval_answer",
+          "status": "complete",
+          "failure_kind": null
+        },
+        {
+          "call_id": "A2-full-initial",
+          "job_id": "A2-full",
+          "role": "answer",
+          "phase": "answer",
+          "status": "complete",
+          "failure_kind": null
+        },
+        {
+          "call_id": "A3-adaptive-initial",
+          "job_id": "A3-adaptive",
+          "role": "answer",
+          "phase": "answer",
+          "status": "complete",
+          "failure_kind": null
+        },
+        {
+          "call_id": "A3-adaptive-retrieved",
+          "job_id": "A3-adaptive",
+          "role": "retrieval_answer",
+          "phase": "retrieval_answer",
+          "status": "complete",
+          "failure_kind": null
+        },
+        {
+          "call_id": "A3-full-initial",
+          "job_id": "A3-full",
+          "role": "answer",
+          "phase": "answer",
+          "status": "complete",
+          "failure_kind": null
+        },
+        {
+          "call_id": "A3-summary-initial",
+          "job_id": "A3-summary",
+          "role": "answer",
+          "phase": "answer",
+          "status": "complete",
+          "failure_kind": null
+        },
+        {
+          "call_id": "A4-full-initial",
+          "job_id": "A4-full",
+          "role": "answer",
+          "phase": "answer",
+          "status": "complete",
+          "failure_kind": null
+        },
+        {
+          "call_id": "A4-summary-initial",
+          "job_id": "A4-summary",
+          "role": "answer",
+          "phase": "answer",
+          "status": "complete",
+          "failure_kind": null
+        },
+        {
+          "call_id": "A4-adaptive-initial",
+          "job_id": "A4-adaptive",
+          "role": "answer",
+          "phase": "answer",
+          "status": "complete",
+          "failure_kind": null
+        },
+        {
+          "call_id": "A4-adaptive-retrieved",
+          "job_id": "A4-adaptive",
+          "role": "retrieval_answer",
+          "phase": "retrieval_answer",
+          "status": "complete",
+          "failure_kind": null
+        },
+        {
+          "call_id": "R1-full-initial",
+          "job_id": "R1-full",
+          "role": "answer",
+          "phase": "answer",
+          "status": "complete",
+          "failure_kind": null
+        },
+        {
+          "call_id": "R1-compact-initial",
+          "job_id": "R1-compact",
+          "role": "answer",
+          "phase": "answer",
+          "status": "complete",
+          "failure_kind": null
+        },
+        {
+          "call_id": "R2-compact-initial",
+          "job_id": "R2-compact",
+          "role": "answer",
+          "phase": "answer",
+          "status": "complete",
+          "failure_kind": null
+        },
+        {
+          "call_id": "R2-full-initial",
+          "job_id": "R2-full",
+          "role": "answer",
+          "phase": "answer",
+          "status": "complete",
+          "failure_kind": null
+        },
+        {
+          "call_id": "R3-full-initial",
+          "job_id": "R3-full",
+          "role": "answer",
+          "phase": "answer",
+          "status": "complete",
+          "failure_kind": null
+        },
+        {
+          "call_id": "R3-compact-initial",
+          "job_id": "R3-compact",
+          "role": "answer",
+          "phase": "answer",
+          "status": "complete",
+          "failure_kind": null
+        },
+        {
+          "call_id": "R4-compact-initial",
+          "job_id": "R4-compact",
+          "role": "answer",
+          "phase": "answer",
+          "status": "complete",
+          "failure_kind": null
+        },
+        {
+          "call_id": "R4-full-initial",
+          "job_id": "R4-full",
+          "role": "answer",
+          "phase": "answer",
+          "status": "complete",
+          "failure_kind": null
+        },
+        {
+          "call_id": "R5-full-initial",
+          "job_id": "R5-full",
+          "role": "answer",
+          "phase": "answer",
+          "status": "complete",
+          "failure_kind": null
+        },
+        {
+          "call_id": "R5-compact-initial",
+          "job_id": "R5-compact",
+          "role": "answer",
+          "phase": "answer",
+          "status": "complete",
+          "failure_kind": null
+        },
+        {
+          "call_id": "R6-compact-initial",
+          "job_id": "R6-compact",
+          "role": "answer",
+          "phase": "answer",
+          "status": "complete",
+          "failure_kind": null
+        },
+        {
+          "call_id": "R6-full-initial",
+          "job_id": "R6-full",
+          "role": "answer",
+          "phase": "answer",
+          "status": "complete",
+          "failure_kind": null
+        },
+        {
+          "call_id": "A1-judge",
+          "job_id": "A1-judge",
+          "role": "judge",
+          "phase": "judge",
+          "status": "complete",
+          "failure_kind": null
+        },
+        {
+          "call_id": "A2-judge",
+          "job_id": "A2-judge",
+          "role": "judge",
+          "phase": "judge",
+          "status": "complete",
+          "failure_kind": null
+        },
+        {
+          "call_id": "A3-judge",
+          "job_id": "A3-judge",
+          "role": "judge",
+          "phase": "judge",
+          "status": "complete",
+          "failure_kind": null
+        },
+        {
+          "call_id": "A4-judge",
+          "job_id": "A4-judge",
+          "role": "judge",
+          "phase": "judge",
+          "status": "complete",
+          "failure_kind": null
+        },
+        {
+          "call_id": "R1-judge",
+          "job_id": "R1-judge",
+          "role": "judge",
+          "phase": "judge",
+          "status": "complete",
+          "failure_kind": null
+        },
+        {
+          "call_id": "R2-judge",
+          "job_id": "R2-judge",
+          "role": "judge",
+          "phase": "judge",
+          "status": "complete",
+          "failure_kind": null
+        },
+        {
+          "call_id": "R3-judge",
+          "job_id": "R3-judge",
+          "role": "judge",
+          "phase": "judge",
+          "status": "complete",
+          "failure_kind": null
+        },
+        {
+          "call_id": "R4-judge",
+          "job_id": "R4-judge",
+          "role": "judge",
+          "phase": "judge",
+          "status": "complete",
+          "failure_kind": null
+        },
+        {
+          "call_id": "R5-judge",
+          "job_id": "R5-judge",
+          "role": "judge",
+          "phase": "judge",
+          "status": "complete",
+          "failure_kind": null
+        },
+        {
+          "call_id": "R6-judge",
+          "job_id": "R6-judge",
+          "role": "judge",
+          "phase": "judge",
+          "status": "complete",
+          "failure_kind": null
+        }
+      ],
+      "scope": "Physical CLI calls and direct token usage only; logical job quality is reported separately."
+    }
+  },
+  "matching_historical_inputs": {
+    "analysis-cases.json": true,
+    "rental-cases.json": true,
+    "target-instructions.md": false
+  },
+  "comparison": [
+    {
+      "experiment": "analysis",
+      "arm": "full",
+      "new": {
+        "tasks": 4,
+        "calls": 4,
+        "required_met": 14,
+        "required_total": 16,
+        "critical_misses": 0,
+        "unsupported_claims": 1,
+        "contradictions": 0,
+        "invalid_citations": 1,
+        "format_failures": 0
+      },
+      "historical": {
+        "tasks": 4,
+        "calls": 4,
+        "required_met": 16,
+        "required_total": 16,
+        "critical_misses": 0,
+        "unsupported_claims": 3,
+        "contradictions": 0,
+        "invalid_citations": 3,
+        "format_failures": 0
+      },
+      "new_answer_tokens": 70099,
+      "historical_answer_tokens": 70055
+    },
+    {
+      "experiment": "analysis",
+      "arm": "summary",
+      "new": {
+        "tasks": 4,
+        "calls": 4,
+        "required_met": 4,
+        "required_total": 16,
+        "critical_misses": 3,
+        "unsupported_claims": 2,
+        "contradictions": 8,
+        "invalid_citations": 0,
+        "format_failures": 0
+      },
+      "historical": {
+        "tasks": 4,
+        "calls": 4,
+        "required_met": 5,
+        "required_total": 16,
+        "critical_misses": 3,
+        "unsupported_claims": 2,
+        "contradictions": 9,
+        "invalid_citations": 0,
+        "format_failures": 0
+      },
+      "new_answer_tokens": 61395,
+      "historical_answer_tokens": 61296
+    },
+    {
+      "experiment": "analysis",
+      "arm": "adaptive",
+      "new": {
+        "tasks": 4,
+        "calls": 8,
+        "required_met": 15,
+        "required_total": 16,
+        "critical_misses": 0,
+        "unsupported_claims": 0,
+        "contradictions": 1,
+        "invalid_citations": 0,
+        "format_failures": 0
+      },
+      "historical": {
+        "tasks": 4,
+        "calls": 8,
+        "required_met": 14,
+        "required_total": 16,
+        "critical_misses": 1,
+        "unsupported_claims": 0,
+        "contradictions": 3,
+        "invalid_citations": 0,
+        "format_failures": 0
+      },
+      "new_answer_tokens": 127363,
+      "historical_answer_tokens": 127189
+    },
+    {
+      "experiment": "rental",
+      "arm": "full",
+      "new": {
+        "tasks": 6,
+        "calls": 6,
+        "required_met": 28,
+        "required_total": 34,
+        "critical_misses": 1,
+        "unsupported_claims": 1,
+        "contradictions": 0,
+        "invalid_citations": 0,
+        "format_failures": 0
+      },
+      "historical": {
+        "tasks": 6,
+        "calls": 6,
+        "required_met": 28,
+        "required_total": 34,
+        "critical_misses": 1,
+        "unsupported_claims": 0,
+        "contradictions": 0,
+        "invalid_citations": 0,
+        "format_failures": 0
+      },
+      "new_answer_tokens": 108214,
+      "historical_answer_tokens": 108569
+    },
+    {
+      "experiment": "rental",
+      "arm": "compact",
+      "new": {
+        "tasks": 6,
+        "calls": 6,
+        "required_met": 23,
+        "required_total": 35,
+        "critical_misses": 2,
+        "unsupported_claims": 5,
+        "contradictions": 4,
+        "invalid_citations": 0,
+        "format_failures": 0
+      },
+      "historical": {
+        "tasks": 6,
+        "calls": 6,
+        "required_met": 27,
+        "required_total": 34,
+        "critical_misses": 1,
+        "unsupported_claims": 2,
+        "contradictions": 1,
+        "invalid_citations": 0,
+        "format_failures": 0
+      },
+      "new_answer_tokens": 102272,
+      "historical_answer_tokens": 102134
+    }
+  ],
+  "call_evidence": [
+    {
+      "id": "A1-adaptive-initial",
+      "purpose": "answer",
+      "usage": {
+        "input_tokens": 14788,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 120,
+        "reasoning_output_tokens": 80
+      },
+      "status": "complete",
+      "tool_events": []
+    },
+    {
+      "id": "A1-adaptive-retrieved",
+      "purpose": "retrieval_answer",
+      "usage": {
+        "input_tokens": 16180,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 838,
+        "reasoning_output_tokens": 0
+      },
+      "status": "complete",
+      "tool_events": []
+    },
+    {
+      "id": "A1-full-initial",
+      "purpose": "answer",
+      "usage": {
+        "input_tokens": 16553,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1111,
+        "reasoning_output_tokens": 0
+      },
+      "status": "complete",
+      "tool_events": []
+    },
+    {
+      "id": "A1-judge",
+      "purpose": "judge",
+      "usage": {
+        "input_tokens": 20109,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 2374,
+        "reasoning_output_tokens": 849
+      },
+      "status": "complete",
+      "tool_events": []
+    },
+    {
+      "id": "A1-summary-initial",
+      "purpose": "answer",
+      "usage": {
+        "input_tokens": 14754,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 579,
+        "reasoning_output_tokens": 0
+      },
+      "status": "complete",
+      "tool_events": []
+    },
+    {
+      "id": "A2-adaptive-initial",
+      "purpose": "answer",
+      "usage": {
+        "input_tokens": 14798,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 61,
+        "reasoning_output_tokens": 21
+      },
+      "status": "complete",
+      "tool_events": []
+    },
+    {
+      "id": "A2-adaptive-retrieved",
+      "purpose": "retrieval_answer",
+      "usage": {
+        "input_tokens": 16174,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 808,
+        "reasoning_output_tokens": 0
+      },
+      "status": "complete",
+      "tool_events": []
+    },
+    {
+      "id": "A2-full-initial",
+      "purpose": "answer",
+      "usage": {
+        "input_tokens": 16693,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 754,
+        "reasoning_output_tokens": 0
+      },
+      "status": "complete",
+      "tool_events": []
+    },
+    {
+      "id": "A2-judge",
+      "purpose": "judge",
+      "usage": {
+        "input_tokens": 19882,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1948,
+        "reasoning_output_tokens": 340
+      },
+      "status": "complete",
+      "tool_events": []
+    },
+    {
+      "id": "A2-summary-initial",
+      "purpose": "answer",
+      "usage": {
+        "input_tokens": 14764,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 631,
+        "reasoning_output_tokens": 44
+      },
+      "status": "complete",
+      "tool_events": []
+    },
+    {
+      "id": "A3-adaptive-initial",
+      "purpose": "answer",
+      "usage": {
+        "input_tokens": 14812,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 91,
+        "reasoning_output_tokens": 51
+      },
+      "status": "complete",
+      "tool_events": []
+    },
+    {
+      "id": "A3-adaptive-retrieved",
+      "purpose": "retrieval_answer",
+      "usage": {
+        "input_tokens": 16230,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 754,
+        "reasoning_output_tokens": 0
+      },
+      "status": "complete",
+      "tool_events": []
+    },
+    {
+      "id": "A3-full-initial",
+      "purpose": "answer",
+      "usage": {
+        "input_tokens": 16780,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 782,
+        "reasoning_output_tokens": 33
+      },
+      "status": "complete",
+      "tool_events": []
+    },
+    {
+      "id": "A3-judge",
+      "purpose": "judge",
+      "usage": {
+        "input_tokens": 19762,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 2168,
+        "reasoning_output_tokens": 493
+      },
+      "status": "complete",
+      "tool_events": []
+    },
+    {
+      "id": "A3-summary-initial",
+      "purpose": "answer",
+      "usage": {
+        "input_tokens": 14778,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 629,
+        "reasoning_output_tokens": 76
+      },
+      "status": "complete",
+      "tool_events": []
+    },
+    {
+      "id": "A4-adaptive-initial",
+      "purpose": "answer",
+      "usage": {
+        "input_tokens": 14819,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 77,
+        "reasoning_output_tokens": 37
+      },
+      "status": "complete",
+      "tool_events": []
+    },
+    {
+      "id": "A4-adaptive-retrieved",
+      "purpose": "retrieval_answer",
+      "usage": {
+        "input_tokens": 16115,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 698,
+        "reasoning_output_tokens": 0
+      },
+      "status": "complete",
+      "tool_events": []
+    },
+    {
+      "id": "A4-full-initial",
+      "purpose": "answer",
+      "usage": {
+        "input_tokens": 16691,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 735,
+        "reasoning_output_tokens": 35
+      },
+      "status": "complete",
+      "tool_events": []
+    },
+    {
+      "id": "A4-judge",
+      "purpose": "judge",
+      "usage": {
+        "input_tokens": 19636,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 2072,
+        "reasoning_output_tokens": 704
+      },
+      "status": "complete",
+      "tool_events": []
+    },
+    {
+      "id": "A4-summary-initial",
+      "purpose": "answer",
+      "usage": {
+        "input_tokens": 14785,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 475,
+        "reasoning_output_tokens": 0
+      },
+      "status": "complete",
+      "tool_events": []
+    },
+    {
+      "id": "R1-compact-initial",
+      "purpose": "answer",
+      "usage": {
+        "input_tokens": 16622,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 431,
+        "reasoning_output_tokens": 102
+      },
+      "status": "complete",
+      "tool_events": []
+    },
+    {
+      "id": "R1-full-initial",
+      "purpose": "answer",
+      "usage": {
+        "input_tokens": 17645,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 582,
+        "reasoning_output_tokens": 113
+      },
+      "status": "complete",
+      "tool_events": []
+    },
+    {
+      "id": "R1-judge",
+      "purpose": "judge",
+      "usage": {
+        "input_tokens": 17650,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1309,
+        "reasoning_output_tokens": 278
+      },
+      "status": "complete",
+      "tool_events": []
+    },
+    {
+      "id": "R2-compact-initial",
+      "purpose": "answer",
+      "usage": {
+        "input_tokens": 16627,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 522,
+        "reasoning_output_tokens": 326
+      },
+      "status": "complete",
+      "tool_events": []
+    },
+    {
+      "id": "R2-full-initial",
+      "purpose": "answer",
+      "usage": {
+        "input_tokens": 17597,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 316,
+        "reasoning_output_tokens": 121
+      },
+      "status": "complete",
+      "tool_events": []
+    },
+    {
+      "id": "R2-judge",
+      "purpose": "judge",
+      "usage": {
+        "input_tokens": 17191,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1806,
+        "reasoning_output_tokens": 807
+      },
+      "status": "complete",
+      "tool_events": []
+    },
+    {
+      "id": "R3-compact-initial",
+      "purpose": "answer",
+      "usage": {
+        "input_tokens": 16642,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 394,
+        "reasoning_output_tokens": 93
+      },
+      "status": "complete",
+      "tool_events": []
+    },
+    {
+      "id": "R3-full-initial",
+      "purpose": "answer",
+      "usage": {
+        "input_tokens": 17669,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 353,
+        "reasoning_output_tokens": 0
+      },
+      "status": "complete",
+      "tool_events": []
+    },
+    {
+      "id": "R3-judge",
+      "purpose": "judge",
+      "usage": {
+        "input_tokens": 17562,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1381,
+        "reasoning_output_tokens": 390
+      },
+      "status": "complete",
+      "tool_events": []
+    },
+    {
+      "id": "R4-compact-initial",
+      "purpose": "answer",
+      "usage": {
+        "input_tokens": 16638,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 265,
+        "reasoning_output_tokens": 55
+      },
+      "status": "complete",
+      "tool_events": []
+    },
+    {
+      "id": "R4-full-initial",
+      "purpose": "answer",
+      "usage": {
+        "input_tokens": 17650,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 245,
+        "reasoning_output_tokens": 0
+      },
+      "status": "complete",
+      "tool_events": []
+    },
+    {
+      "id": "R4-judge",
+      "purpose": "judge",
+      "usage": {
+        "input_tokens": 17353,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1450,
+        "reasoning_output_tokens": 516
+      },
+      "status": "complete",
+      "tool_events": []
+    },
+    {
+      "id": "R5-compact-initial",
+      "purpose": "answer",
+      "usage": {
+        "input_tokens": 16631,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 413,
+        "reasoning_output_tokens": 107
+      },
+      "status": "complete",
+      "tool_events": []
+    },
+    {
+      "id": "R5-full-initial",
+      "purpose": "answer",
+      "usage": {
+        "input_tokens": 17723,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 372,
+        "reasoning_output_tokens": 0
+      },
+      "status": "complete",
+      "tool_events": []
+    },
+    {
+      "id": "R5-judge",
+      "purpose": "judge",
+      "usage": {
+        "input_tokens": 17565,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1142,
+        "reasoning_output_tokens": 240
+      },
+      "status": "complete",
+      "tool_events": []
+    },
+    {
+      "id": "R6-compact-initial",
+      "purpose": "answer",
+      "usage": {
+        "input_tokens": 16632,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 455,
+        "reasoning_output_tokens": 79
+      },
+      "status": "complete",
+      "tool_events": []
+    },
+    {
+      "id": "R6-full-initial",
+      "purpose": "answer",
+      "usage": {
+        "input_tokens": 17635,
+        "cached_input_tokens": 12032,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 427,
+        "reasoning_output_tokens": 122
+      },
+      "status": "complete",
+      "tool_events": []
+    },
+    {
+      "id": "R6-judge",
+      "purpose": "judge",
+      "usage": {
+        "input_tokens": 17559,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1563,
+        "reasoning_output_tokens": 394
+      },
+      "status": "complete",
+      "tool_events": []
+    }
+  ],
+  "limitations": [
+    "Historical comparison is descriptive, not a randomized runtime A/B.",
+    "Primary judgments retain the historical grader's known limitations.",
+    "Processed tokens are not invoice charges or account quota."
+  ]
+}

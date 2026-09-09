@@ -1,5 +1,10 @@
 # Benchmark runner security and process review — 2026-09-09
 
+Follow-up: the [durable runner migration](../runner-unification-2026-09-09/migration.md)
+addresses the remaining mixed-generation execution boundary. Its separate
+[quality rerun protocol](../runner-unification-2026-09-09/protocol.md) preserves the
+scope and evidence of this earlier, offline-only review.
+
 Reviewed the benchmark runners, launcher, latest call controller, handoff notes, and experiment protocol against baseline commit `cb9ed3e`. No benchmark CLI/model call or external HTTP request was made. Reproductions use disposable Python processes, mocks, and temporary files. Historical measurements and raw files were not edited.
 
 ## Findings and corrections

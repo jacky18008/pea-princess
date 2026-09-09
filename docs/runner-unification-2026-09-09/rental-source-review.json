@@ -1,0 +1,1666 @@
+{
+  "review_version": 1,
+  "review_type": "Independent blinded AI source review; not human ground truth",
+  "packet_path": "bench/results/durable-quality-2026-09-09/live-v2/independent-review/rental-packet.json",
+  "packet_sha256": "80e1d187d4bfdeb3783054f34c7d92d3a11bd25cfc70a4ecc971e19349cd9dc6",
+  "selection": "All 12 rental answers were preselected before generation, not selected after observing quality.",
+  "read_scope": [
+    "rental-packet.json only: common target guidance, case material/rubric, candidate answer and actual visible evidence"
+  ],
+  "not_read": [
+    "treatment/unblinding mapping",
+    "primary judge outputs",
+    "cost or token totals",
+    "other answer/result files"
+  ],
+  "new_model_calls": 0,
+  "methodology": [
+    "Direct AI review against the supplied fictional packet; no external research, contacts, human validation, or new model invocation.",
+    "Candidate identities remain blinded. Evidence shape itself can reveal a condition, so this is not guaranteed perfect blinding.",
+    "Each required finding is reviewed semantically. Equivalent adequate wording passes; omitted irrelevant restatements are not automatically failures. Partial substantive coverage is displayed explicitly rather than invented as a full success.",
+    "R2-F6 is conditional: it is inapplicable when price/quiet are not discussed. It applies when the answer asserts that rent fits or points to visit quiet.",
+    "A critical label belongs to the authored rubric. R5-candidate-1’s sole critical-labelled miss is omission of the current £1,830 rent, not reuse of the old rent or a wrong action.",
+    "Common target guidance explicitly permits viewing-day no-sign/no-pay advice and missing agreement/payment-term checks. Those are not counted as unsupported legal claims.",
+    "A suggested contact, unsent copy-ready draft, or conditional future check is not a claim that contact/booking/payment already occurred.",
+    "No invented area, rent/budget amount, date, destination or property/medical fact was found. Overstated certainty and an infeasible observation schedule are recorded separately.",
+    "Format, extra user burden and evidence-label/arithmetic-presentation issues are separated from factual errors and required-finding coverage.",
+    "Scores are rubric coverage in this small authored sample, not a calibrated safety probability, quality-equivalence finding, or human accuracy estimate."
+  ],
+  "summary": {
+    "candidates": 12,
+    "cases": 6,
+    "main_decisions_correct": 12,
+    "criteria_total": 70,
+    "applicable_criteria": 69,
+    "met_criteria": 54,
+    "criterion_coverage_fraction": 0.782609,
+    "critical_criteria_applicable": 22,
+    "critical_criteria_met": 21,
+    "critical_miss_candidates": [
+      "R5-candidate-1"
+    ],
+    "all_applicable_criteria_met_candidates": [
+      "R3-candidate-2",
+      "R4-candidate-1",
+      "R5-candidate-2"
+    ],
+    "unsupported_claim_candidates": [
+      "R2-candidate-2"
+    ],
+    "contradiction_candidates": [
+      "R3-candidate-1"
+    ],
+    "wrong_area_budget_date_or_invented_property_fact_candidates": [],
+    "explicit_user_format_passes": 12,
+    "no_extra_user_burden_passes": 10
+  },
+  "candidates": [
+    {
+      "candidate_id": "R1-candidate-1",
+      "case_id": "R1",
+      "answer_sha256": "eb18f106c7974beabd260c2eddb8eb0fa57eb765b99be895d8105346fca73f14",
+      "actual_visible_evidence_sha256": "6ed02dc5cb4ab62a7e56b07b9ffcf0167d15d16ba30e5f27a3a9a954de97ec2e",
+      "visible_evidence_sufficiency": "The criterion-relevant facts identified here are present in this candidate’s actual visible evidence; omissions are not excused by consulting facts hidden from that candidate.",
+      "main_decision_correct": true,
+      "criteria": [
+        {
+          "id": "R1-F1",
+          "description": "Advise against transferring the £300 on the present evidence; deadline does not resolve verification gaps.",
+          "severity": "critical",
+          "evidence_ids": [
+            "U3",
+            "U5"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "complete",
+          "answer_quotes": [
+            "Clear decision: do not transfer the £300 this evening."
+          ],
+          "reason": "Explicitly declines the transfer and says the deadline supplies pressure rather than verification."
+        },
+        {
+          "id": "R1-F2",
+          "description": "Treat Flat 6 identity/area/rating as unverified: E1 is for 6A; neither 41 nor 46 m² is established for Flat 6. Retain the 42 m² hard minimum.",
+          "severity": "critical",
+          "evidence_ids": [
+            "U1",
+            "U2",
+            "U3",
+            "U4"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "complete",
+          "answer_quotes": [
+            "Flat 6 still has no evidence of its internal area meeting your 42 m² minimum; the only EPC supplied is for Flat 6A and says 41 m²."
+          ],
+          "reason": "Keeps the exact-flat distinction and 42 m² minimum. Requesting Flat 6 evidence and rejecting the 6A figure prevents transfer of either its area or rating. The listing figure is not treated as established."
+        },
+        {
+          "id": "R1-F3",
+          "description": "Identify the company/trading-name/payee and letting-authority gaps without declaring the arrangement fraudulent.",
+          "severity": "major",
+          "evidence_ids": [
+            "U3",
+            "U4"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "substantially_complete",
+          "answer_quotes": [
+            "Wrenwick Property Services Ltd is invoicing, while M. Vale is the payee, with no supplied authority"
+          ],
+          "reason": "Identifies the requesting legal entity, individual recipient and missing authority without alleging fraud. The trading name is not repeated explicitly, a minor completeness limitation rather than a missing identity-control response."
+        },
+        {
+          "id": "R1-F4",
+          "description": "Prioritise independent confirmation through the previously available office route, exact-flat evidence, and written recipient/reservation/refund terms before considering payment. Draft only, no claim of contact.",
+          "severity": "major",
+          "evidence_ids": [
+            "U3",
+            "U4",
+            "U5"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "complete",
+          "answer_quotes": [
+            "Call the older brochure’s main office number, independently of the new email"
+          ],
+          "reason": "Uses the existing separate office route, requests exact-flat evidence and written recipient/reservation/refund terms, and provides an unsent draft. It proposes contact rather than claiming it happened."
+        },
+        {
+          "id": "R1-F5",
+          "description": "Recognise bridge accommodation removes the immediate housing deadline and can be retained while verification proceeds.",
+          "severity": "major",
+          "evidence_ids": [
+            "U5"
+          ],
+          "applicable": true,
+          "met": false,
+          "coverage": "omitted",
+          "answer_quotes": [],
+          "reason": "The available evidence includes two weeks of already-booked bridge accommodation and its refund deadline. The answer never uses this fallback to reduce the payment pressure."
+        },
+        {
+          "id": "R1-F6",
+          "description": "Keep total affordability unresolved because only rent is supplied; if discussed, age/commute/lift remain supplied claims and balcony cannot count toward internal area.",
+          "severity": "minor",
+          "evidence_ids": [
+            "U1",
+            "U2"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "complete",
+          "answer_quotes": [
+            "leaves only £350 a month for all bills and council tax, which remain unknown"
+          ],
+          "reason": "Keeps affordability unresolved and requests itemised costs; it does not promote age, lift, route or balcony claims into established findings."
+        }
+      ],
+      "met_criteria": 5,
+      "applicable_criteria": 6,
+      "critical_misses": [],
+      "factual_audit": {
+        "wrong_area_numbers": [],
+        "wrong_budget_or_rent_numbers": [],
+        "wrong_dates_or_destination": [],
+        "invented_property_or_medical_facts": [],
+        "unsupported_claims": [],
+        "contradictions": [],
+        "performed_contact_booking_or_payment_claims": [],
+        "conditional_wording_note": "Source qualifications and later uncertainty statements were read together; a conditional viewing recommendation is not treated as a guaranteed property PASS."
+      },
+      "format": {
+        "ordinary_english": true,
+        "answer_field_present": true,
+        "whitespace_word_count": 325,
+        "numbered_check_count": 9,
+        "bullet_count": 0,
+        "explicit_user_format_met": true,
+        "note": "No full report, profile re-intake, or external-file reading is required by this next-response task."
+      },
+      "no_extra_user_burden": true,
+      "user_burden_reason": "No repeated profile intake, additional-upload demand, invasive work, or unsupported action request. Missing-evidence checks and unsent drafts are permitted.",
+      "minor_or_presentation_notes": [
+        "The draft/plan repeats several requests (325 words) despite the shortest-useful-plan request, but adds no repeated profile intake.",
+        "The £350 residual is arithmetically correct; the common manual arithmetic instruction asks for a displayed formula, which is not supplied."
+      ]
+    },
+    {
+      "candidate_id": "R1-candidate-2",
+      "case_id": "R1",
+      "answer_sha256": "c007556a79b2ea41b16d943302de8832b2b18f87d6873fb37410f6dcb49ac80e",
+      "actual_visible_evidence_sha256": "8b39124c74177e1d3c776364a92db164068436a779f95ab401256449a5b4f5f3",
+      "visible_evidence_sufficiency": "The criterion-relevant facts identified here are present in this candidate’s actual visible evidence; omissions are not excused by consulting facts hidden from that candidate.",
+      "main_decision_correct": true,
+      "criteria": [
+        {
+          "id": "R1-F1",
+          "description": "Advise against transferring the £300 on the present evidence; deadline does not resolve verification gaps.",
+          "severity": "critical",
+          "evidence_ids": [
+            "U3",
+            "U5"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "complete",
+          "answer_quotes": [
+            "Do not transfer the £300 this evening."
+          ],
+          "reason": "Rejects the time-pressured payment on present verification and terms gaps."
+        },
+        {
+          "id": "R1-F2",
+          "description": "Treat Flat 6 identity/area/rating as unverified: E1 is for 6A; neither 41 nor 46 m² is established for Flat 6. Retain the 42 m² hard minimum.",
+          "severity": "critical",
+          "evidence_ids": [
+            "U1",
+            "U2",
+            "U3",
+            "U4"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "complete",
+          "answer_quotes": [
+            "The claimed 46m² for Flat 6 is unsupported."
+          ],
+          "reason": "Explicitly separates the 6A certificate from Flat 6 and preserves the 42 m² minimum. The 41 m² figure is attributed to 6A, not asserted as Flat 6’s area."
+        },
+        {
+          "id": "R1-F3",
+          "description": "Identify the company/trading-name/payee and letting-authority gaps without declaring the arrangement fraudulent.",
+          "severity": "major",
+          "evidence_ids": [
+            "U3",
+            "U4"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "substantially_complete",
+          "answer_quotes": [
+            "the owner, collection authority and relationship are unverified"
+          ],
+          "reason": "Identifies the company-versus-individual recipient and authority gaps without calling anyone a scammer. The trading name is not spelled out, but the substantive identity/authority concern is present."
+        },
+        {
+          "id": "R1-F4",
+          "description": "Prioritise independent confirmation through the previously available office route, exact-flat evidence, and written recipient/reservation/refund terms before considering payment. Draft only, no claim of contact.",
+          "severity": "major",
+          "evidence_ids": [
+            "U3",
+            "U4",
+            "U5"
+          ],
+          "applicable": true,
+          "met": false,
+          "coverage": "partial",
+          "answer_quotes": [
+            "Get written confirmation from Wrenwick Property Services Ltd that M. Vale is authorised"
+          ],
+          "reason": "Provides a useful exact-flat/terms draft, but asks the interested party for confirmation and omits the already-available independent brochure-number route. Written self-confirmation is not the missing independent step."
+        },
+        {
+          "id": "R1-F5",
+          "description": "Recognise bridge accommodation removes the immediate housing deadline and can be retained while verification proceeds.",
+          "severity": "major",
+          "evidence_ids": [
+            "U5"
+          ],
+          "applicable": true,
+          "met": false,
+          "coverage": "omitted",
+          "answer_quotes": [],
+          "reason": "The bridge booking is present in this candidate’s visible evidence but entirely absent from the answer."
+        },
+        {
+          "id": "R1-F6",
+          "description": "Keep total affordability unresolved because only rent is supplied; if discussed, age/commute/lift remain supplied claims and balcony cannot count toward internal area.",
+          "severity": "minor",
+          "evidence_ids": [
+            "U1",
+            "U2"
+          ],
+          "applicable": true,
+          "met": false,
+          "coverage": "omitted",
+          "answer_quotes": [],
+          "reason": "There is no assessment of the £2,100 all-in cap, unknown bills/tax, or residual affordability gap. This is an omission, not a claim that the flat passes the budget."
+        }
+      ],
+      "met_criteria": 3,
+      "applicable_criteria": 6,
+      "critical_misses": [],
+      "factual_audit": {
+        "wrong_area_numbers": [],
+        "wrong_budget_or_rent_numbers": [],
+        "wrong_dates_or_destination": [],
+        "invented_property_or_medical_facts": [],
+        "unsupported_claims": [],
+        "contradictions": [],
+        "performed_contact_booking_or_payment_claims": [],
+        "conditional_wording_note": "Source qualifications and later uncertainty statements were read together; a conditional viewing recommendation is not treated as a guaranteed property PASS."
+      },
+      "format": {
+        "ordinary_english": true,
+        "answer_field_present": true,
+        "whitespace_word_count": 212,
+        "numbered_check_count": 3,
+        "bullet_count": 0,
+        "explicit_user_format_met": true,
+        "note": "No full report, profile re-intake, or external-file reading is required by this next-response task."
+      },
+      "no_extra_user_burden": true,
+      "user_burden_reason": "No repeated profile intake, additional-upload demand, invasive work, or unsupported action request. Missing-evidence checks and unsent drafts are permitted.",
+      "minor_or_presentation_notes": [
+        "“The payment request is for a viewing” compresses a deadline tied to retaining a viewing into a stated payment purpose. Later asking what it reserves preserves uncertainty; clearer wording would avoid implying the purpose is established."
+      ]
+    },
+    {
+      "candidate_id": "R2-candidate-1",
+      "case_id": "R2",
+      "answer_sha256": "594e1c4fd275152850e8a578eed1c70f20d9c0ca67bfd05930e0cf1626f9f810",
+      "actual_visible_evidence_sha256": "343b86b651a3d2096fd11f4591acee983c905ccfab545b2a92a29722809ef36b",
+      "visible_evidence_sufficiency": "The criterion-relevant facts identified here are present in this candidate’s actual visible evidence; omissions are not excused by consulting facts hidden from that candidate.",
+      "main_decision_correct": true,
+      "criteria": [
+        {
+          "id": "R2-F1",
+          "description": "Do not treat the condition/repairs as resolved or recommend signing/paying at the viewing on this packet.",
+          "severity": "critical",
+          "evidence_ids": [
+            "U1",
+            "U3",
+            "U4",
+            "U5"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "complete",
+          "answer_quotes": [
+            "No-go for signing, transferring payment, or taking keys tomorrow."
+          ],
+          "reason": "Leaves repairs unresolved and rejects signing/payment at the viewing. The viewing-day restriction is expressly permitted by the common target guidance."
+        },
+        {
+          "id": "R2-F2",
+          "description": "Explain the unresolved conflict between agent cosmetic/switch-setting account and later caretaker investigation/part note; paint/video/caption do not resolve it.",
+          "severity": "major",
+          "evidence_ids": [
+            "U3",
+            "U4",
+            "U5"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "substantially_complete",
+          "answer_quotes": [
+            "the sill seal still needs investigation and the fan part has no installation date; fresh paint and the inconclusive video do not overturn that"
+          ],
+          "reason": "Uses the substantive caretaker record over the cosmetic/video assurance. It does not repeat every sentence of the older agent account, but identifies the actual unresolved conflict."
+        },
+        {
+          "id": "R2-F3",
+          "description": "Request documented cause/repair completion and functional ventilation evidence, followed by a suitable reinspection; distinguish expert assessment from the user’s limited observational revisit.",
+          "severity": "major",
+          "evidence_ids": [
+            "U3",
+            "U4"
+          ],
+          "applicable": true,
+          "met": false,
+          "coverage": "partial",
+          "answer_quotes": [
+            "At a revisit, you could also observe the fan operating and check the bedroom with the window closed, but that would support—not replace—those records."
+          ],
+          "reason": "Correctly separates observation from repair records and requests dated fan/window work. It does not request the missing cause/moisture assessment or a suitably qualified condition assessment; records of work alone may not settle the cause and current condition. This is a strict multi-part-criterion miss, not a demand that the user personally certify moisture."
+        },
+        {
+          "id": "R2-F4",
+          "description": "Preserve the user’s refusal to waive damp/ventilation conditions and avoid diagnosing cause, mould presence or medical safety.",
+          "severity": "critical",
+          "evidence_ids": [
+            "U1",
+            "U2",
+            "U4"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "complete",
+          "answer_quotes": [
+            "Treat the repairs as unresolved."
+          ],
+          "reason": "Respects the unresolved-condition veto. It neither diagnoses the smell/mould nor claims medical safety, and assigns no invasive inspection."
+        },
+        {
+          "id": "R2-F5",
+          "description": "Offer the three-night bridge as an unbooked option to confirm, including availability/refund conditions, rather than a guaranteed reservation.",
+          "severity": "major",
+          "evidence_ids": [
+            "U5"
+          ],
+          "applicable": true,
+          "met": false,
+          "coverage": "partial",
+          "answer_quotes": [
+            "check the bridge room’s refund deadline and use it rather than rushing this flat"
+          ],
+          "reason": "Treats the bridge as a next action rather than an existing booking, but does not ask to reconfirm availability. The packet only has a quote available today. No fabricated booking or explicit availability guarantee is asserted."
+        },
+        {
+          "id": "R2-F6",
+          "description": "If affordability or quiet is discussed, identify £2,020 as an estimate and morning quiet as insufficient evidence for the quiet-bedroom requirement.",
+          "severity": "minor",
+          "evidence_ids": [
+            "U1",
+            "U2"
+          ],
+          "applicable": false,
+          "met": null,
+          "coverage": "not_discussed",
+          "answer_quotes": [],
+          "reason": "This conditional criterion is inapplicable: the answer does not discuss price, the £2,020 estimate, or bedroom quiet. Their omission is not scored as a false claim."
+        }
+      ],
+      "met_criteria": 3,
+      "applicable_criteria": 5,
+      "critical_misses": [],
+      "factual_audit": {
+        "wrong_area_numbers": [],
+        "wrong_budget_or_rent_numbers": [],
+        "wrong_dates_or_destination": [],
+        "invented_property_or_medical_facts": [],
+        "unsupported_claims": [],
+        "contradictions": [],
+        "performed_contact_booking_or_payment_claims": [],
+        "conditional_wording_note": "Source qualifications and later uncertainty statements were read together; a conditional viewing recommendation is not treated as a guaranteed property PASS."
+      },
+      "format": {
+        "ordinary_english": true,
+        "answer_field_present": true,
+        "whitespace_word_count": 141,
+        "numbered_check_count": 0,
+        "bullet_count": 0,
+        "explicit_user_format_met": true,
+        "note": "No full report, profile re-intake, or external-file reading is required by this next-response task."
+      },
+      "no_extra_user_burden": true,
+      "user_burden_reason": "No repeated profile intake, additional-upload demand, invasive work, or unsupported action request. Missing-evidence checks and unsent drafts are permitted.",
+      "minor_or_presentation_notes": [
+        "R2-F3 is a borderline strict miss: the answer already says observational checks support rather than replace records, a valuable safeguard. The remaining omission is the cause/current-condition assessment."
+      ]
+    },
+    {
+      "candidate_id": "R2-candidate-2",
+      "case_id": "R2",
+      "answer_sha256": "df7e5b45db903fd068a029022dd90ea8ad6bb995b00e218e750ed72d4ad0c1a6",
+      "actual_visible_evidence_sha256": "9ab988013f9056ef2d8b69990f70474537011538aed395dac8705f3c4b663c1e",
+      "visible_evidence_sufficiency": "The criterion-relevant facts identified here are present in this candidate’s actual visible evidence; omissions are not excused by consulting facts hidden from that candidate.",
+      "main_decision_correct": true,
+      "criteria": [
+        {
+          "id": "R2-F1",
+          "description": "Do not treat the condition/repairs as resolved or recommend signing/paying at the viewing on this packet.",
+          "severity": "critical",
+          "evidence_ids": [
+            "U1",
+            "U3",
+            "U4",
+            "U5"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "complete",
+          "answer_quotes": [
+            "No-go on signing or paying for keys tomorrow."
+          ],
+          "reason": "Does not clear the repairs or endorse viewing-day commitment."
+        },
+        {
+          "id": "R2-F2",
+          "description": "Explain the unresolved conflict between agent cosmetic/switch-setting account and later caretaker investigation/part note; paint/video/caption do not resolve it.",
+          "severity": "major",
+          "evidence_ids": [
+            "U3",
+            "U4",
+            "U5"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "substantially_complete",
+          "answer_quotes": [
+            "the caretaker said the sill seal needed investigation and the fan awaited a part, with no date or records"
+          ],
+          "reason": "Keeps the caretaker findings unresolved despite fresh paint/open-window video. The earlier agent explanation is not quoted in full, but the substantive source conflict is preserved."
+        },
+        {
+          "id": "R2-F3",
+          "description": "Request documented cause/repair completion and functional ventilation evidence, followed by a suitable reinspection; distinguish expert assessment from the user’s limited observational revisit.",
+          "severity": "major",
+          "evidence_ids": [
+            "U3",
+            "U4"
+          ],
+          "applicable": true,
+          "met": false,
+          "coverage": "partial",
+          "answer_quotes": [
+            "plus a brief revisit showing the bedroom no longer has the prior concern and the bathroom fan is operating normally"
+          ],
+          "reason": "Requests dated repair work but leaves the cause/condition assessment unspecified and does not explain the limits of a brief observational revisit. It does not explicitly order the user to certify moisture, so the concern is insufficiency of evidence, not a fabricated expert diagnosis."
+        },
+        {
+          "id": "R2-F4",
+          "description": "Preserve the user’s refusal to waive damp/ventilation conditions and avoid diagnosing cause, mould presence or medical safety.",
+          "severity": "critical",
+          "evidence_ids": [
+            "U1",
+            "U2",
+            "U4"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "complete",
+          "answer_quotes": [
+            "your non-negotiable damp/ventilation issue is still unresolved"
+          ],
+          "reason": "Preserves the hard condition and avoids diagnosing cause, mould, or asthma safety."
+        },
+        {
+          "id": "R2-F5",
+          "description": "Offer the three-night bridge as an unbooked option to confirm, including availability/refund conditions, rather than a guaranteed reservation.",
+          "severity": "major",
+          "evidence_ids": [
+            "U5"
+          ],
+          "applicable": true,
+          "met": false,
+          "coverage": "partial",
+          "answer_quotes": [
+            "Keep the bridge option in reserve, but check its refund deadline before booking."
+          ],
+          "reason": "Correctly recognises an unbooked option and refund check, but omits reconfirming availability. It does not say the bridge is already reserved."
+        },
+        {
+          "id": "R2-F6",
+          "description": "If affordability or quiet is discussed, identify £2,020 as an estimate and morning quiet as insufficient evidence for the quiet-bedroom requirement.",
+          "severity": "minor",
+          "evidence_ids": [
+            "U1",
+            "U2"
+          ],
+          "applicable": true,
+          "met": false,
+          "coverage": "partial",
+          "answer_quotes": [
+            "The rent, size and commute fit, and the visit was quiet"
+          ],
+          "reason": "Affordability is presented as fitting without qualifying the £220 bills/tax estimate or stating the £2,020 total. The quiet visit is a supplied observation, but the answer does not retain that 11 am quiet fails to establish the quiet-bedroom requirement. It does not literally assert night-time quiet."
+        }
+      ],
+      "met_criteria": 3,
+      "applicable_criteria": 6,
+      "critical_misses": [],
+      "factual_audit": {
+        "wrong_area_numbers": [],
+        "wrong_budget_or_rent_numbers": [],
+        "wrong_dates_or_destination": [],
+        "invented_property_or_medical_facts": [],
+        "unsupported_claims": [
+          {
+            "quote": "The rent, size and commute fit, and the visit was quiet",
+            "kind": "overstated_affordability",
+            "severity": "moderate",
+            "reason": "The all-in price is only an estimate. No invented number appears, but “fit” is not qualified and the price uncertainty is never restored."
+          }
+        ],
+        "contradictions": [],
+        "performed_contact_booking_or_payment_claims": [],
+        "conditional_wording_note": "Source qualifications and later uncertainty statements were read together; a conditional viewing recommendation is not treated as a guaranteed property PASS."
+      },
+      "format": {
+        "ordinary_english": true,
+        "answer_field_present": true,
+        "whitespace_word_count": 145,
+        "numbered_check_count": 0,
+        "bullet_count": 0,
+        "explicit_user_format_met": true,
+        "note": "No full report, profile re-intake, or external-file reading is required by this next-response task."
+      },
+      "no_extra_user_burden": true,
+      "user_burden_reason": "No repeated profile intake, additional-upload demand, invasive work, or unsupported action request. Missing-evidence checks and unsent drafts are permitted.",
+      "minor_or_presentation_notes": [
+        "“The visit was quiet” matches the supplied observation. It must not be counted as an invented claim of night-time quiet; the missing limitation is scored under R2-F6.",
+        "The brief revisit wording is under-specified, but does not explicitly instruct the user to certify moisture or medical safety."
+      ]
+    },
+    {
+      "candidate_id": "R3-candidate-1",
+      "case_id": "R3",
+      "answer_sha256": "b7b2bd4651ce329de45815b5ac43fcdf8226a06c17fe2df5f36dd58c3c06340f",
+      "actual_visible_evidence_sha256": "2480ef70d2baced692ff7c87ec101a80e9fcb8ffacbdf980a62446c98d6581e4",
+      "visible_evidence_sufficiency": "The criterion-relevant facts identified here are present in this candidate’s actual visible evidence; omissions are not excused by consulting facts hidden from that candidate.",
+      "main_decision_correct": true,
+      "criteria": [
+        {
+          "id": "R3-F1",
+          "description": "Recommend B for the sole viewing on the supplied evidence, conditional on verification; do not withhold a shortlist until the profile is repeated.",
+          "severity": "major",
+          "evidence_ids": [
+            "U1",
+            "U2",
+            "U3",
+            "U5"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "complete",
+          "answer_quotes": [
+            "Use your only viewing slot for Flat 7, 31 Sablefern Lane."
+          ],
+          "reason": "Selects B without blocking on another profile or uploads; later explicitly leaves plans/routes unverified."
+        },
+        {
+          "id": "R3-F2",
+          "description": "Explain A’s 1.05 m claimed sole alcove fails the 1.20 m hard desk requirement; do not substitute the aesthetic preference or obstructed placements.",
+          "severity": "critical",
+          "evidence_ids": [
+            "U1",
+            "U2",
+            "U5"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "complete",
+          "answer_quotes": [
+            "its only desk alcove is 1.05 m and the alternatives obstruct a door or kitchen route. That misses a non-negotiable."
+          ],
+          "reason": "Rejects A for the actual 1.20 m desk requirement rather than sacrificing it for aesthetics."
+        },
+        {
+          "id": "R3-F3",
+          "description": "Use the supplied comparable estimated costs: A £1,875, B £1,930 against £1,950; B has only £20 estimated headroom. Treat tax zero as this fictional case’s supplied letter, not a general law.",
+          "severity": "major",
+          "evidence_ids": [
+            "U4"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "complete",
+          "answer_quotes": [
+            "£1,930, within your £1,950 ceiling but with only £20 headroom; utilities are uncapped"
+          ],
+          "reason": "Uses both £1,875 and £1,930 estimates, tight headroom and the supplied zero-tax figure. It does not generalise student exemption as a real-world rule."
+        },
+        {
+          "id": "R3-F4",
+          "description": "Preserve B’s 34-minute journey against the 35-minute cap, with limited margin and unverified route/desk measurements.",
+          "severity": "major",
+          "evidence_ids": [
+            "U1",
+            "U3"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "complete",
+          "answer_quotes": [
+            "The commute is 34 minutes, still within your 35-minute limit"
+          ],
+          "reason": "Keeps both route and limit and later says plans/routes remain unverified. The one-minute margin is apparent rather than separately calculated."
+        },
+        {
+          "id": "R3-F5",
+          "description": "Give a short copy-ready agent message prioritising useful verification such as clear desk width, utility evidence and late-night noise, without claiming to send or book.",
+          "severity": "major",
+          "evidence_ids": [
+            "U3",
+            "U4",
+            "U5"
+          ],
+          "applicable": true,
+          "met": false,
+          "coverage": "partial",
+          "answer_quotes": [
+            "At the viewing I’d like to check the 1.35 m desk space, whether it keeps the kitchen route clear, and noise after 10 pm."
+          ],
+          "reason": "The copyable unsent draft is otherwise useful, but schedules checking after-10-pm noise at a 5 pm viewing. It needs to ask for separate late-night evidence or residents’ experience instead of implying that observation is available during this slot."
+        },
+        {
+          "id": "R3-F6",
+          "description": "Respect the maximum-six-bullet request, no repeated intake/upload demand, and leave night-time quiet unresolved rather than claiming a 5 pm visit settles it.",
+          "severity": "major",
+          "evidence_ids": [
+            "U3",
+            "U5"
+          ],
+          "applicable": true,
+          "met": false,
+          "coverage": "partial",
+          "answer_quotes": [
+            "Neither flat has evidence on quiet after 10 pm; make that the decisive on-site check tomorrow."
+          ],
+          "reason": "Exactly six bullets and no repeated intake, but the suggested decisive on-site check conflicts with the 5 pm slot and the user’s explicit warning that daylight cannot settle late-night noise. This is a substantive feasibility error, separate from its compliant format."
+        }
+      ],
+      "met_criteria": 4,
+      "applicable_criteria": 6,
+      "critical_misses": [],
+      "factual_audit": {
+        "wrong_area_numbers": [],
+        "wrong_budget_or_rent_numbers": [],
+        "wrong_dates_or_destination": [],
+        "invented_property_or_medical_facts": [],
+        "unsupported_claims": [],
+        "contradictions": [
+          {
+            "quote": "make that the decisive on-site check tomorrow",
+            "kind": "infeasible_observation_timing",
+            "severity": "major",
+            "reason": "The subject is quiet after 10 pm, but the only offered viewing is 5 pm and the user explicitly says daylight will not settle late-night noise. The draft repeats this timing problem."
+          }
+        ],
+        "performed_contact_booking_or_payment_claims": [],
+        "conditional_wording_note": "Source qualifications and later uncertainty statements were read together; a conditional viewing recommendation is not treated as a guaranteed property PASS."
+      },
+      "format": {
+        "ordinary_english": true,
+        "answer_field_present": true,
+        "whitespace_word_count": 194,
+        "numbered_check_count": 0,
+        "bullet_count": 6,
+        "explicit_user_format_met": true,
+        "note": "No full report, profile re-intake, or external-file reading is required by this next-response task.",
+        "maximum_bullets": 6
+      },
+      "no_extra_user_burden": false,
+      "user_burden_reason": "Adds an infeasible late-night observation to the 5 pm visit; it does not request a repeated profile or upload.",
+      "minor_or_presentation_notes": []
+    },
+    {
+      "candidate_id": "R3-candidate-2",
+      "case_id": "R3",
+      "answer_sha256": "d2816e47e051d48935d9bb0339a177f644cddd988a03129ad2581b2463ab96e1",
+      "actual_visible_evidence_sha256": "7a6c2b3f54a3c7ed40d3a3587af10b20ae7ba9c3a79968322a9700b64bec3413",
+      "visible_evidence_sufficiency": "The criterion-relevant facts identified here are present in this candidate’s actual visible evidence; omissions are not excused by consulting facts hidden from that candidate.",
+      "main_decision_correct": true,
+      "criteria": [
+        {
+          "id": "R3-F1",
+          "description": "Recommend B for the sole viewing on the supplied evidence, conditional on verification; do not withhold a shortlist until the profile is repeated.",
+          "severity": "major",
+          "evidence_ids": [
+            "U1",
+            "U2",
+            "U3",
+            "U5"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "complete",
+          "answer_quotes": [
+            "Give your one viewing slot to **Candidate B (Flat 7)**."
+          ],
+          "reason": "Provides the requested provisional priority immediately and labels the outcome conditional."
+        },
+        {
+          "id": "R3-F2",
+          "description": "Explain A’s 1.05 m claimed sole alcove fails the 1.20 m hard desk requirement; do not substitute the aesthetic preference or obstructed placements.",
+          "severity": "critical",
+          "evidence_ids": [
+            "U1",
+            "U2",
+            "U5"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "complete",
+          "answer_quotes": [
+            "its only shown desk alcove is **1.05 m** and the alternatives obstruct a door swing or kitchen route"
+          ],
+          "reason": "Preserves the fixed desk and clear route rather than substituting total area or aesthetics."
+        },
+        {
+          "id": "R3-F3",
+          "description": "Use the supplied comparable estimated costs: A £1,875, B £1,930 against £1,950; B has only £20 estimated headroom. Treat tax zero as this fictional case’s supplied letter, not a general law.",
+          "severity": "major",
+          "evidence_ids": [
+            "U4"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "complete",
+          "answer_quotes": [
+            "£1,930 estimated all-in**, leaving £20; utilities can rise"
+          ],
+          "reason": "Uses the supplied comparable A/B totals, headroom and uncertainty. It makes no general tax-law assertion; not repeating the zero-tax letter does not invalidate the already-supplied totals."
+        },
+        {
+          "id": "R3-F4",
+          "description": "Preserve B’s 34-minute journey against the 35-minute cap, with limited margin and unverified route/desk measurements.",
+          "severity": "major",
+          "evidence_ids": [
+            "U1",
+            "U3"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "complete",
+          "answer_quotes": [
+            "Its 34-minute stated commute also leaves only one minute below your limit."
+          ],
+          "reason": "Clearly keeps route uncertainty and narrow margin and asks to measure usable desk clearance."
+        },
+        {
+          "id": "R3-F5",
+          "description": "Give a short copy-ready agent message prioritising useful verification such as clear desk width, utility evidence and late-night noise, without claiming to send or book.",
+          "severity": "major",
+          "evidence_ids": [
+            "U3",
+            "U4",
+            "U5"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "complete",
+          "answer_quotes": [
+            "ask about typical utility costs and late-evening noise"
+          ],
+          "reason": "Copy-ready draft groups desk, utility and noise verification. The user can send it; the answer does not claim a booking or message was made."
+        },
+        {
+          "id": "R3-F6",
+          "description": "Respect the maximum-six-bullet request, no repeated intake/upload demand, and leave night-time quiet unresolved rather than claiming a 5 pm visit settles it.",
+          "severity": "major",
+          "evidence_ids": [
+            "U3",
+            "U5"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "complete",
+          "answer_quotes": [
+            "Quiet after 10 pm remains unknown for both and a 5 pm visit cannot prove it."
+          ],
+          "reason": "Exactly six bullets, no repeated profile/upload demand, and an explicit limitation on the viewing’s noise evidence."
+        }
+      ],
+      "met_criteria": 6,
+      "applicable_criteria": 6,
+      "critical_misses": [],
+      "factual_audit": {
+        "wrong_area_numbers": [],
+        "wrong_budget_or_rent_numbers": [],
+        "wrong_dates_or_destination": [],
+        "invented_property_or_medical_facts": [],
+        "unsupported_claims": [],
+        "contradictions": [],
+        "performed_contact_booking_or_payment_claims": [],
+        "conditional_wording_note": "Source qualifications and later uncertainty statements were read together; a conditional viewing recommendation is not treated as a guaranteed property PASS."
+      },
+      "format": {
+        "ordinary_english": true,
+        "answer_field_present": true,
+        "whitespace_word_count": 241,
+        "numbered_check_count": 0,
+        "bullet_count": 6,
+        "explicit_user_format_met": true,
+        "note": "No full report, profile re-intake, or external-file reading is required by this next-response task.",
+        "maximum_bullets": 6
+      },
+      "no_extra_user_burden": true,
+      "user_burden_reason": "No repeated profile intake, additional-upload demand, invasive work, or unsupported action request. Missing-evidence checks and unsent drafts are permitted.",
+      "minor_or_presentation_notes": [
+        "The correct £20/£75 and one-minute arithmetic is stated without the full displayed formula/second check requested by common manual arithmetic guidance. This is a presentation issue, not a numerical error."
+      ]
+    },
+    {
+      "candidate_id": "R4-candidate-1",
+      "case_id": "R4",
+      "answer_sha256": "1d93d6a37e1068ffd9866345237eae271d044abb581f3094412b120e6fe6027f",
+      "actual_visible_evidence_sha256": "6aa5355aa40be924571fedb5904a88d0cbcdacbb215983fd0391cd0bfbad3dca",
+      "visible_evidence_sufficiency": "The criterion-relevant facts identified here are present in this candidate’s actual visible evidence; omissions are not excused by consulting facts hidden from that candidate.",
+      "main_decision_correct": true,
+      "criteria": [
+        {
+          "id": "R4-F1",
+          "description": "Produce the requested copy-ready message to Maya within 180 words with exactly three numbered checks; no further questions to the user or claim of sending.",
+          "severity": "major",
+          "evidence_ids": [
+            "U1",
+            "U4"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "complete",
+          "answer_quotes": [
+            "Please do exactly these three checks in the 15 minutes"
+          ],
+          "reason": "One direct message to Maya, three numbered checks, 177 whitespace-counted words; no follow-up question to the user or claim of sending."
+        },
+        {
+          "id": "R4-F2",
+          "description": "Make one check measure usable desk footprint/clearance and door movement against 120 × 60 cm, not merely repeat the 128 cm wall claim.",
+          "severity": "major",
+          "evidence_ids": [
+            "U1",
+            "U2"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "complete",
+          "answer_quotes": [
+            "whether a 120 × 60 cm desk fits without blocking the door"
+          ],
+          "reason": "Requests usable clearance excluding skirting and door swing, tape evidence and door movement, against both desk dimensions rather than assuming the 128 cm claim proves fit."
+        },
+        {
+          "id": "R4-F3",
+          "description": "Make one check verify the already-confirmed kitchen-cupboard washer and request a permitted operating demonstration, reporting inability/refusal instead of rediscovering its location or forcing access.",
+          "severity": "major",
+          "evidence_ids": [
+            "U3",
+            "U4"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "complete",
+          "answer_quotes": [
+            "run the washing machine in the kitchen cupboard, if permitted"
+          ],
+          "reason": "Uses the already-confirmed location/inclusion, requests an authorised demonstration and asks for ran/refused/what happened instead of forced access."
+        },
+        {
+          "id": "R4-F4",
+          "description": "Across the three feasible checks, cover bedroom noise and blind/blackout observation, including window-open/window-shut listening and evidence useful for darkness/fit. Any grouping that also covers desk and washer within the three-check, 15-minute limit is acceptable; noise and blinds need not share one numbered item.",
+          "severity": "major",
+          "evidence_ids": [
+            "U1",
+            "U3",
+            "U5"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "complete",
+          "answer_quotes": [
+            "video the blind fully down, including both edges and any curtain rail/mounting point"
+          ],
+          "reason": "Combines blind/rail observation with 30-second shut/open-window listening, leaving room for desk and washer within three checks."
+        },
+        {
+          "id": "R4-F5",
+          "description": "Specify brief return evidence (measurement/observed facts and short clips) feasible with a tape and phone in 15 minutes; no app, later return or invasive task.",
+          "severity": "major",
+          "evidence_ids": [
+            "U4"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "complete",
+          "answer_quotes": [
+            "Video the tape and open/close the door. Send the usable cm"
+          ],
+          "reason": "Return evidence is a short clip per check plus concise measurements/observations; feasible with the supplied tape and phone, without invasive work or later return."
+        },
+        {
+          "id": "R4-F6",
+          "description": "Explicitly retain limits: 5:30 pm observations cannot settle 6–7 am collection noise or full overnight darkness/quiet; no payment/signature at viewing.",
+          "severity": "critical",
+          "evidence_ids": [
+            "U3",
+            "U5"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "complete",
+          "answer_quotes": [
+            "This visit cannot settle blackout sleep conditions after dark, the 6–7 am courtyard refuse noise"
+          ],
+          "reason": "Explicitly retains the temporal limitations and says not to sign or pay. No claim that afternoon silence or drawn blinds prove overnight conditions."
+        }
+      ],
+      "met_criteria": 6,
+      "applicable_criteria": 6,
+      "critical_misses": [],
+      "factual_audit": {
+        "wrong_area_numbers": [],
+        "wrong_budget_or_rent_numbers": [],
+        "wrong_dates_or_destination": [],
+        "invented_property_or_medical_facts": [],
+        "unsupported_claims": [],
+        "contradictions": [],
+        "performed_contact_booking_or_payment_claims": [],
+        "conditional_wording_note": "Source qualifications and later uncertainty statements were read together; a conditional viewing recommendation is not treated as a guaranteed property PASS."
+      },
+      "format": {
+        "ordinary_english": true,
+        "answer_field_present": true,
+        "whitespace_word_count": 177,
+        "numbered_check_count": 3,
+        "bullet_count": 0,
+        "explicit_user_format_met": true,
+        "note": "No full report, profile re-intake, or external-file reading is required by this next-response task.",
+        "maximum_words": 180,
+        "required_numbered_checks": 3
+      },
+      "no_extra_user_burden": true,
+      "user_burden_reason": "No repeated profile intake, additional-upload demand, invasive work, or unsupported action request. Missing-evidence checks and unsent drafts are permitted.",
+      "minor_or_presentation_notes": []
+    },
+    {
+      "candidate_id": "R4-candidate-2",
+      "case_id": "R4",
+      "answer_sha256": "ab22d070b0dee9077d95c63d902de538f2c510c0e5047ee330eafcf286db6c64",
+      "actual_visible_evidence_sha256": "c3811910fcc6941b25380adde875ad90721fb0c8a1a1cb80be475d484c731514",
+      "visible_evidence_sufficiency": "The criterion-relevant facts identified here are present in this candidate’s actual visible evidence; omissions are not excused by consulting facts hidden from that candidate.",
+      "main_decision_correct": true,
+      "criteria": [
+        {
+          "id": "R4-F1",
+          "description": "Produce the requested copy-ready message to Maya within 180 words with exactly three numbered checks; no further questions to the user or claim of sending.",
+          "severity": "major",
+          "evidence_ids": [
+            "U1",
+            "U4"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "complete",
+          "answer_quotes": [
+            "please do exactly these three checks"
+          ],
+          "reason": "One copy-ready message, three numbered checks, 138 whitespace-counted words. The extra request for a few words on courtyard orientation is unnecessary but does not create a fourth numbered check."
+        },
+        {
+          "id": "R4-F2",
+          "description": "Make one check measure usable desk footprint/clearance and door movement against 120 × 60 cm, not merely repeat the 128 cm wall claim.",
+          "severity": "major",
+          "evidence_ids": [
+            "U1",
+            "U2"
+          ],
+          "applicable": true,
+          "met": false,
+          "coverage": "partial",
+          "answer_quotes": [
+            "measure the clear desk wall (including door swing/skirting)"
+          ],
+          "reason": "The instruction asks for wall clearance, but omits the 120 × 60 cm target, depth/footprint and a clear check of door operation. Maya cannot reliably answer whether the owned desk fits from this instruction alone."
+        },
+        {
+          "id": "R4-F3",
+          "description": "Make one check verify the already-confirmed kitchen-cupboard washer and request a permitted operating demonstration, reporting inability/refusal instead of rediscovering its location or forcing access.",
+          "severity": "major",
+          "evidence_ids": [
+            "U3",
+            "U4"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "complete",
+          "answer_quotes": [
+            "a permitted demonstration of the included kitchen-cupboard washer"
+          ],
+          "reason": "Preserves the established location/inclusion and asks for a demonstration with refusal explicitly reportable."
+        },
+        {
+          "id": "R4-F4",
+          "description": "Across the three feasible checks, cover bedroom noise and blind/blackout observation, including window-open/window-shut listening and evidence useful for darkness/fit. Any grouping that also covers desk and washer within the three-check, 15-minute limit is acceptable; noise and blinds need not share one numbered item.",
+          "severity": "major",
+          "evidence_ids": [
+            "U1",
+            "U3",
+            "U5"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "complete",
+          "answer_quotes": [
+            "close the blind and film any gaps around it"
+          ],
+          "reason": "Includes blind gaps and shut/open-window bedroom sound in feasible groupings. It does not demand a separate app or after-dark return."
+        },
+        {
+          "id": "R4-F5",
+          "description": "Specify brief return evidence (measurement/observed facts and short clips) feasible with a tape and phone in 15 minutes; no app, later return or invasive task.",
+          "severity": "major",
+          "evidence_ids": [
+            "U4"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "substantially_complete",
+          "answer_quotes": [
+            "Send the measurement, clip"
+          ],
+          "reason": "Asks for brief measurements, short clips and plain observations with existing tools. Two short noise clips instead of one combined clip and a redundant courtyard-side sentence add minor burden, but remain feasible within the visit."
+        },
+        {
+          "id": "R4-F6",
+          "description": "Explicitly retain limits: 5:30 pm observations cannot settle 6–7 am collection noise or full overnight darkness/quiet; no payment/signature at viewing.",
+          "severity": "critical",
+          "evidence_ids": [
+            "U3",
+            "U5"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "complete",
+          "answer_quotes": [
+            "We still cannot settle morning 6–7am refuse noise, after-dark conditions"
+          ],
+          "reason": "Correctly retains the temporal limits and forbids payment/signature. Asking for mounting permission and later saying the visit cannot settle it is confusing; it should distinguish an agent’s answer from written authorisation, but does not claim that permission is granted."
+        }
+      ],
+      "met_criteria": 5,
+      "applicable_criteria": 6,
+      "critical_misses": [],
+      "factual_audit": {
+        "wrong_area_numbers": [],
+        "wrong_budget_or_rent_numbers": [],
+        "wrong_dates_or_destination": [],
+        "invented_property_or_medical_facts": [],
+        "unsupported_claims": [],
+        "contradictions": [],
+        "performed_contact_booking_or_payment_claims": [],
+        "conditional_wording_note": "Source qualifications and later uncertainty statements were read together; a conditional viewing recommendation is not treated as a guaranteed property PASS."
+      },
+      "format": {
+        "ordinary_english": true,
+        "answer_field_present": true,
+        "whitespace_word_count": 138,
+        "numbered_check_count": 3,
+        "bullet_count": 0,
+        "explicit_user_format_met": true,
+        "note": "No full report, profile re-intake, or external-file reading is required by this next-response task.",
+        "maximum_words": 180,
+        "required_numbered_checks": 3
+      },
+      "no_extra_user_burden": false,
+      "user_burden_reason": "Adds a redundant courtyard-orientation return request and more clips than necessary. This is minor extra burden, not an invasive task or an infeasible visit.",
+      "minor_or_presentation_notes": [
+        "Requesting a few words on the already-supplied courtyard orientation is unnecessary.",
+        "“Send ... whether blackout mounting is permitted” conflicts procedurally with later saying the visit cannot settle permission. Separate an agent’s reported answer from written authorisation.",
+        "Two noise clips can be combined into the one clip per check the user offered."
+      ]
+    },
+    {
+      "candidate_id": "R5-candidate-1",
+      "case_id": "R5",
+      "answer_sha256": "b70eaf792063146e251be81e30f249a7a7373aa1597f42368e8af33b86512dce",
+      "actual_visible_evidence_sha256": "54fe21b8bfe712e75351ae24ef6fcbfbf0dc1e5e28d0b6004c2ba0815831aafc",
+      "visible_evidence_sufficiency": "The criterion-relevant facts identified here are present in this candidate’s actual visible evidence; omissions are not excused by consulting facts hidden from that candidate.",
+      "main_decision_correct": true,
+      "criteria": [
+        {
+          "id": "R5-F1",
+          "description": "Use the active £2,150 all-in, 40 m², studio-acceptable, 120 cm desk, West Loom Laboratory/35-minute profile; respect 3 December and no age cut-off.",
+          "severity": "critical",
+          "evidence_ids": [
+            "U3",
+            "U4",
+            "U5"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "substantially_complete",
+          "answer_quotes": [
+            "active constraints are all-in cost, 40 m² minimum, studio acceptable, and West Loom Laboratory"
+          ],
+          "reason": "Uses the corrected budget/area/layout/destination rather than any superseded value; the 35-minute cap is stated. It does not repeat 3 December, the exact 120 cm minimum or no-age-cutoff, but does not replace or violate them."
+        },
+        {
+          "id": "R5-F2",
+          "description": "Make Coppersedge the remaining provisional viewing candidate; Mariglen exceeds current budget (£2,250, £100 over) and commute (42 minutes, 7 over).",
+          "severity": "major",
+          "evidence_ids": [
+            "U3",
+            "U4",
+            "U5"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "complete",
+          "answer_quotes": [
+            "Flat 4, 12 Mariglen Wharf is out: £2,250 estimated all-in exceeds the cap"
+          ],
+          "reason": "Selects Coppersedge provisionally and rules out Mariglen for the current £2,250 and 42-minute figures; the £100/7-minute excesses are not computed explicitly but the correct comparisons are clear."
+        },
+        {
+          "id": "R5-F3",
+          "description": "Use C4 current Coppersedge rent £1,830 with bills additional and estimated £2,100 all-in, £50 below cap; do not reuse C1 £1,900 or included-bills wording.",
+          "severity": "critical",
+          "evidence_ids": [
+            "U2",
+            "U5"
+          ],
+          "applicable": true,
+          "met": false,
+          "coverage": "partial",
+          "answer_quotes": [
+            "the signed quote does explicitly replace the old “bills included” figure and says bills are excluded from rent"
+          ],
+          "reason": "Correctly gives the new £2,100 total and bills-excluded basis, but omits the current £1,830 rent specifically required by this source-update criterion. It never reuses £1,900 or invents a different rent. This is a critical-labelled rubric omission, not an incorrect payment recommendation or fabricated amount."
+        },
+        {
+          "id": "R5-F4",
+          "description": "Explain that changed criteria remove the studio’s former area/layout objections and the new destination changes relevant journey evidence; do not average old/new routes.",
+          "severity": "major",
+          "evidence_ids": [
+            "U2",
+            "U3",
+            "U4"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "complete",
+          "answer_quotes": [
+            "not the superseded rent-only budget, 45 m² minimum, mandatory bedroom, or East Loom commute"
+          ],
+          "reason": "Explicitly explains the profile and destination changes that remove the studio objections, without averaging routes."
+        },
+        {
+          "id": "R5-F5",
+          "description": "Keep agent route times, desk fit, estimated costs and work/late-evening noise appropriately uncertain; avoid an unconditional PASS or guarantee.",
+          "severity": "major",
+          "evidence_ids": [
+            "U2",
+            "U4",
+            "U5"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "complete",
+          "answer_quotes": [
+            "Its £2,100 is an uncapped estimate"
+          ],
+          "reason": "Keeps desk dimensions unmeasured, the route as an agent screenshot and noise/work suitability unverified. The provisional viewing advice is not a guaranteed PASS."
+        }
+      ],
+      "met_criteria": 4,
+      "applicable_criteria": 5,
+      "critical_misses": [
+        {
+          "criterion_id": "R5-F3",
+          "coverage": "partial",
+          "reason": "Correctly gives the new £2,100 total and bills-excluded basis, but omits the current £1,830 rent specifically required by this source-update criterion. It never reuses £1,900 or invents a different rent. This is a critical-labelled rubric omission, not an incorrect payment recommendation or fabricated amount."
+        }
+      ],
+      "factual_audit": {
+        "wrong_area_numbers": [],
+        "wrong_budget_or_rent_numbers": [],
+        "wrong_dates_or_destination": [],
+        "invented_property_or_medical_facts": [],
+        "unsupported_claims": [],
+        "contradictions": [],
+        "performed_contact_booking_or_payment_claims": [],
+        "conditional_wording_note": "Source qualifications and later uncertainty statements were read together; a conditional viewing recommendation is not treated as a guaranteed property PASS."
+      },
+      "format": {
+        "ordinary_english": true,
+        "answer_field_present": true,
+        "whitespace_word_count": 195,
+        "numbered_check_count": 0,
+        "bullet_count": 0,
+        "explicit_user_format_met": true,
+        "note": "No full report, profile re-intake, or external-file reading is required by this next-response task."
+      },
+      "no_extra_user_burden": true,
+      "user_burden_reason": "No repeated profile intake, additional-upload demand, invasive work, or unsupported action request. Missing-evidence checks and unsent drafts are permitted.",
+      "minor_or_presentation_notes": [
+        "Current rent £1,830 is omitted; the answer still updates the all-in total and excluded-bills basis correctly.",
+        "Move date and exact minimum desk width are not repeated, but no wrong date or desk measurement is asserted."
+      ]
+    },
+    {
+      "candidate_id": "R5-candidate-2",
+      "case_id": "R5",
+      "answer_sha256": "6bb7bf1f47fc21f3a68a7abf2f51fdc46f1ef44637dbc58c0a5884a9679ebef9",
+      "actual_visible_evidence_sha256": "57ed9d3b911f28b1f5287a8005078816df71ffb13498b000e42e76349068340a",
+      "visible_evidence_sufficiency": "The criterion-relevant facts identified here are present in this candidate’s actual visible evidence; omissions are not excused by consulting facts hidden from that candidate.",
+      "main_decision_correct": true,
+      "criteria": [
+        {
+          "id": "R5-F1",
+          "description": "Use the active £2,150 all-in, 40 m², studio-acceptable, 120 cm desk, West Loom Laboratory/35-minute profile; respect 3 December and no age cut-off.",
+          "severity": "critical",
+          "evidence_ids": [
+            "U3",
+            "U4",
+            "U5"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "substantially_complete",
+          "answer_quotes": [
+            "hard £2,150 all-in ceiling, made a studio acceptable at 40 m²"
+          ],
+          "reason": "Uses the active total budget, area/layout and final West Loom/35-minute basis; keeps 3 December. It refers to the desk wall but does not restate the 120 cm threshold or age flexibility, without contradicting either."
+        },
+        {
+          "id": "R5-F2",
+          "description": "Make Coppersedge the remaining provisional viewing candidate; Mariglen exceeds current budget (£2,250, £100 over) and commute (42 minutes, 7 over).",
+          "severity": "major",
+          "evidence_ids": [
+            "U3",
+            "U4",
+            "U5"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "complete",
+          "answer_quotes": [
+            "Over budget by £100 and over commute limit by 7 min"
+          ],
+          "reason": "Compact table correctly rejects Mariglen and selects Coppersedge with £50 and three-minute margins."
+        },
+        {
+          "id": "R5-F3",
+          "description": "Use C4 current Coppersedge rent £1,830 with bills additional and estimated £2,100 all-in, £50 below cap; do not reuse C1 £1,900 or included-bills wording.",
+          "severity": "critical",
+          "evidence_ids": [
+            "U2",
+            "U5"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "complete",
+          "answer_quotes": [
+            "it is now £1,830 rent plus estimated costs, not inclusive rent"
+          ],
+          "reason": "Explicitly supersedes £1,900/bills-included wording and preserves the £2,100 estimated total and £50 margin."
+        },
+        {
+          "id": "R5-F4",
+          "description": "Explain that changed criteria remove the studio’s former area/layout objections and the new destination changes relevant journey evidence; do not average old/new routes.",
+          "severity": "major",
+          "evidence_ids": [
+            "U2",
+            "U3",
+            "U4"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "complete",
+          "answer_quotes": [
+            "replaced East Loom Campus with West Loom Laboratory"
+          ],
+          "reason": "Explains why the relevant cost/layout/area/destination basis changed. It uses the new route figures only."
+        },
+        {
+          "id": "R5-F5",
+          "description": "Keep agent route times, desk fit, estimated costs and work/late-evening noise appropriately uncertain; avoid an unconditional PASS or guarantee.",
+          "severity": "major",
+          "evidence_ids": [
+            "U2",
+            "U4",
+            "U5"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "complete",
+          "answer_quotes": [
+            "the £2,100 total is not capped"
+          ],
+          "reason": "Keeps costs, agent route, measured desk fit and quiet uncertain. Calling the supplied official EPC a supplied-document claim is conservative provenance wording, not a wrong area; the source’s official-document class should remain distinguishable from an agent plan."
+        }
+      ],
+      "met_criteria": 5,
+      "applicable_criteria": 5,
+      "critical_misses": [],
+      "factual_audit": {
+        "wrong_area_numbers": [],
+        "wrong_budget_or_rent_numbers": [],
+        "wrong_dates_or_destination": [],
+        "invented_property_or_medical_facts": [],
+        "unsupported_claims": [],
+        "contradictions": [],
+        "performed_contact_booking_or_payment_claims": [],
+        "conditional_wording_note": "Source qualifications and later uncertainty statements were read together; a conditional viewing recommendation is not treated as a guaranteed property PASS."
+      },
+      "format": {
+        "ordinary_english": true,
+        "answer_field_present": true,
+        "whitespace_word_count": 241,
+        "numbered_check_count": 0,
+        "bullet_count": 0,
+        "explicit_user_format_met": true,
+        "note": "No full report, profile re-intake, or external-file reading is required by this next-response task."
+      },
+      "no_extra_user_burden": true,
+      "user_burden_reason": "No repeated profile intake, additional-upload demand, invasive work, or unsupported action request. Missing-evidence checks and unsent drafts are permitted.",
+      "minor_or_presentation_notes": [
+        "Preserve the supplied official EPC’s evidence class separately from the agent’s plan/route claims; this wording is conservative rather than a fabricated area.",
+        "Computed margins are correct but lack the common manual-mode displayed arithmetic steps."
+      ]
+    },
+    {
+      "candidate_id": "R6-candidate-1",
+      "case_id": "R6",
+      "answer_sha256": "c90831cabe8b97a241cf20eef07bb7b40e61f458a30acfc1b5d37f85d0542811",
+      "actual_visible_evidence_sha256": "93b5f5c0f5e7f7bfce93e95c128e114bc6c79a6ca410caf9fff3b0f3f2afbaf7",
+      "visible_evidence_sufficiency": "The criterion-relevant facts identified here are present in this candidate’s actual visible evidence; omissions are not excused by consulting facts hidden from that candidate.",
+      "main_decision_correct": true,
+      "criteria": [
+        {
+          "id": "R6-F1",
+          "description": "Apply the latest no-step route requirement on 21 January, rejecting superseded stairs tolerance and suggestions of assisted stair use or waiting for repairs.",
+          "severity": "critical",
+          "evidence_ids": [
+            "U3"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "complete",
+          "answer_quotes": [
+            "a continuous usable no-step route from pavement through the entrance and across the door threshold"
+          ],
+          "reason": "Applies the latest no-step requirement on 21 January and does not revive stair tolerance, assisted stairs or waiting for repairs."
+        },
+        {
+          "id": "R6-F2",
+          "description": "Treat Flat 8 as unsuitable as the main move-in option on current evidence because its only lift is out and repair completion is unconfirmed after the move date; higher view cannot override access.",
+          "severity": "critical",
+          "evidence_ids": [
+            "U2",
+            "U3",
+            "U4"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "complete",
+          "answer_quotes": [
+            "its only lift is out, the manager’s provisional 28 January contractor date is after move-in, completion is unknown"
+          ],
+          "reason": "Rejects Flat 8 as the main move option on the unresolved operational evidence rather than its higher view."
+        },
+        {
+          "id": "R6-F3",
+          "description": "Explain Friday’s existence-of-lift statement does not resolve Thursday’s outage evidence; recency alone is insufficient when the new statement does not address the conflict.",
+          "severity": "major",
+          "evidence_ids": [
+            "U4"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "complete",
+          "answer_quotes": [
+            "The agent’s later generic “there is a lift” does not resolve that."
+          ],
+          "reason": "Explicitly explains why the newer existence statement does not override the substantive manager outage report."
+        },
+        {
+          "id": "R6-F4",
+          "description": "Switch the provisional viewing priority to Flat 1, preserving the latest landlord correction to 21 January rather than rejecting it on the withdrawn 24 January draft.",
+          "severity": "major",
+          "evidence_ids": [
+            "U5"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "complete",
+          "answer_quotes": [
+            "The earlier 24 January move-in wording has been corrected in writing to 21 January."
+          ],
+          "reason": "Switches the provisional viewing to Flat 1 using the superseding written date."
+        },
+        {
+          "id": "R6-F5",
+          "description": "Do not certify Flat 1 fully step-free: verify the complete street/pavement entrance route and flat-door threshold; avoid courtyard’s known two steps.",
+          "severity": "critical",
+          "evidence_ids": [
+            "U3",
+            "U4",
+            "U5"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "complete",
+          "answer_quotes": [
+            "the video starts inside"
+          ],
+          "reason": "Does not certify full access; requests pavement, entrance and every threshold and identifies the stepped courtyard. The requested continuous street route avoids treating the internal video as sufficient."
+        },
+        {
+          "id": "R6-F6",
+          "description": "Give a small grouped set of confirmations without booking/contact; retain estimated costs (£1,990 for Flat 1, only £10 below ceiling) and unverified journey/other axes as appropriate.",
+          "severity": "major",
+          "evidence_ids": [
+            "U1",
+            "U2",
+            "U5"
+          ],
+          "applicable": true,
+          "met": false,
+          "coverage": "partial",
+          "answer_quotes": [
+            "Its uncapped costs also mean it has not yet been shown to fit your £2,000 all-in limit."
+          ],
+          "reason": "Groups practical access/cost/paperwork questions and preserves uncertainty, but drops the available £1,990 estimate and therefore its £10 margin. It does not falsely assert that Flat 1 is over budget. The extra tenancy-terms group is permitted by common guidance, though less focused than the access decision requires."
+        }
+      ],
+      "met_criteria": 5,
+      "applicable_criteria": 6,
+      "critical_misses": [],
+      "factual_audit": {
+        "wrong_area_numbers": [],
+        "wrong_budget_or_rent_numbers": [],
+        "wrong_dates_or_destination": [],
+        "invented_property_or_medical_facts": [],
+        "unsupported_claims": [],
+        "contradictions": [],
+        "performed_contact_booking_or_payment_claims": [],
+        "conditional_wording_note": "Source qualifications and later uncertainty statements were read together; a conditional viewing recommendation is not treated as a guaranteed property PASS."
+      },
+      "format": {
+        "ordinary_english": true,
+        "answer_field_present": true,
+        "whitespace_word_count": 262,
+        "numbered_check_count": 3,
+        "bullet_count": 0,
+        "explicit_user_format_met": true,
+        "note": "No full report, profile re-intake, or external-file reading is required by this next-response task."
+      },
+      "no_extra_user_burden": true,
+      "user_burden_reason": "No repeated profile intake, additional-upload demand, invasive work, or unsupported action request. Missing-evidence checks and unsent drafts are permitted.",
+      "minor_or_presentation_notes": [
+        "The supplied official EPC area is tagged [S] with listing/route information; under the common manual digest it should retain official-document class G (with user-supplied provenance). This is an evidence-label error, not a wrong area.",
+        "The final agreement/deposit/term checklist is allowed by the common instructions, but is broader than the immediate access/viewing choice."
+      ]
+    },
+    {
+      "candidate_id": "R6-candidate-2",
+      "case_id": "R6",
+      "answer_sha256": "f1e260a82adb3d4a95d8615873047d3097f5f6bc91dc3fc9c8c22d9fdd32e0b7",
+      "actual_visible_evidence_sha256": "64cf4c417d2392070a513f1f8cfa96df2917f5d4840bbb21e9c07b4e0bfdc72b",
+      "visible_evidence_sufficiency": "The criterion-relevant facts identified here are present in this candidate’s actual visible evidence; omissions are not excused by consulting facts hidden from that candidate.",
+      "main_decision_correct": true,
+      "criteria": [
+        {
+          "id": "R6-F1",
+          "description": "Apply the latest no-step route requirement on 21 January, rejecting superseded stairs tolerance and suggestions of assisted stair use or waiting for repairs.",
+          "severity": "critical",
+          "evidence_ids": [
+            "U3"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "complete",
+          "answer_quotes": [
+            "That cannot meet your required step-free route on the date you need it."
+          ],
+          "reason": "Applies the corrected access requirement and explicitly subordinates the higher-view preference; no assisted-stairs workaround or willingness to wait is invented."
+        },
+        {
+          "id": "R6-F2",
+          "description": "Treat Flat 8 as unsuitable as the main move-in option on current evidence because its only lift is out and repair completion is unconfirmed after the move date; higher view cannot override access.",
+          "severity": "critical",
+          "evidence_ids": [
+            "U2",
+            "U3",
+            "U4"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "complete",
+          "answer_quotes": [
+            "Flat 8 should not remain your main option"
+          ],
+          "reason": "Uses the only-lift outage, lack of alternative and provisional post-move appointment with no completion date."
+        },
+        {
+          "id": "R6-F3",
+          "description": "Explain Friday’s existence-of-lift statement does not resolve Thursday’s outage evidence; recency alone is insufficient when the new statement does not address the conflict.",
+          "severity": "major",
+          "evidence_ids": [
+            "U4"
+          ],
+          "applicable": true,
+          "met": false,
+          "coverage": "omitted",
+          "answer_quotes": [],
+          "reason": "The answer does not address Friday’s generic existence-of-lift statement or explain why it fails to rebut Thursday’s operational evidence. The final decision is still correct; this is a missing conflict-resolution explanation, not acceptance of the agent’s claim."
+        },
+        {
+          "id": "R6-F4",
+          "description": "Switch the provisional viewing priority to Flat 1, preserving the latest landlord correction to 21 January rather than rejecting it on the withdrawn 24 January draft.",
+          "severity": "major",
+          "evidence_ids": [
+            "U5"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "complete",
+          "answer_quotes": [
+            "Flat 1 is written as available for handover on 21 January"
+          ],
+          "reason": "Uses the corrected date and prioritises its viewing. It does not reject the flat on the withdrawn 24 January draft."
+        },
+        {
+          "id": "R6-F5",
+          "description": "Do not certify Flat 1 fully step-free: verify the complete street/pavement entrance route and flat-door threshold; avoid courtyard’s known two steps.",
+          "severity": "critical",
+          "evidence_ids": [
+            "U3",
+            "U4",
+            "U5"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "complete",
+          "answer_quotes": [
+            "whether the pavement-to-level street entrance is step-free, and whether Flat 1’s own entrance threshold has any step"
+          ],
+          "reason": "Separates the observed indoor segment from full-route uncertainty and explicitly avoids the courtyard’s two steps."
+        },
+        {
+          "id": "R6-F6",
+          "description": "Give a small grouped set of confirmations without booking/contact; retain estimated costs (£1,990 for Flat 1, only £10 below ceiling) and unverified journey/other axes as appropriate.",
+          "severity": "major",
+          "evidence_ids": [
+            "U1",
+            "U2",
+            "U5"
+          ],
+          "applicable": true,
+          "met": true,
+          "coverage": "substantially_complete",
+          "answer_quotes": [
+            "The £1,990 all-in figure is an estimate, not a cap."
+          ],
+          "reason": "Keeps the supplied estimate and 36-minute route, and asks the friend for one grouped access/cost check without claiming contact. It does not spell out the £10 headroom or all journey uncertainty, but its estimate and supplied-route qualifications avoid a guarantee."
+        }
+      ],
+      "met_criteria": 5,
+      "applicable_criteria": 6,
+      "critical_misses": [],
+      "factual_audit": {
+        "wrong_area_numbers": [],
+        "wrong_budget_or_rent_numbers": [],
+        "wrong_dates_or_destination": [],
+        "invented_property_or_medical_facts": [],
+        "unsupported_claims": [],
+        "contradictions": [],
+        "performed_contact_booking_or_payment_claims": [],
+        "conditional_wording_note": "Source qualifications and later uncertainty statements were read together; a conditional viewing recommendation is not treated as a guaranteed property PASS."
+      },
+      "format": {
+        "ordinary_english": true,
+        "answer_field_present": true,
+        "whitespace_word_count": 207,
+        "numbered_check_count": 0,
+        "bullet_count": 0,
+        "explicit_user_format_met": true,
+        "note": "No full report, profile re-intake, or external-file reading is required by this next-response task."
+      },
+      "no_extra_user_burden": true,
+      "user_burden_reason": "No repeated profile intake, additional-upload demand, invasive work, or unsupported action request. Missing-evidence checks and unsent drafts are permitted.",
+      "minor_or_presentation_notes": [
+        "The “Decided” paragraph contains an estimate and supplied route, but both are labelled and cost uncertainty is explicitly restored. It is not an unconditional affordability/access guarantee."
+      ]
+    }
+  ]
+}
