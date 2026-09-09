@@ -100,9 +100,10 @@ class CallControl:
     """Guard callbacks using an atomic checkpoint and a fixed progress report.
 
     Successful saved calls are idempotent. Failures stay paused, and a restored
-    in-flight call is never dispatched again automatically. There is no automatic
-    retry or resume API. All methods reread the checkpoint under a POSIX file lock;
-    at most one unresolved physical invocation is permitted.
+    in-flight call is never dispatched again automatically. An explicit failure
+    acknowledgment permits other planned IDs to proceed; a failed ID can never
+    be reused. All methods reread the checkpoint under a POSIX file lock; at most
+    one unresolved physical invocation is permitted.
     """
 
     def __init__(self, output_dir, planned_call_ids, allow_tools=False):
@@ -206,7 +207,9 @@ class CallControl:
 
     @staticmethod
     def _raise_paused(state):
-        failed = next((r for r in state["calls"].values() if r["failure_kind"]), None)
+        cause = state["reducer_state"].get("pause_cause")
+        failed = next((r for r in state["calls"].values()
+                       if r["failure_kind"] and cause == "terminal/" + r["call_id"]), None)
         raise CallControlPaused("call controller is paused; no new callback may start",
                                 call_id=failed["call_id"] if failed else None,
                                 failure_kind=failed["failure_kind"] if failed else None,
@@ -225,6 +228,8 @@ class CallControl:
             if previous is not None:
                 if any(previous[key] != value for key, value in metadata.items()):
                     raise ConflictingCallError("call ID reused with different job/role/phase: " + call_id)
+                if previous["failure_kind"] is not None:
+                    raise ConflictingCallError("failed physical call ID can never be dispatched again: " + call_id)
                 if previous["record"] is not None and previous["failure_kind"] is None:
                     return False
             if state["reducer_state"]["paused"]:
@@ -239,6 +244,58 @@ class CallControl:
                 raise CallControlError("underlying reducer rejected dispatch")
             state["reducer_state"] = reduced
             state["calls"][call_id] = dict(metadata, record=None, record_sha256=None, failure_kind=None)
+            state["revision"] += 1
+            self._save(state)
+            return True
+
+    def acknowledge_failure(self, call_id, reason, allow_unknown_usage=False):
+        """Explicitly clear the current failure pause without retrying its ID.
+
+        The caller must decide which independent planned work can proceed. This
+        event records an operator acknowledgment, not fresh user authorization,
+        successful completion or reconciled spend. Any unknown usage in the
+        ledger requires allow_unknown_usage=True and remains unknown afterwards.
+        Repeated/stale acknowledgments fail; inspect the current pause cause.
+        """
+        if not isinstance(call_id, str) or not call_id:
+            raise ValueError("a nonempty failed call ID is required")
+        if not isinstance(reason, str) or not reason.strip():
+            raise ValueError("a nonempty acknowledgment reason is required")
+        if type(allow_unknown_usage) is not bool:
+            raise ValueError("allow_unknown_usage must be boolean")
+        with self._locked() as state:
+            pending = [key for key, row in state["calls"].items() if row["record"] is None]
+            if pending:
+                raise PendingCallError("pending invocation blocks failure acknowledgment: " + pending[0])
+            previous = state["reducer_state"]
+            row = state["calls"].get(call_id)
+            cause = "terminal/" + call_id
+            request = previous["requests"].get(call_id)
+            if (not previous["paused"] or previous.get("pause_cause") != cause
+                    or row is None or row["record"] is None or row["failure_kind"] is None
+                    or request is None or request["terminal"] != "provider_error"):
+                raise CallControlError("acknowledgment must match the current terminal failed call")
+            old_calls = copy.deepcopy(state["calls"])
+            old_requests = copy.deepcopy(previous["requests"])
+            old_usage = copy.deepcopy(report_control.report(previous)["usage"])
+            unknown = {field: [key for key, saved in previous["requests"].items()
+                               if saved["usage"][field] is None] for field in FIELDS}
+            if any(unknown.values()) and not allow_unknown_usage:
+                raise CallControlError("unknown usage requires explicit allow_unknown_usage=True acknowledgment")
+            event = {"id": "acknowledge-failure/" + call_id, "type": "resume",
+                     "acknowledge": cause, "call_id": call_id, "reason": reason,
+                     "allow_unknown_usage": allow_unknown_usage,
+                     "unknown_usage_call_ids": unknown,
+                     "failed_record_sha256": row["record_sha256"]}
+            if event["id"] in previous["seen_events"]:
+                raise ConflictingCallError("failure acknowledgment event already exists: " + call_id)
+            reduced = report_control.reduce_event(previous, event)
+            violations = report_control.invariant_failures(previous, reduced, event)
+            if (violations or reduced["paused"] or reduced.get("pause_cause") is not None
+                    or reduced["requests"] != old_requests or state["calls"] != old_calls
+                    or report_control.report(reduced)["usage"] != old_usage):
+                raise CallControlError("failure acknowledgment changed receipts/usage or violated reducer invariants")
+            state["reducer_state"] = reduced
             state["revision"] += 1
             self._save(state)
             return True

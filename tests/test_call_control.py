@@ -249,6 +249,140 @@ class CallControlTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.control.skip("not-planned", "unknown")
 
+    def test_two_failures_acknowledge_current_cause_and_preserve_receipts_usage_and_history(self):
+        first = record("c1", status="stopped", timeout=True)
+        with self.assertRaises(call_control.CallControlPaused) as initial_error:
+            self.run_call("c1", first)
+        self.assertEqual("c1", initial_error.exception.call_id)
+        before = self.control.snapshot()
+        old_usage = self.control.report()["usage"]
+        reason = "Continue independent original IDs; preserve the failed receipt.\nNo retry."
+        self.assertTrue(self.control.acknowledge_failure("c1", reason))
+        acknowledged = self.control.snapshot()
+        self.assertEqual(before["calls"], acknowledged["calls"])
+        self.assertEqual(before["reducer_state"]["requests"], acknowledged["reducer_state"]["requests"])
+        self.assertEqual(old_usage, self.control.report()["usage"])
+        self.assertEqual(before["revision"] + 1, acknowledged["revision"])
+        event = acknowledged["reducer_state"]["history"][-1]
+        self.assertEqual(before["reducer_state"]["history"] + [event], acknowledged["reducer_state"]["history"])
+        self.assertEqual("resume", event["type"])
+        self.assertEqual("terminal/c1", event["acknowledge"])
+        self.assertEqual(reason, event["reason"])
+        self.assertFalse(event["allow_unknown_usage"])
+        self.assertEqual(before["calls"]["c1"]["record_sha256"], event["failed_record_sha256"])
+        self.assertFalse(self.control.report()["paused"])
+
+        second = record("c2", input_tokens=20, output_tokens=5, status="stopped")
+        with self.assertRaises(call_control.CallControlPaused) as next_error:
+            self.run_call("c2", second)
+        self.assertEqual("c2", next_error.exception.call_id)
+        self.assertEqual(second, next_error.exception.record)
+        blocked = mock.Mock()
+        with self.assertRaises(call_control.CallControlPaused) as dispatch_error:
+            self.control.run("c3", "job", "answer", "initial", blocked)
+        blocked.assert_not_called()
+        self.assertEqual("c2", dispatch_error.exception.call_id)
+        with self.assertRaises(call_control.CallControlError):
+            self.control.acknowledge_failure("c1", "Old failure does not acknowledge the new pause")
+        second_before = self.control.snapshot()
+        second_usage = self.control.report()["usage"]
+        self.control.acknowledge_failure("c2", "Acknowledge the second independent failure")
+        self.assertEqual(second_before["calls"], self.control.snapshot()["calls"])
+        self.assertEqual(second_usage, self.control.report()["usage"])
+        self.run_call("c3", record("c3"))
+        restored = call_control.CallControl(self.path, ["c1", "c2", "c3"])
+        self.assertEqual(first, restored.record("c1"))
+        self.assertEqual(second, restored.record("c2"))
+        self.assertEqual(51, restored.report()["usage"]["total_tokens"])
+        self.assertEqual(2, restored.report()["failed_calls"])
+        self.assertEqual(1, restored.report()["completed_calls"])
+        self.assertEqual(3, restored.report()["resolved_planned_calls"])
+        self.assertFalse(restored.report()["plan_complete"])
+
+    def test_failed_id_is_rejected_before_and_after_acknowledgment_without_overwrite(self):
+        with self.assertRaises(call_control.CallControlPaused):
+            self.run_call("c1", record(status="stopped"))
+        forbidden = mock.Mock(side_effect=AssertionError("failed call must never repeat"))
+        for acknowledged in (False, True):
+            if acknowledged:
+                self.control.acknowledge_failure("c1", "Permit only other independent planned calls")
+            before = self.control.snapshot()
+            with self.assertRaises(call_control.ConflictingCallError):
+                self.control.run("c1", "job", "answer", "initial", forbidden)
+            self.assertEqual(before, self.control.snapshot())
+        forbidden.assert_not_called()
+        self.assertEqual(1, self.control.report()["dispatched_calls"])
+        self.assertEqual(13, self.control.report()["usage"]["total_tokens"])
+
+    def test_unknown_usage_requires_explicit_acknowledgment_and_remains_unknown(self):
+        unknown = record(status="stopped", terminal_usage_events=0, direct_terminal_usage=None)
+        with self.assertRaises(call_control.CallControlPaused):
+            self.run_call("c1", unknown)
+        before = self.control.snapshot()
+        with self.assertRaisesRegex(call_control.CallControlError, "allow_unknown_usage=True"):
+            self.control.acknowledge_failure("c1", "Unknown spend is still unresolved")
+        self.assertEqual(before, self.control.snapshot())
+        self.control.acknowledge_failure("c1", "Operator explicitly accepts unresolved spend for independent work", allow_unknown_usage=True)
+        after = self.control.snapshot()
+        event = after["reducer_state"]["history"][-1]
+        self.assertTrue(event["allow_unknown_usage"])
+        self.assertEqual({field: ["c1"] for field in call_control.FIELDS}, event["unknown_usage_call_ids"])
+        self.assertEqual(before["calls"], after["calls"])
+        self.assertEqual(before["reducer_state"]["requests"], after["reducer_state"]["requests"])
+        self.run_call("c2", record("c2"))
+        usage = self.control.report()["usage"]
+        self.assertIsNone(usage["total_tokens"])
+        self.assertEqual(10, usage["known_input_tokens"])
+        self.assertEqual(3, usage["known_output_tokens"])
+        self.assertEqual(1, usage["unknown_input_tokens_requests"])
+        self.assertEqual(unknown, self.control.record("c1"))
+
+    def test_unknown_cache_counter_also_requires_explicit_acknowledgment(self):
+        with self.assertRaises(call_control.CallControlPaused):
+            self.run_call("c1", record(direct_terminal_usage={"input_tokens": 10, "output_tokens": 3}))
+        self.assertEqual(13, self.control.report()["usage"]["total_tokens"])
+        with self.assertRaises(call_control.CallControlError):
+            self.control.acknowledge_failure("c1", "Cache portion is unobserved")
+        self.control.acknowledge_failure("c1", "Explicitly accept the unknown cache portion", allow_unknown_usage=True)
+        event = self.control.snapshot()["reducer_state"]["history"][-1]
+        self.assertEqual({"input_tokens": [], "cached_input_tokens": ["c1"], "output_tokens": []}, event["unknown_usage_call_ids"])
+        self.assertEqual(13, self.control.report()["usage"]["total_tokens"])
+
+    def test_acknowledgment_rejects_invalid_metadata_stale_cause_and_pending_calls(self):
+        with self.assertRaises(call_control.CallControlPaused):
+            self.run_call("c1", record(status="stopped"))
+        for args in (("c1", "", False), ("c1", " ", False), ("c1", "reason", 1),
+                     ("", "reason", False), ("c2", "wrong failure", False)):
+            before = self.control.snapshot()
+            with self.subTest(args=args), self.assertRaises((ValueError, call_control.CallControlError)):
+                self.control.acknowledge_failure(*args)
+            self.assertEqual(before, self.control.snapshot())
+        stale = call_control.CallControl(self.path, ["c1", "c2", "c3"])
+        self.control.acknowledge_failure("c1", "One explicit acknowledgment")
+        before = self.control.snapshot()
+        with self.assertRaises(call_control.CallControlError):
+            stale.acknowledge_failure("c1", "One explicit acknowledgment")
+        self.assertEqual(before, self.control.snapshot())
+        self.control.dispatch("c2", "job", "answer", "initial")
+        before = self.control.snapshot()
+        with self.assertRaises(call_control.PendingCallError):
+            self.control.acknowledge_failure("c1", "Pending work must block acknowledgment", allow_unknown_usage=True)
+        self.assertEqual(before, self.control.snapshot())
+
+    def test_acknowledgment_fails_closed_if_reducer_changes_original_usage(self):
+        with self.assertRaises(call_control.CallControlPaused):
+            self.run_call("c1", record(status="stopped"))
+        before = self.control.snapshot()
+        real_reduce = call_control.report_control.reduce_event
+        def corrupt_reducer(state, event):
+            changed = real_reduce(state, event)
+            changed["requests"]["c1"]["usage"]["input_tokens"] = 999
+            return changed
+        with mock.patch.object(call_control.report_control, "reduce_event", side_effect=corrupt_reducer), \
+                self.assertRaises(call_control.CallControlError):
+            self.control.acknowledge_failure("c1", "The reducer must preserve accounting")
+        self.assertEqual(before, self.control.snapshot())
+
 
 class SavedRunIntegrationTests(unittest.TestCase):
     @unittest.skipUnless((SAVED / "summary.json").exists(), "ignored archived live run is not available")
