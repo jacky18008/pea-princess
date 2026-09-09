@@ -142,5 +142,17 @@
     "tests/test_persona_playground.py": "fb0b786e4338edf6498472e7a36d0101af693d7612d8ee8556a0cfb28d6b81cb",
     "tests/test_playground_ui.js": "0a410189196f4c14e594cb1a35036259a05e113e519f02d8f25c146a9adcfa16",
     "tests/test_playground_ui.py": "e12c2dac9288f8838c6d6bdcd45d84577fab1d4a2a110a7eaf5580c6b9bd4666"
+  },
+  "hash_definitions": {
+    "raw_sha256": "SHA-256 of the UTF-8 embedded launch_result.stdout JSONL string.",
+    "record_sha256": "SHA-256 of the canonical physical record object, not the whole checkpoint file."
+  },
+  "historical_raw_audit": {
+    "directory": "bench/results",
+    "files_verified": 4162,
+    "changed": 0,
+    "missing": 0,
+    "added": 0,
+    "source_baseline": "pea-princess-harness-20260909T185125Z historical-baseline.json and operational-sha256.json"
   }
 }
