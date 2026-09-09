@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Public community feedback v1 (private notes excluded)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "place_id",
+    "experience_month",
+    "experience_kind",
+    "cleanliness",
+    "noise",
+    "transport",
+    "facilities",
+    "maintenance",
+    "overall",
+    "consent",
+    "license"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "const": 1
+    },
+    "place_id": {
+      "type": "string",
+      "enum": [
+        "demo-orchid-court",
+        "demo-river-house",
+        "demo-maple-hall"
+      ]
+    },
+    "experience_month": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$",
+      "description": "A completed UTC month within the previous 60 months; enforced by both validators."
+    },
+    "experience_kind": {
+      "type": "string",
+      "enum": [
+        "lived",
+        "visited",
+        "hearsay",
+        "undisclosed"
+      ]
+    },
+    "cleanliness": {
+      "type": "string",
+      "enum": [
+        "very_bad",
+        "bad",
+        "mixed",
+        "good",
+        "very_good",
+        "unknown",
+        "not_applicable"
+      ]
+    },
+    "noise": {
+      "type": "string",
+      "enum": [
+        "very_bad",
+        "bad",
+        "mixed",
+        "good",
+        "very_good",
+        "unknown",
+        "not_applicable"
+      ]
+    },
+    "transport": {
+      "type": "string",
+      "enum": [
+        "very_bad",
+        "bad",
+        "mixed",
+        "good",
+        "very_good",
+        "unknown",
+        "not_applicable"
+      ]
+    },
+    "facilities": {
+      "type": "string",
+      "enum": [
+        "very_bad",
+        "bad",
+        "mixed",
+        "good",
+        "very_good",
+        "unknown",
+        "not_applicable"
+      ]
+    },
+    "maintenance": {
+      "type": "string",
+      "enum": [
+        "very_bad",
+        "bad",
+        "mixed",
+        "good",
+        "very_good",
+        "unknown",
+        "not_applicable"
+      ]
+    },
+    "overall": {
+      "type": "string",
+      "enum": [
+        "would_return",
+        "would_not_return",
+        "unsure",
+        "not_applicable"
+      ]
+    },
+    "consent": {
+      "type": "boolean",
+      "const": true
+    },
+    "license": {
+      "type": "string",
+      "const": "CC0-1.0"
+    }
+  }
+}

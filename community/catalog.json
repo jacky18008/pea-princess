@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "catalog_id": "demo-v1",
+  "demo": true,
+  "places": [
+    {"place_id": "demo-orchid-court", "name": "蘭花苑（虛構示例）"},
+    {"place_id": "demo-river-house", "name": "河畔居（虛構示例）"},
+    {"place_id": "demo-maple-hall", "name": "楓葉館（虛構示例）"}
+  ]
+}

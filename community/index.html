@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Hc9u+eBziHmzZsQyd/SRYWeAQ/UNO4cNQ68yTv3HuQw='; style-src 'sha256-jkR+oH0w0Lm+p/GUoOkGkzZ5fsRl+5WJQF2K3eivtP0='; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<title>住過之後 · 豌豆公主本機回饋</title>
+<style>
+:root{color-scheme:light;--ink:#20352d;--muted:#52655b;--line:#d9dfd7;--green:#255c44;--paper:#fffef9;--wash:#f0f3e9}*{box-sizing:border-box}body{margin:0;background:var(--wash);color:var(--ink);font:16px/1.6 system-ui,-apple-system,sans-serif}main{max-width:1060px;margin:auto;padding:44px 24px 70px}.eyebrow{font-size:13px;letter-spacing:.14em;color:var(--green);font-weight:700}h1{font-size:clamp(32px,5vw,48px);line-height:1.2;margin:14px 0}h2{font-size:23px;margin:0 0 14px}p{margin:10px 0}.intro{max-width:720px}.muted,.hint{color:var(--muted)}.hint{font-size:14px}.notice{border-left:4px solid var(--green);padding:10px 16px;background:#e3ebdc;margin:24px 0}.layout{display:grid;grid-template-columns:1.25fr 1fr;gap:22px;align-items:start}.panel{background:var(--paper);padding:26px;border:1px solid var(--line);border-radius:16px;box-shadow:0 6px 18px #29412d06}.step{font-size:12px;font-weight:700;color:var(--green);letter-spacing:.12em}.choices{display:grid;grid-template-columns:1fr 1fr;gap:16px}label{display:block;font-weight:600;font-size:14px}select,textarea{display:block;width:100%;margin-top:6px;border:1px solid #aebbae;border-radius:8px;background:#fff;color:var(--ink);font:inherit;padding:11px}select{appearance:none;-webkit-appearance:none;min-height:46px;padding-right:30px;background-image:linear-gradient(45deg,transparent 50%,#52655b 50%),linear-gradient(135deg,#52655b 50%,transparent 50%);background-position:calc(100% - 16px) 50%,calc(100% - 11px) 50%;background-size:5px 5px;background-repeat:no-repeat}textarea{min-height:210px;resize:vertical;font-weight:400}button{border:1px solid var(--green);border-radius:8px;font:inherit;font-weight:600;padding:11px 16px;background:var(--green);color:white;cursor:pointer}button.secondary{background:transparent;color:var(--green)}button.danger{border-color:#815042;color:#815042;background:transparent}button:disabled{opacity:.45;cursor:not-allowed}button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid #bd9340;outline-offset:3px}.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}.consent{font-weight:400;margin:20px 0;display:flex;gap:10px;align-items:start}.consent input{margin-top:6px;flex-shrink:0;width:18px;height:18px}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#edf0e9;border-radius:8px;padding:16px;font:12px/1.7 ui-monospace,monospace;max-height:350px;overflow:auto}.status{font-size:14px;min-height:42px;margin-top:16px}details{margin-top:20px;border-top:1px solid var(--line);padding-top:16px}summary{cursor:pointer;font-weight:600}footer{margin-top:28px;color:var(--muted);font-size:14px}a{color:var(--green)}code{font-size:.9em}ol{padding-left:22px}li{margin:8px 0}@media(max-width:760px){main{padding:28px 16px 50px}.layout{grid-template-columns:1fr}.panel{padding:20px}.choices{grid-template-columns:1fr 1fr}}@media(max-width:400px){.choices{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main>
+<header class="intro"><div class="eyebrow">PEA PRINCESS · LOCAL FEEDBACK</div><h1>住過之後，留下幾個選項。</h1><p>選項可以成為公共線索；文字筆記留給自己。先核對公開預覽，再下載檔案交給本機工具。</p><p class="muted">第一階段・本機暫存與匯入。這個頁面沒有線上投稿服務，不會把任何資料送到網路。</p></header>
+<div class="notice" id="catalog-state">載入本機目錄中。</div>
+<div class="layout">
+<section class="panel" aria-labelledby="public-title"><div class="step">01 / 公開選項</div><h2 id="public-title">只公開你選擇的答案</h2><p class="hint">不收姓名、地址、網址、精確入住日期或公開文字留言。只選已結束的月份；可選不知道、不適用或不願透露。</p>
+<form id="public-form"><div class="choices" id="choice-fields"></div>
+<label class="consent"><input type="checkbox" id="consent" required><span>我同意這些公開選項以 <strong>CC0-1.0</strong> 提供：任何人可複製、修改及再利用，無須署名。這項同意<strong>只涵蓋本次公開選項，不涵蓋私人筆記或任何既有資料</strong>。我知道未查證回報可能被他人複製，日後本機撤回不能收回所有副本。<a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener noreferrer">閱讀 CC0 說明</a></span></label>
+<button type="submit">產生公開預覽</button></form>
+<p id="public-status" class="status" role="status" aria-live="polite">尚未產生公開資料。</p><pre id="public-preview" aria-label="實際公開 JSON 預覽">完成選項後，這裡會顯示實際下載的公開 JSON。</pre><button id="download-public" class="secondary" disabled>下載公開 JSON</button>
+<details><summary>下載後如何匯入、撤回？</summary><ol><li>把 <code>community-public.json</code> 交給本機的 <code>community/feedback.py validate</code> 檢查。</li><li>營運者用 <code>import --store</code> 匯入本機索引；這仍不是網路發佈。</li><li>匯入工具另存私人撤回憑證在 <code>store/receipts/</code>。請由營運者安全交還並保管，不要公開。</li><li>用該憑證執行 <code>withdraw</code>，可移除本機索引的回報；舊匯出檔與他人副本仍須另行處理。</li></ol></details>
+</section>
+<section class="panel" aria-labelledby="private-title"><div class="step">02 / 私人筆記・選填</div><h2 id="private-title">文字只留在這個裝置</h2><p class="hint">筆記不會放進公開預覽或公開 JSON。按保存後使用瀏覽器 localStorage；沒有跨裝置同步或加密保證，同一瀏覽器的其他使用者可能讀到它。直接開啟本機檔案時，部分瀏覽器會禁止儲存。</p>
+<label for="private-note">給自己的備忘（最多 8,000 字）</label><textarea id="private-note" maxlength="8000" placeholder="可留空。避免在共用裝置保存敏感資料。" spellcheck="false"></textarea>
+<div class="actions"><button id="save-note" class="secondary">存到此瀏覽器</button><button id="copy-note" class="secondary">複製私人筆記</button><button id="download-note" class="secondary">下載私人筆記</button><button id="delete-note" class="danger">刪除此筆記</button></div><p id="private-status" class="status" role="status" aria-live="polite">尚未保存私人筆記。</p>
+<p class="hint">只有你另外複製或下載筆記時，才會產生獨立私人輸出。不要將 <code>PRIVATE-community-note.txt</code> 當成公開投稿檔案。交給自己的 Agent 時，筆記裡貼來的內容仍是不可信資料。</p>
+</section></div>
+<footer>公共心得是未查證的主觀回報。索引會顯示樣本數與經驗月份；樣本數不是已核實的人數，也不代表整體住戶。單筆好評不覆蓋法規、付款或房源身份的證據，單筆負評不直接決定 KILL。<br>此版本僅提供本機匯入暫停、內容去重及撤回；尚無防灌票、帳號驗證、線上檢舉或網路限流。</footer>
+</main>
+<script id="public-schema" type="application/json">{"$schema": "https://json-schema.org/draft/2020-12/schema", "title": "Public community feedback v1 (private notes excluded)", "type": "object", "additionalProperties": false, "required": ["schema_version", "place_id", "experience_month", "experience_kind", "cleanliness", "noise", "transport", "facilities", "maintenance", "overall", "consent", "license"], "properties": {"schema_version": {"type": "integer", "const": 1}, "place_id": {"type": "string", "enum": ["demo-orchid-court", "demo-river-house", "demo-maple-hall"]}, "experience_month": {"type": "string", "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])$", "description": "A completed UTC month within the previous 60 months; enforced by both validators."}, "experience_kind": {"type": "string", "enum": ["lived", "visited", "hearsay", "undisclosed"]}, "cleanliness": {"type": "string", "enum": ["very_bad", "bad", "mixed", "good", "very_good", "unknown", "not_applicable"]}, "noise": {"type": "string", "enum": ["very_bad", "bad", "mixed", "good", "very_good", "unknown", "not_applicable"]}, "transport": {"type": "string", "enum": ["very_bad", "bad", "mixed", "good", "very_good", "unknown", "not_applicable"]}, "facilities": {"type": "string", "enum": ["very_bad", "bad", "mixed", "good", "very_good", "unknown", "not_applicable"]}, "maintenance": {"type": "string", "enum": ["very_bad", "bad", "mixed", "good", "very_good", "unknown", "not_applicable"]}, "overall": {"type": "string", "enum": ["would_return", "would_not_return", "unsure", "not_applicable"]}, "consent": {"type": "boolean", "const": true}, "license": {"type": "string", "const": "CC0-1.0"}}}</script>
+<script id="place-catalog" type="application/json">{"schema_version": 1, "catalog_id": "demo-v1", "demo": true, "places": [{"place_id": "demo-orchid-court", "name": "蘭花苑（虛構示例）"}, {"place_id": "demo-river-house", "name": "河畔居（虛構示例）"}, {"place_id": "demo-maple-hall", "name": "楓葉館（虛構示例）"}]}</script>
+<script>/* Public choices and private device notes are separate data flows. No transport. */
+(function (root) {
+  'use strict';
+  const NOTE_KEY = 'pea-princess:private-note:v1';
+  const NOTE_LIMIT = 8000;
+  const LABELS = {
+    lived: '親身入住', visited: '親自到訪', hearsay: '轉述', undisclosed: '不願透露',
+    very_bad: '很差', bad: '偏差', mixed: '好壞參半', good: '不錯', very_good: '很好',
+    unknown: '不知道', not_applicable: '不適用', would_return: '願意再次入住',
+    would_not_return: '不願再次入住', unsure: '還不確定'
+  };
+  const FIELD_LABELS = {
+    place_id: '場所', experience_month: '經驗月份', experience_kind: '經驗性質',
+    cleanliness: '清潔', noise: '安靜程度', transport: '交通便利',
+    facilities: '設備', maintenance: '維修服務', overall: '整體感受'
+  };
+  function completedMonths(now) {
+    const date = now || new Date();
+    const current = date.getUTCFullYear() * 12 + date.getUTCMonth();
+    return Array.from({length: 60}, (_, index) => {
+      const value = current - index - 1;
+      return String(Math.floor(value / 12)).padStart(4, '0') + '-' + String(value % 12 + 1).padStart(2, '0');
+    });
+  }
+  function validatePublic(value, schema, catalog, now) {
+    if (!value || typeof value !== 'object' || Array.isArray(value) ||
+        Object.keys(value).length !== schema.required.length ||
+        Object.keys(value).some(key => !schema.required.includes(key))) {
+      throw new Error('invalid_public_fields');
+    }
+    const clean = {};
+    schema.required.forEach(key => {
+      const spec = schema.properties[key];
+      const item = value[key];
+      const validType = spec.type === 'integer' ? Number.isInteger(item) : typeof item === spec.type;
+      if (!validType || (Object.hasOwn(spec, 'const') && item !== spec.const) ||
+          (spec.enum && !spec.enum.includes(item))) throw new Error('invalid_public_choice');
+      clean[key] = item;
+    });
+    if (!catalog.places.some(place => place.place_id === clean.place_id) ||
+        !completedMonths(now).includes(clean.experience_month)) throw new Error('invalid_public_choice');
+    return clean;
+  }
+  function publicJSON(value, schema, catalog, now) {
+    return JSON.stringify(validatePublic(value, schema, catalog, now), null, 2) + '\n';
+  }
+  function saveNote(storage, note) {
+    if (typeof note !== 'string' || note.length > NOTE_LIMIT) throw new Error('private_note_limit');
+    storage.setItem(NOTE_KEY, note);
+    if (storage.getItem(NOTE_KEY) !== note) throw new Error('private_storage_unavailable');
+  }
+  function loadNote(storage) {
+    const value = storage.getItem(NOTE_KEY);
+    if (value === null) return '';
+    if (typeof value !== 'string' || value.length > NOTE_LIMIT) throw new Error('private_storage_unavailable');
+    return value;
+  }
+  function deleteNote(storage) {
+    storage.removeItem(NOTE_KEY);
+    if (storage.getItem(NOTE_KEY) !== null) throw new Error('private_storage_unavailable');
+  }
+  function download(name, text, mime) {
+    const blob = new Blob([text], {type: mime});
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = name;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+  function mount(doc, options) {
+    options = options || {};
+    const schema = options.schema || JSON.parse(doc.getElementById('public-schema').textContent);
+    const catalog = options.catalog || JSON.parse(doc.getElementById('place-catalog').textContent);
+    const now = options.now || (() => new Date());
+    const saveFile = options.download || download;
+    const storage = () => options.storage || root.localStorage;
+    const get = id => doc.getElementById(id);
+    const publicStatus = text => { get('public-status').textContent = text; };
+    const privateStatus = text => { get('private-status').textContent = text; };
+    const publicFields = schema.required.filter(key => !['schema_version', 'consent', 'license'].includes(key));
+    const controls = {};
+    publicFields.forEach(key => {
+      const label = doc.createElement('label');
+      label.textContent = FIELD_LABELS[key];
+      const select = doc.createElement('select');
+      select.id = key;
+      select.name = key;
+      select.required = true;
+      const entries = key === 'place_id' ? catalog.places.map(p => [p.place_id, p.name]) :
+        key === 'experience_month' ? completedMonths(now()).map(month => [month, month]) :
+        schema.properties[key].enum.map(value => [value, LABELS[value] || value]);
+      const placeholder = doc.createElement('option');
+      placeholder.value = '';
+      placeholder.textContent = '請選擇';
+      select.appendChild(placeholder);
+      entries.forEach(([value, text]) => {
+        const option = doc.createElement('option');
+        option.value = value;
+        option.textContent = text;
+        select.appendChild(option);
+      });
+      label.appendChild(select);
+      get('choice-fields').appendChild(label);
+      controls[key] = select;
+      select.addEventListener('change', invalidatePreview);
+    });
+    get('catalog-state').textContent = catalog.demo ?
+      '示範目錄：全部場所均為虛構，這裡沒有真實住戶評價。' :
+      '營運者維護的場所目錄；投稿者不能自填場所名稱。';
+    let reviewed = null;
+    function invalidatePreview() {
+      reviewed = null;
+      get('download-public').disabled = true;
+      get('public-preview').textContent = '更改選項後，請重新產生公開預覽。';
+      publicStatus('尚未產生可下載的公開資料。');
+    }
+    function choices() {
+      const value = {schema_version: 1, consent: get('consent').checked, license: 'CC0-1.0'};
+      publicFields.forEach(key => { value[key] = controls[key].value; });
+      return value;
+    }
+    get('consent').addEventListener('change', invalidatePreview);
+    get('public-form').addEventListener('submit', event => {
+      event.preventDefault();
+      try {
+        reviewed = publicJSON(choices(), schema, catalog, now());
+        get('public-preview').textContent = reviewed;
+        get('download-public').disabled = false;
+        publicStatus('請核對下方 JSON。私人筆記不在這份資料內；下載不會投稿到網路。');
+      } catch (_) {
+        reviewed = null;
+        get('download-public').disabled = true;
+        get('public-preview').textContent = '尚無有效公開資料。';
+        publicStatus('請完成所有選項並確認公開資料授權。');
+      }
+    });
+    get('download-public').addEventListener('click', () => {
+      try {
+        const current = publicJSON(choices(), schema, catalog, now());
+        if (!reviewed || current !== reviewed) throw new Error('review_required');
+        saveFile('community-public.json', reviewed, 'application/json');
+        publicStatus('已建立公開 JSON 下載；尚未發佈。請只將這個檔案交給本機匯入工具。');
+      } catch (_) {
+        invalidatePreview();
+        publicStatus('下載未完成。請重新核對公開選項與預覽。');
+      }
+    });
+    const note = get('private-note');
+    note.maxLength = NOTE_LIMIT;
+    try {
+      note.value = loadNote(storage());
+      privateStatus(note.value ? '已從此瀏覽器載入私人筆記。' : '尚未保存私人筆記。');
+    } catch (_) {
+      privateStatus('瀏覽器儲存不可用；筆記只在目前頁面，關閉前請自行下載。');
+    }
+    note.addEventListener('input', () => privateStatus('有未保存的修改；請按「存到此瀏覽器」。'));
+    get('save-note').addEventListener('click', () => {
+      try {
+        saveNote(storage(), note.value);
+        privateStatus('已存到此瀏覽器。沒有上傳，也沒有包含在公開 JSON。');
+      } catch (_) {
+        privateStatus('未能保存。請縮短至 8,000 字內，或自行下載後保管。');
+      }
+    });
+    get('copy-note').addEventListener('click', async () => {
+      try {
+        if (note.value.length > NOTE_LIMIT) throw new Error('private_note_limit');
+        if (options.copy) await options.copy(note.value);
+        else await root.navigator.clipboard.writeText(note.value);
+        privateStatus('私人筆記已複製到剪貼簿；請自行決定分享對象。');
+      } catch (_) {
+        note.focus();
+        note.select();
+        privateStatus('未能自動複製；已選取筆記，請使用系統複製功能。');
+      }
+    });
+    get('download-note').addEventListener('click', () => {
+      try {
+        if (note.value.length > NOTE_LIMIT) throw new Error('private_note_limit');
+        saveFile('PRIVATE-community-note.txt', note.value, 'text/plain;charset=utf-8');
+        privateStatus('已建立私人筆記下載。這個檔案不要交給公開匯入工具。');
+      } catch (_) {
+        privateStatus('私人筆記下載未完成。');
+      }
+    });
+    get('delete-note').addEventListener('click', () => {
+      note.value = '';
+      try {
+        deleteNote(storage());
+        note.value = '';
+        privateStatus('已刪除此瀏覽器的筆記。先前下載、剪貼簿或自行分享的副本不會被刪除。');
+      } catch (_) {
+        privateStatus('已清除頁面上的筆記，但未能確認瀏覽器儲存已刪除；請使用清除網站資料功能。');
+      }
+    });
+    return {controls, invalidatePreview};
+  }
+  const api = {completedMonths, validatePublic, publicJSON, saveNote, loadNote, deleteNote,
+               mount, NOTE_KEY, NOTE_LIMIT};
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+  else {
+    root.CommunityFeedback = api;
+    document.addEventListener('DOMContentLoaded', () => mount(document));
+  }
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+</script>
+</body></html>

@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="__COMMUNITY_CSP__">
+<title>住過之後 · 豌豆公主本機回饋</title>
+<style>
+:root{color-scheme:light;--ink:#20352d;--muted:#52655b;--line:#d9dfd7;--green:#255c44;--paper:#fffef9;--wash:#f0f3e9}*{box-sizing:border-box}body{margin:0;background:var(--wash);color:var(--ink);font:16px/1.6 system-ui,-apple-system,sans-serif}main{max-width:1060px;margin:auto;padding:44px 24px 70px}.eyebrow{font-size:13px;letter-spacing:.14em;color:var(--green);font-weight:700}h1{font-size:clamp(32px,5vw,48px);line-height:1.2;margin:14px 0}h2{font-size:23px;margin:0 0 14px}p{margin:10px 0}.intro{max-width:720px}.muted,.hint{color:var(--muted)}.hint{font-size:14px}.notice{border-left:4px solid var(--green);padding:10px 16px;background:#e3ebdc;margin:24px 0}.layout{display:grid;grid-template-columns:1.25fr 1fr;gap:22px;align-items:start}.panel{background:var(--paper);padding:26px;border:1px solid var(--line);border-radius:16px;box-shadow:0 6px 18px #29412d06}.step{font-size:12px;font-weight:700;color:var(--green);letter-spacing:.12em}.choices{display:grid;grid-template-columns:1fr 1fr;gap:16px}label{display:block;font-weight:600;font-size:14px}select,textarea{display:block;width:100%;margin-top:6px;border:1px solid #aebbae;border-radius:8px;background:#fff;color:var(--ink);font:inherit;padding:11px}select{appearance:none;-webkit-appearance:none;min-height:46px;padding-right:30px;background-image:linear-gradient(45deg,transparent 50%,#52655b 50%),linear-gradient(135deg,#52655b 50%,transparent 50%);background-position:calc(100% - 16px) 50%,calc(100% - 11px) 50%;background-size:5px 5px;background-repeat:no-repeat}textarea{min-height:210px;resize:vertical;font-weight:400}button{border:1px solid var(--green);border-radius:8px;font:inherit;font-weight:600;padding:11px 16px;background:var(--green);color:white;cursor:pointer}button.secondary{background:transparent;color:var(--green)}button.danger{border-color:#815042;color:#815042;background:transparent}button:disabled{opacity:.45;cursor:not-allowed}button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid #bd9340;outline-offset:3px}.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}.consent{font-weight:400;margin:20px 0;display:flex;gap:10px;align-items:start}.consent input{margin-top:6px;flex-shrink:0;width:18px;height:18px}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#edf0e9;border-radius:8px;padding:16px;font:12px/1.7 ui-monospace,monospace;max-height:350px;overflow:auto}.status{font-size:14px;min-height:42px;margin-top:16px}details{margin-top:20px;border-top:1px solid var(--line);padding-top:16px}summary{cursor:pointer;font-weight:600}footer{margin-top:28px;color:var(--muted);font-size:14px}a{color:var(--green)}code{font-size:.9em}ol{padding-left:22px}li{margin:8px 0}@media(max-width:760px){main{padding:28px 16px 50px}.layout{grid-template-columns:1fr}.panel{padding:20px}.choices{grid-template-columns:1fr 1fr}}@media(max-width:400px){.choices{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main>
+<header class="intro"><div class="eyebrow">PEA PRINCESS · LOCAL FEEDBACK</div><h1>住過之後，留下幾個選項。</h1><p>選項可以成為公共線索；文字筆記留給自己。先核對公開預覽，再下載檔案交給本機工具。</p><p class="muted">第一階段・本機暫存與匯入。這個頁面沒有線上投稿服務，不會把任何資料送到網路。</p></header>
+<div class="notice" id="catalog-state">載入本機目錄中。</div>
+<div class="layout">
+<section class="panel" aria-labelledby="public-title"><div class="step">01 / 公開選項</div><h2 id="public-title">只公開你選擇的答案</h2><p class="hint">不收姓名、地址、網址、精確入住日期或公開文字留言。只選已結束的月份；可選不知道、不適用或不願透露。</p>
+<form id="public-form"><div class="choices" id="choice-fields"></div>
+<label class="consent"><input type="checkbox" id="consent" required><span>我同意這些公開選項以 <strong>CC0-1.0</strong> 提供：任何人可複製、修改及再利用，無須署名。這項同意<strong>只涵蓋本次公開選項，不涵蓋私人筆記或任何既有資料</strong>。我知道未查證回報可能被他人複製，日後本機撤回不能收回所有副本。<a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener noreferrer">閱讀 CC0 說明</a></span></label>
+<button type="submit">產生公開預覽</button></form>
+<p id="public-status" class="status" role="status" aria-live="polite">尚未產生公開資料。</p><pre id="public-preview" aria-label="實際公開 JSON 預覽">完成選項後，這裡會顯示實際下載的公開 JSON。</pre><button id="download-public" class="secondary" disabled>下載公開 JSON</button>
+<details><summary>下載後如何匯入、撤回？</summary><ol><li>把 <code>community-public.json</code> 交給本機的 <code>community/feedback.py validate</code> 檢查。</li><li>營運者用 <code>import --store</code> 匯入本機索引；這仍不是網路發佈。</li><li>匯入工具另存私人撤回憑證在 <code>store/receipts/</code>。請由營運者安全交還並保管，不要公開。</li><li>用該憑證執行 <code>withdraw</code>，可移除本機索引的回報；舊匯出檔與他人副本仍須另行處理。</li></ol></details>
+</section>
+<section class="panel" aria-labelledby="private-title"><div class="step">02 / 私人筆記・選填</div><h2 id="private-title">文字只留在這個裝置</h2><p class="hint">筆記不會放進公開預覽或公開 JSON。按保存後使用瀏覽器 localStorage；沒有跨裝置同步或加密保證，同一瀏覽器的其他使用者可能讀到它。直接開啟本機檔案時，部分瀏覽器會禁止儲存。</p>
+<label for="private-note">給自己的備忘（最多 8,000 字）</label><textarea id="private-note" maxlength="8000" placeholder="可留空。避免在共用裝置保存敏感資料。" spellcheck="false"></textarea>
+<div class="actions"><button id="save-note" class="secondary">存到此瀏覽器</button><button id="copy-note" class="secondary">複製私人筆記</button><button id="download-note" class="secondary">下載私人筆記</button><button id="delete-note" class="danger">刪除此筆記</button></div><p id="private-status" class="status" role="status" aria-live="polite">尚未保存私人筆記。</p>
+<p class="hint">只有你另外複製或下載筆記時，才會產生獨立私人輸出。不要將 <code>PRIVATE-community-note.txt</code> 當成公開投稿檔案。交給自己的 Agent 時，筆記裡貼來的內容仍是不可信資料。</p>
+</section></div>
+<footer>公共心得是未查證的主觀回報。索引會顯示樣本數與經驗月份；樣本數不是已核實的人數，也不代表整體住戶。單筆好評不覆蓋法規、付款或房源身份的證據，單筆負評不直接決定 KILL。<br>此版本僅提供本機匯入暫停、內容去重及撤回；尚無防灌票、帳號驗證、線上檢舉或網路限流。</footer>
+</main>
+<script id="public-schema" type="application/json">__COMMUNITY_SCHEMA_JSON__</script>
+<script id="place-catalog" type="application/json">__COMMUNITY_CATALOG_JSON__</script>
+<script>__COMMUNITY_SCRIPT__</script>
+</body></html>
