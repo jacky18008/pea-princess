@@ -63,10 +63,31 @@ class LabTests(unittest.TestCase):
         self.assertIn('What should I ask for?',self.prompts[2])
         self.assertNotIn('THE CRITERIA',self.prompts[1]);self.assertNotIn('success',self.prompts[0])
 
+    def test_runtime_settings_are_projected_only_to_answerer_without_gold(self):
+        sid=self.create();self.answers=['Practical answer.','Thank you. [END]']
+        self.control(sid,'run');self.join()
+        expected={'budget_mode':'lite','fixed_form':'gate','ask_if_missing':'none'}
+        self.assertEqual(expected,self.lab.snapshot(sid)['runtime_settings'])
+        self.assertEqual(expected,self.lab.export(sid)['runtime_settings'])
+        self.assertIn(json.dumps(expected),self.prompts[0])
+        self.assertNotIn('ACTIVE RUNTIME SETTINGS',self.prompts[1])
+        for criterion in self.lab.cards['P4']['success']:
+            self.assertNotIn(criterion,self.prompts[0]);self.assertNotIn(criterion,self.prompts[1])
+
     def test_no_early_held_document_is_automatically_given_to_assistant(self):
         sid=self.create('C1');self.control(sid,'step');self.join()
         s=self.lab._load(sid)
         for body in s['fixtures'].values():self.assertNotIn(body,self.prompts[0])
+
+    def test_persona_knows_released_document_bytes_but_not_future_sources(self):
+        sid=self.create('C1');self.control(sid,'step');self.join()
+        self.answers=['Thank you. [END]'];self.control(sid,'step');self.join()
+        s=self.lab._load(sid);released={d['file'] for d in s['controller']['released']}
+        self.assertTrue(released);self.assertTrue(set(s['fixtures'])-released)
+        for file,body in s['fixtures'].items():
+            if file in released:self.assertIn(json.dumps(body,ensure_ascii=False),self.prompts[1])
+            else:self.assertNotIn(json.dumps(body,ensure_ascii=False),self.prompts[1])
+            self.assertNotIn(body,self.prompts[0])
 
     def test_fixture_expansion_uses_frozen_content_and_rejects_missing_label(self):
         sid=self.create('C1');s=self.lab._load(sid);c=self.lab._control(s)
@@ -189,6 +210,10 @@ class HttpTests(unittest.TestCase):
     def test_static_asset_no_external_assets_and_security_headers(self):
         status,headers,body=self.get('/');self.assertEqual(200,status);self.assertIn('frame-ancestors',headers['Content-Security-Policy']);self.assertEqual('no-store',headers['Cache-Control'])
         self.assertNotIn(b'https://',body);self.assertIn(b'/app.js',body)
+    def test_cross_site_link_can_open_static_page_but_not_read_private_api(self):
+        headers={'Sec-Fetch-Site':'cross-site','Sec-Fetch-Mode':'navigate'}
+        self.assertEqual(200,self.get('/',headers)[0])
+        self.assertEqual(403,self.get('/api/sessions',dict(headers,**{'X-Pea-Client':'persona-lab'}))[0])
     def test_api_requires_custom_header_and_rejects_cross_origin(self):
         self.assertEqual(403,self.get('/api/sessions')[0])
         base={'X-Pea-Client':'persona-lab'}

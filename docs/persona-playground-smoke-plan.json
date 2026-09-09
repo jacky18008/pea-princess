@@ -1,0 +1,16 @@
+{
+  "date": "2026-09-09",
+  "source_commit": "04373de957a6e869453c4fb0b4cd69a2209463b7",
+  "persona_id": "P4",
+  "mode": "chat-adapted dynamic persona",
+  "model": "gpt-6-astra",
+  "effort": "low",
+  "max_calls": 8,
+  "max_processed_tokens": 160000,
+  "seed": 1,
+  "human_interjection": "Before we continue: separate the £4,600 rent from £500 bills, then give me the next two actions. Do not change my requirements.",
+  "injection_point": "First assistant physical call pending",
+  "automatic_judge": false,
+  "claude_calls": 0,
+  "purpose": "One bounded functional smoke through the same local HTTP API; not a quality-equivalence or token-savings study."
+}

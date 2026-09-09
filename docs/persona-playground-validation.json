@@ -1,0 +1,146 @@
+{
+  "date": "2026-09-09",
+  "live_source_commit": "04373de957a6e869453c4fb0b4cd69a2209463b7",
+  "session_id": "3e63ffbdedde55a2a9f629619a5de8d9",
+  "persona_id": "P4",
+  "model": "gpt-6-astra",
+  "effort": "low",
+  "calls": [
+    {
+      "id": "call-001-assistant",
+      "actor": "assistant",
+      "input_tokens": 25710,
+      "output_tokens": 485,
+      "cached_input_tokens": 11520,
+      "processed_tokens": 26195,
+      "seconds": 19.79,
+      "prompt_chars": 42701,
+      "raw_sha256": "6facc4aef0be46691b3ba3e49eb97ff856e09d8b6492e43992d1b71ce4610211",
+      "record_sha256": "296e26d87c1b2c5e57fe7053cd19dd1e1e58be218f8c8b5be7637523b2775ec2"
+    },
+    {
+      "id": "call-002-assistant",
+      "actor": "assistant",
+      "input_tokens": 26465,
+      "output_tokens": 149,
+      "cached_input_tokens": 11520,
+      "processed_tokens": 26614,
+      "seconds": 10.229,
+      "prompt_chars": 45637,
+      "raw_sha256": "0c8a65ad49ae600241c44d660acf71bdbf5119c4d8b9dae36bd89d8d5b25f8f1",
+      "record_sha256": "47709d3a86fe1bad2a884cf08fa03816378d135f24debeb474a5e154a4a0bec4"
+    },
+    {
+      "id": "call-003-persona",
+      "actor": "persona",
+      "input_tokens": 17179,
+      "output_tokens": 265,
+      "cached_input_tokens": 11520,
+      "processed_tokens": 17444,
+      "seconds": 14.911,
+      "prompt_chars": 8880,
+      "raw_sha256": "45230c83e81cba4995da35f012232c46260afb1a124f283d3c1ac4aea708c4f7",
+      "record_sha256": "e0ce60c72a298e96af8d8b28bd9434617680bfa5ecadb335eb7fb3e133259577"
+    },
+    {
+      "id": "call-004-assistant",
+      "actor": "assistant",
+      "input_tokens": 27241,
+      "output_tokens": 303,
+      "cached_input_tokens": 11520,
+      "processed_tokens": 27544,
+      "seconds": 17.402,
+      "prompt_chars": 48370,
+      "raw_sha256": "37330853ed70b4b963385aedb215c70aefa2ff264aaadb9e178b4e2975f9a5da",
+      "record_sha256": "1b29123fbf9661d82d6379c60bfc42ce2ba2849646c00119fc806bab0a0da180"
+    },
+    {
+      "id": "call-005-persona",
+      "actor": "persona",
+      "input_tokens": 17707,
+      "output_tokens": 193,
+      "cached_input_tokens": 11520,
+      "processed_tokens": 17900,
+      "seconds": 13.066,
+      "prompt_chars": 10799,
+      "raw_sha256": "72e6e0e233f9377038a115b86b4d9d6cb173a695988a0046707e5a5ca7ab8c1b",
+      "record_sha256": "9b7f4f45cdc8b2876250fd2f759d985c2389a5983d93081eab81bfe35c963dfc"
+    },
+    {
+      "id": "call-006-assistant",
+      "actor": "assistant",
+      "input_tokens": 27757,
+      "output_tokens": 525,
+      "cached_input_tokens": 11520,
+      "processed_tokens": 28282,
+      "seconds": 22.386,
+      "prompt_chars": 50279,
+      "raw_sha256": "a1c707042187be7f7693eedd4ae1397696ffa2a5a5c10713ca02d02b748b9c87",
+      "record_sha256": "974b0b7bfe4fe352d3636d6b883b5b8eb83a46b17517ed32d9522fde26d1d64d"
+    }
+  ],
+  "totals": {
+    "input_tokens": 142059,
+    "output_tokens": 1920,
+    "cached_input_tokens": 69120,
+    "processed_tokens": 143979,
+    "seconds": 97.784
+  },
+  "actor_processed_tokens": {
+    "assistant": 108635,
+    "persona": 35344
+  },
+  "persona_turns": 3,
+  "message_roles": [
+    "persona",
+    "assistant",
+    "human",
+    "assistant",
+    "persona",
+    "assistant",
+    "persona",
+    "assistant"
+  ],
+  "human_interjections": 1,
+  "amendments": [],
+  "stop_reason": "abandoned",
+  "quality": "not_evaluated",
+  "pending_calls": 0,
+  "pending_messages": 0,
+  "retry_count": 0,
+  "claude_calls": 0,
+  "automatic_judge_calls": 0,
+  "unexpected_tool_events": 0,
+  "original_system_chars": 40668,
+  "live_runtime_settings_projected": false,
+  "live_persona_document_bytes_provided": false,
+  "later_changes": "Released source bytes to persona and explicit allowlisted runtime settings were fixed after this live run; offline regression only, no new live quality claim.",
+  "audit": "Each raw terminal usage compared to the physical record and UI receipt; each call had exactly one terminal usage event and one attempt.",
+  "private_session_sha256": "e033a4aee891e7ff24e3c2074cd3e0903fc7528eea857740209b95c87742b493",
+  "offline_validation": {
+    "full_suite": {
+      "command": "python3 -m unittest discover -s tests -p 'test_*.py'",
+      "tests": 1872,
+      "seconds": 50.916,
+      "result": "PASS",
+      "log_sha256": "9d76ebbb667cedee73a60a89dd2453c0fd47a0c45098100a59f60459ecee7074"
+    },
+    "focused_backend_and_ui": {
+      "tests": 26,
+      "seconds": 4.587,
+      "result": "PASS",
+      "log_sha256": "d4d9892422364093792be595a8e6787a90986d272ad40b2025f329c9b1872ff0"
+    },
+    "scope": "Offline injected-provider tests plus real app.js DOM handlers in Node VM and loopback HTTP. No full browser visual QA; no post-fix live model rerun."
+  },
+  "offline_tested_source_sha256": {
+    "tools/persona_playground.py": "cc21c0dfd72711d7a1fc64d16abd75ca1a8767d8159f75ede2e3198051ce553c",
+    "tools/session_runner.py": "7a6b2c66ef4652ec7bfcf68dd841cec6dabf614808b483777c7ddb9031d001f8",
+    "playground/index.html": "068a3ddbc3719b64e3e1cc405442efcdf4e0855f8080d8392bd065f531b0a581",
+    "playground/app.js": "a9841fd313c8cb4776080b133fe8ac09602df05779d44efebac1b4d0f76b6a8d",
+    "playground/style.css": "845b01409cea5e30877b557e5a6c46a002f367324dca71065ef73533e3a5f764",
+    "tests/test_persona_playground.py": "fb0b786e4338edf6498472e7a36d0101af693d7612d8ee8556a0cfb28d6b81cb",
+    "tests/test_playground_ui.js": "0a410189196f4c14e594cb1a35036259a05e113e519f02d8f25c146a9adcfa16",
+    "tests/test_playground_ui.py": "e12c2dac9288f8838c6d6bdcd45d84577fab1d4a2a110a7eaf5580c6b9bd4666"
+  }
+}

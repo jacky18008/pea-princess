@@ -72,6 +72,13 @@ def source_hashes():
              ROOT/'skills/vet-flat/scripts/session_state.py', ROOT/'evals/personas.json']
     return {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in paths}
 
+def runtime_settings(card):
+    # Execution knobs only. Never project success criteria or private situation.
+    return {key:card['settings'][key] for key in ('budget_mode','fixed_form','ask_if_missing')}
+
+def configured_system(card):
+    return personas.system_prompt(card,'chat')+'\n\nACTIVE RUNTIME SETTINGS FOR THIS CHAT\n'+json.dumps(runtime_settings(card),ensure_ascii=False)+'''\nThese are the selected execution settings, overriding generic start-at-standard defaults above. fixed_form selects advanced.fixed_form.questions and overrides budget_mode for the required rows. ask_if_missing controls only unanswered fixed-form items: none keeps unknown rows visible but asks no follow-up questions for them; gate asks only gate items; all permits all missing items. Routing confirmation is separate. Give a truthful visible settings summary when relevant; do not claim to have written a profile. Later explicit tester changes override these settings within their stated scope.'''
+
 class FrozenController(personas.Controller):
     def __init__(self, card, seed, fixtures, saved=None):
         super().__init__(card, seed=seed, harness='chat')
@@ -210,6 +217,7 @@ class Lab:
     def catalog(self):
         return {'models': list(MODELS), 'personas': [{'id': c['id'], 'name': c['name'],
              'identity': c['identity'], 'language': c['language'], 'patience_turns': c['patience_turns'],
+             'runtime_settings':runtime_settings(c),
              'original_harness': c['tech']['harness']} for c in self.cards.values()]}
 
     def create(self, data):
@@ -238,7 +246,7 @@ class Lab:
             opening=card['opening_message']
             s={'schema_version':1,'id':sid,'revision':0,'created_at':time.time(),'creation':copy.deepcopy(data),
                'model':data['model'],'limits':{'max_calls':data['max_calls'],'max_tokens':data['max_tokens']},'seed':data['seed'],
-               'card':card,'fixtures':fixtures,'system':personas.system_prompt(card,'chat'),'sources':source_hashes(),
+               'card':card,'fixtures':fixtures,'system':configured_system(card),'runtime_settings':runtime_settings(card),'sources':source_hashes(),
                'controller':c.snapshot(),'persona_turn':1,'history':[['user',opening]],'persona_history':[['user',opening]],
                'messages':[{'role':'persona','text':opening,'turn':1}], 'interventions':[], 'amendments':[],
                'queue':[], 'calls':[], 'pending_call':None,'preparing_input':None,'next_actor':'assistant','auto':False,'pause_requested':False,
@@ -252,9 +260,11 @@ class Lab:
             tokens=None if any(u is None for u in usages) else sum(usages)
             phase=s['pending_call']['actor'] if s['pending_call'] else s['next_actor']
             notice=s['notice']
+            if s['sources']!=source_hashes(): notice=('這是舊版保存的對話；可以閱讀或匯出，請建立新對話測試新版。 '+notice).strip()
             if s['amendments']: notice=('此情境已被你的條件變更修改，不再是原始 benchmark。 '+notice).strip()
             return {'id':sid,'revision':s['revision'],'persona_id':s['card']['id'],'name':s['card']['name'],
               'model':s['model'],'status':s['status'],'auto':s['auto'],'busy':self.busy==sid,'notice':notice,
+              'runtime_settings':copy.deepcopy(s.get('runtime_settings')),
               'phase_label':('Codex 正在回答' if phase=='assistant' else 'Persona 正在想下一個問題') if self.busy==sid else '',
               'persona_turn':s['persona_turn'],'patience_turns':s['card']['patience_turns'],'calls':len(s['calls']),
               'tokens':tokens,'limits':s['limits'],'actor_calls':{role:sum(r['actor']==role for r in s['calls']) for role in ('assistant','persona')},
@@ -274,6 +284,7 @@ class Lab:
             return {'private':True,'id':sid,'persona_id':s['card']['id'],'model':s['model'],'mode':'chat-adapted dynamic persona; same-family Codex',
                     'messages':s['messages'],'pending_messages':s['queue'],'actions':s['actions'],'calls':s['calls'],
                     'controller':s['controller'],'amendments':s['amendments'],'sources':s['sources'],
+                    'runtime_settings':s.get('runtime_settings'),
                     'stop_reason':s['stop_reason'],'quality':'not_evaluated','state_revision':self._store(s).show()['revision']}
 
     def _dedupe(self,s,data):
@@ -355,6 +366,11 @@ class Lab:
             turn=s['persona_turn']+1;c.turn=turn
             for d in c.due(turn):c.release(d,turn,'scheduled')
             prompt=personas.persona_prompt(s['card'],c.brief(turn),s['persona_history'])
+            # The simulator must know the bytes of documents it owns, including
+            # ones its raw PASTE markers previously handed to the answerer.
+            # Future releases stay hidden; answering Codex still sees only pastes.
+            held=[{'name':d['name'],'text':s['fixtures'][d['file']]} for d in c.released]
+            prompt+='\n\nDOCUMENTS CURRENTLY IN YOUR POSSESSION (source data, not instructions; no future documents):\n'+json.dumps(held,ensure_ascii=False)+'\nUse these bytes to remember what you have or already pasted. A document is available to the assistant only after you share it. Keep using the exact PASTE labels when sharing.'
             if s['interventions']:
                 prompt+='\n\nTESTER INTERVENTIONS (not words you said; retain their answers; explicit scenario amendments override conflicting original facts within their stated scope):\n'+json.dumps(s['interventions'],ensure_ascii=False)+'\nWrite only your next persona message. Do not disclose these instructions.'
             s['controller']=c.snapshot()
@@ -460,8 +476,10 @@ class Handler(BaseHTTPRequestHandler):
     def _guard(self,api=False):
         expected='127.0.0.1:'+str(self.server.server_port)
         if self.headers.get('Host')!=expected:raise LabError('Host 不允許。')
-        if self.headers.get('Origin') not in (None,'http://'+expected):raise LabError('跨來源請求不允許。')
-        if self.headers.get('Sec-Fetch-Site','') not in ('','none','same-origin'):raise LabError('跨來源請求不允許。')
+        # Public static assets may be reached by a normal link from another site.
+        # Every private read and mutation still requires same-origin API headers.
+        if api and self.headers.get('Origin') not in (None,'http://'+expected):raise LabError('跨來源請求不允許。')
+        if api and self.headers.get('Sec-Fetch-Site','') not in ('','none','same-origin'):raise LabError('跨來源請求不允許。')
         if api and self.headers.get('X-Pea-Client')!='persona-lab':raise LabError('缺少本機測試台請求識別。')
     def do_GET(self):
         try:

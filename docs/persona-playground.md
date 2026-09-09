@@ -19,7 +19,9 @@
 
 第一則為原卡片開場，後續由 `persona_prompt` 與 Codex 動態產生。重用 Controller 的文件釋出、trigger、friction、耐心、mood、learned、no-progress 與停止條件。文件由 fixture 原文展開；未釋出的文件不會提前送入回答者。UI 的 success 清單不會放入回答者或 persona prompt。
 
-回答者保存完整展開後的歷史；persona 保存含 PASTE 標記的獨立歷史。測試者的介入另外標記，避免冒充 persona 自己說過的話。重新開啟不會重播首輪或重買模型呼叫。每次 request、來源版本、原始 terminal usage 與結果由 durable runner 保存。
+回答者保存完整展開後的歷史；persona 保存含 PASTE 標記的獨立歷史，並在每次生成時收到目前已釋出文件的凍結原文，才能記得自己交出了什麼。未來才釋出的文件保持隱藏。測試者的介入另外標記，避免冒充 persona 自己說過的話。重新開啟不會重播首輪或重買模型呼叫。每次 request、來源版本、原始 terminal usage 與結果由 durable runner 保存。
+
+此版本明確採「按卡片配置執行」：只有 `budget_mode`、`fixed_form`、`ask_if_missing` 三個執行選项會顯示在畫面並傳給回答者。Persona 模型看不到這些設定，雙方都看不到 success／failure_modes 評分答案。這遵循 `docs/PERSONAS.md` 的 baseline 設定語義；如果要測「模型是否自行發現最適設定」，必須另定 discovery 實驗。舊 runner 的設定傳遞缺口及本輪修正前後版本差異詳見結果文件。
 
 此介面將原本 shell／fetch 卡片也改以 chat 模式測試：沒有真實網路查詢、profile 寫檔或腳本執行。因此它測的是動態對話與補件行為，不是原 benchmark 的完整工具能力等效重跑。全部來源為既有虛構案例。人工插話或變更條件後會標示情境已改動。
 
@@ -32,6 +34,8 @@ Persona 的 END 也可能代表沒耐心，因此畫面寫「Persona 結束」�
 伺服器只綁定 127.0.0.1；Host、Origin、Sec-Fetch-Site、自訂 API header 與 CSP 防止普通外站網頁直接使用本機介面。沒有 CORS、任意檔案服務或 shell endpoint。每次 Codex 使用專案外的臨時工作目錄、stdin prompt、read-only、ephemeral、忽略使用者設定並關閉額外 project-doc 讀取。這不等於 OS 級完整讀取隔離；意外工具事件會使呼叫失敗，但事後檢查不能撤回已發生的讀取。
 
 只有單一 model worker，回答者與 persona 共用 session 的上限。Token 計數是 input + output，cached input 已包含在 input；不是實際帳單或訂閱剩餘額度。一則呼叫可能超出上限。對話採完整歷史 replay，這次沒有宣称能省掉歷史 token；native thread caching／steering 是可獨立評估的下一個 adapter。
+
+模型呼叫數與 token ceiling 在建立對話時設定，這版 UI 不能原地提高；情境條件中的租屋預算是另一回事。來源程式更新後，旧對話可以閱讀／匯出，但繼續測新版需建立新對話。極端中斷若發生在「保存待呼叫狀態」和真正 dispatch 之間，可能沒有可恢復的 physical receipt：保留待釐清狀態，不自動重買。這仍是公開服務前需要更完整處理的運維邊界。
 
 明確容量：200 段本機 session、每段 80 個模型呼叫以內、10 則排隊訊息、8,000 字單則插話、18,000 字累積條件變更、160,000 字完整 step prompt、96,000 字狀態 packet。超限停止，不丟棄關鍵條件。原本 `session_runner` 32,000 字預設不變，較大 prompt 是這個可信 embedding caller 的明確參數。
 
@@ -54,4 +58,4 @@ Persona 的 END 也可能代表沒耐心，因此畫面寫「Persona 結束」�
 
 [Codex 非互動模式](https://learn.chatgpt.com/docs/non-interactive-mode) 支援 stdin、JSONL 事件、既有登入與 resume；這版使用可審計的有界 exec replay。[進階設定](https://learn.chatgpt.com/docs/config-file/config-advanced) 說明 project-doc discovery 限制。[App Server](https://learn.chatgpt.com/docs/app-server) 提供真正的 turn/steer、turn/interrupt 與 thread/resume；導入時仍須把版本和 usage accounting 接上，不能把本版排隊插話宣稱成同一 turn 的即時 steering。
 
-驗證與本輪真實 smoke 結果會記在 `docs/persona-playground-validation.json`；歷史 benchmarks 保持原樣。
+本輪已完成一次 P4 真實 smoke：3 個 persona 回合加一次插話，6 次呼叫、143,979 processed tokens。該結果屬於修正前的 `04373de`，不能拿來認證修正後品質。完整[結果與後續清單](persona-playground-results.md)、[逐筆用量](persona-playground-validation.json)、[事前固定計畫](persona-playground-smoke-plan.json)均已保存；歷史 benchmarks 保持原樣。
