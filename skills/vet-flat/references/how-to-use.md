@@ -2,11 +2,11 @@ Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen — https://github.com
 
 # How to use this skill, and how to change any setting by talking
 
-Read this when the user asks how something works, how to change a setting, how deep to go, or what a field means. Teach by doing: show the current value, propose the change as a diff, apply only after a yes.
+Read this when the user asks how something works, how to change a setting, how deep to go, or what a field means. Show the current value and change as a diff. A clear user instruction authorizes its stated change; do not ask for a redundant yes. Ask about material ambiguity before changing the ambiguous field.
 
 ## The one rule for every setting change
-1. Turn the user's words into a **diff of `profile.yaml`**: `field: old → new`, one line per field, nothing else touched.
-2. Show the diff and ask for a one-word confirmation. Never apply silently, never invent a field, never change a field the user did not mention.
+1. Capture the user's exact words and update the versioned requirements per `session-harness.md`. Produce a **diff of `profile.yaml`** for fields it can represent: `field: old → new`, one line per field. The latest durable requirements take precedence; the profile is a compatibility projection, not a second authority.
+2. Show the diff. Apply explicitly requested changes; request confirmation for your own suggested changes or clarification for ambiguity. Never invent a field or change unrelated fields. Record conditional predicates, scope and exceptions in the state even when the legacy profile has no matching field.
 3. After applying, run `python3 scripts/profile_check.py profile.yaml` (shell mode) and show its verdict; without a shell, re-read the changed lines back to the user. Never report a validator result you did not see: if you could not run it, say so and print the command for the user.
 4. If a phrase is ambiguous ("dig deeper" with no axis named), ask which axis, offering the list.
 
@@ -21,10 +21,10 @@ Read this when the user asks how something works, how to change a setting, how d
 | "no more than 20 fetches per flat" | `limits.max_fetches_per_flat: 20` | hard cap, whatever the depth |
 | "I hate noise" / 「我怕吵」 | `quiet_over_light: true`, add "main windows facing a main road or a railway" to `avoid` | L4 |
 | "I need to see sky" | `light.reject_no_sky: true` | L2 |
-| "ground floor is fine if it's dry" | `floors.reject_ground_floor: false` | the damp check stays on the viewing list |
+| "ground floor is fine if it's dry" | conditional requirement in `.pea-state`; `floors.reject_ground_floor: false` only as a projection | preserve “dry” as a required condition with evidence; unknown dryness cannot become an unconditional pass |
 | "must have a washing machine" | add `washing_machine_in_flat` to `must_haves` | a must-have that fails is a hard fail |
 | "I always ask X" | append to `my_questions` with `when`/`kind` (classify: compare / filter / viewing / sign) | see `onboarding.md` |
-| "stop asking me about Y" | remove Y from `must_haves` or `avoid` | show the diff |
+| "stop asking me about Y" | change the follow-up question policy | this does not itself waive the requirement; ask once if the user also wants Y retired |
 | "start over" | offer `profiles/` examples or the six intake questions | never delete the old profile without a yes |
 | 「只問把關的八題」 / "just the eight that matter" | `advanced.fixed_form.questions: gate` | the fixed form drops to the money-and-paperwork eight |
 | "all 18 questions, always" / 「全部 18 題都要」 | `advanced.fixed_form.questions: full` | adds council tax band, guarantor, their tenant checks, furniture and inventory |

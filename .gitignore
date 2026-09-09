@@ -20,3 +20,6 @@ bench/private/
 # whole-folder skill exports for pinned experiments: recreate with
 #   git archive --format=tar <commit> skills/vet-flat | tar -x -C bench/ab/skill-variants/skill-<commit> --strip-components=2
 bench/ab/skill-variants/skill-*/
+# Private project memory and local feedback ingestion state.
+.pea-state/
+.community-state/
