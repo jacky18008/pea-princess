@@ -2,7 +2,7 @@ Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen — https://github.com
 
 # Durable requirements and long-running work
 
-Use `scripts/session_state.py --project <working-project> ...`. The working project is the user's private workspace, not the installed skill directory. `.pea-state/` is private runtime data. Never publish it, copy it into a seed, or include it in a report automatically. The complete usage guide is `docs/session-harness.md` in the repository.
+Use `scripts/session_state.py --project <working-project> ...`. When invoking this tool, read the shipped [state-api.md](state-api.md) for its CLI commands, event fields and Python `SessionStore` examples; `request.capture` and `requirement.add` are event operations passed to `apply`, not CLI subcommands. The working project is the user's private workspace, not the installed skill directory. `.pea-state/` is private runtime data. Never publish it, copy it into a seed, or include it in a report automatically.
 
 ## Resume protocol
 

@@ -298,6 +298,8 @@ def settle(output,plan,call,record):
 def run_next(output,roles=('answer','judge'),invoke=None):
  output=Path(output).resolve()
  with exclusive(output):
+  if (output/'PAUSE_REQUESTED.json').exists():
+   return {'operator_paused':True,**status(output)}
   plan=verify_plan(output);control=CallControl(output/'controller',[c['id'] for c in plan['calls']],allow_tools=True)
   report=control.report()
   if report['paused'] or report['pending_call_ids']:raise ValueError('unresolved or failed invocation; inspect, never automatically retry')
@@ -355,7 +357,7 @@ def main():
    roles=('answer',) if a.action=='answers' else ('judge',)
    while True:
     result=run_next(a.output,roles=roles);print(json.dumps(result,ensure_ascii=False),flush=True)
-    if result.get('complete') or result.get('awaiting_role'):return 0
+    if result.get('complete') or result.get('awaiting_role') or result.get('operator_paused'):return 0
   print(json.dumps(result,ensure_ascii=False));return 0
  except Exception as e:
   print(json.dumps({'stopped':True,'error':type(e).__name__,'message':str(e)},ensure_ascii=False),flush=True);return 1

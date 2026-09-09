@@ -8,6 +8,7 @@
 |---|---|
 | `AGENTS.md`、`CLAUDE.md` | 短入口、路徑、必要規則；載入時機依 host 不同 |
 | `skills/vet-flat/references/session-harness.md` | 可攜操作協定，開始／恢復工作時讀取 |
+| [skills/vet-flat/references/state-api.md](../skills/vet-flat/references/state-api.md) | 隨公開 skill 提供的精簡 CLI／Python 操作範例；使用狀態工具時才讀，不必先找本 repo 的完整手冊或讀程式猜 API |
 | `.pea-state/events.json` | 使用者原文、需求 patch、任務與事件歷史；由程式還原當前狀態，不整份重送 |
 | `.pea-state/object-<sha256>.txt` | 原始 UTF-8 文件的私人快照；按指定行檢索 |
 | `.pea-state/checkpoint.json` | revision、event hash、完整當前 context packet；不經 LLM 摘要 |

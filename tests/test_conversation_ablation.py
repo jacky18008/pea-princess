@@ -324,6 +324,57 @@ class ConversationAblationTests(unittest.TestCase):
             runner.run_next(self.output, invoke=fake)
         self.assertEqual(fake.call_count, 1)
 
+    def test_operator_pause_before_first_dispatch_preserves_ledger_and_inputs(self):
+        self.prepare()
+        runner.write(self.output / 'PAUSE_REQUESTED.json', {'reason': 'Offline operator pause fixture'})
+        checkpoint = self.output / 'controller/checkpoint.json'
+        before = checkpoint.read_bytes()
+        histories = {p: p.read_bytes() for p in (self.output / 'sessions').glob('*/history.json')}
+        fake = mock.Mock(side_effect=AssertionError('paused run must never invoke'))
+        with mock.patch.object(runner, 'answer_request', side_effect=AssertionError('paused run must not assemble or mutate inputs')):
+            result = runner.run_next(self.output, invoke=fake)
+        fake.assert_not_called()
+        self.assertTrue(result['operator_paused'])
+        self.assertEqual(0, result['dispatched_calls'])
+        self.assertEqual(0, result['completed_calls'])
+        self.assertEqual(before, checkpoint.read_bytes())
+        self.assertFalse((self.output / 'records').exists())
+        self.assertEqual(histories, {p: p.read_bytes() for p in histories})
+
+    def test_operator_pause_after_paid_call_keeps_exact_usage_without_another_callback(self):
+        self.prepare()
+        fake = mock.Mock(return_value=paid_record())
+        first = runner.run_next(self.output, invoke=fake)
+        runner.write(self.output / 'PAUSE_REQUESTED.json', {'reason': 'Pause before the next paid call'})
+        checkpoint = self.output / 'controller/checkpoint.json'
+        before = checkpoint.read_bytes()
+        records = {str(p.relative_to(self.output)): p.read_bytes()
+                   for p in (self.output / 'records').rglob('*') if p.is_file()}
+        with mock.patch.object(runner, 'settle', side_effect=AssertionError('pause must precede materialization')):
+            result = runner.run_next(self.output, invoke=fake)
+        self.assertTrue(result['operator_paused'])
+        self.assertEqual(1, fake.call_count)
+        self.assertEqual(1, result['dispatched_calls'])
+        self.assertEqual(first['usage'], result['usage'])
+        self.assertEqual(110, result['usage']['total_tokens'])
+        self.assertEqual(before, checkpoint.read_bytes())
+        self.assertEqual(records, {str(p.relative_to(self.output)): p.read_bytes()
+                                  for p in (self.output / 'records').rglob('*') if p.is_file()})
+
+    def test_answers_cli_exits_after_operator_pause_instead_of_busy_looping(self):
+        self.prepare()
+        runner.write(self.output / 'PAUSE_REQUESTED.json', {'reason': 'Offline pause fixture'})
+        checkpoint = self.output / 'controller/checkpoint.json'
+        before = checkpoint.read_bytes()
+        with mock.patch.object(sys, 'argv', ['conversation_ablation.py', 'answers', '--output', str(self.output)]), \
+                mock.patch.object(runner, 'run_next', wraps=runner.run_next) as next_call, \
+                mock.patch.object(runner.native, 'invoke', side_effect=AssertionError('paused CLI must not invoke')) as native_call, \
+                mock.patch('builtins.print'):
+            self.assertEqual(0, runner.main())
+        self.assertEqual(1, next_call.call_count)
+        native_call.assert_not_called()
+        self.assertEqual(before, checkpoint.read_bytes())
+
     def test_post_receipt_crash_recovers_without_second_model_call_or_duplicate_history(self):
         plan = self.prepare()
         fake = mock.Mock(return_value=paid_record())
