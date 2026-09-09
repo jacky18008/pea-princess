@@ -1,17 +1,22 @@
 #!/usr/bin/env python3
 """Continue independent original experiment IDs after an explicit failure acknowledgment.
 
-No retries, new calls, skips, deadline changes or provider switches. Frozen
-request builders, native transport and local settlement remain authoritative.
+No retries, new calls, skips or provider switches. An explicit runtime policy
+can extend deadlines only for undispatched original slots; otherwise the frozen
+240-second transport remains selected. Frozen request builders and local
+settlement remain authoritative.
 The amended budget permits unknown spend, which remains unknown in all reports.
 Acknowledgment is an operator assertion, not authentication of user permission.
 """
 import argparse
+from datetime import datetime
 import hashlib
 import json
 import os
 from pathlib import Path
 import stat
+import sys
+import types
 
 import call_control
 import conversation_resume as operational
@@ -63,15 +68,75 @@ def selection(plan, state, settled):
 
 
 class Continue:
-    def __init__(self, source, output, amendment):
+    def __init__(self, source, output, amendment, execution_policy=None):
         self.resume = operational.Resume(source, output, amendment)
         self.output, self.runner = self.resume.output, self.resume.runner
+        self.execution_policy_path = operational._path(execution_policy) if execution_policy is not None else None
+        self.execution_policy = None
+        self.native = self.runner.native
         self.code_paths = {'driver': Path(__file__).absolute(),
                            'controller': Path(call_control.__file__).absolute(),
                            'resume': Path(operational.__file__).absolute(),
                            'reducer': Path(call_control.report_control.__file__).absolute()}
+        if self.execution_policy_path is not None:
+            self.code_paths['execution_native'] = Path(__file__).absolute().with_name('conversation_native.py')
         self.code_sha256 = {key: _sha(path) for key, path in self.code_paths.items()}
         self._validated()
+        if self.execution_policy is not None:
+            self.native = self._load_execution_native()
+
+    def _policy(self, plan, amendment):
+        if self.execution_policy_path is None:
+            return None
+        policy = operational._read(self.execution_policy_path)
+        expected = {'version': 1, 'policy_id': 'runtime-0001',
+                    'operation': 'extend_deadline_for_unstarted_original_calls',
+                    'original_plan_sha256': operational._digest(plan),
+                    'budget_amendment_sha256': amendment['amendment_sha256'],
+                    'previous_timeout_seconds': 240, 'timeout_seconds': 1200,
+                    'native_sha256': self.code_sha256['execution_native'],
+                    'max_cli_invocations': 192, 'automatic_retries': 0, 'claude_calls': 0}
+        if (not isinstance(policy, dict) or set(policy) != set(expected) | {'operator'}
+                or any(policy[key] != value or type(policy[key]) is not type(value) for key, value in expected.items())):
+            raise ContinueError('execution policy scope, original plan, budget or native source differs')
+        operator = policy['operator']
+        if (not isinstance(operator, dict) or set(operator) != {'actor', 'rationale', 'recorded_at'}
+                or operator['actor'] != 'codex'
+                or any(not isinstance(operator[key], str) or not operator[key].strip()
+                       for key in ('rationale', 'recorded_at'))):
+            raise ContinueError('execution policy requires the actual operator rationale and timestamp')
+        try:
+            timestamp = datetime.fromisoformat(operator['recorded_at'].replace('Z', '+00:00'))
+            if timestamp.tzinfo is None or timestamp.utcoffset() is None:
+                raise ValueError('timezone missing')
+        except ValueError as error:
+            raise ContinueError('execution policy timestamp must include an ISO-8601 timezone') from error
+        return policy
+
+    def _load_execution_native(self):
+        # Execute exactly the selected adapter bytes. All underlying launch and
+        # receipt parsing remain the already-verified frozen implementations.
+        path = self.code_paths['execution_native']; source = operational._bytes(path)
+        if hashlib.sha256(source).hexdigest() != self.execution_policy['native_sha256']:
+            raise ContinueError('execution native source changed before loading')
+        native = types.ModuleType('_pea_execution_native')
+        native.__file__ = str(path)
+        parser = types.ModuleType('durable_run'); parser.cli_record = self.runner.native.cli_record
+        dependencies = {'launch': self.runner.native.launch, 'durable_run': parser}
+        with operational._IMPORT_LOCK:
+            previous = {name: sys.modules.get(name) for name in dependencies}
+            try:
+                sys.modules.update(dependencies)
+                exec(compile(source, str(path), 'exec'), native.__dict__)
+            finally:
+                for name, module in previous.items():
+                    if module is None:
+                        sys.modules.pop(name, None)
+                    else:
+                        sys.modules[name] = module
+        if native.MAX_TIMEOUT_SECONDS != self.execution_policy['timeout_seconds']:
+            raise ContinueError('selected native adapter does not implement the exact execution deadline')
+        return native
 
     def _validated(self):
         if any(_sha(path) != self.code_sha256[key] for key, path in self.code_paths.items()):
@@ -88,7 +153,18 @@ class Continue:
                          'operational_sha256': self.code_sha256,
                          'max_cli_invocations': 192, 'amended_token_ceiling': None,
                          'automatic_retries': 0, 'claude_calls': 0}
-        self.audit_dir = self.output / 'continuation-audit' / amendment['amendment_id']
+        policy = self._policy(plan, amendment)
+        if self.execution_policy is not None and policy != self.execution_policy:
+            raise ContinueError('execution policy changed during continuation')
+        self.execution_policy = policy
+        namespace = amendment['amendment_id']
+        if policy is not None:
+            self.bindings['execution_policy'] = {'policy_id': policy['policy_id'],
+                'sha256': operational._digest(policy), 'file_sha256': _sha(self.execution_policy_path),
+                'previous_timeout_seconds': policy['previous_timeout_seconds'],
+                'timeout_seconds': policy['timeout_seconds'], 'native_sha256': policy['native_sha256']}
+            namespace += '--' + policy['policy_id']
+        self.audit_dir = self.output / 'continuation-audit' / namespace
         if self.audit_dir.exists() or self.audit_dir.is_symlink():
             operational._path(self.audit_dir, directory=True)
             manifest = self._audit_read(self.audit_dir / 'manifest.json')
@@ -204,6 +280,8 @@ class Continue:
                 'deferred': deferred, 'ready_call_ids': [c['id'] for c in ready],
                 'known_processed_token_subtotal': report['usage']['known_input_tokens'] + report['usage']['known_output_tokens'],
                 'amended_token_ceiling': None, 'provider_request_count': None,
+                'execution_policy_id': self.execution_policy['policy_id'] if self.execution_policy else None,
+                'next_unstarted_timeout_seconds': self.execution_policy['timeout_seconds'] if self.execution_policy else 240,
                 'operator_paused': self._paused()}
 
     def status(self):
@@ -278,6 +356,12 @@ class Continue:
                 raise ContinueError('completed artifact is not reflected in the controller')
             factory = self.runner.answer_request if call['role'] == 'answer' else self.runner.judge_request
             request, work, history = factory(self.output, plan, call)
+            if self.execution_policy is not None:
+                if call['id'] in control.snapshot()['calls']:
+                    raise ContinueError('execution policy cannot alter an already dispatched original slot')
+                if type(request.get('timeout_seconds')) is not int or request['timeout_seconds'] != self.execution_policy['previous_timeout_seconds']:
+                    raise ContinueError('frozen request deadline differs from execution policy baseline')
+                request = dict(request, timeout_seconds=self.execution_policy['timeout_seconds'])
             request_digest = self.runner._digest(request)
             frozen = folder / 'request.json'
             if frozen.exists() and operational._read(frozen)['request_sha256'] != request_digest:
@@ -290,7 +374,7 @@ class Continue:
                 return self._view(plan, control)
             def callback():
                 try:
-                    record = (invoke or self.runner.native.invoke)(request, folder, work)
+                    record = (invoke or self.native.invoke)(request, folder, work)
                 except BaseException as error:
                     if isinstance(getattr(error, 'record', None), dict):
                         error.record['id'] = call['id']
@@ -315,6 +399,7 @@ def main(argv=None):
     parser.add_argument('--source', required=True, type=Path)
     parser.add_argument('--output', required=True, type=Path)
     parser.add_argument('--amendment', required=True, type=Path)
+    parser.add_argument('--execution-policy', type=Path)
     parser.add_argument('--call-id')
     parser.add_argument('--reason')
     parser.add_argument('action', choices=('status', 'acknowledge', 'answers', 'judges'))
@@ -324,7 +409,7 @@ def main(argv=None):
     if args.action != 'acknowledge' and (args.call_id is not None or args.reason is not None):
         parser.error('--call-id and --reason are only valid for acknowledge')
     try:
-        driver = Continue(args.source, args.output, args.amendment)
+        driver = Continue(args.source, args.output, args.amendment, execution_policy=args.execution_policy)
         if args.action in ('status', 'acknowledge'):
             result = driver.status() if args.action == 'status' else driver.acknowledge(args.call_id, args.reason)
             print(json.dumps(result, ensure_ascii=False)); return 0

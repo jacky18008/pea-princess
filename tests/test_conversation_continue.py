@@ -40,6 +40,11 @@ class ContinueTests(unittest.TestCase):
             target = self.source / name; target.parent.mkdir(parents=True, exist_ok=True)
             if name != 'dist/vet-flat-skill.zip':
                 shutil.copyfile(ROOT / name, target)
+                if name == 'bench/conversation_native.py':
+                    # The experiment's frozen adapter predates the current runtime policy.
+                    text = target.read_text()
+                    self.assertIn('MAX_TIMEOUT_SECONDS = 1200', text)
+                    target.write_text(text.replace('MAX_TIMEOUT_SECONDS = 1200', 'MAX_TIMEOUT_SECONDS = 240'))
         with zipfile.ZipFile(self.source / 'dist/vet-flat-skill.zip', 'w') as archive:
             for name in ('SKILL.md', 'references/inputs.md', 'references/onboarding.md'):
                 archive.writestr('vet-flat/' + name, 'Synthetic public guide\n')
@@ -58,8 +63,21 @@ class ContinueTests(unittest.TestCase):
                               'source': 'offline fixture', 'authorized_at': '2026-09-09T20:00:00+01:00'}}
         self.amendment_path.write_bytes(operational._json(self.amendment))
 
-    def driver(self):
-        return continuation.Continue(self.source, self.output, self.amendment_path)
+    def driver(self, execution_policy=None):
+        return continuation.Continue(self.source, self.output, self.amendment_path, execution_policy=execution_policy)
+
+    def runtime_policy(self):
+        policy = {'version': 1, 'policy_id': 'runtime-0001',
+                  'operation': 'extend_deadline_for_unstarted_original_calls',
+                  'original_plan_sha256': operational._digest(self.plan),
+                  'budget_amendment_sha256': operational._digest(self.amendment),
+                  'previous_timeout_seconds': 240, 'timeout_seconds': 1200,
+                  'native_sha256': continuation._sha(ROOT / 'bench/conversation_native.py'),
+                  'max_cli_invocations': 192, 'automatic_retries': 0, 'claude_calls': 0,
+                  'operator': {'actor': 'codex', 'rationale': 'Offline operator implementation rationale; no claimed user permission.',
+                               'recorded_at': '2026-09-09T22:00:00+01:00'}}
+        path = self.root / 'runtime-0001.json'; path.write_bytes(operational._json(policy))
+        return path, policy
 
     def control(self):
         return continuation.call_control.CallControl(self.output / 'controller', [c['id'] for c in self.plan['calls']], allow_tools=True)
@@ -267,6 +285,138 @@ class ContinueTests(unittest.TestCase):
         second_audit = driver._audit_read(driver.audit_dir / ('ack-' + second + '.json'))
         self.assertEqual({first, second}, set(second_audit['failed_receipts']))
         self.assertFalse((self.output / 'records' / second / 'finished.json').exists())
+
+    def test_runtime_uses_selected_native_with_real_fake_process_and_exact_request_hashes(self):
+        path, policy = self.runtime_policy(); driver = self.driver(path)
+        self.assertEqual(240, driver.runner.native.MAX_TIMEOUT_SECONDS)
+        self.assertEqual(1200, driver.native.MAX_TIMEOUT_SECONDS)
+        self.assertIsNot(driver.native, driver.runner.native)
+        self.assertIs(driver.native.launch, driver.runner.native.launch)
+        self.assertIs(driver.native.cli_record, driver.runner.native.cli_record)
+        call = self.plan['calls'][0]
+        original_request, work, _ = self.original.answer_request(self.output, self.plan, call)
+        expected = original_request | {'timeout_seconds': 1200}
+        real_start = driver.native.launch.start_process; commands = []
+        script = """import json, sys
+from pathlib import Path
+Path('received.txt').write_text(sys.stdin.read())
+Path(sys.argv[1]).write_text('Synthetic runtime response.')
+print(json.dumps({'type': 'turn.completed', 'usage': {'input_tokens': 20, 'cached_input_tokens': 7, 'output_tokens': 5}}), flush=True)
+"""
+        def start(command, **kwargs):
+            commands.append(command)
+            answer = command[command.index('--output-last-message') + 1]
+            return real_start([sys.executable, '-c', script, answer], **kwargs)
+        with mock.patch.object(driver.native.shutil, 'which', return_value='/offline/fake-codex'), \
+             mock.patch.object(driver.native.launch, 'start_process', side_effect=start), \
+             mock.patch.object(driver.runner.native, 'invoke', side_effect=AssertionError('runtime must select current adapter')):
+            result = driver.step()  # Deliberately no injected invoke: exercise adapter selection.
+        self.assertEqual(call['id'], result['just_completed']); self.assertEqual(1, len(commands))
+        self.assertEqual(25, result['known_processed_token_subtotal'])
+        self.assertEqual('runtime-0001', result['execution_policy_id']); self.assertEqual(1200, result['next_unstarted_timeout_seconds'])
+        folder = self.output / 'records' / call['id']
+        request = operational._read(folder / 'request.json')
+        receipt = operational._read(folder / 'native-record.json')
+        invocation = operational._read(folder / 'native-invocation.json')
+        self.assertEqual(expected, request['request'])
+        self.assertEqual(original_request['prompt'], (work / 'received.txt').read_text())
+        self.assertEqual(original_request['model'], commands[0][commands[0].index('--model') + 1])
+        self.assertIn('model_reasoning_effort="' + original_request['effort'] + '"', commands[0])
+        self.assertEqual(1200, invocation['timeout_seconds'])
+        self.assertEqual(operational._digest(expected), request['request_sha256'])
+        self.assertEqual(request['request_sha256'], receipt['request_sha256'])
+        self.assertEqual(request['request_sha256'], invocation['request_sha256'])
+        self.assertEqual(operational._digest(receipt), operational._read(folder / 'finished.json')['record_sha256'])
+        self.assertEqual('budget-0001--runtime-0001', driver.audit_dir.name)
+        manifest = driver._audit_read(driver.audit_dir / 'manifest.json')
+        self.assertEqual(operational._digest(policy), manifest['bindings']['execution_policy']['sha256'])
+        self.assertEqual(policy['native_sha256'], manifest['bindings']['operational_sha256']['execution_native'])
+
+    def test_runtime_audit_isolation_preserves_older_policy_receipts_and_failed_ids(self):
+        older = self.driver(); older.step(invoke=mock.Mock(return_value=paid()))
+        first_folder = self.output / 'records' / self.plan['calls'][0]['id']
+        first_files = {p.name: p.read_bytes() for p in first_folder.iterdir()}
+        with self.assertRaises(continuation.call_control.CallControlPaused):
+            older.step(invoke=mock.Mock(return_value=failed()))
+        failed_id = self.plan['calls'][1]['id']; old_receipt = self.control().snapshot()['calls'][failed_id]
+        original_audit = {p.name: p.read_bytes() for p in older.audit_dir.iterdir()}
+        policy_path, _ = self.runtime_policy(); policy_bytes = policy_path.read_bytes()
+        driver = self.driver(policy_path)
+        acknowledged = driver.acknowledge(failed_id, 'New deadline only for untouched independent IDs.')
+        self.assertFalse(acknowledged['paused']); self.assertEqual([failed_id], acknowledged['failed_call_ids'])
+        captured = []
+        def fake(request, folder, work):
+            captured.append(request); return paid() | {'request_sha256': operational._digest(request)}
+        result = driver.step(invoke=fake)
+        self.assertEqual(self.plan['calls'][2]['id'], result['just_completed'])
+        self.assertEqual(1200, captured[0]['timeout_seconds'])
+        self.assertEqual(old_receipt, self.control().snapshot()['calls'][failed_id])
+        self.assertFalse((self.output / 'records' / failed_id / 'finished.json').exists())
+        self.assertEqual(original_audit, {p.name: p.read_bytes() for p in older.audit_dir.iterdir()})
+        self.assertEqual(first_files, {p.name: p.read_bytes() for p in first_folder.iterdir()})
+        self.assertEqual(policy_bytes, policy_path.read_bytes())
+        self.assertFalse(result['original_plan_complete']); self.assertEqual(192, result['planned_calls'])
+        with self.assertRaises(continuation.call_control.ConflictingCallError):
+            self.control().dispatch(failed_id, self.plan['calls'][1]['session'], 'answer', 'native')
+
+    def test_default_still_uses_frozen_adapter_and_240_second_request(self):
+        driver = self.driver(); self.assertIs(driver.native, driver.runner.native)
+        self.assertEqual(240, driver.native.MAX_TIMEOUT_SECONDS)
+        with mock.patch.object(driver.runner.native, 'invoke', return_value=paid()) as invoked:
+            result = driver.step()
+        self.assertEqual(240, invoked.call_args.args[0]['timeout_seconds'])
+        self.assertIsNone(result['execution_policy_id']); self.assertEqual(240, result['next_unstarted_timeout_seconds'])
+        self.assertEqual('budget-0001', driver.audit_dir.name)
+        self.assertNotIn('execution_native', driver.code_sha256)
+
+    def test_runtime_policy_scope_and_native_hash_fail_before_mutation(self):
+        path, original = self.runtime_policy(); before = self.control().checkpoint_path.read_bytes()
+        changes = [{'native_sha256': '0' * 64}, {'original_plan_sha256': '0' * 64},
+                   {'budget_amendment_sha256': '0' * 64}, {'previous_timeout_seconds': 239},
+                   {'timeout_seconds': 1201}, {'max_cli_invocations': 193}, {'automatic_retries': 1},
+                   {'claude_calls': 1}, {'policy_id': '../runtime-0001'}, {'version': True},
+                   {'operator': original['operator'] | {'actor': 'user'}},
+                   {'operator': original['operator'] | {'rationale': ''}},
+                   {'operator': original['operator'] | {'recorded_at': '2026-09-09'}}]
+        for change in changes:
+            with self.subTest(change=change):
+                path.write_bytes(operational._json(original | change))
+                with self.assertRaises(continuation.ContinueError):
+                    self.driver(path)
+                self.assertEqual(before, self.control().checkpoint_path.read_bytes())
+        self.assertFalse((self.output / 'continuation-audit').exists())
+
+    def test_runtime_native_source_change_and_policy_change_fail_closed(self):
+        path, policy = self.runtime_policy()
+        copied = self.root / 'operational-copy'; copied.mkdir()
+        for name in ('conversation_continue.py', 'conversation_native.py'):
+            shutil.copyfile(ROOT / 'bench' / name, copied / name)
+        with mock.patch.object(continuation, '__file__', str(copied / 'conversation_continue.py')):
+            driver = self.driver(path)
+        driver.step(invoke=mock.Mock(return_value=paid()))
+        before = self.control().checkpoint_path.read_bytes()
+        manifest = (driver.audit_dir / 'manifest.json').read_bytes(); fake = mock.Mock()
+        selected = copied / 'conversation_native.py'; original_native = selected.read_bytes()
+        selected.write_bytes(original_native + b'\n# changed after source pin\n')
+        with self.assertRaisesRegex(continuation.ContinueError, 'source changed'):
+            driver.step(invoke=fake)
+        selected.write_bytes(original_native)
+        path.write_bytes(operational._json(policy | {'operator': policy['operator'] | {'rationale': 'Changed later.'}}))
+        with self.assertRaisesRegex(continuation.ContinueError, 'policy changed'):
+            driver.step(invoke=fake)
+        fake.assert_not_called(); self.assertEqual(before, self.control().checkpoint_path.read_bytes())
+        self.assertEqual(manifest, (driver.audit_dir / 'manifest.json').read_bytes())
+
+    def test_runtime_does_not_overwrite_a_prepared_240_second_request(self):
+        first = self.plan['calls'][0]; original_request, work, history = self.original.answer_request(self.output, self.plan, first)
+        folder = self.output / 'records' / first['id']; folder.mkdir(parents=True)
+        self.original.write(folder / 'request.json', {'request': original_request, 'request_sha256': operational._digest(original_request), 'call': first})
+        self.original.write(folder / 'input-history.json', history)
+        before = (folder / 'request.json').read_bytes(); path, _ = self.runtime_policy(); fake = mock.Mock()
+        with self.assertRaisesRegex(continuation.ContinueError, 'prepared original request changed'):
+            self.driver(path).step(invoke=fake)
+        fake.assert_not_called(); self.assertEqual(before, (folder / 'request.json').read_bytes())
+        self.assertEqual(0, self.control().report()['dispatched_calls'])
 
     def test_cli_does_not_print_provider_exception_or_endpoint(self):
         with mock.patch.object(continuation, 'Continue', side_effect=RuntimeError('https://secret.example/?token=SECRET')), \

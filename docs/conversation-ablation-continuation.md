@@ -27,3 +27,9 @@
 CLI 提供 `status`、`acknowledge --call-id ... --reason ...`、`answers`、`judges`；三個必要路徑參數與 [budget resume](conversation-ablation-budget-amendment.md) 相同。`PAUSE_REQUESTED.json` 仍可在 invocation 之間停止。新的失敗不會自動被 acknowledge 或重試，須先檢查私有收據。
 
 這是延續原定工作所需的操作修正，不是省 token 的 treatment。工具文件、技能精簡及其他成本改善保留到這輪結果完成後比較。
+
+## 實際驗證與恢復
+
+操作層提交為 `f1a95a2`。完整離線回歸 **2,009 tests，59.314 秒，PASS**，其中包括 15 個 continuation 測試；另有獨立 review。審查額外擋住了「較早完成標記遺失、較晚回合已執行」時倒退還原歷史的情況。
+
+首次 acknowledgment 前保存了五筆收據相符的完整 checkpoint 副本，hash 為 `34f9f8868fb0a9ad9d3bb313b617b0f294e175720e20b4437745360b5db70d12`。原失敗與未知用量未變；之後實際啟動原排程的 `s20-t01`。這是恢復執行的證据，不是整個矩陣已完成或模型品質已通過。

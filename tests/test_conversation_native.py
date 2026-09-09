@@ -140,7 +140,8 @@ class ConversationNativeTests(unittest.TestCase):
 
     def test_invalid_requests_are_rejected_without_starting_a_process(self):
         changes = [{'model': 'claude-sonnet'}, {'model': 'arbitrary-proxy'}, {'effort': 'medium'},
-                   {'timeout_seconds': True}, {'timeout_seconds': 0}, {'timeout_seconds': 241},
+                   {'timeout_seconds': True}, {'timeout_seconds': False}, {'timeout_seconds': 0},
+                   {'timeout_seconds': -1}, {'timeout_seconds': native.MAX_TIMEOUT_SECONDS + 1},
                    {'timeout_seconds': 1.5}, {'prompt': ' '}, {'prompt': 'a' * (native.MAX_PROMPT_BYTES + 1)},
                    {'response_schema': []}, {'response_schema': {'x': float('nan')}},
                    {'response_schema': {'x': object()}}, {'response_schema': {'x': 'a' * native.MAX_SCHEMA_BYTES}},
@@ -148,6 +149,21 @@ class ConversationNativeTests(unittest.TestCase):
         for index, change in enumerate(changes):
             with self.subTest(change=list(change)):
                 self.assert_no_dispatch(request=self.request | change, folder=self.folder('bad-' + str(index)))
+
+    def test_explicit_timeout_boundaries_are_saved_before_dispatch_without_changing_request(self):
+        self.assertEqual(1200, native.MAX_TIMEOUT_SECONDS)
+        for timeout in (1, 240, 241, 1200):
+            with self.subTest(timeout=timeout):
+                folder = self.folder('deadline-' + str(timeout))
+                request = self.request | {'timeout_seconds': timeout}
+                def inspect_receipt(command, kwargs):
+                    saved = json.loads((folder / 'native-invocation.json').read_text())
+                    self.assertEqual(timeout, saved['timeout_seconds'])
+                    self.assertEqual(native._digest(request), saved['request_sha256'])
+                record = self.run_fake(request=request, folder=folder, start_callback=inspect_receipt)
+                self.assertEqual('complete', record['status'])
+                self.assertEqual(native._digest(request), record['request_sha256'])
+                self.assertEqual(timeout, request['timeout_seconds'])
 
     def test_prepare_rejects_real_existing_or_unsafe_paths(self):
         for index, name in enumerate(('../escape', '/absolute', '.git/config', '.')):
@@ -193,6 +209,7 @@ class ConversationNativeTests(unittest.TestCase):
         self.assertLess(time.monotonic() - started, 6)
         self.assertEqual('stopped', record['status'])
         self.assertTrue(record['timeout'])
+        self.assertEqual(1, json.loads((self.root / 'call-1/native-invocation.json').read_text())['timeout_seconds'])
         self.assertEqual(USAGE, record['direct_terminal_usage'])
         self.assertEqual(1, len(self.commands))
         self.assertIsNotNone(self.processes[0].poll())

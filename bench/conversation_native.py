@@ -34,6 +34,7 @@ MAX_ANSWER_BYTES = 1024 * 1024
 MAX_WORKSPACE_BYTES = 32 * 1024 * 1024
 MAX_WORKSPACE_FILES = 2048
 MAX_SCHEMA_BYTES = 16000
+MAX_TIMEOUT_SECONDS = 1200
 ARTIFACTS = ('native-invocation.json', 'native-stdout.jsonl', 'native-stderr.txt', 'native-answer.txt', 'native-schema.json')
 
 
@@ -193,8 +194,8 @@ def invoke(request, folder, workdir):
     if not isinstance(prompt, str) or not prompt.strip() or len(prompt.encode('utf-8')) > MAX_PROMPT_BYTES:
         raise NativeError('native prompt is missing or too large')
     timeout = request.get('timeout_seconds')
-    if type(timeout) is not int or not 1 <= timeout <= 240:
-        raise NativeError('timeout_seconds must be an integer from 1 to 240')
+    if type(timeout) is not int or not 1 <= timeout <= MAX_TIMEOUT_SECONDS:
+        raise NativeError('timeout_seconds must be an integer from 1 to %d' % MAX_TIMEOUT_SECONDS)
     schema = request.get('response_schema')
     try:
         if schema is not None and (not isinstance(schema, dict) or len(_json(schema)) > MAX_SCHEMA_BYTES):
