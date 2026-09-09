@@ -529,5 +529,52 @@ class TestAgainstTheRealRepo(unittest.TestCase):
                          "`python3 tools/copy_deck.py apply`")
 
 
+class TestWritebackSecurity(DeckCase):
+    def save_lock(self, lock):
+        write(self.root, copy_deck.LOCK_REL, json.dumps(lock))
+
+    def test_lock_cannot_target_absolute_parent_or_unregistered_paths(self):
+        self.extract()
+        original = self.lock()
+        first = next(iter(original["blocks"]))
+        for source in ("../outside.txt", "/tmp/outside.txt", "local-secret.txt"):
+            lock = json.loads(json.dumps(original))
+            lock["blocks"][first]["source"] = source
+            self.save_lock(lock)
+            with self.assertRaisesRegex(SystemExit, "unsafe|registered surface"):
+                self.apply()
+
+    def test_allowed_surface_symlink_is_refused_before_writeback(self):
+        self.extract()
+        original = read(self.root, "README.md")
+        target = os.path.join(self.root, "outside.txt")
+        write(self.root, "outside.txt", original)
+        os.unlink(os.path.join(self.root, "README.md"))
+        os.symlink(target, os.path.join(self.root, "README.md"))
+        with self.assertRaisesRegex(SystemExit, "symlinks"):
+            self.apply()
+        self.assertEqual(original, read(self.root, "outside.txt"))
+
+    def test_lock_cannot_promote_a_read_only_source(self):
+        self.extract()
+        lock = self.lock()
+        entry = next(e for e in lock["blocks"].values() if not e["writable"])
+        entry["writable"] = True
+        self.save_lock(lock)
+        with self.assertRaisesRegex(SystemExit, "read-only surface"):
+            self.apply()
+
+    def test_board_json_escapes_html_parser_state_delimiters(self):
+        payload = "<!--<script> untrusted </ScRiPt><img src=x onerror=alert(1)>"
+        write(self.root, "README.md", "# Example\n\n" + payload + "\n")
+        write(self.root, copy_deck.BOARD_REL,
+              copy_deck.ISLAND_OPEN + "{}" + copy_deck.ISLAND_CLOSE)
+        self.quietly(lambda: copy_deck.cmd_board(self.root))
+        page = read(self.root, copy_deck.BOARD_REL)
+        island = page.split(copy_deck.ISLAND_OPEN, 1)[1].split(copy_deck.ISLAND_CLOSE, 1)[0]
+        self.assertNotIn("<", island)
+        self.assertTrue(any(b["text"] == payload for b in json.loads(island)["blocks"]))
+
+
 if __name__ == "__main__":
     unittest.main()

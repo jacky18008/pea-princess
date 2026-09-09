@@ -188,6 +188,19 @@ def sha256(text):
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
+def repo_path(root, rel):
+    """Deck metadata cannot redirect reads or writes outside the checkout or through links."""
+    if not isinstance(rel, str) or os.path.isabs(rel) or "\\" in rel \
+            or any(part in ("", ".", "..") for part in rel.split("/")):
+        raise SystemExit("unsafe copy-deck path: %r" % rel)
+    current = os.path.abspath(root)
+    for part in rel.split("/"):
+        current = os.path.join(current, part)
+        if os.path.islink(current):
+            raise SystemExit("copy-deck paths must not contain symlinks: %s" % rel)
+    return current
+
+
 def read_text(path):
     with open(path, encoding="utf-8") as fh:
         return fh.read()
@@ -529,7 +542,7 @@ def build(root):
             continue
         blocks = []
         for rel in files:
-            text = read_text(os.path.join(root, rel))
+            text = read_text(repo_path(root, rel))
             raw = EXTRACTORS[surface["extractor"]](text, dict(surface, path=rel))
             for n, item in enumerate(raw, 1):
                 start = sum(len(line) + 1 for line in text.split("\n")[:item["first"]])
@@ -607,8 +620,8 @@ def render_lock(groups):
 
 
 def cmd_extract(root, force=False):
-    deck_path = os.path.join(root, DECK_REL)
-    lock_path = os.path.join(root, LOCK_REL)
+    deck_path = repo_path(root, DECK_REL)
+    lock_path = repo_path(root, LOCK_REL)
     if os.path.exists(deck_path) and os.path.exists(lock_path) and not force:
         pending = pending_edits(root)
         if pending:
@@ -676,13 +689,29 @@ def parse_deck(text):
 
 
 def load_lock(root):
-    lock_path = os.path.join(root, LOCK_REL)
+    lock_path = repo_path(root, LOCK_REL)
     if not os.path.exists(lock_path):
         raise SystemExit("no %s — run `extract` first" % LOCK_REL)
     data = json.loads(read_text(lock_path))
     if data.get("version") != LOCK_VERSION:
         raise SystemExit("%s is version %r; this tool writes version %d"
                          % (LOCK_REL, data.get("version"), LOCK_VERSION))
+    allowed = {}
+    for surface in SURFACES:
+        for rel in surface_files(root, surface):
+            allowed[rel] = surface.get("writable", True)
+    blocks = data.get("blocks")
+    if not isinstance(blocks, dict):
+        raise SystemExit("copy-deck lock must contain a blocks object")
+    for entry in blocks.values():
+        if not isinstance(entry, dict):
+            raise SystemExit("copy-deck lock entry must be an object")
+        rel = entry.get("source")
+        repo_path(root, rel)
+        if rel not in allowed:
+            raise SystemExit("copy-deck source is not a registered surface: %s" % rel)
+        if entry.get("writable", True) and not allowed[rel]:
+            raise SystemExit("copy-deck lock cannot make a read-only surface writable: %s" % rel)
     return data
 
 
@@ -692,7 +721,7 @@ def pending_edits(root):
         lock = load_lock(root)
     except SystemExit:
         return []
-    deck_path = os.path.join(root, DECK_REL)
+    deck_path = repo_path(root, DECK_REL)
     if not os.path.exists(deck_path):
         return []
     try:
@@ -739,7 +768,7 @@ def guard_shape(entry, new_text):
 
 def cmd_apply(root, dry_run=False, strict=False):
     lock = load_lock(root)
-    deck_path = os.path.join(root, DECK_REL)
+    deck_path = repo_path(root, DECK_REL)
     if not os.path.exists(deck_path):
         raise SystemExit("no %s — run `extract` first" % DECK_REL)
     try:
@@ -775,7 +804,7 @@ def cmd_apply(root, dry_run=False, strict=False):
 
     changed_files, changed_blocks = [], []
     for rel in sorted(by_file):
-        full = os.path.join(root, rel)
+        full = repo_path(root, rel)
         content = read_text(full)
         if sha256(content) != by_file[rel][0][1]["source_sha256"]:
             message = "%s changed since the deck was extracted" % rel
@@ -839,7 +868,7 @@ def cmd_apply(root, dry_run=False, strict=False):
                 entry["line_to"] = entry["line_from"] + entry["text"].count("\n")
 
     if not dry_run and changed_blocks:
-        write_text(os.path.join(root, LOCK_REL),
+        write_text(repo_path(root, LOCK_REL),
                    json.dumps(lock, ensure_ascii=False, indent=2, sort_keys=True) + "\n")
 
     for block_id, rel, why in refusals:
@@ -890,7 +919,7 @@ def board_payload(groups):
 
 def cmd_board(root):
     """Refresh the data island inside docs/review-board.html. The design is hand-written."""
-    path = os.path.join(root, BOARD_REL)
+    path = repo_path(root, BOARD_REL)
     if not os.path.exists(path):
         raise SystemExit("no %s — the page is a hand-written file; restore it from git" % BOARD_REL)
     page = read_text(path)
@@ -903,7 +932,7 @@ def cmd_board(root):
     groups, _notes = build(root)
     data = board_payload(groups)
     payload = json.dumps(data, ensure_ascii=False, sort_keys=True,
-                         separators=(",", ":")).replace("</", "<\\/")
+                         separators=(",", ":")).replace("<", "\\u003c").replace(">", "\\u003e")
     page = page[:start + len(ISLAND_OPEN)] + payload + page[stop:]
     write_text(path, page)
     size = len(page.encode("utf-8"))
@@ -942,7 +971,7 @@ def read_edits(source):
 
 
 def cmd_merge(root, source):
-    deck_path = os.path.join(root, DECK_REL)
+    deck_path = repo_path(root, DECK_REL)
     if not os.path.exists(deck_path):
         raise SystemExit("no %s — run `extract` first" % DECK_REL)
     incoming = read_edits(source)

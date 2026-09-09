@@ -2001,6 +2001,24 @@ class HtmlRenderer(object):
 
 
 # ---------------------------------------------------------------- Markdown ---
+def markdown_data(value):
+    """Report strings are literal text, never Markdown links, images or raw HTML.
+
+    Escaping only at the final HTML step would miss Markdown image requests and
+    unsafe links in hosts that enable raw HTML. Keep our generated layout markup.
+    """
+    if isinstance(value, dict):
+        return {markdown_data(key): markdown_data(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [markdown_data(item) for item in value]
+    if isinstance(value, str):
+        value = value.replace("\\", "\\\\").replace("&", "&amp;")
+        value = value.replace("<", "&lt;").replace(">", "&gt;")
+        for char in ("`", "[", "]"):
+            value = value.replace(char, "\\" + char)
+    return value
+
+
 def md_escape(text):
     return str(text or "").replace("|", "\\|").replace("\n", " ")
 
@@ -2015,6 +2033,7 @@ def md_table(headers, rows):
 
 
 def render_markdown(data, L, schema=None):
+    data = markdown_data(data)
     o = []
     bad_by_candidate = bad_locations(data)   # also fills candidate.arithmetic_check
     gaps_by_candidate = unsourced_locations(data, schema)

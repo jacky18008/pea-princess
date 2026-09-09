@@ -1002,7 +1002,9 @@ function shareBlock(d){
   if(s.questions.length) text+="\n\nMy questions:\n"+s.questions.map(function(q){
     return "  ["+q.when+(q.kind==="answer"?"":" · "+q.kind)+"] "+q.text; }).join("\n");
   return '<div class="card"><h3>Share card</h3><p class="sub">Small enough to post: preferences and '+
-    'bands, never an address, a name or money. Code to paste: <code>seed.py export</code>.</p>'+
+    'bands. Dedicated identity fields and exact budget fields are omitted, but free text is not '+
+    'anonymized. Read the card below and remove personal details before sharing. '+
+    'Code to paste: <code>seed.py export</code>.</p>'+
     '<pre id="sharetext">'+esc(text)+'</pre><p><button id="sharecopy">Copy the share card</button></p></div>';
 }
 /* ---- page wiring -------------------------------------------------------- */
@@ -1016,16 +1018,22 @@ function say(kind,title,items){
 }
 
 function run(){
+  // Never leave an older report or share card available after a failed import.
+  current=null; currentL=null;
+  $("report").innerHTML=""; $("share").innerHTML="";
   var text=$("json").value.trim();
   if(!text){ $("messages").innerHTML=say("warn","Paste a report.json first, or press Load the example report."); return; }
   var data;
   try { data=JSON.parse(text); }
   catch(e){ $("messages").innerHTML=say("err","That is not valid JSON.",[String(e.message)]); $("report").innerHTML=""; return; }
+  try {
   var res=checkReport(data);
   if(Array.isArray(res)) res={errors:res,warnings:[]};
   var msgs="";
-  if(res.errors.length)
-    msgs+=say("err","This report does not match report-schema.json. It is shown below anyway, but parts may be missing.",res.errors);
+  if(res.errors.length){
+    $("messages").innerHTML=say("err","This report cannot be rendered. Fix the listed fields and try again.",res.errors);
+    return;
+  }
   if(res.warnings.length) msgs+=say("warn","Worth checking",res.warnings);
   var L0=new Labels($("lang").value || data.language || "en"), sums=[];
   recompute(data);
@@ -1036,14 +1044,20 @@ function run(){
   if(!res.errors.length && !res.warnings.length && !sums.length)
     msgs+=say("ok","This report matches report-schema.json, and every number that follows from a formula was recomputed and matches.");
   $("messages").innerHTML=msgs;
-  current=data;
-  currentL=new Labels($("lang").value || data.language || "en");
-  document.documentElement.lang=currentL.lang;
-  $("report").innerHTML='<div class="wrap">'+renderBody(data,currentL)+"</div>";
+  var nextL=new Labels($("lang").value || data.language || "en");
+  var nextHtml='<div class="wrap">'+renderBody(data,nextL)+"</div>";
+  document.documentElement.lang=nextL.lang;
+  $("report").innerHTML=nextHtml;
+  current=data; currentL=nextL;
   try{ $("share").innerHTML=shareBlock(data);
     $("sharecopy").addEventListener("click",function(){ copyText($("sharetext").textContent,
       "The share card is on your clipboard. Read it before you post it."); });
   }catch(e){ $("share").innerHTML=""; }
+  }catch(e){
+    current=null; currentL=null;
+    $("report").innerHTML=""; $("share").innerHTML="";
+    $("messages").innerHTML=say("err","This report cannot be rendered. Check the JSON field types.",[String(e.message)]);
+  }
 }
 
 $("render").addEventListener("click",run);

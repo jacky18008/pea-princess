@@ -34,6 +34,14 @@ import io
 import os
 import sys
 import tarfile
+import tempfile
+import time
+from pathlib import Path
+
+# Also works when imported by the offline regression tests.
+if os.path.dirname(os.path.abspath(__file__)) not in sys.path:
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from build_dist import checked_file, distributable, tracked_files
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, ".."))
@@ -118,49 +126,72 @@ def keep(path):
 
 
 def collect():
-    """[(absolute path, name inside the tarball)], sorted, deterministic."""
+    """Versioned harness plus the explicitly private gold tree; no local run state."""
+    rels = set(tracked_files(ROOT, INCLUDE))
+    private = Path(ROOT, "bench", "private")
+    if private.is_symlink():
+        raise ValueError("bench/private must not be a symlink")
+    if private.is_dir():
+        for base, dirs, files in os.walk(str(private)):
+            # Reject links, including directory links that os.walk would skip.
+            for name in list(dirs) + files:
+                node = Path(base, name)
+                if node.is_symlink():
+                    raise ValueError("symlink is not a package source: %s" % node.relative_to(ROOT))
+            dirs[:] = sorted(d for d in dirs if keep(d) and distributable(d))
+            rels.update(Path(base, name).relative_to(ROOT).as_posix() for name in files)
     out = []
-    for rel in INCLUDE:
-        src = os.path.join(ROOT, rel)
-        if os.path.isfile(src):
-            if keep(rel):
-                out.append((src, "%s/%s" % (TOP, rel)))
-            continue
-        if not os.path.isdir(src):
-            continue
-        for base, dirs, files in os.walk(src):
-            dirs[:] = sorted(d for d in dirs if d not in SKIP_DIRS)
-            for name in sorted(files):
-                full = os.path.join(base, name)
-                inside = os.path.relpath(full, ROOT)
-                if keep(inside):
-                    out.append((full, "%s/%s" % (TOP, inside)))
-    brief = os.path.join(ROOT, "bench", "ab", "CODEX_BRIEF.md")
-    if os.path.exists(brief):
-        out.append((brief, "%s/CODEX_BRIEF.md" % TOP))
+    for rel in sorted(rels):
+        if keep(rel) and distributable(rel):
+            out.append((checked_file(ROOT, rel), "%s/%s" % (TOP, rel)))
+    brief = "bench/ab/CODEX_BRIEF.md"
+    if brief in rels:
+        out.append((checked_file(ROOT, brief), "%s/CODEX_BRIEF.md" % TOP))
     return sorted(set(out), key=lambda pair: pair[1])
 
 
 def build(out_path, show=False):
     members = collect()
-    folder = os.path.dirname(os.path.abspath(out_path))
-    if folder and not os.path.isdir(folder):
-        os.makedirs(folder)
-
-    readme = os.path.join(folder, ".README-CODEX.md.tmp")
-    with io.open(readme, "w", encoding="utf-8") as fh:
-        fh.write(README_CODEX)
-
-    with tarfile.open(out_path, "w:gz") as tar:
-        info = tar.gettarinfo(readme, arcname="%s/README-CODEX.md" % TOP)
-        info.mtime = int(info.mtime)
-        with open(readme, "rb") as fh:
-            tar.addfile(info, fh)
-        for src, inside in members:
-            tar.add(src, arcname=inside, recursive=False)
-    os.unlink(readme)
-
-    size = os.path.getsize(out_path)
+    target = Path(os.path.abspath(out_path))
+    if target.is_symlink():
+        raise ValueError("private output must not be a symlink")
+    if target.exists() and not target.is_file():
+        raise ValueError("private output must be a regular file")
+    if any(p.is_symlink() for p in target.parents):
+        raise ValueError("private output ancestors must not be symlinks")
+    # New destination directories are private. Existing ancestors are not chmod'd.
+    missing = []
+    parent = target.parent
+    while not parent.exists():
+        missing.append(parent)
+        parent = parent.parent
+    for folder in reversed(missing):
+        folder.mkdir(mode=0o700)
+    fd, temporary = tempfile.mkstemp(prefix=".private-ab-", suffix=".tar.gz", dir=str(target.parent))
+    try:
+        with os.fdopen(fd, "wb") as raw, tarfile.open(fileobj=raw, mode="w:gz") as tar:
+            content = README_CODEX.encode("utf-8")
+            info = tarfile.TarInfo("%s/README-CODEX.md" % TOP)
+            info.size = len(content)
+            info.mode = 0o600
+            info.mtime = int(time.time())
+            tar.addfile(info, io.BytesIO(content))
+            for src, inside in members:
+                # Recheck immediately before archiving; include regular contents only.
+                checked_file(ROOT, Path(src).relative_to(ROOT).as_posix())
+                info = tar.gettarinfo(src, arcname=inside)
+                if not info.isfile():
+                    raise ValueError("non-regular archive member: %s" % inside)
+                info.mode = 0o700 if info.mode & 0o111 else 0o600
+                info.uid = info.gid = 0
+                info.uname = info.gname = ""
+                with open(src, "rb") as fh:
+                    tar.addfile(info, fh)
+        os.replace(temporary, target)
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
+    size = target.stat().st_size
     private = sum(1 for _, inside in members if "/bench/private/" in inside)
     print("wrote %s" % out_path)
     print("  %d files, %.1f MB" % (len(members) + 1, size / 1024.0 / 1024.0))
