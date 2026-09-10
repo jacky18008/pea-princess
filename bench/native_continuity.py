@@ -280,6 +280,7 @@ def _command(plan, folder, thread_id):
     command = [plan['runtime']['path'], 'exec', '--ignore-user-config', '--ignore-rules',
                '--cd', plan['workdir'], '--sandbox', 'workspace-write', '--skip-git-repo-check',
                '-c', 'project_doc_max_bytes=0', '-c', 'approval_policy="never"',
+               '-c', 'shell_environment_policy.set={PYTHONDONTWRITEBYTECODE="1"}',
                '-c', 'skills.config=[{path=' + json.dumps(plan['disabled_host_skill_path']) + ',enabled=false}]',
                '--enable', 'skip_host_skill_discovery']
     if thread_id is not None:

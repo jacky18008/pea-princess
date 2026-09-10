@@ -102,6 +102,20 @@ answer.write_text('A measured choice: inspect the evidence before committing.')
             self.assertEqual(second, self.invoke(request))
             start.assert_not_called()
 
+    def test_start_and_resume_pin_python_bytecode_suppression_without_relaxing_other_controls(self):
+        plan, _ = continuity._read_envelope(self.session / 'plan.json')
+        setting = 'shell_environment_policy.set={PYTHONDONTWRITEBYTECODE="1"}'
+        for thread in (None, THREAD):
+            with self.subTest(thread=thread):
+                command = continuity._command(plan, self.session / 'calls/t01', thread)
+                self.assertEqual(1, command.count(setting))
+                self.assertEqual('-c', command[command.index(setting) - 1])
+                self.assertIn('--ignore-user-config', command)
+                self.assertIn('approval_policy="never"', command)
+                self.assertIn('workspace-write', command)
+                self.assertIn('skip_host_skill_discovery', command)
+                self.assertNotIn('--ephemeral', command)
+
     def test_uuid_absent_duplicate_malformed_or_changed_stops_without_retry(self):
         cases = [[], [{'type':'thread.started','thread_id':THREAD}] * 2,
                  [{'type':'thread.started','thread_id':'latest'}]]
