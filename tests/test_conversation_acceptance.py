@@ -30,6 +30,10 @@ class AcceptanceTests(unittest.TestCase):
         self.temp=tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.base=Path(self.temp.name).resolve()
+        plan={'version':1,'max_calls':ca.MAX_CALLS,'raw_counter_stop':ca.STOP_COUNTER,
+              'cases':[{'id':key,'turns':[{} for _ in range(6)]} for key in 'abc']}
+        ca.write(self.base/'plan.json',plan)
+        ca.write(self.base/'frozen.json',{'plan_sha256':ca._digest(plan)})
 
     def test_heldout_shape_and_revisions_fail_closed(self):
         cases=[{'id':k,'turns':[fixture(n) for n in range(1,7)]} for k in 'abc']
