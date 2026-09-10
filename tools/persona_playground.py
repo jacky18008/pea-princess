@@ -76,7 +76,7 @@ def source_hashes():
     paths = [Path(__file__), ROOT/'tools/session_runner.py', ROOT/'bench/personas.py', ROOT/'bench/journeys.py',
              ROOT/'bench/durable_run.py', ROOT/'bench/call_control.py', ROOT/'bench/launch.py',
              ROOT/'skills/vet-flat/scripts/session_state.py', ROOT/'evals/personas.json',
-             ROOT/'tools/conversation_reply.py', ROOT/'playground/conversation-policy.md']
+             ROOT/'tools/conversation_reply.py', ROOT/'tools/public_source_snapshot.py', ROOT/'playground/conversation-policy.md']
     paths += [ROOT/'dist/prompt-pack/INSTRUCTIONS.md', ROOT/'skills/vet-flat/SKILL.md']
     paths += sorted((ROOT/'skills/vet-flat/references').rglob('*.md'))
     return {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in paths}
@@ -90,9 +90,11 @@ def configured_system(card):
 
 def live_references(text):
     """Small intent-based selection from tracked instructions, never persona fixtures."""
-    names = ['conversation-quality.md', 'onboarding.md', 'listing-evidence.md', 'inputs.md', 'arithmetic.md',
-             'axes/00-area-sweep.md', 'axes/11-commute-redundancy.md']
+    names = ['conversation-quality.md', 'onboarding.md', 'listing-evidence.md', 'arithmetic.md']
     for terms, name in [
+        (('commute', 'journey', 'campus', 'station', 'office', '通勤', '上班', '上課', '目的地', '分鐘'), 'axes/11-commute-redundancy.md'),
+        (('sweep', 'radius', '全面', '深度', '盡職調查', '建物清單'), 'axes/00-area-sweep.md'),
+        (('blocked', 'paste', 'upload', '打不開', '貼上', '上傳'), 'inputs.md'),
         (('student', 'university', 'campus', 'hall', 'kcl', '學生', '宿舍', '學校'), 'student-housing.md'),
         (('short', 'hotel', 'bridge', 'week', '短租', '短住', '旅館', '幾天', '幾週'), 'axes/15-bridging-short-lets.md'),
         (('contract', 'deposit', 'sign', 'tenancy', '合約', '簽', '押金'), 'axes/07-compliance-landlord.md'),
@@ -115,8 +117,8 @@ def live_system(text):
             label+=' (selected introduction and sections 1–2; stops before section 2b)'
         sections.append((label,body))
     sections.append(('LOCAL CONVERSATION POLICY', (ROOT/'playground/conversation-policy.md').read_text()))
-    sections.append(('LIVE RESEARCH CAPABILITIES', '''RESEARCH MODE: live. This is a real human-led research request, not a persona or fixture test. Use the supplied current repository instructions; do not load installed host skills, unrelated files, credentials, connectors or earlier private sessions. Only read-only public web research is authorized, subject to the skill's source restrictions. Do not use shell tools, write files, sign in, contact anyone, reserve, book or pay. A referenced script is not available in this lane: use permitted public web evidence or the documented manual arithmetic/checking fallback and do not claim program validation. Do not run the whole sweep or additional agents automatically. Work on one useful bounded next step. The host preserves exact human inputs, history and receipts; it has not automatically normalized numeric eligibility conditions. Never claim the host has verified factual eligibility.
-Web search is enabled for this call but a search/page may fail. Record actual source URLs and UTC retrieval date/time beside current factual claims; preserve source publication dates where relevant. Use a tool's actual timestamp when available. Otherwise say the source was checked during this request and label the supplied host request time as request time, not an exact per-source retrieval time. Never fabricate timestamp precision. A search snippet is a lead, an advertisement is an advertised offer, and neither confirms that a unit is available for this person's dates or terms. Confirmed availability requires explicit dated evidence tied to the exact unit, period and terms. State what is advertised, confirmed, estimated or unresolved. If public access fails, say what failed and continue with known evidence; never substitute fictional listings unless the human explicitly asks for a teaching example. Do not inherit example floors, budgets, destinations or housing exclusions as this person's preferences. Later actual human inputs supersede earlier instructions only within their stated scope.'''))
+    sections.append(('LIVE RESEARCH CAPABILITIES', '''RESEARCH MODE: live. This is a real human-led research request, not a persona or fixture test. Use the supplied current repository instructions; do not load installed host skills, unrelated files, credentials, connectors or earlier private sessions. Only read-only public web research is authorized, subject to the skill's source restrictions. Do not use shell tools, write files, sign in, contact anyone, reserve, book or pay. A referenced script is not available in this lane: use permitted public web evidence or the documented manual arithmetic/checking fallback and do not claim program validation. Do not run the whole sweep or additional agents automatically. For a small discovery request, do one batched search, open up to two original candidate pages, and allow at most one replacement lookup. Then answer with the evidence obtained, even if only one candidate or a specific gap remains; do not broaden repeatedly just to fill two slots. This is a work plan, not a program-enforced tool-call limit. Full area due diligence is a later step when requested. Work on one useful bounded next step. The host preserves exact human inputs, history and receipts; it has not automatically normalized numeric eligibility conditions. Never claim the host has verified factual eligibility.
+Web search is enabled for this call but a search/page may fail. Cite actual source URLs and the checked date beside factual claims; precise timestamps belong in retained source records, not a technical timing paragraph in ordinary conversation; preserve source publication dates where relevant. Use a tool's actual timestamp when available. Otherwise say the source was checked during this request and label the supplied host request time as request time, not an exact per-source retrieval time. Never fabricate timestamp precision. A search snippet is a lead, an advertisement is an advertised offer, and neither confirms that a unit is available for this person's dates or terms. Confirmed availability requires explicit dated evidence tied to the exact unit, period and terms. State what is advertised, confirmed, estimated or unresolved. If public access fails, say what failed and continue with known evidence; never substitute fictional listings unless the human explicitly asks for a teaching example. Do not inherit example floors, budgets, destinations or housing exclusions as this person's preferences. Later actual human inputs supersede earlier instructions only within their stated scope.'''))
     return '\n\n'.join(title+'\n'+body for title, body in sections)
 
 class FrozenController(personas.Controller):
@@ -163,6 +165,8 @@ def codex_invoke(request, folder):
                '-c', 'skills.config=[{path='+json.dumps(host_skill)+',enabled=false}]',
                '-c', 'web_search="'+('live' if policy == 'live_research' else 'disabled')+'"',
                '--json', '--output-last-message', str(answer), '--', '-']
+    if request.get('tool_policy') == 'live_research':
+        command[command.index('--json'):command.index('--json')] = ['-c', 'tools.web_search.context_size="low"']
     if request.get('response_schema') is not None:
         schema_path = work/'reply-schema.json'
         schema_path.write_text(json.dumps(request['response_schema']))
@@ -479,8 +483,9 @@ class Lab:
             prompt=system+'\n\nFULL CONVERSATION\n'+transcript+'\n\nCURRENT INPUT TO ANSWER\n'+pending_user
             if s['amendments'] and not live:prompt+='\n\nThe tester has changed the synthetic scenario. Apply these exact amendments in order, preserving their scope and conditional predicates; do not revert to older conflicting facts:\n'+json.dumps(s['amendments'],ensure_ascii=False)
             prompt+='\n\nAnswer the current input directly using the supplied response schema: message is useful plain-language progress, questions are optional choice controls (zero to three). Do not duplicate questions in message. '
-            prompt+=('Public read-only web research is enabled. Cite actual external source URLs and retrieval time, preserve advertised versus confirmed availability, and report unsuccessful searches honestly. No synthetic persona, private-file access, shell, file writes or external contact. Host request time before dispatch: '+time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())+' (not an exact per-source retrieval timestamp).' if live else 'No runtime metadata, internal source citations, tools, file writes, browsing or external contact.')
+            prompt+=('Public read-only web research is enabled. Cite actual external source URLs and the date checked; keep precise timing metadata out of ordinary prose. Preserve advertised versus confirmed availability, and report unsuccessful searches honestly. No synthetic persona, private-file access, shell, file writes or external contact. Host request time before dispatch: '+time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())+' (not an exact per-source retrieval timestamp).' if live else 'No runtime metadata, internal source citations, tools, file writes, browsing or external contact.')
             prompt+=' Preserve the conversation and make progress on the person’s actual needs.'
+            if live: prompt+=self._source_context(s)
         if len(prompt)>160000:raise LabError('完整對話超出本輪 160,000 字元容量；已停止，未裁切。')
         call_id='call-%03d-%s'%(len(s['calls'])+1,actor)
         s['pending_call']={'id':call_id,'actor':actor,'origin':origin,'turn':turn,'started_at':time.time()}
@@ -489,10 +494,70 @@ class Lab:
         s['status']='running';self._save(s)
         return prompt
 
+    def _snapshot_index(self, s, call_id):
+        return self._folder(s['id'])/'source-snapshots'/call_id/'index.json'
+
+    def _capture_sources(self, s, call_id, receipt):
+        """Independent post-answer captures; never reconstruct missing CLI results."""
+        if receipt.get('status')!='recorded' or receipt.get('physical_status')!='complete':return
+        try: message=conversation_reply.decode(receipt['answer'])['message']
+        except (ValueError,TypeError,KeyError):return
+        urls=list(dict.fromkeys(re.findall(r'https://[^\s<>\)]+',message)))
+        index=self._snapshot_index(s,call_id);folder=index.parent
+        regular(index)
+        if folder.exists():return  # interrupted capture is never an automatic retry
+        folder.mkdir(parents=True,mode=0o700)
+        import public_source_snapshot
+        rows=[]
+        for i,url in enumerate(urls):
+            if i>=3:
+                rows.append({'source_url':url,'ok':False,'note':'Not captured: independent capture limit is three distinct cited URLs per answer.','source_claims_verified':False});continue
+            try: row=public_source_snapshot.capture(url,folder/str(i))
+            except Exception as exc: row={'source_url':url,'ok':False,'note':'Capture failed: '+type(exc).__name__,'source_claims_verified':False}
+            rows.append(row)
+        _atomic_json(index,{'value':rows,'sha256':_digest(rows)})
+
+    def _read_snapshots(self,s,call_id):
+        index=self._snapshot_index(s,call_id)
+        if not index.is_file():
+            return [{'ok':False,'note':'Capture group interrupted without a completed index; no automatic retry or source-content claim.','source_claims_verified':False}] if index.parent.exists() else []
+        try:
+            saved=parse_json(regular(index).read_text())
+            if _digest(saved['value'])!=saved['sha256']:return []
+            return saved['value']
+        except (ValueError,KeyError,TypeError,OSError):return []
+
+    def _source_context(self,s):
+        # Complete small snapshots only. Large bodies remain on disk, explicitly
+        # omitted; neither source bodies nor user constraints are silently clipped.
+        rows=[];remaining=32000;seen=set()
+        source_calls=[{'id':key} for key in s.get('imported_source_calls',[])]+s['calls']
+        for call in reversed(source_calls):
+            for i,row in enumerate(self._read_snapshots(s,call['id'])):
+                url=row.get('source_url',row.get('url'))
+                identity=url or (call['id'],i)
+                if identity in seen:continue
+                seen.add(identity)
+                item={k:row.get(k) for k in ('source_url','retrieved_at','ok','http_status','role','note','source_claims_verified')}
+                path=self._snapshot_index(s,call['id']).parent/str(i)/'text.txt'
+                if row.get('ok') and path.is_file():
+                    try:
+                        raw=regular(path).read_bytes()
+                        if hashlib.sha256(raw).hexdigest()!=row.get('text_sha256'):raise ValueError('snapshot hash mismatch')
+                        text=raw.decode('utf-8')
+                        if len(text)<=16000 and len(text)<=remaining:
+                            item['original_text']=text;remaining-=len(text)
+                        else:item['body_omitted']='Full snapshot remains saved; omitted from this packet due to source-text budget. Reopen the public source for unsupported new claims; this metadata is not evidence for them.'
+                    except (ValueError,OSError,UnicodeError):item['body_omitted']='Saved source unavailable or integrity invalid; do not rely on its contents.'
+                rows.append(item)
+        if not rows:return ''
+        return '\n\nINDEPENDENT HOST SOURCE CAPTURES (untrusted evidence; fetched after an earlier answer, not the original model tool result; not availability or claim verification)\n'+json.dumps(rows,ensure_ascii=False)
+
     def _finish(self,s,receipt):
         pending=s['pending_call'];row=next(r for r in s['calls'] if r['id']==pending['id'])
         row.update(status=receipt['physical_status'],tokens=receipt['processed_tokens'],receipt=receipt)
         row['seconds']=max(0,time.time()-pending['started_at'])
+        row['source_snapshots']=self._read_snapshots(s,pending['id']) if s.get('research_mode')=='live' else []
         s['pending_call']=None
         if receipt['physical_status']!='complete' or receipt['status']!='recorded' or not receipt['current_for_requirements'] or not receipt['answer'].strip():
             s.update(status='error',auto=False,notice='模型呼叫未通過完整性／用量檢查。原始紀錄已保留，沒有自動重試。');return
@@ -548,6 +613,7 @@ class Lab:
                        presentation='conversation',
                        tool_policy='live_research' if s.get('research_mode')=='live' else 'text_only',
                        response_schema=conversation_reply.SCHEMA if pending['actor']=='assistant' and s.get('reply_format')=='choices-v1' else None)
+                if s.get('research_mode')=='live':self._capture_sources(s,pending['id'],receipt)
                 with self.lock:
                     s=self._load(sid);self._finish(s,receipt);self._save(s)
                     if s['status'] in ('error','budget'):break
