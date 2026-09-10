@@ -3,8 +3,10 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('n
 class Element{
  constructor(tag='div'){this.tag=tag;this.children=[];this.textContent='';this.value='';this.style={};this.disabled=false;this.hidden=false;this.checked=false;this.scrollHeight=0;this.scrollTop=0;this.clientHeight=0;}
  append(...children){this.children.push(...children);}
+ set textContent(value){this._text=String(value);this.children=[];}
+ get textContent(){return this._text+this.children.map(child=>child.textContent).join('');}
  setAttribute(name,value){this[name]=value;}
- replaceChildren(...children){this.children=children;if(this.tag==='select'&&!this.value&&children.length)this.value=children[0].value;}
+ replaceChildren(...children){this._text='';this.children=children;if(this.tag==='select'&&!this.value&&children.length)this.value=children[0].value;}
  get firstChild(){return this.children[0];}
  set innerHTML(_){throw Error('Untrusted HTML must never be rendered');}
  click(){if(this.onclick)return this.onclick();}
@@ -12,14 +14,15 @@ class Element{
 const ids=[...fs.readFileSync(path.join(__dirname,'../playground/index.html'),'utf8').matchAll(/id="([^"]+)"/g)].map(m=>m[1]);
 const elements=Object.fromEntries(ids.map(id=>[id,new Element(['persona','model'].includes(id)?'select':'div')]));
 elements['max-calls'].value='30';elements['max-tokens'].value='400000';
-const messages=[],captured=[];let handler=null,count=0;
+const messages=[],captured=[],network=[];let handler=null,count=0;
 function state(id){return {id,revision:1,persona_id:'P4',name:'Person '+id,model:'gpt-6-astra',status:'paused',auto:false,busy:false,notice:'',phase_label:'',persona_turn:1,patience_turns:3,calls:1,tokens:20,limits:{max_calls:30,max_tokens:400000},actor_calls:{assistant:1,persona:0},messages:[{role:'assistant',text:'<script>PRIVATE</script>'}],pending_count:0,mood:'wary',held_documents:[],events:[],criteria:['Get an actionable response'],pending_call:false};}
 function response(value){return {ok:true,json:async()=>value};}
 const context=vm.createContext({document:{getElementById:id=>elements[id],createElement:tag=>new Element(tag)},
  crypto:{randomUUID:()=>`00000000-0000-4000-8000-${String(++count).padStart(12,'0')}`},
  localStorage:{getItem:()=>null,setItem(){}},setTimeout:()=>0,setInterval:()=>0,Blob,
- URL:{createObjectURL:()=> 'blob:private-export',revokeObjectURL(){}},
+ URL:class extends URL{static createObjectURL(){return 'blob:private-export';}static revokeObjectURL(){}},
  fetch:async(url,opts)=>{
+  network.push(url);
   if(opts.body)captured.push({url,data:JSON.parse(opts.body)});
   if(handler){const value=handler(url,opts);if(value!==undefined)return value;}
   if(url==='/api/catalog')return response({models:['gpt-6-astra'],personas:[{id:'P4',name:'Brett',identity:'Viewing tomorrow',language:'en',patience_turns:3,original_harness:'chat'}]});
@@ -33,6 +36,36 @@ async function main(){
  vm.runInContext(fs.readFileSync(path.join(__dirname,'../playground/app.js'),'utf8'),context);await settle();
  assert.equal(elements.connection.textContent,'本機測試台已連接');assert.equal(elements.persona.value,'P4');
  await run("select('A')");assert.equal(elements.title.textContent,'Person A');assert.equal(elements.messages.children[0].children[1].textContent,'<script>PRIVATE</script>');
+ // Exercise the actual DOM renderer, including untrusted syntax. No HTML parser,
+ // resource elements or network calls are permitted during presentation.
+ const descendants=root=>[root,...root.children.flatMap(descendants)],tags=(root,name)=>descendants(root).filter(el=>el.tag===name);
+ const reply=text=>{context.replyText=text;return run('renderReply(replyText)');};
+ const networkBefore=network.length;
+ let formatted=reply('先比較 **安靜** 和 *通勤*，再看 `rent_total`。\n\n1. **河邊**：£2,100\n2. 車站：£2,200\n\n- 可洗衣\n- 有採光');
+ assert.equal(tags(formatted,'p').length,1);assert.equal(tags(formatted,'strong').length,2);assert.equal(tags(formatted,'em').length,1);
+ assert.equal(tags(formatted,'code')[0].textContent,'rent_total');assert.equal(tags(formatted,'ol').length,1);assert.equal(tags(formatted,'ul').length,1);
+ assert.equal(tags(formatted,'li').length,4);assert.ok(!formatted.textContent.includes('**'));assert.ok(formatted.textContent.includes('£2,100'));
+ formatted=reply('### 下一步\n\n5. 保留原編號\n9. 不改成第六\n\n```html\n<img src="x" onerror="bad()">\n**literal code**\n```');
+ assert.equal(tags(formatted,'h5')[0].textContent,'下一步');assert.equal(tags(formatted,'ol')[0].start,5);assert.equal(tags(formatted,'li')[1].value,9);
+ assert.equal(tags(formatted,'pre')[0].textContent,'<img src="x" onerror="bad()">\n**literal code**');assert.equal(tags(formatted,'img').length,0);
+ formatted=reply('| 選項 | 費用 |\n| :--- | ---: |\n| **A** | £2,100 |\n| B \\| C | `a|b` |');
+ assert.equal(tags(formatted,'table').length,1);assert.equal(tags(formatted,'th').length,2);assert.equal(tags(formatted,'td').length,4);
+ assert.equal(tags(formatted,'td')[2].textContent,'B | C');assert.equal(tags(formatted,'td')[3].textContent,'a|b');
+ const hostile='<script>alert(1)</script> <img src=https://tracker.test/pixel onerror=bad()> <iframe src=x></iframe>\n\n![tracking](https://tracker.test/pixel)';
+ formatted=reply(hostile);for(const tag of ['script','img','iframe','svg','object','style','link'])assert.equal(tags(formatted,tag).length,0);
+ assert.ok(formatted.textContent.includes('<script>alert(1)</script>'));assert.ok(formatted.textContent.includes('![tracking](https://tracker.test/pixel)'));
+ const badLinks=['javascript:alert(1)','data:text/html,hello','file:///private/info','//tracker.test/path','https:\\tracker.test/path','https://example.test/a\nb'];
+ for(const url of badLinks){const source=`[keep label](${url})`;formatted=reply(source);assert.equal(tags(formatted,'a').length,0);assert.equal(formatted.textContent,source);}
+ formatted=reply('[**Official** source](https://example.test/path_(a)?x=1&y=2) and [HTTP](http://example.test/)');
+ const anchors=tags(formatted,'a');assert.equal(anchors.length,2);assert.equal(anchors[0].href,'https://example.test/path_(a)?x=1&y=2');assert.equal(anchors[0].textContent,'Official source');
+ for(const a of anchors){assert.equal(a.target,'_blank');assert.equal(a.rel,'noopener noreferrer');assert.equal(a.referrerPolicy,'no-referrer');}
+ const unsupported='> quoted text\n[reference][missing]\n~~not implemented~~\n\\*\\*literal stars\\*\\*\nflat_name';
+ formatted=reply(unsupported);assert.equal(tags(formatted,'strong').length,0);assert.equal(tags(formatted,'em').length,0);assert.ok(formatted.textContent.includes('[reference][missing]'));assert.ok(formatted.textContent.includes('**literal stars**'));
+ for(const text of ['```unclosed\nKeep every byte **here**','[x]('.repeat(20000),'x'.repeat(100001)])assert.equal(reply(text).textContent,text);
+ assert.equal(network.length,networkBefore,'formatting must not fetch any resource');
+ context.markdownState={...state('A'),messages:[{role:'assistant',text:'ORIGINAL **kept**',display_text:'Visible **reply**'},{role:'human',text:'[do not execute](javascript:bad())'}]};
+ const sourceBefore=JSON.stringify(context.markdownState);run('render(markdownState)');assert.equal(JSON.stringify(context.markdownState),sourceBefore,'source messages and display_text remain untouched');
+ assert.equal(tags(elements.messages.children[0],'strong')[0].textContent,'reply');assert.equal(elements.messages.children[1].children[1].textContent,'[do not execute](javascript:bad())');
  let resolveOld;handler=url=>url==='/api/session/A'?new Promise(resolve=>resolveOld=resolve):undefined;
  const old=run('refresh()');await settle();await run("select('B')");
  assert.equal(elements.send.disabled,true);assert.equal(elements.title.textContent,'正在讀取這段對話…');
