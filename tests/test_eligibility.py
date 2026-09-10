@@ -125,6 +125,127 @@ class EligibilityTests(unittest.TestCase):
         self.c["requirements"][1]["basis"].append("reported")
         self.assertEqual(self.evaluate()["candidates"]["C"]["checks"]["area"]["status"], "unresolved")
 
+    def add_commute(self, minutes=32):
+        condition = requirement("commute", "commute_minutes", "number", "lte", 35, "minutes")
+        condition["scope"] = {"kind": "journey", "destination_id": "demo-library-entrance",
+                              "time_window": "weekday-arrival-08:30-09:00"}
+        self.c["requirements"].append(condition)
+        quote = "One weekday journey took %s minutes." % minutes
+        self.e["sources"]["journey"] = quote
+        item = dict(value=minutes, unit="minutes", qualifier="observed", source_id="journey",
+                    quote=quote, scope=deepcopy(condition["scope"]))
+        self.e["candidates"][2]["fields"]["commute_minutes"] = item
+        return condition, item
+
+    def test_commute_unknown_target_stays_unresolved_below_or_above_limit(self):
+        for minutes in (32, 38):
+            for omitted in (True, False):
+                with self.subTest(minutes=minutes, omitted=omitted):
+                    self.c, self.e = fixture()
+                    condition, item = self.add_commute(minutes)
+                    if omitted:
+                        del condition["scope"]
+                    else:
+                        condition["scope"] = None
+                    check = self.evaluate()["candidates"]["C"]["checks"]["commute"]
+                    self.assertEqual(check["status"], "unresolved")
+                    self.assertIsNone(check["comparison"])
+                    self.assertEqual(check["value"], minutes)
+                    self.assertEqual(check["qualifier"], "observed")
+                    self.assertIn("commute", self.evaluate()["candidates"]["C"]["open_requirement_ids"])
+
+    def test_commute_requires_matching_evidence_context_before_scalar_comparison(self):
+        for minutes in (32, 38):
+            for scope in (None, {}, {"date": "2026-01-12", "rooms": ["bedroom"]},
+                          {"kind": "journey", "destination_id": "another-entrance",
+                           "time_window": "weekday-arrival-08:30-09:00"},
+                          {"kind": "journey", "destination_id": "demo-library-entrance",
+                           "time_window": "weekend-arrival-14:00-15:00"}):
+                with self.subTest(minutes=minutes, scope=scope):
+                    self.c, self.e = fixture()
+                    condition, item = self.add_commute(minutes)
+                    if scope == {}:
+                        del item["scope"]
+                    else:
+                        item["scope"] = scope
+                    result = self.evaluate()["candidates"]["C"]
+                    self.assertEqual(result["checks"]["commute"]["status"], "unresolved")
+                    self.assertIsNone(result["checks"]["commute"]["comparison"])
+                    self.assertNotIn("commute", result["failed_requirement_ids"])
+
+    def test_matching_observed_commute_passes_or_fails_at_inclusive_threshold(self):
+        for minutes, status in ((32, "met"), (35, "met"), (38, "failed")):
+            with self.subTest(minutes=minutes):
+                self.c, self.e = fixture()
+                self.add_commute(minutes)
+                result = self.evaluate()["candidates"]["C"]
+                self.assertEqual(result["checks"]["commute"]["status"], status)
+                self.assertEqual(result["checks"]["commute"]["comparison"], minutes <= 35)
+                if status == "failed":
+                    self.assertEqual(result["status"], "blocked")
+                    self.assertEqual(result["failed_requirement_ids"], ["commute"])
+
+    def test_changed_commute_target_invalidates_pins_and_keeps_open_id_in_todos(self):
+        condition, item = self.add_commute()
+        old_pins = pins(self.c, self.e)
+        r = proposal(self.c, self.e)
+        self.assertTrue(self.validate(r)["valid"])
+        condition["scope"]["destination_id"] = "new-user-destination"
+        self.c["revision"] += 1
+        with self.assertRaisesRegex(eligibility.EligibilityError, "constraints SHA mismatch"):
+            eligibility.evaluate(self.c, self.e, **old_pins)
+        self.assertFalse(self.validate(r)["valid"])
+        r["binding"] = pins(self.c, self.e)
+        r["todos"][0]["binding"] = pins(self.c, self.e)
+        self.assertFalse(self.validate(r)["valid"])
+        r["ranking"][0]["open_requirement_ids"].append("commute")
+        self.assertFalse(self.validate(r)["valid"])
+        r["todos"][0]["requirement_ids"].append("commute")
+        self.assertTrue(self.validate(r)["valid"])
+        self.assertIsNone(self.evaluate()["candidates"]["C"]["checks"]["commute"]["comparison"])
+        before_evidence_update = pins(self.c, self.e)
+        item["scope"] = deepcopy(condition["scope"])
+        with self.assertRaisesRegex(eligibility.EligibilityError, "evidence SHA mismatch"):
+            eligibility.evaluate(self.c, self.e, **before_evidence_update)
+        self.assertEqual(self.evaluate()["candidates"]["C"]["checks"]["commute"]["status"], "met")
+
+    def test_journey_scope_is_typed_without_placeholder_defaults(self):
+        invalid_scopes = [False, "weekday", {"kind": "journey", "destination_id": ""},
+            {"kind": "journey", "destination_id": "entrance", "time_window": " "},
+            {"kind": "journey", "destination_id": False, "time_window": "weekday-morning"},
+            {"kind": "route", "destination_id": "entrance", "time_window": "weekday-morning"},
+            {"kind": "journey", "destination_id": "entrance", "time_window": "weekday-morning", "rooms": []},
+            {"date": "2026-01-12", "rooms": ["bedroom"]}]
+        for scope in invalid_scopes:
+            with self.subTest(scope=scope):
+                self.c, self.e = fixture()
+                condition, item = self.add_commute()
+                condition["scope"] = scope
+                with self.assertRaises(eligibility.EligibilityError):
+                    self.evaluate()
+
+    def test_scope_unknown_never_satisfies_an_and_exception_predicate(self):
+        condition, item = self.add_commute()
+        predicate = {key: value for key, value in condition.items() if key not in ("id", "mandatory")}
+        self.c["exceptions"][0]["when"].append(predicate)
+        item["scope"] = None
+        result = self.evaluate()["candidates"]["C"]
+        self.assertEqual(result["failed_requirement_ids"], ["floor"])
+        self.assertEqual(result["exception_ids"], [])
+        self.assertEqual(result["open_requirement_ids"], ["budget", "commute", "quiet"])
+        item["scope"] = deepcopy(condition["scope"])
+        self.assertEqual(self.evaluate()["candidates"]["C"]["exception_ids"], ["floor-c"])
+        self.e["candidates"][2]["fields"]["dry_inspection"]["scope"] = None
+        self.assertEqual(self.evaluate()["candidates"]["C"]["failed_requirement_ids"], ["floor"])
+
+    def test_explicit_unknown_scope_is_not_an_unscoped_numeric_check(self):
+        self.c["requirements"][1]["scope"] = None
+        result = self.evaluate()["candidates"]["C"]
+        self.assertEqual(result["checks"]["area"]["status"], "unresolved")
+        self.assertIsNone(result["checks"]["area"]["comparison"])
+        del self.c["requirements"][1]["scope"]
+        self.assertEqual(self.evaluate()["candidates"]["C"]["checks"]["area"]["status"], "met")
+
     def test_exception_never_leaks_to_another_candidate(self):
         self.e["candidates"][0]["fields"]["ground_floor"]["value"] = True
         a = self.evaluate()["candidates"]["A"]

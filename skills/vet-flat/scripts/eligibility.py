@@ -72,6 +72,14 @@ def _unit(value, kind, at):
 
 
 def _scope(value, at):
+    if value is None:
+        return
+    if type(value) is dict and "kind" in value:
+        _object(value, {"kind", "destination_id", "time_window"}, at=at)
+        _require(value["kind"] == "journey", at + ".kind must be journey")
+        _text(value["destination_id"], at + ".destination_id")
+        _text(value["time_window"], at + ".time_window")
+        return
     _object(value, {"date", "rooms"}, at=at)
     _require(type(value["date"]) is str and
              re.fullmatch(r"\d{4}-\d{2}-\d{2}", value["date"]) is not None,
@@ -101,6 +109,9 @@ def _predicate(row, at, fields, requirement=False):
     _require(set(row["basis"]) <= QUALIFIERS - {"unknown"}, at + ".basis is unsupported")
     if "scope" in row:
         _scope(row["scope"], at + ".scope")
+    if row["field"] == "commute_minutes" and row.get("scope") is not None:
+        _require(row["scope"].get("kind") == "journey",
+                 at + ".scope must be a journey scope for commute_minutes")
     spec = (row["type"], row["unit"])
     _require(row["field"] not in fields or fields[row["field"]] == spec,
              at + " conflicts with the field type/unit")
@@ -215,6 +226,15 @@ def _validate_inputs(constraints, evidence, binding):
     return requirements, candidates
 
 
+def _scope_matches(target, observed):
+    if observed is None:
+        return False
+    if target.get("kind") == "journey":
+        return target == observed
+    return ("kind" not in observed and target["date"] == observed["date"] and
+            set(target["rooms"]) <= set(observed["rooms"]))
+
+
 def _check(predicate, fields):
     item = fields.get(predicate["field"])
     if item is None or item["qualifier"] == "unknown":
@@ -226,9 +246,13 @@ def _check(predicate, fields):
     if "scope" in item:
         result["scope"] = item["scope"]
     scope = predicate.get("scope")
-    if scope and ("scope" not in item or scope["date"] != item["scope"]["date"] or
-                  not set(scope["rooms"]) <= set(item["scope"]["rooms"])):
-        return dict(result, status="unresolved", reason="Evidence does not cover the required date/rooms")
+    if scope is None and (predicate["field"] == "commute_minutes" or "scope" in predicate):
+        return dict(result, status="unresolved", reason="Required applicability scope is unknown")
+    if scope is not None and not _scope_matches(scope, item.get("scope")):
+        reason = ("Evidence does not match the required destination/time window"
+                  if scope.get("kind") == "journey" else
+                  "Evidence does not cover the required date/rooms")
+        return dict(result, status="unresolved", reason=reason)
     left, right = item["value"], predicate["value"]
     if predicate["type"] == "number":
         left, right = Decimal(str(left)), Decimal(str(right))
