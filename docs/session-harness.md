@@ -72,7 +72,7 @@ python3 skills/vet-flat/scripts/session_state.py --project . apply --expected-re
 
 | 使用者改變 | 記錄與處理 |
 |---|---|
-| 提高／降低房租或 all-in 預算 | `requirement.update` 保存數字、幣別、週期與 scope；若另有登錄 rental budget，同一 pending request 下也用 `budget.set` 同步該上限；不會增加 API tokens |
+| 提高／降低房租或每月總花費預算 | `requirement.update` 保存數字、幣別、週期與 scope；若另有登錄 rental budget，同一 pending request 下也用 `budget.set` 同步該上限；不會增加 API tokens |
 | 提高／降低執行資源 | `budget.set` 區分 `api_tokens`／`execution_spend`；原本 spend 不歸零 |
 | 新增／改值／必須變偏好 | `requirement.add` 或 `requirement.update` + `changes`，保留穩定 ID 和歷史 |
 | 禁止改為 conditional | 保存新的 strength、predicate、scope、exceptions；未知 predicate 不可變成無條件 PASS |
