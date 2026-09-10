@@ -41,7 +41,7 @@ logs can contain source text, personal details and provider metadata; treat them
 
 ## Running experiments
 
-Use synthetic or deliberately supplied documents in a dedicated work directory. Claude actors
+Use synthetic or deliberately supplied documents in a dedicated work directory for fixed-evidence tests. Explicit live-research sessions additionally permit public web retrieval, with source/tool records retained and no automatic fictional fallback. Their read-only research policy is an instruction plus host configuration, not a preventative tool allowlist or independent filesystem/network sandbox. Claude actors
 explicitly restrict available built-in tools and exclude inherited MCP/configuration hooks;
 permission allow-rules alone do not disable tools. Codex read-only mode still permits reads:
 no-tools behavior observed in a transcript is not proof of preventative filesystem isolation.

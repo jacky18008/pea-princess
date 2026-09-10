@@ -165,6 +165,155 @@ class SessionRunnerTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             runner.recover(self.root, "step-1")
 
+    def test_default_text_only_rejects_tool_event_and_keeps_known_usage(self):
+        event = {"type": "item.completed", "item": {
+            "id": "search-1", "type": "web_search", "status": "completed"}}
+        with self.assertRaises(runner.CallControlError):
+            self.run_step(lambda *_: terminal(tool_events=[event]))
+        folder = self.root / ".pea-state/runs/step-1"
+        manifest = runner._envelope(folder, "manifest.json")
+        self.assertEqual(2, manifest["version"])
+        self.assertEqual("text_only", manifest["tool_policy"])
+        self.assertEqual("text_only", manifest["request"]["tool_policy"])
+        self.assertEqual(runner._digest(manifest["request"]), manifest["request_hash"])
+        self.assertFalse(runner._envelope(folder / "physical", "run.json")["allow_tools"])
+        receipt = runner.recover(self.root, "step-1")
+        self.assertEqual("failed", receipt["physical_status"])
+        self.assertEqual(20, receipt["processed_tokens"])
+        self.assertFalse(self.store.show()["budgets"]["tokens"]["unknown_spend"])
+
+    def test_fake_cli_policy_flags_and_live_events_survive_recovery(self):
+        for policy, source_status in (("text_only", None), ("live_research", "completed"),
+                                      ("live_research", "failed")):
+            with self.subTest(policy=policy, source_status=source_status):
+                call_id = policy + "-" + (source_status or "plain")
+                events = [] if source_status is None else [{"type": "item.completed", "item": {
+                    "id": "search-1", "type": "web_search", "status": source_status,
+                    "query": "synthetic fixture only"}}]
+                raw = "\n".join(json.dumps(event) for event in events + [
+                    {"type": "turn.completed", "usage": terminal()["direct_terminal_usage"]}])
+
+                def launch(cmd, cwd, timeout, family, attempts):
+                    configs = [cmd[i + 1] for i, arg in enumerate(cmd[:-1]) if arg == "-c"]
+                    self.assertIn('web_search="' + ("live" if policy == "live_research" else "disabled") + '"', configs)
+                    self.assertIn("project_doc_max_bytes=0", configs)
+                    self.assertIn("--ignore-user-config", cmd)
+                    self.assertEqual("read-only", cmd[cmd.index("--sandbox") + 1])
+                    self.assertEqual("skip_host_skill_discovery", cmd[cmd.index("--enable") + 1])
+                    self.assertIn("skills.config=[{path=" + json.dumps(str(Path.home() / ".agents/skills/vet-flat"))
+                                  + ",enabled=false}]", configs)
+                    self.assertEqual(("codex", 1), (family, attempts))
+                    Path(cmd[cmd.index("--output-last-message") + 1]).write_text("Synthetic answer")
+                    return runner.launch.LaunchResult(stdout=raw, exit_code=0)
+
+                with mock.patch.object(runner.launch, "run", side_effect=launch) as mocked:
+                    first = self.run_step(runner._codex_invoke, call_id=call_id, tool_policy=policy)
+                mocked.assert_called_once()
+                folder = self.root / ".pea-state/runs" / call_id
+                manifest = runner._envelope(folder, "manifest.json")
+                self.assertEqual((2, policy, policy), (manifest["version"], manifest["tool_policy"],
+                                                     manifest["request"]["tool_policy"]))
+                self.assertIs(policy == "live_research", runner._envelope(folder / "physical", "run.json")["allow_tools"])
+                checkpoint = json.loads((folder / "physical/control/checkpoint.json").read_text())
+                record = checkpoint["state"]["calls"]["answer"]["record"]
+                self.assertIs(policy == "live_research", checkpoint["state"]["allow_tools"])
+                self.assertEqual(events, record["tool_events"])
+                self.assertEqual(raw, record["launch_result"]["stdout"])
+                self.assertEqual(terminal()["direct_terminal_usage"], record["direct_terminal_usage"])
+                revision = self.store.show()["revision"]
+                with mock.patch.object(runner.launch, "run", side_effect=AssertionError("no process on recovery")):
+                    second = runner.recover(self.root, call_id)
+                    third = runner.recover(self.root, call_id)
+                self.assertEqual(first, second)
+                self.assertEqual(second, third)
+                self.assertEqual(revision, self.store.show()["revision"])
+                self.assertEqual("complete", first["physical_status"])
+                self.assertEqual(20, first["processed_tokens"])
+                self.assertEqual(len(events), first["tool_observations"]["event_count"])
+                self.assertEqual(int(source_status == "failed"), first["tool_observations"]["explicit_failed_event_count"])
+                self.assertFalse(first["tool_observations"]["source_claims_verified"])
+        budget = self.store.show()["budgets"]["tokens"]
+        self.assertEqual(60, budget["spent"])
+        self.assertEqual(3, len(budget["spends"]))
+        self.assertFalse(budget["unknown_spend"])
+
+    def test_invalid_tool_policy_is_rejected_before_dispatch(self):
+        revision = self.store.show()["revision"]
+        invoke = mock.Mock(return_value=terminal())
+        for policy in (None, True, "", "live", [], {"live_research": True}):
+            with self.subTest(policy=policy):
+                with self.assertRaises(ValueError):
+                    self.run_step(invoke, tool_policy=policy)
+        invoke.assert_not_called()
+        self.assertEqual(revision, self.store.show()["revision"])
+        self.assertFalse(self.store.show()["dispatches"])
+        self.assertFalse((self.root / ".pea-state/runs/step-1").exists())
+
+    def test_rehashed_tool_policy_tampering_is_rejected_by_binding(self):
+        self.run_step(tool_policy="live_research")
+        folder = self.root / ".pea-state/runs/step-1"
+        request_path = next((folder / "physical/requests").glob("*.json"))
+        cases = ((folder / "manifest.json", "value", "sha256", "outer"),
+                 (folder / "manifest.json", "value", "sha256", "request"),
+                 (folder / "manifest.json", "value", "sha256", "both"),
+                 (request_path, "value", "sha256", "physical_request"),
+                 (folder / "physical/run.json", "value", "sha256", "allow_tools"),
+                 (folder / "physical/control/checkpoint.json", "state", "state_sha256", "allow_tools"))
+        for path, value_key, hash_key, kind in cases:
+            with self.subTest(path=str(path.relative_to(folder)), kind=kind):
+                original = path.read_bytes()
+                envelope = json.loads(original)
+                value = envelope[value_key]
+                if kind in ("outer", "both"):
+                    value["tool_policy"] = "text_only"
+                if kind in ("request", "both", "physical_request"):
+                    value["request"]["tool_policy"] = "text_only"
+                if kind == "allow_tools":
+                    value["allow_tools"] = False
+                envelope[hash_key] = runner._digest(value)
+                path.write_text(json.dumps(envelope))
+                try:
+                    with self.assertRaises((ValueError, runner.CallControlError)):
+                        runner.recover(self.root, "step-1")
+                finally:
+                    path.write_bytes(original)
+        self.assertEqual(20, self.store.show()["budgets"]["tokens"]["spent"])
+        self.assertEqual("complete", runner.recover(self.root, "step-1")["physical_status"])
+
+    def test_legacy_v1_recovery_accepts_only_absent_tool_policy(self):
+        # Build historical evidence in this fresh fake project; never rewrite
+        # a SessionStore event or downgrade an already dispatched request.
+        packet = self.store.context()
+        request = {"model": "test-model", "prompt": "Do not invoke tools. Synthetic legacy request.",
+                   "timeout_seconds": 180, "packet_revision": packet["revision"],
+                   "packet_event_hash": packet["event_hash"]}
+        request_hash = runner._digest(request)
+        state = self.apply({"op": "dispatch.start", "id": "legacy", "task_id": "check",
+                            "based_on_revision": packet["revision"], "request_hash": request_hash,
+                            "budget_ids": ["tokens"]})
+        manifest = {"version": 1, "id": "legacy", "task_id": "check", "token_budget_id": "tokens",
+                    "request": request, "request_hash": request_hash, "packet": packet,
+                    "dispatch_revision": state["revision"]}
+        folder = runner._directory(self.root, "legacy", create=True)
+        runner._save(folder, "manifest.json", {"value": manifest, "sha256": runner._digest(manifest)})
+        control = runner.DurableRun(folder / "physical", ["answer"], {"project_step": request_hash},
+                                    max_total_tokens=1000, allow_tools=False, allow_claude=False)
+        invoke = mock.Mock(return_value=dict(terminal(), project_request_hash=request_hash))
+        control.run_callable("answer", "check", "agent", "project_step", invoke, request=request, family="codex")
+        with mock.patch.object(runner, "_codex_invoke", side_effect=AssertionError("legacy recovery is offline")):
+            receipt = runner.recover(self.root, "legacy")
+        invoke.assert_called_once()
+        self.assertEqual((1, "text_only", 20), (receipt["version"], receipt["tool_policy"], receipt["processed_tokens"]))
+        for target in (manifest, request):
+            with self.subTest(target="outer" if target is manifest else "request"):
+                target["tool_policy"] = "text_only"
+                runner._save(folder, "manifest.json", {"value": manifest, "sha256": runner._digest(manifest)})
+                with self.assertRaises(ValueError):
+                    runner.recover(self.root, "legacy")
+                del target["tool_policy"]
+        runner._save(folder, "manifest.json", {"value": manifest, "sha256": runner._digest(manifest)})
+        self.assertEqual(receipt, runner.recover(self.root, "legacy"))
+
     def record_fact(self):
         self.apply({"op": "fact.record", "id": "latest-fact", "value": "New viewing evidence",
                     "critical": True, "requirement_ids": ["dry-ground-floor"],

@@ -70,7 +70,10 @@ class LabTests(unittest.TestCase):
         self.assertEqual('not_evaluated',s['quality']);self.assertEqual(80,s['tokens'])
         self.assertIn('Do not sign or pay tomorrow',self.prompts[1])
         self.assertIn('What should I ask for?',self.prompts[2])
-        self.assertNotIn('THE CRITERIA',self.prompts[1]);self.assertNotIn('success',self.prompts[0])
+        self.assertNotIn('THE CRITERIA',self.prompts[1])
+        # Ordinary words such as "unsuccessful search" are not hidden gold.
+        for criterion in self.lab.cards['P4']['success']:
+            self.assertNotIn(criterion,self.prompts[0]);self.assertNotIn(criterion,self.prompts[1])
 
     def test_runtime_settings_are_projected_only_to_answerer_without_gold(self):
         sid=self.create();self.answers=['Practical answer.','Thank you. [END]']

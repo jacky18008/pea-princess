@@ -12,7 +12,7 @@ Enumerate cheaply, read expensively, and only at the end.
 2. Free: filtering that list by distance, age, area, floor and price band.
 3. Moderate: asking the user to paste review pages for the survivors only.
 4. Expensive, and last: the agent reading review text and officer reports.
-**The agent reads compact JSON and pasted excerpts. It never reads raw pages.** The compression happens in the scripts; if page text reaches the agent, the sweep costs several times what it should.
+**For scripted register sweeps, use compact JSON and retrieve the original source spans when a critical fact needs checking.** Host listing research may read permitted public pages; retain relevant evidence once and avoid repeatedly loading whole pages.
 Deep review reading is done only inside `sweep_deep_read_radius_m`, even when the enumeration radius is `sweep_radius_m`.
 
 ## Stage 0 — Anchor
@@ -21,7 +21,9 @@ Deep review reading is done only inside `sweep_deep_read_radius_m`, even when th
 - A map pin on a listing portal is never geometry. Neither is a police snap point.
 - Record the radius, the anchor and the date at the top of the report; every later number is relative to them.
 
-## Stage 1 — Enumerate (take the union of two routes)
+## Stage 1 — Enumerate
+
+Read [listing-evidence.md](../listing-evidence.md) for real candidate discovery using permitted host tools. This register sweep finds buildings; it does not establish advertised units or current availability. Merge public operator listings where accessible, preserving unit identities and source dates. A failed lookup is not permission to create example flats.
 1. **Energy-register postcode census.** `python3 scripts/geo.py cover --lat <lat> --lng <lng> --radius <m>` gives the postcodes inside the circle (the underlying radius search caps at `nearest_postcode_max_radius_m` and silently ignores a larger value, so page the circle rather than asking for one big one); then `python3 scripts/epc.py search --postcode "<pc>"` for each, and `python3 scripts/epc.py building --postcode "<pc>" --match "<name>"` for each building worth expanding. Where high floors are missing, search by street instead.
 2. **A user-supplied list.** Listing portals and resident-review sites cannot be enumerated automatically; ask the user to paste the search results or the names of the developments they already know, and merge that list in. See `inputs.md`.
 Deduplicate by building, not by listing: one building split across postcodes is one candidate, and two flats in the same building are one entry with two units.
@@ -44,7 +46,7 @@ Anything that fails here never reaches a script that costs money. Record the cou
 ## Stage 3 — Per-building facts (scripts only, capped)
 Cap the deep lines at `sweep_max_deep_lines` buildings. For each, run and store **one compact JSON record**, every field carrying `source_url`, `retrieved_at` and `evidence_class`:
 `epc.py building` · `crime.py latest` then `crime.py box` · `commute.py journey`, `stations`, `redundancy` · `planning.py near` and `stages` · `roads.py near` · `company.py search`, `profile`, `address-search` · `redress.py cmp|prs|tpo|rogue|heat-trust` · `landregistry.py price-paid`.
-No page text is kept. The record is the input to every later stage.
+Keep compact records for later stages and retain the source spans needed to verify critical claims.
 
 ## Stage 4 — Worst-review surgery (paste mode)
 For the survivors only, ask the user once for the review pages, then run the full review hygiene in `06-management-neighbours.md`:
@@ -62,7 +64,7 @@ Every reviewer must also file a **"checked but not proven"** list: the defects t
 ## Stage 6 — Integration
 Produce, in this order:
 1. **Coverage and denominator table** — how many buildings were enumerated, excluded, filtered, vetted; and for each source, what was searched and what came back empty.
-2. **Comparison table**, one row per building: original verdict, verdict after the adversarial pass, organic management score and invited share, harshest review theme, commute and redundancy grade, residual crime reading, distance to works, best available unit and its all-in cost, landlord type.
+2. **Comparison table**, one row per building: original verdict, verdict after the adversarial pass, organic management score and invited share, harshest review theme, commute and redundancy grade, residual crime reading, distance to works, best evidenced unit and its estimated total monthly cost, landlord type.
 3. **Worst-review matrix**: building, distance, source, date, score, organic or not, and a short verbatim excerpt.
 4. **Structural versus single-building findings.** A theme found across at least `structural_finding_min_developments` buildings and at least `structural_finding_min_years` years is structural and may be generalised to the area. Anything narrower is a single-building defect and may not.
 5. **Red flags and green lights**, each with a grade, a source class, and whether it is reversible; plus the "not found" table carrying the exact search strings used.

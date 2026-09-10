@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Loopback-only interactive persona lab using the installed, authenticated Codex CLI.
+"""Loopback-only human research and synthetic persona lab using the user's Codex CLI.
 
 No API key, external assets, publication, or Claude process. User text goes through
 Codex to its model service. Sessions/physical usage are private. One actor at a time;
@@ -39,6 +39,11 @@ STATE_FIELDS = ('turn', 'released', 'events', 'invalid', 'impatience', 'paste_mi
                 'over_session_mark', 'fired', 'no_progress', 'learned', 'mood', 'materialised')
 ID = re.compile(r'[a-f0-9]{32}\Z')
 MAX_SESSION_BYTES = 8 * 1024 * 1024
+RESEARCH_MODES = ('live', 'fixture')
+CAPABILITIES = {
+    'live': '可嘗試唯讀公開網頁研究；網站限制或查無資料會明示。廣告刊登不等於已確認可租；不登入、聯絡、預訂或付款。',
+    'fixture': '合成人物測試；僅使用已提供的虛構材料，不執行即時搜尋。',
+}
 
 class LabError(ValueError):
     pass
@@ -72,7 +77,7 @@ def source_hashes():
              ROOT/'bench/durable_run.py', ROOT/'bench/call_control.py', ROOT/'bench/launch.py',
              ROOT/'skills/vet-flat/scripts/session_state.py', ROOT/'evals/personas.json',
              ROOT/'tools/conversation_reply.py', ROOT/'playground/conversation-policy.md']
-    paths += [ROOT/'dist/prompt-pack/INSTRUCTIONS.md']
+    paths += [ROOT/'dist/prompt-pack/INSTRUCTIONS.md', ROOT/'skills/vet-flat/SKILL.md']
     paths += sorted((ROOT/'skills/vet-flat/references').rglob('*.md'))
     return {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in paths}
 
@@ -81,7 +86,38 @@ def runtime_settings(card):
     return {key:card['settings'][key] for key in ('budget_mode','fixed_form','ask_if_missing')}
 
 def configured_system(card):
-    return personas.system_prompt(card,'chat')+'\n\nINTERNAL EXECUTION SETTINGS (never cite or announce)\n'+json.dumps(runtime_settings(card),ensure_ascii=False)+'''\nThese settings override generic defaults: fixed_form chooses required report rows; ask_if_missing controls only missing fixed-form items. They do not require an onboarding questionnaire or visible configuration banner. Later user changes override within their scope. Do not claim unavailable tools or saved files.\n\n'''+(ROOT/'playground/conversation-policy.md').read_text()
+    return personas.system_prompt(card,'chat')+'\n\nRESEARCH MODE: fixture (synthetic test; no live search).\nINTERNAL EXECUTION SETTINGS (never cite or announce)\n'+json.dumps(runtime_settings(card),ensure_ascii=False)+'''\nThese settings override generic defaults: fixed_form chooses required report rows; ask_if_missing controls only missing fixed-form items. They do not require an onboarding questionnaire or visible configuration banner. Later user changes override within their scope. Do not claim unavailable tools or saved files.\n\n'''+(ROOT/'playground/conversation-policy.md').read_text()
+
+def live_references(text):
+    """Small intent-based selection from tracked instructions, never persona fixtures."""
+    names = ['conversation-quality.md', 'onboarding.md', 'listing-evidence.md', 'inputs.md', 'arithmetic.md',
+             'axes/00-area-sweep.md', 'axes/11-commute-redundancy.md']
+    for terms, name in [
+        (('student', 'university', 'campus', 'hall', 'kcl', '學生', '宿舍', '學校'), 'student-housing.md'),
+        (('short', 'hotel', 'bridge', 'week', '短租', '短住', '旅館', '幾天', '幾週'), 'axes/15-bridging-short-lets.md'),
+        (('contract', 'deposit', 'sign', 'tenancy', '合約', '簽', '押金'), 'axes/07-compliance-landlord.md'),
+    ]:
+        if any(term in text.lower() for term in terms): names.append(name)
+    return names
+
+def live_system(text):
+    base = ROOT/'skills/vet-flat'
+    sections = [("CURRENT REPOSITORY SKILL", (base/'SKILL.md').read_text())]
+    story_requested=any(term in text.lower() for term in (
+        'past homes', 'housing history', 'places i have lived', 'past housing',
+        '居住經歷', '以前住過', '過去住過', '住房故事'))
+    for name in live_references(text):
+        body=(base/'references'/name).read_text();label='REFERENCE '+name
+        if name=='onboarding.md' and not story_requested:
+            marker='\n## 2b. Tell me about the places you have lived'
+            if marker not in body:raise LabError('初始研究指引的段落邊界已變更，請先檢查。')
+            body=body.split(marker,1)[0]
+            label+=' (selected introduction and sections 1–2; stops before section 2b)'
+        sections.append((label,body))
+    sections.append(('LOCAL CONVERSATION POLICY', (ROOT/'playground/conversation-policy.md').read_text()))
+    sections.append(('LIVE RESEARCH CAPABILITIES', '''RESEARCH MODE: live. This is a real human-led research request, not a persona or fixture test. Use the supplied current repository instructions; do not load installed host skills, unrelated files, credentials, connectors or earlier private sessions. Only read-only public web research is authorized, subject to the skill's source restrictions. Do not use shell tools, write files, sign in, contact anyone, reserve, book or pay. A referenced script is not available in this lane: use permitted public web evidence or the documented manual arithmetic/checking fallback and do not claim program validation. Do not run the whole sweep or additional agents automatically. Work on one useful bounded next step. The host preserves exact human inputs, history and receipts; it has not automatically normalized numeric eligibility conditions. Never claim the host has verified factual eligibility.
+Web search is enabled for this call but a search/page may fail. Record actual source URLs and UTC retrieval date/time beside current factual claims; preserve source publication dates where relevant. Use a tool's actual timestamp when available. Otherwise say the source was checked during this request and label the supplied host request time as request time, not an exact per-source retrieval time. Never fabricate timestamp precision. A search snippet is a lead, an advertisement is an advertised offer, and neither confirms that a unit is available for this person's dates or terms. Confirmed availability requires explicit dated evidence tied to the exact unit, period and terms. State what is advertised, confirmed, estimated or unresolved. If public access fails, say what failed and continue with known evidence; never substitute fictional listings unless the human explicitly asks for a teaching example. Do not inherit example floors, budgets, destinations or housing exclusions as this person's preferences. Later actual human inputs supersede earlier instructions only within their stated scope.'''))
+    return '\n\n'.join(title+'\n'+body for title, body in sections)
 
 class FrozenController(personas.Controller):
     def __init__(self, card, seed, fixtures, saved=None):
@@ -116,10 +152,16 @@ def codex_invoke(request, folder):
     answer = regular(folder/'answer.txt')
     executable = shutil.which('codex')
     if not executable: raise LabError('找不到本機 Codex CLI。')
+    policy = request.get('tool_policy', 'text_only')
+    if policy not in ('text_only', 'live_research'): raise LabError('研究工具政策無效。')
+    host_skill = str(Path.home()/'.agents/skills/vet-flat')
     command = [executable, 'exec', '--ignore-user-config', '--ephemeral',
                '--cd', str(work), '--sandbox', 'read-only', '--skip-git-repo-check',
                '--model', request['model'], '-c', 'model_reasoning_effort="low"',
                '-c', 'project_doc_max_bytes=0',
+               '--enable', 'skip_host_skill_discovery',
+               '-c', 'skills.config=[{path='+json.dumps(host_skill)+',enabled=false}]',
+               '-c', 'web_search="'+('live' if policy == 'live_research' else 'disabled')+'"',
                '--json', '--output-last-message', str(answer), '--', '-']
     if request.get('response_schema') is not None:
         schema_path = work/'reply-schema.json'
@@ -215,6 +257,7 @@ class Lab:
         _atomic_json(path, saved); path.chmod(0o600)
 
     def _control(self, s):
+        if s.get('research_mode') == 'live': raise LabError('真人研究沒有自動 persona。')
         return FrozenController(s['card'], s['seed'], s['fixtures'], s['controller'])
 
     def _store(self, s): return SessionStore(self._folder(s['id']))
@@ -224,17 +267,24 @@ class Lab:
         s['actions'].append({'kind': kind, 'data': data, 'time': time.time()})
 
     def catalog(self):
-        return {'models': list(MODELS), 'personas': [{'id': c['id'], 'name': c['name'],
+        return {'models': list(MODELS), 'research_modes': list(RESEARCH_MODES),
+             'capabilities': copy.deepcopy(CAPABILITIES), 'personas': [{'id': c['id'], 'name': c['name'],
              'identity': c['identity'], 'language': c['language'], 'patience_turns': c['patience_turns'],
              'runtime_settings':runtime_settings(c),
              'original_harness': c['tech']['harness']} for c in self.cards.values()]}
 
     def create(self, data):
         if self.runtime_sources != source_hashes():raise LabError('程式已更新，請等待測試台重新啟動後再建立對話。')
-        if set(data) != {'persona_id','model','max_calls','max_tokens','seed','client_id'}: raise LabError('建立對話的欄位不完整。')
+        mode = data.get('research_mode', 'fixture')
+        if mode not in RESEARCH_MODES: raise LabError('研究模式無效。')
+        fields = {'model','max_calls','max_tokens','seed','client_id'}
+        fields |= {'research_mode','initial_request'} if mode == 'live' else {'persona_id'}
+        if mode == 'fixture' and 'research_mode' in data: fields.add('research_mode')
+        if set(data) != fields: raise LabError('建立對話的欄位不完整。')
         for k, low, high in [('max_calls',1,80),('max_tokens',10000,2000000),('seed',1,10000)]:
             if type(data[k]) is not int or not low <= data[k] <= high: raise LabError('用量上限或 seed 超出允許範圍。')
-        if data['persona_id'] not in self.cards or data['model'] not in MODELS: raise LabError('請選擇已提供的 persona 與 Codex 模型。')
+        if data['model'] not in MODELS or (mode == 'fixture' and data['persona_id'] not in self.cards): raise LabError('請選擇已提供的 persona 與 Codex 模型。')
+        if mode == 'live' and (not isinstance(data['initial_request'],str) or not data['initial_request'].strip() or len(data['initial_request'])>8000): raise LabError('請輸入 1–8,000 字的實際需求。')
         try: client = str(uuid.UUID(data['client_id']))
         except (ValueError, TypeError, AttributeError): raise LabError('操作識別碼無效。')
         sid = uuid.uuid5(uuid.NAMESPACE_URL, 'pea-persona-lab/'+client).hex
@@ -245,21 +295,30 @@ class Lab:
                 if s['creation'] != data: raise LabError('這個操作已使用不同設定。')
                 return {'id': sid}
             if len(list(self.root.glob('*/session.json'))) >= 200: raise LabError('請先封存舊對話；目前最多 200 段。')
-            card = copy.deepcopy(self.cards[data['persona_id']]); fixtures = {d['file']: personas.fixture_text(d['file']) for d in card.get('documents',[])}
-            c = FrozenController(card, data['seed'], fixtures); c.turn=1
-            for doc in c.due(1): c.release(doc,1,'scheduled')
-            c.brief(1)
+            if mode == 'fixture':
+                card = copy.deepcopy(self.cards[data['persona_id']]); fixtures = {d['file']: personas.fixture_text(d['file']) for d in card.get('documents',[])}
+                c = FrozenController(card, data['seed'], fixtures); c.turn=1
+                for doc in c.due(1): c.release(doc,1,'scheduled')
+                c.brief(1)
+                opening=card['opening_message'];system=configured_system(card);controller=c.snapshot()
+            else:
+                card={};fixtures={};controller={};opening=data['initial_request'];system=live_system(opening)
             folder.mkdir(mode=0o700)
-            store = SessionStore(folder); store.init('persona-'+sid)
-            event(store,'budget.set',id='tokens',scope='api_tokens',limit=data['max_tokens'],unit='tokens',provenance=provenance('User selected the displayed session token ceiling.'))
-            event(store,'task.add',id='conversation',title='One bounded actor step in this synthetic conversation',budget_ids=['tokens'],acceptance=['Persist actor text and measured usage; do not equate persona END with quality acceptance.'])
-            opening=card['opening_message']
+            store = SessionStore(folder); store.init(('live-' if mode == 'live' else 'persona-')+sid)
+            event(store,'budget.set',id='tokens',scope='api_tokens',limit=data['max_tokens'],unit='tokens',provenance=provenance('User selected the displayed session token ceiling.','interactive-human' if mode=='live' else 'local-test-operator'))
+            event(store,'task.add',id='conversation',title='One bounded research response to an actual human input' if mode == 'live' else 'One bounded actor step in this synthetic conversation',budget_ids=['tokens'],acceptance=['Persist actor text and measured usage; do not equate a finished call with verified eligibility or availability.' if mode == 'live' else 'Persist actor text and measured usage; do not equate persona END with quality acceptance.'])
+            if mode == 'live':
+                rid='human-initial'
+                event(store,'request.capture',id=rid,text=opening,source='interactive-human:initial')
+                event(store,'requirement.add',id='live-user-inputs',value=[opening],strength='must',scope='live-research-user-instructions',provenance=dict(provenance(opening,rid),request_id=rid))
+                event(store,'request.resolve',id=rid,resolution='applied',note='Exact human request retained as ordered instructions; no automatic semantic eligibility extraction.')
             s={'schema_version':1,'id':sid,'revision':0,'created_at':time.time(),'creation':copy.deepcopy(data),
+               'research_mode':mode,
                'model':data['model'],'limits':{'max_calls':data['max_calls'],'max_tokens':data['max_tokens']},'seed':data['seed'],
-               'card':card,'fixtures':fixtures,'system':configured_system(card),'runtime_settings':runtime_settings(card),'sources':source_hashes(),
+               'card':card,'fixtures':fixtures,'system':system,'runtime_settings':runtime_settings(card) if mode == 'fixture' else None,'sources':source_hashes(),
                'reply_format':'choices-v1',
-               'controller':c.snapshot(),'persona_turn':1,'history':[['user',opening]],'persona_history':[['user',opening]],
-               'messages':[{'role':'persona','text':opening,'turn':1}], 'interventions':[], 'amendments':[],
+               'controller':controller,'persona_turn':1,'history':[['user',opening]],'persona_history':[['user',opening]] if mode == 'fixture' else [],
+               'messages':[{'role':'human' if mode == 'live' else 'persona','text':opening,'turn':1}], 'interventions':[], 'amendments':[],
                'queue':[], 'calls':[], 'pending_call':None,'preparing_input':None,'next_actor':'assistant','auto':False,'pause_requested':False,
                'status':'ready','notice':'','actions':[],'client_ids':{},'stop_reason':None}
             self._action(s,'created',data);self._save(s)
@@ -268,6 +327,7 @@ class Lab:
     def snapshot(self, sid):
         with self.lock:
             s=self._load(sid); c=s['controller']; usages=[r.get('tokens') for r in s['calls'] if r['status']!='pending']
+            mode=s.get('research_mode','fixture');live=mode=='live'
             tokens=None if any(u is None for u in usages) else sum(usages)
             phase=s['pending_call']['actor'] if s['pending_call'] else s['next_actor']
             notice=s['notice']
@@ -276,27 +336,31 @@ class Lab:
             if self.runtime_sources!=current_sources:
                 notice=('程式已更新；既有紀錄仍可閱讀或匯出，請等待測試台重新啟動。 '+notice).strip()
             elif not compatible: notice=('這是舊版保存的對話；可以閱讀或匯出，請建立新對話測試新版。 '+notice).strip()
-            if s['amendments']: notice=('此情境已被你的條件變更修改，不再是原始 benchmark。 '+notice).strip()
-            return {'id':sid,'revision':s['revision'],'persona_id':s['card']['id'],'name':s['card']['name'],
+            if s['amendments'] and not live: notice=('此情境已被你的條件變更修改，不再是原始 benchmark。 '+notice).strip()
+            return {'id':sid,'revision':s['revision'],'persona_id':s['card'].get('id'),'name':'真實找房研究' if live else s['card']['name'],
+              'research_mode':mode,'capability_status':CAPABILITIES[mode],'next_actor':s['next_actor'],
               'model':s['model'],'status':s['status'],'auto':s['auto'],'busy':self.busy==sid,'notice':notice,'compatible':compatible,
               'runtime_settings':copy.deepcopy(s.get('runtime_settings')),
               'phase_label':('Codex 正在回答' if phase=='assistant' else 'Persona 正在想下一個問題') if self.busy==sid else '',
-              'persona_turn':s['persona_turn'],'patience_turns':s['card']['patience_turns'],'calls':len(s['calls']),
+              'persona_turn':s['persona_turn'],'patience_turns':s['card'].get('patience_turns'),'calls':len(s['calls']),
               'tokens':tokens,'limits':s['limits'],'actor_calls':{role:sum(r['actor']==role for r in s['calls']) for role in ('assistant','persona')},
               'messages':copy.deepcopy(s['messages'])+[{'role':'human','text':m['text'],'kind':m['kind'],'pending':True} for m in s['queue']],
-              'pending_count':len(s['queue']),'mood':c['mood'],'held_documents':[d['name'] for d in c['released']],
-              'events':c['events'],'criteria':s['card'].get('success',[]),'stop_reason':s['stop_reason'],
+              'pending_count':len(s['queue']),'mood':c.get('mood'),'held_documents':[d['name'] for d in c.get('released',[])],
+              'events':c.get('events',[]),'criteria':s['card'].get('success',[]),'stop_reason':s['stop_reason'],
               'quality':'not_evaluated','amended':bool(s['amendments']),'pending_call':bool(s['pending_call'] or s.get('preparing_input'))}
 
     def list(self):
         with self.lock:
             rows=[self.snapshot(p.parent.name) for p in sorted(self.root.glob('*/session.json'),key=lambda p:p.stat().st_mtime,reverse=True)]
-            return {'sessions':[{k:s[k] for k in ('id','name','status','calls','tokens')} for s in rows]}
+            return {'sessions':[{k:s[k] for k in ('id','name','status','calls','tokens','research_mode')} for s in rows]}
 
     def export(self,sid):
         with self.lock:
             s=self._load(sid)
-            return {'private':True,'id':sid,'persona_id':s['card']['id'],'model':s['model'],'mode':'chat-adapted dynamic persona; same-family Codex',
+            live=s.get('research_mode')=='live'
+            return {'private':True,'id':sid,'persona_id':s['card'].get('id'),'model':s['model'],
+                    'research_mode':s.get('research_mode','fixture'),'capability_status':CAPABILITIES['live' if live else 'fixture'],
+                    'mode':'human-led public research; no synthetic persona' if live else 'chat-adapted dynamic persona; same-family Codex',
                     'messages':s['messages'],'pending_messages':s['queue'],'actions':s['actions'],'calls':s['calls'],
                     'controller':s['controller'],'amendments':s['amendments'],'sources':s['sources'],
                     'runtime_settings':s.get('runtime_settings'),
@@ -349,6 +413,9 @@ class Lab:
                 if s['status']=='running':s['status']='paused'
                 self._action(s,'recovered_without_model_call',{'call_id':pending['id']});self._save(s);return {'ok':True}
             if s['pending_call'] or s['status'] in ('error','interrupted','ended','budget'): raise LabError('這段對話已停止；請查看原因。')
+            if s.get('research_mode')=='live':
+                if action=='run': raise LabError('真人研究由你的訊息推進，不會自動產生 persona。')
+                if not s['queue'] and s['next_actor'] is None: raise LabError('請先送出下一個實際問題。')
             if self.runtime_sources!=source_hashes():raise LabError('程式已更新，請等待測試台重新啟動。')
             if s['sources']!=source_hashes():raise LabError('這是舊版保存的對話；請建立新對話測試新版。')
             self._action(s,action,{});self._save(s);self._start(sid,auto=action=='run');return {'ok':True}
@@ -360,6 +427,9 @@ class Lab:
     def _prepare(self,s):
         if self.runtime_sources!=source_hashes():raise LabError('程式已更新，請等待測試台重新啟動。')
         if s['sources']!=source_hashes(): raise LabError('實作已更新。這段紀錄保持原樣，請建立新對話使用新版。')
+        live=s.get('research_mode')=='live'
+        if live and not s['queue'] and s['next_actor'] is None:
+            s.update(status='paused',auto=False);return None
         store=self._store(s);budget=store.show()['budgets']['tokens']
         if len(s['calls'])>=s['limits']['max_calls'] or budget['spent']>=s['limits']['max_tokens'] or budget['unknown_spend']:
             s.update(status='budget',auto=False,notice='已到達呼叫／token 上限，或有未確認用量。沒有啟動下一則。');return None
@@ -368,9 +438,15 @@ class Lab:
             item=s['queue'].pop(0);origin='human';actor='assistant';raw=item['text']
             request_id='human-'+uuid.UUID(item['client_id']).hex
             captured=store.show()['requests'].get(request_id)
-            if captured is None:event(store,'request.capture',id=request_id,text=raw,source='interactive-tester:'+item['kind'])
+            if captured is None:event(store,'request.capture',id=request_id,text=raw,source=('interactive-human:' if live else 'interactive-tester:')+item['kind'])
             elif captured['text']!=raw:raise LabError('已保存的原始插話不一致。')
-            if item['kind']=='amendment':
+            if live:
+                ordered=[body for role,body in s['history'] if role=='user']+[raw]
+                if store.show()['requirements']['live-user-inputs']['value']!=ordered:
+                    event(store,'requirement.update',id='live-user-inputs',changes={'value':ordered},provenance=dict(provenance(raw,request_id),request_id=request_id))
+                s['persona_turn']+=1
+                if item['kind']=='amendment':s['amendments'].append(raw)
+            elif item['kind']=='amendment':
                 s['amendments'].append(raw)
                 prov=dict(provenance(raw,request_id),request_id=request_id)
                 existing=store.show()['requirements'].get('tester-amendments')
@@ -378,10 +454,11 @@ class Lab:
                     if existing['value']!=s['amendments']:event(store,'requirement.update',id='tester-amendments',changes={'value':s['amendments']},provenance=prov)
                 else:event(store,'requirement.add',id='tester-amendments',value=s['amendments'],strength='must',scope='synthetic-scenario',provenance=prov)
             if store.show()['requests'][request_id]['status']=='pending':
-                event(store,'request.resolve',id=request_id,resolution='applied' if item['kind']=='amendment' else 'no_change',note='Exact operator input retained; questions do not silently change persona conditions. Amendments are ordered verbatim, not an automatic semantic extraction.')
-            s['messages'].append({'role':'human','text':raw,'kind':item['kind']});s['history'].append(['user',raw]);s['interventions'].append({'role':'tester','kind':item['kind'],'text':raw})
+                event(store,'request.resolve',id=request_id,resolution='applied' if live or item['kind']=='amendment' else 'no_change',note='Exact human inputs retained in order; later instructions apply only within their explicit scope, without automatic semantic eligibility extraction.' if live else 'Exact operator input retained; questions do not silently change persona conditions. Amendments are ordered verbatim, not an automatic semantic extraction.')
+            s['messages'].append({'role':'human','text':raw,'kind':item['kind']});s['history'].append(['user',raw]);s['interventions'].append({'role':'human' if live else 'tester','kind':item['kind'],'text':raw})
+        elif live:actor='assistant';origin='human';raw=s['history'][0][1]
         else:actor=s['next_actor'];origin='persona';raw=s['card']['opening_message'] if actor=='assistant' and len(s['history'])==1 else None
-        c=self._control(s)
+        c=None if live else self._control(s)
         if actor=='persona':
             turn=s['persona_turn']+1;c.turn=turn
             for d in c.due(turn):c.release(d,turn,'scheduled')
@@ -398,9 +475,12 @@ class Lab:
             turn=s['persona_turn']
             transcript='\n\n'.join(('USER' if role=='user' else 'ASSISTANT')+': '+body for role,body in s['history'])
             pending_user=raw if origin=='human' else next(body for role,body in reversed(s['persona_history']) if role=='user')
-            prompt=s['system']+'\n\nFULL CONVERSATION\n'+transcript+'\n\nCURRENT INPUT TO ANSWER\n'+pending_user
-            if s['amendments']:prompt+='\n\nThe tester has changed the synthetic scenario. Apply these exact amendments in order, preserving their scope and conditional predicates; do not revert to older conflicting facts:\n'+json.dumps(s['amendments'],ensure_ascii=False)
-            prompt+='\n\nAnswer the current input directly using the supplied response schema: message is useful plain-language progress, questions are optional choice controls (zero to three). Do not duplicate questions in message. No runtime metadata, internal source citations, tools, file writes, browsing or external contact. Preserve the conversation and make progress on the person’s actual needs.'
+            system=live_system('\n'.join(body for role,body in s['history'] if role=='user')) if live else s['system']
+            prompt=system+'\n\nFULL CONVERSATION\n'+transcript+'\n\nCURRENT INPUT TO ANSWER\n'+pending_user
+            if s['amendments'] and not live:prompt+='\n\nThe tester has changed the synthetic scenario. Apply these exact amendments in order, preserving their scope and conditional predicates; do not revert to older conflicting facts:\n'+json.dumps(s['amendments'],ensure_ascii=False)
+            prompt+='\n\nAnswer the current input directly using the supplied response schema: message is useful plain-language progress, questions are optional choice controls (zero to three). Do not duplicate questions in message. '
+            prompt+=('Public read-only web research is enabled. Cite actual external source URLs and retrieval time, preserve advertised versus confirmed availability, and report unsuccessful searches honestly. No synthetic persona, private-file access, shell, file writes or external contact. Host request time before dispatch: '+time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())+' (not an exact per-source retrieval timestamp).' if live else 'No runtime metadata, internal source citations, tools, file writes, browsing or external contact.')
+            prompt+=' Preserve the conversation and make progress on the person’s actual needs.'
         if len(prompt)>160000:raise LabError('完整對話超出本輪 160,000 字元容量；已停止，未裁切。')
         call_id='call-%03d-%s'%(len(s['calls'])+1,actor)
         s['pending_call']={'id':call_id,'actor':actor,'origin':origin,'turn':turn,'started_at':time.time()}
@@ -416,7 +496,8 @@ class Lab:
         s['pending_call']=None
         if receipt['physical_status']!='complete' or receipt['status']!='recorded' or not receipt['current_for_requirements'] or not receipt['answer'].strip():
             s.update(status='error',auto=False,notice='模型呼叫未通過完整性／用量檢查。原始紀錄已保留，沒有自動重試。');return
-        answer=receipt['answer'];actor=pending['actor'];c=self._control(s);questions=[]
+        live=s.get('research_mode')=='live'
+        answer=receipt['answer'];actor=pending['actor'];c=None if live else self._control(s);questions=[]
         if actor=='assistant' and s.get('reply_format')=='choices-v1':
             try: reply=conversation_reply.decode(answer)
             except (ValueError,TypeError):
@@ -438,7 +519,9 @@ class Lab:
             message={'role':'assistant','text':answer,'responding_to':pending['origin']}
             if s.get('reply_format')=='choices-v1':message.update(display_text=reply['message'],questions=questions)
             s['messages'].append(message);s['history'].append(['assistant',answer])
-            if pending['origin']=='human':
+            if live:
+                s.update(next_actor=None,auto=False)
+            elif pending['origin']=='human':
                 s['interventions'].append({'role':'assistant_to_tester','text':answer})
                 if s['stop_reason']:s.update(status='ended',auto=False)
             else:
@@ -448,7 +531,7 @@ class Lab:
                 reason=c.stop_reason(s['persona_turn'],answer,'',sum(r.get('seconds',0) for r in s['calls']),time.time()-pending['started_at'])
                 s['next_actor']='persona'
                 if reason:s.update(status='ended',auto=False,stop_reason=reason,notice='已到 persona 的耐心／進度／時間停止條件；不代表所有需求完成。')
-        s['controller']=c.snapshot()
+        if c is not None:s['controller']=c.snapshot()
 
     def _work(self,sid):
         try:
@@ -461,8 +544,9 @@ class Lab:
                     if prompt is None:self._save(s);break
                     pending=copy.deepcopy(s['pending_call'])
                 receipt=session_runner.run_step(self._folder(sid),pending['id'],'conversation',s['model'],prompt,'tokens',
-                       max_chars=96000,timeout=180,invoke=self.invoke,max_prompt_chars=160000,
+                       max_chars=96000,timeout=300 if s.get('research_mode')=='live' else 180,invoke=self.invoke,max_prompt_chars=160000,
                        presentation='conversation',
+                       tool_policy='live_research' if s.get('research_mode')=='live' else 'text_only',
                        response_schema=conversation_reply.SCHEMA if pending['actor']=='assistant' and s.get('reply_format')=='choices-v1' else None)
                 with self.lock:
                     s=self._load(sid);self._finish(s,receipt);self._save(s)

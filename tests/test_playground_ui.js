@@ -12,10 +12,11 @@ class Element{
  click(){if(this.onclick)return this.onclick();}
 }
 const ids=[...fs.readFileSync(path.join(__dirname,'../playground/index.html'),'utf8').matchAll(/id="([^"]+)"/g)].map(m=>m[1]);
-const elements=Object.fromEntries(ids.map(id=>[id,new Element(['persona','model'].includes(id)?'select':'div')]));
+const elements=Object.fromEntries(ids.map(id=>[id,new Element(['persona','model','research-mode'].includes(id)?'select':'div')]));
 elements['max-calls'].value='30';elements['max-tokens'].value='400000';
 const messages=[],captured=[],network=[];let handler=null,count=0;
 function state(id){return {id,revision:1,persona_id:'P4',name:'Person '+id,model:'gpt-6-astra',status:'paused',auto:false,busy:false,notice:'',phase_label:'',persona_turn:1,patience_turns:3,calls:1,tokens:20,limits:{max_calls:30,max_tokens:400000},actor_calls:{assistant:1,persona:0},messages:[{role:'assistant',text:'<script>PRIVATE</script>'}],pending_count:0,mood:'wary',held_documents:[],events:[],criteria:['Get an actionable response'],pending_call:false};}
+function liveState(id){return {...state(id),research_mode:'live',persona_id:null,name:'真實找房研究',status:'ready',next_actor:'assistant',patience_turns:null,calls:0,tokens:0,actor_calls:{assistant:0,persona:0},criteria:[],events:[],messages:[{role:'human',text:'Find an actual listing.',kind:'question'}],capability_status:'可嘗試唯讀公開網頁研究；廣告刊登不等於已確認可租。'};}
 function response(value){return {ok:true,json:async()=>value};}
 const context=vm.createContext({document:{getElementById:id=>elements[id],createElement:tag=>new Element(tag)},
  crypto:{randomUUID:()=>`00000000-0000-4000-8000-${String(++count).padStart(12,'0')}`},
@@ -25,7 +26,7 @@ const context=vm.createContext({document:{getElementById:id=>elements[id],create
   network.push(url);
   if(opts.body)captured.push({url,data:JSON.parse(opts.body)});
   if(handler){const value=handler(url,opts);if(value!==undefined)return value;}
-  if(url==='/api/catalog')return response({models:['gpt-6-astra'],personas:[{id:'P4',name:'Brett',identity:'Viewing tomorrow',language:'en',patience_turns:3,original_harness:'chat'}]});
+  if(url==='/api/catalog')return response({research_modes:['live','fixture'],models:['gpt-6-astra'],personas:[{id:'P4',name:'Brett',identity:'Viewing tomorrow',language:'en',patience_turns:3,original_harness:'chat'}]});
   if(url==='/api/sessions')return response({sessions:[]});
   const match=url.match(/^\/api\/session\/([^/]+)$/);if(match)return response(state(match[1]));
   return response({ok:true});
@@ -34,7 +35,50 @@ const run=code=>vm.runInContext(code,context);
 const settle=async()=>{for(let i=0;i<8;i++)await new Promise(resolve=>setImmediate(resolve));};
 async function main(){
  vm.runInContext(fs.readFileSync(path.join(__dirname,'../playground/app.js'),'utf8'),context);await settle();
- assert.equal(elements.connection.textContent,'本機測試台已連接');assert.equal(elements.persona.value,'P4');
+ assert.equal(elements.connection.textContent,'本機研究介面已連接');assert.equal(elements.persona.value,'P4');
+ // New work defaults to genuine human input; loading the UI or creating a
+ // session never requests a model action. These responses are offline stubs.
+ assert.equal(elements['research-mode'].value,'live');assert.equal(elements['fixture-setup'].hidden,true);assert.equal(elements['live-setup'].hidden,false);
+ assert.equal(elements.create.disabled,true);assert.equal(captured.length,0);
+ elements['initial-request'].value='  \n ';elements['initial-request'].oninput();await elements.create.onclick();assert.equal(captured.length,0);
+ elements['initial-request'].value='x'.repeat(8001);elements['initial-request'].oninput();assert.equal(elements.create.disabled,true);await elements.create.onclick();assert.equal(captured.length,0);
+ elements['initial-request'].value='x'.repeat(8000);elements['initial-request'].oninput();assert.equal(elements.create.disabled,false);
+ const initial='  Find a quiet flat.\nPlease compare real source links.  ';
+ elements['initial-request'].value=initial;elements['initial-request'].oninput();
+ let failCreate=true,live=liveState('L');live.messages[0].text=initial;
+ handler=(url,opts)=>{if(url==='/api/sessions'&&opts.method==='POST'){if(failCreate){failCreate=false;throw Error('uncertain create response');}return response({id:'L'});}if(url==='/api/session/L')return response(live);};
+ await elements.create.onclick();assert.equal(elements['initial-request'].value,initial);assert.equal(elements.create.disabled,false);
+ await elements.create.onclick();const creates=captured.filter(x=>x.url==='/api/sessions');
+ assert.equal(creates.length,2);assert.equal(creates[0].data.client_id,creates[1].data.client_id);
+ assert.equal(creates[1].data.research_mode,'live');assert.equal(creates[1].data.initial_request,initial);assert.equal('persona_id' in creates[1].data,false);
+ assert.equal(creates[1].data.max_calls,30);assert.equal(creates[1].data.max_tokens,400000);
+ assert.equal(captured.filter(x=>x.url.endsWith('/control')).length,0);
+ assert.equal(elements.messages.children.length,1);assert.equal(elements.messages.children[0].firstChild.textContent,'你');assert.equal(elements.messages.children[0].children[1].textContent,initial);
+ assert.equal(elements.step.textContent,'研究並回覆');assert.equal(elements.step.disabled,false);assert.equal(elements.run.hidden,true);assert.equal(elements.run.disabled,true);
+ assert.equal(elements['turn-label'].textContent,'真人輸入');assert.equal(elements.turn.textContent,'1');assert.equal(elements['fixture-observations'].hidden,true);
+ assert.equal(elements['amendment-label'].hidden,true);assert.ok(!elements.behavior.textContent.includes('耐心'));assert.ok(!elements['usage-note'].textContent.includes('persona'));
+ assert.match(elements['capability-status'].textContent,/廣告刊登不等於已確認可租/);assert.match(elements['mode-limit-note'].textContent,/來源連結與查詢時間/);
+ const beforeLiveRefresh=captured.length;await run('refresh()');await run("action('run')");assert.equal(captured.length,beforeLiveRefresh);
+ handler=(url,opts)=>{if(url==='/api/session/L/control'){live={...live,revision:2,status:'paused',next_actor:null,calls:1,actor_calls:{assistant:1,persona:0},messages:[...live.messages,{role:'assistant',text:'Check the [source](https://example.test/listing). Retrieved 2026-09-10; availability unconfirmed.'}]};return response({ok:true});}if(url==='/api/session/L')return response(live);};
+ await elements.step.onclick();assert.equal(captured.at(-1).data.action,'step');assert.equal(elements.step.disabled,true);assert.equal(elements.status.textContent,'等待你的回覆');
+ assert.equal(elements.messages.children.length,2);assert.match(elements.messages.textContent,/Retrieved 2026-09-10; availability unconfirmed/);
+ const afterLiveAnswer=captured.length;await elements.step.onclick();await run("action('run')");await run('refresh()');assert.equal(captured.length,afterLiveAnswer,'idle live session cannot generate another turn');
+ // Live follow-ups preserve text and run through the human inbox. A hidden
+ // fixture checkbox cannot silently change the kind of the new input.
+ const followup='  Now compare the journey.\nMy budget changed.  ';elements.message.value=followup;elements.amendment.checked=true;
+ handler=(url,opts)=>{if(url==='/api/session/L/message'){live={...live,revision:3,status:'running',busy:true,persona_turn:2,pending_count:1,messages:[...live.messages,{role:'human',text:followup,pending:true}]};return response({ok:true});}if(url==='/api/session/L')return response(live);};
+ await elements.composer.onsubmit({preventDefault(){}});assert.equal(captured.at(-1).data.text,followup);assert.equal(captured.at(-1).data.kind,'question');
+ assert.equal(elements.message.value,'');assert.equal(elements.send.disabled,false);assert.equal(elements.step.disabled,true);assert.equal(elements.turn.textContent,'2');assert.match(elements['queue-note'].textContent,/1 則問題已保存/);
+ context.queuedLive={...live,busy:false,status:'paused',next_actor:null};run('render(queuedLive)');assert.equal(elements.step.disabled,false,'a queued live input enables one step');assert.equal(elements.run.disabled,true);
+ context.cappedLive={...context.queuedLive,calls:30};run('render(cappedLive)');assert.equal(elements.step.disabled,true);assert.equal(elements.send.disabled,true);assert.equal(elements.export.disabled,false);
+ // Deliberately choosing the old lane keeps the synthetic identity and payload.
+ elements['research-mode'].value='fixture';elements['research-mode'].onchange();assert.equal(elements['fixture-setup'].hidden,false);assert.equal(elements['live-setup'].hidden,true);
+ handler=(url,opts)=>url==='/api/sessions'&&opts.method==='POST'?response({id:'F'}):undefined;
+ await elements.create.onclick();const fixtureCreate=captured.filter(x=>x.url==='/api/sessions').at(-1).data;
+ assert.equal(fixtureCreate.research_mode,'fixture');assert.equal(fixtureCreate.persona_id,'P4');assert.equal('initial_request' in fixtureCreate,false);
+ assert.equal(elements.run.hidden,false);assert.equal(elements.run.disabled,false);assert.equal(elements.step.textContent,'下一步');assert.equal(elements['fixture-observations'].hidden,false);assert.equal(elements['amendment-label'].hidden,false);
+ assert.match(elements['session-label'].textContent,/合成人物測試 · 虛構資料/);assert.match(elements['capability-status'].textContent,/虛構材料/);
+ handler=null;captured.length=0;
  await run("select('A')");assert.equal(elements.title.textContent,'Person A');assert.equal(elements.messages.children[0].children[1].textContent,'<script>PRIVATE</script>');
  // Exercise the actual DOM renderer, including untrusted syntax. No HTML parser,
  // resource elements or network calls are permitted during presentation.

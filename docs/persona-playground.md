@@ -1,4 +1,4 @@
-# Persona 對話實驗室
+# 本機真實研究與 Persona 對話實驗室
 
 這是一個可互動的本機 alpha。你可以觀察既有 persona 與 Codex 的整段對話，也可以中途插話。產品交付是下載的 skill／tool，由使用者自己的 agent 執行；這個 UI 是本機驗收工具。最新發布範圍與訂閱政策見 `docs/local-product-and-provider-policy.md`。
 
@@ -6,8 +6,8 @@
 
 在 repo 根目錄執行 `python3 tools/persona_playground.py --port 8765`，開啟 `http://127.0.0.1:8765`。需要已登入的本機 Codex CLI；使用既有 ChatGPT 登入，不把憑證放入網頁。Python 標準函式庫即可，不需 npm install。
 
-1. 選擇 16 個既有 persona 之一，確認模型、呼叫數及 token 上限，再建立對話。建立、重整頁面、切換紀錄都不呼叫模型。
-2. 「下一步」跑到下一則回答；「連續對話」持續執行原 controller，直到 persona 結束、耐心／進度／時間限制、用量上限或失敗。
+1. 選「真實研究」，輸入自己的找房需求；或選「固定資料測試」觀察 16 個 persona。確認模型及用量上限後建立對話；建立、重整、切換紀錄都不呼叫模型。
+2. 真實研究由你的訊息推進；「下一步」執行一則回答，之後等你回覆，不另呼叫模型扮演你。固定資料測試可選「連續對話」，沿用 persona controller 的文件釋出和停止條件。
 3. 在輸入框插入問題。正在產生的那一則先結束、記帳；你的問題接著優先回答。這不是把文字直接塞入正在生成的同一個模型 turn。
 4. 如果要提高／降低預算或改變條件，勾「同時改變情境條件」。原文會保存成有版本的 requirement；以追加的原話和順序保留 scope／conditional，沒有宣稱自動正確解析任意自然語言。普通問題不會偷偷改條件。
 5. 「暫停」在目前呼叫結束後停止；「恢復已保存的結果」只讀取既有模型證據，不自動 retry。未知用量仍停止；不能把它當零。
@@ -15,7 +15,7 @@
 
 新版回答先給具體比較或可行的下一步，再漸進釐清偏好。需要澄清時，回答下方會顯示最多三題的選項；沒有預先勾選，可以只答部分問題，也能自行填寫。送出會保存完整題目與回答，接著由 Codex 回應。這是測試台的選項介面；正式 skill 使用原廠 host 實際提供的澄清工具，並非這裡已接上原生 Codex／Claude 互動工具。
 
-測試台沒有房源搜尋工具。新手開場可使用明確標成虛構的比較例子，引導討論安靜、距離與其他取捨；例子不是現在可租的房源，也不代表倫敦行情。真實研究與查房能力要在使用者自己的 agent 另外驗收。
+真實研究通過本機 Codex CLI 啟用公開網頁搜尋，載入 repo 當前的 skill 和相關說明；它不使用 persona 虛構文件。回覆應提供來源、日期及適用範圍；公開刊登仍不等於已確認可入住。來源失敗時保留缺口，不切成虛構候選。固定資料測試仍明示合成來源並關閉搜尋；兩種結果不能混報。實際驗收與分級見 [本輪紀錄](live-evidence-2026-09-10/plan.md)。
 
 選項中的 gpt-6-astra 是這台電腦檢查到的設定模型；也提供 Terra／Sol。思考強度明確設為 low，沒有繼承本機的 ultra。不同帳號的模型可用性以實際呼叫為準；失敗不自動切模型。沒有任何 Claude 呼叫。
 
@@ -35,9 +35,9 @@ Persona 的 END 也可能代表沒耐心，因此畫面寫「Persona 結束」�
 
 私人紀錄位於 `.pea-playground/<session-id>/`。`session.json` 保存 UI inbox、controller 和兩份歷史；該 session 的 `.pea-state/` 保存 revision、原話／條件與 physical calls。檔案使用 0600、目錄 0700，且檢查 hash、symlink 和單一 server ownership。Hash 和權限不是加密或多使用者身分驗證。
 
-伺服器只綁定 127.0.0.1；Host、Origin、Sec-Fetch-Site、自訂 API header 與 CSP 防止普通外站網頁直接使用本機介面。沒有 CORS、任意檔案服務或 shell endpoint。每次 Codex 使用專案外的臨時工作目錄、stdin prompt、read-only、ephemeral、忽略使用者設定並關閉額外 project-doc 讀取。這不等於 OS 級完整讀取隔離；意外工具事件會使呼叫失敗，但事後檢查不能撤回已發生的讀取。
+伺服器只綁定 127.0.0.1；Host、Origin、Sec-Fetch-Site、自訂 API header 與 CSP 防止普通外站網頁直接使用本機介面。沒有 CORS、任意檔案服務或 shell endpoint。每次 Codex 使用專案外的臨時工作目錄、stdin prompt、read-only、ephemeral、忽略使用者設定並關閉額外 project-doc 讀取。這不等於 OS 級完整讀取隔離；固定資料模式的工具事件會使呼叫失敗；真實研究明確允許工具事件並保留原始紀錄。政策允許的是唯讀公開研究，沒有授權聯絡／付款。這些提示和事後紀錄不是工具權限防火牆，不能撤回已發生的讀取。
 
-只有單一 model worker，回答者與 persona 共用 session 的上限。Token 計數是 input + output，cached input 已包含在 input；不是實際帳單或訂閱剩餘額度。一則呼叫可能超出上限。對話採完整歷史 replay，這次沒有宣称能省掉歷史 token；native thread caching／steering 是可獨立評估的下一個 adapter。
+只有單一 model worker；固定資料模式的回答者與 persona 共用上限，真實研究不額外產生 persona。Token 計數是 input + output，cached input 已包含在 input；不是實際帳單或訂閱剩餘額度。一則呼叫可能超出上限。對話採完整歷史 replay，這次沒有宣称能省掉歷史 token；native thread caching／steering 是可獨立評估的下一個 adapter。
 
 模型呼叫數與 token ceiling 在建立對話時設定，這版 UI 不能原地提高；情境條件中的租屋預算是另一回事。來源程式更新後，旧對話可以閱讀／匯出，但繼續測新版需建立新對話。極端中斷若發生在「保存待呼叫狀態」和真正 dispatch 之間，可能沒有可恢復的 physical receipt：保留待釐清狀態，不自動重買。這仍是公開服務前需要更完整處理的運維邊界。
 

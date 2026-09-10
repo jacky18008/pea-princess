@@ -15,7 +15,7 @@ After installing the skill using the [installation guide](INSTALL.md), try:
 
 It starts with useful examples or the evidence you provide, explains a trade-off, and learns what matters from your reaction. Usually it asks zero to two questions at a time, never more than three essential clarifications. You can say “not sure”. A complete set of preferences is not required before making progress.
 
-When the host can search permitted sources, real examples should carry their source and date. Without search, examples are clearly labelled fictional; illustrative prices are not claims about today's market. Your assistant may need you to paste a listing or attach a floor plan. It explains what is needed and why, while continuing other checks. If your app supports a choice panel, it can use that; otherwise you answer in ordinary text.
+The assistant uses real rental examples with source links and dates. A public advert is not a guarantee of availability. If a source cannot be reached, it continues with supported information and asks for the missing extract; it does not switch to fictional homes. Invented teaching examples are used only if you request them. Your assistant may need you to paste a listing or attach a floor plan. It explains what is needed and why, while continuing other checks. If your app supports a choice panel, it can use that; otherwise you answer in ordinary text.
 
 ### Learn by comparing
 

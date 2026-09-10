@@ -8,6 +8,10 @@ portals disallow everything), some sites block bots, some need a login or a fee,
 and some things (floor plans, the flat itself) are not on any API. **This is
 normal. Do not guess, do not fabricate, do not silently skip the axis.** Ask.
 
+## If listing research is blocked
+
+Use permitted public sources through the host when available; follow [listing-evidence.md](listing-evidence.md). A source failure never authorizes invented candidates. Keep already supported comparisons moving and ask for the affected listing extract only when needed. A general building page or register entry is not proof that a particular flat is currently offered.
+
 ## Rules for asking
 1. Try available scripts or open sources first; use only tools actually available.
 2. Collect gaps; ask at most **three essential clarifications** once, with where to

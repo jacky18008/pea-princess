@@ -337,7 +337,7 @@ It starts with useful examples or the evidence you provide, explains a trade-off
 - write-back: yes
 
 ```text
-When the host can search permitted sources, real examples should carry their source and date. Without search, examples are clearly labelled fictional; illustrative prices are not claims about today's market. Your assistant may need you to paste a listing or attach a floor plan. It explains what is needed and why, while continuing other checks. If your app supports a choice panel, it can use that; otherwise you answer in ordinary text.
+The assistant uses real rental examples with source links and dates. A public advert is not a guarantee of availability. If a source cannot be reached, it continues with supported information and asks for the missing extract; it does not switch to fictional homes. Invented teaching examples are used only if you request them. Your assistant may need you to paste a listing or attach a floor plan. It explains what is needed and why, while continuing other checks. If your app supports a choice panel, it can use that; otherwise you answer in ordinary text.
 ```
 
 ### deck:using:9
@@ -810,41 +810,41 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:1
 
-- source: `skills/vet-flat/references/onboarding.md` · L12
-- under: ## 1. The pitch (say it in the user's language, at this length)
+- source: `skills/vet-flat/references/onboarding.md` · L14
+- under: ## 1. The pitch (only when asked what this does)
 - lang: en
 - write-back: yes
 
 ```text
-> I help you compare London rentals: what they cost each month, whether the commute works, and which problems need checking before you commit. Send a listing or tell me where you need to get to; I will explain what looks promising, what is only an estimate, and what we still need to find out.
+> A lower advertised rent can lose its advantage once the bills and daily journey are included. I help you compare that whole picture, spot the checks that could change your choice, and find a sensible next step from a listing or a rough idea.
 ```
 
 ### deck:onboarding:2
 
-- source: `skills/vet-flat/references/onboarding.md` · L15
-- under: ## 1. The pitch (say it in the user's language, at this length)
+- source: `skills/vet-flat/references/onboarding.md` · L17
+- under: ## 1. The pitch (only when asked what this does)
 - lang: zh-TW
 - write-back: yes
 
 ```text
-> 我幫你比較倫敦租屋的每月總花費（房租加帳單）、通勤，以及簽約前要查清楚的問題。貼一間房源，或告訴我平常要去哪裡；我會說明哪裡值得考慮、哪些只是估計、還缺什麼資料。
+> 房租比較便宜，加上帳單與每天的交通，未必就是更划算的選擇。我會陪你把這些差別看清楚，找出真正會影響決定的問題；有房源就從房源看起，只有模糊想法也能開始。
 ```
 
 ### deck:onboarding:3
 
-- source: `skills/vet-flat/references/onboarding.md` · L18
-- under: ## 1. The pitch (say it in the user's language, at this length)
+- source: `skills/vet-flat/references/onboarding.md` · L20
+- under: ## 1. The pitch (only when asked what this does)
 - lang: zh-CN
 - write-back: yes
 
 ```text
-> 我帮你比较伦敦租房的每月总花费（房租加账单）、通勤，以及签约前要查清楚的问题。贴一套房源，或告诉我平常要去哪里；我会说明哪里值得考虑、哪些只是估计、还缺什么资料。
+> 房租比较便宜，加上账单与每天的交通，未必就是更划算的选择。我会陪你把这些差别看清楚，找出真正会影响决定的问题；有房源就从房源看起，只有模糊想法也能开始。
 ```
 
 ### deck:onboarding:4
 
-- source: `skills/vet-flat/references/onboarding.md` · L21
-- under: ## 1. The pitch (say it in the user's language, at this length)
+- source: `skills/vet-flat/references/onboarding.md` · L23
+- under: ## 1. The pitch (only when asked what this does)
 - lang: en
 - write-back: yes
 
@@ -854,8 +854,8 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:5
 
-- source: `skills/vet-flat/references/onboarding.md` · L22
-- under: ## 1. The pitch (say it in the user's language, at this length)
+- source: `skills/vet-flat/references/onboarding.md` · L24
+- under: ## 1. The pitch (only when asked what this does)
 - lang: en
 - write-back: yes
 
@@ -865,8 +865,8 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:6
 
-- source: `skills/vet-flat/references/onboarding.md` · L23
-- under: ## 1. The pitch (say it in the user's language, at this length)
+- source: `skills/vet-flat/references/onboarding.md` · L25
+- under: ## 1. The pitch (only when asked what this does)
 - lang: en
 - write-back: yes
 
@@ -876,8 +876,8 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:7
 
-- source: `skills/vet-flat/references/onboarding.md` · L24
-- under: ## 1. The pitch (say it in the user's language, at this length)
+- source: `skills/vet-flat/references/onboarding.md` · L26
+- under: ## 1. The pitch (only when asked what this does)
 - lang: en
 - write-back: yes
 
@@ -887,7 +887,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:8
 
-- source: `skills/vet-flat/references/onboarding.md` · L203
+- source: `skills/vet-flat/references/onboarding.md` · L205
 - under: ## 3. Primer for someone with no idea (ten facts, one screen; cite `references/sources.yaml` ids where numbers appear)
 - lang: en
 - write-back: yes
@@ -898,7 +898,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:9
 
-- source: `skills/vet-flat/references/onboarding.md` · L204
+- source: `skills/vet-flat/references/onboarding.md` · L206
 - under: ## 3. Primer for someone with no idea (ten facts, one screen; cite `references/sources.yaml` ids where numbers appear)
 - lang: en
 - write-back: yes
@@ -909,7 +909,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:10
 
-- source: `skills/vet-flat/references/onboarding.md` · L205
+- source: `skills/vet-flat/references/onboarding.md` · L207
 - under: ## 3. Primer for someone with no idea (ten facts, one screen; cite `references/sources.yaml` ids where numbers appear)
 - lang: en
 - write-back: yes
@@ -920,7 +920,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:11
 
-- source: `skills/vet-flat/references/onboarding.md` · L206
+- source: `skills/vet-flat/references/onboarding.md` · L208
 - under: ## 3. Primer for someone with no idea (ten facts, one screen; cite `references/sources.yaml` ids where numbers appear)
 - lang: en
 - write-back: yes
@@ -931,7 +931,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:12
 
-- source: `skills/vet-flat/references/onboarding.md` · L207
+- source: `skills/vet-flat/references/onboarding.md` · L209
 - under: ## 3. Primer for someone with no idea (ten facts, one screen; cite `references/sources.yaml` ids where numbers appear)
 - lang: en
 - write-back: yes
@@ -942,7 +942,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:13
 
-- source: `skills/vet-flat/references/onboarding.md` · L208
+- source: `skills/vet-flat/references/onboarding.md` · L210
 - under: ## 3. Primer for someone with no idea (ten facts, one screen; cite `references/sources.yaml` ids where numbers appear)
 - lang: en
 - write-back: yes
@@ -953,7 +953,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:14
 
-- source: `skills/vet-flat/references/onboarding.md` · L209
+- source: `skills/vet-flat/references/onboarding.md` · L211
 - under: ## 3. Primer for someone with no idea (ten facts, one screen; cite `references/sources.yaml` ids where numbers appear)
 - lang: en
 - write-back: yes
@@ -964,7 +964,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:15
 
-- source: `skills/vet-flat/references/onboarding.md` · L210
+- source: `skills/vet-flat/references/onboarding.md` · L212
 - under: ## 3. Primer for someone with no idea (ten facts, one screen; cite `references/sources.yaml` ids where numbers appear)
 - lang: en
 - write-back: yes
@@ -975,7 +975,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:16
 
-- source: `skills/vet-flat/references/onboarding.md` · L211
+- source: `skills/vet-flat/references/onboarding.md` · L213
 - under: ## 3. Primer for someone with no idea (ten facts, one screen; cite `references/sources.yaml` ids where numbers appear)
 - lang: en
 - write-back: yes
@@ -986,7 +986,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:17
 
-- source: `skills/vet-flat/references/onboarding.md` · L212
+- source: `skills/vet-flat/references/onboarding.md` · L214
 - under: ## 3. Primer for someone with no idea (ten facts, one screen; cite `references/sources.yaml` ids where numbers appear)
 - lang: en
 - write-back: yes
@@ -997,7 +997,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:18
 
-- source: `skills/vet-flat/references/onboarding.md` · L218
+- source: `skills/vet-flat/references/onboarding.md` · L220
 - under: ## 4. Short answers to common questions
 - lang: en
 - write-back: yes
@@ -1008,7 +1008,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:19
 
-- source: `skills/vet-flat/references/onboarding.md` · L219
+- source: `skills/vet-flat/references/onboarding.md` · L221
 - under: ## 4. Short answers to common questions
 - lang: en
 - write-back: yes
@@ -1019,7 +1019,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:20
 
-- source: `skills/vet-flat/references/onboarding.md` · L220
+- source: `skills/vet-flat/references/onboarding.md` · L222
 - under: ## 4. Short answers to common questions
 - lang: en
 - write-back: yes
@@ -1030,7 +1030,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:21
 
-- source: `skills/vet-flat/references/onboarding.md` · L221
+- source: `skills/vet-flat/references/onboarding.md` · L223
 - under: ## 4. Short answers to common questions
 - lang: en
 - write-back: yes
@@ -1041,7 +1041,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:22
 
-- source: `skills/vet-flat/references/onboarding.md` · L222
+- source: `skills/vet-flat/references/onboarding.md` · L224
 - under: ## 4. Short answers to common questions
 - lang: en
 - write-back: yes
@@ -1052,7 +1052,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:23
 
-- source: `skills/vet-flat/references/onboarding.md` · L223
+- source: `skills/vet-flat/references/onboarding.md` · L225
 - under: ## 4. Short answers to common questions
 - lang: en
 - write-back: yes
@@ -1063,7 +1063,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:24
 
-- source: `skills/vet-flat/references/onboarding.md` · L224
+- source: `skills/vet-flat/references/onboarding.md` · L226
 - under: ## 4. Short answers to common questions
 - lang: en
 - write-back: yes
@@ -1074,7 +1074,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:25
 
-- source: `skills/vet-flat/references/onboarding.md` · L225
+- source: `skills/vet-flat/references/onboarding.md` · L227
 - under: ## 4. Short answers to common questions
 - lang: en
 - write-back: yes
@@ -1085,7 +1085,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:26
 
-- source: `skills/vet-flat/references/onboarding.md` · L226
+- source: `skills/vet-flat/references/onboarding.md` · L228
 - under: ## 4. Short answers to common questions
 - lang: en
 - write-back: yes
@@ -1096,7 +1096,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:27
 
-- source: `skills/vet-flat/references/onboarding.md` · L227
+- source: `skills/vet-flat/references/onboarding.md` · L229
 - under: ## 4. Short answers to common questions
 - lang: en
 - write-back: yes
@@ -1107,7 +1107,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:28
 
-- source: `skills/vet-flat/references/onboarding.md` · L228
+- source: `skills/vet-flat/references/onboarding.md` · L230
 - under: ## 4. Short answers to common questions
 - lang: en
 - write-back: yes
@@ -1118,7 +1118,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:29
 
-- source: `skills/vet-flat/references/onboarding.md` · L229
+- source: `skills/vet-flat/references/onboarding.md` · L231
 - under: ## 4. Short answers to common questions
 - lang: en
 - write-back: yes
@@ -1129,7 +1129,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:30
 
-- source: `skills/vet-flat/references/onboarding.md` · L230
+- source: `skills/vet-flat/references/onboarding.md` · L232
 - under: ## 4. Short answers to common questions
 - lang: en
 - write-back: yes
@@ -1238,7 +1238,7 @@ The ask template only. The per-axis table is model-facing.
 
 ### deck:inputs:1
 
-- source: `skills/vet-flat/references/inputs.md` · L55-L63
+- source: `skills/vet-flat/references/inputs.md` · L59-L67
 - under: ## Template for the ask (copy, fill, send once)
 - lang: en
 - write-back: yes
