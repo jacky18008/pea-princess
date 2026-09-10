@@ -30,10 +30,13 @@ class StateApiDocumentationTests(unittest.TestCase):
         self.env = dict(os.environ, PEA_SKILL=str(self.skill), PEA_PROJECT=str(self.project))
         self.doc = (self.skill / 'references/state-api.md').read_text()
 
-    def block(self, language):
+    def blocks(self, language, count):
         blocks = re.findall(r'^```' + language + r'\n(.*?)^```', self.doc, re.M | re.S)
-        self.assertEqual(len(blocks), 1)
-        return blocks[0]
+        self.assertEqual(len(blocks), count)
+        return blocks
+
+    def block(self, language):
+        return self.blocks(language, 1)[0]
 
     def invoke(self, command, input_text=None, expected=0):
         result = subprocess.run(command, cwd=self.project, env=self.env, input=input_text,
@@ -78,7 +81,7 @@ class StateApiDocumentationTests(unittest.TestCase):
         self.assertFalse((self.skill / '.pea-state').exists())
 
     def test_cli_examples_apply_one_event_with_observed_revision_and_support_stdin(self):
-        commands = [line for line in self.block('bash').splitlines() if line.strip()]
+        commands = [line for line in self.blocks('bash', 2)[0].splitlines() if line.strip()]
         self.assertEqual(len(commands), 5)
         initial = self.invoke(['bash', '-c', commands[0]])
         packet = self.invoke(['bash', '-c', commands[1]])
@@ -104,6 +107,33 @@ class StateApiDocumentationTests(unittest.TestCase):
                             input_text=json.dumps(event), expected=2)
         self.assertEqual(rejected['error'], 'RevisionConflict')
         self.assertEqual(self.cli('show')['revision'], resolved['revision'])
+
+    def test_receipt_example_uses_observed_revision_then_returns_complete_context(self):
+        before = self.invoke([sys.executable, '-c', self.block('python')])
+        commands = [line for line in self.blocks('bash', 2)[1].splitlines() if line.strip()]
+        self.assertEqual(len(commands), 2)
+        raw = 'Keep every current condition, including the conditional dryness check.'
+        event = {'op': 'request.capture', 'id': 'receipt-u1', 'source': 'synthetic-user', 'text': raw}
+        event_path = self.project / 'private receipt event.json'
+        event_path.write_text(json.dumps(event, ensure_ascii=False))
+        self.env.update(PEA_REVISION=str(before['revision']), PEA_EVENT_FILE=str(event_path))
+        receipt = self.invoke(['bash', '-c', commands[0]])
+        packet = self.invoke(['bash', '-c', commands[1]])
+        self.assertEqual(receipt, dict(ok=True, schema_version=packet['schema_version'],
+                                      project_id=packet['project_id'], revision=packet['revision'],
+                                      event_hash=packet['event_hash']))
+        self.assertEqual(receipt['revision'], before['revision'] + 1)
+        self.assertNotIn(raw, json.dumps(receipt))
+        self.assertEqual(packet, self.cli('context', '--max-chars', '32000'))
+        self.assertEqual(packet['requirements'], before['requirements'])
+        self.assertEqual(packet['pending_requests']['receipt-u1']['text'], raw)
+        self.assertEqual(packet['requirements']['floor-demo']['predicate'],
+                         'An independent inspection confirms candidate demo-flat is dry.')
+        checked = self.cli('verify')
+        self.assertTrue(checked['ok'])
+        self.assertEqual(checked['revision'], receipt['revision'])
+        self.assertEqual(checked['event_hash'], receipt['event_hash'])
+        self.assertFalse((self.skill / '.pea-state').exists())
 
     def test_todo_event_is_valid_after_the_documented_requirement_sequence(self):
         self.invoke([sys.executable, '-c', self.block('python')])
