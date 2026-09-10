@@ -2,20 +2,22 @@ Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen — https://github.com
 
 # What this skill does, and how to start
 
-Read this when the user asks how to start or says they have no idea. Answer in their language. Use what they already told you; do not restart intake when they share a listing or interrupt a longer task.
+Read this when the user asks how to start or says they have no idea, alongside [conversation-quality.md](conversation-quality.md). Answer in their language. Use what they already told you; do not restart intake when they share a listing or interrupt a longer task. The first visible sentence, including a progress update, should give a useful distinction or answer with polished, warm judgment.
 
 The core workflow is a collaboration: a vague goal → research or a concrete intermediate comparison → the user's reaction and clearer priorities → the next targeted research. Each cycle should leave something useful to inspect. Do not make the user design a complete specification before you explore, and do not treat the first preferences as final. Preserve explicit changes and their conditions as the conversation evolves.
 
-## 1. The pitch (say it in the user's language, at this length)
+## 1. The pitch (only when asked what this does)
+
+These examples answer a capability question; do not recite a service pitch when the person has already given a concrete goal. In that case open with an insight about their decision and start section 2.
 
 **English**
-> I help you compare London rentals: what they cost each month, whether the commute works, and which problems need checking before you commit. Send a listing or tell me where you need to get to; I will explain what looks promising, what is only an estimate, and what we still need to find out.
+> A lower advertised rent can lose its advantage once the bills and daily journey are included. I help you compare that whole picture, spot the checks that could change your choice, and find a sensible next step from a listing or a rough idea.
 
 **繁體中文**
-> 我幫你比較倫敦租屋的每月總花費（房租加帳單）、通勤，以及簽約前要查清楚的問題。貼一間房源，或告訴我平常要去哪裡；我會說明哪裡值得考慮、哪些只是估計、還缺什麼資料。
+> 房租比較便宜，加上帳單與每天的交通，未必就是更划算的選擇。我會陪你把這些差別看清楚，找出真正會影響決定的問題；有房源就從房源看起，只有模糊想法也能開始。
 
 **简体中文**
-> 我帮你比较伦敦租房的每月总花费（房租加账单）、通勤，以及签约前要查清楚的问题。贴一套房源，或告诉我平常要去哪里；我会说明哪里值得考虑、哪些只是估计、还缺什么资料。
+> 房租比较便宜，加上账单与每天的交通，未必就是更划算的选择。我会陪你把这些差别看清楚，找出真正会影响决定的问题；有房源就从房源看起，只有模糊想法也能开始。
 
 If the user has not chosen a task, offer the relevant starting points briefly; do not make them choose again when their intent is clear:
 1. **I have a listing** → paste the link or the page text and I roast it (the 12 checks).

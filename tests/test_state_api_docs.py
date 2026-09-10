@@ -23,7 +23,7 @@ class StateApiDocumentationTests(unittest.TestCase):
         self.project = self.root / 'private rental project'
         self.project.mkdir()
         for relative in ('scripts/session_state.py', 'references/state-api.md', 'references/state-sources-api.md',
-                         'references/session-harness.md'):
+                         'references/session-harness.md', 'references/eligibility-api.md'):
             target = self.skill / relative
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(SKILL / relative, target)

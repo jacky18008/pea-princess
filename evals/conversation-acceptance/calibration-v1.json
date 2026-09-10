@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "rubric_id": "pea-conversation-ux-gate-v1",
+  "provenance": "Author-created synthetic anchors, not real user conversations, model results or human labels.",
+  "use": "Evaluator calibration only. Keep separate from answerer inputs and novel acceptance scenarios. Expected gates are illustrative anchors; unlisted gates are not implicitly passed.",
+  "anchors": [
+    {
+      "id": "opening-useful",
+      "messages": [
+        {"id": "u1", "role": "user", "channel": "message", "content": "我不知道怎麼比較兩間租屋，先看什麼？"},
+        {"id": "a1", "role": "assistant", "channel": "final", "content": "先把房租與帳單放在同一張表，才不會把租金便宜誤當成住起來便宜。把兩間的房租和已知帳單貼給我，我會先算出可比較的部分，再指出哪個缺項可能改變結果。"}
+      ],
+      "expected": {"O1": "pass", "U1": "pass", "U2": "pass", "U3": "pass", "U4": "pass"},
+      "reason": "The first sentence supplies a useful comparison frame without invented market numbers; the request is limited to the next calculation. Polished service does not need ornate language."
+    },
+    {
+      "id": "visible-status-before-good-final",
+      "messages": [
+        {"id": "u1", "role": "user", "channel": "message", "content": "我不知道怎麼比較兩間租屋，先看什麼？"},
+        {"id": "a1", "role": "assistant", "channel": "commentary", "content": "正在載入專案狀態並核對內部欄位，完成初始化後會回答。"},
+        {"id": "a2", "role": "assistant", "channel": "final", "content": "先把房租與帳單放在同一張表，才不會把租金便宜誤當成住起來便宜。把兩間的房租和已知帳單貼給我，我會先算出可比較的部分。"}
+      ],
+      "expected": {"O1": "fail", "U3": "fail"},
+      "reason": "The first visible sentence makes the user manage internal setup. Later useful prose remains useful but cannot erase the opening failure."
+    },
+    {
+      "id": "courteous-but-no-help",
+      "messages": [
+        {"id": "u1", "role": "user", "channel": "message", "content": "我第一次自己找房，現在完全沒方向。能先讓我知道怎麼選嗎？"},
+        {"id": "a1", "role": "assistant", "channel": "final", "content": "很榮幸為您服務，您的舒適生活是我們最高使命。請先提供預算、日期、地點、房型、面積、樓層、擔保方式，以及所有不能接受的條件，我才能開始。"}
+      ],
+      "expected": {"O1": "fail", "U1": "fail", "U2": "fail", "U3": "fail", "U4": "fail"},
+      "reason": "Courtesy and formal vocabulary do not supply insight. One sentence hides eight requested decisions and makes complete intake a prerequisite."
+    },
+    {
+      "id": "useful-acknowledgement",
+      "messages": [
+        {"id": "u1", "role": "user", "channel": "message", "content": "先停在這裡，我週末看過房再回來。"},
+        {"id": "a1", "role": "assistant", "channel": "final", "content": "好，等你看過房，我們就能用現場感受判斷哪些疑慮真的影響選擇。到時從你的觀察接著看，不必重填需求。"}
+      ],
+      "expected": {"O1": "pass", "U1": "pass", "U2": "pass", "U4": "pass"},
+      "reason": "A short acknowledgement attached to a useful continuity frame is natural. Honoring a pause is progress appropriate to the request; no new question is required. Saving must still be checked separately if claimed."
+    },
+    {
+      "id": "fluent-ranking-still-fails-correctness",
+      "facts": ["The user's hard area minimum is 40 square metres.", "The supplied authoritative measurement is 38 square metres for the sole candidate.", "The user has authorized no exception."],
+      "messages": [
+        {"id": "u1", "role": "user", "channel": "message", "content": "四十平方公尺是底線，這間能留在看房清單嗎？"},
+        {"id": "a1", "role": "assistant", "channel": "final", "content": "面積底線能幫你避免看完喜歡、搬進去卻放不下生活的房子。這間三十八平方公尺稍小，但可以破例留在首選。"}
+      ],
+      "expected": {"O1": "pass", "G3": "fail"},
+      "reason": "The opening is a relevant decision frame; a later fluent recommendation invents an exception. An attractive opening cannot compensate for the independent hard-condition failure."
+    },
+    {
+      "id": "adapt-after-interruption",
+      "messages": [
+        {"id": "u1", "role": "user", "channel": "message", "content": "我在比較寬敞一些但通勤較久，跟小一些但離公司近的兩間。"},
+        {"id": "a1", "role": "assistant", "channel": "final", "content": "這兩間的關鍵差別，是把時間花在路上，還是把空間留在家裡。先看你平日怎麼用家，比急著選哪間更能看出取捨。"},
+        {"id": "u2", "role": "user", "channel": "message", "content": "插問一下，如果我常在家工作，是不是多一點空間比較有價值？我現在每週只去辦公室一天。"},
+        {"id": "a2", "role": "assistant", "channel": "final", "content": "每週只通勤一天，工作區好不好用就值得放到比較的前面。較大的那間未必自動勝出；我們先看平面圖能否放下桌椅、工作時會不會佔掉吃飯和休息的空間，再比較那一天的路程。"}
+      ],
+      "expected": {"C1": "pass", "C2": "pass"},
+      "reason": "The interruption is answered and the actual new weekly pattern changes the next research step. The agent does not invent a new hard area threshold."
+    },
+    {
+      "id": "acknowledge-but-ignore-reaction",
+      "messages": [
+        {"id": "u1", "role": "user", "channel": "message", "content": "我在比較寬敞一些但通勤較久，跟小一些但離公司近的兩間。"},
+        {"id": "a1", "role": "assistant", "channel": "final", "content": "可以先比較你每週花在通勤的時間，以及在家需要的空間。"},
+        {"id": "u2", "role": "user", "channel": "message", "content": "我每週只去辦公室一天，其他時間在家工作，先看工作空間。"},
+        {"id": "a2", "role": "assistant", "channel": "final", "content": "收到，我完全理解你的想法。每天通勤都省時間最重要，所以先看近公司的那間；你每週去公司幾天？"}
+      ],
+      "expected": {"O1": "fail", "U1": "fail", "U4": "fail", "C2": "fail"},
+      "reason": "Agreement language masks failure to use the user's actual answer; the response repeats a known fact and contradicts the chosen research priority."
+    },
+    {
+      "id": "missing-progress-trace",
+      "evidence_limit": "Only a final message was retained; whether earlier progress messages were visible is unknown.",
+      "messages": [
+        {"id": "u1", "role": "user", "channel": "message", "content": "先幫我比較帳單。"},
+        {"id": "a1", "role": "assistant", "channel": "final", "content": "先確認兩間的帳單包含相同項目，才能公平比較每月總花費。"}
+      ],
+      "expected": {"O1": "unknown", "acceptance_status": "unknown"},
+      "reason": "A good retained final does not establish the true opening when the visible progress trace is missing. Unknown is not a pass."
+    }
+  ]
+}
