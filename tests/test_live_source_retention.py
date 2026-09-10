@@ -25,6 +25,20 @@ class RetentionTests(unittest.TestCase):
         folder.mkdir(mode=0o700);raw=b'Advertised rent: 2000. Availability for this person: unconfirmed.'
         (folder/'text.txt').write_bytes(raw)
         return {'source_url':url,'ok':True,'http_status':200,'retrieved_at':'2026-09-10T23:00:00Z','role':'independent_host_capture_after_actor','source_claims_verified':False,'text_sha256':hashlib.sha256(raw).hexdigest()}
+    def write_group(self,call_id,entries):
+        index=self.lab._snapshot_index(self.s,call_id)
+        index.parent.mkdir(parents=True,mode=0o700)
+        rows=[]
+        for i,(url,text,ok) in enumerate(entries):
+            folder=index.parent/str(i);folder.mkdir()
+            raw=text.encode('utf-8')
+            if ok:(folder/'text.txt').write_bytes(raw)
+            rows.append({'source_url':url,'ok':ok,'note':None if ok else 'Source refresh failed.',
+                         'text_sha256':hashlib.sha256(raw).hexdigest(),'source_claims_verified':False})
+        index.write_text(json.dumps({'value':rows,'sha256':p._digest(rows)}))
+        return index
+    def context_rows(self):
+        return json.loads(self.lab._source_context(self.s).split('\n',3)[-1])
     def test_cited_sources_deduplicated_bounded_retained_and_reloaded_without_fetch(self):
         message=' '.join('[source](https://www.foxtons.co.uk/unit/%s)'%i for i in (1,1,2,3,4))
         with mock.patch.object(public_source_snapshot,'capture',side_effect=self.capture) as capture:
@@ -62,5 +76,58 @@ class RetentionTests(unittest.TestCase):
         index=self.lab._snapshot_index(self.s,'call-001-assistant');saved=json.loads(index.read_text());saved['value'][0]['text_sha256']=hashlib.sha256(raw).hexdigest();saved['sha256']=p._digest(saved['value']);index.write_text(json.dumps(saved))
         context=self.lab._source_context(self.s)
         self.assertIn('due to source-text budget',context);self.assertNotIn('x'*100,context)
+    def test_invalid_newer_index_blocks_all_older_groups_but_keeps_newer_intact_evidence(self):
+        url='https://www.foxtons.co.uk/unit/shared'
+        for i,kind in enumerate(('malformed','hash','nonlist','nonobjectrow','missingurl','missingindex')):
+            with self.subTest(kind=kind):
+                old,bad,new=('old-%s'%i,'bad-%s'%i,'new-%s'%i)
+                self.write_group(old,[(url,'OLDER SAME URL MUST NOT RETURN',True),
+                    ('https://www.getliving.com/old','OLDER UNKNOWN SCOPE MUST NOT RETURN',True)])
+                index=self.write_group(bad,[(url,'UNTRUSTED NEW VERSION',True)])
+                self.write_group(new,[('https://www.getliving.com/new','NEWER INTACT CONTENT',True)])
+                saved=json.loads(index.read_text())
+                if kind=='malformed':index.write_text('{not-json')
+                elif kind=='missingindex':index.unlink()
+                else:
+                    if kind=='hash':saved['sha256']='0'*64
+                    else:
+                        saved['value']={'url':url} if kind=='nonlist' else ['not an object'] if kind=='nonobjectrow' else [{'ok':True}]
+                        saved['sha256']=p._digest(saved['value'])
+                    index.write_text(json.dumps(saved))
+                self.s['calls']=[{'id':key} for key in (old,bad,new)]
+                with mock.patch.object(public_source_snapshot,'capture',side_effect=AssertionError('no retry')):
+                    errors=self.lab._read_snapshots(self.s,bad)
+                    context=self.lab._source_context(self.s)
+                self.assertEqual(1,len(errors));self.assertFalse(errors[0]['ok'])
+                self.assertEqual(bad,errors[0]['call_id']);self.assertTrue(errors[0]['snapshot_group_error'])
+                self.assertFalse(errors[0]['source_claims_verified'])
+                self.assertIn('NEWER INTACT CONTENT',context)
+                self.assertIn('older capture groups are withheld',context)
+                self.assertNotIn('OLDER SAME URL',context);self.assertNotIn('OLDER UNKNOWN SCOPE',context)
+                self.assertNotIn('UNTRUSTED NEW VERSION',context)
+    def test_missing_latest_text_is_unavailable_and_never_falls_back_for_its_url(self):
+        url='https://www.foxtons.co.uk/unit/shared'
+        self.write_group('old',[(url,'STALE OLD SOURCE TEXT',True)])
+        index=self.write_group('latest',[(url,'NEW SOURCE TEXT',True)])
+        (index.parent/'0/text.txt').unlink()
+        self.s['calls']=[{'id':'old'},{'id':'latest'}]
+        rows=self.context_rows()
+        self.assertEqual(1,len(rows));self.assertEqual(url,rows[0]['source_url'])
+        self.assertFalse(rows[0]['ok']);self.assertTrue(rows[0]['capture_ok'])
+        self.assertFalse(rows[0]['source_claims_verified'])
+        self.assertIn('unavailable or integrity invalid',rows[0]['body_omitted'])
+        self.assertNotIn('original_text',rows[0]);self.assertNotIn('STALE OLD SOURCE TEXT',json.dumps(rows))
+        self.assertTrue(json.loads(index.read_text())['value'][0]['ok'])  # Original receipt is untouched.
+    def test_valid_empty_group_and_failed_refresh_preserve_known_url_boundaries(self):
+        shared='https://www.foxtons.co.uk/unit/shared';other='https://www.getliving.com/other'
+        self.write_group('old',[(shared,'STALE SHARED TEXT',True),(other,'VALID OTHER TEXT',True)])
+        self.write_group('failed',[(shared,'',False)])
+        self.write_group('empty',[])
+        self.s['calls']=[{'id':key} for key in ('old','failed','empty')]
+        rows=self.context_rows()
+        self.assertEqual(2,len(rows));self.assertFalse(rows[0]['ok'])
+        self.assertEqual('VALID OTHER TEXT',rows[1]['original_text'])
+        self.assertNotIn('STALE SHARED TEXT',json.dumps(rows))
+        self.assertFalse(any(row.get('snapshot_group_error') for row in rows))
 
 if __name__=='__main__':unittest.main()

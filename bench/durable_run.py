@@ -15,6 +15,7 @@ import json
 import math
 import os
 from pathlib import Path
+import re
 import subprocess
 
 from call_control import (CallControl, CallControlError, CallControlPaused,
@@ -26,6 +27,12 @@ VERSION = 1
 MAX_SNAPSHOT_BYTES = 32 * 1024 * 1024
 MAX_SNAPSHOT_FILES = 2000
 EXCLUDED = ((".git",), (".cache",), ("__pycache__",))
+_SKIP_DISCOVERY_WARNING = re.compile(
+    r"Under-development features enabled: skip_host_skill_discovery\. "
+    r"Under-development features are incomplete and may behave unpredictably\. "
+    r"To suppress this warning, set `suppress_unstable_features_warning = true` "
+    r"in /[^\x00-\x1f\x7f]+/config\.toml\."
+)
 
 
 def source_fingerprint(root=None):
@@ -94,11 +101,24 @@ def _json_safe(value):
     return value
 
 
+def _startup_feature_warning(event):
+    """Recognize one observed CLI diagnostic, not arbitrary item/error messages."""
+    if set(event) != {"type", "item"} or event["type"] != "item.completed":
+        return False
+    item = event["item"]
+    return (isinstance(item, dict) and set(item) == {"id", "type", "message"}
+            and item["type"] == "error" and isinstance(item["id"], str)
+            and re.fullmatch(r"item_[0-9]+", item["id"]) is not None
+            and isinstance(item["message"], str)
+            and _SKIP_DISCOVERY_WARNING.fullmatch(item["message"]) is not None)
+
+
 def cli_record(call_id, result, family):
     """Audit the complete physical CLI stream, never recursive/last-holder totals."""
     raw = result.stdout or (result.text if family == "codex" else "")
-    errors, tool_events, malformed, terminals = [], [], 0, []
+    errors, tool_events, diagnostic_events, malformed, terminals = [], [], [], 0, []
     if family == "codex":
+        thread_started, turn_started = False, False
         for line in raw.splitlines():
             if not line.strip():
                 continue
@@ -109,6 +129,13 @@ def cli_record(call_id, result, family):
                 continue
             if not isinstance(event, dict):
                 malformed += 1
+                continue
+            if event.get("type") == "thread.started":
+                thread_started = True
+            if event.get("type") in ("turn.started", "turn.completed", "turn.failed"):
+                turn_started = True
+            if thread_started and not turn_started and _startup_feature_warning(event):
+                diagnostic_events.append(event)
                 continue
             if event.get("type") == "turn.completed":
                 terminals.append(event.get("usage"))
@@ -137,7 +164,8 @@ def cli_record(call_id, result, family):
         errors.append({"type": "provider_error", "message": result.note})
     return _json_safe({"id": call_id, "status": "stopped" if stopped else "complete",
             "exit_code": result.exit_code, "timeout": timeout, "errors": errors,
-            "tool_events": tool_events, "malformed_event_lines": malformed,
+            "tool_events": tool_events, "diagnostic_events": diagnostic_events,
+            "malformed_event_lines": malformed,
             "terminal_usage_events": len(terminals), "direct_terminal_usage": usage,
             "family": family, "launch_result": dict(result._asdict())})
 

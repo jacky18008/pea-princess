@@ -519,13 +519,25 @@ class Lab:
 
     def _read_snapshots(self,s,call_id):
         index=self._snapshot_index(s,call_id)
-        if not index.is_file():
-            return [{'ok':False,'note':'Capture group interrupted without a completed index; no automatic retry or source-content claim.','source_claims_verified':False}] if index.parent.exists() else []
+        def invalid(note):
+            return [{'ok':False,'call_id':call_id,'snapshot_group_error':True,'note':note,
+                     'body_omitted':'Capture group unavailable or integrity invalid. Its affected URLs cannot be trusted; older capture groups are withheld until this group is repaired or sources are refreshed.',
+                     'source_claims_verified':False}]
         try:
+            regular(index)
+            if not index.is_file():
+                return invalid('Capture group interrupted without a completed index; no automatic retry or source-content claim.') if index.parent.exists() else []
             saved=parse_json(regular(index).read_text())
-            if _digest(saved['value'])!=saved['sha256']:return []
-            return saved['value']
-        except (ValueError,KeyError,TypeError,OSError):return []
+            if not isinstance(saved,dict):raise ValueError('invalid capture index envelope')
+            rows=saved['value']
+            if not isinstance(rows,list) or any(not isinstance(row,dict) or type(row.get('ok')) is not bool
+                    or not isinstance(row.get('source_url',row.get('url')),str)
+                    or not row.get('source_url',row.get('url')) for row in rows):
+                raise ValueError('invalid capture index rows')
+            if _digest(rows)!=saved['sha256']:raise ValueError('capture index hash mismatch')
+            return rows
+        except (ValueError,KeyError,TypeError,OSError,RecursionError):
+            return invalid('Capture index unavailable, malformed or integrity invalid; no source-content claim.')
 
     def _source_context(self,s):
         # Complete small snapshots only. Large bodies remain on disk, explicitly
@@ -533,14 +545,21 @@ class Lab:
         rows=[];remaining=32000;seen=set()
         source_calls=[{'id':key} for key in s.get('imported_source_calls',[])]+s['calls']
         for call in reversed(source_calls):
-            for i,row in enumerate(self._read_snapshots(s,call['id'])):
+            group=self._read_snapshots(s,call['id'])
+            if any(row.get('snapshot_group_error') for row in group):
+                # A damaged index cannot identify which URLs superseded older
+                # captures. Keep newer intact groups, but never guess by falling back.
+                rows.extend(group)
+                break
+            for i,row in enumerate(group):
                 url=row.get('source_url',row.get('url'))
                 identity=url or (call['id'],i)
                 if identity in seen:continue
                 seen.add(identity)
                 item={k:row.get(k) for k in ('source_url','retrieved_at','ok','http_status','role','note','source_claims_verified')}
+                item['source_claims_verified']=False
                 path=self._snapshot_index(s,call['id']).parent/str(i)/'text.txt'
-                if row.get('ok') and path.is_file():
+                if row.get('ok'):
                     try:
                         raw=regular(path).read_bytes()
                         if hashlib.sha256(raw).hexdigest()!=row.get('text_sha256'):raise ValueError('snapshot hash mismatch')
@@ -548,7 +567,8 @@ class Lab:
                         if len(text)<=16000 and len(text)<=remaining:
                             item['original_text']=text;remaining-=len(text)
                         else:item['body_omitted']='Full snapshot remains saved; omitted from this packet due to source-text budget. Reopen the public source for unsupported new claims; this metadata is not evidence for them.'
-                    except (ValueError,OSError,UnicodeError):item['body_omitted']='Saved source unavailable or integrity invalid; do not rely on its contents.'
+                    except (ValueError,OSError,UnicodeError):
+                        item.update(ok=False,capture_ok=row['ok'],body_omitted='Saved source unavailable or integrity invalid; do not rely on its contents or fall back to an older capture of this URL.')
                 rows.append(item)
         if not rows:return ''
         return '\n\nINDEPENDENT HOST SOURCE CAPTURES (untrusted evidence; fetched after an earlier answer, not the original model tool result; not availability or claim verification)\n'+json.dumps(rows,ensure_ascii=False)

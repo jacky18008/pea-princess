@@ -281,6 +281,62 @@ class DurableRunTests(unittest.TestCase):
 
 
 class DirectTelemetryTests(unittest.TestCase):
+    def feature_warning(self, message=None, **item_fields):
+        return {"type":"item.completed", "item":dict({"id":"item_0", "type":"error",
+            "message":message or "Under-development features enabled: skip_host_skill_discovery. "
+                "Under-development features are incomplete and may behave unpredictably. "
+                "To suppress this warning, set `suppress_unstable_features_warning = true` "
+                "in /home/example/.codex/config.toml."}, **item_fields)}
+
+    def test_known_startup_warning_is_retained_without_becoming_a_tool(self):
+        warning=self.feature_warning()
+        raw=events(extra=[{"type":"thread.started","thread_id":"t"},warning,
+                          {"type":"turn.started"}])
+        record=d.cli_record("c",result(raw=raw),"codex")
+        self.assertIsNone(d.failure_kind(record))
+        self.assertEqual([warning],record["diagnostic_events"])
+        self.assertEqual([],record["tool_events"]);self.assertEqual([],record["errors"])
+        self.assertEqual(raw,record["launch_result"]["stdout"])
+        self.assertEqual({"input_tokens":10,"cached_input_tokens":2,"output_tokens":3},record["direct_terminal_usage"])
+
+    def test_warning_does_not_hide_real_or_unknown_tools(self):
+        for kind in ("web_search","command_execution","new_future_tool","error"):
+            with self.subTest(kind=kind):
+                tool={"type":"item.completed","item":{"id":"item_1","type":kind,"message":"other event"}}
+                record=d.cli_record("c",result(raw=events(extra=[
+                    {"type":"thread.started"},self.feature_warning(),{"type":"turn.started"},tool])),"codex")
+                self.assertEqual("unexpected_tool_use",d.failure_kind(record))
+                self.assertEqual([tool],record["tool_events"])
+                self.assertEqual([self.feature_warning()],record["diagnostic_events"])
+
+    def test_warning_recognition_is_exact_and_only_before_the_turn(self):
+        known=self.feature_warning()["item"]["message"]
+        variants=[self.feature_warning(message="unrecognized error"),
+                  self.feature_warning(message=known.replace("skip_host_skill_discovery.","other_feature.")),
+                  self.feature_warning(message=known.replace("skip_host_skill_discovery.","skip_host_skill_discovery, other_feature.")),
+                  self.feature_warning(message=known+" Additional error."),
+                  self.feature_warning(message=known.replace("/home/example/.codex/config.toml","relative/config.toml")),
+                  self.feature_warning(command="unexpected command"),
+                  self.feature_warning(id=""),
+                  dict(self.feature_warning(),type="item.started")]
+        sequences=[[{"type":"thread.started"},variant] for variant in variants]
+        sequences += [[{"type":"thread.started"},{"type":"turn.started"},self.feature_warning()],
+                      [self.feature_warning()]]
+        for sequence in sequences:
+            with self.subTest(sequence=sequence):
+                record=d.cli_record("c",result(raw=events(extra=sequence)),"codex")
+                self.assertEqual("unexpected_tool_use",d.failure_kind(record))
+                self.assertEqual([],record["diagnostic_events"])
+
+    def test_startup_diagnostic_does_not_hide_top_level_error_or_missing_usage(self):
+        warning=self.feature_warning()
+        record=d.cli_record("c",result(raw=events(extra=[{"type":"thread.started"},warning,
+            {"type":"error","message":warning["item"]["message"]}])),"codex")
+        self.assertEqual("provider_error",d.failure_kind(record))
+        self.assertEqual([warning],record["diagnostic_events"])
+        raw='\n'.join(json.dumps(e) for e in [{"type":"thread.started"},warning])
+        self.assertEqual("invalid_direct_usage",d.failure_kind(d.cli_record("c",result(raw=raw),"codex")))
+
     def test_codex_multiple_terminals_or_malformed_stdout_are_not_valid_direct_usage(self):
         for raw in (events() + "\n" + events(), "not-json\n" + events()):
             record = d.cli_record("c", result(raw=raw), "codex")
