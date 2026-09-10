@@ -19,6 +19,7 @@ import selectors
 import shutil
 import stat
 import subprocess
+import sys
 import threading
 import time
 import uuid
@@ -36,6 +37,9 @@ MAX_WORKSPACE_FILES = 2048
 MAX_SCHEMA_BYTES = 16000
 MAX_TIMEOUT_SECONDS = 1200
 ARTIFACTS = ('native-invocation.json', 'native-stdout.jsonl', 'native-stderr.txt', 'native-answer.txt', 'native-schema.json')
+ISOLATED_PERMISSION_PROFILE = 'pea_native_minimal'
+ISOLATED_RUNTIME_ROOTS = (Path('/Library/Developer/CommandLineTools/usr/bin'),
+                          Path('/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework'))
 
 
 class NativeError(ValueError):
@@ -178,11 +182,32 @@ def _validate_workspace(workdir):
     return workdir, marker['sha256'], _snapshot(workdir)
 
 
+def _isolated_permission_args():
+    """Host-specific child-tool read boundary; outer Codex still owns its auth/config."""
+    if sys.platform != 'darwin':
+        raise NativeError('isolate_workspace_reads is tested only on macOS')
+    if any(not root.is_dir() or root.is_symlink() for root in ISOLATED_RUNTIME_ROOTS):
+        raise NativeError('isolate_workspace_reads requires the approved macOS Python runtime roots')
+    filesystem = {':minimal': 'read', ':workspace_roots': 'write'}
+    filesystem.update((str(root), 'read') for root in ISOLATED_RUNTIME_ROOTS)
+    table = '{' + ','.join(json.dumps(key) + '=' + json.dumps(value) for key, value in filesystem.items()) + '}'
+    shell_path = str(ISOLATED_RUNTIME_ROOTS[0]) + ':/usr/bin:/bin:/usr/sbin:/sbin'
+    disabled_skill = Path.home() / '.agents/skills/vet-flat'
+    return ['-c', 'default_permissions=' + json.dumps(ISOLATED_PERMISSION_PROFILE),
+            '-c', 'permissions.' + ISOLATED_PERMISSION_PROFILE + '.filesystem=' + table,
+            '-c', 'permissions.' + ISOLATED_PERMISSION_PROFILE + '.network.enabled=false',
+            '-c', 'shell_environment_policy.inherit="none"',
+            '-c', 'shell_environment_policy.set={PATH=' + json.dumps(shell_path) + '}',
+            '-c', 'skills.config=[{path=' + json.dumps(str(disabled_skill)) + ',enabled=false}]']
+
+
 def invoke(request, folder, workdir):
     """One physical attempt; request has model, effort, prompt, timeout_seconds.
 
     Optional response_schema is supplied to Codex without changing prompt text.
     Optional skip_host_skill_discovery controls discovery, not filesystem reads.
+    Optional isolate_workspace_reads selects the tested macOS minimal permissions
+    profile plus read-only system Python roots; it is not outer-process isolation.
     Optional tool_output_token_limit caps individual tool outputs in history,
     not total usage. Omitted controls preserve the original command line.
     folder is a fresh per-call artifact directory disjoint from the workspace.
@@ -190,7 +215,8 @@ def invoke(request, folder, workdir):
     A stopped/unknown/invalid record must stop the caller's batch; never retry it.
     """
     if not isinstance(request, dict) or set(request) - {'model', 'effort', 'prompt', 'timeout_seconds', 'response_schema',
-                                                      'skip_host_skill_discovery', 'tool_output_token_limit'}:
+                                                      'skip_host_skill_discovery', 'tool_output_token_limit',
+                                                      'isolate_workspace_reads'}:
         raise NativeError('unsupported native request fields')
     if request.get('model') not in MODELS or request.get('effort') not in EFFORTS:
         raise NativeError('explicit supported Codex model and low/high effort required')
@@ -202,6 +228,8 @@ def invoke(request, folder, workdir):
         raise NativeError('timeout_seconds must be an integer from 1 to %d' % MAX_TIMEOUT_SECONDS)
     if 'skip_host_skill_discovery' in request and type(request['skip_host_skill_discovery']) is not bool:
         raise NativeError('skip_host_skill_discovery must be a boolean')
+    if 'isolate_workspace_reads' in request and type(request['isolate_workspace_reads']) is not bool:
+        raise NativeError('isolate_workspace_reads must be a boolean')
     if 'tool_output_token_limit' in request:
         limit = request['tool_output_token_limit']
         if type(limit) is not int or not 256 <= limit <= 16000:
@@ -214,6 +242,7 @@ def invoke(request, folder, workdir):
     except (TypeError, ValueError, OverflowError) as error:
         raise NativeError('request must contain bounded JSON schema data') from error
     schema = request.get('response_schema')
+    permission_args = _isolated_permission_args() if request.get('isolate_workspace_reads', False) else ['--sandbox', 'workspace-write']
     workdir, owner_sha, before = _validate_workspace(workdir)
     folder = _safe_path(folder)
     if folder == workdir or folder in workdir.parents or workdir in folder.parents:
@@ -224,8 +253,8 @@ def invoke(request, folder, workdir):
     if not executable:
         raise NativeError('Codex executable is unavailable')
     answer = folder / 'native-answer.txt'
-    command = [executable, 'exec', '--ignore-user-config', '--ephemeral', '--cd', str(workdir),
-               '--sandbox', 'workspace-write', '--skip-git-repo-check', '--model', request['model'],
+    command = [executable, 'exec', '--ignore-user-config', '--ephemeral', '--cd', str(workdir)] + permission_args + [
+               '--skip-git-repo-check', '--model', request['model'],
                '-c', 'model_reasoning_effort="%s"' % request['effort'], '-c', 'project_doc_max_bytes=0',
                '--json', '--output-last-message', str(answer)]
     if request.get('skip_host_skill_discovery', False):

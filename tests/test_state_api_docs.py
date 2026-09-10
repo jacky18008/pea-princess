@@ -22,7 +22,7 @@ class StateApiDocumentationTests(unittest.TestCase):
         self.skill = self.root / 'detached skill'
         self.project = self.root / 'private rental project'
         self.project.mkdir()
-        for relative in ('scripts/session_state.py', 'references/state-api.md',
+        for relative in ('scripts/session_state.py', 'references/state-api.md', 'references/state-sources-api.md',
                          'references/session-harness.md'):
             target = self.skill / relative
             target.parent.mkdir(parents=True, exist_ok=True)
@@ -146,9 +146,54 @@ class StateApiDocumentationTests(unittest.TestCase):
         self.assertEqual(task['status'], 'pending')
         self.assertFalse(task['valid'])
 
+    def test_source_example_retains_qualified_evidence_and_pending_output_task(self):
+        source_doc = (self.skill / 'references/state-sources-api.md').read_text()
+        blocks = re.findall(r'^```python\n(.*?)^```', source_doc, re.M | re.S)
+        self.assertEqual(len(blocks), 1)
+        packet = self.invoke([sys.executable, '-c', blocks[0]])
+        self.assertEqual(packet, self.cli('context', '--max-chars', '32000'))
+        self.assertEqual(set(packet['documents']), {'quote-demo', 'comparison-doc'})
+        quote = 'Estimated monthly bills: GBP 230; this is not a cap.'
+        fact = packet['facts']['bills-demo']
+        self.assertEqual(fact['value'], {'amount': 230, 'unit': 'GBP/month', 'qualifier': 'estimate, not a cap'})
+        self.assertEqual(fact['source_ids'], ['quote-demo'])
+        self.assertEqual(fact['provenance']['actor'], 'external')
+        self.assertEqual(fact['provenance']['quote'], quote)
+        self.assertTrue(fact['source_verified'])
+        self.assertEqual(fact['verification_kind'], 'saved_source_quote')
+        output = packet['outputs']['comparison-output']
+        self.assertEqual(output['task_id'], 'compare-demo')
+        self.assertEqual(output['document_id'], 'comparison-doc')
+        self.assertEqual(output['decision_ids'], [])
+        self.assertEqual(packet['tasks']['compare-demo']['status'], 'pending')
+        self.assertFalse(packet['tasks']['compare-demo']['valid'])
+        self.assertEqual(packet['decisions'], {})
+        self.assertTrue(self.cli('verify')['ok'])
+        original = self.cli('retrieve', 'quote-demo', '--start', '1', '--end', '1')
+        self.assertEqual(original['text'], quote)
+        (self.project / 'source.txt').write_text('Replaced original; no longer the saved quote.\n')
+        self.assertEqual(self.cli('retrieve', 'quote-demo', '--start', '1', '--end', '1'), original)
+        self.assertEqual(self.cli('context', '--max-chars', '32000'), packet)
+        invalid = [
+            {'op': 'fact.record', 'id': 'wrong-quote', 'critical': True, 'value': 230,
+             'source_ids': ['quote-demo'], 'provenance': {'actor': 'external', 'source_id': 'quote-demo',
+                                                       'quote': 'Guaranteed monthly cap: GBP 230.'}},
+            {'op': 'document.add', 'id': 'nested-document',
+             'document': {'path': 'source.txt', 'line_ranges': [[1, 1]],
+                          'provenance': {'actor': 'external', 'source_id': 'quote-demo', 'quote': quote}}},
+        ]
+        for event in invalid:
+            with self.subTest(operation=event['op']):
+                rejected = self.cli('apply', '--expected-revision', str(packet['revision']),
+                                    input_text=json.dumps(event), expected=2)
+                self.assertEqual(rejected['error'], 'SessionStateError')
+                self.assertEqual(self.cli('context', '--max-chars', '32000'), packet)
+                self.assertTrue(self.cli('verify')['ok'])
+        self.assertFalse((self.skill / '.pea-state').exists())
+
     def test_portable_reference_links_resolve_without_repository_docs(self):
         self.assertFalse((self.root / 'docs').exists())
-        for name in ('state-api.md', 'session-harness.md'):
+        for name in ('state-api.md', 'state-sources-api.md', 'session-harness.md'):
             source = self.skill / 'references' / name
             links = re.findall(r'\[[^\]]+\]\(([^)]+)\)', source.read_text())
             self.assertTrue(links)

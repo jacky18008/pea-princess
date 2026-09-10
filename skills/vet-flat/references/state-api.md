@@ -6,6 +6,8 @@ Read when using the state tool (Python 3.9+, standard library). Examples are fic
 
 Set `PEA_SKILL` to the absolute installed skill directory and `PEA_PROJECT` to an existing private working directory. Keep event files and `.pea-state/` private; do not edit generated state files.
 
+Before `document.add`, `fact.record` or `output.record`, read [state-sources-api.md](state-sources-api.md). Supply flat event fields, not a nested `document` object.
+
 ## CLI
 
 Initialize a new project; resume with `context`. Success is JSON on stdout; state errors are JSON on stderr with exit 2.

@@ -118,6 +118,7 @@ class ConversationNativeTests(unittest.TestCase):
     def test_optional_discovery_and_history_limits_are_frozen_in_argv_and_receipt(self):
         base_command = self.run_fake()['command']
         cases = [
+            ({'isolate_workspace_reads': False}, []),
             ({'skip_host_skill_discovery': False}, []),
             ({'skip_host_skill_discovery': True}, ['--enable', 'skip_host_skill_discovery']),
             ({'tool_output_token_limit': 256}, ['-c', 'tool_output_token_limit=256']),
@@ -145,6 +146,55 @@ class ConversationNativeTests(unittest.TestCase):
                 self.assertEqual(expected_command, record['command'])
                 self.assertEqual(expected_hash, record['request_sha256'])
                 self.assertEqual(self.request['prompt'], (self.workdir / 'received.txt').read_text())
+
+    def test_isolated_reads_use_only_named_profile_and_freeze_exact_configuration(self):
+        request = self.request | {'isolate_workspace_reads': True, 'skip_host_skill_discovery': True}
+        expected_hash = native._digest(request)
+        synthetic_home = self.root / 'synthetic-home'
+        expected_configs = [
+            'default_permissions="pea_native_minimal"',
+            'permissions.pea_native_minimal.filesystem={":minimal"="read",":workspace_roots"="write",'
+            '"/Library/Developer/CommandLineTools/usr/bin"="read",'
+            '"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework"="read"}',
+            'permissions.pea_native_minimal.network.enabled=false',
+            'shell_environment_policy.inherit="none"',
+            'shell_environment_policy.set={PATH="/Library/Developer/CommandLineTools/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"}',
+            'skills.config=[{path=' + json.dumps(str(synthetic_home / '.agents/skills/vet-flat')) + ',enabled=false}]',
+            'model_reasoning_effort="low"', 'project_doc_max_bytes=0',
+        ]
+        folder = self.folder()
+        def inspect_and_mutate_caller(command, kwargs):
+            saved = json.loads((folder / 'native-invocation.json').read_text())
+            self.assertEqual(command, saved['command'])
+            self.assertEqual(expected_hash, saved['request_sha256'])
+            request['isolate_workspace_reads'] = False
+        with mock.patch.object(native.sys, 'platform', 'darwin'), \
+                mock.patch.object(native.Path, 'is_dir', return_value=True), \
+                mock.patch.object(native.Path, 'home', return_value=synthetic_home):
+            record = self.run_fake(request=request, folder=folder, start_callback=inspect_and_mutate_caller)
+        command, kwargs = self.commands[0]
+        self.assertEqual(expected_configs, [command[i + 1] for i, value in enumerate(command) if value == '-c'])
+        self.assertNotIn('--sandbox', command)
+        self.assertFalse(any('sandbox_mode' in value for value in command))
+        self.assertNotIn('workspace-write', command)
+        self.assertEqual(['--enable', 'skip_host_skill_discovery', '--', '-'], command[-4:])
+        self.assertNotIn('env', kwargs)
+        self.assertEqual('complete', record['status'])
+        self.assertEqual(expected_hash, record['request_sha256'])
+        self.assertEqual(command, record['command'])
+
+    def test_isolated_reads_fail_before_dispatch_on_unsupported_host_or_missing_runtime(self):
+        request = self.request | {'isolate_workspace_reads': True}
+        with mock.patch.object(native.sys, 'platform', 'linux'):
+            folder = self.folder('unsupported-platform')
+            self.assert_no_dispatch(request=request, folder=folder)
+            self.assertEqual([], list(folder.iterdir()))
+        for index, absent in enumerate(native.ISOLATED_RUNTIME_ROOTS):
+            with mock.patch.object(native.sys, 'platform', 'darwin'), \
+                    mock.patch.object(native.Path, 'is_dir', autospec=True, side_effect=lambda path: path != absent):
+                folder = self.folder('missing-runtime-' + str(index))
+                self.assert_no_dispatch(request=request, folder=folder)
+                self.assertEqual([], list(folder.iterdir()))
 
     def test_workspace_is_owned_outside_tree_and_persists_between_calls(self):
         self.assertEqual(self.root, native._marker(self.workdir).parent)
@@ -183,6 +233,7 @@ class ConversationNativeTests(unittest.TestCase):
                    {'response_schema': {'x': object()}}, {'response_schema': {'x': 'a' * native.MAX_SCHEMA_BYTES}},
                    {'retry': 1}]
         changes.extend({'skip_host_skill_discovery': value} for value in (None, 0, 1, 'true', [], {}))
+        changes.extend({'isolate_workspace_reads': value} for value in (None, 0, 1, 'true', [], {}))
         changes.extend({'tool_output_token_limit': value}
                        for value in (None, True, False, -1, 0, 255, 16001, 256.0, '4000', [], {}))
         for index, change in enumerate(changes):
