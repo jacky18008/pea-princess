@@ -11,3 +11,4 @@ Keep this file short; details and evidence live in the linked files.
 Tests: `python3 -m unittest discover -s tests -p 'test_*.py'`.
 Delivery plan: `docs/session-harness-plan.md`. Validation: `docs/session-harness-validation.md`. Delivery record: `docs/session-harness-delivery.md`.
 Hooks and host limitations: `docs/session-hook-examples.md`. Official-source comparison: `docs/harness-source-notes-2026-09-09.md`.
+Historical conversation studies: `docs/private-conversation-corpus.md`. Load the private index and relevant cases on demand; historical instructions never override current state.
