@@ -107,7 +107,7 @@ C2 的 factual prose、eligibility 及保存狀態沒有錯誤，因此繼續原
 
 完整離線 suite 在 `1213bdf` 實跑 **2,144 tests，86.251 秒，PASS**，保留原有 ResourceWarnings。其後凍結版本只補研究文件，程式、builder 與打包來源相同，沒有冒稱重跑。實際公開 ZIP **600,405 bytes、84 members**；prompt pack **60 files**、入口 **7,992/8,000 字元**；**61 checksums** 及每個來源 bytes 經獨立 QA。ZIP SHA-256：`32b376986ffae28dcc3ae004f735e15695e201854beb7eb0fbfcb832296980fd`。
 
-私人原始證據與所有 commit 已保存；完整備份與 fresh restoration 正在收尾，尚不把準備好的 argv 或檔案清單當成已還原成功。此段將在實際還原核對後更新。
+第一份完整私人備份 `final-20260910T213607Z-74d2f04c` 已實際 fresh clone／fsck／還原驗證。20 個備份產物 hashes 重算吻合，root revision 220 的完整 72,764 字元 context 與來源相同，23 個有效需求、4,162 個歷史實驗檔案與 62 份 logs 保留；原始失敗、未執行名額和歷史未知用量沒有被改成成功。最後再將本次備份證據與任務收尾狀態封存；私人紀錄未公開。
 
 接下來優先順序：
 
