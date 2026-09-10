@@ -47,7 +47,10 @@ def prepare(output, prior):
     old=controller(prior,[r['id'] for r in base.layout()]); new=controller(output,IDS)
     known=combined_gate(old,new)
     files=base.seed_files()
-    sources=list(base.read(prior/'plan.json')['source_sha256']) + ['bench/waste_isolation_canary.py']
+    current_skill_sources=subprocess.check_output(['git','ls-files','skills/vet-flat'],cwd=base.ROOT,text=True).splitlines()
+    sources=sorted(set(base.read(prior/'plan.json')['source_sha256']) |
+                   {rel for rel in current_skill_sources if (base.ROOT/rel).is_file()} |
+                   {'bench/waste_isolation_canary.py'})
     plan={'version':2,'purpose':'post-stop isolated guided sanity checks; not a matched causal cost comparison',
           'model':'gpt-5.6-luna','effort':'low','calls':IDS,'prior_run':str(prior),
           'prior_checkpoint_sha256':base.sha(prior/'controller/checkpoint.json'),

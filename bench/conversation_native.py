@@ -40,6 +40,12 @@ ARTIFACTS = ('native-invocation.json', 'native-stdout.jsonl', 'native-stderr.txt
 ISOLATED_PERMISSION_PROFILE = 'pea_native_minimal'
 ISOLATED_RUNTIME_ROOTS = (Path('/Library/Developer/CommandLineTools/usr/bin'),
                           Path('/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework'))
+# Keep the candidate configuration available for offline validation, but never
+# claim this boundary works until an actual supported runtime passes the probes.
+ISOLATED_READS_UNSUPPORTED_REASON = (
+    'isolate_workspace_reads is unsupported: tested Codex CLI 0.153.4 permits '
+    'shared temporary-directory reads/writes despite explicit deny rules; '
+    'no isolated invocation may start until enforcement is verified')
 
 
 class NativeError(ValueError):
@@ -188,7 +194,9 @@ def _isolated_permission_args():
         raise NativeError('isolate_workspace_reads is tested only on macOS')
     if any(not root.is_dir() or root.is_symlink() for root in ISOLATED_RUNTIME_ROOTS):
         raise NativeError('isolate_workspace_reads requires the approved macOS Python runtime roots')
-    filesystem = {':minimal': 'read', ':workspace_roots': 'write'}
+    filesystem = {':minimal': 'read', ':workspace_roots': 'write',
+                  ':tmpdir': 'deny', ':slash_tmp': 'deny', '/tmp': 'deny',
+                  '/private/tmp': 'deny', '/var/tmp': 'deny', '/private/var/tmp': 'deny'}
     filesystem.update((str(root), 'read') for root in ISOLATED_RUNTIME_ROOTS)
     table = '{' + ','.join(json.dumps(key) + '=' + json.dumps(value) for key, value in filesystem.items()) + '}'
     shell_path = str(ISOLATED_RUNTIME_ROOTS[0]) + ':/usr/bin:/bin:/usr/sbin:/sbin'
@@ -206,8 +214,9 @@ def invoke(request, folder, workdir):
 
     Optional response_schema is supplied to Codex without changing prompt text.
     Optional skip_host_skill_discovery controls discovery, not filesystem reads.
-    Optional isolate_workspace_reads selects the tested macOS minimal permissions
-    profile plus read-only system Python roots; it is not outer-process isolation.
+    Optional isolate_workspace_reads currently fails closed: the tested macOS
+    runtime did not enforce shared-temp denials. Candidate profile construction
+    remains available for offline checks; this is not outer-process isolation.
     Optional tool_output_token_limit caps individual tool outputs in history,
     not total usage. Omitted controls preserve the original command line.
     folder is a fresh per-call artifact directory disjoint from the workspace.
@@ -230,6 +239,8 @@ def invoke(request, folder, workdir):
         raise NativeError('skip_host_skill_discovery must be a boolean')
     if 'isolate_workspace_reads' in request and type(request['isolate_workspace_reads']) is not bool:
         raise NativeError('isolate_workspace_reads must be a boolean')
+    if request.get('isolate_workspace_reads', False) and ISOLATED_READS_UNSUPPORTED_REASON is not None:
+        raise NativeError(ISOLATED_READS_UNSUPPORTED_REASON)
     if 'tool_output_token_limit' in request:
         limit = request['tool_output_token_limit']
         if type(limit) is not int or not 256 <= limit <= 16000:
@@ -252,6 +263,17 @@ def invoke(request, folder, workdir):
     executable = shutil.which('codex')
     if not executable:
         raise NativeError('Codex executable is unavailable')
+    if request.get('isolate_workspace_reads', False):
+        # macOS helper dispatch retains the launched executable path. A HOME/bin
+        # symlink is outside the minimal profile even when its target is allowed.
+        # Launch the canonical binary instead of widening read access to that alias.
+        try:
+            canonical_executable = Path(executable).resolve(strict=True)
+        except (OSError, RuntimeError) as error:
+            raise NativeError('isolated Codex executable cannot be resolved') from error
+        if not canonical_executable.is_file() or not os.access(str(canonical_executable), os.X_OK):
+            raise NativeError('isolated Codex executable must be an executable regular file')
+        executable = str(canonical_executable)
     answer = folder / 'native-answer.txt'
     command = [executable, 'exec', '--ignore-user-config', '--ephemeral', '--cd', str(workdir)] + permission_args + [
                '--skip-git-repo-check', '--model', request['model'],

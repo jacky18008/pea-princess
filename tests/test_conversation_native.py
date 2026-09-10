@@ -56,7 +56,7 @@ class ConversationNativeTests(unittest.TestCase):
         path.mkdir(mode=0o700)
         return path
 
-    def run_fake(self, script=SUCCESS, request=None, folder=None, start_callback=None):
+    def run_fake(self, script=SUCCESS, request=None, folder=None, start_callback=None, executable='/fake/codex'):
         folder = folder or self.folder()
         def start(command, **kwargs):
             self.commands.append((command, kwargs.copy()))
@@ -66,7 +66,7 @@ class ConversationNativeTests(unittest.TestCase):
             proc = self.real_start([sys.executable, '-c', FAKE_PREFIX + script, answer, str(self.workdir)], **kwargs)
             self.processes.append(proc)
             return proc
-        with mock.patch.object(native.shutil, 'which', return_value='/fake/codex'), \
+        with mock.patch.object(native.shutil, 'which', return_value=executable), \
                 mock.patch.object(native.launch, 'start_process', side_effect=start):
             return native.invoke(request or self.request, folder, self.workdir)
 
@@ -147,13 +147,17 @@ class ConversationNativeTests(unittest.TestCase):
                 self.assertEqual(expected_hash, record['request_sha256'])
                 self.assertEqual(self.request['prompt'], (self.workdir / 'received.txt').read_text())
 
-    def test_isolated_reads_use_only_named_profile_and_freeze_exact_configuration(self):
+    def test_candidate_isolation_configuration_freezes_denials_without_legacy_settings(self):
         request = self.request | {'isolate_workspace_reads': True, 'skip_host_skill_discovery': True}
         expected_hash = native._digest(request)
         synthetic_home = self.root / 'synthetic-home'
+        runtime = self.root / 'codex-runtime';runtime.write_text('synthetic executable');runtime.chmod(0o700)
+        executable_alias = self.root / 'codex-alias';executable_alias.symlink_to(runtime)
         expected_configs = [
             'default_permissions="pea_native_minimal"',
             'permissions.pea_native_minimal.filesystem={":minimal"="read",":workspace_roots"="write",'
+            '":tmpdir"="deny",":slash_tmp"="deny","/tmp"="deny","/private/tmp"="deny",'
+            '"/var/tmp"="deny","/private/var/tmp"="deny",'
             '"/Library/Developer/CommandLineTools/usr/bin"="read",'
             '"/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework"="read"}',
             'permissions.pea_native_minimal.network.enabled=false',
@@ -168,11 +172,15 @@ class ConversationNativeTests(unittest.TestCase):
             self.assertEqual(command, saved['command'])
             self.assertEqual(expected_hash, saved['request_sha256'])
             request['isolate_workspace_reads'] = False
-        with mock.patch.object(native.sys, 'platform', 'darwin'), \
+        with mock.patch.object(native, 'ISOLATED_READS_UNSUPPORTED_REASON', None), \
+                mock.patch.object(native.sys, 'platform', 'darwin'), \
                 mock.patch.object(native.Path, 'is_dir', return_value=True), \
                 mock.patch.object(native.Path, 'home', return_value=synthetic_home):
-            record = self.run_fake(request=request, folder=folder, start_callback=inspect_and_mutate_caller)
+            record = self.run_fake(request=request, folder=folder, start_callback=inspect_and_mutate_caller,
+                                   executable=str(executable_alias))
         command, kwargs = self.commands[0]
+        self.assertEqual(str(runtime), command[0])
+        self.assertNotIn(str(executable_alias), command)
         self.assertEqual(expected_configs, [command[i + 1] for i, value in enumerate(command) if value == '-c'])
         self.assertNotIn('--sandbox', command)
         self.assertFalse(any('sandbox_mode' in value for value in command))
@@ -183,7 +191,18 @@ class ConversationNativeTests(unittest.TestCase):
         self.assertEqual(expected_hash, record['request_sha256'])
         self.assertEqual(command, record['command'])
 
-    def test_isolated_reads_fail_before_dispatch_on_unsupported_host_or_missing_runtime(self):
+    def test_isolation_remains_disabled_before_dispatch_despite_available_runtime(self):
+        folder = self.folder('unsupported-isolation')
+        with mock.patch.object(native.sys, 'platform', 'darwin'), \
+                mock.patch.object(native.Path, 'is_dir', return_value=True), \
+                mock.patch.object(native.launch, 'start_process') as launched:
+            with self.assertRaisesRegex(native.NativeError, 'shared temporary-directory'):
+                native.invoke(self.request | {'isolate_workspace_reads': True}, folder, self.workdir)
+            launched.assert_not_called()
+        self.assertEqual([], list(folder.iterdir()))
+
+    @mock.patch.object(native, 'ISOLATED_READS_UNSUPPORTED_REASON', None)
+    def test_candidate_isolation_rejects_unsupported_host_or_missing_runtime(self):
         request = self.request | {'isolate_workspace_reads': True}
         with mock.patch.object(native.sys, 'platform', 'linux'):
             folder = self.folder('unsupported-platform')
@@ -195,6 +214,24 @@ class ConversationNativeTests(unittest.TestCase):
                 folder = self.folder('missing-runtime-' + str(index))
                 self.assert_no_dispatch(request=request, folder=folder)
                 self.assertEqual([], list(folder.iterdir()))
+
+    @mock.patch.object(native, 'ISOLATED_READS_UNSUPPORTED_REASON', None)
+    def test_candidate_isolation_executable_alias_must_resolve_to_an_executable_file(self):
+        request = self.request | {'isolate_workspace_reads': True}
+        nonexecutable = self.root / 'not-executable';nonexecutable.write_text('synthetic')
+        directory = self.root / 'not-a-file';directory.mkdir()
+        dangling = self.root / 'dangling';dangling.symlink_to(self.root / 'missing')
+        with mock.patch.object(native.sys, 'platform', 'darwin'), \
+                mock.patch.object(native.Path, 'is_dir', return_value=True), \
+                mock.patch.object(native.launch, 'start_process') as launched:
+            for index, executable in enumerate((nonexecutable, directory, dangling)):
+                folder = self.folder('invalid-executable-' + str(index))
+                with self.subTest(executable=executable.name), \
+                        mock.patch.object(native.shutil, 'which', return_value=str(executable)), \
+                        self.assertRaises(native.NativeError):
+                    native.invoke(request, folder, self.workdir)
+                self.assertEqual([], list(folder.iterdir()))
+            launched.assert_not_called()
 
     def test_workspace_is_owned_outside_tree_and_persists_between_calls(self):
         self.assertEqual(self.root, native._marker(self.workdir).parent)

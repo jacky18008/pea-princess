@@ -65,6 +65,24 @@ class CanaryIntegrationTests(unittest.TestCase):
     def current(self):
         return canary.controller(self.output,canary.IDS)
 
+    def test_new_reference_is_pinned_even_if_absent_from_original_plan(self):
+        added='skills/vet-flat/references/state-sources-api.md'
+        self.assertNotIn(added,canary.base.read(self.prior/'plan.json')['source_sha256'])
+        target=self.root/'with-new-reference';original=canary.base.subprocess.check_output
+        def checkout(command, **kwargs):
+            if command[:2]==['git','ls-files']:return 'skills/vet-flat/SKILL.md\n'+added+'\n'
+            return original(command, **kwargs)
+        with patch.object(canary.base.subprocess,'check_output',side_effect=checkout):
+            canary.prepare(target,self.prior)
+        plan=canary.base.read(target/'plan.json')
+        self.assertEqual(canary.base.sha(canary.base.ROOT/added),plan['source_sha256'][added])
+        self.assertTrue((target/'q01/work/skill/references/state-sources-api.md').is_file())
+        original_sha=canary.base.sha
+        with patch.object(canary.base,'sha',side_effect=lambda p:'changed' if Path(p)==canary.base.ROOT/added else original_sha(p)), \
+                patch.object(canary.base.native,'invoke') as physical:
+            with self.assertRaisesRegex(ValueError,'canary source changed'):canary.run_one(target)
+            physical.assert_not_called()
+
     def test_first_review_gates_second_then_combined_call_limit_stops(self):
         first_work=self.output/'q01/work';second_work=self.output/'q02/work'
         self.assertEqual(canary.base.native._snapshot(first_work),canary.base.native._snapshot(second_work))

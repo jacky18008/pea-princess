@@ -47,6 +47,11 @@ permission allow-rules alone do not disable tools. Codex read-only mode still pe
 no-tools behavior observed in a transcript is not proof of preventative filesystem isolation.
 Use a separate OS account/container with narrowly mounted files for adversarial containment tests.
 
+The optional native benchmark setting `isolate_workspace_reads` currently refuses dispatch.
+On the tested Codex CLI 0.153.4/macOS, shared `/tmp` and `/var/tmp` remained readable and
+writable even with explicit deny rules. Disabling skill discovery does not establish isolation.
+See the [reproduction and stopped quality probe](docs/waste-reduction-2026-09-10/results.md).
+
 Legacy launchers now make one attempt by default. Explicit retries retain per-attempt usage;
 unknown usage is not zero. Owned process cleanup handles timeouts and interruption, including
 ordinary child processes, but is not a sandbox against deliberately detached daemons or abrupt
