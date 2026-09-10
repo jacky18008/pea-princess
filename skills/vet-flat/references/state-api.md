@@ -18,7 +18,18 @@ python3 "$PEA_SKILL/scripts/session_state.py" --project "$PEA_PROJECT" checkpoin
 python3 "$PEA_SKILL/scripts/session_state.py" --project "$PEA_PROJECT" verify
 ```
 
-`PEA_REVISION` is the revision actually read; `PEA_EVENT_FILE` contains **one JSON event object**. Omit `--event-file` to use stdin. `request.capture` / `requirement.add` are event `op` values, not CLI subcommands. `show` and `apply` return full state; `context` returns the active packet directly. All include `revision`.
+`PEA_REVISION` is the revision actually read; `PEA_EVENT_FILE` contains **one JSON event object**. Omit `--event-file` to use stdin. `request.capture` / `requirement.add` are event `op` values, not CLI subcommands. `show` and default `apply` return full state; `context` returns the active packet directly. All include `revision`.
+
+For an already reconciled batch of events, opt into `apply --receipt-only` to avoid echoing full state after every event:
+
+```bash
+python3 "$PEA_SKILL/scripts/session_state.py" --project "$PEA_PROJECT" apply --expected-revision "$PEA_REVISION" --event-file "$PEA_EVENT_FILE" --receipt-only
+python3 "$PEA_SKILL/scripts/session_state.py" --project "$PEA_PROJECT" context --max-chars 32000
+```
+
+The receipt contains only `ok: true`, `schema_version`, `project_id`, `revision` and `event_hash` from that successful apply. Validation, locking, revision checks and invalidation are unchanged. Use the returned revision for the next already reconciled event; a conflict still requires reloading and reconciling, never automatic retry. An idempotent duplicate spend returns the existing revision/hash without appending an event. The receipt identifies that apply's resulting journal head, even if another writer advances the journal before stdout is printed; it does not guarantee that revision remains current.
+
+Read the complete `context` packet after the batch and before dependent work. A receipt is neither a context packet nor a decision receipt, and is not evidence that requirements or task completion were semantically validated. This option reduces stdout only; it does not reduce or truncate stored state, required context or model input.
 
 ## Python: capture, add, change and checkpoint
 

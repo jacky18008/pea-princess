@@ -182,11 +182,15 @@ def invoke(request, folder, workdir):
     """One physical attempt; request has model, effort, prompt, timeout_seconds.
 
     Optional response_schema is supplied to Codex without changing prompt text.
+    Optional skip_host_skill_discovery controls discovery, not filesystem reads.
+    Optional tool_output_token_limit caps individual tool outputs in history,
+    not total usage. Omitted controls preserve the original command line.
     folder is a fresh per-call artifact directory disjoint from the workspace.
     The record omits id so the caller can bind any durable dispatch identity.
     A stopped/unknown/invalid record must stop the caller's batch; never retry it.
     """
-    if not isinstance(request, dict) or set(request) - {'model', 'effort', 'prompt', 'timeout_seconds', 'response_schema'}:
+    if not isinstance(request, dict) or set(request) - {'model', 'effort', 'prompt', 'timeout_seconds', 'response_schema',
+                                                      'skip_host_skill_discovery', 'tool_output_token_limit'}:
         raise NativeError('unsupported native request fields')
     if request.get('model') not in MODELS or request.get('effort') not in EFFORTS:
         raise NativeError('explicit supported Codex model and low/high effort required')
@@ -196,6 +200,12 @@ def invoke(request, folder, workdir):
     timeout = request.get('timeout_seconds')
     if type(timeout) is not int or not 1 <= timeout <= MAX_TIMEOUT_SECONDS:
         raise NativeError('timeout_seconds must be an integer from 1 to %d' % MAX_TIMEOUT_SECONDS)
+    if 'skip_host_skill_discovery' in request and type(request['skip_host_skill_discovery']) is not bool:
+        raise NativeError('skip_host_skill_discovery must be a boolean')
+    if 'tool_output_token_limit' in request:
+        limit = request['tool_output_token_limit']
+        if type(limit) is not int or not 256 <= limit <= 16000:
+            raise NativeError('tool_output_token_limit must be an integer from 256 to 16000')
     schema = request.get('response_schema')
     try:
         if schema is not None and (not isinstance(schema, dict) or len(_json(schema)) > MAX_SCHEMA_BYTES):
@@ -218,6 +228,10 @@ def invoke(request, folder, workdir):
                '--sandbox', 'workspace-write', '--skip-git-repo-check', '--model', request['model'],
                '-c', 'model_reasoning_effort="%s"' % request['effort'], '-c', 'project_doc_max_bytes=0',
                '--json', '--output-last-message', str(answer)]
+    if request.get('skip_host_skill_discovery', False):
+        command.extend(['--enable', 'skip_host_skill_discovery'])
+    if 'tool_output_token_limit' in request:
+        command.extend(['-c', 'tool_output_token_limit=%d' % request['tool_output_token_limit']])
     if schema is not None:
         schema_bytes = _json(schema)
         # Native tools can inspect this known schema; the CLI uses the protected

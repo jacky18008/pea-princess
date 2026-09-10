@@ -96,6 +96,11 @@ class ConversationNativeTests(unittest.TestCase):
         self.assertIn('project_doc_max_bytes=0', command)
         self.assertIn('--ignore-user-config', command)
         self.assertIn('--ephemeral', command)
+        self.assertEqual([
+            '/fake/codex', 'exec', '--ignore-user-config', '--ephemeral', '--cd', str(self.workdir),
+            '--sandbox', 'workspace-write', '--skip-git-repo-check', '--model', 'gpt-6-astra',
+            '-c', 'model_reasoning_effort="low"', '-c', 'project_doc_max_bytes=0',
+            '--json', '--output-last-message', str(self.root / 'call-1' / 'native-answer.txt'), '--', '-'], command)
         self.assertEqual(['--', '-'], command[-2:])
         self.assertNotIn(self.request['prompt'], command)
         self.assertEqual(0o077, kwargs['umask'])
@@ -109,6 +114,37 @@ class ConversationNativeTests(unittest.TestCase):
         self.assertEqual(record['request_sha256'], invocation['request_sha256'])
         self.assertNotIn(self.request['prompt'], json.dumps(invocation))
         self.assertTrue(all(proc.poll() is not None for proc in self.processes))
+
+    def test_optional_discovery_and_history_limits_are_frozen_in_argv_and_receipt(self):
+        base_command = self.run_fake()['command']
+        cases = [
+            ({'skip_host_skill_discovery': False}, []),
+            ({'skip_host_skill_discovery': True}, ['--enable', 'skip_host_skill_discovery']),
+            ({'tool_output_token_limit': 256}, ['-c', 'tool_output_token_limit=256']),
+            ({'tool_output_token_limit': 4000}, ['-c', 'tool_output_token_limit=4000']),
+            ({'tool_output_token_limit': 16000}, ['-c', 'tool_output_token_limit=16000']),
+            ({'skip_host_skill_discovery': True, 'tool_output_token_limit': 4000},
+             ['--enable', 'skip_host_skill_discovery', '-c', 'tool_output_token_limit=4000']),
+        ]
+        for index, (options, extra_args) in enumerate(cases):
+            with self.subTest(options=options):
+                folder = self.folder('controls-' + str(index))
+                request = self.request | options
+                expected_hash = native._digest(request)
+                expected_command = base_command[:-2] + extra_args + ['--', '-']
+                expected_command[expected_command.index('--output-last-message') + 1] = str(folder / 'native-answer.txt')
+                def inspect_and_mutate_caller(command, kwargs):
+                    saved = json.loads((folder / 'native-invocation.json').read_text())
+                    self.assertEqual(expected_command, command)
+                    self.assertEqual(expected_command, saved['command'])
+                    self.assertEqual(expected_hash, saved['request_sha256'])
+                    request['skip_host_skill_discovery'] = not request.get('skip_host_skill_discovery', False)
+                    request['tool_output_token_limit'] = 999
+                record = self.run_fake(request=request, folder=folder, start_callback=inspect_and_mutate_caller)
+                self.assertEqual('complete', record['status'])
+                self.assertEqual(expected_command, record['command'])
+                self.assertEqual(expected_hash, record['request_sha256'])
+                self.assertEqual(self.request['prompt'], (self.workdir / 'received.txt').read_text())
 
     def test_workspace_is_owned_outside_tree_and_persists_between_calls(self):
         self.assertEqual(self.root, native._marker(self.workdir).parent)
@@ -146,6 +182,9 @@ class ConversationNativeTests(unittest.TestCase):
                    {'response_schema': []}, {'response_schema': {'x': float('nan')}},
                    {'response_schema': {'x': object()}}, {'response_schema': {'x': 'a' * native.MAX_SCHEMA_BYTES}},
                    {'retry': 1}]
+        changes.extend({'skip_host_skill_discovery': value} for value in (None, 0, 1, 'true', [], {}))
+        changes.extend({'tool_output_token_limit': value}
+                       for value in (None, True, False, -1, 0, 255, 16001, 256.0, '4000', [], {}))
         for index, change in enumerate(changes):
             with self.subTest(change=list(change)):
                 self.assert_no_dispatch(request=self.request | change, folder=self.folder('bad-' + str(index)))

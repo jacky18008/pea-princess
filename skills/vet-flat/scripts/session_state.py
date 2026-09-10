@@ -979,6 +979,7 @@ def main(argv=None):
     init_parser = sub.add_parser("init"); init_parser.add_argument("--project-id")
     apply_parser = sub.add_parser("apply"); apply_parser.add_argument("--expected-revision", type=int, required=True)
     apply_parser.add_argument("--event-file", type=Path, help="otherwise read one JSON event from stdin")
+    apply_parser.add_argument("--receipt-only", action="store_true", help="return verified revision/hash identity instead of full state; read context after the batch")
     sub.add_parser("show"); sub.add_parser("verify")
     for name in ("context", "checkpoint"):
         child = sub.add_parser(name); child.add_argument("--max-chars", type=int, default=DEFAULT_CONTEXT_CHARS)
@@ -1002,6 +1003,8 @@ def main(argv=None):
             if len(raw) > MAX_EVENT_BYTES:
                 raise SessionStateError("event exceeds limit")
             result = store.apply(_parse(raw), args.expected_revision)
+            if args.receipt_only:
+                result = dict({key: result[key] for key in ("schema_version", "project_id", "revision", "event_hash")}, ok=True)
         elif args.command in ("context", "checkpoint"):
             result = getattr(store, args.command)(args.max_chars, args.task_ids, args.max_tokens)
         elif args.command == "retrieve":

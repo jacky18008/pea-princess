@@ -1,10 +1,13 @@
 """Offline state continuity, revision safety, source integrity and permission boundaries."""
 import copy
+from contextlib import redirect_stderr, redirect_stdout
 import hashlib
+import io
 import json
 import multiprocessing
 import os
 from pathlib import Path
+import shutil
 import sys
 import tempfile
 import unittest
@@ -64,6 +67,79 @@ class SessionStateTests(unittest.TestCase):
         values=dict(id=identifier,task_id='vet',based_on_revision=self.state['revision'],request_hash='a'*64)
         values.update(kwargs)
         return self.apply('dispatch.start', **values)
+
+    def cli_apply(self, event, revision, receipt_only=False, project=None):
+        project=project or self.root
+        event_file=project/'event.json';event_file.write_text(json.dumps(event))
+        args=['--project',str(project),'apply','--expected-revision',str(revision),'--event-file',str(event_file)]
+        if receipt_only:args.append('--receipt-only')
+        stdout=io.StringIO();stderr=io.StringIO()
+        with redirect_stdout(stdout),redirect_stderr(stderr):
+            code=s.main(args)
+        return code,stdout.getvalue(),stderr.getvalue()
+
+    def test_cli_receipt_only_preserves_default_journal_context_and_invalidation(self):
+        self.requirement(value='PRIVATE CONDITION')
+        self.fact(value='PRIVATE FACT')
+        self.task(requirement_ids=['budget'])
+        self.apply('task.complete',id='vet',evidence_ids=['observation'],based_on_revision=self.state['revision'])
+        replica=self.root/'replica';replica.mkdir()
+        shutil.copytree(self.store.state_root,replica/'.pea-state')
+        event=dict(op='request.capture',id='private-request',text='PRIVATE REQUEST',source='user-input')
+        recorded_at=s.datetime.datetime(2026,1,1,tzinfo=s.datetime.timezone.utc)
+        with mock.patch.object(s.datetime,'datetime') as timestamp:
+            timestamp.now.return_value=recorded_at
+            default=self.cli_apply(event,self.state['revision'])
+            compact=self.cli_apply(event,self.state['revision'],receipt_only=True,project=replica)
+        self.assertEqual((0,''),(default[0],default[2]))
+        self.assertEqual((0,''),(compact[0],compact[2]))
+        state=json.loads(default[1]);receipt=json.loads(compact[1])
+        self.assertEqual(self.store.show(),state)
+        self.assertEqual(dict(schema_version=state['schema_version'],project_id=state['project_id'],
+                              revision=state['revision'],event_hash=state['event_hash'],ok=True),receipt)
+        restored=s.SessionStore(replica)
+        self.assertEqual((self.store.state_root/'events.json').read_bytes(),(restored.state_root/'events.json').read_bytes())
+        self.assertEqual(self.store.context(),restored.context())
+        self.assertTrue(restored.verify()['ok'])
+        self.assertEqual('needs_review',state['tasks']['vet']['status'])
+        for private_text in ('PRIVATE CONDITION','PRIVATE FACT','PRIVATE REQUEST','private-request'):
+            self.assertIn(private_text,default[1]);self.assertNotIn(private_text,compact[1])
+
+    def test_cli_receipt_only_rejects_stale_revision_without_writing(self):
+        stale=self.state['revision'];self.requirement()
+        before=(self.store.state_root/'events.json').read_bytes()
+        code,stdout,stderr=self.cli_apply(dict(op='question.add',id='q',text='Optional',blocking=False),stale,receipt_only=True)
+        self.assertEqual(2,code);self.assertEqual('',stdout)
+        self.assertEqual('RevisionConflict',json.loads(stderr)['error'])
+        self.assertFalse(json.loads(stderr)['ok'])
+        self.assertEqual(before,(self.store.state_root/'events.json').read_bytes())
+
+    def test_cli_receipt_only_identifies_own_apply_despite_followup_write(self):
+        revision=self.state['revision'];original_apply=s.SessionStore.apply
+        def apply_then_write(store,event,expected_revision):
+            result=original_apply(store,event,expected_revision)
+            original_apply(store,dict(op='question.add',id='later',text='Later change',blocking=False),result['revision'])
+            return result
+        with mock.patch.object(s.SessionStore,'apply',apply_then_write):
+            code,stdout,stderr=self.cli_apply(dict(op='question.add',id='first',text='First change',blocking=False),revision,receipt_only=True)
+        self.assertEqual((0,''),(code,stderr))
+        receipt=json.loads(stdout)
+        journal=json.loads((self.store.state_root/'events.json').read_text())
+        self.assertEqual(revision+1,receipt['revision'])
+        self.assertEqual(journal['events'][-2]['event_hash'],receipt['event_hash'])
+        self.assertEqual(revision+2,self.store.show()['revision'])
+
+    def test_cli_receipt_only_keeps_duplicate_spend_noop_identity(self):
+        self.apply('budget.set',id='api',scope='api_tokens',unit='tokens',limit=100,provenance=user())
+        self.task(budget_ids=['api']);self.start()
+        self.apply('budget.spend',id='api',amount=13,dispatch_id='call1')
+        before=(self.store.state_root/'events.json').read_bytes()
+        code,stdout,stderr=self.cli_apply(dict(op='budget.spend',id='api',amount=13,dispatch_id='call1'),self.state['revision'],receipt_only=True)
+        self.assertEqual((0,''),(code,stderr))
+        receipt=json.loads(stdout)
+        self.assertEqual(self.state['revision'],receipt['revision'])
+        self.assertEqual(self.state['event_hash'],receipt['event_hash'])
+        self.assertEqual(before,(self.store.state_root/'events.json').read_bytes())
 
     def test_restart_reconstructs_state_and_raw_quotes_without_previous_chat(self):
         quote='  My new ceiling is £2,150.\nDo not silently reuse £2,200.  '
