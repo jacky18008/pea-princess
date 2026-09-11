@@ -282,8 +282,8 @@ def names(block, limit=3):
 
 def compose(where, crime, planning, roads, living, notes, noise=None, street=None, depth="standard"):
     """The fixed shape, from the raw outputs of the register scripts (any may be None)."""
-    out = {"schema": SCHEMA, "ok": True, "retrieved_at": now_iso(), "depth": depth, "where": where,
-           "next": "This is the whole street scan for this point. Write the answer from it; do not run crime.py, planning.py, roads.py, noise.py or living_env.py again for the same point.",
+    out = {"how_to_use": "Complete. Write the answer from this JSON. Do not read this script's source, the cache, or the registers again, and do not run crime.py, planning.py, roads.py, noise.py or living_env.py for the same point.",
+           "schema": SCHEMA, "ok": True, "retrieved_at": now_iso(), "depth": depth, "where": where,
            "street": None, "quiet": None, "noise": None, "crime": None, "works": None, "living_environment": None,
            "reading": [], "sources": [], "not_found": list(notes)}
     reading = out["reading"]
@@ -498,7 +498,8 @@ def scan(postcode=None, lat=None, lng=None, months=6, crime_half_m=150, planning
 
 
 def main():
-    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter,
+                                 epilog="Run it once per street and write from the JSON; the output is complete. --depth is the person's budget mode; standard when unknown. Reading this file's source or the cache adds nothing.")
     ap.add_argument("--postcode")
     ap.add_argument("--lat", type=float)
     ap.add_argument("--lng", type=float)

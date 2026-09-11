@@ -44,7 +44,7 @@ class TestCompose(unittest.TestCase):
         self.out = AS.compose(WHERE, CRIME, PLANNING, ROADS, LIVING, [])
 
     def test_the_shape_is_fixed_and_small(self):
-        for key in ("schema", "ok", "retrieved_at", "where", "quiet", "crime", "works", "living_environment", "reading", "sources", "not_found"):
+        for key in ("how_to_use", "schema", "ok", "retrieved_at", "where", "quiet", "crime", "works", "living_environment", "reading", "sources", "not_found"):
             self.assertIn(key, self.out, key)
         self.assertEqual("vet-flat/area-scan/2", self.out["schema"])
         self.assertTrue(self.out["ok"])
@@ -112,7 +112,7 @@ class TestStreetAndNoise(unittest.TestCase):
         self.assertEqual("60.0-64.9", out["noise"]["band_2017_road"])
         self.assertTrue(any(r.startswith("Road noise") for r in out["reading"]))
         self.assertFalse(any(r.startswith("These are modelled") for r in out["reading"]), "the scan carries its own closing caveat")
-        self.assertIn("noise.py", out["next"])
+        self.assertIn("noise.py", out["how_to_use"]); self.assertEqual("how_to_use", list(out.keys())[0], "the first key tells a sub-agent the output is complete")
         self.assertLess(len(json.dumps(out, ensure_ascii=False)), 7000)
 
     def test_a_missing_street_is_reported_and_the_scan_stays_put(self):
