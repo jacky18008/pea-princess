@@ -1,44 +1,27 @@
-# 「禁止自動爬蟲」在英國與歐盟到底有多大拘束力
+# 網站自動擷取與免費本機 skill：更正說明
 
-2026-09-11。回答的問題：Rightmove、Zoopla 這類網站寫「禁止自動抓取」，如果我照抓，會有法律責任嗎？
+2026-09-11 更正。**本版取代先前比較表與追問回答**；舊內容保留於 Git 歷史（例如 `9e99da4`）。撤回「個人風險接近零」「公開工具就侵權」「不繞封鎖就沒有刑事問題」及「人工貼上即有完整授權」等過度保證。本次只修正文獻，不變更來源政策或產品功能。
 
-**結論：那句話本身不是法律，但它會啟動三種真的有拘束力的機制。個人少量抓取自己要看的頁面，實際風險接近零；做成公開工具替所有使用者自動抓，風險是真的。這也是豌豆公主「請使用者自己貼頁面、不自動抓這些站」的理由。**
+**免費發布、讓使用者在自己電腦安裝的 skill，不會因公開或使用 AI 就自動違法；免費與本機執行，也不是資料取得和再利用的全面豁免。** 應分別判斷使用者、開發者及資料服務實際做了什麼。
 
-證據標示：■ 法條或判決（一手來源）；● 觀察到的執法實務（未定案）。
+## 法律限制
 
-| 機制 | 英國 | 歐盟 | 對你的意義 |
-|---|---|---|---|
-| **契約**（網站條款） | Rightmove 條款 2.2「使用即接受」、5.2 禁止 bots／crawlers／scrapers、5.5 只准「人工直接操作介面」取得資料、6.5 可封鎖並採法律行動；準據法英格蘭■ | 歐盟法院 *Ryanair v PR Aviation*（C-30/14，2015）■：即使資料庫不受著作權或資料庫權保護，網站仍可用條款禁止爬取，且該禁止可執行；英國脫歐後此判決屬保留的歐盟判例，仍有說服力 | 違反是**民事**：封鎖、終止帳號、求償。個人使用幾乎沒有可證明的損害；商業或大量使用才會被追 |
-| **資料庫權**（sui generis right） | 1997 年《著作權及資料庫權利規則》承襲歐盟指令 96/9■ | 指令 96/9 第 7 條■ | 只有「系統性抽取或再利用實質部分」才侵權。貼一戶給助理看不算；寫工具替大家批量抓整站就算 |
-| **著作權與文字資料探勘（TDM）例外** | CDPA 1988 s.29A：只限**非商業研究**、須**合法存取**、契約不得排除■。2024 年 12 月諮詢提出的「可 opt-out 的一般 TDM 例外」已在 2026 年 1–3 月被政府放棄，維持現狀■ | DSM 指令 2019/790 第 4 條：任何人（含商業）可做 TDM，**但權利人以機器可讀方式（robots.txt、條款）明示保留權利後，例外失效**■；第 3 條研究機構例外不能被排除■；AI Act 第 53 條要求通用 AI 模型供應商遵守這種保留■ | 在歐盟，網站把「不要爬」寫成機器可讀，**法律上真的有效**：它拿掉你的豁免，回到要授權。英國商業用途本來就沒有豁免；個人非商業研究才有 s.29A，而「合法存取」是否包含違反條款取得的頁面，尚無判決 |
-| **刑事**（Computer Misuse Act 1990 s.1） | 公開頁面一般不構成「未經授權存取」；繞過登入、付費牆、反爬或速率限制才有刑事風險■ | 各國有類似的電腦犯罪條文 | 不破解、不繞封鎖，就不是刑事問題 |
-| **個資**（UK GDPR／GDPR） | 廣告裡仲介的姓名、電話是個資；純個人家用豁免，公開工具不豁免■ | 同 | 工具若儲存仲介聯絡資料，需有合法基礎與告知 |
+- **網站合約：** Rightmove 第 5.2、5.5 條禁止自動存取；第 8.3 條另限制下載、複製、保存等用途。因此不能把「人工開頁面後整份貼給 AI」概括為已獲授權。條款是否形成有效合約、是否適用及是否違反，仍依個案判斷。第 6.5 條針對第 6 條內容違規，不能直接當作爬蟲專屬救濟依據。[Rightmove 條款](https://www.rightmove.co.uk/c/terms-of-use/)
+- **資料庫權：** 先須符合受保護資格；未經同意擷取全部或實質部分可能侵權，反覆、系統性的小量擷取也可能累積達門檻。合法使用者另有擷取非實質部分及相關契約保障。沒有固定「幾戶以下一定合法」規則。[法規第 13、16、19 條](https://www.wipo.int/wipolex/en/legislation/details/1726)
+- **著作權：** 文字、照片、平面圖須分別判斷授權或例外。s.29A 要求合法存取及非商業研究；不收費或自己找房不足以證明符合。[UK IPO](https://www.gov.uk/guidance/exceptions-to-copyright)
+- **刑事：** 違反條款不自動等於犯罪；《Computer Misuse Act》s.1 要看未授權存取及明知等要件，並非只有破解技術障礙才可能成立。[CPS](https://www.cps.gov.uk/prosecution-guidance/computer-misuse-act)
+- **個資：** 個人／家用豁免不會免除其他法律；沒有豁免也不代表禁止處理，而是需要遵守個資法。開發者是否為控制者，要看其對處理目的與方式的實際控制，不能只看是否公開程式或資料是否回傳。[ICO](https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/controllers-and-processors/controllers-and-processors-a-guide/)
 
-## 執法實務
+## 工具作者與實際風險
 
-- 我查不到英國法院對 Rightmove 或 Zoopla 爬蟲的判決；看得到的是封鎖 IP、終止帳號與律師函●。
-- Rightmove 條款 5.5 的「只准人工直接操作」意味著：使用者自己開頁面、複製貼給助理，是條款允許的行為；助理替使用者自動開頁面抓，就不是。
+提供可被誤用的工具，不代表自動授權侵權；*CBS Songs v Amstrad* 支持這個有限區分，不能擴張為所有工具免責。開發者自行擷取、散布或參與具體侵權，仍須另行判斷。「交給使用者的 agent」不能把責任全部轉走。[判決](https://www.bailii.org/uk/cases/UKHL/1988/15.html)
 
-## 對豌豆公主的設計含意
+本文件沒有可靠的 Rightmove 提告機率或完整執法資料。個人偶爾查看少量房源，可能比持續彙整再發布較少引發追究，但這只是風險推論，不能承諾「只會封鎖」「沒人告」或「只有商業用途才會被追」。
 
-1. 維持「使用者貼頁面」：責任留在使用者自己的瀏覽行為，且不觸及資料庫權的「系統性抽取」。
-2. 公開發布時在文件寫明：對 Rightmove、Zoopla、OnTheMarket、OpenRent、HomeViews、Trustpilot、Google 評論、Airbnb、Booking.com 只列名、不提供抓取方法（`references/sources.yaml` 已如此標示）。
-3. 若日後想自動取得房源資料，正途是官方 API 或授權資料商，不是繞過條款。
+## 專案選擇與技術保障
 
-## 兩個追問
+現行 skill 排除指定商業入口網站的自動擷取方法，是專案採取的來源政策，不是所有免費工具的法定架構。[現行規則](../../skills/vet-flat/SKILL.md)
 
-**「個人爬合法、做成工具就違法？」** 不是二分。個人抓自己要看的頁面仍違反條款（契約），後果幾乎只有被封鎖；不涉刑事，也達不到資料庫權的「實質部分」。做成工具後差別在三處：你的伺服器每次抓都是你在違約；替所有使用者累積抓取構成「系統性抽取實質部分」，侵權主體變成你；即使抓取跑在使用者機器上，寫指令叫大家自動抓，在英格蘭法下也可能構成誘使違約（inducing breach of contract）與授權侵權（authorising infringement）■。個人的風險小到沒人追，工具的風險大到會收律師函●。
+接受使用者提供的必要資料、保留私人狀態、提供已授權或開放資料的分析，都可作為本機 skill 的功能；仍須符合各來源的使用條件。貼上不會自動取得完整重製或公開權利。固定主機名單、限速、頁數上限及無 cookie 等技術措施，也不是法律許可，且不一定約束 host 的全部網路工具。[安全邊界](../../SECURITY.md)
 
-**「拿掉爬蟲、讓使用者的 agent 自己想辦法，就沒事了？」** 大致是，前提是技能文字不能教 agent 自動抓那些站。`references/sources.yaml` 對 Rightmove、Zoopla、OnTheMarket、OpenRent、HomeViews、Trustpilot、Google 評論、Airbnb、Booking.com 標「只列名、不給方法」，抓取模式不碰它們；這樣工具這邊既沒有抓取行為、也沒有指示抓取，剩下的是使用者自己貼頁面（Rightmove 條款 5.5 允許的人工操作）。使用者若自己用有瀏覽器工具的 agent 開頁面，是他自己的違約，後果是「個人」等級。
-
-## 來源
-
-- [CDPA 1988 s.29A](https://www.legislation.gov.uk/ukpga/1988/48/section/29A)
-- [Reed Smith：Text and data mining in UK](https://www.reedsmith.com/articles/text-and-data-mining-in-uk/)
-- [Lewis Silkin：UK government rethinks its position on copyright and AI（2026-03-24）](https://www.lewissilkin.com/en/insights/2026/03/24/opt-out-cop-out-uk-government-rethinks-its-position-on-copyright-and-ai-102mnx9)
-- [Kluwer Copyright Blog：DSM Directive Articles 3 and 4](https://legalblogs.wolterskluwer.com/copyright-blog/the-new-copyright-directive-text-and-data-mining-articles-3-and-4/)
-- [Norton Rose Fulbright：Hamburg court on machine-readable opt-outs（2025-12）](https://www.insidetechlaw.com/blog/2025/12/machine-readable-opt-outs-and-ai-training-hamburg-court-clarifies-copyright-exceptions)
-- [Gowling WLG：Ryanair v PR Aviation](https://gowlingwlg.com/en/insights-resources/articles/2015/ryanair-flying-high-at-the-cjeu)
-- [Rightmove Terms of Use](https://www.rightmove.co.uk/c/terms-of-use/)
-- [Sprintlaw：Is web scraping legal in the UK?](https://sprintlaw.co.uk/articles/is-web-scraping-legal-in-the-uk/)
-- [EU AI Act Article 53](https://casrai.org/dictionary/term/eu-ai-act-article-53-general-purpose-ai-model-obligations)
+歐盟 DSM 第 4 條的有效權利保留會影響該項探勘例外，並不等於禁止所有網路讀取；仍須判斷受保護內容、行為、其他授權或例外及成員國實施法。[指令第 4 條](https://eur-lex.europa.eu/legal-content/EN/TXT/PDF/?uri=CELEX%3A32019L0790)
