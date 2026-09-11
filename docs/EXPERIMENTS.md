@@ -727,6 +727,26 @@ a pub at 15 m for one; no main road, secondary road at 176 m for the other; crim
 their denominators) and no web search. Input tokens fell 20–60× and wall time 3–7×. A first reading of
 this experiment mis-classified the "after" runs as "no script run" because the harness had truncated
 command strings at 120 characters and the scan call sat after a chained file read; the raw event streams
-(pair 3) settled it: the scan ran, no sub-agent was involved (the `collab` items are idle `wait` calls).
+(pair 3) settled it: the scan ran.
 Caveat: Codex also read the machine's stale global copy of the skill by name before the workdir copy.
+
+**Correction (2026-09-11, late): the table above counts the main thread only.** The `collab` items
+are not idle: Codex (0.153, `multi_agent` on by default) spawned two or three sub-agent threads per run
+to run the scripts, and `codex exec --json` prints neither their commands nor their tokens. Re-read from
+the rollout files under `~/.codex/sessions/` (main thread plus every thread whose parent chain leads to
+it; `bench/street_ab.py --account` does this for later runs):
+
+| Arm | Main thread only (as above) | All threads | Sub-agent threads (their calls) |
+|---|---|---|---|
+| before, pair 1 | 7.83M | 25.94M | 3 (165) |
+| before, pair 2 | 2.99M | 9.59M | 3 (72) |
+| before, pair 3 | 6.47M | 23.34M | 3 (150) |
+| after, pair 1 | 0.13M | 0.31M | 2 (6) |
+| after, pair 2 | 0.22M | 0.47M | 2 (8) |
+| after, pair 3 | 0.33M | 0.53M | 2 (7) |
+
+The direction and the ratio survive (20–83× fewer input tokens with one scan per street), but every
+absolute Codex figure in this file that predates this correction is a main-thread figure; the true
+cost is 1.6–3.6× higher. The replay rows for Codex (`bench/private/history-replay-2026-09-11/`) have the
+same gap and their thread ids are in the raw streams; account them before quoting a Codex token number.
 
