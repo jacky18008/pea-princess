@@ -23,9 +23,11 @@ trust, a rule that is yours — goes here, in your copy, and stays out of the sh
 - **It is labelled.** Every finding from an add-on carries `(personal add-on: <file>)`.
 - **It reads only what its own source allows.** No listing sites, no review sites; the
   open-register rule of the main skill applies to add-ons too.
-- **It does not describe people.** Anything that sorts neighbourhoods by who lives in them —
-  income, benefits, origin, faith — is not an add-on the skill will run. Sort places by
-  what they are like to live in, not by who lives there.
+- **It does not sort people by protected characteristics.** An add-on that ranks areas by
+  ethnicity, nationality, faith, disability or the like is not one the skill will run.
+  Everything else that the shared skill deliberately leaves out — an income or benefits
+  statistic, a reputation you have heard, a rule of thumb of your own — is exactly what
+  this folder is for: your call, in your copy, labelled as yours, never in the verdict.
 - **It is yours.** Nothing in this folder is shared, uploaded or stored anywhere but your copy.
 
 ## Things people add

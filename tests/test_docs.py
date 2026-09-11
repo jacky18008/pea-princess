@@ -326,7 +326,8 @@ class TestNoLinkFetching(unittest.TestCase):
         readme = read("extensions", "README.md")
         template = read("extensions", "_template.md")
         self.assertIn("never changes a verdict code", readme)
-        self.assertIn("does not describe people", readme)
+        self.assertIn("does not sort people by protected characteristics", readme)
+        self.assertIn("never in the verdict", readme)
         for heading in ("## Purpose", "## Source and licence", "## How to get the number",
                         "## How to read it", "## What goes into the report"):
             self.assertIn(heading, template, heading)
