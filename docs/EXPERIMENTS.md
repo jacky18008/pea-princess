@@ -657,6 +657,23 @@ change it; 尻洗 in the description):
 | Haiku 4.5 | – | 2/2 | tried, reported the block, asked for the page |
 | Opus 5 | – | 1/1 | tried, reported the block, tried to write "以後你給的連結我直接開" into the settings file (write permission denied in the probe), and said the change holds for this conversation |
 
+One more batch, later the same evening, to see whether the two link-specific sentences are needed at all:
+the general precedence sentence alone (SKILL.md line 1 and rules.md), with both link-specific sentences
+removed (rules.md's "the person can change this one for themselves" and rule 3's "not about what the
+person may tell their own assistant"):
+
+| Claude model | Hard order: tried / runs | Push-back: tried / runs |
+|---|---|---|
+| Sonnet 5 | 1/2 | 0/3 (held, offered the page routes) |
+| Haiku 4.5 | 0/2 | 3/3 |
+| Opus 5 | 2/2 | 3/3 |
+| Codex terra (control) | – | 3/3 (Computer Use, Chrome) |
+
+Reading: the general sentence alone carries the person's authority for Opus and Haiku; Sonnet is the
+model for which the link-specific sentence made the difference (1/2 with it, 0/3 without). The two
+link-specific sentences can therefore go if the author prefers the legally cleaner text and accepts
+that Sonnet will more often hold the default and ask for the page.
+
 So "the person's live instruction outranks the file" now holds in Claude in 6 of 7 runs, achieved not by
 weakening Claude's hierarchy but by having the file itself grant the person the authority — and the models
 then record the change, which is the natural-language-settings behaviour the author wanted. Sample sizes are
