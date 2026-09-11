@@ -37,6 +37,7 @@ import live_eligibility
 import playground_review
 import playground_replay
 import playground_skill
+import playground_settings
 from playground_attachments import AttachmentStore, AttachmentError
 
 LIVE_REPLY_SCHEMA = {
@@ -100,7 +101,7 @@ def source_hashes():
     # The agent-output lane may consult any shipped reference or script.
     paths += [p for p in (ROOT/'skills/vet-flat').rglob('*')
               if p.is_file() and p.suffix in ('.md','.py','.json','.yaml') and '__pycache__' not in p.parts]
-    paths.append(ROOT/'tools/playground_skill.py')
+    paths += [ROOT/'tools/playground_skill.py', ROOT/'tools/playground_settings.py', ROOT/'tools/playground_review.py']
     artifact = playground_skill.artifact_info(ROOT)
     if artifact['kind'] == 'public_zip':
         # The legacy tree above supplies controller imports only. The actor's
@@ -210,7 +211,7 @@ def codex_invoke(request, folder):
     sandbox = ['--sandbox', 'workspace-write', '-c', 'sandbox_workspace_write.network_access=true'] if policy == 'live_research' else ['--sandbox', 'read-only']
     command = [executable, 'exec', '--ignore-user-config', '--ephemeral',
                '--cd', str(work)] + sandbox + ['--skip-git-repo-check',
-               '--model', request['model'], '-c', 'model_reasoning_effort="low"',
+               '--model', request['model'], '-c', 'model_reasoning_effort='+json.dumps(playground_settings.validate(request['execution_settings'])['reasoning_effort'] if 'execution_settings' in request else 'low'),
                '-c', 'project_doc_max_bytes=0',
                '--enable', 'skip_host_skill_discovery',
                '-c', 'skills.config=['+','.join('{path='+json.dumps(path)+',enabled=false}' for path in host_skills)+']',
@@ -332,6 +333,9 @@ class Lab:
 
     def catalog(self):
         return {'models': list(MODELS), 'research_modes': list(RESEARCH_MODES),
+             'execution_options': {'research_depths':list(playground_settings.DEPTHS),
+                 'reasoning_efforts':list(playground_settings.EFFORTS),
+                 'defaults':{'research_depth':'standard','reasoning_effort':'low'}},
              'skill_artifact': playground_skill.artifact_info(ROOT),
              'attachments': {'max_file_bytes':25*1024*1024, 'max_per_message':6, 'mode':'agent'},
              'capabilities': copy.deepcopy(CAPABILITIES), 'personas': [{'id': c['id'], 'name': c['name'],
@@ -400,6 +404,7 @@ class Lab:
         if output_mode not in ('checked','agent') or ('output_mode' in data and mode!='live'):
             raise LabError('回覆模式無效。')
         fields = {'model','max_calls','max_tokens','seed','client_id'}
+        fields |= {'research_depth','reasoning_effort'} & set(data)
         if 'attachments' in data: fields.add('attachments')
         if 'output_mode' in data: fields.add('output_mode')
         fields |= {'research_mode','initial_request'} if mode == 'live' else {'persona_id'}
@@ -408,6 +413,8 @@ class Lab:
         for k, low, high in [('max_calls',1,80),('max_tokens',10000,2000000),('seed',1,10000)]:
             if type(data[k]) is not int or not low <= data[k] <= high: raise LabError('用量上限或 seed 超出允許範圍。')
         if data['model'] not in MODELS or (mode == 'fixture' and data['persona_id'] not in self.cards): raise LabError('請選擇已提供的 persona 與 Codex 模型。')
+        try: settings=playground_settings.configured(data,mode,self.cards.get(data.get('persona_id')))
+        except ValueError as error: raise LabError('研究深度或模型推理 effort 無效。') from error
         if mode == 'live' and (not isinstance(data['initial_request'],str) or (not data['initial_request'].strip() and not data.get('attachments')) or len(data['initial_request'])>8000): raise LabError('請輸入需求或加入附件；文字最多 8,000 字。')
         try: client = str(uuid.UUID(data['client_id']))
         except (ValueError, TypeError, AttributeError): raise LabError('操作識別碼無效。')
@@ -422,13 +429,15 @@ class Lab:
             # Historical path text is never a fresh file-selection instruction.
             selected=[] if _replay is not None else self._attach(data,mode,output_mode,data.get('initial_request',''))
             if mode == 'fixture':
-                card = copy.deepcopy(self.cards[data['persona_id']]); fixtures = {d['file']: personas.fixture_text(d['file']) for d in card.get('documents',[])}
+                card = copy.deepcopy(self.cards[data['persona_id']]);card['settings']['budget_mode']=settings['research_depth']
+                fixtures = {d['file']: personas.fixture_text(d['file']) for d in card.get('documents',[])}
                 c = FrozenController(card, data['seed'], fixtures); c.turn=1
                 for doc in c.due(1): c.release(doc,1,'scheduled')
                 c.brief(1)
                 opening=card['opening_message'];system=configured_system(card);controller=c.snapshot()
             else:
                 card={};fixtures={};controller={};opening=data['initial_request'] or '請先查看我提供的附件。';system=live_system(opening,output_mode)
+            system += playground_settings.depth_instruction(settings)
             folder.mkdir(mode=0o700)
             supplied=self._retain_files(folder,selected) if selected else []
             store = SessionStore(folder); store.init(('live-' if mode == 'live' else 'persona-')+sid)
@@ -443,7 +452,7 @@ class Lab:
                'research_mode':mode,'output_mode':output_mode if mode=='live' else 'persona',
                'model':data['model'],'limits':{'max_calls':data['max_calls'],'max_tokens':data['max_tokens']},'seed':data['seed'],
                'card':card,'fixtures':fixtures,'system':system,'runtime_settings':runtime_settings(card) if mode == 'fixture' else None,'sources':source_hashes(),
-               'reply_format':'choices-v1','skill_artifact':playground_skill.artifact_info(ROOT),
+               'reply_format':'choices-v1','skill_artifact':playground_skill.artifact_info(ROOT),'execution_settings':settings,
                'controller':controller,'persona_turn':1,'history':[['user',opening]],'persona_history':[['user',opening]] if mode == 'fixture' else [],
                 'messages':[{'role':'human' if mode == 'live' else 'persona','text':opening,'turn':1,**({'attachments':supplied} if supplied else {})}], 'interventions':[], 'amendments':[],
                'queue':[], 'calls':[], 'pending_call':None,'preparing_input':None,'next_actor':'assistant','auto':False,'pause_requested':False,
@@ -463,7 +472,7 @@ class Lab:
         """Prepare a separate fixed-input replay; reads/creation never call a model."""
         with self.lock:
             if data is not None:
-                if set(data)!={'source_sha256','model','max_calls','max_tokens','client_id'}:
+                if set(data)-{'research_depth','reasoning_effort'}!={'source_sha256','model','max_calls','max_tokens','client_id'}:
                     raise LabError('重測設定欄位無效。')
                 try:client=str(uuid.UUID(data['client_id']))
                 except (ValueError,TypeError,AttributeError):raise LabError('操作識別碼無效。')
@@ -484,6 +493,7 @@ class Lab:
             if data is None:
                 return {'source_id':sid,'source_revision':source['revision'],'source_sha256':pin,
                         'model':source['model'],'turn_count':len(turns),
+                        'execution_settings':playground_settings.read_session(source),
                         'turns':[{'index':t['index'],'user_text':'\n\n'.join(i['text'] for i in t['inputs']),
                                   'original_reply':t['original_reply'],'attachment_count':sum(len(i.get('attachments',[])) for i in t['inputs'])} for t in turns],
                         'excluded_pending_count':extracted['excluded_pending_count'],
@@ -496,6 +506,7 @@ class Lab:
                   'excluded_pending_count':extracted['excluded_pending_count']}
             creation=dict(research_mode='live',output_mode='agent',initial_request='Saved conversation replay',
                           model=data['model'],max_calls=data['max_calls'],max_tokens=data['max_tokens'],seed=source.get('seed',1),client_id=client)
+            creation.update({key:data[key] for key in ('research_depth','reasoning_effort') if key in data})
             # Freeze all selected bytes first, but release only the current turn
             # into supplied-files. Future text/old answers stay out of prompts.
             target=self._folder(target_id)
@@ -582,6 +593,7 @@ class Lab:
               'research_mode':mode,'output_mode':output_mode,'capability_status':CAPABILITIES['agent' if output_mode=='agent' else mode],'next_actor':s['next_actor'],
               'model':s['model'],'status':s['status'],'auto':s['auto'],'busy':self.busy==sid,'notice':notice,'compatible':compatible,
               'runtime_settings':copy.deepcopy(s.get('runtime_settings')),
+              'execution_settings':playground_settings.read_session(s),
               'skill_artifact':copy.deepcopy(s.get('skill_artifact')),
               'replay':self._replay_view(s),'replay_comparison':self._replay_comparison(s),
               'phase_label':('Codex 正在回答' if phase=='assistant' else 'Persona 正在想下一個問題') if self.busy==sid else '',
@@ -611,6 +623,7 @@ class Lab:
                     'messages':s['messages'],'pending_messages':s['queue'],'actions':s['actions'],'calls':s['calls'],
                     'controller':s['controller'],'amendments':s['amendments'],'interventions':s['interventions'],'sources':s['sources'],
                     'runtime_settings':s.get('runtime_settings'),
+                    'execution_settings':playground_settings.read_session(s),
                     'skill_artifact':copy.deepcopy(s.get('skill_artifact')),
                     'replay':copy.deepcopy(s.get('replay')),'replay_comparison':self._replay_comparison(s),
                     'comparison_status':gate['status'] if gate else 'unavailable',
@@ -625,7 +638,8 @@ class Lab:
         folder=self._folder(sid)
         metadata={key:s.get(key) for key in ('id','name','created_at','model','research_mode','output_mode','runtime_settings','sources','skill_artifact','status','stop_reason')}
         metadata['name']=('Agent 對話測試' if s.get('output_mode')=='agent' else '真實找房研究') if s.get('research_mode')=='live' else s['card'].get('name',sid)
-        metadata['configured_effort']='low'
+        metadata['execution_settings']=playground_settings.read_session(s)
+        metadata['configured_effort']=metadata['execution_settings']['reasoning_effort']
         metadata['quality']='not_evaluated'
         metadata['private']=True
         metadata['replay']=self._replay_view(s)
@@ -850,6 +864,7 @@ class Lab:
             transcript='\n\n'.join(('USER' if role=='user' else 'ASSISTANT')+': '+body for role,body in s['history'])
             pending_user=raw if origin=='human' else next(body for role,body in reversed(s['persona_history']) if role=='user')
             system=live_system('\n'.join(body for role,body in s['history'] if role=='user'),s.get('output_mode','checked')) if live else s['system']
+            if live:system+=playground_settings.depth_instruction(playground_settings.read_session(s))
             prompt=system+'\n\nFULL CONVERSATION\n'+transcript+'\n\nCURRENT INPUT TO ANSWER\n'+pending_user
             if s['amendments'] and not live:prompt+='\n\nThe tester has changed the synthetic scenario. Apply these exact amendments in order, preserving their scope and conditional predicates; do not revert to older conflicting facts:\n'+json.dumps(s['amendments'],ensure_ascii=False)
             prompt+='\n\nAnswer the current input directly using the supplied response schema: message is useful plain-language progress, questions are optional choice controls (zero to three). Do not duplicate questions in message. ' if s.get('live_gate_version')!=1 else ''
@@ -872,13 +887,14 @@ class Lab:
                 prompt+='\nThis host now computes the formal comparison, ranking and TODOs itself. Return ONLY candidates with source_url and a short location label, plus focus_fields for the current question, using the supplied schema. Do not return message, prose, facts, conditions, verdicts, ranking, TODOs or pins. Your output is an untrusted discovery proposal, not the visible reply. The host independently captures the original cited unit pages and extracts supported fields; missing evidence stays unknown. Prefer direct unit URLs. If the user requests no new listings, reuse the known sources and select the relevant focus fields. If no source was obtained, return an empty candidate list. Do not invent a URL to complete the schema.'
         if len(prompt)>160000:raise LabError('完整對話超出本輪 160,000 字元容量；已停止，未裁切。')
         call_id='call-%03d-%s'%(len(s['calls'])+1,actor)
-        s['pending_call']={'id':call_id,'actor':actor,'origin':origin,'turn':turn,'started_at':time.time()}
+        settings=playground_settings.for_call(s,actor)
+        s['pending_call']={'id':call_id,'actor':actor,'origin':origin,'turn':turn,'started_at':time.time(),'execution_settings':settings}
         if replay_turn is not None:s['pending_call']['replay_turn']=replay_turn
         if s.get('attachments'):s['pending_call']['input_files']=self._call_files(s)
         if s.get('live_gate_version')==1:
             s['pending_call'].update(intent_epoch=s['intent_epoch'],input_sha256=_digest(self._live_inputs(s)))
         s['preparing_input']=None
-        s['calls'].append({'id':call_id,'actor':actor,'status':'pending','tokens':None})
+        s['calls'].append({'id':call_id,'actor':actor,'status':'pending','tokens':None,'execution_settings':copy.deepcopy(settings)})
         if s.get('live_gate_version')==1:s['calls'][-1]['source_capture_required']=True
         s['status']='running';self._save(s)
         return prompt
@@ -1170,6 +1186,7 @@ class Lab:
                        max_chars=96000,timeout=300 if s.get('research_mode')=='live' else 180,invoke=self.invoke,max_prompt_chars=160000,
                        presentation='conversation',
                        input_files=pending.get('input_files'),
+                       execution_settings=pending['execution_settings'],
                        tool_policy='live_research' if s.get('research_mode')=='live' else 'text_only',
                        response_schema=LIVE_REPLY_SCHEMA if s.get('live_gate_version')==1 else conversation_reply.SCHEMA if pending['actor']=='assistant' and s.get('reply_format')=='choices-v1' else None)
                 capture_status=self._capture_sources(s,pending['id'],receipt) if s.get('research_mode')=='live' and s.get('output_mode')!='agent' else None

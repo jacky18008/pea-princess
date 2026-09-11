@@ -22,7 +22,7 @@ import playground_skill
 ROOT = Path(__file__).resolve().parents[1]
 GENERATED = 'dist/prompt-pack/INSTRUCTIONS.md'
 REQUIRED = (
-    'tools/persona_playground.py', 'tools/session_runner.py',
+    'tools/persona_playground.py', 'tools/session_runner.py', 'tools/playground_settings.py',
     'tools/conversation_reply.py', 'tools/public_source_snapshot.py', 'tools/playground_review.py', 'tools/playground_attachments.py', 'tools/playground_replay.py', 'tools/playground_skill.py',
     'bench/personas.py', 'bench/journeys.py', 'bench/durable_run.py',
     'bench/call_control.py', 'bench/launch.py',

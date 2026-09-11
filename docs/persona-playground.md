@@ -8,6 +8,8 @@
 
 Agent 對話測試也可選擇／拖放檔案或加入本機路徑。送出時交給模型的是已保存的檔案快照；加入附件本身不呼叫模型。開頭和追問都能附檔，檢閱台會記錄來源名稱、版本與大小。[使用方式與範圍](playground-attachments-2026-09-11.md)。
 
+新對話與「用新版重測」可分別選擇研究深度（lite／standard／deep）和模型推理 effort（low／medium／high）；真人對話預設 standard／low。合成人物預設沿用人物卡的研究深度，可在建立前調整。研究深度會作為起始工作範圍注入提示，effort 實際傳入 Codex CLI；對話中的明確追加要求仍可改變研究範圍。對話標頭、Inspector 和匯出都會顯示設定，逐次呼叫另存當時送出的設定與來源。舊紀錄缺少的值顯示「未記錄」，不以目前預設補值。[設定與紀錄格式](playground-settings-2026-09-11.md)。
+
 在 repo 根目錄執行 `python3 tools/start_playground.py --port 8765`，開啟 `http://127.0.0.1:8765`。需要已登入的本機 Codex CLI；使用既有 ChatGPT 登入，不把憑證放入網頁。Python 標準函式庫即可，不需 npm install。
 
 啟動器把測試程式與 `dist/pea-princess-skill.zip` 凍結成私人快照，再啟動測試台。回答者讀取 ZIP 解開的 `skills/pea-princess/`；逐檔核對內容，保留 ZIP 與 SHA-256，不使用電腦上另外安裝的私人 skill。介面顯示公開包版本，展開可見完整雜湊。可用 `--skill-archive /完整路徑/pea-princess-skill.zip` 指定已有公開包；不會自動重建或偷偷改用開發版。

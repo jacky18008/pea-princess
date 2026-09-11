@@ -18,6 +18,7 @@ sys.path[:0] = [str(ROOT / "bench"), str(ROOT / "skills/vet-flat/scripts")]
 from call_control import CallControl, CallControlError, _atomic_json, _digest
 from durable_run import DurableRun, cli_record
 import launch
+import playground_settings
 
 MAX_PROMPT_CHARS = 32000
 IDENTIFIER = re.compile(r"[A-Za-z0-9][A-Za-z0-9_-]{0,79}\Z")
@@ -74,7 +75,7 @@ def _manifest_tool_policy(manifest):
     if type(version) is not int or not isinstance(request, dict):
         raise ValueError("step manifest integrity mismatch")
     if version == 1:
-        if "tool_policy" in manifest or "tool_policy" in request or "input_files" in request:
+        if "tool_policy" in manifest or "tool_policy" in request or "input_files" in request or "execution_settings" in request:
             raise ValueError("legacy manifest cannot contain a tool policy")
         return "text_only"
     if version != 2:
@@ -82,6 +83,8 @@ def _manifest_tool_policy(manifest):
     policy = _tool_policy(manifest.get("tool_policy"))
     if request.get("tool_policy") != policy:
         raise ValueError("request tool policy is not bound to this step")
+    if 'execution_settings' in request:
+        playground_settings.validate(request['execution_settings'])
     if "input_files" in request:
         if request["input_files"] is None:
             raise ValueError("saved input_files must be a list")
@@ -192,7 +195,7 @@ def _codex_invoke(request, folder):
                        for name in ("pea-princess", "vet-flat")]
     cmd = ["codex", "exec", "--ignore-user-config", "--ephemeral", "--cd", str(work),
            "--sandbox", "read-only", "--skip-git-repo-check", "--model", request["model"],
-           "-c", 'model_reasoning_effort="low"', "-c", "web_search=" + json.dumps(web_search),
+           "-c", 'model_reasoning_effort='+json.dumps(playground_settings.validate(request['execution_settings'])['reasoning_effort'] if 'execution_settings' in request else 'low'), "-c", "web_search=" + json.dumps(web_search),
            "-c", "project_doc_max_bytes=0", "--enable", "skip_host_skill_discovery",
            "-c", "skills.config=[" + ",".join("{path=" + json.dumps(str(path)) + ",enabled=false}"
                                        for path in disabled_skills) + "]", "--json",
@@ -217,9 +220,12 @@ def _codex_invoke(request, folder):
 
 def run_step(project, call_id, task_id, model, prompt, token_budget_id,
              max_chars=24000, timeout=180, invoke=None, max_prompt_chars=MAX_PROMPT_CHARS,
-             response_schema=None, presentation="audit", tool_policy="text_only", input_files=None):
+             response_schema=None, presentation="audit", tool_policy="text_only", input_files=None,
+             execution_settings=None):
     tool_policy = _tool_policy(tool_policy)
     input_files = _input_files(input_files)
+    if execution_settings is not None:
+        execution_settings = playground_settings.validate(execution_settings)
     if input_files and (tool_policy != "live_research" or not callable(invoke)):
         raise ValueError("input files require live_research and a custom invoke adapter")
     if presentation not in ("audit", "conversation"):
@@ -283,6 +289,8 @@ def run_step(project, call_id, task_id, model, prompt, token_budget_id,
                "tool_policy": tool_policy}
     if input_files:
         request["input_files"] = input_files
+    if execution_settings is not None:
+        request['execution_settings'] = execution_settings
     if response_schema is not None:
         request["response_schema"] = json.loads(json.dumps(response_schema))
     manifest = {"version": 2, "id": call_id, "task_id": task_id, "tool_policy": tool_policy,

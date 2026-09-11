@@ -56,7 +56,7 @@ class PlaygroundReviewTests(unittest.TestCase):
     def add_call(self, call_id="call-001-assistant", usage=None, seconds=2.5,
                  answer="Synthetic answer with a concrete next step.",
                  current_input="Please compare the two supplied options.",
-                 events=None, raw=None, record_changes=None):
+                 events=None, raw=None, record_changes=None, execution_settings=None):
         usage = ({"input_tokens": 100, "cached_input_tokens": 80, "output_tokens": 10}
                  if usage is None else usage)
         events = [] if events is None else copy.deepcopy(events)
@@ -80,7 +80,8 @@ class PlaygroundReviewTests(unittest.TestCase):
             receipt = runner.run_step(
                 project=self.folder, call_id=call_id, task_id="answer-task", model="synthetic-model",
                 prompt=prompt, token_budget_id="tokens", tool_policy="live_research",
-                max_prompt_chars=256000, invoke=lambda *_: copy.deepcopy(record))
+                max_prompt_chars=256000, invoke=lambda *_: copy.deepcopy(record),
+                **({'execution_settings': execution_settings} if execution_settings is not None else {}))
         except runner.CallControlError:
             # Failed streams still produce immutable physical evidence and a
             # recoverable receipt. Nothing retries or invokes a real transport.
@@ -162,6 +163,120 @@ class PlaygroundReviewTests(unittest.TestCase):
         for key, value in {"input_tokens": 140, "cached_input_tokens": 90, "uncached_input_tokens": 50,
                            "output_tokens": 15, "processed_tokens": 155, "seconds": 3.5}.items():
             self.assertEqual({"value": value, "known_sum": value, "unknown_calls": 0}, totals[key])
+
+    def settings(self, depth='standard', effort='low', depth_source='user_selected', effort_source='host_default'):
+        return dict(research_depth=depth, reasoning_effort=effort,
+                    research_depth_source=depth_source, reasoning_effort_source=effort_source)
+
+    def test_execution_settings_follow_each_bound_call_not_current_session_or_row(self):
+        first = self.settings('lite', 'low')
+        second = self.settings('deep', 'high', effort_source='user_selected')
+        self.add_call(execution_settings=first, answer='First configured answer')
+        self.add_call('call-002-assistant', execution_settings=second, answer='Second configured answer')
+        self.session['execution_settings'] = self.settings('standard', 'medium')
+        self.session['calls'][0]['execution_settings'] = self.settings('deep', 'high')
+        before = self.source_bytes()
+        index = review.build_index(self.folder, self.session)
+        self.assertEqual([first, second], [row['execution_settings'] for row in index['calls']])
+        for number, expected in enumerate((first, second), 1):
+            call_id = 'call-%03d-assistant' % number
+            detail = self.detail(call_id)
+            self.assertEqual(expected, detail['execution_settings'])
+            evidence = detail['execution_settings_evidence']
+            self.assertEqual('bound', evidence['status'])
+            manifest = json.loads((self.run_folder(call_id) / 'manifest.json').read_bytes())['value']
+            self.assertEqual(manifest['request_hash'], evidence['request_sha256'])
+            self.assertTrue(evidence['source_path'].endswith('#value.request.execution_settings'))
+        self.assertEqual(before, self.source_bytes())
+        detail['execution_settings']['reasoning_effort'] = 'low'
+        self.assertEqual(second, self.detail('call-002-assistant')['execution_settings'])
+
+    def test_unrecorded_legacy_call_settings_remain_unknown_in_details_index_and_markdown(self):
+        self.add_call()
+        self.session.update(research_mode='fixture', runtime_settings={'budget_mode': 'deep'},
+                            execution_settings=self.settings('deep', 'high'))
+        self.session['calls'][0]['execution_settings'] = self.settings('lite', 'low')
+        unknown = dict(research_depth=None, reasoning_effort=None,
+                       research_depth_source='unrecorded', reasoning_effort_source='unrecorded')
+        detail = self.detail()
+        self.assertEqual(unknown, detail['execution_settings'])
+        self.assertEqual('not_recorded', detail['execution_settings_evidence']['status'])
+        index = review.build_index(self.folder, self.session)
+        self.assertEqual(unknown, index['calls'][0]['execution_settings'])
+        packet = dict(index, messages=self.session['messages'], selected_call=detail)
+        markdown = review.export_markdown(packet)
+        self.assertIn('本次呼叫的研究深度與推理程度', markdown)
+        self.assertIn('"reasoning_effort": null', markdown)
+        self.assertIn('"research_depth": null', markdown)
+        self.assertNotIn('"reasoning_effort": "low"', markdown)
+        self.assertNotIn('"research_depth": "deep"', markdown)
+
+    def test_request_settings_tampering_and_rehashed_manifest_are_unbound(self):
+        self.add_call(execution_settings=self.settings('standard', 'medium'))
+        path = self.run_folder() / 'manifest.json'
+        original = json.loads(path.read_bytes())
+        for rehash_request in (False, True):
+            modified = copy.deepcopy(original)
+            modified['value']['request']['execution_settings']['reasoning_effort'] = 'high'
+            if rehash_request:
+                modified['value']['request_hash'] = digest(modified['value']['request'])
+            modified['sha256'] = digest(modified['value'])
+            with self.subTest(rehash_request=rehash_request), self.altered_file(path, json.dumps(modified)):
+                detail = self.detail()
+                self.assertFalse(detail['integrity']['ok'])
+                self.assertEqual('unbound', detail['execution_settings_evidence']['status'])
+                self.assertIsNone(detail['execution_settings']['research_depth'])
+                self.assertIsNone(detail['execution_settings']['reasoning_effort'])
+                self.assertIsNone(detail['execution_settings_evidence']['request_sha256'])
+
+    def test_invalid_saved_settings_are_not_exposed_as_verified_values(self):
+        self.add_call(execution_settings=self.settings())
+        path = self.run_folder() / 'manifest.json'
+        original = json.loads(path.read_bytes())
+        invalid = [None, self.settings(effort='ultra'), self.settings(depth=True),
+                   self.settings(depth_source='untrusted_source'), dict(self.settings(), extra='do not expose')]
+        for settings in invalid:
+            modified = copy.deepcopy(original)
+            modified['value']['request']['execution_settings'] = settings
+            modified['sha256'] = digest(modified['value'])
+            with self.subTest(settings=settings), self.altered_file(path, json.dumps(modified)):
+                detail = self.detail()
+                self.assertEqual('invalid', detail['execution_settings_evidence']['status'])
+                self.assertIsNone(detail['execution_settings']['reasoning_effort'])
+                self.assertIsNone(detail['execution_settings']['research_depth'])
+                self.assertNotIn('extra', detail['execution_settings'])
+                self.assertFalse(detail['integrity']['ok'])
+
+    def test_persona_depth_is_explicitly_not_applicable_with_bound_effort(self):
+        settings = self.settings(None, 'medium', depth_source='not_applicable')
+        self.add_call(execution_settings=settings)
+        self.session['calls'][0]['actor'] = 'persona'
+        self.session['messages'][-1]['role'] = 'persona'
+        detail = self.detail()
+        self.assertEqual(settings, detail['execution_settings'])
+        self.assertEqual('bound', detail['execution_settings_evidence']['status'])
+        self.assertEqual('not_applicable', detail['execution_settings']['research_depth_source'])
+
+    def test_exports_preserve_distinct_settings_sources_and_binding_evidence(self):
+        first, second = self.settings('lite', 'low'), self.settings('deep', 'high', effort_source='user_selected')
+        self.add_call(execution_settings=first, answer='First answer')
+        self.add_call('call-002-assistant', execution_settings=second, answer='Second answer')
+        packet = dict(review.build_index(self.folder, self.session), messages=self.session['messages'],
+                      selected_call=self.detail('call-002-assistant'))
+        before = self.source_bytes()
+        json_receipt = review.save_export(self.folder, packet, 'json')
+        md_receipt = review.save_export(self.folder, packet, 'md')
+        saved = json.loads(Path(json_receipt['path']).read_bytes())
+        self.assertEqual([first, second], [row['execution_settings'] for row in saved['calls']])
+        self.assertEqual(second, saved['selected_call']['execution_settings'])
+        markdown = Path(md_receipt['path']).read_text()
+        self.assertIn('"research_depth": "lite"', markdown)
+        self.assertIn('"research_depth": "deep"', markdown)
+        self.assertIn('"reasoning_effort": "high"', markdown)
+        self.assertIn('"reasoning_effort_source": "user_selected"', markdown)
+        self.assertIn('"status": "bound"', markdown)
+        after = self.source_bytes()
+        self.assertEqual(before, {name: body for name, body in after.items() if 'review-exports/' not in name})
 
     def test_missing_usage_remains_unknown_in_totals(self):
         self.add_call()

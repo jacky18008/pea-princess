@@ -19,6 +19,7 @@ import stat
 import tempfile
 import uuid
 from session_runner import _input_files, _manifest_tool_policy
+from playground_settings import validate as _validate_execution_settings, unknown as _unknown_execution_settings
 
 VERSION = 2
 MAX_ARTIFACT_BYTES = 32 * 1024 * 1024
@@ -295,12 +296,20 @@ def _inspect(folder, session, row, detail):
     gaps = []
     manifest, record, record_hash, binding = None, None, None, True
     request_binding, files, files_present, files_valid = False, [], False, True
+    settings, settings_present, settings_valid = _unknown_execution_settings(), False, True
     receipt = row.get('receipt')
     reply = receipt.get('answer') if isinstance(receipt, dict) else None
     reply_path = 'session.calls[%s].receipt.answer' % call_id
     try:
         manifest = _envelope(folder, base + '/manifest.json')
         request = manifest['request']
+        settings_present = 'execution_settings' in request
+        if settings_present:
+            try:
+                settings = _validate_execution_settings(request['execution_settings'])
+            except (ValueError, TypeError):
+                settings_valid = False
+                raise ValueError('invalid execution settings metadata')
         files_present = 'input_files' in request
         if files_present:
             try:
@@ -403,8 +412,19 @@ def _inspect(folder, session, row, detail):
     request = manifest.get('request') if isinstance(manifest, dict) else None
     request = request if isinstance(request, dict) else {}
     displayed = _display_snapshot(session, row, reply, gaps)
+    settings_bound = settings_present and settings_valid and request_binding and binding
+    settings_status = ('not_recorded' if not settings_present and request_binding else
+                       'invalid' if not settings_valid else 'bound' if settings_bound else 'unbound')
     result = {'call_id': call_id, 'actor': row.get('actor'), 'status': row.get('status', 'unknown'),
               'model': request.get('model'),
+              'execution_settings': settings if settings_bound else _unknown_execution_settings(),
+              'execution_settings_evidence': {
+                  'status': settings_status,
+                  'request_sha256': manifest.get('request_hash') if settings_bound else None,
+                  'source_path': base + '/manifest.json#value.request.execution_settings',
+                  'note': ('These settings are bound to this saved physical-call request; they do not independently prove provider application.' if settings_bound else
+                           'This saved request did not record execution settings; current session values and call-row labels are not substituted.' if settings_status == 'not_recorded' else
+                           'Execution settings cannot be verified for this call; current session values and call-row labels are not substituted.')},
               'integrity': {'ok': not gaps, 'gaps': gaps}, 'usage': usage,
               'tool_invocation_count': len(tools) if events is not None and tool_shape_ok else None,
               'tool_failed_count': sum(t['failed'] for t in tools) if events is not None and tool_shape_ok else None,
@@ -712,6 +732,9 @@ def export_markdown(packet):
         if not isinstance(selected, dict) or not isinstance(selected.get('tools', []), list):
             raise ValueError('invalid selected-call export')
         sections.extend(['## 選定呼叫', _fenced(selected.get('call_id'))])
+        sections.extend(['### 本次呼叫的研究深度與推理程度',
+                         _fenced(selected.get('execution_settings', _unknown_execution_settings())),
+                         '### 設定來源與請求綁定', _fenced(selected.get('execution_settings_evidence'))])
         for key, label in (('raw_actor_reply', '原始模型輸出'), ('current_input', '當輪輸入'),
                            ('prompt', '送給模型的完整提示（或明示截斷）'),
                            ('input_files', '提供給這次呼叫的附件收據（不代表模型已讀取）'),

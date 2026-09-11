@@ -4,12 +4,22 @@
  const el=id=>document.getElementById(id);
  const tags={missed_question:'沒有回答當下問題',condition_loss:'條件遺失或漂移',unsupported_claim:'說法缺乏證據',process_jargon:'內部術語干擾',no_progress:'沒有推進',tool_failure:'工具失敗',cost:'用量或重複工作'};
  const ratings={helpful:'有幫助',needs_work:'可以改善',problem:'有明顯問題',unrated:'未評分'};
+ const settingLabels={research_depth:{lite:'精簡（lite）',standard:'標準（standard）',deep:'深入（deep）'},reasoning_effort:{low:'低（low）',medium:'中（medium）',high:'高（high）'}};
+ const settingSources={user_selected:'使用者選擇',host_default:'主機預設',persona_card:'人物卡',legacy_record:'舊版紀錄',unrecorded:'未記錄',not_applicable:'不適用'};
  const numbers=v=>Number.isFinite(v)?v.toLocaleString(undefined,{maximumFractionDigits:2}):'未記錄';
  let sid=null,callId=null,index=null,detail=null,reviews=[],generation=0,visible=false,saving=false;
  const drafts=new Map(), intents=new Map();
  const key=()=>`${sid}:${callId}`;
  function total(v){return v?.value===null?`${numbers(v.known_sum)} 已知 · ${v.unknown_calls} 次未記錄`:numbers(v?.value);}
  function card(title){const c=node('section',undefined,'review-card');c.append(node('h3',title));return c;}
+ function recordedSetting(labels,value){return Object.hasOwn(labels,value)?labels[value]:'未記錄';}
+ function executionSettings(values,evidence,call=false){
+  const section=node('div',undefined,'review-execution-settings'),settings=call&&evidence?.status!=='bound'?null:values;
+  section.append(node('h4',call?'這次呼叫的設定':'對話設定基準'));
+  for(const [key,label] of [['research_depth','研究深度基準'],['reasoning_effort','模型思考強度']]){const row=node('p'),value=key==='research_depth'&&settings?.research_depth_source==='not_applicable'?'不適用（模擬使用者）':recordedSetting(settingLabels[key],settings?.[key]);row.append(node('span',`${label}：${value}`),node('small',`來源：${recordedSetting(settingSources,settings?.[key+'_source'])}`));section.append(row);}
+  section.append(node('p',call?(evidence?.status==='bound'?'設定已綁定保存請求；不代表已確認實際研究涵蓋程度。':evidence?.status==='not_recorded'?'這份舊請求未記錄設定，不能用目前預設值代填。':'未取得有效的請求設定紀錄，無法確認這次呼叫的設定。'):'這是保存的設定基準；追加要求保留在對話中，不代表已核對實際研究涵蓋程度。','fine'));
+  if(call&&evidence?.status==='bound'&&evidence.source_path)section.append(node('code',evidence.source_path));return section;
+ }
  function disclosure(title,block){
   const d=node('details',undefined,'review-disclosure');d.append(node('summary',title));
   d.append(node('pre',block?.sha256?block.text:'未記錄'));
@@ -58,7 +68,7 @@
   box.append(head);
   const usage=card('02 · 這次呼叫的用量');const grid=node('div',undefined,'review-totals');
   for(const [k,label] of [['input_tokens','輸入（含快取）'],['cached_input_tokens','其中快取輸入'],['uncached_input_tokens','非快取輸入'],['output_tokens','輸出'],['processed_tokens','合計 tokens'],['seconds','耗時（秒）']]){const cell=node('div');cell.append(node('strong',numbers(d.usage[k])),node('small',label));grid.append(cell);}usage.append(grid,node('p','合計＝輸入＋輸出，快取不重複加計。這是 provider 回報的 token 用量，並非帳單金額。','fine'));box.append(usage);
-  const inputs=card('03 · 輸入與送給模型的內容');inputs.append(disclosure('這次要回答的輸入',d.current_input),disclosure('實際完整提示內容（含注入的條件與歷史）',d.prompt),attachmentList(d.input_files));box.append(inputs);
+  const inputs=card('03 · 輸入與送給模型的內容');inputs.append(executionSettings(d.execution_settings,d.execution_settings_evidence,true),disclosure('這次要回答的輸入',d.current_input),disclosure('實際完整提示內容（含注入的條件與歷史）',d.prompt),attachmentList(d.input_files));box.append(inputs);
   const tools=card('04 · 工具與研究過程');
   tools.append(node('p',d.tool_invocation_count===null?'工具紀錄未取得；不能推定沒有使用工具。':d.tool_invocation_count===0?'已保存紀錄中沒有工具執行。':`${d.tool_invocation_count} 次工具執行；${d.tool_failed_count} 次失敗。同一工具的開始與完成事件只計一次。`,'fine'));
   for(const t of d.tools||[]){const c=node('details',undefined,'review-tool');c.append(node('summary',`${t.id} · ${t.type} · ${t.status}`),disclosure('工具輸入',t.input),disclosure('工具輸出',t.output),disclosure('原始工具事件內容',t.raw));tools.append(c);}if(d.tools_truncated)tools.append(node('p','工具清單超過顯示上限，請查原始保存檔。','review-notice'));tools.append(disclosure('保存的工具事件（不含隱藏推理）',d.raw_tool_events));box.append(tools);
@@ -71,9 +81,10 @@
   try{const d=await api(`/api/session/${sid}/inspect/${id}`);if(request!==generation)return;detail=d;renderDetail(d);location.hash=`review/${sid}/${id}`;}catch(e){if(request===generation)el('review-detail').replaceChildren(node('p',e.message,'review-notice'));}
  }
  async function loadSession(id,preferred){
-  stash();const request=++generation;sid=id;callId=null;index=null;detail=null;reviews=[];restore();el('review-export-result').replaceChildren();el('review-conversation').open=false;el('review-conversation-body').replaceChildren();el('review-save').disabled=true;el('review-json').disabled=true;el('review-md').disabled=true;el('review-detail').replaceChildren();el('review-calls').replaceChildren();el('review-totals').replaceChildren();el('review-history').replaceChildren();el('review-notice').textContent='讀取已保存的呼叫；執行中的工具要等該次呼叫完成才會出現。';
+  stash();const request=++generation;sid=id;callId=null;index=null;detail=null;reviews=[];restore();el('review-export-result').replaceChildren();el('review-session-settings').replaceChildren();el('review-conversation').open=false;el('review-conversation-body').replaceChildren();el('review-save').disabled=true;el('review-json').disabled=true;el('review-md').disabled=true;el('review-detail').replaceChildren();el('review-calls').replaceChildren();el('review-totals').replaceChildren();el('review-history').replaceChildren();el('review-notice').textContent='讀取已保存的呼叫；執行中的工具要等該次呼叫完成才會出現。';
   try{const [data,notes]=await Promise.all([api(`/api/session/${id}/inspect`),api(`/api/session/${id}/reviews`)]);if(request!==generation)return;index=data;reviews=notes.reviews;el('review-session').value=id;
-   el('review-title').textContent=data.session.name||id;el('review-meta').textContent=`${data.session.model||'模型未記錄'} · 設定思考強度 ${data.session.configured_effort||data.session.effort} · ${data.session.output_mode||data.session.research_mode} · ${data.session.created_at?new Date(data.session.created_at*1000).toLocaleString():'時間未記錄'} · ${id}`;
+   el('review-title').textContent=data.session.name||id;el('review-meta').textContent=`${data.session.model||'模型未記錄'} · ${data.session.output_mode||data.session.research_mode} · ${data.session.created_at?new Date(data.session.created_at*1000).toLocaleString():'時間未記錄'} · ${id}`;
+   el('review-session-settings').replaceChildren(executionSettings(data.session.execution_settings));
    const totals=el('review-totals');for(const [k,label] of [['processed_tokens','整段合計 tokens'],['cached_input_tokens','其中快取輸入'],['tool_invocation_count','工具執行'],['seconds','累計耗時（秒）']]){const cell=node('div');cell.append(node('strong',total(data.totals[k])),node('small',label));totals.append(cell);}
    el('review-notice').textContent=`這是保存當時的版本；查看不會重跑模型。${data.gaps.length?'部分呼叫的紀錄有缺口，請逐次查看。':''}${notes.gaps.length?'評閱筆記有完整性缺口：'+notes.gaps.join('；'):''}`;
    renderCalls();const chosen=data.calls.find(c=>c.call_id===preferred)||data.calls[data.calls.length-1];if(chosen)await loadCall(chosen.call_id);
