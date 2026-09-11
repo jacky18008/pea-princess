@@ -701,3 +701,32 @@ bands labelled "an estimate, not a quote" without naming the reference they came
 source" default applies to first replies too. Codex terra: before 0–1 questions, after 1–6, both with
 its web search; not re-run after the description change.
 
+## Token A/B (2026-09-11): the street question, one call per street
+
+The audited playground turn — "你不幫我掃一下周圍街區安不安靜嗎？" after two Foxtons listings had been
+compared from PDFs — cost 815k processed tokens on Codex: 106k characters of manuals read (some twice),
+15 web queries, two council PDFs that failed to download. The same conversation prefix and question were
+replayed here on Codex (gpt-5.6-terra, workspace-write sandbox with network, the skill installed) with
+the morning's skill ("before": no area_scan, no research budget) and the current skill ("after": one
+`area_scan.py` call per street, the research budget, the no-re-read rule). Coordinates for the two
+streets were supplied as outcode centroids, the same in both arms. Three valid pairs; four earlier runs
+timed out during a network outage and are not counted.
+
+| Arm | Tool calls | Script runs | Web searches | Input tokens (incl. cached re-sends) | New input | Output | Wall |
+|---|---|---|---|---|---|---|---|
+| before, pair 1 | 56 | 25 | 8 | 7.83M | 236k | 28.8k | 764 s |
+| before, pair 2 | 28 | 16 | 0 | 2.99M | 134k | 18.2k | 494 s |
+| before, pair 3 | 46 | 30+ | 8 | 6.47M | 202k | 27.2k | 683 s |
+| after, pair 1 | 2 | 1 (area_scan, both streets) | 0 | 0.13M | 16k | 2.6k | 102 s |
+| after, pair 2 | 4 | 1 | 0 | 0.22M | 23k | 5.0k | 153 s |
+| after, pair 3 | 5 | 2 (area_scan; eligibility) | 0 | 0.33M | 36k | 7.1k | 189 s |
+
+Reading: every Codex tool call re-sends the whole context, so the number of calls is the cost; the
+"after" arm answered from one scan per street with the same substance (main road at 0 m, tube at 110 m,
+a pub at 15 m for one; no main road, secondary road at 176 m for the other; crime and works counts with
+their denominators) and no web search. Input tokens fell 20–60× and wall time 3–7×. A first reading of
+this experiment mis-classified the "after" runs as "no script run" because the harness had truncated
+command strings at 120 characters and the scan call sat after a chained file read; the raw event streams
+(pair 3) settled it: the scan ran, no sub-agent was involved (the `collab` items are idle `wait` calls).
+Caveat: Codex also read the machine's stale global copy of the skill by name before the workdir copy.
+
