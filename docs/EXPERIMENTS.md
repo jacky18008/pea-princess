@@ -773,17 +773,18 @@ skill run a second time: the run-to-run noise.
 | Arm | G1 facts / G2 authority / G3 hard req. pass | First sentence pass | T mean (0–3) | Task (0–2) | Satisfy (0–2) | Beats original | Numbers w/o cue | Questions |
 |---|---|---|---|---|---|---|---|---|
 | main | 2 / 13 / 14 | 9 | 1.43 | 1.00 | 0.80 | 2/15 | 3.3 | 1.2 |
-| main-2 (7 of 15 judged so far) | 0 / 6 / 3 | 3 | 1.46 | 1.00 | 1.00 | 0/7 | 4.4 | 1.6 |
+| main-2 (the same skill, run again) | 3 / 14 / 8 | 7 | 1.49 | 1.00 | 0.87 | 1/15 | 2.7 | 1.0 |
 | variant-a | 5 / 14 / 13 | 6 | 1.41 | 0.87 | 0.67 | 0/15 | 2.9 | 0.5 |
 | variant-b | 4 / 13 / 9 | 11 | 1.46 | 1.00 | 0.80 | 0/15 | 2.2 | 0.7 |
 
-Reading: variant-b keeps task and satisfaction level with main, opens with the answer more often
-(11 vs 9, against main-2's pace of about 6), passes the facts gate more often (4 vs 2 vs 0), and moves
-the two steady counts the right way (numbers without a cue 3.3 → 2.2, questions 1.2 → 0.7). It loses
-on the hard-requirements gate against main (9 vs 14) but not against main-2's pace, and on
-beats-original (0 vs 2 vs 0), both inside the noise between main and main-2. Adopted (commit on
-2026-09-11 night) with those two numbers written down; the next variant is measured against the new
-main. Single runs of fifteen: direction, not rates.
+Reading: the noise between two runs of the same skill (main vs main-2) is itself wide — the
+hard-requirements gate moved 14 → 8 and the first sentence 9 → 7 with nothing changed. Against both
+runs, variant-b opens with the answer more often (11 vs 9 and 7), passes the facts gate more often
+(4 vs 2 and 3), keeps task and satisfaction level (1.00; 0.80 vs 0.80 and 0.87), and moves the two
+steady counts the right way (numbers without a cue 2.2 vs 3.3 and 2.7; questions 0.7 vs 1.2 and 1.0).
+Beats-original is 0 vs 2 and 1, inside that noise. Adopted (commit 1df20ce, 2026-09-11 night) with
+those numbers written down; the next variant is measured against the new main. Single runs of
+fifteen: direction, not rates.
 
 ### The models on the same fifteen turns (standard, "ask" turn; rows still being judged are marked)
 
