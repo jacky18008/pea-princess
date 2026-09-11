@@ -873,7 +873,8 @@ verified constants, and the brief).
 ## `seed.py` — the shareable seed (no network, no key)
 
 ```
-seed.py export --profile profile.yaml [--name "quiet, high, morning sun"]
+seed.py export --profile profile.yaml [--name "quiet, high, morning sun"]        # public card: taste only, no place, no date
+seed.py export --profile profile.yaml --for friend [--commute-area "Zone 1"]     # adds district, month, story; private message only
                [--journey journey.json] [--exact] [--commute-area "Zone 1"]
                [--hide-commute] [--reveal-address] [--max-code 400] [--json]
 seed.py import "PP1.eyJ2Ijox…" [--out profile.yaml] [--force] [--json]

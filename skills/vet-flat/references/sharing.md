@@ -41,12 +41,23 @@ profile; a seed leaves their machine only because they decided it should.
 
 ## 2. What is shared, in plain words
 
-Shared: the kind of home; the budget **as a band** ("£2,000–2,400 all-in"), not the real ceiling;
-where they commute to, cut down to a postcode district, a zone or a borough — or left out; the
-move-in window **as a month**; their deal-breakers, must-haves and top three priorities; **the
-questions they make every report answer**; the floor and light rules; whether quiet beats light;
-how deep they run the checks; their plan for the first weeks; and the three-sentence summary of
-what makes a home good for them, if they have one.
+There are two cards, and the default is the safe one.
+
+**The public card** (`seed.py export`, the default) carries taste and nothing that points at a
+place or a time: the kind of home; the budget **as a band** ("£2,000–2,400 all-in"), not the real
+ceiling; deal-breakers, must-haves and the top three priorities; **the questions they make every
+report answer**; the floor and light rules; whether quiet beats light; how deep they run the
+checks; the plan for the first weeks. No commute district, no move-in month, no story summary.
+The reason is concrete: a district plus a month plus a public workplace is enough for someone to
+work out where a person lives. Whoever uses the seed fills in their own commute and dates anyway.
+
+**The friend card** (`seed.py export --for friend`) adds the commute district (or a coarser label
+with `--commute-area`), the move-in month and the story summary. It is for a private message to
+someone the person trusts; the command says so when it writes one. Never post a friend card.
+
+In both, free text is scrubbed of postcodes, outward codes, London borough names, "X station" and
+"X Road"-style names, and the command lists what it removed. Employer, school and shop names are
+on no list: read the card once more before it goes anywhere.
 
 Excluded as structured profile fields: full address/postcode, personal or company identity,
 employer/school, guarantor route, income, savings, introduction, exact dates, tenancy terms,
@@ -100,6 +111,11 @@ A question may also carry a `trigger` in the profile — one line saying when it
 as "price below the local band by 10% or more". **Triggers are not shared.** They often describe
 the exact circumstances of one person's search, and they are the least useful part of a question to
 a stranger; the question itself is the part worth copying.
+
+The three sentences the assistant drafts for a public card name no place, no employer or school,
+no date and no landlord or building; they describe taste ("a few floors up, morning light, a
+courtyard between me and the road"). If a sentence needs a place to make sense, it is a friend
+card, not a public one.
 
 ## 4. The social post, ready to send
 

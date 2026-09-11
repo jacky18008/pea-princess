@@ -1,0 +1,340 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""Replay the person's real flat-hunting messages against the current skill, and judge the new answer
+by what the person actually reacted to.
+
+Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen -
+https://github.com/jacky18008/pea-princess - MIT
+
+The private corpus (never committed) holds curated cases: the conversation before one answer, the
+answer, the person's real reaction, and what happened next. This probe freezes the prefix, hands
+the person's message to an agent that has the skill installed and a profile at the chosen depth,
+records the new answer, then asks a strong judge three things: did it do what was asked, how good
+is the reply, and — given what this person praised or complained about right after the original
+answer — would they be satisfied. The judge also says whether the new answer beats the original.
+
+The answerer never sees the reaction or what happened next. Listing sites are not fetched: the same
+deny-and-log hook as link_probe.py; the skill's own scripts may read open registers.
+
+    python3 bench/history_replay.py --corpus <dir> --cases case-02,case-06,case-08 --agent claude --model claude-sonnet-5 --depth standard
+    python3 bench/history_replay.py --corpus <dir> --cases all --agent codex --model gpt-5.6-terra --depth lite
+    python3 bench/history_replay.py --report bench/private/history-replay-<day>
+
+Rows and raw streams land under bench/private/ (ignored by git). Standard library only, Python 3.9.
+"""
+from __future__ import unicode_literals
+
+import argparse
+import datetime
+import glob
+import io
+import json
+import os
+import re
+import shutil
+import sys
+import tempfile
+import uuid
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+import link_probe as LP  # noqa: E402
+
+DEFAULT_CORPUS = os.path.join(HERE, "..", ".pea-playground", "claude-rental-history-20260910")
+JUDGE_MODEL = "claude-opus-5"
+HEAD = re.compile(r"^### (user|assistant) · source line (\d+) · `([0-9a-f-]+)`\s*$")
+
+
+# ------------------------------------------------------------------ corpus --
+def parse_case(path):
+    """The case as one flat sequence of (role, text) blocks in file order, fences respected."""
+    text = io.open(path, encoding="utf-8").read()
+    role, fence, buf, seq = None, False, [], []
+    for line in text.splitlines():
+        if line.startswith("```"):
+            if fence:
+                fence = False
+                if role:
+                    seq.append((role, "\n".join(buf).strip()))
+                buf = []
+            else:
+                fence = True
+            continue
+        if fence:
+            buf.append(line)
+            continue
+        m = HEAD.match(line)
+        if m:
+            role = m.group(1)
+    return seq
+
+
+def case_focus(corpus, case_id):
+    idx = os.path.join(corpus, "case-index.md")
+    if os.path.exists(idx):
+        for line in io.open(idx, encoding="utf-8"):
+            if "[%s]" % case_id in line:
+                cells = [c.strip() for c in line.strip().strip("|").split("|")]
+                if len(cells) >= 2:
+                    return cells[1]
+    return ""
+
+
+def case_path(corpus, case_id):
+    for folder in ("cases-v3", "short-stay-cases"):
+        p = os.path.join(corpus, folder, case_id + ".md")
+        if os.path.exists(p):
+            return p
+    raise IOError("case not found: %s" % case_id)
+
+
+def _user_blocks(seq):
+    return [t for r, t in seq if r == "user"]
+
+
+def split_case(seq, turn="ask"):
+    """The answer under review is the last assistant block that a user block follows (that user
+    block is the real reaction). turn="ask": replay the message that produced the answer; the
+    reaction is the judge's evidence, the answer is the original. turn="reaction": replay the
+    reaction itself; the original is what the assistant said next, and the evidence is what the
+    person said after that (when the record has it)."""
+    k = max(i for i, (r, _) in enumerate(seq) if r == "assistant" and any(rr == "user" for rr, _ in seq[i + 1:]))
+    react_i = min(i for i, (r, _) in enumerate(seq) if i > k and r == "user")
+    reaction = "\n\n".join(t for r, t in seq[react_i:next((i for i, (rr, _) in enumerate(seq) if i > react_i and rr == "assistant"), len(seq))] if r == "user")
+    if turn == "ask":
+        msg_i = max(i for i, (r, _) in enumerate(seq[:k]) if r == "user")
+        history = seq[:msg_i]
+        message = seq[msg_i][1]
+        original = "\n\n".join(t for r, t in seq[msg_i + 1:k + 1] if r == "assistant")
+        evidence = reaction
+    else:
+        history = seq[:react_i]
+        message = reaction
+        after = [i for i, (r, _) in enumerate(seq) if i > react_i and r == "assistant"]
+        if after:
+            a0 = after[0]
+            nxt_user = next((i for i, (r, _) in enumerate(seq) if i > a0 and r == "user"), len(seq))
+            original = "\n\n".join(t for r, t in seq[a0:nxt_user] if r == "assistant")
+            evidence = "\n\n".join(t for r, t in seq[nxt_user:nxt_user + 2] if r == "user") if nxt_user < len(seq) else ""
+        else:
+            original, evidence = "", ""
+    return history, message, original, evidence
+
+
+def transcript(history, limit=14000):
+    lines = []
+    for role, text in history:
+        lines.append(("[使用者]\n%s" if role == "user" else "[助理]\n%s") % text)
+    out = "\n\n".join(lines)
+    if len(out) > limit:
+        out = "（更早的部分略）…\n\n" + out[-limit:]
+    return out
+
+
+def answer_prompt(history, message):
+    return ("用 pea-princess 技能。以下是你和使用者先前的對話紀錄（2026 年 8 到 9 月，倫敦找房，原文）。"
+            "請接著回覆最後一則使用者訊息，用使用者的語言；房源網站的頁面由使用者提供，不要自己去讀。\n\n"
+            "=== 先前對話 ===\n%s\n\n=== 最新訊息 ===\n%s" % (transcript(history), message))
+
+
+# ------------------------------------------------------------------ runner --
+def prepare_workdir(agent, depth, skill_dir=None):
+    path = tempfile.mkdtemp(prefix="vetflat-replay-%s-" % agent)
+    home = os.path.join(path, LP.SKILL_HOME[agent])
+    os.makedirs(home)
+    shutil.copytree(skill_dir or LP.SKILL_DIR, os.path.join(home, "vet-flat"))
+    with io.open(os.path.join(path, "profile.yaml"), "w", encoding="utf-8") as fh:
+        fh.write('budget_mode: %s\nlanguage: "zh-TW"\n' % depth)
+    return path
+
+
+def claude_command(prompt, workdir, model, hook_path):
+    settings = {"disableAllHooks": False,
+                "hooks": {"PreToolUse": [{"matcher": "WebFetch|WebSearch|Bash|mcp__.*",
+                                          "hooks": [{"type": "command", "command": "python3 %s" % hook_path}]}]}}
+    allowed = "Read,Glob,Grep,Skill,Write,Edit,Bash(python3 .claude/skills/vet-flat/scripts/*),Bash(python3 scripts/*)"
+    return ["claude", "-p", "--output-format", "stream-json", "--verbose", "--allowedTools", allowed,
+            "--setting-sources", "project", "--settings", json.dumps(settings),
+            "--strict-mcp-config", "--mcp-config", '{"mcpServers":{}}', "--add-dir", workdir,
+            "--session-id", str(uuid.uuid4())] + (["--model", model] if model else []) + ["--", prompt]
+
+
+def codex_command(prompt, workdir, model):
+    return ["codex", "exec", "--cd", workdir, "--sandbox", "workspace-write",
+            "-c", "sandbox_workspace_write.network_access=true", "--skip-git-repo-check", "--json"] + \
+        (["--model", model] if model else []) + ["--", prompt]
+
+
+def run_answer(agent, model, depth, prompt, timeout, skill_dir=None):
+    workdir = prepare_workdir(agent, depth, skill_dir)
+    side = tempfile.mkdtemp(prefix="vetflat-replay-side-")
+    hook_log = os.path.join(side, "hook.log")
+    if agent == "claude":
+        hook_path = os.path.join(side, "probe_hook.py")
+        with io.open(hook_path, "w", encoding="utf-8") as fh:
+            fh.write(LP.HOOK % {"net": repr(LP.HOOK_DENY.pattern)})
+        cmd = claude_command(prompt, workdir, model, hook_path)
+    else:
+        cmd = codex_command(prompt, workdir, model)
+    env = dict(os.environ, LINK_PROBE_LOG=hook_log)
+    t0 = datetime.datetime.utcnow()
+    stdout, stderr, code = LP._launch(cmd, workdir, env, timeout)
+    if agent == "claude":
+        attempts, hook_seen, final, usage = LP.parse_claude(stdout, hook_log)
+    else:
+        attempts, final = LP.parse_codex(stdout)
+        hook_seen, usage = [], {}
+    out = {"exit": code, "seconds": (datetime.datetime.utcnow() - t0).total_seconds(), "tools": [a.get("tool") for a in attempts],
+           "listing_fetch_attempts": [a for a in attempts if LP.is_fetch(a)], "reply": final, "usage": usage,
+           "stderr_tail": stderr[-600:], "stdout": stdout}
+    shutil.rmtree(workdir, ignore_errors=True)
+    shutil.rmtree(side, ignore_errors=True)
+    return out
+
+
+# ------------------------------------------------------------------- judge --
+JUDGE_PROMPT = """你是嚴格的評審。一位正在倫敦找房的使用者，在 2026 年 8–9 月和一個助理對話。下面給你：這個案例的重點、先前對話的尾段、使用者的那句話、當時助理的原答、使用者對原答的真實反應，以及現在新版助理對同一句話的新答。
+
+請只評新答，回傳 JSON（不要別的文字）：
+{"task": 0|1|2, "quality": 1|2|3|4|5, "satisfy": 0|1|2, "vs_history": "new"|"history"|"tie", "invented_numbers": 整數, "questions_asked": 整數, "issues": ["最多四條，每條一句"], "one_line": "一句話總評"}
+
+規則：
+- task：新答有沒有做到使用者這句話要的事（0 沒做、1 做一半、2 做到）。
+- quality：白話、有上下文回顧、主詞名詞清楚、數字有解釋和出處、沒有代號和罐頭句、問題不超過三個、不確定的地方誠實說。5 是很好，1 是很差。
+- satisfy：只看使用者的真實反應透露出他在意什麼（例如要 recap、不要代號、要修正費用算法、目標已改變），推斷他看到新答會不會滿意（0 不會、1 一半、2 會）。反應是證據，不是標準答案；原答也不是範本。
+- vs_history：新答和原答，哪個對這位使用者更有用。
+- invented_numbers：新答裡沒有出處、沒有算式、也不是使用者給的數字有幾個。
+- 新答如果宣稱去讀了房源網站，或假裝看過沒提供的照片、頁面，算嚴重問題。
+- 新答如果只複述舊資訊、只問問題不推進，quality 不高於 2。
+
+=== 案例重點 ===
+{focus}
+
+=== 先前對話（尾段）===
+{tail}
+
+=== 使用者的那句話 ===
+{message}
+
+=== 當時的原答 ===
+{history_answer}
+
+=== 使用者的真實反應 ===
+{reaction}
+
+=== 新答 ===
+{new_answer}
+"""
+
+
+def judge(row_inputs, timeout=600):
+    prompt = JUDGE_PROMPT
+    for key, value in row_inputs.items():
+        prompt = prompt.replace("{%s}" % key, value or "（無）")
+    cmd = ["claude", "-p", "--output-format", "json", "--tools", "", "--allowedTools", "", "--disable-slash-commands",
+           "--setting-sources", "", "--strict-mcp-config", "--mcp-config", '{"mcpServers":{}}', "--model", JUDGE_MODEL, "--", prompt]
+    stdout, stderr, code = LP._launch(cmd, os.getcwd(), dict(os.environ), timeout)
+    text, usage = "", {}
+    try:
+        env = json.loads(stdout)
+        text = env.get("result") or ""
+        usage = env.get("usage") or {}
+        usage["cost_usd"] = env.get("total_cost_usd")
+    except ValueError:
+        text = stdout
+    m = re.search(r"\{.*\}", text, re.S)
+    verdict = None
+    if m:
+        try:
+            verdict = json.loads(m.group(0))
+        except ValueError:
+            verdict = None
+    return {"exit": code, "verdict": verdict, "raw": text[:2000], "usage": usage, "stderr_tail": stderr[-300:]}
+
+
+# ----------------------------------------------------------------- driver --
+def run_case(args, case_id, out_dir):
+    corpus = os.path.abspath(args.corpus)
+    seq = parse_case(case_path(corpus, case_id))
+    history, message, hist_answer, reaction = split_case(seq, args.turn)
+    focus = case_focus(corpus, case_id)
+    prompt = answer_prompt(history, message)
+    ans = run_answer(args.agent, args.model, args.depth, prompt, args.timeout, args.skill_dir)
+    raw = os.path.join(out_dir, "raw", "%s-%s-%s-%s-%s.jsonl" % (case_id, args.turn, args.agent, (args.model or "default").replace("/", "_"), args.depth))
+    os.makedirs(os.path.dirname(raw), exist_ok=True)
+    with io.open(raw, "w", encoding="utf-8") as fh:
+        fh.write(ans.pop("stdout") or "")
+    verdict = None
+    if ans["reply"].strip() and not args.no_judge:
+        verdict = judge({"focus": focus, "tail": transcript(history[-4:], 3000), "message": message[:3000],
+                         "history_answer": hist_answer[:7000], "reaction": reaction[:2000], "new_answer": ans["reply"][:9000]})
+    row = {"case": case_id, "turn": args.turn, "focus": focus, "agent": args.agent, "model": args.model, "depth": args.depth, "label": args.label,
+           "started": datetime.datetime.utcnow().isoformat() + "Z", "message_chars": len(message), "history_blocks": len(history),
+           "answer": ans, "judge": verdict}
+    with io.open(os.path.join(out_dir, "rows.jsonl"), "a", encoding="utf-8") as fh:
+        fh.write(json.dumps(row, ensure_ascii=False) + "\n")
+    return row
+
+
+def report(out_dir):
+    rows = [json.loads(l) for l in io.open(os.path.join(out_dir, "rows.jsonl"), encoding="utf-8") if l.strip()]
+    print("| agent | model | depth | turn | cases | task (0-2) | quality (1-5) | satisfy (0-2) | beats original | invented numbers | listing fetch tries | median chars | answer cost USD |")
+    print("|---|---|---|---|---|---|---|---|---|---|---|---|---|")
+    keys = sorted({(r["agent"], r["model"], r["depth"], r.get("turn", "ask")) for r in rows})
+    for agent, model, depth, turn in keys:
+        g = [r for r in rows if (r["agent"], r["model"], r["depth"], r.get("turn", "ask")) == (agent, model, depth, turn)]
+        v = [r["judge"]["verdict"] for r in g if r.get("judge") and r["judge"].get("verdict")]
+        mean = lambda k: (sum(float(x.get(k, 0) or 0) for x in v) / len(v)) if v else 0.0
+        wins = sum(1 for x in v if x.get("vs_history") == "new")
+        chars = sorted(len(r["answer"]["reply"] or "") for r in g)
+        cost = sum((r["answer"]["usage"] or {}).get("cost_usd") or 0 for r in g)
+        fetch = sum(1 for r in g if r["answer"]["listing_fetch_attempts"])
+        print("| %s | %s | %s | %s | %d | %.2f | %.2f | %.2f | %d/%d | %.1f | %d | %d | %.2f |" % (
+            agent, model, depth, turn, len(g), mean("task"), mean("quality"), mean("satisfy"), wins, len(v), mean("invented_numbers"), fetch,
+            chars[len(chars) // 2] if chars else 0, cost))
+    print()
+    for r in rows:
+        v = (r.get("judge") or {}).get("verdict") or {}
+        print("%s %s %s/%s %s: task=%s q=%s sat=%s vs=%s | %s" % (r["case"], r.get("turn", "ask"), r["model"], r["depth"], r["label"], v.get("task"), v.get("quality"),
+                                                             v.get("satisfy"), v.get("vs_history"), (v.get("one_line") or "")[:120]))
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--corpus", default=DEFAULT_CORPUS)
+    ap.add_argument("--cases", default="all", help="comma-separated case ids, or all")
+    ap.add_argument("--agent", choices=("claude", "codex"))
+    ap.add_argument("--model")
+    ap.add_argument("--depth", choices=("lite", "standard", "deep"), default="standard")
+    ap.add_argument("--turn", choices=("ask", "reaction"), default="ask", help="replay the message before the reviewed answer, or the reaction itself")
+    ap.add_argument("--label", default="")
+    ap.add_argument("--skill-dir", default=None)
+    ap.add_argument("--timeout", type=int, default=900)
+    ap.add_argument("--no-judge", action="store_true")
+    ap.add_argument("--out", default=None)
+    ap.add_argument("--report", default=None)
+    args = ap.parse_args()
+    if args.report:
+        report(args.report); return 0
+    if not args.agent:
+        ap.error("--agent is required unless --report")
+    out_dir = args.out or os.path.join(HERE, "private", "history-replay-%s" % datetime.date.today().isoformat())
+    os.makedirs(out_dir, exist_ok=True)
+    corpus = os.path.abspath(args.corpus)
+    if args.cases == "all":
+        ids = sorted(os.path.basename(p)[:-3] for folder in ("cases-v3", "short-stay-cases") for p in glob.glob(os.path.join(corpus, folder, "*.md")))
+    else:
+        ids = [c.strip() for c in args.cases.split(",") if c.strip()]
+    for case_id in ids:
+        row = run_case(args, case_id, out_dir)
+        v = (row.get("judge") or {}).get("verdict") or {}
+        print("%s %s %s %s: exit=%s chars=%d tools=%d fetch=%d | task=%s q=%s sat=%s vs=%s %s" % (
+            case_id, args.agent, args.model, args.depth, row["answer"]["exit"], len(row["answer"]["reply"] or ""), len(row["answer"]["tools"]),
+            len(row["answer"]["listing_fetch_attempts"]), v.get("task"), v.get("quality"), v.get("satisfy"), v.get("vs_history"),
+            (v.get("one_line") or "")[:90]), flush=True)
+    report(out_dir)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

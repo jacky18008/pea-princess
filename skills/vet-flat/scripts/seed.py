@@ -96,6 +96,25 @@ CODE_RE = re.compile(r"PP1\.[A-Za-z0-9_-]+")
 KEY_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_-]*$")
 MONTHS = ["January", "February", "March", "April", "May", "June",
           "July", "August", "September", "October", "November", "December"]
+
+# Who the card is for. "public" (the default) carries no place, no date and no story: the
+# person reading it fills in their own commute and dates, so nothing in a public post can be
+# combined with a workplace or a school to point at where somebody lives. "friend" adds the
+# commute district, the move-in month and the story summary, for a private message to someone
+# the person trusts; the command says so out loud when it writes one.
+AUDIENCES = ("public", "friend")
+BOROUGHS = ("Barking and Dagenham", "Barnet", "Bexley", "Brent", "Bromley", "Camden", "City of London", "Croydon",
+            "Ealing", "Enfield", "Greenwich", "Hackney", "Hammersmith and Fulham", "Haringey", "Harrow",
+            "Havering", "Hillingdon", "Hounslow", "Islington", "Kensington and Chelsea", "Kingston upon Thames",
+            "Lambeth", "Lewisham", "Merton", "Newham", "Redbridge", "Richmond upon Thames", "Southwark",
+            "Sutton", "Tower Hamlets", "Waltham Forest", "Wandsworth", "Westminster")
+BOROUGH_RE = re.compile(r"\b(" + "|".join(re.escape(b) for b in sorted(BOROUGHS, key=len, reverse=True)) + r")\b")
+OUTCODE_ONLY_RE = re.compile(r"\b[A-Z]{1,2}[0-9][A-Z0-9]?\b")
+STATION_RE = re.compile(r"\b((?:[A-Z][A-Za-z'&-]+ ){1,3})(?:[Ss]tation|Underground|[Tt]ube|DLR|Overground)\b")
+STATION_ZH_RE = re.compile(r"(?:[A-Z][A-Za-z'&-]+(?: [A-Z][A-Za-z'&-]+){0,2}|[\u4e00-\u9fff]{1,8})站")
+ROAD_RE = re.compile(r"\b((?:[A-Z][A-Za-z'-]+ ){1,3})(Road|Street|Lane|Square|Avenue|Place|Gardens|Terrace|Close|"
+                     r"Crescent|Wharf|Hill|Bridge|Market|Walk|Row|Mews|Yard|Court|Park|Quay|Green|Common|Fields)\b")
+PLACE_REMOVED = "[place removed]"
 FLAT_TYPES = {
     "studio": "a studio",
     "one_bed": "a one-bedroom flat",
@@ -279,6 +298,33 @@ def strip_postcodes(text):
     return re.sub(r"\s{2,}", " ", POSTCODE_RE.sub("[postcode removed]", text)).strip()
 
 
+def scrub_places(text, removed=None):
+    """Free text with anything that points at a place taken out: full postcodes, outward codes,
+    London borough names, "X station" / "X站", and "X Road"-style street names. Names of
+    employers, schools and shops are not on any list; sharing.md tells the assistant to read the
+    card for those before it is posted. `removed` collects what was taken out, for the report."""
+    if text is None:
+        return None
+    out = str(text)
+    found = []
+    lead = ("Is", "The", "Near", "Around", "In", "At", "Off", "By", "From", "To", "Behind", "Opposite", "Above", "Below")
+
+    def _trim(m):
+        words = m.group(0).strip().split(" ")
+        while len(words) > 1 and words[0] in lead:
+            words.pop(0)
+        return " ".join(words)
+
+    for pattern in (POSTCODE_RE, STATION_RE, STATION_ZH_RE, ROAD_RE, BOROUGH_RE, OUTCODE_ONLY_RE):
+        for m in pattern.finditer(out):
+            found.append(_trim(m))
+        out = pattern.sub(lambda m: (" ".join(w for w in m.group(0).strip().split(" ")[:len(m.group(0).strip().split(" ")) - len(_trim(m).split(" "))]) + " " + PLACE_REMOVED).strip(), out)
+    out = re.sub(r"(?:\[place removed\]\s*){2,}", PLACE_REMOVED + " ", out).strip()
+    if removed is not None:
+        removed.extend(f for f in found if f and f not in removed)
+    return out
+
+
 def clean_questions(value, limit=5):
     """`my_questions` as {text, when, kind}. A bare string is {text, vet, answer}; `trigger`
     is dropped here, because it is the one part of a question that stays at home."""
@@ -371,9 +417,18 @@ def best_aspects(scores):
     return [name for score, name in sorted(pairs, key=lambda p: (-p[0], p[1])) if score >= top][:3]
 
 
-def shareable(profile, name=None, exact=False, commute_area=None, hide_commute=False):
-    """Everything on the allow-list, and nothing else, from a parsed profile.yaml."""
+def shareable(profile, name=None, exact=False, commute_area=None, hide_commute=False,
+              audience="public", removed=None):
+    """Everything on the allow-list, and nothing else, from a parsed profile.yaml.
+
+    audience="public" (default): no commute area, no move-in month, no story summary — a
+    public post carries taste, not whereabouts. audience="friend": the district (or the label
+    given), the month and the story, for a private message. Free text is scrubbed of places
+    either way; `removed` (a list) collects what the scrub took out."""
+    if audience not in AUDIENCES:
+        raise ValueError("audience must be one of %s" % ", ".join(AUDIENCES))
     profile = profile or {}
+    removed = removed if removed is not None else []
     budget = profile.get("budget") or {}
     window = profile.get("move_in_window") or {}
     commute = profile.get("commute") or {}
@@ -389,7 +444,7 @@ def shareable(profile, name=None, exact=False, commute_area=None, hide_commute=F
     if exact and budget.get("all_in_pcm_ceiling") and budget.get("rent_pcm_target"):
         money = "%s (rent target £%s)" % (money, format(int(budget["rent_pcm_target"]), ","))
 
-    if hide_commute:
+    if audience == "public" or hide_commute:
         area = None
     elif commute_area:
         area = strip_postcodes(str(commute_area).strip())[:40] or None
@@ -398,16 +453,17 @@ def shareable(profile, name=None, exact=False, commute_area=None, hide_commute=F
 
     seed = {
         "version": SEED_VERSION,
-        "name": (strip_postcodes(str(name).strip())[:60] if name else None) or None,
+        "name": (scrub_places(str(name).strip(), removed)[:60] if name else None) or None,
         "flat_type": profile.get("flat_type") or None,
         "budget_band": money,
         "budget_mode": profile.get("budget_mode") or None,
         "commute_area": area,
-        "move_in_month": month_of(window.get("earliest"), window.get("latest")),
-        "must_haves": clean_list(profile.get("must_haves")),
-        "avoid": clean_list(profile.get("avoid")),
+        "move_in_month": month_of(window.get("earliest"), window.get("latest")) if audience == "friend" else None,
+        "must_haves": [scrub_places(x, removed) for x in clean_list(profile.get("must_haves"))],
+        "avoid": [scrub_places(x, removed) for x in clean_list(profile.get("avoid"))],
         "priorities": clean_list(profile.get("priorities"), limit=3),
-        "my_questions": clean_questions(profile.get("my_questions")),
+        "my_questions": [dict(q, text=scrub_places(q.get("text"), removed)) if isinstance(q, dict) else scrub_places(q, removed)
+                         for q in clean_questions(profile.get("my_questions"))],
         "floors": {
             "reject_ground_floor": bool(floors.get("reject_ground_floor")) if isinstance(floors, dict) else False,
             "prefer_floor_band": (str(floors.get("prefer_floor_band"))[:20]
@@ -419,8 +475,8 @@ def shareable(profile, name=None, exact=False, commute_area=None, hide_commute=F
         },
         "quiet_over_light": bool(profile.get("quiet_over_light")),
         "first_weeks": (bridging.get("first_weeks") if isinstance(bridging, dict) else None) or None,
-        "story_summary": (strip_postcodes(str(profile["story_summary"]))[:600]
-                          if profile.get("story_summary") else None),
+        "story_summary": (scrub_places(str(profile["story_summary"]), removed)[:600]
+                          if profile.get("story_summary") and audience == "friend" else None),
     }
     return seed
 
@@ -945,8 +1001,12 @@ def cmd_export(args):
     profile = read_yaml(args.profile)
     if not isinstance(profile, dict) or not profile:
         die("%s does not look like a profile.yaml" % args.profile)
-    seed = shareable(profile, name=args.name, exact=args.exact,
-                     commute_area=args.commute_area, hide_commute=args.hide_commute)
+    if args.audience == "public" and (args.commute_area or args.hide_commute):
+        die("--commute-area and --hide-commute only mean something with --for friend; "
+            "a public card never carries a place", 2)
+    removed = []
+    seed = shareable(profile, name=args.name, exact=args.exact, commute_area=args.commute_area,
+                     hide_commute=args.hide_commute, audience=args.audience, removed=removed)
     journey = None
     if args.journey:
         if not os.path.exists(args.journey):
@@ -967,11 +1027,21 @@ def cmd_export(args):
                    "trimmed_from_code": trimmed,
                    "scrubbed_from_profile": dropped_fields(profile),
                    "shared_fields": [k for k, _ in ALLOW],
+                   "audience": args.audience, "places_removed": removed,
                    "note": "preferences and bands only; see references/sharing.md"},
                   sys.stdout, ensure_ascii=False, indent=1)
         print()
         return 0
     sys.stdout.write(text)
+    if args.audience == "public":
+        sys.stdout.write("\n(Public card: no place, no date, no story. Whoever uses it fills in their own.)\n")
+    else:
+        sys.stderr.write("FRIEND CARD: this one says where you go each day (%s), when you move (%s) and how you live. "
+                         "Send it only to someone you trust; never post it.\n"
+                         % (seed.get("commute_area") or "not given", seed.get("move_in_month") or "not given"))
+    if removed:
+        sys.stderr.write("place-like words removed from the free text: %s\n" % "; ".join(removed[:12]))
+    sys.stderr.write("read the card once more for employer, school or shop names before sharing: no list can catch those\n")
     dropped = dropped_fields(profile)
     if dropped:
         sys.stderr.write("kept out of the seed: %s\n" % ", ".join(dropped))
@@ -1037,6 +1107,9 @@ def build_parser():
                         help="share the real budget numbers instead of a band")
     export.add_argument("--commute-area", dest="commute_area",
                         help='say the area by hand, e.g. "Zone 1" (default: the postcode district)')
+    export.add_argument("--for", dest="audience", choices=AUDIENCES, default="public",
+                        help="public (default): taste only, no place or date; friend: adds the commute "
+                             "district, the move-in month and the story, for a private message")
     export.add_argument("--hide-commute", dest="hide_commute", action="store_true",
                         help="leave the commute area out altogether")
     export.add_argument("--reveal-address", dest="reveal_address", action="store_true",
