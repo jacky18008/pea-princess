@@ -42,6 +42,8 @@ class PackageBoundary(unittest.TestCase):
         self.write('viewer/viewer.html', '<!doctype html>')
         self.write('bench/ab/CODEX_BRIEF.md', 'Synthetic brief')
         self.write('bench/run.py', 'print(1)\n')
+        self.write('skills/vet-flat/references/rules.md',
+                   '# Defaults, and the four things that do not move\nEverything is a default.\n\n## Defaults\n- one\n')
         subprocess.run(['git', '-C', str(self.root), 'add', '.'], check=True)
         self.patches = mock.patch.multiple(DIST, ROOT=str(self.root),
                                           SKILL=str(self.root / 'skills/vet-flat'),

@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Pea Princess · 找房研究</title>
-  <link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script>
+  <link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/review.css"><script src="/app.js" defer></script><script src="/review.js" defer></script>
 </head>
 <body>
-<header><a class="brand" href="/">● <strong>Pea Princess</strong><span>找房研究</span></a><span id="connection" class="pill">連接中</span></header>
-<main>
+<header><a class="brand" href="/">● <strong>Pea Princess</strong><span>找房研究</span></a><nav aria-label="測試台視圖"><button id="show-chat" aria-pressed="true">對話</button><button id="show-review" aria-pressed="false">檢閱過程</button></nav><span id="connection" class="pill">連接中</span></header>
+<main id="chat-view">
   <aside class="library">
     <h1>從你的需求開始</h1><p class="muted">先比較最多三間真實房源的房租、房數、樓層與面積，再依你的需求調整。</p>
     <label for="research-mode">開始什麼對話</label><select id="research-mode"><option value="live">Agent 對話測試</option><option value="fixture">合成人物測試 · 虛構資料</option></select>
@@ -28,5 +28,10 @@
   </section>
   <aside class="observations"><h2>這段對話的狀態</h2><div class="metrics"><div><strong id="turn">—</strong><span id="turn-label">真人輸入</span></div><div><strong id="calls">0</strong><span>模型呼叫</span></div></div><div class="usage"><span>已記錄 tokens</span><strong id="tokens">0</strong><div class="bar"><i id="usage-bar"></i></div><small id="usage-note">包含 input 與 output；cached input 不重複加計。</small></div><h3 id="behavior-title">研究進度</h3><div id="behavior" class="muted">建立後會保存需求與每次回答。</div><div id="fixture-observations" hidden><h3>原本要完成的事</h3><ol id="criteria"></ol><p class="fine">這是合成測試觀察清單。人物結束不代表每一項都通過；目前沒有額外模型裁判。</p></div><details><summary>資料與限制</summary><p id="mode-limit-note" class="fine">研究結果應附來源連結與查詢時間，並區分刊登資訊、推估及尚未確認的可租狀態。</p><p class="fine">你輸入的文字會經本機 Codex 傳給模型服務處理。介面只綁定本機，私人對話不進 Git。</p></details></aside>
 </main>
+<section id="review-view" hidden aria-label="Agent 回覆與研究過程檢閱">
+  <aside class="review-library"><span class="eyebrow">PIPELINE INSPECTOR</span><h1>回覆與研究過程</h1><p class="fine">從結果回看輸入、工具與用量。檢閱不會呼叫模型。</p><label for="review-session">選擇已保存的對話</label><select id="review-session"></select><button id="review-refresh" class="wide">重新讀取紀錄</button><div id="review-calls" aria-label="模型呼叫列表"></div></aside>
+  <div class="review-workspace"><div class="review-heading"><div><h2 id="review-title">選一段對話開始檢閱</h2><p id="review-meta" class="fine"></p></div><div class="review-actions"><button id="review-json" disabled>匯出 JSON</button><button id="review-md" disabled>匯出 Markdown</button></div></div><p id="review-export-result" class="fine" role="status"></p><div id="review-totals" class="review-totals"></div><p id="review-notice" role="status" class="review-notice"></p><details id="review-conversation" class="review-card"><summary>整段對話與使用者插問</summary><div id="review-conversation-body"></div></details><div id="review-detail"></div></div>
+  <aside class="review-feedback"><h2>評閱筆記</h2><p class="fine">保留原答案，筆記綁定這次呼叫的紀錄。下次請求不會自動帶入這裡的意見。</p><form id="review-form"><label for="review-rating">這則回答的體驗</label><select id="review-rating"><option value="unrated">尚未評分</option><option value="helpful">有幫助、能推進</option><option value="needs_work">可以改善</option><option value="problem">有明顯問題</option></select><label for="review-severity">問題程度</label><select id="review-severity"><option value="none">沒有標記</option><option value="low">低 · 措辭或小幅改善</option><option value="medium">中 · 體驗或研究缺口</option><option value="high">高 · 錯誤決策或條件遺失</option></select><fieldset id="review-tags"><legend>問題類型（可複選）</legend></fieldset><label for="review-note">具體原因、使用者反應與修正建議</label><textarea id="review-note" rows="5" maxlength="4000" placeholder="例如：使用者問暖氣費，回答只重列條件，沒有回答當下問題。"></textarea><button id="review-save" class="primary wide" disabled>保存評閱筆記</button></form><div id="review-history"></div></aside>
+</section>
 <div id="toast" role="alert" hidden></div>
 </body></html>

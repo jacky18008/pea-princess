@@ -4,6 +4,8 @@
 
 ## 開啟與操作
 
+頁面上方的「檢閱過程」可查看每次呼叫的畫面回覆與選項、實際提示內容、工具輸入／輸出、快取與非快取 tokens，以及整段對話的插問。評閱筆記另外保存並綁定原始內容，檢閱、匯出和寫筆記都不呼叫模型。完整規格、review agent API 與限制見 [Pipeline Inspector](pipeline-inspector-2026-09-11.md)。
+
 在 repo 根目錄執行 `python3 tools/start_playground.py --port 8765`，開啟 `http://127.0.0.1:8765`。需要已登入的本機 Codex CLI；使用既有 ChatGPT 登入，不把憑證放入網頁。Python 標準函式庫即可，不需 npm install。
 
 啟動器先把這次使用的程式與 skill 凍結成私人快照，印出路徑與 manifest，再啟動測試台。之後 Claude 或其他工作修改主 repo，不會中斷這份快照的對話。需要測新版時重新啟動並建立新場；舊記錄不改寫。快照採 Git 追蹤檔案的目前內容，另明確包含既有生成的 `dist/prompt-pack/INSTRUCTIONS.md`；新建但尚未加入 Git 的程式不會自動帶入。

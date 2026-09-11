@@ -22,12 +22,12 @@ ROOT = Path(__file__).resolve().parents[1]
 GENERATED = 'dist/prompt-pack/INSTRUCTIONS.md'
 REQUIRED = (
     'tools/persona_playground.py', 'tools/session_runner.py',
-    'tools/conversation_reply.py', 'tools/public_source_snapshot.py',
+    'tools/conversation_reply.py', 'tools/public_source_snapshot.py', 'tools/playground_review.py',
     'bench/personas.py', 'bench/journeys.py', 'bench/durable_run.py',
     'bench/call_control.py', 'bench/launch.py',
     'skills/vet-flat/SKILL.md', 'skills/vet-flat/scripts/session_state.py',
     'evals/personas.json', 'playground/index.html', 'playground/app.js',
-    'playground/style.css', 'playground/conversation-policy.md',
+    'playground/style.css', 'playground/review.js', 'playground/review.css', 'playground/conversation-policy.md',
     'docs/persona-playground.md', GENERATED,
 )
 PRIVATE_PARTS = frozenset(('private', 'secrets', 'credentials', 'runtime', 'raw',

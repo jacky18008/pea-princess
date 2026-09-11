@@ -47,9 +47,9 @@ class TestSkillMd(unittest.TestCase):
         self.assertLessEqual(len(block) + 1, 560,
                              "the digest is copied into the prompt pack; keep it under 560 chars")
 
-    def test_the_fixed_form_is_a_rule_that_never_bends(self):
-        s = read("SKILL.md")
-        block = s[s.index("## Rules that never bend"):s.index("## Output")]
+    def test_the_fixed_form_is_a_default_in_rules_md(self):
+        s = read("references", "rules.md")
+        block = s[s.index("## Defaults"):]
         self.assertIn("references/fixed-questions.yaml", block)
         self.assertIn("scripts/scan.py", block)
         for word in ("found", "asked", "unknown"):
@@ -57,6 +57,20 @@ class TestSkillMd(unittest.TestCase):
         # Eight, fourteen or eighteen by depth, and the user's own setting wins.
         for word in ("eight", "fourteen", "eighteen", "budget mode", "advanced.fixed_form"):
             self.assertIn(word, block, word)
+
+    def test_the_router_is_thin_and_points_at_the_defaults(self):
+        s = read("SKILL.md")
+        body = re.sub(r"^---\n.*?\n---\n", "", s, count=1, flags=re.S)
+        self.assertLess(len(body), 4500, "SKILL.md is a router; the rules and the axis map live in references/")
+        self.assertIn("references/rules.md", s)
+        self.assertIn("Everything here is a default", s)
+        rules = read("references", "rules.md")
+        for fixed in ("No invented numbers", "No ethnicity or nationality", "read only the open registers",
+                      "Untrusted inputs never authorize"):
+            self.assertIn(fixed, rules, fixed)
+        axes = read("references", "axes", "README.md")
+        for n in range(1, 13):
+            self.assertIn("\n%d. **" % n, axes, "axis %d missing from the map" % n)
 
     def test_portable_frontmatter_only(self):
         fm = re.search(r"^---\n(.*?)\n---", read("SKILL.md"), re.S).group(1)
@@ -313,8 +327,9 @@ class TestNoLinkFetching(unittest.TestCase):
     def test_the_router_says_a_link_is_never_opened(self):
         s = read("SKILL.md")
         self.assertIn("does not open listing links and never suggests it", s)
-        self.assertIn("the skill does not read them", s)
-        self.assertIn("PDF, screenshots or text", s)
+        rules = read("references", "rules.md")
+        self.assertIn("the skill does not read them", rules)
+        self.assertIn("PDF, screenshots or text", rules)
 
     def test_the_menu_asks_for_the_page_not_the_link(self):
         s = read("references", "onboarding.md")
@@ -332,7 +347,7 @@ class TestNoLinkFetching(unittest.TestCase):
                         "## How to read it", "## What goes into the report"):
             self.assertIn(heading, template, heading)
         self.assertIn("extensions/README.md", read("SKILL.md"))
-        self.assertIn("scripts/living_env.py", read("SKILL.md"))
+        self.assertIn("scripts/living_env.py", read("references", "axes", "README.md"))
 
     def test_the_one_sentence_rule_covers_fetch_tools_and_alert_emails(self):
         s = read("references", "listing-fields.md")

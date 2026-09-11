@@ -34,6 +34,7 @@ from durable_run import cli_record
 import launch
 import conversation_reply
 import live_eligibility
+import playground_review
 
 LIVE_REPLY_SCHEMA = {
     'type':'object','additionalProperties':False,'required':['candidates','focus_fields'],
@@ -180,13 +181,13 @@ def codex_invoke(request, folder):
     if not executable: raise LabError('找不到本機 Codex CLI。')
     policy = request.get('tool_policy', 'text_only')
     if policy not in ('text_only', 'live_research'): raise LabError('研究工具政策無效。')
-    host_skill = str(Path.home()/'.agents/skills/vet-flat')
+    host_skills = [str(Path.home()/'.agents/skills'/name) for name in ('pea-princess','vet-flat')]
     command = [executable, 'exec', '--ignore-user-config', '--ephemeral',
                '--cd', str(work), '--sandbox', 'read-only', '--skip-git-repo-check',
                '--model', request['model'], '-c', 'model_reasoning_effort="low"',
                '-c', 'project_doc_max_bytes=0',
                '--enable', 'skip_host_skill_discovery',
-               '-c', 'skills.config=[{path='+json.dumps(host_skill)+',enabled=false}]',
+               '-c', 'skills.config=['+','.join('{path='+json.dumps(path)+',enabled=false}' for path in host_skills)+']',
                '-c', 'web_search="'+('live' if policy == 'live_research' else 'disabled')+'"',
                '--json', '--output-last-message', str(answer), '--', '-']
     if request.get('tool_policy') == 'live_research':
@@ -413,6 +414,48 @@ class Lab:
                     'current_comparison':gate['artifact'] if gate and gate['status']=='current' and s['sources']==source_hashes() else None,
                     'history_note':('Actual model replies for evaluation; not host-authored or automatically validated comparisons.' if s.get('output_mode')=='agent' else 'Earlier messages and raw call proposals are retained historical evidence, not the current recommendation. Use current_comparison only when present.'),
                     'stop_reason':s['stop_reason'],'quality':'not_evaluated','state_revision':self._store(s).show()['revision']}
+
+    def inspect(self,sid,call_id=None,packet=False):
+        # Archive inspection is read-only even when an older runtime cannot resume.
+        with self.lock:
+            s=copy.deepcopy(self._load(sid))
+        folder=self._folder(sid)
+        metadata={key:s.get(key) for key in ('id','name','created_at','model','research_mode','output_mode','runtime_settings','sources','status','stop_reason')}
+        metadata['name']=('Agent 對話測試' if s.get('output_mode')=='agent' else '真實找房研究') if s.get('research_mode')=='live' else s['card'].get('name',sid)
+        metadata['configured_effort']='low'
+        metadata['quality']='not_evaluated'
+        metadata['private']=True
+        metadata['telemetry_note']='Completed-call observations; no live partial trace or billing price is inferred.'
+        result=playground_review.build_call(folder,s,call_id) if call_id else playground_review.build_index(folder,s)
+        result['session']=metadata
+        if packet:
+            result['messages']=s['messages']
+            result['interventions']=s['interventions']
+            result['amendments']=s['amendments']
+            result['reviews']=playground_review.read_reviews(folder)
+            result['call_detail_routes']={row['id']:'/api/session/'+sid+'/inspect/'+row['id'] for row in s['calls']}
+        return result
+
+    def reviews(self,sid,data=None):
+        with self.lock:
+            s=copy.deepcopy(self._load(sid))
+            try:
+                return playground_review.read_reviews(self._folder(sid)) if data is None else playground_review.save_review(self._folder(sid),s,data)
+            except ValueError as error:
+                raise LabError(str(error)) from error
+
+    def review_export(self,sid,data):
+        if set(data)!={'call_id','format','expected_source'} or data['format'] not in ('json','md'):
+            raise LabError('匯出欄位無效。')
+        with self.lock:
+            packet=self.inspect(sid,packet=True)
+            detail=self.inspect(sid,data['call_id'])
+            source={key:detail['source'].get(key) for key in ('record_sha256','message_sha256','displayed_sha256')}
+            if data['expected_source']!=source:raise LabError('內容已更新，請重新讀取後匯出。')
+            packet['selected_call']=detail
+            packet['export_scope']='Full conversation/index/reviews plus selected-call bounded trace; other call detail routes included.'
+            try:return playground_review.save_export(self._folder(sid),packet,data['format'])
+            except ValueError as error:raise LabError(str(error)) from error
 
     def _dedupe(self,s,data):
         try: key=str(uuid.UUID(data['client_id']))
@@ -848,7 +891,7 @@ class Lab:
                 c.invalid.append('persona generated an unsupported money/area number')
                 s.update(status='ended',auto=False,stop_reason='invalid_persona',notice='Persona 產生未獲來源支持的數字；停止於回答者呼叫之前。')
             else:
-                s['persona_turn']=pending['turn'];s['messages'].append({'role':'persona','text':expanded,'turn':pending['turn']})
+                s['persona_turn']=pending['turn'];s['messages'].append({'role':'persona','text':expanded,'turn':pending['turn'],'call_id':pending['id']})
                 s['history'].append(['user',expanded]);s['persona_history'].append(['user',answer]);s['next_actor']='assistant'
                 reason=c.message_stop(answer)
                 if reason:s.update(status='ended',auto=False,stop_reason='persona_ended' if reason=='completed' else reason,notice='Persona 已結束這段對話；這不是所有需求通過的品質判定。')
@@ -856,6 +899,7 @@ class Lab:
             message={'role':'assistant','text':answer,'responding_to':pending['origin']}
             if s.get('reply_format')=='choices-v1':message.update(display_text=reply['message'],questions=questions)
             if s.get('live_gate_version')==1:message['acceptance_id']=pending['id']
+            message['call_id']=pending['id']
             s['messages'].append(message);s['history'].append(['assistant',answer])
             if live:
                 s.update(next_actor=None,auto=False)
@@ -945,12 +989,17 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         try:
             self._guard(self.path.startswith('/api/'))
-            assets={'/':('playground/index.html','text/html; charset=utf-8'),'/app.js':('playground/app.js','text/javascript; charset=utf-8'),'/style.css':('playground/style.css','text/css; charset=utf-8'),'/readiness':('docs/persona-playground.md','text/plain; charset=utf-8')}
+            assets={'/':('playground/index.html','text/html; charset=utf-8'),'/app.js':('playground/app.js','text/javascript; charset=utf-8'),'/style.css':('playground/style.css','text/css; charset=utf-8'),'/review.js':('playground/review.js','text/javascript; charset=utf-8'),'/review.css':('playground/review.css','text/css; charset=utf-8'),'/readiness':('docs/persona-playground.md','text/plain; charset=utf-8')}
             if self.path in assets:
                 file,typ=assets[self.path];return self._send(200,(ROOT/file).read_bytes(),typ)
             lab=self.server.lab
             if self.path=='/api/catalog':return self._send(200,lab.catalog())
             if self.path=='/api/sessions':return self._send(200,lab.list())
+            match=re.fullmatch(r'/api/session/([a-f0-9]{32})/(inspect|reviews|review-packet)(?:/([A-Za-z0-9][A-Za-z0-9_-]{0,79}))?',self.path)
+            if match:
+                sid,kind,call_id=match.groups()
+                if call_id and kind!='inspect':return self._send(404,{'message':'找不到這個頁面。'})
+                return self._send(200,lab.reviews(sid) if kind=='reviews' else lab.inspect(sid,call_id,packet=kind=='review-packet'))
             match=re.fullmatch(r'/api/session/([a-f0-9]{32})(/export)?',self.path)
             if match:return self._send(200,lab.export(match[1]) if match[2] else lab.snapshot(match[1]))
             self._send(404,{'message':'找不到這個頁面。'})
@@ -966,8 +1015,10 @@ class Handler(BaseHTTPRequestHandler):
             body=parse_json(self.rfile.read(length));lab=self.server.lab
             if not isinstance(body,dict):raise LabError('請求必須是 JSON object。')
             if self.path=='/api/sessions':return self._send(200,lab.create(body))
-            match=re.fullmatch(r'/api/session/([a-f0-9]{32})/(message|control)',self.path)
+            match=re.fullmatch(r'/api/session/([a-f0-9]{32})/(message|control|reviews|review-export)',self.path)
             if not match:return self._send(404,{'message':'找不到這個操作。'})
+            if match[2]=='reviews':return self._send(200,lab.reviews(match[1],body))
+            if match[2]=='review-export':return self._send(200,lab.review_export(match[1],body))
             return self._send(200,lab.message(match[1],body) if match[2]=='message' else lab.control(match[1],body))
         except (LabError,ValueError,TypeError,RecursionError) as e:self._send(400,{'message':str(e) if isinstance(e,LabError) else '請求格式無效。'})
         except Exception:self._send(500,{'message':'操作未完成；已保存的紀錄不會自動重跑。'})

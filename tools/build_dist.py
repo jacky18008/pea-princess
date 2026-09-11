@@ -32,6 +32,7 @@ ARCHIVE_NAME = SKILL_NAME + "-skill.zip"
 
 
 DIGEST_SOURCES = [  # in priority order; short, high-value sections first
+    ("references/rules.md", "# Defaults, and the four things that do not move", "\n# (end of file)"),
     ("references/inputs.md", "## Rules for asking", "## What to ask for"),
     ("references/report-contract.md", "## The fixed form", "## Plain-language rules"),
     ("references/arithmetic.md", "## Without a shell", "## Constants"),
@@ -56,18 +57,18 @@ def compose_instructions(limit=LIMIT):
     for index, (rel, start, end) in enumerate(DIGEST_SOURCES):
         path = Path(SKILL, rel)
         section = _section(path.read_text(encoding="utf-8"), start, end) if path.exists() else ""
-        if index < 2 and not section:
+        if index < 3 and not section:
             raise ValueError("required manual digest section missing: %s in %s" % (start, rel))
         parts.append(section)
     header = "\n---\n# Manual-mode digest (from the references; the full files are attached)\n\n"
-    kept = parts[:2]
+    kept = parts[:3]
     required = body + header + "\n".join(kept)
     if len(required) > limit:
         raise ValueError("required manual instructions need %d characters (limit %d); "
-                         "shorten SKILL.md by at least %d characters; asking rules and fixed "
-                         "questions cannot be dropped" %
+                         "shorten SKILL.md or rules.md by at least %d characters; the defaults, "
+                         "asking rules and fixed questions cannot be dropped" %
                          (len(required), limit, len(required) - limit))
-    for section in parts[2:]:
+    for section in parts[3:]:
         if section and len(body + header + "\n".join(kept + [section])) <= limit:
             kept.append(section)
     return body + header + "\n".join(kept)
