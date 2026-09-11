@@ -79,6 +79,8 @@ Final verification: 77 inspector-related checks and 31 platform checks passed on
 
 The browser's ordinary narrow panel exercised the responsive layout; a separate full-width desktop or mobile-device visual certification is not claimed. The served runtime retains the same tested skill bytes across the export fix. Concurrent edits to the main repository's skill were excluded from that final runtime using the isolated checkout and recorded manifest.
 
+Commit provenance: skill naming is in `87390b8`. A concurrent Claude commit, `c6ee291`, included the already-staged inspector implementation alongside its own skill-router edits; `c807ded` adds the final browser validation record. History was preserved rather than rewritten. The inspector's executable/UI bytes were compared directly with the final running snapshot. The full-suite result applies to the isolated tested overlay, not to the later concurrent router changes. The locally installed 93-file rename package is also that earlier validated package; a subsequent main-repository build can produce a newer archive. Future parallel release work should stage and commit inside separate worktrees to avoid this shared-index coupling.
+
 ## Remaining limits
 
 Native Grok Bot observations do not have this Codex CLI receipt format. Its separately preserved transcript is not imported as fake calls or assigned zero tokens. Cross-provider import requires an explicit observation schema and provenance before sharing these numeric comparisons. Automated long-conversation scoring and automatic issue-to-prompt changes remain separate experiments.
