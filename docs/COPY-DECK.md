@@ -32,7 +32,7 @@ On a phone
 | Surface | Blocks | Source |
 |---|---|---|
 | README — the front page | 20 | `README.md` |
-| docs/USING.md — the plain-words walkthrough | 38 | `docs/USING.md` |
+| docs/USING.md — the plain-words walkthrough | 41 | `docs/USING.md` |
 | docs/INSTALL.md — install page | 13 | `docs/INSTALL.md` |
 | docs/EXPERIMENTS.md — which configuration to run | 7 | `docs/EXPERIMENTS.md` |
 | onboarding.md — what the skill says to a new user | 30 | `skills/vet-flat/references/onboarding.md` |
@@ -40,7 +40,7 @@ On a phone
 | inputs.md — the one message that asks the user for what is missing | 1 | `skills/vet-flat/references/inputs.md` |
 | profiles/ — the sentences a profile carries | 14 | `skills/vet-flat/profiles/*.yaml` |
 | seed.py — the seed card sentences (read-only here) | 25 | `skills/vet-flat/scripts/seed.py` |
-| **Total** | **154** | |
+| **Total** | **157** | |
 
 ---
 
@@ -474,13 +474,13 @@ Use the report to decide what to investigate, then see the flat and speak with t
 
 ### deck:using:19
 
-- source: `docs/USING.md` · L52
-- under: ## 繁體中文
-- lang: zh-TW
+- source: `docs/USING.md` · L50
+- under: ### Before arriving or committing
+- lang: en
 - write-back: yes
 
 ```text
-不用寫程式，也不用先填完整問卷或挑技術設定。按照[安裝說明](INSTALL.md)加入技能後，可以直接說：
+**Share what you learned, not where you live.** Ask the assistant for your seed and post it: it carries your taste, deal-breakers and the questions you make every flat answer, never where you go each day or when you move. Around it, say what helped you; leave out your employer, school, station and moving date. A friend card that includes those exists for private messages only.
 ```
 
 ### deck:using:20
@@ -491,12 +491,23 @@ Use the report to decide what to investigate, then see the flat and speak with t
 - write-back: yes
 
 ```text
-- 「我十月要去倫敦，先給我例子，教我怎麼挑。」
+不用寫程式，也不用先填完整問卷或挑技術設定。按照[安裝說明](INSTALL.md)加入技能後，可以直接說：
 ```
 
 ### deck:using:21
 
-- source: `docs/USING.md` · L55
+- source: `docs/USING.md` · L56
+- under: ## 繁體中文
+- lang: zh-TW
+- write-back: yes
+
+```text
+- 「我十月要去倫敦，先給我例子，教我怎麼挑。」
+```
+
+### deck:using:22
+
+- source: `docs/USING.md` · L57
 - under: ## 繁體中文
 - lang: zh-TW
 - write-back: yes
@@ -505,26 +516,15 @@ Use the report to decide what to investigate, then see the flat and speak with t
 - 「我想找安靜的一房，每月總花費（房租加帳單）不要超過 £2,200。」
 ```
 
-### deck:using:22
+### deck:using:23
 
-- source: `docs/USING.md` · L56
+- source: `docs/USING.md` · L58
 - under: ## 繁體中文
 - lang: zh-TW
 - write-back: yes
 
 ```text
 - 「比較這兩間，告訴我看房時要查什麼。」
-```
-
-### deck:using:23
-
-- source: `docs/USING.md` · L57
-- under: ## 繁體中文
-- lang: zh-TW
-- write-back: yes
-
-```text
-- 「先插問一下：擔保人是做什麼的？」
 ```
 
 ### deck:using:24
@@ -535,7 +535,7 @@ Use the report to decide what to investigate, then see the flat and speak with t
 - write-back: yes
 
 ```text
-助理會先用例子或你提供的房源做出有用的比較，再從你的反應了解偏好。通常一次問零到兩題，必要確認最多三題；「還不知道」也可以，不必先把所有條件想清楚。
+- 「先插問一下：擔保人是做什麼的？」
 ```
 
 ### deck:using:25
@@ -546,7 +546,7 @@ Use the report to decide what to investigate, then see the flat and speak with t
 - write-back: yes
 
 ```text
-能搜尋時，真實房源會附來源與日期；不能搜尋時，教學例子會明確標示為虛構，不會把假設價格說成倫敦現在的行情。需要你貼房源、戶型圖或其他文件時，會說明用途，並繼續做不受影響的部分。聊天軟體有選項介面就用選項，沒有就直接打字。
+助理會先用例子或你提供的房源做出有用的比較，再從你的反應了解偏好。通常一次問零到兩題，必要確認最多三題；「還不知道」也可以，不必先把所有條件想清楚。
 ```
 
 ### deck:using:26
@@ -557,7 +557,7 @@ Use the report to decide what to investigate, then see the flat and speak with t
 - write-back: yes
 
 ```text
-**不想打字，可以用語音輸入。** 用手機或電腦內建的聽寫，或你習慣的語音轉文字工具，把內容輸入助理的對話框即可；[Typeless](https://www.typeless.com/pricing) 和 [Wispr Flow](https://wisprflow.ai/pricing) 都是可選例子。兩者目前都有免費方案，但有用量限制，依平台與方案而異（2026-09-11 查核，最新額度看官方頁面）；不需要為了使用這個 skill 另外安裝或付費。
+能搜尋時，真實房源會附來源與日期；不能搜尋時，教學例子會明確標示為虛構，不會把假設價格說成倫敦現在的行情。需要你貼房源、戶型圖或其他文件時，會說明用途，並繼續做不受影響的部分。聊天軟體有選項介面就用選項，沒有就直接打字。
 ```
 
 ### deck:using:27
@@ -568,7 +568,7 @@ Use the report to decide what to investigate, then see the flat and speak with t
 - write-back: yes
 
 ```text
-可以直接說需求、過去住過的好房子或雷點，也能中途改主意，不用先整理成表單或漂亮的提示詞。送出前看一下校名、郵遞區號、金額、日期，以及「不要」「只有……才可以」有沒有辨識正確。這是把聲音轉成文字，不要求助理本身支援語音通話。
+**不想打字，可以用語音輸入。** 用手機或電腦內建的聽寫，或你習慣的語音轉文字工具，把內容輸入助理的對話框即可；[Typeless](https://www.typeless.com/pricing) 和 [Wispr Flow](https://wisprflow.ai/pricing) 都是可選例子。兩者目前都有免費方案，但有用量限制，依平台與方案而異（2026-09-11 查核，最新額度看官方頁面）；不需要為了使用這個 skill 另外安裝或付費。
 ```
 
 ### deck:using:28
@@ -579,7 +579,7 @@ Use the report to decide what to investigate, then see the flat and speak with t
 - write-back: yes
 
 ```text
-可以先比較「通勤近一點，還是空間大一點」、「臥室安靜，還是生活機能方便」、「租金低一點，還是帳單比較確定」。邊看邊問倫敦的區域、預算、租屋流程或常見問題，也可以請助理教你如何在看房時查證。涉及目前行情或法律的說法，應附上查過的來源。
+可以直接說需求、過去住過的好房子或雷點，也能中途改主意，不用先整理成表單或漂亮的提示詞。送出前看一下校名、郵遞區號、金額、日期，以及「不要」「只有……才可以」有沒有辨識正確。這是把聲音轉成文字，不要求助理本身支援語音通話。
 ```
 
 ### deck:using:29
@@ -590,7 +590,7 @@ Use the report to decide what to investigate, then see the flat and speak with t
 - write-back: yes
 
 ```text
-答案先說下一步和理由。數字會保留來源與限制：「房東估計通勤 20 分鐘，還沒查證」不等於實際通勤已確認；逐字核對房東訊息，也不代表內容一定正確。每月總花費會說明房租、能源、水、網路與適用的市政稅哪些已知、哪些只是估計。
+可以先比較「通勤近一點，還是空間大一點」、「臥室安靜，還是生活機能方便」、「租金低一點，還是帳單比較確定」。邊看邊問倫敦的區域、預算、租屋流程或常見問題，也可以請助理教你如何在看房時查證。涉及目前行情或法律的說法，應附上查過的來源。
 ```
 
 ### deck:using:30
@@ -601,7 +601,7 @@ Use the report to decide what to investigate, then see the flat and speak with t
 - write-back: yes
 
 ```text
-中途改條件直接說：「總預算提高到 £2,300」、「安靜比採光重要」、「通勤可以久一點，但超過 45 分鐘就不要」。助理會套用明確指示，用白話說明影響，保留例外和其他條件；不需要再確認同一個要求。只有意思不明確，或助理自己提議修改時，才需要釐清。
+答案先說下一步和理由。數字會保留來源與限制：「房東估計通勤 20 分鐘，還沒查證」不等於實際通勤已確認；逐字核對房東訊息，也不代表內容一定正確。每月總花費會說明房租、能源、水、網路與適用的市政稅哪些已知、哪些只是估計。
 ```
 
 ### deck:using:31
@@ -612,7 +612,7 @@ Use the report to decide what to investigate, then see the flat and speak with t
 - write-back: yes
 
 ```text
-隨時可以插問其他問題，再回到原本的找房工作，不必重新交代偏好。跨對話保存取決於你使用的軟體；助理不能假裝已經存好。
+中途改條件直接說：「總預算提高到 £2,300」、「安靜比採光重要」、「通勤可以久一點，但超過 45 分鐘就不要」。助理會套用明確指示，用白話說明影響，保留例外和其他條件；不需要再確認同一個要求。只有意思不明確，或助理自己提議修改時，才需要釐清。
 ```
 
 ### deck:using:32
@@ -623,7 +623,7 @@ Use the report to decide what to investigate, then see the flat and speak with t
 - write-back: yes
 
 ```text
-還沒抵達時，可以比較暫住方案，替實地看房留時間。取消、退款和退房條件都要看實際條款，不能只因為是旅館或服務式公寓就當成有保障。看房時親自確認環境、和仲介或房東談清楚；合約帶回去讀，看房當天不簽約。法律與付款提醒會放在相關決定旁，不會每次開場都貼一整段。
+隨時可以插問其他問題，再回到原本的找房工作，不必重新交代偏好。跨對話保存取決於你使用的軟體；助理不能假裝已經存好。
 ```
 
 ### deck:using:33
@@ -634,29 +634,29 @@ Use the report to decide what to investigate, then see the flat and speak with t
 - write-back: yes
 
 ```text
-**自己的小秘書。** 共用技能沒查、但你在意的東西，例如到健身房的步行時間、學區、你知道的噪音來源、你信任的資料集，寫成一頁放進你自己那份的 `extensions/` 資料夾（有範本）。這些加購項目在報告裡會標示出來、不會自己改變判決、不讀房源和評價網站、也不用「住的是誰」來描述一個地區。
+還沒抵達時，可以比較暫住方案，替實地看房留時間。取消、退款和退房條件都要看實際條款，不能只因為是旅館或服務式公寓就當成有保障。看房時親自確認環境、和仲介或房東談清楚；合約帶回去讀，看房當天不簽約。法律與付款提醒會放在相關決定旁，不會每次開場都貼一整段。
 ```
 
 ### deck:using:34
 
-- source: `docs/USING.md` · L81
-- under: ## 简体中文
-- lang: zh-CN
+- source: `docs/USING.md` · L79
+- under: ## 繁體中文
+- lang: zh-TW
 - write-back: yes
 
 ```text
-直接聊天就能开始，不用先填问卷。可以说「先给我例子，教我怎么挑」，或贴两套房源请助理比较。它会先做有用的分析，再从你的反应了解偏好；通常一次问零到两题，必要确认最多三题。支持选项界面时使用真实选项，没有就直接打字。
+**自己的小秘書。** 共用技能沒查、但你在意的東西，例如到健身房的步行時間、學區、你知道的噪音來源、你信任的資料集，寫成一頁放進你自己那份的 `extensions/` 資料夾（有範本）。這些加購項目在報告裡會標示出來、不會自己改變判決、不讀房源和評價網站、也不用「住的是誰」來描述一個地區。
 ```
 
 ### deck:using:35
 
-- source: `docs/USING.md` · L83
-- under: ## 简体中文
-- lang: zh-CN
+- source: `docs/USING.md` · L81
+- under: ## 繁體中文
+- lang: zh-TW
 - write-back: yes
 
 ```text
-**不想打字，可以用语音输入。** 使用设备内置的听写或你习惯的语音转文字工具，将内容输入助理的聊天框；[Typeless](https://www.typeless.com/pricing) 和 [Wispr Flow](https://wisprflow.ai/pricing) 是可选例子。两者目前都有免费方案，但有用量限制，依平台和方案而异（2026-09-11 查核，最新额度看官方页面），不必另行安装或付费。直接说需求、住屋经历或临时改动即可；发送前核对名称、邮编、金额、日期及否定词、附带条件。无需先填表，也不要求助理支持语音通话。
+**分享你學到的，不分享你住哪。** 跟助理要一組「種子」貼出去：它帶的是你的口味、地雷和你要求每間房回答的問題，從來不含你每天去哪、什麼時候搬。貼文裡寫對你有幫助的事就好，別補上公司、學校、車站和搬家日。含這些的「給朋友版」只給私訊用。
 ```
 
 ### deck:using:36
@@ -667,7 +667,7 @@ Use the report to decide what to investigate, then see the flat and speak with t
 - write-back: yes
 
 ```text
-每月总花费包括房租和账单；数字会说明来源、哪些只是估计。真实房源需要来源与日期，不能搜索时的教学例子会标成虚构。你可以随时插问、改变预算或增加条件，助理应保留原本的工作，不让你重新填写全部资料。跨对话保存取决于软件能力，不能假装已经保存。
+直接聊天就能开始，不用先填问卷。可以说「先给我例子，教我怎么挑」，或贴两套房源请助理比较。它会先做有用的分析，再从你的反应了解偏好；通常一次问零到两题，必要确认最多三题。支持选项界面时使用真实选项，没有就直接打字。
 ```
 
 ### deck:using:37
@@ -678,7 +678,7 @@ Use the report to decide what to investigate, then see the flat and speak with t
 - write-back: yes
 
 ```text
-先用比较学会取舍，再安排查证和看房。退款、付款、签约规则要看实际条款与适用法律；合约带回去读，看房当天不签约。
+**不想打字，可以用语音输入。** 使用设备内置的听写或你习惯的语音转文字工具，将内容输入助理的聊天框；[Typeless](https://www.typeless.com/pricing) 和 [Wispr Flow](https://wisprflow.ai/pricing) 是可选例子。两者目前都有免费方案，但有用量限制，依平台和方案而异（2026-09-11 查核，最新额度看官方页面），不必另行安装或付费。直接说需求、住屋经历或临时改动即可；发送前核对名称、邮编、金额、日期及否定词、附带条件。无需先填表，也不要求助理支持语音通话。
 ```
 
 ### deck:using:38
@@ -689,7 +689,40 @@ Use the report to decide what to investigate, then see the flat and speak with t
 - write-back: yes
 
 ```text
+每月总花费包括房租和账单；数字会说明来源、哪些只是估计。真实房源需要来源与日期，不能搜索时的教学例子会标成虚构。你可以随时插问、改变预算或增加条件，助理应保留原本的工作，不让你重新填写全部资料。跨对话保存取决于软件能力，不能假装已经保存。
+```
+
+### deck:using:39
+
+- source: `docs/USING.md` · L91
+- under: ## 简体中文
+- lang: zh-CN
+- write-back: yes
+
+```text
+先用比较学会取舍，再安排查证和看房。退款、付款、签约规则要看实际条款与适用法律；合约带回去读，看房当天不签约。
+```
+
+### deck:using:40
+
+- source: `docs/USING.md` · L93
+- under: ## 简体中文
+- lang: zh-CN
+- write-back: yes
+
+```text
 **自己的小秘书。** 共用技能没查、但你在意的东西，例如到健身房的步行时间、学区、你知道的噪音来源、你信任的数据集，写成一页放进你自己那份的 `extensions/` 文件夹（有模板）。这些加购项目在报告里会标示出来、不会自己改变判决、不读房源和评价网站、也不用「住的是谁」来描述一个地区。
+```
+
+### deck:using:41
+
+- source: `docs/USING.md` · L95
+- under: ## 简体中文
+- lang: zh-CN
+- write-back: yes
+
+```text
+**分享你学到的，不分享你住哪。** 跟助理要一组「种子」贴出去：它带的是你的口味、地雷和你要求每套房回答的问题，从来不含你每天去哪、什么时候搬。帖子里写对你有帮助的事就好，别补上公司、学校、车站和搬家日。含这些的「给朋友版」只给私信用。
 ```
 
 ---
@@ -1300,7 +1333,7 @@ The three social posts, the two questions worth copying, and what to say to some
 
 ### deck:sharing:1
 
-- source: `skills/vet-flat/references/sharing.md` · L72-L73
+- source: `skills/vet-flat/references/sharing.md` · L83-L84
 - under: ## 3. Share your questions
 - lang: en
 - write-back: yes
@@ -1312,7 +1345,7 @@ The three social posts, the two questions worth copying, and what to say to some
 
 ### deck:sharing:2
 
-- source: `skills/vet-flat/references/sharing.md` · L75
+- source: `skills/vet-flat/references/sharing.md` · L86
 - under: ## 3. Share your questions
 - lang: en
 - write-back: yes
@@ -1323,7 +1356,7 @@ The three social posts, the two questions worth copying, and what to say to some
 
 ### deck:sharing:3
 
-- source: `skills/vet-flat/references/sharing.md` · L111-L116
+- source: `skills/vet-flat/references/sharing.md` · L132-L138
 - under: ## 4. The social post, ready to send
 - lang: en
 - write-back: yes
@@ -1335,11 +1368,12 @@ The three social posts, the two questions worth copying, and what to say to some
 > What it means: [three sentences from the card]
 > What I asked of every flat: [the questions]
 > What I found: 14 flats vetted — 2 PASS, 3 EDGE, 9 KILL.
+> (Share your taste and tips, not your whereabouts: the card carries no place or date; don't add your employer, school, station or moving date around it.)
 ```
 
 ### deck:sharing:4
 
-- source: `skills/vet-flat/references/sharing.md` · L120-L125
+- source: `skills/vet-flat/references/sharing.md` · L142-L148
 - under: ## 4. The social post, ready to send
 - lang: zh-TW
 - write-back: yes
@@ -1351,11 +1385,12 @@ The three social posts, the two questions worth copying, and what to say to some
 > 這組條件是什麼意思：〔卡片上的三句話〕
 > 我要求每間房都回答的問題：〔你的問題〕
 > 結果：看了 14 間，2 間通過、3 間邊緣、9 間淘汰。
+> （分享口味和小撇步，別分享行蹤：卡片本來就不含地點和日期，貼文裡也別補上公司、學校、車站、搬家日。）
 ```
 
 ### deck:sharing:5
 
-- source: `skills/vet-flat/references/sharing.md` · L129-L134
+- source: `skills/vet-flat/references/sharing.md` · L152-L158
 - under: ## 4. The social post, ready to send
 - lang: zh-CN
 - write-back: yes
@@ -1367,11 +1402,12 @@ The three social posts, the two questions worth copying, and what to say to some
 > 这组条件是什么意思：〔卡片上的三句话〕
 > 我要求每套房都回答的问题：〔你的问题〕
 > 结果：看了 14 套，2 套通过、3 套边缘、9 套淘汰。
+> （分享口味和小窍门，别分享行踪：卡片本来就不含地点和日期，帖子里也别补上公司、学校、车站、搬家日。）
 ```
 
 ### deck:sharing:6
 
-- source: `skills/vet-flat/references/sharing.md` · L185-L189
+- source: `skills/vet-flat/references/sharing.md` · L209-L213
 - under: ## 6. Importing somebody else's seed
 - lang: en
 - write-back: yes
@@ -1589,7 +1625,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:1
 
-- source: `skills/vet-flat/scripts/seed.py` · L589
+- source: `skills/vet-flat/scripts/seed.py` · L645
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1600,7 +1636,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:2
 
-- source: `skills/vet-flat/scripts/seed.py` · L591
+- source: `skills/vet-flat/scripts/seed.py` · L647
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1611,7 +1647,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:3
 
-- source: `skills/vet-flat/scripts/seed.py` · L593
+- source: `skills/vet-flat/scripts/seed.py` · L649
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1622,7 +1658,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:4
 
-- source: `skills/vet-flat/scripts/seed.py` · L595
+- source: `skills/vet-flat/scripts/seed.py` · L651
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1633,7 +1669,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:5
 
-- source: `skills/vet-flat/scripts/seed.py` · L600
+- source: `skills/vet-flat/scripts/seed.py` · L656
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1644,7 +1680,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:6
 
-- source: `skills/vet-flat/scripts/seed.py` · L602
+- source: `skills/vet-flat/scripts/seed.py` · L658
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1655,7 +1691,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:7
 
-- source: `skills/vet-flat/scripts/seed.py` · L604
+- source: `skills/vet-flat/scripts/seed.py` · L660
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1666,7 +1702,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:8
 
-- source: `skills/vet-flat/scripts/seed.py` · L609
+- source: `skills/vet-flat/scripts/seed.py` · L665
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1677,7 +1713,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:9
 
-- source: `skills/vet-flat/scripts/seed.py` · L611
+- source: `skills/vet-flat/scripts/seed.py` · L667
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1688,7 +1724,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:10
 
-- source: `skills/vet-flat/scripts/seed.py` · L612
+- source: `skills/vet-flat/scripts/seed.py` · L668
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1699,7 +1735,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:11
 
-- source: `skills/vet-flat/scripts/seed.py` · L612
+- source: `skills/vet-flat/scripts/seed.py` · L668
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1710,7 +1746,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:12
 
-- source: `skills/vet-flat/scripts/seed.py` · L617
+- source: `skills/vet-flat/scripts/seed.py` · L673
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1721,7 +1757,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:13
 
-- source: `skills/vet-flat/scripts/seed.py` · L619-L620
+- source: `skills/vet-flat/scripts/seed.py` · L675-L676
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1733,7 +1769,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:14
 
-- source: `skills/vet-flat/scripts/seed.py` · L622-L623
+- source: `skills/vet-flat/scripts/seed.py` · L678-L679
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1745,7 +1781,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:15
 
-- source: `skills/vet-flat/scripts/seed.py` · L624
+- source: `skills/vet-flat/scripts/seed.py` · L680
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1756,7 +1792,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:16
 
-- source: `skills/vet-flat/scripts/seed.py` · L625
+- source: `skills/vet-flat/scripts/seed.py` · L681
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1767,7 +1803,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:17
 
-- source: `skills/vet-flat/scripts/seed.py` · L627
+- source: `skills/vet-flat/scripts/seed.py` · L683
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1778,7 +1814,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:18
 
-- source: `skills/vet-flat/scripts/seed.py` · L631
+- source: `skills/vet-flat/scripts/seed.py` · L687
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1789,7 +1825,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:19
 
-- source: `skills/vet-flat/scripts/seed.py` · L738
+- source: `skills/vet-flat/scripts/seed.py` · L794
 - under: def journey_lines(
 - lang: en
 - write-back: no (read-only)
@@ -1800,7 +1836,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:20
 
-- source: `skills/vet-flat/scripts/seed.py` · L746
+- source: `skills/vet-flat/scripts/seed.py` · L802
 - under: def journey_lines(
 - lang: en
 - write-back: no (read-only)
@@ -1811,7 +1847,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:21
 
-- source: `skills/vet-flat/scripts/seed.py` · L750
+- source: `skills/vet-flat/scripts/seed.py` · L806
 - under: def journey_lines(
 - lang: en
 - write-back: no (read-only)
@@ -1822,7 +1858,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:22
 
-- source: `skills/vet-flat/scripts/seed.py` · L763
+- source: `skills/vet-flat/scripts/seed.py` · L819
 - under: def card(
 - lang: en
 - write-back: no (read-only)
@@ -1833,7 +1869,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:23
 
-- source: `skills/vet-flat/scripts/seed.py` · L767
+- source: `skills/vet-flat/scripts/seed.py` · L823
 - under: def card(
 - lang: en
 - write-back: no (read-only)
@@ -1844,7 +1880,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:24
 
-- source: `skills/vet-flat/scripts/seed.py` · L778-L779
+- source: `skills/vet-flat/scripts/seed.py` · L834-L835
 - under: def card(
 - lang: en
 - write-back: no (read-only)
@@ -1856,7 +1892,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:25
 
-- source: `skills/vet-flat/scripts/seed.py` · L782-L783
+- source: `skills/vet-flat/scripts/seed.py` · L838-L839
 - under: def card(
 - lang: en
 - write-back: no (read-only)

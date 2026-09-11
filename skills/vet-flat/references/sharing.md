@@ -122,6 +122,11 @@ card, not a public one.
 Fill in the code, and the "what I found" line if there is a `journey.json`. Post the card
 underneath, or in a reply if the code is long.
 
+Encourage the sharing and say the one rule in the same breath, in the person's language:
+"Share your taste and your tips; keep your whereabouts. The public card already leaves out where
+you go and when you move — don't add your employer, school, station or moving date in the post
+around it." One sentence, at the moment they are about to post; not a paragraph of warnings.
+
 **English**
 
 > I found a flat in London with this Pea Princess seed — paste it into any AI agent that has the
@@ -130,6 +135,7 @@ underneath, or in a reply if the code is long.
 > What it means: [three sentences from the card]
 > What I asked of every flat: [the questions]
 > What I found: 14 flats vetted — 2 PASS, 3 EDGE, 9 KILL.
+> (Share your taste and tips, not your whereabouts: the card carries no place or date; don't add your employer, school, station or moving date around it.)
 
 **繁體中文**
 
@@ -139,6 +145,7 @@ underneath, or in a reply if the code is long.
 > 這組條件是什麼意思：〔卡片上的三句話〕
 > 我要求每間房都回答的問題：〔你的問題〕
 > 結果：看了 14 間，2 間通過、3 間邊緣、9 間淘汰。
+> （分享口味和小撇步，別分享行蹤：卡片本來就不含地點和日期，貼文裡也別補上公司、學校、車站、搬家日。）
 
 **简体中文**
 
@@ -148,6 +155,7 @@ underneath, or in a reply if the code is long.
 > 这组条件是什么意思：〔卡片上的三句话〕
 > 我要求每套房都回答的问题：〔你的问题〕
 > 结果：看了 14 套，2 套通过、3 套边缘、9 套淘汰。
+> （分享口味和小窍门，别分享行踪：卡片本来就不含地点和日期，帖子里也别补上公司、学校、车站、搬家日。）
 
 Say plainly that anyone can decode the code. Show its actual contents and the card together;
 never promise that excluding structured identity fields makes free text anonymous. Posting or
