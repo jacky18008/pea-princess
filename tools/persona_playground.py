@@ -18,6 +18,7 @@ import re
 import selectors
 import shutil
 import subprocess
+import shutil
 import sys
 import tempfile
 import threading
@@ -35,6 +36,7 @@ import launch
 import conversation_reply
 import live_eligibility
 import playground_review
+import playground_replay
 from playground_attachments import AttachmentStore, AttachmentError
 
 LIVE_REPLY_SCHEMA = {
@@ -91,7 +93,7 @@ def source_hashes():
     paths = [Path(__file__), ROOT/'tools/session_runner.py', ROOT/'bench/personas.py', ROOT/'bench/journeys.py',
              ROOT/'bench/durable_run.py', ROOT/'bench/call_control.py', ROOT/'bench/launch.py',
              ROOT/'skills/vet-flat/scripts/session_state.py', ROOT/'evals/personas.json',
-             ROOT/'tools/conversation_reply.py', ROOT/'tools/public_source_snapshot.py', ROOT/'tools/playground_attachments.py', ROOT/'playground/conversation-policy.md']
+             ROOT/'tools/conversation_reply.py', ROOT/'tools/public_source_snapshot.py', ROOT/'tools/playground_attachments.py', ROOT/'tools/playground_replay.py', ROOT/'playground/conversation-policy.md']
     paths += [ROOT/'dist/prompt-pack/INSTRUCTIONS.md', ROOT/'skills/vet-flat/SKILL.md']
     paths += [ROOT/'skills/vet-flat/scripts/live_eligibility.py', ROOT/'skills/vet-flat/scripts/eligibility.py']
     paths += sorted((ROOT/'skills/vet-flat/references').rglob('*.md'))
@@ -365,7 +367,7 @@ class Lab:
             item['image']=bool(item.get('image') and item['id'] in current_ids)
         return files
 
-    def create(self, data):
+    def create(self, data, _replay=None):
         if self.runtime_sources != source_hashes():raise LabError('程式已更新，請等待測試台重新啟動後再建立對話。')
         mode = data.get('research_mode', 'fixture')
         if mode not in RESEARCH_MODES: raise LabError('研究模式無效。')
@@ -392,7 +394,8 @@ class Lab:
                 if s['creation'] != data: raise LabError('這個操作已使用不同設定。')
                 return {'id': sid}
             if len(list(self.root.glob('*/session.json'))) >= 200: raise LabError('請先封存舊對話；目前最多 200 段。')
-            selected=self._attach(data,mode,output_mode,data.get('initial_request',''))
+            # Historical path text is never a fresh file-selection instruction.
+            selected=[] if _replay is not None else self._attach(data,mode,output_mode,data.get('initial_request',''))
             if mode == 'fixture':
                 card = copy.deepcopy(self.cards[data['persona_id']]); fixtures = {d['file']: personas.fixture_text(d['file']) for d in card.get('documents',[])}
                 c = FrozenController(card, data['seed'], fixtures); c.turn=1
@@ -406,7 +409,7 @@ class Lab:
             store = SessionStore(folder); store.init(('live-' if mode == 'live' else 'persona-')+sid)
             event(store,'budget.set',id='tokens',scope='api_tokens',limit=data['max_tokens'],unit='tokens',provenance=provenance('User selected the displayed session token ceiling.','interactive-human' if mode=='live' else 'local-test-operator'))
             event(store,'task.add',id='conversation',title='One bounded research response to an actual human input' if mode == 'live' else 'One bounded actor step in this synthetic conversation',budget_ids=['tokens'],acceptance=['Persist actor text and measured usage; do not equate a finished call with verified eligibility or availability.' if mode == 'live' else 'Persist actor text and measured usage; do not equate persona END with quality acceptance.'])
-            if mode == 'live':
+            if mode == 'live' and _replay is None:
                 rid='human-initial'
                 event(store,'request.capture',id=rid,text=opening,source='interactive-human:initial')
                 event(store,'requirement.add',id='live-user-inputs',value=[opening],strength='must',scope='live-research-user-instructions',provenance=dict(provenance(opening,rid),request_id=rid))
@@ -424,8 +427,110 @@ class Lab:
             if supplied and not data.get('initial_request'):
                 s['messages'][0].update(text='',attachment_only_default=opening)
             if mode=='live' and output_mode=='checked':s.update(live_gate_version=1,intent_epoch=1,current_acceptance=None)
+            if _replay is not None:
+                s.update(history=[],messages=[],next_actor='assistant',persona_turn=0,replay=copy.deepcopy(_replay))
+                s.update(status='interrupted',notice='正在保存重測附件；未完成前不會呼叫模型。')
+                event(store,'requirement.add',id='live-user-inputs',value=[],strength='must',scope='live-research-user-instructions',provenance=provenance('The user selected a saved conversation for replay; release its inputs in order.','interactive-replay-operator'))
             self._action(s,'created',data);self._save(s)
             return {'id':sid}
+
+    def replay(self,sid,data=None):
+        """Prepare a separate fixed-input replay; reads/creation never call a model."""
+        with self.lock:
+            if data is not None:
+                if set(data)!={'source_sha256','model','max_calls','max_tokens','client_id'}:
+                    raise LabError('重測設定欄位無效。')
+                try:client=str(uuid.UUID(data['client_id']))
+                except (ValueError,TypeError,AttributeError):raise LabError('操作識別碼無效。')
+                target_id=uuid.uuid5(uuid.NAMESPACE_URL,'pea-persona-lab/'+client).hex
+                if (self._folder(target_id)/'session.json').exists():
+                    old=self._load(target_id).get('replay',{})
+                    if old.get('source_id')!=sid or old.get('request')!=data:
+                        raise LabError('這個操作已使用不同重測設定。')
+                    if not old.get('initialized'):raise LabError('上次建立重測未完成；沒有啟動模型，請重新載入頁面後建立重測。')
+                    return {'id':target_id}
+            source=self._load(sid)
+            if self.busy==sid or source.get('pending_call') or source.get('preparing_input'):
+                raise LabError('請等這段對話的呼叫完成或恢復紀錄後，再建立重測。')
+            try:extracted=playground_replay.extract_turns(source)
+            except ValueError as error:raise LabError(str(error)) from error
+            turns=extracted['turns'];pin=_digest(source)
+            if not turns:raise LabError('這段對話還沒有完成的問答可供重測。')
+            if data is None:
+                return {'source_id':sid,'source_revision':source['revision'],'source_sha256':pin,
+                        'model':source['model'],'turn_count':len(turns),
+                        'turns':[{'index':t['index'],'user_text':'\n\n'.join(i['text'] for i in t['inputs']),
+                                  'original_reply':t['original_reply'],'attachment_count':sum(len(i.get('attachments',[])) for i in t['inputs'])} for t in turns],
+                        'excluded_pending_count':extracted['excluded_pending_count'],
+                        'note':'沿用已完成問答中的使用者原話；新回答可能改變後續追問的語意。即時網站資料也可能更新。建立重測不會呼叫模型。'}
+            if data['source_sha256']!=pin:raise LabError('原對話已更新，請重新預覽再建立重測。')
+            plan={'source_id':sid,'source_sha256':pin,'source_revision':source['revision'],
+                  'source_model':source['model'],'source_sources':copy.deepcopy(source['sources']),
+                  'request':copy.deepcopy(data),'turns':copy.deepcopy(turns),
+                  'next_index':0,'completed':0,'active_turn':None,'released':False,'modified':False,'initialized':False,
+                  'excluded_pending_count':extracted['excluded_pending_count']}
+            creation=dict(research_mode='live',output_mode='agent',initial_request='Saved conversation replay',
+                          model=data['model'],max_calls=data['max_calls'],max_tokens=data['max_tokens'],seed=source.get('seed',1),client_id=client)
+            # Freeze all selected bytes first, but release only the current turn
+            # into supplied-files. Future text/old answers stay out of prompts.
+            target=self._folder(target_id)
+            if target.exists():raise LabError('重測目的資料夾已存在，請重新建立操作。')
+            try:
+                result=self.create(creation,_replay=plan)
+                s=self._load(target_id)
+                (target/'replay-source').mkdir(mode=0o700)
+                for turn in s['replay']['turns']:
+                    turn['inputs']=playground_replay.clone_input_files(self._folder(sid),target/'replay-source',turn['inputs'])
+                s['replay']['initialized']=True;s.update(status='ready',notice='')
+                self._save(s)
+            except Exception:
+                # Only this newly allocated, never-dispatched session is removed.
+                if target.exists():shutil.rmtree(target)
+                raise
+            return result
+
+    def _replay_view(self,s):
+        r=s.get('replay')
+        if not r:return None
+        total=len(r['turns'])
+        return {k:r[k] for k in ('source_id','source_sha256','source_model','modified','completed','excluded_pending_count')} | {
+            'total':total,'remaining':total-r['next_index'],'next_turn':r['next_index']+1 if r['next_index']<total else None}
+
+    def _replay_comparison(self,s):
+        if not s.get('replay'):return []
+        answers={m['replay_turn']:m for m in s['messages'] if m['role']=='assistant' and 'replay_turn' in m}
+        return [{'index':t['index'],'user_text':'\n\n'.join(i['text'] for i in t['inputs']),
+                 'attachment_count':sum(len(i.get('attachments',[])) for i in t['inputs']),
+                 'original_reply':t['original_reply'],'new_reply':answers.get(t['index'],{}).get('display_text',answers.get(t['index'],{}).get('text','')),
+                 'source_call_id':t.get('source_call_id'),'new_call_id':answers.get(t['index'],{}).get('call_id'),
+                 'status':'complete' if t['index'] in answers else 'pending'} for t in s['replay']['turns']]
+
+    def _release_replay_turn(self,s):
+        r=s['replay'];turn=r['turns'][r['next_index']]
+        if not r.get('initialized'):raise LabError('這份重測尚未完成建立；沒有啟動模型。')
+        if r['released']:return
+        r['active_turn']=turn['index'];s['preparing_input']='replay-%03d'%turn['index'];self._save(s)
+        try:inputs=playground_replay.clone_input_files(self._folder(s['id'])/'replay-source',self._folder(s['id']),turn['inputs'])
+        except ValueError as error:raise LabError(str(error)) from error
+        store=self._store(s)
+        for offset,item in enumerate(inputs):
+            raw=item['text'] or item.get('attachment_only_default') or '請先查看我提供的附件。'
+            rid='replay-%03d-input-%03d'%(turn['index'],offset+1)
+            prior=store.show()['requests'].get(rid)
+            if prior is None:event(store,'request.capture',id=rid,text=raw,source='saved-human-replay:'+s['replay']['source_id'])
+            elif prior['text']!=raw:raise LabError('已保存的重測輸入不一致。')
+            ordered=[body for role,body in s['history'] if role=='user']+[raw]
+            if store.show()['requirements']['live-user-inputs']['value']!=ordered:
+                event(store,'requirement.update',id='live-user-inputs',changes={'value':ordered},provenance=dict(provenance(raw,rid),request_id=rid))
+            if store.show()['requests'][rid]['status']=='pending':event(store,'request.resolve',id=rid,resolution='applied',note='Fixed historical human input released at its original turn; not fresh feedback on the new answer.')
+            message=dict(role='human',text=item['text'],kind=item['kind'],replay_turn=turn['index'])
+            if not item['text']:message['attachment_only_default']=raw
+            if item.get('attachments'):
+                message['attachments']=copy.deepcopy(item['attachments'])
+                s.setdefault('attachments',{}).update({f['id']:f for f in item['attachments']})
+            s['messages'].append(message);s['history'].append(['user',raw])
+            if item['kind']=='amendment':s['amendments'].append(raw)
+        r['released']=True;s['preparing_input']=None;s['persona_turn']+=1;s['next_actor']='assistant';self._save(s)
 
     def snapshot(self, sid):
         with self.lock:
@@ -438,7 +543,7 @@ class Lab:
             compatible=s['sources']==current_sources and self.runtime_sources==current_sources
             if self.runtime_sources!=current_sources:
                 notice=('程式已更新；既有紀錄仍可閱讀或匯出，請等待測試台重新啟動。 '+notice).strip()
-            elif not compatible: notice=('這是舊版保存的對話；可以閱讀或匯出，請建立新對話測試新版。 '+notice).strip()
+            elif not compatible: notice=('這是舊版保存的對話；可閱讀、匯出，或用「用新版重測」沿用你的問題。 '+notice).strip()
             if s['amendments'] and not live: notice=('此情境已被你的條件變更修改，不再是原始 benchmark。 '+notice).strip()
             gate=self._current_gate(s) if s.get('live_gate_version')==1 else None
             messages=copy.deepcopy(s['messages'])
@@ -448,10 +553,11 @@ class Lab:
                         message['comparison_status']='current' if gate['status']=='current' and message['acceptance_id']==s['current_acceptance'] else 'historical'
                 if gate['status']=='invalid':notice=('來源或核對紀錄已變更；目前比較暫停使用。 '+notice).strip()
             output_mode=s.get('output_mode','checked' if live else 'persona')
-            return {'id':sid,'revision':s['revision'],'persona_id':s['card'].get('id'),'name':('Agent 對話測試' if output_mode=='agent' else '真實找房研究') if live else s['card']['name'],
+            return {'id':sid,'revision':s['revision'],'persona_id':s['card'].get('id'),'name':('重測 · '+s['model']+' · '+sid[:6]) if s.get('replay') else ('Agent 對話測試' if output_mode=='agent' else '真實找房研究') if live else s['card']['name'],
               'research_mode':mode,'output_mode':output_mode,'capability_status':CAPABILITIES['agent' if output_mode=='agent' else mode],'next_actor':s['next_actor'],
               'model':s['model'],'status':s['status'],'auto':s['auto'],'busy':self.busy==sid,'notice':notice,'compatible':compatible,
               'runtime_settings':copy.deepcopy(s.get('runtime_settings')),
+              'replay':self._replay_view(s),'replay_comparison':self._replay_comparison(s),
               'phase_label':('Codex 正在回答' if phase=='assistant' else 'Persona 正在想下一個問題') if self.busy==sid else '',
               'persona_turn':s['persona_turn'],'patience_turns':s['card'].get('patience_turns'),'calls':len(s['calls']),
               'tokens':tokens,'limits':s['limits'],'actor_calls':{role:sum(r['actor']==role for r in s['calls']) for role in ('assistant','persona')},
@@ -479,6 +585,7 @@ class Lab:
                     'messages':s['messages'],'pending_messages':s['queue'],'actions':s['actions'],'calls':s['calls'],
                     'controller':s['controller'],'amendments':s['amendments'],'interventions':s['interventions'],'sources':s['sources'],
                     'runtime_settings':s.get('runtime_settings'),
+                    'replay':copy.deepcopy(s.get('replay')),'replay_comparison':self._replay_comparison(s),
                     'comparison_status':gate['status'] if gate else 'unavailable',
                     'current_comparison':gate['artifact'] if gate and gate['status']=='current' and s['sources']==source_hashes() else None,
                     'history_note':('Actual model replies for evaluation; not host-authored or automatically validated comparisons.' if s.get('output_mode')=='agent' else 'Earlier messages and raw call proposals are retained historical evidence, not the current recommendation. Use current_comparison only when present.'),
@@ -494,10 +601,12 @@ class Lab:
         metadata['configured_effort']='low'
         metadata['quality']='not_evaluated'
         metadata['private']=True
+        metadata['replay']=self._replay_view(s)
         metadata['telemetry_note']='Completed-call observations; no live partial trace or billing price is inferred.'
         result=playground_review.build_call(folder,s,call_id) if call_id else playground_review.build_index(folder,s)
         result['session']=metadata
         if packet:
+            result['replay_comparison']=self._replay_comparison(s)
             result['messages']=s['messages']
             result['interventions']=s['interventions']
             result['amendments']=s['amendments']
@@ -569,6 +678,8 @@ class Lab:
                             queued['clarification_origin']={'acceptance_id':s['current_acceptance'],'question':question['question']}
                             break
             s['queue'].append(queued);s['pause_requested']=False
+            if s.get('replay'):
+                s['replay']['modified']=True;s['auto']=False
             if s.get('live_gate_version')==1:
                 # The saved inbox invalidates publication immediately, including
                 # ordinary questions that contain a changed condition.
@@ -599,8 +710,9 @@ class Lab:
                 self._action(s,'recovered_without_model_call',{'call_id':pending['id']});self._save(s);return {'ok':True}
             if s['pending_call'] or s['status'] in ('error','interrupted','ended','budget'): raise LabError('這段對話已停止；請查看原因。')
             if s.get('research_mode')=='live':
-                if action=='run': raise LabError('真人研究由你的訊息推進，不會自動產生 persona。')
-                if not s['queue'] and s['next_actor'] is None: raise LabError('請先送出下一個實際問題。')
+                remaining=s.get('replay') and s['replay']['next_index']<len(s['replay']['turns'])
+                if action=='run' and not s.get('replay'): raise LabError('真人研究由你的訊息推進，不會自動產生 persona。')
+                if not s['queue'] and s['next_actor'] is None and not remaining: raise LabError('請先送出下一個實際問題。')
             if self.runtime_sources!=source_hashes():raise LabError('程式已更新，請等待測試台重新啟動。')
             if s['sources']!=source_hashes():raise LabError('這是舊版保存的對話；請建立新對話測試新版。')
             self._action(s,action,{});self._save(s);self._start(sid,auto=action=='run');return {'ok':True}
@@ -649,11 +761,16 @@ class Lab:
         if self.runtime_sources!=source_hashes():raise LabError('程式已更新，請等待測試台重新啟動。')
         if s['sources']!=source_hashes(): raise LabError('實作已更新。這段紀錄保持原樣，請建立新對話使用新版。')
         live=s.get('research_mode')=='live'
-        if live and not s['queue'] and s['next_actor'] is None:
+        replay_ready=s.get('replay') and s['replay']['next_index']<len(s['replay']['turns'])
+        if live and not s['queue'] and s['next_actor'] is None and not replay_ready:
             s.update(status='paused',auto=False);return None
         store=self._store(s);budget=store.show()['budgets']['tokens']
         if len(s['calls'])>=s['limits']['max_calls'] or budget['spent']>=s['limits']['max_tokens'] or budget['unknown_spend']:
             s.update(status='budget',auto=False,notice='已到達呼叫／token 上限，或有未確認用量。沒有啟動下一則。');return None
+        replay_turn=None
+        if replay_ready and not s['queue']:
+            self._release_replay_turn(s)
+            replay_turn=s['replay']['active_turn']
         if s['queue'] and s.get('live_gate_version')==1:
             raw=self._prepare_live_inputs(s);actor='assistant';origin='human'
         elif s['queue']:
@@ -684,7 +801,9 @@ class Lab:
                 s.setdefault('attachments',{}).update({x['id']:x for x in item['attachments']})
             if 'original_text' in item:message['attachment_only_default']=raw
             s['messages'].append(message);s['history'].append(['user',raw]);s['interventions'].append(copy.deepcopy(message))
-        elif live:actor='assistant';origin='human';raw=s['history'][0][1]
+        elif live:
+            actor='assistant';origin='human'
+            raw='\n\n'.join(i['text'] or i.get('attachment_only_default') or '請先查看我提供的附件。' for i in s['replay']['turns'][s['replay']['next_index']]['inputs']) if replay_turn is not None else s['history'][0][1]
         else:actor=s['next_actor'];origin='persona';raw=s['card']['opening_message'] if actor=='assistant' and len(s['history'])==1 else None
         c=None if live else self._control(s)
         if actor=='persona':
@@ -727,6 +846,7 @@ class Lab:
         if len(prompt)>160000:raise LabError('完整對話超出本輪 160,000 字元容量；已停止，未裁切。')
         call_id='call-%03d-%s'%(len(s['calls'])+1,actor)
         s['pending_call']={'id':call_id,'actor':actor,'origin':origin,'turn':turn,'started_at':time.time()}
+        if replay_turn is not None:s['pending_call']['replay_turn']=replay_turn
         if s.get('attachments'):s['pending_call']['input_files']=self._call_files(s)
         if s.get('live_gate_version')==1:
             s['pending_call'].update(intent_epoch=s['intent_epoch'],input_sha256=_digest(self._live_inputs(s)))
@@ -988,9 +1108,14 @@ class Lab:
             if s.get('reply_format')=='choices-v1':message.update(display_text=reply['message'],questions=questions)
             if s.get('live_gate_version')==1:message['acceptance_id']=pending['id']
             message['call_id']=pending['id']
+            if 'replay_turn' in pending:message['replay_turn']=pending['replay_turn']
             s['messages'].append(message);s['history'].append(['assistant',answer])
             if live:
-                s.update(next_actor=None,auto=False)
+                s['next_actor']=None
+                if 'replay_turn' in pending:
+                    r=s['replay'];r['next_index']+=1;r['completed']+=1;r.update(active_turn=None,released=False)
+                    if r['next_index']>=len(r['turns']):s.update(auto=False,notice='原有問題已重測完畢，可在對照中檢閱結果或繼續追問。')
+                else:s['auto']=False
             elif pending['origin']=='human':
                 s['interventions'].append({'role':'assistant_to_tester','text':answer})
                 if s['stop_reason']:s.update(status='ended',auto=False)
@@ -1084,6 +1209,8 @@ class Handler(BaseHTTPRequestHandler):
             lab=self.server.lab
             if self.path=='/api/catalog':return self._send(200,lab.catalog())
             if self.path=='/api/sessions':return self._send(200,lab.list())
+            match=re.fullmatch(r'/api/session/([a-f0-9]{32})/replay',self.path)
+            if match:return self._send(200,lab.replay(match[1]))
             match=re.fullmatch(r'/api/session/([a-f0-9]{32})/(inspect|reviews|review-packet)(?:/([A-Za-z0-9][A-Za-z0-9_-]{0,79}))?',self.path)
             if match:
                 sid,kind,call_id=match.groups()
@@ -1106,9 +1233,10 @@ class Handler(BaseHTTPRequestHandler):
             if not isinstance(body,dict):raise LabError('請求必須是 JSON object。')
             if self.path=='/api/attachments':return self._send(200,lab.upload(body))
             if self.path=='/api/sessions':return self._send(200,lab.create(body))
-            match=re.fullmatch(r'/api/session/([a-f0-9]{32})/(message|control|reviews|review-export)',self.path)
+            match=re.fullmatch(r'/api/session/([a-f0-9]{32})/(message|control|reviews|review-export|replay)',self.path)
             if not match:return self._send(404,{'message':'找不到這個操作。'})
             if match[2]=='reviews':return self._send(200,lab.reviews(match[1],body))
+            if match[2]=='replay':return self._send(200,lab.replay(match[1],body))
             if match[2]=='review-export':return self._send(200,lab.review_export(match[1],body))
             return self._send(200,lab.message(match[1],body) if match[2]=='message' else lab.control(match[1],body))
         except (LabError,ValueError,TypeError,RecursionError) as e:self._send(400,{'message':str(e) if isinstance(e,LabError) else '請求格式無效。'})

@@ -68,3 +68,7 @@ Persona 的 END 也可能代表沒耐心，因此畫面寫「Persona 結束」�
 ## 2026-09-11 輸出測試修正
 
 這次只恢復可測實際回答的測試台，不繼續草稿保存或介面設計。此工具仍使用唯讀 Codex exec、low effort 與完整歷史 replay；模型可按需讀取完整 skill 包，但不測原生 host 的檔案寫入、同 turn steering 或其他模型。它不等於 Codex、Grok、Claude Code 的跨 host 驗收。最新操作與 smoke 證據見 [輸出測試結果](agent-output-platform-2026-09-11.md)。
+
+## 重測已打過的對話
+
+選取已保存的真人對話，按「用新版重測」即可沿用原問題與附件，改選模型並使用目前的程式／skill 版本。建立時不花模型用量；可逐輪或連續執行，另存新回答並展開新舊對照。中途插話會停止自動重測。完整邊界與評估限制見 [重測指南](playground-replay-2026-09-11.md)。

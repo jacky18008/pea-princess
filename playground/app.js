@@ -2,6 +2,8 @@
 const $=id=>document.getElementById(id);
 let catalog=null, current=null, selected=null, lastRevision=null, polling=false, createIntent=null, actionIntent=null, creating=false;
 const choiceDrafts=new Map(), choiceIntents=new Map(), choiceSending=new Set(), messageSending=new Set();
+let replayPreview=null,replayLoading=false,replayCreating=false,replayPreviewRequest=0;
+const replayIntents=new Map(),replayComparisonOpen=new Map();
 // Drafts remain in memory only. Uploaded bytes never enter browser storage or exports.
 const initialDraft={attachments:[],path:""},messageDrafts=new Map(),messageIntents=new Map(),pickerTargets=new Map();
 const INITIAL_DRAFT="initial",MAX_ATTACHMENT_BYTES=25*1024*1024,MAX_ATTACHMENTS=6;
@@ -168,7 +170,7 @@ function limitNotice(s){
  return "";
 }
 function canCompose(s){return Boolean(s&&s.id===selected&&s.compatible!==false&&!limitNotice(s)&&!["error","interrupted","budget"].includes(s.status));}
-function canAdvance(s,action){return Boolean(s&&s.id===selected&&!s.busy&&s.compatible!==false&&!limitNotice(s)&&!["error","interrupted","ended","budget"].includes(s.status)&&(!isLive(s)||(action==="step"&&(s.next_actor||s.pending_count>0))));}
+function canAdvance(s,action){return Boolean(s&&s.id===selected&&!s.busy&&s.compatible!==false&&!limitNotice(s)&&!["error","interrupted","ended","budget"].includes(s.status)&&(!isLive(s)||(s.replay?.remaining>0)||(action==="step"&&(s.next_actor||s.pending_count>0))));}
 function syncComposer(){const blocked=!canCompose(current);$("message").disabled=blocked;$("amendment").disabled=blocked||isLive(current);$("send").disabled=blocked||messageSending.has(selected)||(selected&&attachmentPending(attachmentDraft(selected)));renderAttachmentDraft("message",selected);}
 function canChoose(s,index,id){return canCompose(s)&&s.id===id&&index===s.messages.length-1&&!s.busy&&!s.pending_count&&!choiceSending.has(`${id}:${index}`);}
 function clarificationForm(s,m,index){
@@ -196,7 +198,68 @@ function creationMode(){
  $("call-limit-note").textContent=(live?"":"包含回答與合成人物。")+"每次呼叫之間檢查上限，可能超出一則；不自動重試。思考強度固定 low。";
  if(!current&&!selected){$("session-label").textContent=modeNames[live?"live":"fixture"];$("title").textContent=live?"寫下需求，開始研究":"挑一個合成人物，開始測試";$("run").hidden=live;$("step").textContent=live?"研究並回覆":"下一步";$("capability-status").textContent=capabilityDefaults[live?"live":"fixture"];$("empty-title").textContent=live?"把選項查清楚，再一起決定":"觀察合成人物的多輪對話";$("empty-note").textContent=live?"從大致需求開始，逐步比較來源、費用與取捨。你可以隨時補充問題或修改條件。":"人物會追問、補充虛構材料，也可能失去耐心。你可以中途插話，觀察 Codex 如何接續。";$("turn-label").textContent=live?"真人輸入":"合成人物回合";}
 }
-function statusLabel(s){return isLive(s)&&s.status==="paused"?(s.next_actor||s.pending_count?"等待研究":"等待你的回覆"):statuses[s.status]||s.status;}
+function canPreviewReplay(){return Boolean(current?.id===selected&&isLive(current)&&!current.busy&&!current.pending_call&&catalog);}
+function replaySettings(){return {model:$("replay-model").value,max_calls:Number($("replay-max-calls").value),max_tokens:Number($("replay-max-tokens").value)};}
+function validReplaySettings(settings){return catalog?.models.includes(settings.model)&&Number.isInteger(settings.max_calls)&&settings.max_calls>=1&&settings.max_calls<=80&&Number.isInteger(settings.max_tokens)&&settings.max_tokens>=10000&&settings.max_tokens<=2000000;}
+function syncReplayControls(){
+ $("replay-open").hidden=!isLive(current);$("replay-open").disabled=!canPreviewReplay()||replayCreating||replayLoading;
+ const ready=replayPreview?.source_id===selected&&canPreviewReplay()&&!replayLoading&&!replayCreating;
+ const stale=ready&&current.revision!==replayPreview.source_revision;
+ $("replay-create").disabled=!ready||stale||!replayPreview.turn_count||!validReplaySettings(replaySettings());
+ for(const key of ["replay-model","replay-max-calls","replay-max-tokens"])$(key).disabled=!ready;
+ $("replay-reload").disabled=!canPreviewReplay()||replayLoading||replayCreating;$("replay-close").disabled=replayCreating;
+ if(stale){$("replay-error").textContent="原對話已更新，請重新預覽後建立重測。";$("replay-error").hidden=false;}
+}
+function closeReplayPreview(){replayPreviewRequest++;replayLoading=false;replayPreview=null;$("replay-setup").hidden=true;$("replay-preview-turns").replaceChildren();$("replay-error").hidden=true;syncReplayControls();}
+function replayInput(text,count){return node("p",text||((count||0)>0?`（僅附件，共 ${count} 份）`:"（空白輸入）"),"replay-input");}
+function replayAnswer(label,text,empty){const box=node("section",undefined,"replay-answer");box.append(node("h4",label));box.append(typeof text==="string"&&text?renderReply(text):node("p",empty,"fine"));return box;}
+async function openReplayPreview(){
+ if(!canPreviewReplay()||replayCreating||replayLoading)return;
+ const id=selected,request=++replayPreviewRequest;replayLoading=true;replayPreview=null;$("replay-setup").hidden=false;$("replay-preview-turns").replaceChildren();$("replay-preview-meta").textContent="正在讀取已完成的歷史回合…";$("replay-preview-note").textContent="";$("replay-error").hidden=true;syncReplayControls();
+ try{
+  const preview=await api(`/api/session/${id}/replay`);if(request!==replayPreviewRequest||selected!==id)return;
+  if(preview.source_id!==id||!Array.isArray(preview.turns)||typeof preview.source_sha256!=="string")throw Error("重測預覽不完整，請重新讀取。");
+  replayPreview=preview;
+  $("replay-model").replaceChildren(...catalog.models.map(model=>{const option=node("option",model);option.value=model;return option;}));
+  $("replay-model").value=catalog.models.includes($("model").value)?$("model").value:catalog.models[0];
+  $("replay-max-calls").value=$("max-calls").value;$("replay-max-tokens").value=$("max-tokens").value;
+  $("replay-preview-meta").textContent=`${preview.turn_count} 輪已完成的輸入與回答 · 原模型 ${preview.model}`+(preview.excluded_pending_count?` · ${preview.excluded_pending_count} 則未完成輸入未納入`:"");
+  $("replay-preview-note").textContent=typeof preview.note==="string"?preview.note:"";
+  preview.turns.forEach((turn,index)=>{const row=node("details",undefined,"replay-turn");row.append(node("summary",`第 ${index+1} 輪${turn.attachment_count?` · ${turn.attachment_count} 份附件`:""}`),replayInput(turn.user_text,turn.attachment_count),replayAnswer("原回答",turn.original_reply,"尚無原回答紀錄。"));$("replay-preview-turns").append(row);});
+ }catch(error){if(request===replayPreviewRequest&&selected===id){$("replay-preview-meta").textContent="未能讀取重測內容。";$("replay-error").textContent=error.message;$("replay-error").hidden=false;}}
+ finally{if(request===replayPreviewRequest){replayLoading=false;syncReplayControls();}}
+}
+async function createReplay(event){
+ event.preventDefault();const preview=replayPreview;if(!preview||preview.source_id!==selected||!canPreviewReplay()||replayLoading||replayCreating)return;
+ const settings=replaySettings();if(!validReplaySettings(settings)||!preview.turn_count){$("replay-error").textContent="請選擇模型與有效用量上限，並確認有可重測的回合。";$("replay-error").hidden=false;return;}
+ if(current.revision!==preview.source_revision){syncReplayControls();return;}
+ const data={source_sha256:preview.source_sha256,...settings},fingerprint=JSON.stringify([preview.source_id,data]);let intent=replayIntents.get(fingerprint);
+ if(!intent){intent={id:crypto.randomUUID()};replayIntents.set(fingerprint,intent);}replayCreating=true;$("replay-error").hidden=true;syncReplayControls();
+ try{
+  const result=await api(`/api/session/${preview.source_id}/replay`,{...data,client_id:intent.id});if(!result||typeof result.id!=="string"||!result.id)throw Error("尚未確認建立結果；請以相同設定再試一次。");
+  replayIntents.delete(fingerprint);
+  if(selected===preview.source_id&&replayPreview===preview)await select(result.id);else{await list();toast("重測已建立，可從已保存的對話開啟。");}
+ }catch(error){if(replayPreview===preview){$("replay-error").textContent=error.message;$("replay-error").hidden=false;}else toast(error.message);}
+ finally{replayCreating=false;syncReplayControls();}
+}
+function renderReplay(s){
+ syncReplayControls();const panel=$("replay-comparison"),body=$("replay-comparison-body"),replay=s.replay;panel.hidden=!replay;body.replaceChildren();if(!replay)return;
+ $("replay-comparison-summary").textContent=`重測對照 · ${replay.completed}/${replay.total} 輪`;
+ $("replay-progress").textContent=replay.remaining>0?`已完成 ${replay.completed} 輪，剩下 ${replay.remaining} 輪。`:`${replay.total} 輪重測已完成。`;
+ $("replay-context-note").textContent=(replay.modified?"你已加入新訊息；這段重測包含後續修改，繼續歷史回合需按下一輪或連續重測。":"使用固定歷史輸入重測；這些輸入不是對新回答的即時反饋。")+" 原回答僅供對照，不會交給新模型；公開資料可能已改變。";
+ $("replay-origin").disabled=!replay.source_id;$("replay-origin").onclick=()=>select(replay.source_id);
+ $("step").textContent=replay.remaining>0?"重測下一輪":"研究並回覆";$("run").hidden=false;$("run").textContent="連續重測";
+ $("turn-label").textContent="已重測回合";$("turn").textContent=`${replay.completed}/${replay.total}`;
+ $("queue-note").textContent="可補充新問題；送出會標記此輪重測已修改，並暫停後續歷史回合。";
+ for(const [position,turn] of (s.replay_comparison||[]).entries()){
+  const key=`${s.id}:${turn.index??position}`,row=node("details",undefined,"replay-turn"),answers=node("div",undefined,"replay-answers");
+  const status=typeof turn.new_reply==="string"&&turn.new_reply?"已回覆":({running:"進行中",pending:"等待重測",error:"未完成",failed:"未完成",interrupted:"待恢復"}[turn.status]||"等待重測");
+  row.open=replayComparisonOpen.get(key)||false;row.ontoggle=()=>replayComparisonOpen.set(key,row.open);
+  row.append(node("summary",`第 ${position+1} 輪 · ${status}`),replayInput(turn.user_text,turn.attachment_count));
+  answers.append(replayAnswer("原回答",turn.original_reply,"尚無原回答紀錄。"),replayAnswer("本次回答",turn.new_reply,status));row.append(answers);body.append(row);
+ }
+}
+function statusLabel(s){if(s.replay&&["ready","paused","ended"].includes(s.status))return s.replay.remaining>0?"等待重測":"重測已完成";return isLive(s)&&s.status==="paused"?(s.next_actor||s.pending_count?"等待研究":"等待你的回覆"):statuses[s.status]||s.status;}
 function currentChecks(s){
  const panel=$("current-checks"), body=$("current-checks-body"), a=s.current_comparison;
  if(!panel||!body)return;
@@ -209,19 +272,22 @@ function currentChecks(s){
  if(a.presentation?.todos?.length){body.append(node("h3","目前待辦"));const list=node("ul");for(const text of a.presentation.todos)list.append(node("li",text));body.append(list);}
 }
 async function list(){const rows=await api("/api/sessions");$("sessions").replaceChildren();for(const s of rows.sessions){const b=node("button",s.name,"session-card"+(s.id===selected?" active":""));b.append(node("small",`${isLive(s)?"真實研究":"合成測試"} · ${statusLabel(s)} · ${s.calls} calls · ${s.tokens===null?"用量未知":s.tokens.toLocaleString()+" tokens"}`));b.onclick=()=>select(s.id);$("sessions").append(b);}}
-async function select(id){saveComposerDraft();selected=id;lastRevision=null;current=null;restoreComposerDraft();syncComposer();$("title").textContent="正在讀取這段對話…";$("messages").replaceChildren();if($("current-checks"))$("current-checks").hidden=true;if($("current-checks-body"))$("current-checks-body").replaceChildren();for(const key of ["step","run","pause","send","message","amendment","export"])$(key).disabled=true;try{localStorage.setItem("pea-lab-session",id);}catch(_){}await refresh();await list();}
+async function select(id){saveComposerDraft();selected=id;lastRevision=null;current=null;closeReplayPreview();$("replay-comparison").hidden=true;$("replay-comparison").open=false;$("replay-comparison-body").replaceChildren();restoreComposerDraft();syncComposer();$("title").textContent="正在讀取這段對話…";$("messages").replaceChildren();if($("current-checks"))$("current-checks").hidden=true;if($("current-checks-body"))$("current-checks-body").replaceChildren();for(const key of ["step","run","pause","send","message","amendment","export"])$(key).disabled=true;try{localStorage.setItem("pea-lab-session",id);}catch(_){}await refresh();await list();}
 function render(s){current=s;globalThis.PeaReview?.sessionUpdated(s);currentChecks(s);const live=isLive(s);$("title").textContent=s.name;$("session-label").textContent=live?`${s.output_mode==="agent"?"Agent 對話測試":"真實找房研究"} · ${s.model}`:`合成人物測試 · 虛構資料 · ${s.persona_id} · ${s.model}`;$("status").textContent=statusLabel(s);$("phase").textContent=s.phase_label||"";$("turn-label").textContent=live?"真人輸入":"合成人物回合";$("turn").textContent=live?String(s.persona_turn):`${s.persona_turn}/${s.patience_turns}`;$("calls").textContent=`${s.calls}/${s.limits.max_calls}`;const knownTokens=Number.isFinite(s.tokens);$("tokens").textContent=knownTokens?s.tokens.toLocaleString():(s.busy||s.pending_call?"計算中":"用量未知");$("usage-bar").hidden=!knownTokens;$("usage-bar").style.width=knownTokens?`${Math.max(0,Math.min(100,100*s.tokens/s.limits.max_tokens))}%`:"";$("usage-note").textContent=`上限 ${s.limits.max_tokens.toLocaleString()} · 回答 ${s.actor_calls.assistant} 次`+(live?"":`／合成人物 ${s.actor_calls.persona} 次`);
- const capNotice=limitNotice(s);$("step").textContent=live?"研究並回覆":"下一步";$("step").disabled=!canAdvance(s,"step");$("run").hidden=live;$("run").disabled=!canAdvance(s,"run");$("pause").disabled=!s.busy&&!s.auto;$("export").disabled=false;$("recover").hidden=!(s.pending_call&&!s.busy);$("message-label").textContent=live?"繼續討論":"加入這段對話";$("amendment-label").hidden=live;$("send").textContent=live?"送出並研究 ↑":"插入問題 ↑";syncComposer();$("banner").hidden=!(capNotice||s.notice);$("banner").textContent=[capNotice,s.notice].filter(Boolean).join("\n");$("queue-note").textContent=live?(s.pending_count?`${s.pending_count} 則問題已保存，會依序研究並回覆。`:"送出後繼續研究；研究途中也能補充需求。"):(s.pending_count?`${s.pending_count} 則插話已保存，將於目前這則完成後優先回答。`:"插話會保存，於目前這則完成後優先回答。");
+ const capNotice=limitNotice(s);$("step").textContent=live?"研究並回覆":"下一步";$("step").disabled=!canAdvance(s,"step");$("run").hidden=live;$("run").textContent="連續對話";$("run").disabled=!canAdvance(s,"run");$("pause").disabled=!s.busy&&!s.auto;$("export").disabled=false;$("recover").hidden=!(s.pending_call&&!s.busy);$("message-label").textContent=live?"繼續討論":"加入這段對話";$("amendment-label").hidden=live;$("send").textContent=live?"送出並研究 ↑":"插入問題 ↑";syncComposer();$("banner").hidden=!(capNotice||s.notice);$("banner").textContent=[capNotice,s.notice].filter(Boolean).join("\n");$("queue-note").textContent=live?(s.pending_count?`${s.pending_count} 則問題已保存，會依序研究並回覆。`:"送出後繼續研究；研究途中也能補充需求。"):(s.pending_count?`${s.pending_count} 則插話已保存，將於目前這則完成後優先回答。`:"插話會保存，於目前這則完成後優先回答。");
  $("capability-status").textContent=typeof s.capability_status==="string"&&s.capability_status?s.capability_status:capabilityDefaults[live?"live":"fixture"];
  $("fixture-observations").hidden=live;$("criteria").replaceChildren(...s.criteria.map(x=>node("li",x)));$("behavior-title").textContent=live?"研究進度":"行為與補件";
  if(live){$("behavior").replaceChildren(node("p",capNotice?"已達用量上限，可閱讀與匯出已保存的內容。":s.compatible===false?"這段紀錄目前只能閱讀與匯出。":["error","interrupted","budget"].includes(s.status)?"研究尚未完成，請查看上方狀態。":s.busy?"正在研究你的問題。":s.next_actor||s.pending_count?"需求已保存，可以開始研究。":"回答已保存，等你補充問題或調整條件。"));}
  else{$("behavior").replaceChildren(node("p",`情緒：${s.mood} · 尚可 ${Math.max(0,s.patience_turns-s.persona_turn)} 回合`),node("p",`合成人物持有 ${s.held_documents.length} 份文件`));for(const e of s.events.slice(-7))$("behavior").append(node("div",`第 ${e[0]} 回合 · ${e[1]}`,"event"));}
  $("mode-limit-note").textContent=live?(s.output_mode==="agent"?"這裡顯示模型原始回答供測試；不代表已通過房源條件核對。完整輸入、回答、工具紀錄與用量保存在本機。":"研究結果應附來源連結與查詢時間，並區分刊登資訊、推估及尚未確認的可租狀態。"):"合成人物的後續訊息由 Codex 產生，使用分開的歷史。測試僅使用所提供的虛構材料，沒有即時查詢；不代表真實在租房源。";
  const box=$("messages"), nearBottom=box.scrollHeight-box.scrollTop-box.clientHeight<180;box.replaceChildren();s.messages.forEach((m,index)=>{const article=node("article",undefined,`message ${m.role}`);article.append(node("div",m.role==="assistant"?"Codex":m.role==="human"?(live?"你":m.kind==="amendment"?"你 · 情境變更":"你 · 插話"):m.role==="persona"?`${s.name} · 合成人物`:"紀錄","speaker"));if(m.pending)article.firstChild.append(node("small","已保存・排隊中"));if(m.comparison_status==="historical")article.append(node("small","先前的比較；目前條件或來源已更新。","fine"));article.append(renderReply(m.display_text??m.text));if(Array.isArray(m.attachments)&&m.attachments.length)article.append(renderMessageAttachments(m.attachments));if(m.questions?.length)article.append(clarificationForm(s,m,index));box.append(article);});if(s.busy){const pending=node("article",undefined,"message system");pending.append(node("div",s.phase_label+"…","bubble"));box.append(pending);}if(nearBottom||lastRevision===null)box.scrollTop=box.scrollHeight;
+ renderReplay(s);
 }
 async function refresh(){if(!selected||polling)return;polling=true;try{const requestedId=selected;const s=await api(`/api/session/${requestedId}`);if(selected!==requestedId)return;if(s.revision!==lastRevision||s.compatible!==current?.compatible||s.comparison_status!==current?.comparison_status||s.notice!==current?.notice){render(s);lastRevision=s.revision;}}catch(e){toast(e.message);}finally{polling=false;}}
 async function action(action){if(["step","run"].includes(action)&&!canAdvance(current,action)){if(limitNotice(current))toast(limitNotice(current));return;}try{const id=selected,fingerprint=JSON.stringify([id,action]);if(!actionIntent||actionIntent.fingerprint!==fingerprint)actionIntent={fingerprint,id:crypto.randomUUID()};const intent=actionIntent;await api(`/api/session/${id}/control`,{action,client_id:intent.id});if(actionIntent===intent)actionIntent=null;await refresh();await list();}catch(e){toast(e.message);}}
 $("persona").onchange=()=>{profile();creationMode();};$("research-mode").onchange=creationMode;$("initial-request").oninput=creationMode;$("refresh").onclick=()=>list().catch(e=>toast(e.message));$("step").onclick=()=>action("step");$("run").onclick=()=>action("run");$("pause").onclick=()=>action("pause");$("recover").onclick=()=>action("recover");
+$("replay-open").onclick=openReplayPreview;$("replay-reload").onclick=openReplayPreview;$("replay-close").onclick=()=>{if(!replayCreating)closeReplayPreview();};$("replay-form").onsubmit=createReplay;
+for(const key of ["replay-model","replay-max-calls","replay-max-tokens"]){$(key).oninput=syncReplayControls;$(key).onchange=syncReplayControls;}
 wireAttachments("initial","live-setup");wireAttachments("message","composer");
 $("message").oninput=saveComposerDraft;$("amendment").onchange=saveComposerDraft;
 $("create").onclick=async()=>{

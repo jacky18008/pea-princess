@@ -22,7 +22,7 @@ ROOT = Path(__file__).resolve().parents[1]
 GENERATED = 'dist/prompt-pack/INSTRUCTIONS.md'
 REQUIRED = (
     'tools/persona_playground.py', 'tools/session_runner.py',
-    'tools/conversation_reply.py', 'tools/public_source_snapshot.py', 'tools/playground_review.py', 'tools/playground_attachments.py',
+    'tools/conversation_reply.py', 'tools/public_source_snapshot.py', 'tools/playground_review.py', 'tools/playground_attachments.py', 'tools/playground_replay.py',
     'bench/personas.py', 'bench/journeys.py', 'bench/durable_run.py',
     'bench/call_control.py', 'bench/launch.py',
     'skills/vet-flat/SKILL.md', 'skills/vet-flat/scripts/session_state.py',
