@@ -131,11 +131,29 @@ def transcript(history, limit=14000):
     return out
 
 
-def answer_prompt(history, message):
+def case_date(corpus, case_id, turn="ask"):
+    """The calendar date of the message being answered, from the case's JSON sidecar: the reaction's own
+    timestamp for the reaction turn, else the last prefix record's (the target follows it by minutes).
+    None when the sidecar or the timestamps are missing."""
+    path = os.path.join(corpus, "cases", case_id + ".json")
+    try:
+        d = json.load(io.open(path, encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    ts = (d.get("reaction") or {}).get("timestamp") if turn == "reaction" else None
+    if not ts:
+        stamps = [x.get("timestamp") for x in (d.get("prefix") or []) if x.get("timestamp")]
+        ts = stamps[-1] if stamps else None
+    return ts[:10] if ts else None
+
+
+def answer_prompt(history, message, today=None):
+    date_line = (("今天是 %s（對話最新一則訊息的日期），不要用執行當天的日期" % today) if today
+                 else "對話的日期以對話裡提到的為準，不要用執行當天的日期")
     return ("用 pea-princess 技能。以下是你和使用者先前的對話紀錄（2026 年 8 到 9 月初，倫敦找房，原文）。"
             "請接著回覆最後一則使用者訊息，用使用者的語言；房源網站的頁面由使用者提供，不要自己去讀。"
-            "對話的日期以對話裡提到的為準，不要用執行當天的日期；沒有狀態檔就以上文為帳本，不要向使用者談環境、技能清單、工具權限或檔案。\n\n"
-            "=== 先前對話 ===\n%s\n\n=== 最新訊息 ===\n%s" % (transcript(history), message))
+            "%s；沒有狀態檔就以上文為帳本，不要向使用者談環境、技能清單、工具權限或檔案。\n\n"
+            "=== 先前對話 ===\n%s\n\n=== 最新訊息 ===\n%s" % (date_line, transcript(history), message))
 
 
 # ------------------------------------------------------------------ runner --
@@ -498,7 +516,8 @@ def run_case(args, case_id, out_dir):
     seq = parse_case(case_path(corpus, case_id))
     history, message, hist_answer, reaction = split_case(seq, args.turn)
     focus = case_focus(corpus, case_id)
-    prompt = answer_prompt(history, message)
+    today = case_date(os.path.abspath(args.corpus or DEFAULT_CORPUS), case_id, args.turn) if getattr(args, "inject_date", False) else None
+    prompt = answer_prompt(history, message, today)
     ans = run_answer(args.agent, args.model, args.depth, prompt, args.timeout, args.skill_dir)
     raw = os.path.join(out_dir, "raw", "%s-%s-%s-%s-%s.jsonl" % (case_id, args.turn, args.agent, (args.model or "default").replace("/", "_"), args.depth))
     os.makedirs(os.path.dirname(raw), exist_ok=True)
@@ -508,7 +527,7 @@ def run_case(args, case_id, out_dir):
     if ans["reply"].strip() and not args.no_judge:
         verdict = judge({"focus": focus, "tail": transcript(history[-4:], 3000), "message": message[:3000],
                          "history_answer": hist_answer[:7000], "reaction": reaction[:2000], "new_answer": ans["reply"][:9000]})
-    row = {"case": case_id, "turn": args.turn, "focus": focus, "agent": args.agent, "model": args.model, "depth": args.depth, "label": args.label,
+    row = {"case": case_id, "turn": args.turn, "focus": focus, "agent": args.agent, "model": args.model, "depth": args.depth, "label": args.label, "today": today,
            "started": datetime.datetime.utcnow().isoformat() + "Z", "message_chars": len(message), "history_blocks": len(history),
            "answer": ans, "judge": verdict}
     with io.open(os.path.join(out_dir, "rows.jsonl"), "a", encoding="utf-8") as fh:
@@ -585,6 +604,8 @@ def main():
     ap.add_argument("--retry-failed", default=None, help="results folder: re-run every configuration row that failed (API error, empty, non-zero exit); new rows are appended")
     ap.add_argument("--rejudge-limit", type=int, default=None)
     ap.add_argument("--calibrate", default=None, help="results folder: judge the ORIGINAL answers blind and compare with the real reactions")
+    ap.add_argument("--inject-date", action="store_true",
+                    help="tell the answerer the date of the message it answers (from the case's JSON sidecar); the reviews found models using the run date otherwise")
     ap.add_argument("--judge-profile", action="store_true", help="give the judge the person's standing preferences (their own rules, not any reaction)")
     args = ap.parse_args()
     if args.report:

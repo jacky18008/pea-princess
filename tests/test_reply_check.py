@@ -68,6 +68,31 @@ class TestOpening(unittest.TestCase):
         self.assertEqual([], RC.scan("橋接不是額外成本：那一週你付的是週租，不是長租的房租。"))
 
 
+class TestReviewAdditions(unittest.TestCase):
+    """From the Opus and Codex terra checkpoint reviews (2026-09-11)."""
+
+    def test_machine_paths_and_file_urls(self):
+        found = RC.scan("報告存在 /private/var/folders/ab/T/report.html，打開看。")
+        self.assertIn("paths", kinds(found))
+        self.assertIn("paths", kinds(RC.scan("see file:///Users/me/Desktop/x.html")))
+        self.assertEqual([], [f for f in RC.scan("報告的第一區是排序，第二區是這次改了什麼。") if f["kind"] == "paths"])
+
+    def test_third_person_address(self):
+        self.assertIn("address", kinds(RC.scan("使用者可以先看第一戶，這一戶的房租來自你給的頁面，其他兩戶下週再排，都以官方資料為準。")))
+        self.assertEqual([], [f for f in RC.scan("你可以先看第一戶，這一戶的房租來自你給的頁面。") if f["kind"] == "address"])
+
+    def test_codes_and_acronyms_need_an_explanation_in_the_sentence(self):
+        found = RC.scan("這一戶先 HOLD。")
+        self.assertEqual(["terms"], kinds(found)); self.assertIn("HOLD", found[0]["say"])
+        self.assertEqual([], [f for f in RC.scan("這一戶先保留（HOLD：等押金證明再決定）。") if f["kind"] == "terms"])
+        self.assertIn("terms", kinds(RC.scan("隔壁交了 CEMP，工程快開始了。")))
+        self.assertEqual([], [f for f in RC.scan("隔壁交了 CEMP（施工環境管理計畫，開工前的文件），工程快開始了。") if f["kind"] == "terms"])
+
+    def test_an_empty_claim_is_flagged_and_a_full_one_is_not(self):
+        self.assertIn("claims", kinds(RC.scan("排序已驗證。房租來自你給的頁面。")))
+        self.assertEqual([], [f for f in RC.scan("排序已核對：Anchor 從第 3 升到第 1，因為 Bale 的面積來自能源證書是 41 平方公尺。") if f["kind"] == "claims"])
+
+
 class TestCli(unittest.TestCase):
     def test_exit_code_and_json(self):
         proc = subprocess.run([sys.executable, os.path.join(SCRIPTS, "reply_check.py"), "-", "--json"],

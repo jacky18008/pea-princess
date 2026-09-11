@@ -27,6 +27,16 @@ What it checks (2026-09-11, from the replay review of fifteen real cases):
             go-ahead (Go / gp / 都同意 / 繼續 / 照做 / continue / go ahead): execute and report.
   opening   the first sentence is praise or agreement (問得好, 你說得對, great question): open with
             the answer instead.
+  paths     a machine path or file URL in the body (/var/folders, /private/var, /tmp, file://, ~/):
+            the person cannot open it; say what the file contains instead.
+  address   the person is called "使用者" / "the user" in the body: say 你 / you.
+  terms     a board code (HOLD, CONDITIONAL, EDGE, NO-GO) or a planning/tenancy acronym (CEMP, CMP,
+            CLP, AQDMP, PRS, BTR, HMO, AST, EICR, TDS, DPS) with no plain explanation in the same
+            sentence: explain it once, in the person's language.
+  claims    "已驗證 / 已核對 / 已合併 / verified / confirmed" with nothing verifiable beside it
+            (no figure, quote, colon or name): say what was checked and what it showed.
+The 2026-09-11 checkpoint reviews of Opus and Codex terra on the same fifteen cases added the last
+four kinds (local paths, third person, unexplained codes, empty claims).
 Standard library only, Python 3.9.
 """
 from __future__ import unicode_literals
@@ -52,6 +62,13 @@ INTERNAL = re.compile(r"(fixed form|budget mode|money-gate|money gate|landmine|\
 QUESTION = re.compile(r"[?？]")
 PRAISE_OPENER = re.compile(r"^\s*[*_#>\-]*\s*(問得好|問得對|好問題|你說得對|你說的對|你的直覺是對的|說得好|這個問題很好|很好的問題|沒錯|對，|對的|"
                            r"great question|good question|you'?re right|you are right|that'?s a great|excellent question|fair point|absolutely)", re.I)
+MACHINE_PATH = re.compile(r"(/private/var/|/var/folders/|/tmp/|file://|(?<![\w.])~/[\w.-]+|/Users/[\w.-]+/)")
+THIRD_PERSON = re.compile(r"使用者|\bthe user\b", re.I)
+BOARD_CODE = re.compile(r"(?<![A-Za-z-])(HOLD|CONDITIONAL|EDGE|NO-GO|NOGO)(?![A-Za-z-])")
+ACRONYM = re.compile(r"(?<![A-Za-z])(CEMP|CMP|CLP|AQDMP|PRS|BTR|HMO|AST|EICR|TDS|DPS|CMP)(?![A-Za-z])")
+EXPLAINED = re.compile(r"[（(][^）)]{2,60}[）)]|[：:]|即|也就是|指的是|意思是|means|i\.e\.|that is")
+EMPTY_CLAIM = re.compile(r"(已(?:經)?(?:驗證|核對|確認|合併|更新|交代|寫進|寫入|記錄|同步)|\b(?:verified|confirmed|reconciled|merged)\b)", re.I)
+CONTENT_CUE = re.compile(r"[：:「」“”\d£%]|→|改前|改後|from .* to ")
 GO_AHEAD = re.compile(r"(?i)\b(go|gp|continue|go ahead|do it|proceed|yes)\b|都同意|同意|繼續|照做|照這樣|去做|開始吧|可以|好，?做|沒問題")
 SIMPLIFIED = set("这说们时间对问题见车电东门长结应该认为与从发产权让还进过现经国单号计设层楼费钱价买卖办处务实际总条约签订视听讲话语书录读写点线区块图机关开风气热体验检证据确识质数议论选择优标备参决则规围绕码头脑岁维护积极响")
 
@@ -85,6 +102,19 @@ def scan(text, previous=None):
     first = (text or "").strip()
     if PRAISE_OPENER.search(first):
         findings.append({"kind": "opening", "fragment": first[:60], "say": "開頭是稱讚或附和；第一句要直接給答案、洞見或取捨。"})
+    for m in MACHINE_PATH.finditer(text or ""):
+        findings.append({"kind": "paths", "fragment": text[max(0, m.start() - 10):m.end() + 30].strip(), "say": "機器路徑或檔案網址，使用者打不開；寫出檔案裡有什麼。"})
+    body_has_chinese = len(re.findall(r"[一-鿿]", text or "")) > 20
+    for m in THIRD_PERSON.finditer(text or ""):
+        if body_has_chinese or m.group(0).lower() == "the user":
+            findings.append({"kind": "address", "fragment": text[max(0, m.start() - 12):m.end() + 12].strip(), "say": "正文用第三人稱叫對方；改成「你」。"})
+            break
+    for sent in re.split(r"(?<=[。.!?！？\n])", text or ""):
+        codes = BOARD_CODE.findall(sent) + ACRONYM.findall(sent)
+        if codes and not EXPLAINED.search(sent):
+            findings.append({"kind": "terms", "fragment": sent.strip()[:120], "say": "代號或縮寫沒解釋：%s。同一句用白話說它是什麼。" % "、".join(sorted(set(codes)))})
+        if EMPTY_CLAIM.search(sent) and not CONTENT_CUE.search(sent):
+            findings.append({"kind": "claims", "fragment": sent.strip()[:120], "say": "說已經驗證／合併／更新，卻沒附內容；寫出查了什麼、結果是什麼。"})
     q = len(QUESTION.findall(text or ""))
     if q > 3:
         findings.append({"kind": "asking", "fragment": "%d 個問號" % q, "say": "問題超過三個；留下會改變下一步的那幾個，其餘用預設。"})
