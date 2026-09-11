@@ -18,7 +18,7 @@ This axis catches what the other eleven miss, because none of them are about dai
 1. `python3 scripts/geo.py nearby "<postcode>" --radius 400` and `python3 scripts/roads.py near --lat <lat> --lng <lng> --radius 400` — the nearest food shop, launderette, pharmacy and the walking distance to each.
 2. `python3 scripts/commute.py journey` — whether the daily route is direct or needs changes (a direct route beats a route that saves five minutes with a change).
 3. Reviews (paste mode, axis 6) — search for lifts, parcels, laundry and heating complaints.
-4. `python3 scripts/living_env.py lookup --postcode "<postcode>"` — the neighbourhood's living-environment deciles (official, open). Context for the comparison, never a filter.
+4. `python3 scripts/living_env.py lookup --postcode "<postcode>"` — the neighbourhood's living-environment deciles (official, open). Context for the comparison, never a filter. (`scripts/area_scan.py` includes this with roads, crime and works in one call.)
 
 ## Method in fetch mode
 Mapping and journey data only. Everything about the inside of the flat comes from the listing or the viewing.

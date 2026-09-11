@@ -221,7 +221,7 @@
       "section": "Intro",
       "sha256": "684ddb383e6b2c28e7594b262babcea083e3e20a7a06f22801ff8bc540d2b9b4",
       "source": "docs/EXPERIMENTS.md",
-      "source_sha256": "3ba72d6b478b5ac67b3e5e6372e5caf4021c54e7da38a0474c1c29b6170742d4",
+      "source_sha256": "4b52d09468af7c5bfef60185c28e67fec907b149b48591900a465d292412ba0b",
       "text": "This page exists so you can choose with evidence instead of vibes. Fifteen configurations of the\nsame skill were run against the same five real London flats, and every report was scored against a\ngold set of problems a human had already found in those flats by reading the documents.",
       "writable": true
     },
@@ -236,7 +236,7 @@
       "section": "Intro",
       "sha256": "836df6bb2982af0e5d061fbe8cf10308252100158938dd392a66e26a9e3a53d6",
       "source": "docs/EXPERIMENTS.md",
-      "source_sha256": "3ba72d6b478b5ac67b3e5e6372e5caf4021c54e7da38a0474c1c29b6170742d4",
+      "source_sha256": "4b52d09468af7c5bfef60185c28e67fec907b149b48591900a465d292412ba0b",
       "text": "**The public default is: a cheap model for the extraction workers, the strongest model you have for\nthe judgment.** On Anthropic that is Sonnet-class workers with an Opus-class judge; on OpenAI, the\nmid or small GPT-5.6 model as worker with Sol as judge. The numbers below are here so you can pick\nsomething else, and so you can see what that choice costs you.",
       "writable": true
     },
@@ -251,7 +251,7 @@
       "section": "What it means",
       "sha256": "d7cd0c645dcdfcb07b5bc321828fbdacdacb38ee1e0b9645010a11379c762e5e",
       "source": "docs/EXPERIMENTS.md",
-      "source_sha256": "3ba72d6b478b5ac67b3e5e6372e5caf4021c54e7da38a0474c1c29b6170742d4",
+      "source_sha256": "4b52d09468af7c5bfef60185c28e67fec907b149b48591900a465d292412ba0b",
       "text": "- **Scripts instead of raw web pages cost nothing and save most of the bill.** The clean one-factor\n  pair is `B-lean` against `B-raw`: 0.57 recall for $6.70 against 0.58 for $11.70. Identical\n  finding rate, 1.7× the money for the raw pages, and the raw arm's spread is much wider (0.20–0.80\n  against 0.40–0.78) because a page that loads differently changes the whole run. The big gap\n  between `A-legacy` (0.87) and `B-lean` (0.57) is real, but it is not the data path — `A-legacy`\n  also runs one reader per axis. That is the next bullet. On the OpenAI side raw pages did appear to\n  help (`codex-A-raw-sol` 0.52 against `codex-B-lean-sol` 0.30), but that arm timed out on two of\n  five flats, so it is the least trustworthy row in either table.",
       "writable": true
     },
@@ -266,7 +266,7 @@
       "section": "What it means",
       "sha256": "e7df1d0bedcd933d688b762c29872306d6ffca3aec45c25c1e152461671537e1",
       "source": "docs/EXPERIMENTS.md",
-      "source_sha256": "3ba72d6b478b5ac67b3e5e6372e5caf4021c54e7da38a0474c1c29b6170742d4",
+      "source_sha256": "4b52d09468af7c5bfef60185c28e67fec907b149b48591900a465d292412ba0b",
       "text": "- **Breadth is what finds landmines, and breadth is what you pay for.** The two arms that give each\n  axis its own reader are the top two: `A-legacy` at 0.87 and `B-readers-sonnet` at 0.69, against\n  0.57 for the default. `B-readers-sonnet` also has the highest precision in the Claude table\n  (0.96) and the lowest share of unknown axes among the script arms (17% against 29%). It costs\n  1.4× the default and 2.2× the wall time; `A-legacy` costs 4.7× and 2.0×. Nothing else in either\n  table buys recall the way a second pair of eyes on each axis does.",
       "writable": true
     },
@@ -281,7 +281,7 @@
       "section": "What it means",
       "sha256": "f7b358a299e6f809f01f88b376171f1d0cf8520b65b07b606afafeb8e2de2444",
       "source": "docs/EXPERIMENTS.md",
-      "source_sha256": "3ba72d6b478b5ac67b3e5e6372e5caf4021c54e7da38a0474c1c29b6170742d4",
+      "source_sha256": "4b52d09468af7c5bfef60185c28e67fec907b149b48591900a465d292412ba0b",
       "text": "- **The worker model does not matter; the judge model matters a little.** Swapping the extraction\n  workers from Sonnet to Opus moved recall from 0.57 to 0.63 — inside the noise band — while the\n  worker eval says Sonnet is 15/15 against Opus's 14/15 at 42% of the cost. The main model, which\n  is the one doing the judging, does move things: Opus 0.71, CLI default 0.57, Sonnet 0.46. Each\n  single step is at or inside the noise floor, but the direction is consistent and the ends are\n  0.25 apart. Hence the default: cheap where the work is copying a number out of a document, strong\n  where the work is deciding what it means.",
       "writable": true
     },
@@ -296,7 +296,7 @@
       "section": "What it means",
       "sha256": "3b758e2df3e308c0213d12752c6779e22193fd298fa5326fa986fc5e931e9071",
       "source": "docs/EXPERIMENTS.md",
-      "source_sha256": "3ba72d6b478b5ac67b3e5e6372e5caf4021c54e7da38a0474c1c29b6170742d4",
+      "source_sha256": "4b52d09468af7c5bfef60185c28e67fec907b149b48591900a465d292412ba0b",
       "text": "- **Budget mode matters more than model size.** `lite` on the strongest main model (`B-lite`, 0.38)\n  scores below `standard` on the weakest (`B-main-sonnet`, 0.46), for half the money and 40% of the\n  time. The same holds on the OpenAI side, harder: the smallest model in `standard` mode\n  (`codex-D-luna-standard`, 0.46) beats the biggest model in `lite` (`codex-C-sol-lite`, 0.13) by\n  more than three times. If you have to economise, cut axes, not depth.",
       "writable": true
     },
@@ -311,7 +311,7 @@
       "section": "What it means",
       "sha256": "8484c15947030d4ed0548ba1046ea4363d66a074a8f8617344ddd49036c8113f",
       "source": "docs/EXPERIMENTS.md",
-      "source_sha256": "3ba72d6b478b5ac67b3e5e6372e5caf4021c54e7da38a0474c1c29b6170742d4",
+      "source_sha256": "4b52d09468af7c5bfef60185c28e67fec907b149b48591900a465d292412ba0b",
       "text": "- **Cheap configurations invent numbers.** Fabrications per run climb from 0.30 on the default to\n  2.00 on `B-lite` and 2.33 on `C-twenty` — and the cheapest arms' precision stays high, which\n  means the invented numbers sit inside findings that otherwise look right. This is why the skill\n  makes `scripts/calc.py` do the arithmetic and prints its formula, and why the report contract has\n  no place to put a number without a source: `null` and an honest \"not known\" are always available,\n  and the grader counts a guess as a fabrication, not as a near miss.",
       "writable": true
     },

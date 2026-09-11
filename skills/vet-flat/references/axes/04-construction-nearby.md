@@ -15,7 +15,7 @@ For any development begun after about 2010, the first question is: is the scheme
 
 ## Method in shell mode
 1. `python3 scripts/geo.py lookup "<postcode>"` for coordinates.
-2. `python3 scripts/planning.py near --lat <lat> --lng <lng> --radius 250` — applications within the standard radius from the London-wide index.
+2. `python3 scripts/planning.py near --lat <lat> --lng <lng> --radius 250 --brief` — the nearest applications within the standard radius, ten fields each (`scripts/area_scan.py` already includes the nearest five); drop `--brief` only for one application's full record.
 3. `python3 scripts/planning.py search --site-name "<building or neighbour site>"` — by name, and by street when the name fails.
 4. `python3 scripts/planning.py stages --ref "<application reference>"` — decision date, conditions, and which conditions have been discharged.
 5. `python3 scripts/planning.py planit --postcode "<pc>" --radius-km 0.3` — a second index, queried by postcode and radius (a free-text site-name search there matches only the description field and will return nothing).

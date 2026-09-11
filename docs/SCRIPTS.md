@@ -1318,3 +1318,19 @@ ceiling and what it covers, home type, move-in window, priorities, deal-breakers
 the person's own questions, then the list of what is still unknown. Blank in the profile shows as
 "not yet known". Only those keys reach the page. The assistant's summary and next steps go in the
 box at the top. Contract: `references/requirements-contract.md`.
+
+## `area_scan.py` — one call for "is this street quiet, safe, and is anything being built?" (open registers, no key)
+```
+area_scan.py --postcode "N6 5QD"
+area_scan.py --lat 51.5732 --lng -0.1462 [--months 6] [--crime-half-m 150] [--planning-radius 250] [--roads-radius 300]
+```
+Runs the four register scripts the skill already has — police crime in a ~300 m box over six
+months, GLA planning applications within 250 m (nearest five, short fields), OpenStreetMap roads,
+rail, night economy and parks within 300 m, the 2025 living-environment deciles — and prints one
+JSON of about 5,000 characters with a fixed shape (`vet-flat/area-scan/1`): `where`, `quiet`,
+`crime`, `works`, `living_environment`, `reading` (four plain sentences plus the "area, not the
+flat" caveat), `sources`, `not_found`. A failed register is listed, never guessed. Measured on
+2026-09-11: the same question answered by free web research cost one host 815,000 tokens in a
+single turn; this call is about 1,600 tokens to read. Needs a postcode (from the listing, the EPC
+or the person) or a point; an outcode centroid is not a street.
+

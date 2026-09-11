@@ -1,6 +1,8 @@
 # Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen — https://github.com/jacky18008/pea-princess — CC BY 4.0
 #
 # Every source the axis files use. Per-borough planning, committee and licensing pages live in boroughs.yaml.
+# For people and tests, not for the model to read at run time: the scripts carry their own sources, and
+# reading this file costs about ten thousand tokens without answering any question about a flat.
 #
 # Field guide
 #   official            true if a public body, a statutory register or legislation publishes it
