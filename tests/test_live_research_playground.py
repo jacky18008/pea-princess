@@ -243,6 +243,8 @@ class CodexTransportTests(unittest.TestCase):
                 folder=Path(tmp).resolve();seen=[]
                 def start(command,**kwargs):
                     seen.append(command)
+                    self.assertEqual(str(Path(kwargs['cwd'])/'.pea-cache'),kwargs['env']['VETFLAT_CACHE'])
+                    self.assertEqual('1',kwargs['env']['PYTHONDONTWRITEBYTECODE'])
                     answer=command[command.index('--output-last-message')+1]
                     code='import sys,json;sys.stdin.read();open(sys.argv[1],"w").write("answer");print(json.dumps({"type":"item.completed","item":{"type":"agent_message","text":"Visible progress."}}));print(json.dumps({"type":"turn.completed","usage":{"input_tokens":15,"output_tokens":5,"cached_input_tokens":0}}))'
                     return subprocess.Popen([sys.executable,'-c',code,answer],**kwargs)
@@ -252,6 +254,8 @@ class CodexTransportTests(unittest.TestCase):
                     result=p.codex_invoke(request,folder)
                 command=seen[0]
                 self.assertIn('web_search="'+expected+'"',command)
+                self.assertEqual('workspace-write' if policy=='live_research' else 'read-only',command[command.index('--sandbox')+1])
+                self.assertEqual(policy=='live_research','sandbox_workspace_write.network_access=true' in command)
                 self.assertIn('skip_host_skill_discovery',command)
                 self.assertTrue(any(arg.startswith('skills.config=') and 'enabled=false' in arg for arg in command))
                 self.assertEqual(['--','-'],command[-2:]);self.assertNotIn('private stdin text',command)

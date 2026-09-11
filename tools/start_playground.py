@@ -17,12 +17,13 @@ import subprocess
 import sys
 import time
 import uuid
+import playground_skill
 
 ROOT = Path(__file__).resolve().parents[1]
 GENERATED = 'dist/prompt-pack/INSTRUCTIONS.md'
 REQUIRED = (
     'tools/persona_playground.py', 'tools/session_runner.py',
-    'tools/conversation_reply.py', 'tools/public_source_snapshot.py', 'tools/playground_review.py', 'tools/playground_attachments.py', 'tools/playground_replay.py',
+    'tools/conversation_reply.py', 'tools/public_source_snapshot.py', 'tools/playground_review.py', 'tools/playground_attachments.py', 'tools/playground_replay.py', 'tools/playground_skill.py',
     'bench/personas.py', 'bench/journeys.py', 'bench/durable_run.py',
     'bench/call_control.py', 'bench/launch.py',
     'skills/vet-flat/SKILL.md', 'skills/vet-flat/scripts/session_state.py',
@@ -113,7 +114,16 @@ def private_directory(path):
     return path
 
 
-def freeze(root=ROOT, state_dir=None):
+def remove_staging(path):
+    # Published public-skill directories are read-only. A failed unpublished
+    # snapshot remains ours to remove, without following any directory symlinks.
+    for folder, dirs, _ in os.walk(path, followlinks=False):
+        if not Path(folder).is_symlink():
+            Path(folder).chmod(0o700)
+    shutil.rmtree(path, ignore_errors=True)
+
+
+def freeze(root=ROOT, state_dir=None, skill_archive=None):
     """Copy current bytes once, verify their stability, then publish a snapshot."""
     root = Path(root).resolve()
     state_dir = private_directory(state_dir if state_dir is not None else root / '.pea-playground')
@@ -125,6 +135,7 @@ def freeze(root=ROOT, state_dir=None):
     destination = runtime / snapshot_id
     staging.mkdir(mode=0o700)
     try:
+        public_bundle = playground_skill.load_archive(skill_archive if skill_archive is not None else root / 'dist/pea-princess-skill.zip')
         indexed = tracked(root)
         names = [name for name in indexed if regular(root, name)]
         # Existing generated prompt instructions are a required runtime input,
@@ -151,24 +162,35 @@ def freeze(root=ROOT, state_dir=None):
             body, observed = read_source(root, name)
             if observed != observations[name] or hashlib.sha256(body).hexdigest() != records[name]['sha256']:
                 raise FreezeError('Runtime file changed during freeze; restart when edits settle: ' + name)
+        public_skill = playground_skill.install_archive(public_bundle, staging)
+        playground_skill.verify_source(public_bundle)
+        for name, item in public_skill['files'].items():
+            records[public_skill['skill_path'] + '/' + name] = dict(item, origin='public-skill-archive')
+        records[public_skill['archive_path']] = {'sha256':public_skill['archive_sha256'],
+            'bytes':public_skill['archive_bytes'], 'origin':'selected-public-skill-archive'}
         head = subprocess.run(['git', '-C', str(root), 'rev-parse', 'HEAD'],
                               stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, check=False)
         manifest = {'schema_version': 1, 'snapshot_id': snapshot_id,
                     'source_root': str(root), 'state_dir': str(state_dir),
                     'created_at': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
                     'git_head': head.stdout.decode('ascii').strip() if head.returncode == 0 else None,
-                    'files': records,
-                    'note': 'Hashes describe current working bytes, including uncommitted tracked edits; Git HEAD alone does not identify this snapshot.'}
+                    'files': records, 'public_skill':public_skill,
+                    'note': 'Host hashes describe current working bytes, including uncommitted tracked edits. The actor skill is the exact separately retained public ZIP identified by public_skill; Git HEAD alone does not identify this snapshot.'}
         raw = json.dumps(manifest, ensure_ascii=False, sort_keys=True, indent=2).encode('utf-8') + b'\n'
         (staging / 'runtime-manifest.json').write_bytes(raw)
         (staging / 'runtime-manifest.json').chmod(0o400)
+        public_info = playground_skill.artifact_info(staging)
         staging.rename(destination)
+        public_info.update(path=str(destination / public_skill['skill_path']), archive_path=str(destination / public_skill['archive_path']))
         return {'snapshot_id': snapshot_id, 'snapshot': str(destination),
                 'manifest': str(destination / 'runtime-manifest.json'),
                 'manifest_sha256': hashlib.sha256(raw).hexdigest(),
-                'state_dir': str(state_dir), 'files': len(records)}
+                'state_dir': str(state_dir), 'files': len(records), 'public_skill':public_info}
+    except playground_skill.PublicSkillError as error:
+        remove_staging(staging)
+        raise FreezeError(str(error)) from error
     except BaseException:
-        shutil.rmtree(staging, ignore_errors=True)
+        remove_staging(staging)
         raise
 
 
@@ -181,13 +203,14 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--port', type=int, default=8765)
     parser.add_argument('--state-dir', type=Path, default=ROOT / '.pea-playground')
+    parser.add_argument('--skill-archive', type=Path, default=ROOT / 'dist/pea-princess-skill.zip', help='Exact public pea-princess ZIP to freeze; never rebuilt or replaced by development files.')
     parser.add_argument('--freeze-only', action='store_true', help='Print the snapshot receipt without starting a server.')
     args = parser.parse_args(argv)
     if not 1024 <= args.port <= 65535:
         parser.error('port must be 1024..65535')
     os.umask(0o077)
     try:
-        result = freeze(ROOT, args.state_dir)
+        result = freeze(ROOT, args.state_dir, args.skill_archive)
         result['url'] = 'http://127.0.0.1:' + str(args.port)
         print(json.dumps(result, ensure_ascii=False), flush=True)
         if not args.freeze_only:

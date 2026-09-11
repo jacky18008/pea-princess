@@ -6,6 +6,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+import zipfile
 from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -26,6 +27,15 @@ class LauncherTests(unittest.TestCase):
         self.git('add', '.')
         # Production prompt pack is ignored/untracked, and explicitly named.
         self.git('rm', '--cached', launcher.GENERATED)
+        self.archive = self.root / 'dist/pea-princess-skill.zip'
+        self.make_archive(self.archive)
+
+    def make_archive(self, path, text='Public packaged instructions.'):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with zipfile.ZipFile(path, 'w', zipfile.ZIP_DEFLATED) as archive:
+            archive.writestr('pea-princess/SKILL.md', '---\nname: pea-princess\n---\n' + text)
+            archive.writestr('pea-princess/scripts/public_only.py', 'PUBLIC_VERSION = 1\n')
+            archive.writestr('pea-princess/viewer/viewer.html', '<p>Packaged public viewer</p>')
 
     def git(self, *args):
         result = subprocess.run(['git', '-C', str(self.root), *args],
@@ -55,6 +65,15 @@ class LauncherTests(unittest.TestCase):
         self.assertEqual('generated-runtime-input', manifest['files'][launcher.GENERATED]['origin'])
         self.assertTrue((snapshot / 'evals/personas/fixtures/P1/listing.txt').is_file())
         self.assertEqual(self.root / '.pea-playground', Path(result['state_dir']))
+        public = snapshot / 'skills/pea-princess'
+        self.assertIn('Public packaged instructions.', (public / 'SKILL.md').read_text())
+        self.assertNotIn('Uncommitted current skill.', (public / 'SKILL.md').read_text())
+        self.assertTrue((public / 'viewer/viewer.html').is_file())
+        self.assertEqual(self.archive.read_bytes(), (snapshot / launcher.playground_skill.ARCHIVE_PATH).read_bytes())
+        self.assertEqual('public_zip', result['public_skill']['kind'])
+        self.assertEqual(3, manifest['public_skill']['file_count'])
+        self.assertEqual(hashlib.sha256(self.archive.read_bytes()).hexdigest(), result['public_skill']['sha256'])
+        self.assertEqual(public, launcher.playground_skill.skill_root(snapshot))
 
     def test_untracked_private_and_symlink_files_are_excluded(self):
         excluded = ('tools/untracked.py', 'tools/.env', 'bench/private/history.txt',
@@ -109,6 +128,32 @@ class LauncherTests(unittest.TestCase):
                           str(Path(result['snapshot']) / 'tools/persona_playground.py'),
                           '--state-dir', str(self.root / '.pea-playground'), '--port', '8765'], command)
         self.assertFalse((Path(result['snapshot']) / '.pea-playground').exists())
+
+    def test_explicit_public_archive_is_used_without_rebuilding_default(self):
+        default_before = self.archive.read_bytes()
+        selected = self.root / 'selected release.zip'
+        self.make_archive(selected, text='Explicit selected release.')
+        result = launcher.freeze(self.root, skill_archive=selected)
+        snapshot = Path(result['snapshot'])
+        self.assertIn('Explicit selected release.', (snapshot / 'skills/pea-princess/SKILL.md').read_text())
+        self.assertEqual(default_before, self.archive.read_bytes())
+        self.assertEqual(selected.read_bytes(), (snapshot / launcher.playground_skill.ARCHIVE_PATH).read_bytes())
+
+    def test_missing_or_changing_public_archive_fails_without_publishing(self):
+        self.archive.unlink()
+        with self.assertRaises(launcher.FreezeError):
+            launcher.freeze(self.root)
+        self.assertEqual([], list((self.root / '.pea-playground/runtime').iterdir()))
+        self.make_archive(self.archive)
+        original = launcher.playground_skill.install_archive
+        def changing(bundle, root):
+            result = original(bundle, root)
+            self.make_archive(self.archive, text='Changed during freeze.')
+            return result
+        with mock.patch.object(launcher.playground_skill, 'install_archive', side_effect=changing):
+            with self.assertRaisesRegex(launcher.FreezeError, 'changed during freeze'):
+                launcher.freeze(self.root)
+        self.assertEqual([], list((self.root / '.pea-playground/runtime').iterdir()))
 
 
 if __name__ == '__main__':
