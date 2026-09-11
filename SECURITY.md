@@ -79,7 +79,7 @@ edits. Untracked files are excluded. Credential/runtime names and source symlink
 or excluded, but no filename filter can identify secrets accidentally written into ordinary code
 or documentation. Inspect the archive list and scan tracked content as part of review.
 
-Public deliverables are `dist/vet-flat-skill.zip` and `dist/prompt-pack/`, with their public
+Public deliverables are `dist/pea-princess-skill.zip` and `dist/prompt-pack/`, with their public
 checksums. Do not upload the whole `dist/` directory: it may also contain a deliberately private
 A/B handoff archive. `tools/build_ab_package.py` includes private gold by design and creates a
 private archive; filesystem permissions are not encryption. Backups and raw results stay local

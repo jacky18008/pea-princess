@@ -163,7 +163,8 @@ class ConversationNativeTests(unittest.TestCase):
             'permissions.pea_native_minimal.network.enabled=false',
             'shell_environment_policy.inherit="none"',
             'shell_environment_policy.set={PATH="/Library/Developer/CommandLineTools/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin"}',
-            'skills.config=[{path=' + json.dumps(str(synthetic_home / '.agents/skills/vet-flat')) + ',enabled=false}]',
+            'skills.config=[' + ','.join('{path=' + json.dumps(str(synthetic_home / '.agents/skills' / name))
+                                       + ',enabled=false}' for name in ('pea-princess', 'vet-flat')) + ']',
             'model_reasoning_effort="low"', 'project_doc_max_bytes=0',
         ]
         folder = self.folder()

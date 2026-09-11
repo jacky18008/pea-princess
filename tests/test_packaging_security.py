@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 import stat
 import subprocess
+import sys
 import tarfile
 import tempfile
 import unittest
@@ -31,7 +32,7 @@ class PackageBoundary(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.root = Path(self.temp.name).resolve()
         subprocess.run(['git', 'init', '-q', str(self.root)], check=True)
-        self.write('skills/vet-flat/SKILL.md', '---\nname: vet-flat\n---\nTest skill\n')
+        self.write('skills/vet-flat/SKILL.md', '---\nname: pea-princess\n---\nTest skill\n')
         self.write('skills/vet-flat/references/inputs.md',
                    '## Rules for asking\nAsk once.\n## What to ask for\nInputs.\n')
         self.write('skills/vet-flat/references/report-contract.md',
@@ -63,8 +64,33 @@ class PackageBoundary(unittest.TestCase):
     def public_build(self):
         with contextlib.redirect_stdout(io.StringIO()):
             DIST.main()
-        with zipfile.ZipFile(self.root / 'dist/vet-flat-skill.zip') as archive:
+        with zipfile.ZipFile(self.root / 'dist/pea-princess-skill.zip') as archive:
             return {name: archive.read(name) for name in archive.namelist()}
+
+    def test_canonical_package_extracts_one_discoverable_working_skill(self):
+        files = self.public_build()
+        self.assertEqual({'pea-princess'}, {name.split('/')[0] for name in files})
+        self.assertEqual(['pea-princess/SKILL.md'],
+                         [name for name in files if name.endswith('/SKILL.md')])
+        installed = self.root / 'installed-skills'
+        with zipfile.ZipFile(self.root / 'dist/pea-princess-skill.zip') as archive:
+            archive.extractall(installed)
+        skill = installed / 'pea-princess'
+        self.assertIn('name: pea-princess', (skill / 'SKILL.md').read_text())
+        self.assertTrue((skill / 'references/inputs.md').is_file())
+        self.assertTrue((skill / 'viewer/viewer.html').is_file())
+        output = subprocess.check_output(
+            [sys.executable, str(skill / 'scripts/calc.py')], cwd=installed, text=True)
+        self.assertEqual('1', output.strip())
+
+    def test_identity_mismatch_refused_without_replacing_release(self):
+        self.public_build()
+        output = self.root / 'dist/pea-princess-skill.zip'
+        before = output.read_bytes()
+        self.write('skills/vet-flat/SKILL.md', '---\nname: vet-flat\n---\nOld identity\n')
+        with self.assertRaisesRegex(ValueError, 'frontmatter name must be pea-princess'):
+            self.public_build()
+        self.assertEqual(before, output.read_bytes())
 
     def test_public_excludes_untracked_notes_and_even_tracked_credentials(self):
         self.write('skills/vet-flat/references/private-notes.md', 'PRIVATE_SENTINEL')
@@ -73,8 +99,8 @@ class PackageBoundary(unittest.TestCase):
         subprocess.run(['git', '-C', str(self.root), 'add', '-f', 'skills/vet-flat/scripts/.env',
                         'skills/vet-flat/profile.yaml'], check=True)
         files = self.public_build()
-        self.assertIn('vet-flat/scripts/calc.py', files)
-        self.assertIn('vet-flat/viewer/viewer.html', files)
+        self.assertIn('pea-princess/scripts/calc.py', files)
+        self.assertIn('pea-princess/viewer/viewer.html', files)
         self.assertNotIn(b'SECRET_SENTINEL', b''.join(files.values()))
         self.assertNotIn(b'PRIVATE_SENTINEL', b''.join(files.values()))
         pack = self.root / 'dist/prompt-pack'
@@ -83,14 +109,14 @@ class PackageBoundary(unittest.TestCase):
 
     def test_symlink_file_and_parent_refused_before_existing_release_changes(self):
         self.public_build()
-        before = (self.root / 'dist/vet-flat-skill.zip').read_bytes()
+        before = (self.root / 'dist/pea-princess-skill.zip').read_bytes()
         external = self.write('outside.txt', 'SECRET_SENTINEL')
         link = self.root / 'skills/vet-flat/references/link.txt'
         link.symlink_to(external)
         subprocess.run(['git', '-C', str(self.root), 'add', str(link)], check=True)
         with self.assertRaisesRegex(ValueError, 'symlink'):
             self.public_build()
-        self.assertEqual(before, (self.root / 'dist/vet-flat-skill.zip').read_bytes())
+        self.assertEqual(before, (self.root / 'dist/pea-princess-skill.zip').read_bytes())
         link.unlink()
         with self.assertRaisesRegex(ValueError, 'unsafe'):
             DIST.checked_file(str(self.root), '../outside.txt')
@@ -106,7 +132,7 @@ class PackageBoundary(unittest.TestCase):
         self.assertEqual('PRIVATE_SENTINEL', private.read_text())
         checksums = (self.root / 'dist/CHECKSUMS.txt').read_text()
         self.assertNotIn('private-handoff', checksums)
-        self.assertIn('vet-flat-skill.zip', checksums)
+        self.assertIn('pea-princess-skill.zip', checksums)
 
     def test_required_digest_cannot_be_silently_dropped_to_fit(self):
         with self.assertRaisesRegex(ValueError, 'cannot be dropped'):
@@ -144,7 +170,7 @@ class PackageBoundary(unittest.TestCase):
     def test_public_invalid_output_type_preserves_existing_prompt_pack(self):
         self.public_build()
         sentinel = self.write('dist/prompt-pack/sentinel.txt', 'KEEP')
-        output = self.root / 'dist/vet-flat-skill.zip'
+        output = self.root / 'dist/pea-princess-skill.zip'
         output.unlink()
         output.mkdir()
         with self.assertRaisesRegex(ValueError, 'regular file'):
@@ -157,7 +183,7 @@ class PackageBoundary(unittest.TestCase):
                   for p in (self.root / 'dist').rglob('*') if p.is_file()}
         original = os.replace
         def fail_new_zip(source, destination):
-            if Path(source).name == 'vet-flat-skill.zip' and Path(source).parent.name.startswith('.public-build-'):
+            if Path(source).name == 'pea-princess-skill.zip' and Path(source).parent.name.startswith('.public-build-'):
                 raise OSError('synthetic promotion failure')
             return original(source, destination)
         with mock.patch.object(DIST.os, 'replace', side_effect=fail_new_zip):

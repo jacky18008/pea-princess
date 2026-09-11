@@ -145,12 +145,14 @@ def _codex_invoke(request, folder):
     answer = _safe_file(work, "answer.txt")
     policy = _tool_policy(request.get("tool_policy", "text_only"))
     web_search = "live" if policy == "live_research" else "disabled"
-    disabled_skill = Path.home() / ".agents/skills/vet-flat"
+    disabled_skills = [Path.home() / ".agents/skills" / name
+                       for name in ("pea-princess", "vet-flat")]
     cmd = ["codex", "exec", "--ignore-user-config", "--ephemeral", "--cd", str(work),
            "--sandbox", "read-only", "--skip-git-repo-check", "--model", request["model"],
            "-c", 'model_reasoning_effort="low"', "-c", "web_search=" + json.dumps(web_search),
            "-c", "project_doc_max_bytes=0", "--enable", "skip_host_skill_discovery",
-           "-c", "skills.config=[{path=" + json.dumps(str(disabled_skill)) + ",enabled=false}]", "--json",
+           "-c", "skills.config=[" + ",".join("{path=" + json.dumps(str(path)) + ",enabled=false}"
+                                       for path in disabled_skills) + "]", "--json",
            "--output-last-message", str(answer), "--", request["prompt"]]
     if request.get("response_schema") is not None:
         _save(work, "reply-schema.json", request["response_schema"])

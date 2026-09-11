@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://github.com/jacky18008/pea-princess/blob/main/skills/vet-flat/references/report-schema.json",
-  "title": "vet-flat report",
-  "description": "Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen - https://github.com/jacky18008/pea-princess - CC BY 4.0. THIS FILE IS THE STANDARD, NOT THE HTML. Emit one JSON object that matches this schema and stop. Two renderers (scripts/render.py and viewer/viewer.html) turn it into the fixed page layout; never write the HTML yourself. PLAIN-LANGUAGE RULES FOR EVERY TEXT FIELD: (1) short sentences, one idea each; (2) no jargon and no abbreviation without a gloss in the same sentence - write 'EPC (the government energy certificate)' the first time; (3) every number is followed by what it means and what it is compared with - that is what the 'meaning' and 'compared_to' fields are for, and they are required; (4) show evidence as the plain label (official record / self-reported / third-party / inferred / unknown), never as a bare letter; (5) never mention ethnicity, nationality, race, religion or immigration status anywhere in this file, in any field, for any reason; (6) never invent a number - if you did not find it, leave the field null and add a not_found entry with the exact search string you used.",
+  "title": "Pea Princess report",
+  "description": "Part of Pea Princess by Hsien Hao (Jacky) Chen - https://github.com/jacky18008/pea-princess - CC BY 4.0. THIS FILE IS THE STANDARD, NOT THE HTML. Emit one JSON object that matches this schema and stop. Two renderers (scripts/render.py and viewer/viewer.html) turn it into the fixed page layout; never write the HTML yourself. PLAIN-LANGUAGE RULES FOR EVERY TEXT FIELD: (1) short sentences, one idea each; (2) no jargon and no abbreviation without a gloss in the same sentence - write 'EPC (the government energy certificate)' the first time; (3) every number is followed by what it means and what it is compared with - that is what the 'meaning' and 'compared_to' fields are for, and they are required; (4) show evidence as the plain label (official record / self-reported / third-party / inferred / unknown), never as a bare letter; (5) never mention ethnicity, nationality, race, religion or immigration status anywhere in this file, in any field, for any reason; (6) never invent a number - if you did not find it, leave the field null and add a not_found entry with the exact search string you used.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -75,7 +75,7 @@
     },
     "footer": {
       "type": "string",
-      "description": "Leave this out. The renderers write the attribution line themselves from generated_by.version and generated_by.source_url. If you do write it, write exactly: Generated with vet-flat <version> — https://github.com/jacky18008/pea-princess (the dash is an em dash).",
+      "description": "Leave this out. The renderers write the attribution line themselves from generated_by.version and generated_by.source_url. If you do write it, write exactly: Generated with pea-princess <version> — https://github.com/jacky18008/pea-princess (the dash is an em dash).",
       "maxLength": 200
     }
   },
@@ -195,7 +195,7 @@
       "properties": {
         "tool": {
           "type": "string",
-          "description": "Write the skill name that produced this report. Write \"vet-flat\" unless you forked it, and then write your fork's name.",
+          "description": "Write the skill name that produced this report. Write \"pea-princess\" unless you forked it, and then write your fork's name.",
           "minLength": 1,
           "maxLength": 60
         },

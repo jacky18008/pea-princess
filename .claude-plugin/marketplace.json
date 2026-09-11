@@ -5,7 +5,7 @@
   "version": "1.0.0-draft",
   "plugins": [
     {
-      "name": "vet-flat",
+      "name": "pea-princess",
       "source": "./",
       "description": "London rental flat due-diligence pipeline with plain-language verdicts",
       "version": "1.0.0-draft",

@@ -1,4 +1,4 @@
-Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen — https://github.com/jacky18008/pea-princess — CC BY 4.0
+Part of Pea Princess by Hsien Hao (Jacky) Chen — https://github.com/jacky18008/pea-princess — CC BY 4.0
 
 # The report contract
 
@@ -18,7 +18,7 @@ Start with what the user should do and the main reason. Keep execution settings 
 8. **The 12 checks in detail** with an evidence chip on each finding and an unknowns list.
 9. **Questions and the viewing day**: at most two killer questions drawn from `questions.md`, then the checks only the site can answer.
 10. **What only you can tell**: the axes marked unknown and the things the tool cannot sense (smell, noise at night, light on the day, how the street feels), phrased as a request, not a gap; the report's own asks go in `only_you_can_tell`, and leaving it out asks the four standard ones.
-11. **What we could not find**, with the search strings and the blocked sources; **sources** with retrieval times; the arithmetic check; **About this report** with the scope of checks in plain words and the footer `Generated with vet-flat <version> — <source URL>`.
+11. **What we could not find**, with the search strings and the blocked sources; **sources** with retrieval times; the arithmetic check; **About this report** with the scope of checks in plain words and the footer `Generated with pea-princess <version> — <source URL>`.
 
 ## The fixed form
 found = quote+source · asked = user said it · unknown = no quote, no number. How many: lite 8 · standard 14 · deep 18; `advanced.fixed_form` overrides. Gate (ask if missing): F1 deposit cap 5/6 weeks · F2 holding (1 wk) · F3 advance (see scope) · F4 tenancy/licence · F5 landlord · F6 deposit scheme · F7 redress+CMP · F8 council licence. Listing (if pasted): F9 area+source · F10 EPC letter · F11 bills · F12 min term · F13 break clause · F14 move-in. Extended: F15 tax band · F16 guarantor · F17 referencing · F18 furnished/inventory.

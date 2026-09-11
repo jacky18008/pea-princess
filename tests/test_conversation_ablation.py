@@ -47,11 +47,11 @@ class ConversationAblationTests(unittest.TestCase):
         (self.repo / runner.BASE / 'scenario.json').write_text(json.dumps(self.scenario))
         (self.repo / runner.BASE / 'rubric.json').write_text(json.dumps(self.rubric))
         (self.repo / runner.BASE / 'skill-outcome.md').write_text('OUTCOME_ENTRY_ONLY\n')
-        with zipfile.ZipFile(self.repo / 'dist/vet-flat-skill.zip', 'w') as archive:
-            archive.writestr('vet-flat/SKILL.md', 'BASELINE_ENTRY_ONLY\n')
-            archive.writestr('vet-flat/references/inputs.md', 'BULK_INPUT_GUIDANCE\n')
-            archive.writestr('vet-flat/references/onboarding.md', 'BULK_ONBOARDING_GUIDANCE\n')
-            archive.writestr('vet-flat/scripts/calc.py', '# deterministic test fixture\n')
+        with zipfile.ZipFile(self.repo / 'dist/pea-princess-skill.zip', 'w') as archive:
+            archive.writestr('pea-princess/SKILL.md', 'BASELINE_ENTRY_ONLY\n')
+            archive.writestr('pea-princess/references/inputs.md', 'BULK_INPUT_GUIDANCE\n')
+            archive.writestr('pea-princess/references/onboarding.md', 'BULK_ONBOARDING_GUIDANCE\n')
+            archive.writestr('pea-princess/scripts/calc.py', '# deterministic test fixture\n')
         self.root_patch = mock.patch.object(runner, 'ROOT', self.repo)
         self.root_patch.start()
         self.addCleanup(self.root_patch.stop)
@@ -477,8 +477,8 @@ class ConversationAblationTests(unittest.TestCase):
         self.assertNotIn('documents/README.md', outputs)
 
     def test_archive_path_traversal_rejected(self):
-        with zipfile.ZipFile(self.repo / 'dist/vet-flat-skill.zip', 'w') as archive:
-            archive.writestr('vet-flat/SKILL.md', 'entry')
+        with zipfile.ZipFile(self.repo / 'dist/pea-princess-skill.zip', 'w') as archive:
+            archive.writestr('pea-princess/SKILL.md', 'entry')
             archive.writestr('../escape.txt', 'escape')
         with self.assertRaises(ValueError):
             runner.public_skill()

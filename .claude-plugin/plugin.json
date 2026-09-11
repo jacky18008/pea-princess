@@ -1,5 +1,5 @@
 {
-  "name": "vet-flat",
+  "name": "pea-princess",
   "description": "London rental flat due-diligence pipeline (Pea Princess): identity, area, age, heating, construction, crime, reviews, compliance, price, light, cost, commute → plain-language verdict with evidence grades.",
   "version": "1.0.0-draft",
   "author": { "name": "Hsien Hao (Jacky) Chen" },

@@ -33,12 +33,12 @@ class ConversationResumeTests(unittest.TestCase):
         for name in current_runner.SOURCES:
             target = self.source / name
             target.parent.mkdir(parents=True, exist_ok=True)
-            if name != 'dist/vet-flat-skill.zip':
+            if name != 'dist/pea-princess-skill.zip':
                 shutil.copyfile(ROOT / name, target)
-        with zipfile.ZipFile(self.source / 'dist/vet-flat-skill.zip', 'w') as archive:
-            archive.writestr('vet-flat/SKILL.md', 'Synthetic public skill entry\n')
-            archive.writestr('vet-flat/references/inputs.md', 'Synthetic input guide\n')
-            archive.writestr('vet-flat/references/onboarding.md', 'Synthetic onboarding guide\n')
+        with zipfile.ZipFile(self.source / 'dist/pea-princess-skill.zip', 'w') as archive:
+            archive.writestr('pea-princess/SKILL.md', 'Synthetic public skill entry\n')
+            archive.writestr('pea-princess/references/inputs.md', 'Synthetic input guide\n')
+            archive.writestr('pea-princess/references/onboarding.md', 'Synthetic onboarding guide\n')
         self.original = operational._load_frozen(self.source)
         self.output = self.root / 'run'
         with mock.patch.object(self.original.subprocess, 'check_output', return_value='e' * 40 + '\n'):

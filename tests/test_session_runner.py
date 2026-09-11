@@ -200,8 +200,9 @@ class SessionRunnerTests(unittest.TestCase):
                     self.assertIn("--ignore-user-config", cmd)
                     self.assertEqual("read-only", cmd[cmd.index("--sandbox") + 1])
                     self.assertEqual("skip_host_skill_discovery", cmd[cmd.index("--enable") + 1])
-                    self.assertIn("skills.config=[{path=" + json.dumps(str(Path.home() / ".agents/skills/vet-flat"))
-                                  + ",enabled=false}]", configs)
+                    self.assertIn("skills.config=[" + ",".join(
+                        "{path=" + json.dumps(str(Path.home() / ".agents/skills" / name)) + ",enabled=false}"
+                        for name in ("pea-princess", "vet-flat")) + "]", configs)
                     self.assertEqual(("codex", 1), (family, attempts))
                     Path(cmd[cmd.index("--output-last-message") + 1]).write_text("Synthetic answer")
                     return runner.launch.LaunchResult(stdout=raw, exit_code=0)

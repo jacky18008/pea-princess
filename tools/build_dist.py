@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build distributables from the single source of truth (skills/vet-flat/).
 
-  python3 tools/build_dist.py            → dist/vet-flat-skill.zip  (zip root = vet-flat/)
+  python3 tools/build_dist.py            → dist/pea-princess-skill.zip  (zip root = pea-princess/)
                                          → dist/prompt-pack/        (INSTRUCTIONS.md + references)
                                          → dist/CHECKSUMS.txt
 Build from a Git checkout: only indexed source files are eligible. Runtime state,
@@ -27,6 +27,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SKILL = os.path.join(ROOT, "skills", "vet-flat")
 DIST = os.path.join(ROOT, "dist")
 LIMIT = 8000
+SKILL_NAME = "pea-princess"
+ARCHIVE_NAME = SKILL_NAME + "-skill.zip"
 
 
 DIGEST_SOURCES = [  # in priority order; short, high-value sections first
@@ -120,6 +122,11 @@ def main():
     for rel, _, _ in DIGEST_SOURCES:
         if os.path.exists(os.path.join(SKILL, rel)) and "skills/vet-flat/" + rel not in allowed:
             raise ValueError("manual digest source is not a reviewed tracked file: %s" % rel)
+    identity = Path(SKILL, "SKILL.md").read_text(encoding="utf-8")
+    frontmatter = re.match(r"^---\n(.*?)\n---(?:\n|$)", identity, re.S)
+    name = re.search(r"^name: *([^\n]+)$", frontmatter[1], re.M) if frontmatter else None
+    if not name or name[1].strip().strip("\"\'") != SKILL_NAME:
+        raise ValueError("public skill frontmatter name must be " + SKILL_NAME)
     body = compose_instructions()
     if len(body) > LIMIT:
         raise ValueError("INSTRUCTIONS.md exceeds %d characters" % LIMIT)
@@ -129,18 +136,18 @@ def main():
     pack_dest = os.path.join(DIST, "prompt-pack")
     if os.path.lexists(pack_dest) and (os.path.islink(pack_dest) or not os.path.isdir(pack_dest)):
         raise ValueError("prompt-pack must be a real directory")
-    for name in ("vet-flat-skill.zip", "CHECKSUMS.txt"):
+    for name in (ARCHIVE_NAME, "CHECKSUMS.txt"):
         target = Path(DIST, name)
         if target.is_symlink() or (target.exists() and not target.is_file()):
             raise ValueError("public output must be a regular file: %s" % name)
     with tempfile.TemporaryDirectory(prefix=".public-build-", dir=DIST) as stage:
-        zpath = os.path.join(stage, "vet-flat-skill.zip")
+        zpath = os.path.join(stage, ARCHIVE_NAME)
         pack = os.path.join(stage, "prompt-pack")
         os.makedirs(pack)
         with zipfile.ZipFile(zpath, "w", zipfile.ZIP_DEFLATED) as z:
             for full, rel in members:
-                inside = ("vet-flat/" + rel[len("skills/vet-flat/"):]
-                          if rel.startswith("skills/vet-flat/") else "vet-flat/" + rel)
+                inside = (SKILL_NAME + "/" + rel[len("skills/vet-flat/"):]
+                          if rel.startswith("skills/vet-flat/") else SKILL_NAME + "/" + rel)
                 z.write(full, inside)
                 short = rel[len("skills/vet-flat/"):] if rel.startswith("skills/vet-flat/") else rel
                 if short.startswith(("references/", "profiles/")) or short == "profile.template.yaml":
@@ -153,7 +160,7 @@ def main():
                 shutil.copyfile(full, target)
         Path(pack, "INSTRUCTIONS.md").write_text(body, encoding="utf-8")
         Path(pack, "README.txt").write_text(
-            "Pea Princess (vet-flat) prompt pack.\n"
+            "Pea Princess prompt pack.\n"
             "1. Paste INSTRUCTIONS.md into your chat product's project/system instructions.\n"
             "2. Attach the files in references/ (and your filled profile.template.yaml).\n"
             "3. Ask: 'Vet this flat: <address>, flat <n>'. The skill will list, once, what to paste.\n"
@@ -172,7 +179,7 @@ def main():
         previous.mkdir()
         saved, installed = [], []
         try:
-            for name in ("prompt-pack", "vet-flat-skill.zip", "CHECKSUMS.txt"):
+            for name in ("prompt-pack", ARCHIVE_NAME, "CHECKSUMS.txt"):
                 destination = Path(DIST, name)
                 if destination.exists():
                     os.replace(destination, previous / name)
@@ -190,7 +197,7 @@ def main():
                 os.replace(previous / name, Path(DIST, name))
             raise
     print("zip: %d bytes; INSTRUCTIONS.md: %d chars; files: %d" %
-          (os.path.getsize(os.path.join(DIST, "vet-flat-skill.zip")), len(body), len(lines)))
+          (os.path.getsize(os.path.join(DIST, ARCHIVE_NAME)), len(body), len(lines)))
 
 
 if __name__ == "__main__":

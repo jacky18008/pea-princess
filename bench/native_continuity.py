@@ -157,7 +157,9 @@ def prepare_session(session_dir, workdir, *, max_calls, model='gpt-6-astra',
             'model': model, 'effort': effort, 'timeout_seconds': timeout_seconds,
             'turn_ids': ['t%02d' % number for number in range(1, max_calls + 1)],
             'runtime': runtime, 'source_sha256': pins,
-            'disabled_host_skill_path': str(Path.home() / '.agents/skills/vet-flat'),
+            'disabled_host_skill_path': str(Path.home() / '.agents/skills/pea-princess'),
+            'disabled_host_skill_paths': [str(Path.home() / '.agents/skills' / name)
+                                          for name in ('pea-princess', 'vet-flat')],
             'usage_scope': USAGE_SCOPE}
     session_dir.mkdir(mode=0o700)
     (session_dir / 'calls').mkdir(mode=0o700)
@@ -277,11 +279,14 @@ def recover(session_dir):
 
 
 def _command(plan, folder, thread_id):
+    # Older frozen plans retain their recorded single-path policy.
+    disabled = plan.get('disabled_host_skill_paths', [plan['disabled_host_skill_path']])
     command = [plan['runtime']['path'], 'exec', '--ignore-user-config', '--ignore-rules',
                '--cd', plan['workdir'], '--sandbox', 'workspace-write', '--skip-git-repo-check',
                '-c', 'project_doc_max_bytes=0', '-c', 'approval_policy="never"',
                '-c', 'shell_environment_policy.set={PYTHONDONTWRITEBYTECODE="1"}',
-               '-c', 'skills.config=[{path=' + json.dumps(plan['disabled_host_skill_path']) + ',enabled=false}]',
+               '-c', 'skills.config=[' + ','.join('{path=' + json.dumps(path) + ',enabled=false}'
+                                           for path in disabled) + ']',
                '--enable', 'skip_host_skill_discovery']
     if thread_id is not None:
         command.extend(['resume', '--ignore-user-config', '--ignore-rules', '--skip-git-repo-check'])

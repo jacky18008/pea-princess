@@ -38,16 +38,16 @@ class ContinueTests(unittest.TestCase):
         self.source.mkdir()
         for name in current_runner.SOURCES:
             target = self.source / name; target.parent.mkdir(parents=True, exist_ok=True)
-            if name != 'dist/vet-flat-skill.zip':
+            if name != 'dist/pea-princess-skill.zip':
                 shutil.copyfile(ROOT / name, target)
                 if name == 'bench/conversation_native.py':
                     # The experiment's frozen adapter predates the current runtime policy.
                     text = target.read_text()
                     self.assertIn('MAX_TIMEOUT_SECONDS = 1200', text)
                     target.write_text(text.replace('MAX_TIMEOUT_SECONDS = 1200', 'MAX_TIMEOUT_SECONDS = 240'))
-        with zipfile.ZipFile(self.source / 'dist/vet-flat-skill.zip', 'w') as archive:
+        with zipfile.ZipFile(self.source / 'dist/pea-princess-skill.zip', 'w') as archive:
             for name in ('SKILL.md', 'references/inputs.md', 'references/onboarding.md'):
-                archive.writestr('vet-flat/' + name, 'Synthetic public guide\n')
+                archive.writestr('pea-princess/' + name, 'Synthetic public guide\n')
         self.original = operational._load_frozen(self.source); self.output = self.root / 'run'
         with mock.patch.object(self.original.subprocess, 'check_output', return_value='e' * 40 + '\n'):
             self.original.prepare(self.output)

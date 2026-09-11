@@ -16,11 +16,11 @@
 
 ## References (`skills/vet-flat/references/`)
 - English, model-facing, plain sentences, checklists over prose. Numbers live in `thresholds.yaml` and are referenced by id; endpoints live in `sources.yaml`.
-- First line of every reference file: `Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen — https://github.com/jacky18008/pea-princess — CC BY 4.0`.
+- First line of every reference file: `Part of Pea Princess by Hsien Hao (Jacky) Chen — https://github.com/jacky18008/pea-princess — CC BY 4.0`.
 - No codenames, no personal circumstances, no named real buildings, no ethnicity/nationality rules.
 
 ## Report contract
-- `references/report-schema.json` is the single source of truth for the report. Text fields follow the plain-language rules in SKILL.md §7. `render.py` (shell) and `viewer/viewer.html` (browser) must produce the same layout from the same JSON, and both print the footer `Generated with vet-flat <version> — https://github.com/jacky18008/pea-princess`.
+- `references/report-schema.json` is the single source of truth for the report. Text fields follow the plain-language rules in SKILL.md §7. `render.py` (shell) and `viewer/viewer.html` (browser) must produce the same layout from the same JSON, and both print the footer `Generated with pea-princess <version> — https://github.com/jacky18008/pea-princess`.
 - Twelve sections in this order: verdict, hard filters, the questions we always answer, side by side, worst reviews, landmines, the 12 checks, questions and the viewing day, what only you can tell, what we could not find, sources, about. Adding one means `SECTIONS` in `render.py`, `SECTIONS` in `viewer/viewer.html`, a `section.*` entry in `glossary.yaml` in three languages, and a line in `report-contract.md`.
 - The fixed form has three states and no fourth: `found` (the sentence quoted, a source id that is not `user`), `asked` (the user answered it, source `user`), `unknown` (no quote, no number, and the reader is shown the `why` line from `references/fixed-questions.yaml`). A missing id warns and fails `--strict`; a repeated id is an error.
 - The fixed form has three tiers — gate F1-F8, listing F9-F14, extended F15-F18 — and how many a report owes follows its budget mode (lite 8, standard 14, deep 18), overridden by `advanced.fixed_form.questions`. That mapping lives in exactly one place, the `tiers` block of `references/fixed-questions.yaml`: never count the questions in code. Answering more than the tier asks for is welcome and never warns.

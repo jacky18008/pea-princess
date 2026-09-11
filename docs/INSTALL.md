@@ -1,6 +1,6 @@
 # Install (every channel) · 安裝方式（各平台）
 
-Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen — https://github.com/jacky18008/pea-princess — CC BY 4.0
+Part of Pea Princess by Hsien Hao (Jacky) Chen — https://github.com/jacky18008/pea-princess — CC BY 4.0
 Verified against vendor documentation on 2026-09-03; product features change, so check the linked pages if a step looks different.
 
 **Never used a terminal?** You do not need to. Sections B and C need only a chat app; section A is one pasted line and then everything is sentences too. Plain-words walkthrough: `docs/USING.md`.
@@ -9,7 +9,7 @@ Verified against vendor documentation on 2026-09-03; product features change, so
 
 | Product | Install | Note |
 |---|---|---|
-| Claude Code | `/plugin marketplace add jacky18008/pea-princess` then `/plugin install vet-flat@pea-princess` | Local shell; full mode |
+| Claude Code | `/plugin marketplace add jacky18008/pea-princess` then `/plugin install pea-princess@pea-princess` | Local shell; full mode |
 | Codex (CLI, IDE, app, cloud) | `npx skills add jacky18008/pea-princess -a codex` or in-session `$skill-installer install https://github.com/jacky18008/pea-princess` | **Sandbox network is off by default.** Enable with `codex -c 'sandbox_workspace_write.network_access=true'` or set it in `~/.codex/config.toml`; otherwise use manual mode |
 | Gemini CLI | `gemini skills install https://github.com/jacky18008/pea-princess` | Needs a Gemini API key (or Code Assist Standard/Enterprise): consumer Google AI Pro/Ultra sign-in stopped on 2026-06-18; Antigravity CLI is Google's first-party route for those plans |
 | Grok CLI | `npx skills add jacky18008/pea-princess -a grok` (also reads Claude Code marketplaces) | |
@@ -44,13 +44,13 @@ Subscription by default. This workload is cheap in absolute terms at pay-as-you-
 | Running batch sweeps, or your plan's windows keep stopping you | Get an API key and use a cheap model (Gemini Flash, Grok build, Sonnet) in Codex, OpenCode or Gemini CLI: predictable, under £1 per sweep |
 | On a £100+ plan already | `deep` mode everywhere; nothing to decide |
 
-## B. Chat products with a Skills feature (upload the zip from Releases)
+## B. Chat products with a Skills feature (upload pea-princess-skill.zip from Releases)
 
 | Product | Steps | Network for scripts |
 |---|---|---|
 | claude.ai / Claude Desktop | Settings → Capabilities → enable "Code execution and file creation" → Customize → Skills → + → Upload a skill → the zip | On by default for Free/Pro/Max; **off by default on Team/Enterprise** (an owner enables it) |
 | Claude Cowork | Same account: skills enabled on claude.ai sync automatically; or Customize → Plugins → "Add from a repository" → this repo's URL | Has a real browser and a shell in Anthropic's sandbox |
-| ChatGPT (Skills) / ChatGPT Work | Skills → Create → Upload from your computer → the zip; invoke with `@vet-flat` | Available on Business / Enterprise / Edu plans at the time of writing (check your plan) |
+| ChatGPT (Skills) / ChatGPT Work | Skills → Create → Upload from your computer → the zip; invoke with `@pea-princess` | Available on Business / Enterprise / Edu plans at the time of writing (check your plan) |
 | Gemini app (Skills) | Skills → upload | Scripts cannot reach the internet there, and the feature is not offered in the UK: use manual mode |
 
 ## C. Chat boxes without Skills (manual mode: paste the instructions, attach the references)
@@ -67,5 +67,11 @@ Use `dist/prompt-pack/` from Releases: `INSTRUCTIONS.md` (the SKILL.md text, und
 
 In manual mode the skill will list, once, the pages you need to open and paste (see `skills/vet-flat/references/inputs.md`).
 
-## D. Verify
-Ask: "Vet this flat: <address or postcode>, flat <n>." The first line of the answer states the mode (shell / fetch / manual). The report ends with "Generated with vet-flat <version> — https://github.com/jacky18008/pea-princess".
+## D. Local package and existing installations
+
+`python3 tools/build_dist.py` creates `dist/pea-princess-skill.zip` with one root folder, `pea-princess/`. Install that folder in your agent's skills directory, such as `~/.agents/skills/pea-princess/`; invoke it as `$pea-princess` in Codex.
+
+If you installed the former `vet-flat` package, preserve that directory outside every agent skills directory before installing the replacement. Keep only `pea-princess` discoverable, then reload the agent's skill list or start a new session. The source tree still uses `skills/vet-flat/` for existing script imports and historical tests; that internal path is not an additional installed skill. Existing report/schema identifiers remain readable.
+
+## E. Verify
+Ask: "Vet this flat: <address or postcode>, flat <n>." The first line of the answer states the mode (shell / fetch / manual). The report ends with "Generated with pea-princess <version> — https://github.com/jacky18008/pea-princess".

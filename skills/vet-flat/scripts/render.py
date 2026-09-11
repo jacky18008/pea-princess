@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Turn a vet-flat report.json into the fixed report layout.
+"""Turn a Pea Princess report.json into the fixed report layout.
 
 The standard is `references/report-schema.json`, not the HTML: models emit JSON,
 this script decides the layout. `viewer/viewer.html` renders the same sections in
@@ -37,7 +37,7 @@ DEFAULT_SCHEMA = os.path.join(REFS, "report-schema.json")
 DEFAULT_GLOSSARY = os.path.join(REFS, "glossary.yaml")
 DEFAULT_FIXED = os.path.join(REFS, "fixed-questions.yaml")
 
-FOOTER_TEMPLATE = "Generated with vet-flat {version} \u2014 {url}"
+FOOTER_TEMPLATE = "Generated with pea-princess {version} \u2014 {url}"
 DEFAULT_SOURCE_URL = "https://github.com/jacky18008/pea-princess"
 
 # The twelve sections, in order. (glossary id, html anchor)
@@ -2383,7 +2383,7 @@ def render_markdown(data, L, schema=None):
 # -------------------------------------------------------------------- main ---
 def build_parser():
     p = argparse.ArgumentParser(
-        description="Render a vet-flat report.json as one self-contained HTML page, or as Markdown.")
+        description="Render a Pea Princess report.json as one self-contained HTML page, or as Markdown.")
     p.add_argument("report", help="path to report.json")
     p.add_argument("--lang", default=None,
                    help="BCP-47 language for labels (en, zh-TW, zh-CN...). Default: the report's own language.")

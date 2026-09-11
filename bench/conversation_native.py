@@ -200,13 +200,15 @@ def _isolated_permission_args():
     filesystem.update((str(root), 'read') for root in ISOLATED_RUNTIME_ROOTS)
     table = '{' + ','.join(json.dumps(key) + '=' + json.dumps(value) for key, value in filesystem.items()) + '}'
     shell_path = str(ISOLATED_RUNTIME_ROOTS[0]) + ':/usr/bin:/bin:/usr/sbin:/sbin'
-    disabled_skill = Path.home() / '.agents/skills/vet-flat'
+    disabled_skills = [Path.home() / '.agents/skills' / name
+                       for name in ('pea-princess', 'vet-flat')]
     return ['-c', 'default_permissions=' + json.dumps(ISOLATED_PERMISSION_PROFILE),
             '-c', 'permissions.' + ISOLATED_PERMISSION_PROFILE + '.filesystem=' + table,
             '-c', 'permissions.' + ISOLATED_PERMISSION_PROFILE + '.network.enabled=false',
             '-c', 'shell_environment_policy.inherit="none"',
             '-c', 'shell_environment_policy.set={PATH=' + json.dumps(shell_path) + '}',
-            '-c', 'skills.config=[{path=' + json.dumps(str(disabled_skill)) + ',enabled=false}]']
+            '-c', 'skills.config=[' + ','.join('{path=' + json.dumps(str(path)) + ',enabled=false}'
+                                        for path in disabled_skills) + ']']
 
 
 def invoke(request, folder, workdir):

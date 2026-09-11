@@ -1,4 +1,4 @@
-# Copy deck — Pea Princess (`vet-flat`)
+# Copy deck — Pea Princess (`pea-princess`)
 
 Every sentence a *reader* sees, in one place, so it can be rewritten in one voice.
 Model-facing text (SKILL.md, the axis files, budget modes, the question tables, the
@@ -31,16 +31,16 @@ On a phone
 
 | Surface | Blocks | Source |
 |---|---|---|
-| README — the front page | 18 | `README.md` |
+| README — the front page | 19 | `README.md` |
 | docs/USING.md — the plain-words walkthrough | 33 | `docs/USING.md` |
-| docs/INSTALL.md — install page | 9 | `docs/INSTALL.md` |
+| docs/INSTALL.md — install page | 11 | `docs/INSTALL.md` |
 | docs/EXPERIMENTS.md — which configuration to run | 7 | `docs/EXPERIMENTS.md` |
 | onboarding.md — what the skill says to a new user | 30 | `skills/vet-flat/references/onboarding.md` |
 | sharing.md — social posts and the card description | 6 | `skills/vet-flat/references/sharing.md` |
 | inputs.md — the one message that asks the user for what is missing | 1 | `skills/vet-flat/references/inputs.md` |
 | profiles/ — the sentences a profile carries | 14 | `skills/vet-flat/profiles/*.yaml` |
 | seed.py — the seed card sentences (read-only here) | 25 | `skills/vet-flat/scripts/seed.py` |
-| **Total** | **143** | |
+| **Total** | **146** | |
 
 ---
 
@@ -51,7 +51,7 @@ All prose paragraphs. Tables, headings and code blocks are not in the deck.
 ### deck:readme:1
 
 - source: `README.md` · L3
-- under: # Pea Princess · 豌豆公主 (`vet-flat`)
+- under: # Pea Princess · 豌豆公主 (`pea-princess`)
 - lang: en
 - write-back: yes
 
@@ -62,7 +62,7 @@ All prose paragraphs. Tables, headings and code blocks are not in the deck.
 ### deck:readme:2
 
 - source: `README.md` · L5
-- under: # Pea Princess · 豌豆公主 (`vet-flat`)
+- under: # Pea Princess · 豌豆公主 (`pea-princess`)
 - lang: zh-TW
 - write-back: yes
 
@@ -73,7 +73,7 @@ All prose paragraphs. Tables, headings and code blocks are not in the deck.
 ### deck:readme:3
 
 - source: `README.md` · L7
-- under: # Pea Princess · 豌豆公主 (`vet-flat`)
+- under: # Pea Princess · 豌豆公主 (`pea-princess`)
 - lang: en
 - write-back: yes
 
@@ -84,7 +84,7 @@ All prose paragraphs. Tables, headings and code blocks are not in the deck.
 ### deck:readme:4
 
 - source: `README.md` · L9
-- under: # Pea Princess · 豌豆公主 (`vet-flat`)
+- under: # Pea Princess · 豌豆公主 (`pea-princess`)
 - lang: en
 - write-back: yes
 
@@ -100,12 +100,23 @@ All prose paragraphs. Tables, headings and code blocks are not in the deck.
 - write-back: yes
 
 ```text
-Codex: enable sandbox network (`sandbox_workspace_write.network_access = true`) or use manual mode.
+The skill is installed and invoked as **`pea-princess`**; the upload artifact is `dist/pea-princess-skill.zip`. The repository still stores its source in `skills/vet-flat/` so existing script paths and experiment records remain valid. This is one skill, with one installed name.
 ```
 
 ### deck:readme:6
 
-- source: `README.md` · L29
+- source: `README.md` · L28
+- under: # claude.ai / Claude Cowork / ChatGPT Skills: upload the zip from Releases
+- lang: en
+- write-back: yes
+
+```text
+Codex: enable sandbox network (`sandbox_workspace_write.network_access = true`) or use manual mode.
+```
+
+### deck:readme:7
+
+- source: `README.md` · L31
 - under: ## Scripts (Python 3.9 standard library only; network via curl)
 - lang: en
 - write-back: yes
@@ -114,9 +125,9 @@ Codex: enable sandbox network (`sandbox_workspace_write.network_access = true`) 
 All in `skills/vet-flat/scripts/`; each prints one JSON object with `source_url`, `retrieved_at`, `http_status`, `ok` and an evidence class. Usage details: `docs/SCRIPTS.md`.
 ```
 
-### deck:readme:7
+### deck:readme:8
 
-- source: `README.md` · L44
+- source: `README.md` · L46
 - under: ## Scripts (Python 3.9 standard library only; network via curl)
 - lang: en
 - write-back: yes
@@ -125,9 +136,9 @@ All in `skills/vet-flat/scripts/`; each prints one JSON object with `source_url`
 Report layout for people without a shell: open `viewer/viewer.html` in a browser and paste the JSON.
 ```
 
-### deck:readme:8
+### deck:readme:9
 
-- source: `README.md` · L47
+- source: `README.md` · L49
 - under: ## Why "Pea Princess"
 - lang: en
 - write-back: yes
@@ -136,9 +147,9 @@ Report layout for people without a shell: open `viewer/viewer.html` in a browser
 In the fairy tale only the real princess feels the pea through twenty mattresses. Here **you** are the princess. This tool lifts the mattresses one by one: it reads the registers, counts the crimes, checks the planning applications and the company filings, and tells you where the pea might be. Only you can feel it: go and see the flat, walk the street, talk to the agent and the landlord. The report is a filter, and when you are in a hurry it is only a filter. Its first duty is to say what it does not know and ask you for it.
 ```
 
-### deck:readme:9
+### deck:readme:10
 
-- source: `README.md` · L50
+- source: `README.md` · L52
 - under: ## No code required · 不用會寫程式
 - lang: en
 - write-back: yes
@@ -147,26 +158,15 @@ In the fairy tale only the real princess feels the pea through twenty mattresses
 Everything is done by typing sentences: install (one pasted line, or a zip upload in a chat app), then ask, paste what it asks for, read the report, and change any setting by saying it. `docs/USING.md` walks through it in five minutes, in English and Chinese.
 ```
 
-### deck:readme:10
+### deck:readme:11
 
-- source: `README.md` · L53
+- source: `README.md` · L55
 - under: ## Start here, on any platform
 - lang: en
 - write-back: yes
 
 ```text
 Ask **"What can this do?"** (or 這能幹嘛？). The answer comes from `skills/vet-flat/references/onboarding.md`: a short pitch, three starting points (a listing → vet it; an area or destination → sweep; no idea → a ten-fact primer and six questions with suggested defaults). Your rules live in `profile.yaml` (budget, size, flat type, deal-breakers, priorities, `budget_mode` lite/standard/deep for £20 plans and chat-only use). The hard follow-up questions the agent must ask are in `references/questions.md`.
-```
-
-### deck:readme:11
-
-- source: `README.md` · L56
-- under: ## Benchmark (facts must be right on every model; verdicts may differ)
-- lang: en
-- write-back: yes
-
-```text
-`evals/evals.json` has 8 real flats across 7 boroughs plus 2 conversation cases ("what can this do", "I have no idea"), with truth produced by the repo's own fetchers on 2026-09-03. `bench/grade.py` scores fact recall, fabrications, citations, unknown-honesty and hard-filter consistency; `bench/run.py --dry-run` prints the exact command for Claude Code, Codex, Gemini CLI or an OpenAI-compatible API. See `bench/README.md`.
 ```
 
 ### deck:readme:12
@@ -177,7 +177,7 @@ Ask **"What can this do?"** (or 這能幹嘛？). The answer comes from `skills/
 - write-back: yes
 
 ```text
-**Which configuration to run:** `docs/EXPERIMENTS.md` records the original flat-vetting comparisons. The [later context ablation](docs/ablation-2026-09-09/results.md) includes generation costs and source reviews: extra summarization, structured memory and multiple retrieval calls did not save tokens at the tested sizes. Keep one agent with full context as the starting point; the four-role pipeline remains experimental. These studies measure different tasks, not a universal model ranking.
+`evals/evals.json` has 8 real flats across 7 boroughs plus 2 conversation cases ("what can this do", "I have no idea"), with truth produced by the repo's own fetchers on 2026-09-03. `bench/grade.py` scores fact recall, fabrications, citations, unknown-honesty and hard-filter consistency; `bench/run.py --dry-run` prints the exact command for Claude Code, Codex, Gemini CLI or an OpenAI-compatible API. See `bench/README.md`.
 ```
 
 ### deck:readme:13
@@ -188,7 +188,7 @@ Ask **"What can this do?"** (or 這能幹嘛？). The answer comes from `skills/
 - write-back: yes
 
 ```text
-**Long-running projects and changing requirements:** the [session harness](docs/session-harness.md) saves exact user requests, revisioned requirements and conditional exceptions, source snapshots, goals, TODOs and execution state. The managed runner inserts the current packet itself and rejects stale results. Short `AGENTS.md` / `CLAUDE.md` files link to detailed rules; pointers alone cannot ensure reading. [Lifecycle validation](docs/session-harness-validation.md) tests recovery without new model calls, not quality equivalence or token savings.
+**Which configuration to run:** `docs/EXPERIMENTS.md` records the original flat-vetting comparisons. The [later context ablation](docs/ablation-2026-09-09/results.md) includes generation costs and source reviews: extra summarization, structured memory and multiple retrieval calls did not save tokens at the tested sizes. Keep one agent with full context as the starting point; the four-role pipeline remains experimental. These studies measure different tasks, not a universal model ranking.
 ```
 
 ### deck:readme:14
@@ -199,7 +199,7 @@ Ask **"What can this do?"** (or 這能幹嘛？). The answer comes from `skills/
 - write-back: yes
 
 ```text
-**Try a whole persona conversation:** run `python3 tools/persona_playground.py` and open the printed local URL. The [interactive lab](docs/persona-playground.md) uses your local Codex login for dynamic persona replies and assistant answers, with step/run/pause, queued human questions, scenario amendments, private history and shared usage ceilings. All 16 cards are available in a clearly labelled chat adaptation; this is a local alpha, with no public deployment or hidden model judge.
+**Long-running projects and changing requirements:** the [session harness](docs/session-harness.md) saves exact user requests, revisioned requirements and conditional exceptions, source snapshots, goals, TODOs and execution state. The managed runner inserts the current packet itself and rejects stale results. Short `AGENTS.md` / `CLAUDE.md` files link to detailed rules; pointers alone cannot ensure reading. [Lifecycle validation](docs/session-harness-validation.md) tests recovery without new model calls, not quality equivalence or token savings.
 ```
 
 ### deck:readme:15
@@ -210,7 +210,7 @@ Ask **"What can this do?"** (or 這能幹嘛？). The answer comes from `skills/
 - write-back: yes
 
 ```text
-**Community feedback, stage 1:** open the [local options form](community/index.html) and follow the [guide](docs/community-feedback-stage1.md). Public JSON contains controlled choices; optional text stays on the author's device. Local validation, import and search use a fictional demo catalog. There is no online submission service or real review dataset yet.
+**Try a whole persona conversation:** run `python3 tools/persona_playground.py` and open the printed local URL. The [interactive lab](docs/persona-playground.md) uses your local Codex login for dynamic persona replies and assistant answers, with step/run/pause, queued human questions, scenario amendments, private history and shared usage ceilings. All 16 cards are available in a clearly labelled chat adaptation; this is a local alpha, with no public deployment or hidden model judge.
 ```
 
 ### deck:readme:16
@@ -221,12 +221,23 @@ Ask **"What can this do?"** (or 這能幹嘛？). The answer comes from `skills/
 - write-back: yes
 
 ```text
-**Whole conversations, not one answer:** `docs/JOURNEYS.md` scores nine scripted multi-turn journeys, and `docs/PERSONAS.md` goes one step further — sixteen fictional people played by a model, with a deterministic controller holding their documents so nothing can be invented, a judge that has to quote its evidence, and a paired probe per person that moves exactly one setting. `python3 bench/personas.py --matrix pilot --dry-run` prints the whole plan without calling a model.
+**Community feedback, stage 1:** open the [local options form](community/index.html) and follow the [guide](docs/community-feedback-stage1.md). Public JSON contains controlled choices; optional text stays on the author's device. Local validation, import and search use a fictional demo catalog. There is no online submission service or real review dataset yet.
 ```
 
 ### deck:readme:17
 
-- source: `README.md` · L74
+- source: `README.md` · L68
+- under: ## Benchmark (facts must be right on every model; verdicts may differ)
+- lang: en
+- write-back: yes
+
+```text
+**Whole conversations, not one answer:** `docs/JOURNEYS.md` scores nine scripted multi-turn journeys, and `docs/PERSONAS.md` goes one step further — sixteen fictional people played by a model, with a deterministic controller holding their documents so nothing can be invented, a judge that has to quote its evidence, and a paired probe per person that moves exactly one setting. `python3 bench/personas.py --matrix pilot --dry-run` prints the whole plan without calling a model.
+```
+
+### deck:readme:18
+
+- source: `README.md` · L76
 - under: ## Sources you will not find here
 - lang: en
 - write-back: yes
@@ -235,15 +246,15 @@ Ask **"What can this do?"** (or 這能幹嘛？). The answer comes from `skills/
 Rightmove, Zoopla, OnTheMarket, OpenRent, HomeViews, Trustpilot, Airbnb, Booking.com are listed by name only. Their terms forbid automated access, so this project gives no method for them; the skill asks you for the page (a PDF, screenshots or the text) and does not open listing links itself.
 ```
 
-### deck:readme:18
+### deck:readme:19
 
-- source: `README.md` · L77
+- source: `README.md` · L79
 - under: ## Licence and attribution (proposed)
 - lang: en
 - write-back: yes
 
 ```text
-Documentation and skill text: CC BY 4.0. Code: MIT. Every report carries "Generated with vet-flat <version> — <source URL>". Please keep it.
+Documentation and skill text: CC BY 4.0. Code: MIT. Every report carries "Generated with pea-princess <version> — <source URL>". Please keep it.
 ```
 
 ---
@@ -711,13 +722,35 @@ In manual mode the skill will list, once, the pages you need to open and paste (
 
 ### deck:install:9
 
-- source: `docs/INSTALL.md` · L71
-- under: ## D. Verify
+- source: `docs/INSTALL.md` · L72
+- under: ## D. Local package and existing installations
 - lang: en
 - write-back: yes
 
 ```text
-Ask: "Vet this flat: <address or postcode>, flat <n>." The first line of the answer states the mode (shell / fetch / manual). The report ends with "Generated with vet-flat <version> — https://github.com/jacky18008/pea-princess".
+`python3 tools/build_dist.py` creates `dist/pea-princess-skill.zip` with one root folder, `pea-princess/`. Install that folder in your agent's skills directory, such as `~/.agents/skills/pea-princess/`; invoke it as `$pea-princess` in Codex.
+```
+
+### deck:install:10
+
+- source: `docs/INSTALL.md` · L74
+- under: ## D. Local package and existing installations
+- lang: en
+- write-back: yes
+
+```text
+If you installed the former `vet-flat` package, preserve that directory outside every agent skills directory before installing the replacement. Keep only `pea-princess` discoverable, then reload the agent's skill list or start a new session. The source tree still uses `skills/vet-flat/` for existing script imports and historical tests; that internal path is not an additional installed skill. Existing report/schema identifiers remain readable.
+```
+
+### deck:install:11
+
+- source: `docs/INSTALL.md` · L77
+- under: ## E. Verify
+- lang: en
+- write-back: yes
+
+```text
+Ask: "Vet this flat: <address or postcode>, flat <n>." The first line of the answer states the mode (shell / fetch / manual). The report ends with "Generated with pea-princess <version> — https://github.com/jacky18008/pea-princess".
 ```
 
 ---

@@ -77,6 +77,10 @@ answer.write_text('A measured choice: inspect the evidence before committing.')
         for expected in ('--ignore-user-config', '--ignore-rules', 'workspace-write', 'gpt-6-astra', 'skip_host_skill_discovery'):
             self.assertIn(expected, command)
         self.assertEqual(['--', '-'], command[-2:])
+        disabled = 'skills.config=[' + ','.join(
+            '{path=' + json.dumps(str(Path.home() / '.agents/skills' / name)) + ',enabled=false}'
+            for name in ('pea-princess', 'vet-flat')) + ']'
+        self.assertIn(disabled, command)
         self.assertEqual(THREAD, result['thread_uuid']); self.assertIsNone(result['resumed_from_uuid'])
         self.assertEqual(request['prompt'], (self.work / 't01-received.txt').read_text())
         self.assertEqual(['commentary', 'final'], [row['item']['channel'] for row in result['assistant_messages']])
@@ -101,6 +105,14 @@ answer.write_text('A measured choice: inspect the evidence before committing.')
         with mock.patch.object(continuity.native.launch, 'start_process') as start:
             self.assertEqual(second, self.invoke(request))
             start.assert_not_called()
+
+    def test_older_plan_retains_its_recorded_single_skill_exclusion(self):
+        plan, _ = continuity._read_envelope(self.session / 'plan.json')
+        plan.pop('disabled_host_skill_paths')
+        plan['disabled_host_skill_path'] = str(Path.home() / '.agents/skills/vet-flat')
+        command = continuity._command(plan, self.session / 'calls/t01', None)
+        self.assertIn('skills.config=[{path=' + json.dumps(plan['disabled_host_skill_path'])
+                      + ',enabled=false}]', command)
 
     def test_start_and_resume_pin_python_bytecode_suppression_without_relaxing_other_controls(self):
         plan, _ = continuity._read_envelope(self.session / 'plan.json')

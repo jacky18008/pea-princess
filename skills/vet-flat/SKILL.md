@@ -1,5 +1,5 @@
 ---
-name: vet-flat
+name: pea-princess
 description: "Checks London rental listings using official and open UK data: identity, size, condition, surroundings, management, paperwork, price, light, total monthly cost and commute. Explains what is known, estimated or missing, then gives a plain-language recommendation. Use for a listing, a comparison or finding candidates around a destination."
 license: CC-BY-4.0
 metadata:
@@ -9,7 +9,7 @@ metadata:
   version: "1.0.0-draft"
   brand: "Pea Princess / 豌豆公主"
 ---
-# vet-flat — London flat vetting (Pea Princess)
+# Pea Princess — London flat vetting
 
 ## Start
 1. Listing pages come from the person: a PDF or saved page, screenshots, or copied text (`scripts/listing_fields.py` reads HTML/text). The skill does not open listing links and never suggests it; say so once, ask for the page. Open registers in `references/sources.yaml` are read directly.

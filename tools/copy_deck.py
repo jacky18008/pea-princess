@@ -41,7 +41,7 @@ LOCK_REL = "docs/copy-deck.lock.json"
 LOCK_VERSION = 1
 
 HEADER = """\
-# Copy deck — Pea Princess (`vet-flat`)
+# Copy deck — Pea Princess (`pea-princess`)
 
 Every sentence a *reader* sees, in one place, so it can be rewritten in one voice.
 Model-facing text (SKILL.md, the axis files, budget modes, the question tables, the

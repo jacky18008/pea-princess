@@ -32,7 +32,7 @@ FIXED_QUESTIONS = os.path.join(REFS, "fixed-questions.yaml")
 VIEWER = os.path.join(VIEWER_DIR, "viewer.html")
 PROFILE = os.path.join(ROOT, "skills", "vet-flat", "profile.template.yaml")
 
-FOOTER = "Generated with vet-flat 1.0.0-draft \u2014 https://github.com/jacky18008/pea-princess"
+FOOTER = "Generated with pea-princess 1.0.0-draft \u2014 https://github.com/jacky18008/pea-princess"
 
 SECTION_TITLES_EN = [
     "Verdict",
@@ -396,7 +396,7 @@ class TestViewer(unittest.TestCase):
         self.assertEqual(load_sample(), payload)
 
     def test_footer_string(self):
-        self.assertIn("Generated with vet-flat {version} \u2014 {url}", self.html)
+        self.assertIn("Generated with pea-princess {version} \u2014 {url}", self.html)
         self.assertIn("https://github.com/jacky18008/pea-princess", self.html)
 
     def test_same_sections_in_the_same_order(self):

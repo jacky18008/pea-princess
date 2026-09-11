@@ -1,4 +1,4 @@
-# Pea Princess · 豌豆公主 (`vet-flat`)
+# Pea Princess · 豌豆公主 (`pea-princess`)
 
 **EN** — A vendor-neutral agent skill that vets a London rental flat the way a careful surveyor would: identity, floor area, age, heating, construction nearby, crime, management reviews, agent compliance, price, light, total monthly cost and commute, from official and open UK data, ending in a plain-language verdict. Works with any agent that reads the [Agent Skills](https://agentskills.io) format (Claude Code, Codex, Gemini CLI, Grok CLI, Cursor, Copilot, OpenCode, Cline, Goose, OpenHands, Kimi Code, Qwen Code, pi, OpenClaw, Hermes Agent…) and, in reduced modes, with chat products that cannot run scripts.
 
@@ -20,9 +20,11 @@
 # most agents (Codex, Gemini CLI, Cursor, Copilot, OpenCode, Cline, Goose, pi, OpenClaw, Hermes…)
 npx skills add jacky18008/pea-princess
 # Claude Code
-/plugin marketplace add jacky18008/pea-princess && /plugin install vet-flat@pea-princess
+/plugin marketplace add jacky18008/pea-princess && /plugin install pea-princess@pea-princess
 # claude.ai / Claude Cowork / ChatGPT Skills: upload the zip from Releases
 ```
+The skill is installed and invoked as **`pea-princess`**; the upload artifact is `dist/pea-princess-skill.zip`. The repository still stores its source in `skills/vet-flat/` so existing script paths and experiment records remain valid. This is one skill, with one installed name.
+
 Codex: enable sandbox network (`sandbox_workspace_write.network_access = true`) or use manual mode.
 
 ## Scripts (Python 3.9 standard library only; network via curl)
@@ -74,4 +76,4 @@ python3 -m unittest tests/test_epc.py
 Rightmove, Zoopla, OnTheMarket, OpenRent, HomeViews, Trustpilot, Airbnb, Booking.com are listed by name only. Their terms forbid automated access, so this project gives no method for them; the skill asks you for the page (a PDF, screenshots or the text) and does not open listing links itself.
 
 ## Licence and attribution (proposed)
-Documentation and skill text: CC BY 4.0. Code: MIT. Every report carries "Generated with vet-flat <version> — <source URL>". Please keep it.
+Documentation and skill text: CC BY 4.0. Code: MIT. Every report carries "Generated with pea-princess <version> — <source URL>". Please keep it.

@@ -36,7 +36,7 @@ SOURCES = ('bench/conversation_ablation.py','bench/conversation_native.py','benc
            'bench/call_control.py','bench/report_control.py','bench/durable_run.py',
            'bench/launch.py',BASE+'scenario.json',BASE+'rubric.json',
            BASE+'skill-outcome.md',BASE+'skill-component-audit.json',
-           'dist/vet-flat-skill.zip')
+           'dist/pea-princess-skill.zip')
 BOUNDARY = '''You are the user's local rental research agent. Use the installed skill at skill/SKILL.md.
 This workspace contains deliberately fictional research material. You may read local files,
 run the provided deterministic Python tools and save requested artifacts here. Use only
@@ -77,14 +77,14 @@ def layout():
 
 def public_skill():
  result={}
- with zipfile.ZipFile(ROOT/'dist/vet-flat-skill.zip') as z:
+ with zipfile.ZipFile(ROOT/'dist/pea-princess-skill.zip') as z:
   for member in z.infolist():
    if member.is_dir():continue
    p=Path(member.filename)
    if p.is_absolute() or '..' in p.parts:raise ValueError('unsafe public artifact path')
    # Distribution zip has one skill root; preserve relative paths below it.
    parts=p.parts
-   if parts[0]=='vet-flat':parts=parts[1:]
+   if parts[0]=='pea-princess':parts=parts[1:]
    result['skill/'+str(Path(*parts))]=z.read(member)
  if 'skill/SKILL.md' not in result:raise ValueError('public package has no skill entry')
  return result
