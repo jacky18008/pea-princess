@@ -136,7 +136,7 @@ def run_arm_claude(arm, skill_dir, prompt, model, out_dir, pair, timeout):
             "reply": res.get("reply") or "", "types": {}, "stderr_tail": (res.get("stderr_tail") or "")[-400:], "started": t0.isoformat() + "Z"}
 
 
-def run_arm(arm, skill_dir, prompt, model, out_dir, pair, timeout, agent="codex"):
+def run_arm(arm, skill_dir, prompt, model, out_dir, pair, timeout, agent="codex", codex_extra=None):
     if agent == "claude":
         return run_arm_claude(arm, skill_dir, prompt, model, out_dir, pair, timeout)
     work = tempfile.mkdtemp(prefix="vetflat-streetab-")
@@ -147,7 +147,7 @@ def run_arm(arm, skill_dir, prompt, model, out_dir, pair, timeout, agent="codex"
     env["HOME"] = work
     env.setdefault("CODEX_HOME", os.path.join(os.path.expanduser("~"), ".codex"))
     cmd = ["codex", "exec", "--cd", work, "--sandbox", "workspace-write", "-c", "sandbox_workspace_write.network_access=true",
-           "--skip-git-repo-check", "--json", "--model", model, "--", prompt]
+           "--skip-git-repo-check", "--json", "--model", model] + list(codex_extra or []) + ["--", prompt]
     t0 = datetime.datetime.utcnow()
     try:
         proc = subprocess.run(cmd, cwd=work, env=env, stdin=subprocess.DEVNULL, capture_output=True, text=True, timeout=timeout)
@@ -159,7 +159,7 @@ def run_arm(arm, skill_dir, prompt, model, out_dir, pair, timeout, agent="codex"
     os.makedirs(os.path.join(out_dir, "raw"), exist_ok=True)
     io.open(os.path.join(out_dir, "raw", "codex-%s-%d.jsonl" % (arm, pair)), "w", encoding="utf-8").write(stdout)
     usage, cmds, searches, final, types = parse_stream(stdout)
-    row = {"arm": arm, "pair": pair, "skill_dir": skill_dir, "model": model, "agent": "codex", "exit": code, "seconds": round(seconds, 1),
+    row = {"arm": arm, "pair": pair, "skill_dir": skill_dir, "model": model, "agent": "codex", "codex_extra": list(codex_extra or []), "exit": code, "seconds": round(seconds, 1),
            "usage": usage, "commands": cmds, "script_runs": sum(1 for c in cmds if ".py" in c and "sed -n" not in c and "cat " not in c),
            "area_scan_calls": sum(1 for c in cmds if "area_scan" in c), "noise_calls": sum(1 for c in cmds if "noise.py" in c),
            "web_searches": searches, "reply_chars": len(final), "reply": final, "types": types,
@@ -363,6 +363,7 @@ def main():
     ap.add_argument("--pairs", type=int, default=3)
     ap.add_argument("--model", default="gpt-5.6-terra")
     ap.add_argument("--agent", choices=("codex", "claude"), default="codex")
+    ap.add_argument("--codex-extra", default="", help='extra codex exec arguments, space-separated, e.g. "--disable multi_agent"')
     ap.add_argument("--timeout", type=int, default=1200)
     ap.add_argument("--judge")
     ap.add_argument("--account", help="results folder: add each Codex row's sub-agent threads to its usage (usage_total)")
@@ -389,7 +390,7 @@ def main():
         for arm, skill in (("before", a.before), ("after", a.after)):
             if any(r["pair"] == pair and r["arm"] == arm and r.get("agent", "codex") == a.agent and r.get("exit") == 0 and r.get("reply") for r in done):
                 continue
-            row = run_arm(arm, skill, prompt, a.model, a.out, pair, a.timeout, a.agent)
+            row = run_arm(arm, skill, prompt, a.model, a.out, pair, a.timeout, a.agent, a.codex_extra.split() if a.codex_extra else None)
             with io.open(os.path.join(a.out, "rows.jsonl"), "a", encoding="utf-8") as fh:
                 fh.write(json.dumps(row, ensure_ascii=False) + "\n")
             u = row.get("usage") or {}
