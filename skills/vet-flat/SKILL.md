@@ -13,7 +13,7 @@ metadata:
 
 ## Start
 1. Use permitted tools for real listings; keep URL/date/status per `references/listing-evidence.md`. No invented fallback. If blocked: `references/inputs.md`.
-2. Resume `.pea-state` per `references/session-harness.md`, else read an existing `profile.yaml`. Research → options → user priorities → next checks; vague goals suffice. Ask 0–2 questions, at most **three essential clarifications**; use native choices if available, else text. Assumptions stay provisional.
+2. Resume `.pea-state` per `references/session-harness.md`, else read an existing `profile.yaml`. Every reply moves the search (a listing checked, an area named, a number, a decision); never a reply that only asks. At most **three essential clarifications**, in one message when the person has no idea; native choices when offered. Assumptions stay provisional.
 3. **Route by intent** — read the file before acting:
 
 | The user… | Read |
