@@ -109,14 +109,15 @@ def run_arm_claude(arm, skill_dir, prompt, model, out_dir, pair, timeout):
     t0 = datetime.datetime.utcnow()
     res = H.run_answer("claude", model, "standard", prompt, timeout, skill_dir=skill_dir)
     os.makedirs(os.path.join(out_dir, "raw"), exist_ok=True)
-    io.open(os.path.join(out_dir, "raw", "%s-%d.jsonl" % (arm, pair)), "w", encoding="utf-8").write(res.get("stdout") or "")
+    io.open(os.path.join(out_dir, "raw", "claude-%s-%d.jsonl" % (arm, pair)), "w", encoding="utf-8").write(res.get("stdout") or "")
     cmds = []
     for line in (res.get("stdout") or "").splitlines():
         try:
             ev = json.loads(line)
         except ValueError:
             continue
-        content = ((ev.get("message") or {}).get("content") or []) if isinstance(ev, dict) else []
+        msg = ev.get("message") if isinstance(ev, dict) else None
+        content = msg.get("content") if isinstance(msg, dict) else []
         for block in (content if isinstance(content, list) else []):
             if isinstance(block, dict) and block.get("type") == "tool_use":
                 inp = block.get("input") or {}
@@ -152,7 +153,7 @@ def run_arm(arm, skill_dir, prompt, model, out_dir, pair, timeout, agent="codex"
         stderr, code = "", "timeout"
     seconds = (datetime.datetime.utcnow() - t0).total_seconds()
     os.makedirs(os.path.join(out_dir, "raw"), exist_ok=True)
-    io.open(os.path.join(out_dir, "raw", "%s-%d.jsonl" % (arm, pair)), "w", encoding="utf-8").write(stdout)
+    io.open(os.path.join(out_dir, "raw", "codex-%s-%d.jsonl" % (arm, pair)), "w", encoding="utf-8").write(stdout)
     usage, cmds, searches, final, types = parse_stream(stdout)
     row = {"arm": arm, "pair": pair, "skill_dir": skill_dir, "model": model, "agent": "codex", "exit": code, "seconds": round(seconds, 1),
            "usage": usage, "commands": cmds, "script_runs": sum(1 for c in cmds if ".py" in c and "sed -n" not in c and "cat " not in c),
@@ -161,6 +162,121 @@ def run_arm(arm, skill_dir, prompt, model, out_dir, pair, timeout, agent="codex"
            "stderr_tail": stderr[-400:], "started": t0.isoformat() + "Z"}
     shutil.rmtree(work, ignore_errors=True)
     return row
+
+
+CODEX_SESSIONS = os.path.join(os.path.expanduser("~"), ".codex", "sessions")
+
+
+def thread_id_of(stream):
+    for line in (stream or "").splitlines():
+        if line.startswith("{") and '"thread.started"' in line:
+            try:
+                return json.loads(line).get("thread_id")
+            except ValueError:
+                return None
+    return None
+
+
+def rollout_index(day_dirs=None):
+    """{thread_id: (path, parent_thread_id)} over the rollout files of the given day folders (default: all)."""
+    idx = {}
+    roots = day_dirs or [CODEX_SESSIONS]
+    for root in roots:
+        for dirpath, _, files in os.walk(root):
+            for name in files:
+                if not name.startswith("rollout-") or not name.endswith(".jsonl"):
+                    continue
+                path = os.path.join(dirpath, name)
+                try:
+                    head = io.open(path, encoding="utf-8", errors="replace").readline()
+                    meta = json.loads(head).get("payload") or {}
+                except (OSError, ValueError):
+                    continue
+                if meta.get("id"):
+                    idx[meta["id"]] = (path, meta.get("parent_thread_id"))
+    return idx
+
+
+def thread_usage(path):
+    """The last cumulative token count in a rollout, the tool calls, and the scan commands it ran."""
+    last, calls, scans = None, 0, []
+    for line in io.open(path, encoding="utf-8", errors="replace"):
+        try:
+            ev = json.loads(line)
+        except ValueError:
+            continue
+        p = ev.get("payload") or {}
+        if ev.get("type") == "event_msg" and p.get("type") == "token_count" and (p.get("info") or {}).get("total_token_usage"):
+            last = p["info"]["total_token_usage"]
+        if ev.get("type") == "response_item" and p.get("type") in ("function_call", "custom_tool_call", "local_shell_call"):
+            calls += 1
+            a = p.get("arguments") or p.get("input") or ""
+            if isinstance(a, str) and "area_scan.py" in a and "--help" not in a and "sed -n" not in a[:60]:
+                for m in re.finditer(r"area_scan\.py[^\"\\\n]{0,160}", a):
+                    scans.append(m.group(0)[:150])
+    return last or {}, calls, scans
+
+
+def account(out_dir):
+    """Backfill every Codex row with the usage of its sub-agent threads (rollout files under ~/.codex/sessions):
+    Codex spawns sub-agents that run the scripts, and the main stream's usage does not include them."""
+    rows = load_rows(out_dir)
+    idx = rollout_index()
+    children = {}
+    for tid, (path, parent) in idx.items():
+        if parent:
+            children.setdefault(parent, []).append(tid)
+    changed = 0
+    for r in rows:
+        if r.get("agent", "codex") != "codex":
+            continue
+        tid = None
+        for name in ("codex-%s-%d.jsonl" % (r["arm"], r["pair"]), "%s-%d.jsonl" % (r["arm"], r["pair"])):
+            raw = os.path.join(out_dir, "raw", name)
+            if os.path.exists(raw):
+                tid = thread_id_of(read(raw))
+                if tid:
+                    break
+        if not tid:  # the stream is gone or was overwritten: match the rollout by the run's private workdir
+            m = re.search(r"vetflat-streetab-\w+", " ".join(r.get("commands") or []))
+            if m:
+                for t, (path, parent) in idx.items():
+                    if parent:
+                        continue
+                    try:
+                        meta = json.loads(io.open(path, encoding="utf-8", errors="replace").readline()).get("payload") or {}
+                    except (OSError, ValueError):
+                        continue
+                    if m.group(0) in (meta.get("cwd") or ""):
+                        tid = t
+                        break
+        if not tid or tid not in idx:
+            continue
+        stack, threads = [tid], []
+        while stack:
+            t = stack.pop()
+            threads.append(t)
+            stack.extend(children.get(t, []))
+        total = {"input_tokens": 0, "cached_input_tokens": 0, "output_tokens": 0, "threads": len(threads), "subagent_calls": 0, "subagent_scans": []}
+        for t in threads:
+            u, calls, scans = thread_usage(idx[t][0])
+            for k in ("input_tokens", "cached_input_tokens", "output_tokens"):
+                total[k] += u.get(k) or 0
+            if t != tid:
+                total["subagent_calls"] += calls
+                total["subagent_scans"].extend(scans)
+        r["thread_id"], r["usage_total"] = tid, total
+        changed += 1
+    with io.open(os.path.join(out_dir, "rows.jsonl"), "w", encoding="utf-8") as fh:
+        for r in rows:
+            fh.write(json.dumps(r, ensure_ascii=False) + "\n")
+    print("accounted %d codex rows" % changed)
+    for r in rows:
+        if r.get("usage_total"):
+            t = r["usage_total"]
+            print("%s #%d: main in=%s | with %d sub-agent thread(s): in=%s cached=%s out=%s | sub-agent calls=%d scans=%s" % (
+                r["arm"], r["pair"], (r.get("usage") or {}).get("input_tokens"), t["threads"] - 1, t["input_tokens"], t["cached_input_tokens"], t["output_tokens"],
+                t["subagent_calls"], [x[:70] for x in t["subagent_scans"][:3]]))
 
 
 def load_rows(out_dir):
@@ -211,13 +327,14 @@ def judge(out_dir, reviewer=JUDGE_MODEL, timeout=600):
 
 def report(out_dir):
     rows = load_rows(out_dir)
-    print("| Arm | Pair | Host | Tool calls | Script runs | Scan calls | Web searches | Input tokens (incl. cached) | New input | Output | Wall |")
-    print("|---|---|---|---|---|---|---|---|---|---|---|")
+    print("| Arm | Pair | Host | Main-thread calls | Sub-agent threads (calls) | Web searches | Input tokens, all threads (incl. cached) | New input | Output | Wall |")
+    print("|---|---|---|---|---|---|---|---|---|---|")
     for r in sorted(rows, key=lambda r: (r.get("agent", "codex"), r["pair"], r["arm"] != "before")):
-        u = r.get("usage") or {}
+        u = r.get("usage_total") or r.get("usage") or {}
         inp, cached = u.get("input_tokens") or 0, u.get("cached_input_tokens") or 0
-        print("| %s | %d | %s | %d | %d | %d | %d | %.2fM | %dk | %.1fk | %d s%s |" % (
-            r["arm"], r["pair"], r.get("agent", "codex"), len(r["commands"]), r["script_runs"], r["area_scan_calls"], r["web_searches"],
+        subs = ("%d (%d)" % (u["threads"] - 1, u["subagent_calls"])) if r.get("usage_total") else ("n/a" if r.get("agent", "codex") == "codex" else "0")
+        print("| %s | %d | %s | %d | %s | %d | %.2fM | %dk | %.1fk | %d s%s |" % (
+            r["arm"], r["pair"], r.get("agent", "codex"), len(r["commands"]), subs, r["web_searches"],
             inp / 1e6, (inp - cached) / 1000, (u.get("output_tokens") or 0) / 1000, r["seconds"], "" if r["exit"] == 0 else " (exit %s)" % r["exit"]))
     qpath = os.path.join(out_dir, "quality.json")
     if os.path.exists(qpath):
@@ -244,11 +361,15 @@ def main():
     ap.add_argument("--agent", choices=("codex", "claude"), default="codex")
     ap.add_argument("--timeout", type=int, default=1200)
     ap.add_argument("--judge")
+    ap.add_argument("--account", help="results folder: add each Codex row's sub-agent threads to its usage (usage_total)")
     ap.add_argument("--report")
     ap.add_argument("--reviewer", default=JUDGE_MODEL)
     a = ap.parse_args()
     if a.judge:
         judge(a.judge, a.reviewer)
+        return 0
+    if a.account:
+        account(a.account)
         return 0
     if a.report:
         report(a.report)
