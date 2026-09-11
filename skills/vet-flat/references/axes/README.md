@@ -17,4 +17,6 @@ Read the axis file before doing the check; this page is the map.
 11. **Commute and redundancy** (`11-commute-redundancy.md`) — TfL door-to-door; two independent rail families within a 10-minute walk.
 12. **Low-maintenance living** (`12-livability.md`) — bills bundled, washer, parcels, blackout, shop within 3 minutes; the area's living environment (`scripts/living_env.py`: housing quality, air, road accidents) as context, never a filter.
 
+A street in one call: `scripts/area_scan.py --street NAME --depth <budget mode>` (quiet, road noise in dB via `scripts/noise.py`, safety, works, living environment; once per street, then write).
+
 Beyond the twelve: `00-area-sweep.md` (candidates around a commute point, `scripts/sweep.py`), `13-adversarial-review.md` (the roast), `14-site-visit.md` and `18-street-view.md` (the viewing), `15-bridging-short-lets.md`, `16-referencing-and-proof-of-funds.md`, `17-uk-admin-pitfalls.md` (the move-in half).

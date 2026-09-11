@@ -14,7 +14,7 @@ The output is a tier and a texture, not a precise ranking of streets.
 - **U** — the address is too new to appear in the street gazetteer, so it is unmeasured (which is not the same as clean).
 
 ## Method in shell mode
-0. If the question is the street rather than one flat, `python3 scripts/area_scan.py --postcode "<pc>"` answers crime, roads, works and the living environment in one compact JSON; come here only for the finer window or route analysis.
+0. If the question is the street rather than one flat, `python3 scripts/area_scan.py --postcode "<pc>" --street "<name>"` answers crime, roads, noise in dB, works and the living environment in one compact JSON; come here only for the finer window or route analysis.
 1. `python3 scripts/crime.py latest` — the newest month the dataset actually holds. Choose months from this, never from today's date.
 2. `python3 scripts/geo.py box --lat <lat> --lng <lng> --half-width 150` — the polygon. Same spec for every candidate.
 3. `python3 scripts/crime.py box --lat <lat> --lng <lng> --half-width 150 --months 6 --sensitivity 20` — counts by month and category, the top street anchors, and the four shifted boxes.

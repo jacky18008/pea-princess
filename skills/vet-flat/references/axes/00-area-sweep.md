@@ -45,7 +45,7 @@ Anything that fails here never reaches a script that costs money. Record the cou
 
 ## Stage 3 — Per-building facts (scripts only, capped)
 Cap the deep lines at `sweep_max_deep_lines` buildings. For each, run and store **one compact JSON record**, every field carrying `source_url`, `retrieved_at` and `evidence_class`:
-`epc.py building` · `crime.py latest` then `crime.py box` · `commute.py journey`, `stations`, `redundancy` · `planning.py near` and `stages` · `roads.py near` · `company.py search`, `profile`, `address-search` · `redress.py cmp|prs|tpo|rogue|heat-trust` · `landregistry.py price-paid`.
+`epc.py building` · `crime.py latest` then `crime.py box` · `commute.py journey`, `stations`, `redundancy` · `planning.py near` and `stages` · `roads.py near` · `noise.py` (or `area_scan.py --street` for the whole street in one call) · `company.py search`, `profile`, `address-search` · `redress.py cmp|prs|tpo|rogue|heat-trust` · `landregistry.py price-paid`.
 Keep compact records for later stages and retain the source spans needed to verify critical claims.
 
 ## Stage 4 — Worst-review surgery (paste mode)

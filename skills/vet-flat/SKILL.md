@@ -22,7 +22,7 @@ metadata:
 | asks how to start or what this does | `references/onboarding.md` |
 | gives a listing or an address → vet it | `references/axes/README.md`, then `axes/01`–`12` |
 | wants candidates around an area or a commute | `references/axes/00-area-sweep.md` (shell: `scripts/sweep.py`) |
-| asks if a street or area is quiet, safe, or has works | `scripts/area_scan.py`, once per street, then write |
+| asks if a street is quiet, safe, or has works | `scripts/area_scan.py --street --depth`, once per street, then write |
 | wants a shortlist roasted (尻洗) or compared | `references/axes/13-adversarial-review.md`, then the report contract |
 | about to sign, needs a bridge stay, or referencing | `references/axes/15`–`17` |
 | going to a viewing, or just been | `references/axes/14-site-visit.md`, `18-street-view.md` |

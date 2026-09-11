@@ -837,6 +837,22 @@ sources:
     last_tested: 2026-09-11
     note: "9.9 MB CSV, 33,755 areas, cached for 90 days. The skill reads only the Living Environment domain and its indoors (housing quality) and outdoors (air quality, road traffic accidents) halves; the income, employment, health, education, crime and barriers domains are deliberately not read. Release page: https://www.gov.uk/government/statistics/english-indices-of-deprivation-2025"
 
+  # ------------------------------------------------- strategic noise maps --
+  - id: defra_strategic_noise_maps
+    name: "Defra strategic noise maps for England: Round 4 (2022, WMS point values in dB) and Round 3 (2017, WFS band polygons)"
+    url: "https://environment.data.gov.uk/spatialdata/road-noise-all-metrics-england-round-4/wms"
+    official: true
+    access: open
+    method: "WMS 1.3.0 GetFeatureInfo (a dB value at a point; rail at /spatialdata/noise-data/wms) and WFS 2.0 GetFeature with CQL INTERSECTS (the 2017 band)"
+    needs_key: false
+    robots_note: "Defra Data Services Platform; OGC services published for programmatic use."
+    tos_note: "Open Government Licence v3.0. Attribution statement: © Crown Copyright."
+    content_assertion: "GRAY_INDEX"
+    used_by_scripts: [noise.py, area_scan.py]
+    used_for: [road_noise, rail_noise, quiet]
+    last_tested: 2026-09-11
+    note: "Lden (day-evening-night, night +10 dB) and Lnight (23:00-07:00) modelled outdoors at 4 m on a 10 m grid from 2021 traffic; the raster holds 0 where nothing is drawn (floor 40 dB Lden / 35 Lnight), which the script reports as 'not drawn', never 0 dB. Round 3 polygons start at 55 dB (Lden) / 50 (Lnight). Only road and rail traffic are mapped. Endpoints verified in docs/research/defra-noise-endpoints-2026-09-11.md."
+
   # ------------------------------ commercial portals and review sites -------
   - id: commercial_portals_and_review_sites
     name: "Rightmove; Zoopla; OnTheMarket; OpenRent; HomeViews; Trustpilot; Google reviews; Airbnb; Booking.com"

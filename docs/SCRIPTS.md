@@ -1319,18 +1319,48 @@ the person's own questions, then the list of what is still unknown. Blank in the
 "not yet known". Only those keys reach the page. The assistant's summary and next steps go in the
 box at the top. Contract: `references/requirements-contract.md`.
 
+## `noise.py` — modelled road and rail noise at a point, in dB (Defra strategic noise maps, OGL v3, no key)
+```
+noise.py --lat 51.4926 --lng -0.2284
+noise.py --postcode "W6 0QU"                                  # postcode centroid, not a door
+noise.py --lat 51.4926 --lng -0.2284 --rail --night           # add rail, and the night-time layers
+noise.py --points "51.4926,-0.2284;51.4930,-0.2300" [--no-band]   # up to five points, one summary
+```
+Reads the 2022 maps (Round 4, 2021 traffic) with a WMS `GetFeatureInfo` at the point: Lden (the
+day-evening-night average, night weighted +10 dB) and, when asked, Lnight (23:00–07:00), for road
+and rail; and the 2017 band polygon (Round 3) the point sits in. One JSON of about 1,500–3,000
+characters (`vet-flat/noise/1`): `points`, `summary` (min/max per layer), `band_2017`, `reading`
+(plain sentences anchored to the WHO 2018 guideline values — road Lden 53 dB, Lnight 45; rail 54 / 44),
+`scale`, `sources`, `licence`, `caveats`, `not_found`. The raster holds 0 where nothing is drawn: the
+script says "not drawn", never "0 dB". Measured 2026-09-11: King Street, Hammersmith 75.3 dB Lden /
+67.3 Lnight (band 70.0–74.9); a point on Hampstead Heath 40.6 (the floor). These are modelled
+outdoor levels, not a measurement at the window; a 3 dB step is just noticeable.
+
 ## `area_scan.py` — one call for "is this street quiet, safe, and is anything being built?" (open registers, no key)
 ```
 area_scan.py --postcode "N6 5QD"
-area_scan.py --lat 51.5732 --lng -0.1462 [--months 6] [--crime-half-m 150] [--planning-radius 250] [--roads-radius 300]
+area_scan.py --lat 51.5732 --lng -0.1462 --street "Milton Park"       # the street is known: say so
+area_scan.py --postcode "N6 5QD" --depth lite|standard|deep [--months 6] [--crime-half-m 150] [--roads-radius 300]
 ```
-Runs the four register scripts the skill already has — police crime in a ~300 m box over six
-months, GLA planning applications within 250 m (nearest five, short fields), OpenStreetMap roads,
-rail, night economy and parks within 300 m, the 2025 living-environment deciles — and prints one
-JSON of about 5,000 characters with a fixed shape (`vet-flat/area-scan/1`): `where`, `quiet`,
-`crime`, `works`, `living_environment`, `reading` (four plain sentences plus the "area, not the
-flat" caveat), `sources`, `not_found`. A failed register is listed, never guessed. Measured on
-2026-09-11: the same question answered by free web research cost one host 815,000 tokens in a
-single turn; this call is about 1,600 tokens to read. Needs a postcode (from the listing, the EPC
-or the person) or a point; an outcode centroid is not a street.
+Runs the register scripts the skill already has — OpenStreetMap for the street itself (`--street`,
+or the nearest named street) and for roads, rail, night economy and parks within 300 m; Defra's
+noise maps (`noise.py`) at points along the street; police crime in a ~300 m box over six months
+(an empty box is re-run at 600 m, because police map points snap to a few street locations); GLA
+planning applications within 250 m (the nearest five; "notable recent" = since 2024 and either big or a
+works-about-to-start signal such as a demolition method statement, dust plan or hoarding, with
+householder extensions filtered out and one site listed once); the 2025 living-environment deciles —
+and prints one JSON of about 5,000–6,000 characters with a fixed shape (`vet-flat/area-scan/2`):
+`where`, `street`, `quiet`, `noise`, `crime`, `works`, `living_environment`, `reading` (plain sentences
+plus the "quiet ≠ safety" and "area, not the flat" caveats), `sources`, `not_found`. A failed register
+is listed, never guessed.
 
+Depth changes the requests, not the size of the summary: **lite** = the given point, four registers
+and road noise there (about 5 requests); **standard** = the scan moves onto the street, samples road
+noise at three points about 120 m apart, adds the 2017 band and the stage of the biggest recent
+application (about 10 requests, 40–50 s); **deep** = standard plus rail and night-time noise and
+planning within 500 m (about 19 requests). When the given point is more than 40 m from the street
+the reading says so ("a centroid, not a door") and every register runs from the street point: on
+2026-09-11 the W6 outcode centroid sat 236 m from Southerton Road, which the expensive free-research
+run had found by hand. Measured the same day: the question answered by free web research cost one
+host 815,000 tokens in a single turn; this call is about 1,800 tokens to read. Needs a postcode (from
+the listing, the EPC or the person) or a point; give `--street` whenever the name is known.
