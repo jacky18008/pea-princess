@@ -1,23 +1,25 @@
-# 本機真實研究與 Persona 對話實驗室
+# 本機 Agent 輸出與 Persona 對話測試台
 
 這是一個可互動的本機 alpha。你可以觀察既有 persona 與 Codex 的整段對話，也可以中途插話。產品交付是下載的 skill／tool，由使用者自己的 agent 執行；這個 UI 是本機驗收工具。最新發布範圍與訂閱政策見 `docs/local-product-and-provider-policy.md`。
 
 ## 開啟與操作
 
-在 repo 根目錄執行 `python3 tools/persona_playground.py --port 8765`，開啟 `http://127.0.0.1:8765`。需要已登入的本機 Codex CLI；使用既有 ChatGPT 登入，不把憑證放入網頁。Python 標準函式庫即可，不需 npm install。
+在 repo 根目錄執行 `python3 tools/start_playground.py --port 8765`，開啟 `http://127.0.0.1:8765`。需要已登入的本機 Codex CLI；使用既有 ChatGPT 登入，不把憑證放入網頁。Python 標準函式庫即可，不需 npm install。
 
-1. 選「真實研究」，輸入自己的找房需求；或選「固定資料測試」觀察 16 個 persona。確認模型及用量上限後建立對話；建立、重整、切換紀錄都不呼叫模型。
-2. 真實研究由你的訊息推進；「下一步」執行一則回答，之後等你回覆，不另呼叫模型扮演你。固定資料測試可選「連續對話」，沿用 persona controller 的文件釋出和停止條件。
-3. 在輸入框插入問題。新版真實研究會立即保存原话並使舊比較失效；正在產生的舊提案結束後仍記帳，但不發布，接著處理新輸入。多則排隊文字保持順序合併處理。這不是直接改寫正在生成的同一個模型 turn。
-4. 真實研究直接輸入提高／降低預算或其他條件，不需勾選；普通追問裡的條件也會保存。程式只解析支援的明確語句，模糊預算、未知需求與複雜例外保留待釐清原文。「查看目前條件與待辦」可展開檢查。合成人物測試才使用「同時改變情境條件」勾選框。
-5. 「暫停」在目前呼叫結束後停止；「恢復已保存的結果」只讀取既有模型證據，不自動 retry。未知用量仍停止；不能把它當零。
-6. 匯出檔以 PRIVATE 命名，包含對話、插話、動作和每個 actor 的 usage。它不是公開回饋資料，也不會加入 Git。
+啟動器先把這次使用的程式與 skill 凍結成私人快照，印出路徑與 manifest，再啟動測試台。之後 Claude 或其他工作修改主 repo，不會中斷這份快照的對話。需要測新版時重新啟動並建立新場；舊記錄不改寫。快照採 Git 追蹤檔案的目前內容，另明確包含既有生成的 `dist/prompt-pack/INSTRUCTIONS.md`；新建但尚未加入 Git 的程式不會自動帶入。
+
+1. 選「Agent 對話測試」，輸入需求；或選「合成人物測試」觀察 persona。確認模型及用量上限後建立對話；建立、重整、切換紀錄不呼叫模型。
+2. 按「研究並回覆」執行第一則回答。之後直接在下方送出追問或條件變更，每則真人訊息推進一次回答，不另呼叫模型扮演使用者。
+3. 顯示的是 Codex 回传的原始 `message` 與選項，沒有經過房源比較模板改寫。完整 JSON 回答、輸入歷史、工具事件、用量及版本指紋保存在 `.pea-playground/<session-id>/`，供 eval 檢閱。
+4. 可以測一般租屋問答、比較與中途改要求。已有房源資料直接貼入正文；目前 skill 不開房源連結。Codex 可讀取 repo 的 skill 文件、參考檔和腳本，並依 skill 規則查開放公共資料。這條路徑不執行 host 的刊登頁面擷取。
+5. 執行中插話會排隊，在目前回答完成後依序處理，不是原生同一 turn 的即時 steering。「暫停」等目前呼叫完成後停止；「恢復已保存的結果」只讀既有證據，不自動 retry。未知用量仍停止。
+6. 匯出檔以 PRIVATE 命名，包含對話、插話、動作和用量，不進 Git。重啟後可接續同一版本且仍有額度的對話；既有兩次上限場不被偷偷提高，測新版請建立新場。
+
+這是模型輸出的測試，不把輸出當成已通過程式核對的推薦。此路徑的 `current_comparison` 為空。原有條件核對工具保留獨立測試，產品整合時仍須另外驗證它與 agent 回覆的一致性。
 
 新版回答先給具體比較或可行的下一步，再漸進釐清偏好。需要澄清時，回答下方會顯示最多三題的選項；沒有預先勾選，可以只答部分問題，也能自行填寫。送出會保存完整題目與回答，接著由 Codex 回應。這是測試台的選項介面；正式 skill 使用原廠 host 實際提供的澄清工具，並非這裡已接上原生 Codex／Claude 互動工具。
 
-新版真實比較的選項來自已核對的 host 回覆。送出後，訊息／插話紀錄保留完整題目及回答；條件解析只接使用者實際選擇或自填的文字。只有與目前有效回覆完全相符的題目前綴才可移除，避免把程式自己提出的問題誤當使用者新增要求。
-
-真實研究通過本機 Codex CLI 啟用公開網頁搜尋，載入 repo 當前的 skill 和相關說明；它不使用 persona 虛構文件。回覆應提供來源、日期及適用範圍；公開刊登仍不等於已確認可入住。來源失敗時保留缺口，不切成虛構候選。新版模型只提出最多三個候選網址及本次比較重點，本機在發布正式比較前獨立擷取原頁，保存原始HTML、抽取文字、時間與hash；目前僅支援Foxtons、Grainger（含prod主機）、Get Living、Fizzy列明的公開主機。失敗或超限也保留；這不是原始模型工具結果或可租確認。完整小型快照會提供給後續研究，較大正文明示未載入。程式從完整本機快照提取有限房源欄位，與目前條件核對，再一次產生比較、排序及待辦；模型原提案留在私人收據，不能自行把超標房源改成例外。每次閱讀／匯出會重新核對來源與條件。來源或版本變動時，舊比較標為歷史且不進 current_comparison。固定資料測試仍明示合成來源並關閉搜尋；兩種結果不能混報。實際驗收與分級見 [本輪紀錄](live-evidence-2026-09-10/plan.md)及[停止後修正](live-evidence-2026-09-10/plan-v2.md)。
+舊版「真實找房研究」使用 `output_mode: checked`：模型只交候選 URL 與欄位，host 生成比較、排序和待辦。其舊紀錄及 API 相容性保留，但瀏覽器建立的新真人場明確指定 `output_mode: agent`。不要把舊模板回覆當成新版 agent 對話品質的證據；新版也不繼承舊場的核對標章。
 
 選項中的 gpt-6-astra 是這台電腦檢查到的設定模型；也提供 Terra／Sol。思考強度明確設為 low，沒有繼承本機的 ultra。不同帳號的模型可用性以實際呼叫為準；失敗不自動切模型。沒有任何 Claude 呼叫。
 
@@ -39,7 +41,7 @@ Persona 的 END 也可能代表沒耐心，因此畫面寫「Persona 結束」�
 
 伺服器只綁定 127.0.0.1；Host、Origin、Sec-Fetch-Site、自訂 API header 與 CSP 防止普通外站網頁直接使用本機介面。沒有 CORS、任意檔案服務或 shell endpoint。每次 Codex 使用專案外的臨時工作目錄、stdin prompt、read-only、ephemeral、忽略使用者設定並關閉額外 project-doc 讀取。這不等於 OS 級完整讀取隔離；固定資料模式的工具事件會使呼叫失敗；真實研究明確允許工具事件並保留原始紀錄。政策允許的是唯讀公開研究，沒有授權聯絡／付款。這些提示和事後紀錄不是工具權限防火牆，不能撤回已發生的讀取。
 
-真實研究目前是一個有明確欄位的候選比較介面：一般閒聊、任意租屋知識問答、複雜條件例外與超過三戶的長清單，尚不能靠這個固定呈現器完整處理。不要把原生 skill 的開放式對話能力，與本機介面的程式核對範圍混為一談。完整[接入契約](../skills/vet-flat/references/live-eligibility.md)及[本輪驗收](live-eligibility-2026-09-11/results.md)分別說明支援與實測界線。
+舊 `checked` 路徑是一個有明確欄位的候選比較介面；新版 `agent` 路徑保留模型自己的開放式回答。不要把原生 skill 的開放式對話能力，與本機介面的程式核對範圍混為一談。完整[接入契約](../skills/vet-flat/references/live-eligibility.md)及[本輪驗收](live-eligibility-2026-09-11/results.md)分別說明支援與實測界線。
 
 只有單一 model worker；固定資料模式的回答者與 persona 共用上限，真實研究不額外產生 persona。Token 計數是 input + output，cached input 已包含在 input；不是實際帳單或訂閱剩餘額度。一則呼叫可能超出上限。對話採完整歷史 replay，這次沒有宣称能省掉歷史 token；native thread caching／steering 是可獨立評估的下一個 adapter。
 
@@ -58,3 +60,7 @@ Persona 的 END 也可能代表沒耐心，因此畫面寫「Persona 結束」�
 [Codex 非互動模式](https://learn.chatgpt.com/docs/non-interactive-mode) 支援 stdin、JSONL 事件、既有登入與 resume；這版使用可審計的有界 exec replay。[進階設定](https://learn.chatgpt.com/docs/config-file/config-advanced) 說明 project-doc discovery 限制。[App Server](https://learn.chatgpt.com/docs/app-server) 提供真正的 turn/steer、turn/interrupt 與 thread/resume；導入時仍須把版本和 usage accounting 接上，不能把本版排隊插話宣稱成同一 turn 的即時 steering。
 
 本輪已完成一次 P4 真實 smoke：3 個 persona 回合加一次插話，6 次呼叫、143,979 processed tokens。該結果屬於修正前的 `04373de`，不能拿來認證修正後品質。完整[結果與後續清單](persona-playground-results.md)、[逐筆用量](persona-playground-validation.json)、[事前固定計畫](persona-playground-smoke-plan.json)均已保存；歷史 benchmarks 保持原樣。
+
+## 2026-09-11 輸出測試修正
+
+這次只恢復可測實際回答的測試台，不繼續草稿保存或介面設計。此工具仍使用唯讀 Codex exec、low effort 與完整歷史 replay；模型可按需讀取完整 skill 包，但不測原生 host 的檔案寫入、同 turn steering 或其他模型。它不等於 Codex、Grok、Claude Code 的跨 host 驗收。最新操作與 smoke 證據見 [輸出測試結果](agent-output-platform-2026-09-11.md)。
