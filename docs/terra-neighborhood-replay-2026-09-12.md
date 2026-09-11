@@ -179,6 +179,8 @@ available in deep. Calling this an unauthorized escalation overstates the eviden
 The demonstrated issue is that requested baseline, effective tool depth and scope
 change were not reconciled in the record, so it cannot validate standard use/cost.
 This distinction matters for legitimate mid-conversation changes in user priorities.
+The evaluator appended a correction and rates this as a moderate protocol and
+traceability mismatch, not proven violation of a hard user spending limit.
 
 Before another quality run, prioritize the formatter crash, explicit effective-depth
 and scope-change recording, pending-scan/result reuse, and partial source coverage.
@@ -186,6 +188,42 @@ An experiment that requires fixed depth must state it to the actor and check it;
 the product must continue to support explicitly authorized changes of scope.
 Do not solve this by merely adding another long prose instruction. This turn
 stopped at three new native calls, with no Claude calls or automatic model retries.
+
+## Fixes shipped after the actor run
+
+- `188d01a` fixes the nullable/omitted planning-field crash, retains known zero
+  distances, avoids treating unknown distances as zero coverage, and keeps
+  unidentified planning rows distinct. Seven new offline regressions include
+  a mocked complete scan path that retains the other registers' results.
+- `3f40ea4` fixes Inspector's usage interpretation. Four web-search item events
+  have duplicate nested JSON keys. The reader can identify their unique,
+  non-terminal envelopes without accepting the ambiguous payloads. It retains
+  four explicit integrity warnings, while independently validating the unique
+  strict terminal event against the stored direct counters. Malformed/ambiguous
+  terminal data, ambiguous outer event types and inconsistent counters still
+  produce unknown usage. Saved raw events are never rewritten.
+
+The original Inspector packets remain unchanged. Reinspection through the actual
+server API now reports 847,076 processed tokens for the probe and still flags the
+four tool-payload gaps. The two earlier calls retain their original verified
+usage. All 24 pre-existing session files, original PDFs/replay copies and new
+physical checkpoint hashes were checked unchanged after restarting.
+
+The merged source `3f40ea4` passed **2,571 offline tests** in 112.569 seconds.
+All 767 tracked source files remained byte-identical throughout that check.
+The rebuilt 100-member public ZIP is
+`6df6f79a428a3bca5dae1568902f66583e3c58dd97811a8356ac3574fe73b6f3`.
+Default freeze verified it against current source and created runtime
+`20260911T233254Z-56ffdba4be2b`, manifest
+`2f9f35f037e2d8514d153dd83cc582bda8f0375aa4de48c25c646a1e1af00ba4`.
+The local test server was restarted on this package after confirming no active
+call. A real stale-ZIP startup attempt before rebuilding was rejected and named
+`scripts/area_scan.py`, demonstrating the release guard on the changed artifact.
+
+This later release received no additional native model call. It fixes the observed
+code defects; it does not establish repaired conversation quality, eliminate
+duplicate scans, or validate standard-depth cost. The three retained actor
+responses continue to belong to the earlier `fd8dfb…` archive.
 
 ## Validation and retention
 
