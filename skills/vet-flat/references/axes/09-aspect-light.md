@@ -51,6 +51,7 @@ Ask the user for:
 - **Marketing photography for a rental building is shot per unit type, not per flat** ("example furniture only"), so at best it fixes the orientation of the stack, not of this flat.
 - **Date a window photograph** from landmarks on the skyline, the direction of shadows, leaf cover and any scaffolding — then say what the photograph can and cannot establish.
 - **A split level with a spiral staircase** is a daily tax; note it here and again on axis 12.
+- **Lower ground, garden and basement flats** are where the advert and the room differ most. The listing may say "garden flat" or "ground floor" where the floor plan, the EPC or the photographs say lower ground; photographs are shot upward toward the window. Check: window head height and any light well (sky openness is close to zero below pavement level), damp marks low on the walls and the smell on the viewing day, flood risk for the postcode (`ea_long_term_flood_risk` in `sources.yaml`, open), pavement noise and footfall at the window, security grilles, and where the bins live. A lower ground flat is not a rejection; an undisclosed one is an identity landmine on axis 1 and an almost-no-light question here.
 - **A rejection made on orientation alone should be revisited** once sky openness is measured: several units rejected for "no direct sun" turned out to be acceptable on openness, while their other defects stood unchanged.
 
 ## What goes into the report

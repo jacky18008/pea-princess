@@ -312,17 +312,18 @@ class TestNoLinkFetching(unittest.TestCase):
 
     def test_the_router_says_a_link_is_never_opened(self):
         s = read("SKILL.md")
-        self.assertIn("A listing link is never opened", s)
-        self.assertIn("fetch/browser tool", s)
-        self.assertIn("never read by skill or host tools", s)
+        self.assertIn("does not open listing links and never suggests it", s)
+        self.assertIn("the skill does not read them", s)
+        self.assertIn("PDF, screenshots or text", s)
 
     def test_the_menu_asks_for_the_page_not_the_link(self):
         s = read("references", "onboarding.md")
         line = [l for l in s.splitlines() if l.startswith("1. **I have a listing**")][0]
-        self.assertIn("copy the page text", line)
-        self.assertIn("not the link", line)
+        self.assertIn("PDF, screenshots or copied text", line)
+        self.assertIn("I do not open listing sites", line)
 
     def test_the_one_sentence_rule_covers_fetch_tools_and_alert_emails(self):
         s = read("references", "listing-fields.md")
-        self.assertIn("not with a fetch tool, a browser tool or curl", s)
-        self.assertIn("The links inside it are not opened either", s)
+        self.assertIn("does not suggest that anything else should", s)
+        self.assertIn("A link carries no photos and no floor plan", s)
+        self.assertIn("does not open the links inside it either", s)

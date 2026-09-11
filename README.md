@@ -71,7 +71,7 @@ python3 -m unittest tests/test_epc.py
 ```
 
 ## Sources you will not find here
-Rightmove, Zoopla, OnTheMarket, OpenRent, HomeViews, Trustpilot, Airbnb, Booking.com are listed by name only. Their terms forbid automated access, so this project gives no method for them; the skill asks you for the page text or a saved copy and never opens a listing link, even when you paste one.
+Rightmove, Zoopla, OnTheMarket, OpenRent, HomeViews, Trustpilot, Airbnb, Booking.com are listed by name only. Their terms forbid automated access, so this project gives no method for them; the skill asks you for the page (a PDF, screenshots or the text) and does not open listing links itself.
 
 ## Licence and attribution (proposed)
 Documentation and skill text: CC BY 4.0. Code: MIT. Every report carries "Generated with vet-flat <version> — <source URL>". Please keep it.

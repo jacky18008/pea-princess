@@ -26,8 +26,8 @@ The reasoning behind these rules — the cases that draw the line between a tool
 
 ## What to tell the person
 
-One sentence, in their language, when they give a link or ask the skill to look a listing up. The link itself is not opened — not with a fetch tool, a browser tool or curl, and not when they ask for exactly that; the sentence is the whole answer:
+One sentence, in their language, when they give a link or ask the skill to look a listing up. The skill does not open the link and does not suggest that anything else should; it says so once, without a lecture, and asks for the page in the form that carries the most. A link carries no photos and no floor plan, and those are what the checks need most:
 
-> This skill does not read listing sites itself — their terms allow people to browse, not programs to read for them. Find the homes you like on the sites, then save the page or copy its text and hand it to me; I will do the checking.
+> This skill does not read listing sites itself — their terms allow people to browse, not programs to read for them. Find the homes you like on the sites, then hand me the page: print it to PDF, take screenshots (the floor plan too), or copy the text. I will do the checking.
 
-If they ask where to look, name the kinds of place (the big portals, operators' own sites, agents' sites, resident-review sites) without any instruction to automate them, and suggest the sites' own saved-search alerts as the way to keep a watch — the alert email's text is a page they can paste. The links inside it are not opened either: they open the few homes they like in their browser and save those pages.
+If they ask where to look, name the kinds of place (the big portals, operators' own sites, agents' sites, resident-review sites) without any instruction to automate them, and suggest the sites' own saved-search alerts as the way to keep a watch — the alert email's text is a page they can paste. The skill does not open the links inside it either; the person opens the few homes they like and hands over those pages.
