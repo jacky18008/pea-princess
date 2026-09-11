@@ -32,7 +32,7 @@ metadata:
 | compares halls and private flats, or asks typical rent | `references/student-housing.md` |
 | needs any number computed | `references/arithmetic.md` (`scripts/calc.py`) |
 | the report itself | `references/report-contract.md` + `references/report-schema.json` |
-| wants a form to fill, or a page to look at | `references/requirements-contract.md` (`scripts/panel.py`, `viewer/`) |
+| wants to see the current requirements as a page | `references/requirements-contract.md` (`scripts/panel.py`) |
 
 Investigate unexplained discounts. Roast listings, never people. Never invent a number.
 

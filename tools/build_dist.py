@@ -107,7 +107,7 @@ def tracked_files(root, paths):
 
 def public_members():
     rows = []
-    for rel in tracked_files(ROOT, ["skills/vet-flat", "viewer/viewer.html", "viewer/requirements.html"]):
+    for rel in tracked_files(ROOT, ["skills/vet-flat", "viewer/viewer.html"]):
         if distributable(rel):
             rows.append((checked_file(ROOT, rel), rel))
     if not any(rel == "skills/vet-flat/SKILL.md" for _, rel in rows):
@@ -153,8 +153,8 @@ def main():
                 short = rel[len("skills/vet-flat/"):] if rel.startswith("skills/vet-flat/") else rel
                 if short.startswith(("references/", "profiles/")) or short == "profile.template.yaml":
                     target = os.path.join(pack, short)
-                elif rel in ("viewer/viewer.html", "viewer/requirements.html"):
-                    target = os.path.join(pack, os.path.basename(rel))
+                elif rel == "viewer/viewer.html":
+                    target = os.path.join(pack, "viewer.html")
                 else:
                     continue
                 os.makedirs(os.path.dirname(target), exist_ok=True)

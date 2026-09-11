@@ -1305,15 +1305,15 @@ $ living_env.py lookup --postcode "N21 1BD"
   "how_to_use": "Context for axis 12, never a filter and never a verdict. ..." }
 ```
 
-## `panel.py` — the requirements page from profile.yaml (no network, no key)
+## `panel.py` — the requirements page, a read-only view of profile.yaml (no network, no key)
 ```
-panel.py --profile profile.yaml > requirements.html
-panel.py --profile profile.yaml --out requirements.html --summary "Two areas within 30 minutes." --next "Send me a listing page" --revision 3
+panel.py --profile profile.yaml --out requirements.html
+panel.py --profile profile.yaml --out requirements.html --revision 3 --summary "Two areas within 35 minutes." --next "Send me a listing page"
 ```
-Writes `viewer/requirements.html` with the profile's page keys inlined (destination and its
-precision, commute limits, the monthly ceiling, home type, move-in window, priorities,
-deal-breakers, depth, language, the person's own questions) and, optionally, the assistant's
-summary and next steps. Only those keys go into the page: story summaries and seeds stay in the
-profile. The person opens the file from disk in any browser, edits, and copies the YAML back.
-Without a shell, the same page takes a pasted profile. Contract: `references/requirements-contract.md`.
-
+The person talks to the assistant; the assistant edits `profile.yaml` and re-runs this after every
+change; the person opens `requirements.html` whenever they want to see where things stand. The page
+has no form and no script: the destination and how exact it is, the commute limits, the monthly
+ceiling and what it covers, home type, move-in window, priorities, deal-breakers, depth, language,
+the person's own questions, then the list of what is still unknown. Blank in the profile shows as
+"not yet known". Only those keys reach the page. The assistant's summary and next steps go in the
+box at the top. Contract: `references/requirements-contract.md`.
