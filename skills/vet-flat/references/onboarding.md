@@ -35,11 +35,13 @@ For a new renter, begin with a small comparison grounded in real evidence: the p
 
 After this first small batch, make useful progress with what is known: inspect the supplied listing, compare the stated costs, or explain the next concrete step. Keep other gaps visible for later; do not replace six questions with two consecutive batches of three before doing any work. Accept “don't know”; do not silently invent a budget, destination, move-in date or hard requirement. An illustrative assumption is provisional and cannot pass a filter. Store actual answers where the host supports saving, and summarize only what changed in plain language.
 
-| Priority when starting a search | One clarification | If unknown | Internal field |
-|---|---|---|---|
-| 1 | Where do you need to get to most days? | Review other supplied evidence; do not claim a commute is suitable yet | `commute.destination` |
-| 2 | What is your maximum total monthly cost, including rent and bills? | Show rent and known bills separately; budget fit remains unknown | `budget.all_in_pcm_ceiling` |
-| 3 | When do you need to move in? | Compare known availability without claiming it fits | `move_in_window` |
+| Priority when starting a search | One clarification | Answer type | If unknown | Internal field |
+|---|---|---|---|---|
+| 1 | Where do you need to get to most days? | **typed** (a place name, address or postcode) | Review other supplied evidence; do not claim a commute is suitable yet | `commute.destination` |
+| 2 | What is your maximum total monthly cost, including rent and bills? | **number** (£ per month; "not sure" is fine) | Show rent and known bills separately; budget fit remains unknown | `budget.all_in_pcm_ceiling` |
+| 3 | When do you need to move in? | **date or month** | Compare known availability without claiming it fits | `move_in_window` |
+
+**Which tool asks which.** A host's choice tool (Claude Code's option picker, Codex's question tabs, Gemini's ask tool) is for answers that come from a short fixed set: home type, the deal-breaker menu below, yes/no, "how deep". Typed answers — a destination, a figure, a date, anything only the person knows — are asked in plain text, or through the tool's own free-text field when it has one. Never invent options for a typed answer ("Central / East / West" is not a destination). One message, at most three questions, each with its default or "not sure" stated; in a plain chat box, the same three lines as text.
 
 This is a menu, not a required form. A signing deadline, unsafe room or supplied shortlist takes priority over search intake. Ask about home type, space, arrival time, deal-breakers, temporary accommodation or income checks only when the next decision needs it. Offer recurring personal questions later, when useful; they go to `my_questions` per section 2b.
 
@@ -213,7 +215,7 @@ Eight changed lines in the preference block of `profile.yaml` (the summary block
 7. **Money safety.** Never pay anything before you have viewed (in person or on a verified live video) and have a written tenancy. Deposits go to a protection scheme, never to a personal bank account. Requests to move to WhatsApp or to transfer money "to secure it" are a reason to walk.
 8. **Never sign on the viewing day.** Sleep on it. Ask two questions that could kill the deal (the skill writes them for you).
 9. **Streets, roads, rails.** Police crime data is public by street; roads and railways are on the map; ask which side the windows face. "Quiet side or road side" is often the same price for two different homes.
-10. **Where to look.** The big listing portals, the rental operators' own sites, and resident-review sites. The skill tells you exactly what to open and paste; it does not scrape them.
+10. **Where to look.** The big portals (Rightmove, Zoopla, OnTheMarket), direct-from-landlord sites (OpenRent), rooms (SpareRoom), the build-to-rent operators' own sites, your university's accommodation office, and resident-review sites for the building. Browse them as a person under their terms; set a saved-search alert and forward the alert email. The skill tells you exactly what to open and hand over; it does not read those sites itself.
 
 Do not recite all ten facts by default. Pick the fact that helps the current decision, show an example, and let the next question follow from it.
 

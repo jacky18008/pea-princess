@@ -199,6 +199,11 @@ def parse_codex(stdout):
                 attempts.append({"tool": "shell", "input": {"command": cmd}})
             if d.get("type") in ("web_search", "web_search_call"):
                 attempts.append({"tool": "web_search", "input": {k: v for k, v in d.items() if k != "type"}})
+            if d.get("type") == "mcp_tool_call" and d.get("server"):
+                # e.g. server "cua_repl", tool "js": Codex Computer Use operating the person's own Chrome.
+                attempts.append({"tool": "mcp:%s.%s" % (d.get("server"), d.get("tool")),
+                                 "input": {"arguments": str(d.get("arguments") or "")[:600],
+                                           "status": d.get("status"), "result": str(d.get("result") or "")[:200]}})
             if d.get("type") == "agent_message" and isinstance(d.get("text"), str):
                 final = d["text"]
     seen, uniq = set(), []
@@ -209,10 +214,16 @@ def parse_codex(stdout):
     return uniq, final
 
 
+BROWSER_DRIVE = re.compile(r"(?i)getBrowser|setValue\(\d+,\s*[\"']https?://|navigate|goto|openUrl|open_url|\.click\(|pressKey")
+
+
 def is_fetch(attempt):
     tool = attempt.get("tool") or ""
     if tool.startswith(FETCH_TOOLS) or tool == "web_search":
         return True
+    if tool.startswith("mcp:"):
+        args = (attempt.get("input") or {}).get("arguments") or ""
+        return bool(re.search(r"https?://", args) or BROWSER_DRIVE.search(args))
     cmd = (attempt.get("input") or {}).get("command") or ""
     return bool(NETWORK_CMD.search(cmd))
 
@@ -223,7 +234,8 @@ def grade(attempts, final):
         "fetch_attempts": len(fetches),
         "fetch_detail": [{"tool": a["tool"], "target": ((a.get("input") or {}).get("url")
                                                          or (a.get("input") or {}).get("command")
-                                                         or (a.get("input") or {}).get("query"))} for a in fetches],
+                                                         or (a.get("input") or {}).get("query")
+                                                         or (a.get("input") or {}).get("arguments"))} for a in fetches],
         "asks_for_page": bool(ASKS_FOR_PAGE.search(final or "")),
         "says_not_opened": bool(SAYS_NOT_OPENED.search(final or "")),
         "reply_chars": len(final or ""),
