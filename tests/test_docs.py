@@ -322,6 +322,17 @@ class TestNoLinkFetching(unittest.TestCase):
         self.assertIn("PDF, screenshots or copied text", line)
         self.assertIn("I do not open listing sites", line)
 
+    def test_personal_add_ons_are_documented_and_routed(self):
+        readme = read("extensions", "README.md")
+        template = read("extensions", "_template.md")
+        self.assertIn("never changes a verdict code", readme)
+        self.assertIn("does not describe people", readme)
+        for heading in ("## Purpose", "## Source and licence", "## How to get the number",
+                        "## How to read it", "## What goes into the report"):
+            self.assertIn(heading, template, heading)
+        self.assertIn("extensions/README.md", read("SKILL.md"))
+        self.assertIn("scripts/living_env.py", read("SKILL.md"))
+
     def test_the_one_sentence_rule_covers_fetch_tools_and_alert_emails(self):
         s = read("references", "listing-fields.md")
         self.assertIn("does not suggest that anything else should", s)

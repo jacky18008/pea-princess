@@ -32,7 +32,7 @@ On a phone
 | Surface | Blocks | Source |
 |---|---|---|
 | README — the front page | 18 | `README.md` |
-| docs/USING.md — the plain-words walkthrough | 30 | `docs/USING.md` |
+| docs/USING.md — the plain-words walkthrough | 33 | `docs/USING.md` |
 | docs/INSTALL.md — install page | 9 | `docs/INSTALL.md` |
 | docs/EXPERIMENTS.md — which configuration to run | 7 | `docs/EXPERIMENTS.md` |
 | onboarding.md — what the skill says to a new user | 30 | `skills/vet-flat/references/onboarding.md` |
@@ -40,7 +40,7 @@ On a phone
 | inputs.md — the one message that asks the user for what is missing | 1 | `skills/vet-flat/references/inputs.md` |
 | profiles/ — the sentences a profile carries | 14 | `skills/vet-flat/profiles/*.yaml` |
 | seed.py — the seed card sentences (read-only here) | 25 | `skills/vet-flat/scripts/seed.py` |
-| **Total** | **140** | |
+| **Total** | **143** | |
 
 ---
 
@@ -419,13 +419,13 @@ Use the report to decide what to investigate, then see the flat and speak with t
 
 ### deck:using:16
 
-- source: `docs/USING.md` · L44
-- under: ## 繁體中文
-- lang: zh-TW
+- source: `docs/USING.md` · L42
+- under: ### Before arriving or committing
+- lang: en
 - write-back: yes
 
 ```text
-不用寫程式，也不用先填完整問卷或挑技術設定。按照[安裝說明](INSTALL.md)加入技能後，可以直接說：
+**Your own little secretary.** Anything personal or local that the shared skill does not check — the walk to your gym, a school's catchment, a noise source you know about, a data set you trust — goes into `extensions/` in your copy as a one-page add-on (there is a template). Add-ons are labelled in the report, never change the verdict by themselves, read no listing or review sites, and never describe an area by who lives there.
 ```
 
 ### deck:using:17
@@ -436,12 +436,23 @@ Use the report to decide what to investigate, then see the flat and speak with t
 - write-back: yes
 
 ```text
-- 「我十月要去倫敦，先給我例子，教我怎麼挑。」
+不用寫程式，也不用先填完整問卷或挑技術設定。按照[安裝說明](INSTALL.md)加入技能後，可以直接說：
 ```
 
 ### deck:using:18
 
-- source: `docs/USING.md` · L47
+- source: `docs/USING.md` · L48
+- under: ## 繁體中文
+- lang: zh-TW
+- write-back: yes
+
+```text
+- 「我十月要去倫敦，先給我例子，教我怎麼挑。」
+```
+
+### deck:using:19
+
+- source: `docs/USING.md` · L49
 - under: ## 繁體中文
 - lang: zh-TW
 - write-back: yes
@@ -450,26 +461,15 @@ Use the report to decide what to investigate, then see the flat and speak with t
 - 「我想找安靜的一房，每月總花費（房租加帳單）不要超過 £2,200。」
 ```
 
-### deck:using:19
+### deck:using:20
 
-- source: `docs/USING.md` · L48
+- source: `docs/USING.md` · L50
 - under: ## 繁體中文
 - lang: zh-TW
 - write-back: yes
 
 ```text
 - 「比較這兩間，告訴我看房時要查什麼。」
-```
-
-### deck:using:20
-
-- source: `docs/USING.md` · L49
-- under: ## 繁體中文
-- lang: zh-TW
-- write-back: yes
-
-```text
-- 「先插問一下：擔保人是做什麼的？」
 ```
 
 ### deck:using:21
@@ -480,7 +480,7 @@ Use the report to decide what to investigate, then see the flat and speak with t
 - write-back: yes
 
 ```text
-助理會先用例子或你提供的房源做出有用的比較，再從你的反應了解偏好。通常一次問零到兩題，必要確認最多三題；「還不知道」也可以，不必先把所有條件想清楚。
+- 「先插問一下：擔保人是做什麼的？」
 ```
 
 ### deck:using:22
@@ -491,7 +491,7 @@ Use the report to decide what to investigate, then see the flat and speak with t
 - write-back: yes
 
 ```text
-能搜尋時，真實房源會附來源與日期；不能搜尋時，教學例子會明確標示為虛構，不會把假設價格說成倫敦現在的行情。需要你貼房源、戶型圖或其他文件時，會說明用途，並繼續做不受影響的部分。聊天軟體有選項介面就用選項，沒有就直接打字。
+助理會先用例子或你提供的房源做出有用的比較，再從你的反應了解偏好。通常一次問零到兩題，必要確認最多三題；「還不知道」也可以，不必先把所有條件想清楚。
 ```
 
 ### deck:using:23
@@ -502,7 +502,7 @@ Use the report to decide what to investigate, then see the flat and speak with t
 - write-back: yes
 
 ```text
-可以先比較「通勤近一點，還是空間大一點」、「臥室安靜，還是生活機能方便」、「租金低一點，還是帳單比較確定」。邊看邊問倫敦的區域、預算、租屋流程或常見問題，也可以請助理教你如何在看房時查證。涉及目前行情或法律的說法，應附上查過的來源。
+能搜尋時，真實房源會附來源與日期；不能搜尋時，教學例子會明確標示為虛構，不會把假設價格說成倫敦現在的行情。需要你貼房源、戶型圖或其他文件時，會說明用途，並繼續做不受影響的部分。聊天軟體有選項介面就用選項，沒有就直接打字。
 ```
 
 ### deck:using:24
@@ -513,7 +513,7 @@ Use the report to decide what to investigate, then see the flat and speak with t
 - write-back: yes
 
 ```text
-答案先說下一步和理由。數字會保留來源與限制：「房東估計通勤 20 分鐘，還沒查證」不等於實際通勤已確認；逐字核對房東訊息，也不代表內容一定正確。每月總花費會說明房租、能源、水、網路與適用的市政稅哪些已知、哪些只是估計。
+可以先比較「通勤近一點，還是空間大一點」、「臥室安靜，還是生活機能方便」、「租金低一點，還是帳單比較確定」。邊看邊問倫敦的區域、預算、租屋流程或常見問題，也可以請助理教你如何在看房時查證。涉及目前行情或法律的說法，應附上查過的來源。
 ```
 
 ### deck:using:25
@@ -524,7 +524,7 @@ Use the report to decide what to investigate, then see the flat and speak with t
 - write-back: yes
 
 ```text
-中途改條件直接說：「總預算提高到 £2,300」、「安靜比採光重要」、「通勤可以久一點，但超過 45 分鐘就不要」。助理會套用明確指示，用白話說明影響，保留例外和其他條件；不需要再確認同一個要求。只有意思不明確，或助理自己提議修改時，才需要釐清。
+答案先說下一步和理由。數字會保留來源與限制：「房東估計通勤 20 分鐘，還沒查證」不等於實際通勤已確認；逐字核對房東訊息，也不代表內容一定正確。每月總花費會說明房租、能源、水、網路與適用的市政稅哪些已知、哪些只是估計。
 ```
 
 ### deck:using:26
@@ -535,7 +535,7 @@ Use the report to decide what to investigate, then see the flat and speak with t
 - write-back: yes
 
 ```text
-隨時可以插問其他問題，再回到原本的找房工作，不必重新交代偏好。跨對話保存取決於你使用的軟體；助理不能假裝已經存好。
+中途改條件直接說：「總預算提高到 £2,300」、「安靜比採光重要」、「通勤可以久一點，但超過 45 分鐘就不要」。助理會套用明確指示，用白話說明影響，保留例外和其他條件；不需要再確認同一個要求。只有意思不明確，或助理自己提議修改時，才需要釐清。
 ```
 
 ### deck:using:27
@@ -546,29 +546,29 @@ Use the report to decide what to investigate, then see the flat and speak with t
 - write-back: yes
 
 ```text
-還沒抵達時，可以比較暫住方案，替實地看房留時間。取消、退款和退房條件都要看實際條款，不能只因為是旅館或服務式公寓就當成有保障。看房時親自確認環境、和仲介或房東談清楚；合約帶回去讀，看房當天不簽約。法律與付款提醒會放在相關決定旁，不會每次開場都貼一整段。
+隨時可以插問其他問題，再回到原本的找房工作，不必重新交代偏好。跨對話保存取決於你使用的軟體；助理不能假裝已經存好。
 ```
 
 ### deck:using:28
 
-- source: `docs/USING.md` · L67
-- under: ## 简体中文
-- lang: zh-CN
+- source: `docs/USING.md` · L65
+- under: ## 繁體中文
+- lang: zh-TW
 - write-back: yes
 
 ```text
-直接聊天就能开始，不用先填问卷。可以说「先给我例子，教我怎么挑」，或贴两套房源请助理比较。它会先做有用的分析，再从你的反应了解偏好；通常一次问零到两题，必要确认最多三题。支持选项界面时使用真实选项，没有就直接打字。
+還沒抵達時，可以比較暫住方案，替實地看房留時間。取消、退款和退房條件都要看實際條款，不能只因為是旅館或服務式公寓就當成有保障。看房時親自確認環境、和仲介或房東談清楚；合約帶回去讀，看房當天不簽約。法律與付款提醒會放在相關決定旁，不會每次開場都貼一整段。
 ```
 
 ### deck:using:29
 
-- source: `docs/USING.md` · L69
-- under: ## 简体中文
-- lang: zh-CN
+- source: `docs/USING.md` · L67
+- under: ## 繁體中文
+- lang: zh-TW
 - write-back: yes
 
 ```text
-每月总花费包括房租和账单；数字会说明来源、哪些只是估计。真实房源需要来源与日期，不能搜索时的教学例子会标成虚构。你可以随时插问、改变预算或增加条件，助理应保留原本的工作，不让你重新填写全部资料。跨对话保存取决于软件能力，不能假装已经保存。
+**自己的小秘書。** 共用技能沒查、但你在意的東西，例如到健身房的步行時間、學區、你知道的噪音來源、你信任的資料集，寫成一頁放進你自己那份的 `extensions/` 資料夾（有範本）。這些加購項目在報告裡會標示出來、不會自己改變判決、不讀房源和評價網站、也不用「住的是誰」來描述一個地區。
 ```
 
 ### deck:using:30
@@ -579,7 +579,40 @@ Use the report to decide what to investigate, then see the flat and speak with t
 - write-back: yes
 
 ```text
+直接聊天就能开始，不用先填问卷。可以说「先给我例子，教我怎么挑」，或贴两套房源请助理比较。它会先做有用的分析，再从你的反应了解偏好；通常一次问零到两题，必要确认最多三题。支持选项界面时使用真实选项，没有就直接打字。
+```
+
+### deck:using:31
+
+- source: `docs/USING.md` · L73
+- under: ## 简体中文
+- lang: zh-CN
+- write-back: yes
+
+```text
+每月总花费包括房租和账单；数字会说明来源、哪些只是估计。真实房源需要来源与日期，不能搜索时的教学例子会标成虚构。你可以随时插问、改变预算或增加条件，助理应保留原本的工作，不让你重新填写全部资料。跨对话保存取决于软件能力，不能假装已经保存。
+```
+
+### deck:using:32
+
+- source: `docs/USING.md` · L75
+- under: ## 简体中文
+- lang: zh-CN
+- write-back: yes
+
+```text
 先用比较学会取舍，再安排查证和看房。退款、付款、签约规则要看实际条款与适用法律；合约带回去读，看房当天不签约。
+```
+
+### deck:using:33
+
+- source: `docs/USING.md` · L77
+- under: ## 简体中文
+- lang: zh-CN
+- write-back: yes
+
+```text
+**自己的小秘书。** 共用技能没查、但你在意的东西，例如到健身房的步行时间、学区、你知道的噪音来源、你信任的数据集，写成一页放进你自己那份的 `extensions/` 文件夹（有模板）。这些加购项目在报告里会标示出来、不会自己改变判决、不读房源和评价网站、也不用「住的是谁」来描述一个地区。
 ```
 
 ---

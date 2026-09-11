@@ -8,6 +8,7 @@ This axis catches what the other eleven miss, because none of them are about dai
 
 ## What counts as evidence
 - **G** — the tenancy or the inventory listing the appliances; a bundled-bill contract; the building's own parcel policy in writing.
+- **G** — the area's living-environment deciles from the English Indices of Deprivation 2025 (`scripts/living_env.py`): housing quality indoors; air quality and road traffic accidents outdoors. About 1,500 people around the postcode, not the building.
 - **S** — the listing's amenity list and the operator's description.
 - **C** — residents describing what actually happens with parcels, lifts, laundry and the concierge.
 - **I** — an appliance inferred from a photograph or a plan symbol.
@@ -17,6 +18,7 @@ This axis catches what the other eleven miss, because none of them are about dai
 1. `python3 scripts/geo.py nearby "<postcode>" --radius 400` and `python3 scripts/roads.py near --lat <lat> --lng <lng> --radius 400` — the nearest food shop, launderette, pharmacy and the walking distance to each.
 2. `python3 scripts/commute.py journey` — whether the daily route is direct or needs changes (a direct route beats a route that saves five minutes with a change).
 3. Reviews (paste mode, axis 6) — search for lifts, parcels, laundry and heating complaints.
+4. `python3 scripts/living_env.py lookup --postcode "<postcode>"` — the neighbourhood's living-environment deciles (official, open). Context for the comparison, never a filter.
 
 ## Method in fetch mode
 Mapping and journey data only. Everything about the inside of the flat comes from the listing or the viewing.
@@ -29,6 +31,7 @@ Ask the user for:
 4. Whether the building's parcel room accepts couriers other than the national postal service.
 
 ## How to read the numbers
+- `living_environment.decile`, `indoors.decile`, `outdoors.decile` — 1 is the most deprived tenth of small areas in England, 10 the least. Read the two halves separately: a low outdoors decile is air quality and road accidents (most of inner London), a low indoors decile is housing in poor condition or without central heating in the area, which the EPC and the viewing settle for this flat. Compare candidates with each other; say the number is an area figure; never let it change a verdict on its own, and never describe the area by who lives there.
 - `supermarket_walk_min` — a food shop within this walk.
 - `redundancy_walk_min` — reused here for the launderette and pharmacy walk.
 - `washing_machine_required` — profile. For most users a machine inside the flat is close to a hard requirement; a missing one is usually only found in older conversions, where the age filter has already bitten.

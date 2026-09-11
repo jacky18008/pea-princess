@@ -1274,3 +1274,34 @@ header, `Rating, N stars` with resident tags, and a Traditional Chinese page), t
 41-review page in `tests/fixtures/find/`, and — skipped cleanly when that directory
 is absent — the three de-identified real shapes under `bench/private/docs/cases/`,
 checked against the review counts their own gold answers state.
+
+## `living_env.py` — English Indices of Deprivation 2025, living environment only (official, OGL v3, no key)
+```
+living_env.py lookup --postcode "N21 1BD"
+living_env.py lookup --lsoa E01001567
+living_env.py lookup --postcode "SE3 0BU" --csv tests/fixtures/living_env-file7-sample.csv   # offline
+```
+Reads one official table (MHCLG File 7, 9.9 MB, 33,755 small areas on 2021 boundaries,
+downloaded once and cached for 90 days) and prints, for the area around a postcode, the
+Living Environment domain and its two halves: **indoors** (housing in poor condition,
+homes without central heating) and **outdoors** (air quality, road traffic accidents), each
+as score, rank, decile out of 33,755 and a plain reading. The postcode's area code comes
+from postcodes.io (`codes.lsoa21`).
+
+It deliberately does not read or print the income, employment, health, education, crime or
+barriers domains: crime comes from the police data directly (axis 5), and the skill does not
+sort neighbourhoods by who lives in them. `how_to_use` in the output says the rest: an
+area of about 1,500 people, not the building; inner London sits low outdoors almost
+everywhere because of air quality; compare candidates with each other; context for axis 12,
+never a filter, never a verdict.
+
+```console
+$ living_env.py lookup --postcode "N21 1BD"
+{ "ok": true, "evidence_class": "G", "licence": "Open Government Licence v3.0",
+  "lsoa": {"code": "E01001567", "name": "Enfield 022C", "local_authority": "Enfield"},
+  "living_environment": {"score": 26.854, "rank": 11026, "decile": 4, "of": 33755, "reading": "below the middle", ...},
+  "indoors":  {"decile": 4, "measures": "the quality of housing: housing in poor condition, homes without central heating", ...},
+  "outdoors": {"decile": 4, "measures": "air quality and road traffic accidents", ...},
+  "how_to_use": "Context for axis 12, never a filter and never a verdict. ..." }
+```
+

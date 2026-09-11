@@ -819,6 +819,22 @@ sources:
     verify_before_release: true
     note: "Not opened by this repo's audit. Ask the availability endpoint for an exact timestamp first, then request that timestamped snapshot; a vague year-level snapshot path can hang."
 
+  # ------------------------------------------- neighbourhood living environment --
+  - id: iod2025_file7
+    name: "English Indices of Deprivation 2025, File 7 (all ranks, scores, deciles by LSOA 2021)"
+    url: "https://assets.publishing.service.gov.uk/media/691ded56d140bbbaa59a2a7d/File_7_IoD2025_All_Ranks_Scores_Deciles_Population_Denominators.csv"
+    official: true
+    access: open
+    method: GET
+    needs_key: false
+    robots_note: "GOV.UK asset host; the file is a published open-data download."
+    tos_note: "Open Government Licence v3.0 (MHCLG). Attribute the source."
+    content_assertion: "LSOA code (2021)"
+    used_by_scripts: [living_env.py]
+    used_for: [living_environment, housing_condition, air_quality, road_traffic_accidents]
+    last_tested: 2026-09-11
+    note: "9.9 MB CSV, 33,755 areas, cached for 90 days. The skill reads only the Living Environment domain and its indoors (housing quality) and outdoors (air quality, road traffic accidents) halves; the income, employment, health, education, crime and barriers domains are deliberately not read. Release page: https://www.gov.uk/government/statistics/english-indices-of-deprivation-2025"
+
   # ------------------------------ commercial portals and review sites -------
   - id: commercial_portals_and_review_sites
     name: "Rightmove; Zoopla; OnTheMarket; OpenRent; HomeViews; Trustpilot; Google reviews; Airbnb; Booking.com"
