@@ -151,6 +151,82 @@ class DurableRunTests(unittest.TestCase):
         self.assertEqual("after c1", (folder / "profile.yaml").read_text())
         self.assertFalse((folder / "future.txt").exists())
 
+    def test_fresh_actor_restore_preserves_the_next_actors_empty_cwd(self):
+        session = self.session(allow_tools=True)
+        folder = session.output_dir / "work"
+        persona = folder / "_persona"
+        persona.mkdir(parents=True)
+        original_launch = launch.run
+        visited = []
+
+        def offline_actor(command, cwd, timeout, family, **kwargs):
+            visited.append(Path(cwd))
+            # Exercise the OS cwd setup with Python, never an installed model CLI.
+            return original_launch([sys.executable, "-c", "print(" + repr(events()) + ")"],
+                                   cwd, timeout, family, **kwargs)
+
+        with mock.patch.object(launch, "run", side_effect=offline_actor):
+            self.cli(session, "c1", cwd=folder)
+            self.assertTrue(persona.is_dir())
+            self.assertEqual({}, session.control.record("c1")["workdir_artifacts"])
+            self.cli(session, "c2", cwd=persona)
+        self.assertEqual([folder.resolve(), persona.resolve()], visited)
+        self.assertEqual(2, session.report()["completed_calls"])
+
+    def test_file_only_replay_preserves_empty_runtime_dirs_and_removes_future_files(self):
+        session = self.session(allow_tools=True)
+        folder = session.output_dir / "work"
+        persona = folder / "_persona"
+        persona.mkdir(parents=True)
+        (folder / "saved.txt").write_text("recorded")
+        with mock.patch.object(launch, "run", return_value=result()) as launched:
+            self.cli(session, cwd=folder)
+            (persona / "future.txt").write_text("not in recorded files")
+            (folder / "later-empty").mkdir()
+            (folder / "saved.txt").write_text("changed")
+            self.cli(self.session(allow_tools=True), cwd=folder)
+        self.assertEqual(1, launched.call_count)
+        self.assertTrue(persona.is_dir())
+        self.assertTrue((folder / "later-empty").is_dir())  # Not an exact-tree snapshot.
+        self.assertFalse((persona / "future.txt").exists())
+        self.assertEqual("recorded", (folder / "saved.txt").read_text())
+
+    def test_restore_replaces_conflicting_directory_tree_with_its_saved_file(self):
+        folder = self.root / "work"
+        folder.mkdir()
+        saved = folder / "result.txt"
+        saved.write_text("recorded file")
+        nested = folder / "saved-dir"
+        nested.mkdir()
+        (nested / "child.txt").write_text("recorded child")
+        rows = d._snapshot(folder)
+        saved.unlink()
+        (saved / "extra" / "empty").mkdir(parents=True)
+        (saved / "extra" / "future.txt").write_text("unrecorded")
+        (nested / "child.txt").unlink()
+        nested.rmdir()
+        nested.write_text("a file replaced the parent directory")
+        (folder / "runtime").mkdir()
+        d._restore(folder, rows)
+        self.assertEqual("recorded file", saved.read_text())
+        self.assertEqual("recorded child", (nested / "child.txt").read_text())
+        self.assertTrue((folder / "runtime").is_dir())
+
+    def test_missing_or_file_cwd_is_rejected_before_request_and_dispatch(self):
+        session = self.session(allow_tools=True)
+        not_dir = session.output_dir / "file-cwd"
+        not_dir.write_text("a file")
+        for folder in (session.output_dir / "missing", not_dir):
+            with self.subTest(folder=folder), mock.patch.object(launch, "run") as launched:
+                with self.assertRaises(CallControlError) as raised:
+                    self.cli(session, cwd=folder)
+                self.assertIn(str(folder.resolve()), str(raised.exception))
+                launched.assert_not_called()
+        self.assertEqual(0, session.report()["dispatched_calls"])
+        self.assertEqual(0, session.report()["usage"]["total_tokens"])
+        self.assertIsNone(session.control.record("c1"))
+        self.assertEqual([], list((session.output_dir / "requests").glob("*.json")))
+
     def test_symlink_is_rejected_before_call(self):
         session = self.session(allow_tools=True)
         folder = session.output_dir / "work"

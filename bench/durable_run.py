@@ -198,6 +198,10 @@ def _snapshot(folder):
 
 
 def _restore(folder, rows):
+    # This manifest records files, not an exact directory tree. Preserve empty
+    # runtime directories (including a later actor's cwd); their existence/mode
+    # is not persisted artifact authority. Only prune dirs that conflict with a
+    # saved file, after all unsaved files have been removed.
     current = _snapshot(folder)  # Reject symlinks and oversize trees before any write.
     for rel in current:
         if rel not in rows:
@@ -205,11 +209,9 @@ def _restore(folder, rows):
     for parent, dirs, _files in os.walk(str(folder), topdown=False):
         for name in dirs:
             path = Path(parent) / name
-            if not _excluded(path.relative_to(folder)):
-                try:
-                    path.rmdir()
-                except OSError:
-                    pass
+            rel = path.relative_to(folder)
+            if not _excluded(rel) and any(str(p) in rows for p in (rel, *rel.parents)):
+                path.rmdir()  # Fail closed if a conflicting directory is not empty.
     for rel, row in rows.items():
         path = folder / rel
         if Path(rel).is_absolute() or ".." in Path(rel).parts:
@@ -316,6 +318,8 @@ class DurableRun:
             raise ValueError("durable calls permit one physical attempt; register a new plan to retry")
         kwargs["attempts"] = 1
         folder = Path(cwd).resolve()
+        if not folder.is_dir():
+            raise CallControlError("CLI working directory is missing or not a directory: " + str(folder))
         if self.allow_tools and (folder == self.output_dir or self.output_dir not in folder.parents):
             raise CallControlError("tool-enabled workdir must be strictly inside the durable run directory")
         command = [str(part) for part in cmd]

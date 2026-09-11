@@ -62,6 +62,8 @@ Physical calls are serial so that the next call cannot race a failure in another
 
 Repeat the exact original command against the same directory to validate and reuse successful work. Changed model/settings, request content or pinned inputs should reject reuse. Raw-file presence alone is not permission to skip a job.
 
+Workdir snapshots restore file contents, not an exact directory tree. Empty runtime directories are preserved; the caller must create its owned working directory before dispatch or replay. A missing/non-directory cwd is rejected before a call is registered. See the [nested-persona directory incident and recovery](../controller-recovery-2026-09-11.md).
+
 If a call is pending after interruption, do not delete its checkpoint or manually mark it successful. Inspect the retained process/output state. If it failed or the outcome remains unknown, preserve that directory. A deliberate recovery requires a new documented attempt with its own identity and budget; totals must include any known earlier usage. This migration does not auto-resolve uncertain provider billing or implement exactly-once delivery across provider servers.
 
 ## Evidence and permissions
