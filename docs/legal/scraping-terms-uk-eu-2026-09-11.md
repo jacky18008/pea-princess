@@ -25,6 +25,12 @@
 2. 公開發布時在文件寫明：對 Rightmove、Zoopla、OnTheMarket、OpenRent、HomeViews、Trustpilot、Google 評論、Airbnb、Booking.com 只列名、不提供抓取方法（`references/sources.yaml` 已如此標示）。
 3. 若日後想自動取得房源資料，正途是官方 API 或授權資料商，不是繞過條款。
 
+## 兩個追問
+
+**「個人爬合法、做成工具就違法？」** 不是二分。個人抓自己要看的頁面仍違反條款（契約），後果幾乎只有被封鎖；不涉刑事，也達不到資料庫權的「實質部分」。做成工具後差別在三處：你的伺服器每次抓都是你在違約；替所有使用者累積抓取構成「系統性抽取實質部分」，侵權主體變成你；即使抓取跑在使用者機器上，寫指令叫大家自動抓，在英格蘭法下也可能構成誘使違約（inducing breach of contract）與授權侵權（authorising infringement）■。個人的風險小到沒人追，工具的風險大到會收律師函●。
+
+**「拿掉爬蟲、讓使用者的 agent 自己想辦法，就沒事了？」** 大致是，前提是技能文字不能教 agent 自動抓那些站。`references/sources.yaml` 對 Rightmove、Zoopla、OnTheMarket、OpenRent、HomeViews、Trustpilot、Google 評論、Airbnb、Booking.com 標「只列名、不給方法」，抓取模式不碰它們；這樣工具這邊既沒有抓取行為、也沒有指示抓取，剩下的是使用者自己貼頁面（Rightmove 條款 5.5 允許的人工操作）。使用者若自己用有瀏覽器工具的 agent 開頁面，是他自己的違約，後果是「個人」等級。
+
 ## 來源
 
 - [CDPA 1988 s.29A](https://www.legislation.gov.uk/ukpga/1988/48/section/29A)
