@@ -1,6 +1,6 @@
 ---
 name: pea-princess
-description: "Checks London rental listings using official and open UK data: identity, size, condition, surroundings, management, paperwork, price, light, total monthly cost and commute. Explains what is known, estimated or missing, then gives a plain-language recommendation. Use for a listing, a comparison or finding candidates around a destination, and whenever someone asks to roast (尻洗) a flat."
+description: "Checks London rental listings using official and open UK data: identity, size, condition, surroundings, management, paperwork, price, light, total monthly cost and commute. Explains what is known, estimated or missing, then gives a plain-language recommendation. Use for a listing, a comparison or finding candidates around a destination; whenever someone asks to roast (尻洗) a flat; and when someone is moving to London to rent and has no idea where to start (倫敦租房、找房、租屋、想找房子從哪開始)."
 license: CC-BY-4.0
 metadata:
   runtime: Best with a shell and internet access (python3 + curl). Works in fetch-only or chat-only runtimes in reduced modes; the skill tells the user exactly what to paste.
