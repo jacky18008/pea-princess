@@ -146,6 +146,11 @@ def run_arm(arm, skill_dir, prompt, model, out_dir, pair, timeout, agent="codex"
     env = dict(os.environ)
     env["HOME"] = work
     env.setdefault("CODEX_HOME", os.path.join(os.path.expanduser("~"), ".codex"))
+    # The scripts' fetch cache and the temp fallback stay inside this run: the 2026-09-11 sub-agents went
+    # hunting through the machine-wide temp cache (raw register dumps from other runs) by coordinate.
+    env["VETFLAT_CACHE"] = os.path.join(work, ".cache", "vet-flat")
+    env["TMPDIR"] = os.path.join(work, "tmp")
+    os.makedirs(env["TMPDIR"], exist_ok=True)
     cmd = ["codex", "exec", "--cd", work, "--sandbox", "workspace-write", "-c", "sandbox_workspace_write.network_access=true",
            "--skip-git-repo-check", "--json", "--model", model] + list(codex_extra or []) + ["--", prompt]
     t0 = datetime.datetime.utcnow()
