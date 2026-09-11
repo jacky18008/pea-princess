@@ -1,0 +1,157 @@
+{
+  "schema_version": 1,
+  "run": "conv-check-20260911-recovery-v1",
+  "scope": "Old frozen C1 chat conversation; engineering continuation, not current skill acceptance or fresh A/B",
+  "commits": {
+    "controller": "0297e94",
+    "recovery": "46ef16b"
+  },
+  "execution": {
+    "planned_calls": 28,
+    "dispatched_calls": 24,
+    "completed_calls": 24,
+    "failed_calls": 0,
+    "skipped_calls": 4,
+    "plan_complete": true,
+    "pending_call_ids": [],
+    "paused": false
+  },
+  "recovery_result": {
+    "ok": true,
+    "error": null,
+    "mode": "frozen_system_full_transcript_replay_new_native_calls",
+    "conversation_outcome": "abandoned",
+    "quality_scope": "old frozen-system engineering continuation; no current-skill or fresh A/B claim",
+    "new_calls": 24,
+    "original_calls": 2,
+    "combined_calls": 26,
+    "max_combined_calls": 30,
+    "new_usage": {
+      "known_input_tokens": 612558,
+      "unknown_input_tokens_requests": 0,
+      "known_cached_input_tokens": 411107,
+      "unknown_cached_input_tokens_requests": 0,
+      "known_output_tokens": 29777,
+      "unknown_output_tokens_requests": 0,
+      "total_tokens": 642335
+    },
+    "original_usage": {
+      "known_input_tokens": 23653,
+      "unknown_input_tokens_requests": 1,
+      "known_cached_input_tokens": 3298,
+      "unknown_cached_input_tokens_requests": 1,
+      "known_output_tokens": 1453,
+      "unknown_output_tokens_requests": 1,
+      "total_tokens": null
+    },
+    "combined_usage": {
+      "known_input_tokens": 636211,
+      "unknown_input_tokens_requests": 1,
+      "known_cached_input_tokens": 414405,
+      "unknown_cached_input_tokens_requests": 1,
+      "known_output_tokens": 31230,
+      "unknown_output_tokens_requests": 1,
+      "total_tokens": null
+    },
+    "usage_limit_note": "Original failed-call usage stays unknown; known counters gate between calls, not exact spend.",
+    "original_unchanged": true
+  },
+  "new_usage_by_role": {
+    "persona": {
+      "calls": 11,
+      "input_tokens": 238687,
+      "cached_input_tokens": 125184,
+      "output_tokens": 7867,
+      "processed_tokens": 246554
+    },
+    "assistant": {
+      "calls": 11,
+      "input_tokens": 323869,
+      "cached_input_tokens": 250723,
+      "output_tokens": 16802,
+      "processed_tokens": 340671
+    },
+    "satisfaction": {
+      "calls": 1,
+      "input_tokens": 24869,
+      "cached_input_tokens": 23296,
+      "output_tokens": 266,
+      "processed_tokens": 25135
+    },
+    "judge": {
+      "calls": 1,
+      "input_tokens": 25133,
+      "cached_input_tokens": 11904,
+      "output_tokens": 4842,
+      "processed_tokens": 29975
+    }
+  },
+  "known_combined_processed_tokens": 667441,
+  "conversation": {
+    "assistant_turns": 12,
+    "runner_outcome": "abandoned",
+    "reply_characters": [
+      633,
+      1351,
+      865,
+      1253,
+      856,
+      274,
+      1134,
+      1348,
+      401,
+      192,
+      256,
+      781
+    ],
+    "median_reply_characters": 818.5,
+    "simulated_satisfaction": {
+      "rating": 2,
+      "unresolved": "我還不知道這間房現在是不是確實存在、真的可以租給我。",
+      "diagnostic": true
+    },
+    "legacy_grade": 0.34,
+    "legacy_grade_caps": [
+      "safety: viewing_day_warning"
+    ],
+    "legacy_criteria_met": 2
+  },
+  "validation": {
+    "durable_tests": 37,
+    "recovery_tests": 13,
+    "full_suite_tests": 2295,
+    "full_suite_passed": true,
+    "historical_negative_control_failed_as_expected": true
+  },
+  "usage_scope": "Direct benchmark CLI counters; excludes coordinating Codex conversation/review subagents. Cached input is included in input and not added again. Original unknown usage is not replaced with zero.",
+  "raw_artifact_sha256": {
+    "recovery.json": "70286945764941b665a45af92c45ba0815596d66d4d2c1a4832ff78832513c27",
+    "recovery-result.json": "94fefefd85b2b2fd3356c97c337330a64b70cb7830d5111b34c5d719bcfafa9e",
+    "conversation.json": "d168303857807929d26c24b5ed76e0aef37b079b95cdb078cfbbea1baaff0139",
+    "continuation/control/checkpoint.json": "afb49f1a263e9658a1dfe0efabc0c7002535ee86b0c0135c116cab8d05fe1a1d"
+  },
+  "independent_review": {
+    "reviewer": "Astra subagent",
+    "engineering_pass": true,
+    "conversation_acceptance_pass": false,
+    "rental_goal_achieved": false,
+    "demonstrated_p0": false,
+    "p1_findings": [
+      "advance-rent recommendation contradicts supplied scoped rule",
+      "rent amount misread as timing",
+      "payment prerequisite drift",
+      "overstated fraud assurance"
+    ],
+    "private_report": ".pea-playground/conv-check-20260911-recovery-v1/astra-review.md",
+    "sha256": "b4deab06182e6079fdbdc0fe8b250a9a2fdcddefe255c6e19cf00e187ee1829b"
+  },
+  "avoidable_duplicate_pair": {
+    "assistant_turn": 11,
+    "new_call_ids": [
+      "call-000019",
+      "call-000020"
+    ],
+    "processed_tokens": 59135,
+    "scope": "Duplicate simulated document paste and response; not all later turns classified as waste"
+  }
+}
