@@ -35,6 +35,7 @@ import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
+sys.path.insert(0, HERE)
 JUDGE_MODEL = "claude-opus-5"
 
 JUDGE_PROMPT = """You are reading two assistant answers to the same question in a London flat search. The person had
@@ -102,7 +103,36 @@ def parse_stream(stdout):
     return usage, cmds, searches, final, types
 
 
-def run_arm(arm, skill_dir, prompt, model, out_dir, pair, timeout):
+def run_arm_claude(arm, skill_dir, prompt, model, out_dir, pair, timeout):
+    """Claude Code with the arm's skill installed in a private project (history_replay.run_answer)."""
+    import history_replay as H
+    t0 = datetime.datetime.utcnow()
+    res = H.run_answer("claude", model, "standard", prompt, timeout, skill_dir=skill_dir)
+    os.makedirs(os.path.join(out_dir, "raw"), exist_ok=True)
+    io.open(os.path.join(out_dir, "raw", "%s-%d.jsonl" % (arm, pair)), "w", encoding="utf-8").write(res.get("stdout") or "")
+    cmds = []
+    for line in (res.get("stdout") or "").splitlines():
+        try:
+            ev = json.loads(line)
+        except ValueError:
+            continue
+        for block in ((ev.get("message") or {}).get("content") or []) if isinstance(ev, dict) else []:
+            if isinstance(block, dict) and block.get("type") == "tool_use":
+                inp = block.get("input") or {}
+                cmds.append("%s %s" % (block.get("name"), (inp.get("command") or inp.get("file_path") or inp.get("pattern") or json.dumps(inp, ensure_ascii=False)[:200])))
+    u = res.get("usage") or {}
+    usage = {"input_tokens": (u.get("input_tokens") or 0) + (u.get("cache_read_input_tokens") or 0) + (u.get("cache_creation_input_tokens") or 0),
+             "cached_input_tokens": u.get("cache_read_input_tokens") or 0, "output_tokens": u.get("output_tokens") or 0, "cost_usd": u.get("cost_usd"), "raw": u}
+    return {"arm": arm, "pair": pair, "skill_dir": skill_dir, "model": model, "agent": "claude", "exit": res.get("exit"), "seconds": round(res.get("seconds") or 0, 1),
+            "usage": usage, "commands": cmds, "script_runs": sum(1 for c in cmds if ".py" in c and c.startswith("Bash")),
+            "area_scan_calls": sum(1 for c in cmds if "area_scan" in c), "noise_calls": sum(1 for c in cmds if "noise.py" in c),
+            "web_searches": sum(1 for c in cmds if c.startswith(("WebSearch", "WebFetch"))), "reply_chars": len(res.get("reply") or ""),
+            "reply": res.get("reply") or "", "types": {}, "stderr_tail": (res.get("stderr_tail") or "")[-400:], "started": t0.isoformat() + "Z"}
+
+
+def run_arm(arm, skill_dir, prompt, model, out_dir, pair, timeout, agent="codex"):
+    if agent == "claude":
+        return run_arm_claude(arm, skill_dir, prompt, model, out_dir, pair, timeout)
     work = tempfile.mkdtemp(prefix="vetflat-streetab-")
     home_skills = os.path.join(work, ".agents", "skills")
     os.makedirs(home_skills)
@@ -123,7 +153,7 @@ def run_arm(arm, skill_dir, prompt, model, out_dir, pair, timeout):
     os.makedirs(os.path.join(out_dir, "raw"), exist_ok=True)
     io.open(os.path.join(out_dir, "raw", "%s-%d.jsonl" % (arm, pair)), "w", encoding="utf-8").write(stdout)
     usage, cmds, searches, final, types = parse_stream(stdout)
-    row = {"arm": arm, "pair": pair, "skill_dir": skill_dir, "model": model, "exit": code, "seconds": round(seconds, 1),
+    row = {"arm": arm, "pair": pair, "skill_dir": skill_dir, "model": model, "agent": "codex", "exit": code, "seconds": round(seconds, 1),
            "usage": usage, "commands": cmds, "script_runs": sum(1 for c in cmds if ".py" in c and "sed -n" not in c and "cat " not in c),
            "area_scan_calls": sum(1 for c in cmds if "area_scan" in c), "noise_calls": sum(1 for c in cmds if "noise.py" in c),
            "web_searches": searches, "reply_chars": len(final), "reply": final, "types": types,
@@ -141,12 +171,12 @@ def load_rows(out_dir):
 
 def judge(out_dir, reviewer=JUDGE_MODEL, timeout=600):
     rows = load_rows(out_dir)
-    pairs = sorted(set(r["pair"] for r in rows))
+    pairs = sorted(set((r.get("agent", "codex"), r["pair"]) for r in rows))
     verdicts = []
     rnd = random.Random(20260911)
-    for p in pairs:
-        b = [r for r in rows if r["pair"] == p and r["arm"] == "before" and r.get("reply")]
-        a = [r for r in rows if r["pair"] == p and r["arm"] == "after" and r.get("reply")]
+    for host, p in pairs:
+        b = [r for r in rows if r["pair"] == p and r["arm"] == "before" and r.get("agent", "codex") == host and r.get("reply")]
+        a = [r for r in rows if r["pair"] == p and r["arm"] == "after" and r.get("agent", "codex") == host and r.get("reply")]
         if not b or not a:
             continue
         flip = rnd.random() < 0.5
@@ -165,6 +195,7 @@ def judge(out_dir, reviewer=JUDGE_MODEL, timeout=600):
         except ValueError:
             v = {"error": text[:300]}
         v["pair"] = p
+        v["host"] = host
         v["A_is"] = "after" if flip else "before"
         v["B_is"] = "before" if flip else "after"
         if v.get("more_useful") in ("A", "B"):
@@ -172,25 +203,25 @@ def judge(out_dir, reviewer=JUDGE_MODEL, timeout=600):
         else:
             v["winner"] = v.get("more_useful")
         verdicts.append(v)
-        print("pair %d: winner=%s | %s" % (p, v.get("winner"), (v.get("why") or v.get("error") or "")[:160]), flush=True)
+        print("%s pair %d: winner=%s | %s" % (host, p, v.get("winner"), (v.get("why") or v.get("error") or "")[:160]), flush=True)
     io.open(os.path.join(out_dir, "quality.json"), "w", encoding="utf-8").write(json.dumps(verdicts, ensure_ascii=False, indent=1))
     return verdicts
 
 
 def report(out_dir):
     rows = load_rows(out_dir)
-    print("| Arm | Pair | Tool calls | Script runs | Scan calls | Web searches | Input tokens (incl. cached) | New input | Output | Wall |")
-    print("|---|---|---|---|---|---|---|---|---|---|")
-    for r in sorted(rows, key=lambda r: (r["pair"], r["arm"] != "before")):
+    print("| Arm | Pair | Host | Tool calls | Script runs | Scan calls | Web searches | Input tokens (incl. cached) | New input | Output | Wall |")
+    print("|---|---|---|---|---|---|---|---|---|---|---|")
+    for r in sorted(rows, key=lambda r: (r.get("agent", "codex"), r["pair"], r["arm"] != "before")):
         u = r.get("usage") or {}
         inp, cached = u.get("input_tokens") or 0, u.get("cached_input_tokens") or 0
-        print("| %s | %d | %d | %d | %d | %d | %.2fM | %dk | %.1fk | %d s%s |" % (
-            r["arm"], r["pair"], len(r["commands"]), r["script_runs"], r["area_scan_calls"], r["web_searches"],
+        print("| %s | %d | %s | %d | %d | %d | %d | %.2fM | %dk | %.1fk | %d s%s |" % (
+            r["arm"], r["pair"], r.get("agent", "codex"), len(r["commands"]), r["script_runs"], r["area_scan_calls"], r["web_searches"],
             inp / 1e6, (inp - cached) / 1000, (u.get("output_tokens") or 0) / 1000, r["seconds"], "" if r["exit"] == 0 else " (exit %s)" % r["exit"]))
     qpath = os.path.join(out_dir, "quality.json")
     if os.path.exists(qpath):
         vs = json.loads(read(qpath))
-        print("\nBlind quality (%s): " % JUDGE_MODEL + ", ".join("pair %d → %s" % (v["pair"], v.get("winner")) for v in vs))
+        print("\nBlind quality (%s): " % JUDGE_MODEL + ", ".join("%s pair %d → %s" % (v.get("host", "codex"), v["pair"], v.get("winner")) for v in vs))
         for key in ("centroid_off_street", "noise_db_with_source", "works_about_to_start", "quiet_vs_safety_separated", "numbers_without_source"):
             vals = {}
             for v in vs:
@@ -209,6 +240,7 @@ def main():
     ap.add_argument("--out")
     ap.add_argument("--pairs", type=int, default=3)
     ap.add_argument("--model", default="gpt-5.6-terra")
+    ap.add_argument("--agent", choices=("codex", "claude"), default="codex")
     ap.add_argument("--timeout", type=int, default=1200)
     ap.add_argument("--judge")
     ap.add_argument("--report")
@@ -229,9 +261,9 @@ def main():
     done = load_rows(a.out)
     for pair in range(a.pairs):
         for arm, skill in (("before", a.before), ("after", a.after)):
-            if any(r["pair"] == pair and r["arm"] == arm and r.get("exit") == 0 and r.get("reply") for r in done):
+            if any(r["pair"] == pair and r["arm"] == arm and r.get("agent", "codex") == a.agent and r.get("exit") == 0 and r.get("reply") for r in done):
                 continue
-            row = run_arm(arm, skill, prompt, a.model, a.out, pair, a.timeout)
+            row = run_arm(arm, skill, prompt, a.model, a.out, pair, a.timeout, a.agent)
             with io.open(os.path.join(a.out, "rows.jsonl"), "a", encoding="utf-8") as fh:
                 fh.write(json.dumps(row, ensure_ascii=False) + "\n")
             u = row.get("usage") or {}
