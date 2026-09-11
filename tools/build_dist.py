@@ -13,6 +13,7 @@ The zip is what claude.ai, Claude Cowork, ChatGPT Skills and the Gemini app acce
 The prompt pack is for chat boxes without a Skills feature: INSTRUCTIONS.md is the
 SKILL.md body (front matter stripped) and must stay under 8,000 characters.
 """
+import ast
 import hashlib
 import os
 import re
@@ -115,10 +116,72 @@ def public_members():
     return rows
 
 
+def check_script_dependencies(members):
+    """Reject omitted local imports without executing code or expanding the index.
+
+    Inspect imports at every nesting level. Only modules/packages present beside
+    the source scripts are checked; absent names may be standard-library modules.
+    Dynamic imports and arbitrary sys.path changes are outside this preflight.
+    """
+    allowed = {rel for _, rel in members}
+    scripts = Path(SKILL) / "scripts"
+
+    def require(path, importer, directory=False):
+        rel = path.relative_to(ROOT).as_posix()
+        if path.is_symlink():
+            raise ValueError("symlink script dependency: %s -> %s" % (importer, rel))
+        included = any(name.startswith(rel + "/") for name in allowed) if directory else rel in allowed
+        if not included:
+            raise ValueError("local script dependency is not a public package member: %s -> %s" % (importer, rel))
+
+    def check_module(base, parts, importer):
+        for part in parts:
+            base = base / part
+            if base.is_symlink():
+                require(base, importer)
+            initializer = base / "__init__.py"
+            module = base.with_suffix(".py")
+            if initializer.is_symlink() or initializer.is_file():
+                require(initializer, importer)
+            elif module.is_symlink() or module.is_file():
+                require(module, importer)
+                break
+            elif base.is_dir():
+                require(base, importer, directory=True)
+            else:
+                break
+
+    for full, rel in members:
+        path = Path(full)
+        if path.suffix != ".py" or scripts not in path.parents:
+            continue
+        tree = ast.parse(path.read_bytes(), filename=rel)
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                names = [alias.name.split(".") for alias in node.names]
+                bases = {path.parent, scripts}
+            elif isinstance(node, ast.ImportFrom):
+                prefix = node.module.split(".") if node.module else []
+                names = [prefix] + [prefix + [alias.name] for alias in node.names if alias.name != "*"]
+                if node.level:
+                    base = path.parent
+                    for _ in range(node.level - 1):
+                        base = base.parent
+                    bases = {base} if base == scripts or scripts in base.parents else set()
+                else:
+                    bases = {path.parent, scripts}
+            else:
+                continue
+            for base in sorted(bases):
+                for parts in names:
+                    check_module(base, parts, rel)
+
+
 def main():
     # Validate every source before touching an existing release. Public builds do
     # not remove other dist/ files: it can also hold a private A/B handoff archive.
     members = public_members()
+    check_script_dependencies(members)
     allowed = {rel for _, rel in members}
     for rel, _, _ in DIGEST_SOURCES:
         if os.path.exists(os.path.join(SKILL, rel)) and "skills/vet-flat/" + rel not in allowed:
