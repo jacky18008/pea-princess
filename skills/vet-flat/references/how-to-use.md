@@ -4,6 +4,10 @@ Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen — https://github.com
 
 Read this when the user asks how something works or changes their needs or the scope of checks. Explain changes in their language, not configuration syntax. A clear user instruction authorizes its stated change; do not ask for a redundant yes. Clarify only material ambiguity, while continuing independent work.
 
+## Optional voice input
+
+If the person prefers speaking, suggest dictation into their existing chat box. Built-in device dictation or their usual app is enough; [Typeless](https://www.typeless.com/pricing) and [Wispr Flow](https://wisprflow.ai/pricing) are optional examples with usage-limited free plans (checked 2026-09-11; current limits are on those pages). They can describe needs, housing experiences or changes without preparing a form. Suggest checking names, postcodes, amounts, dates, negations and conditions before sending. Offer this when useful, not in every opening; neither a new app nor a live voice-call feature is required.
+
 ## The one rule for every setting change
 1. Capture the user's exact words and update the versioned requirements per `session-harness.md`. Produce a **diff of `profile.yaml`** for fields it can represent: `field: old → new`, one line per field. The latest durable requirements take precedence; the profile is a compatibility projection, not a second authority.
 2. Show the effect in plain words, for example “The monthly limit is now £2,300 including bills; the quiet-bedroom requirement still applies.” Keep the technical diff in the local record unless requested. Apply explicit changes; confirm your own suggested changes or clarify ambiguity. Preserve conditions, scope and exceptions even when the legacy profile has no matching field.

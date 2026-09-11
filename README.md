@@ -49,7 +49,9 @@ Report layout for people without a shell: open `viewer/viewer.html` in a browser
 In the fairy tale only the real princess feels the pea through twenty mattresses. Here **you** are the princess. This tool lifts the mattresses one by one: it reads the registers, counts the crimes, checks the planning applications and the company filings, and tells you where the pea might be. Only you can feel it: go and see the flat, walk the street, talk to the agent and the landlord. The report is a filter, and when you are in a hurry it is only a filter. Its first duty is to say what it does not know and ask you for it.
 
 ## No code required · 不用會寫程式
-Everything is done by typing sentences: install (one pasted line, or a zip upload in a chat app), then ask, paste what it asks for, read the report, and change any setting by saying it. `docs/USING.md` walks through it in five minutes, in English and Chinese.
+Everything is done by typing or dictating sentences: install (one pasted line, or a zip upload in a chat app), then ask, paste what it asks for, read the report, and change any setting by saying it. [The walkthrough](docs/USING.md) explains it in English and Chinese.
+
+**Prefer speaking? · 不想打字？** Use your device's built-in dictation, or an optional app such as Typeless or Wispr Flow, to put your words into the assistant's text box. 可以直接口述需求、住屋經驗或中途補充，不用先整理成表單。See [voice input and free-plan limits](docs/USING.md#speak-instead-of-typing).
 
 ## Start here, on any platform
 Ask **"What can this do?"** (or 這能幹嘛？). The answer comes from `skills/vet-flat/references/onboarding.md`: a short pitch, three starting points (a listing → vet it; an area or destination → sweep; no idea → a ten-fact primer and six questions with suggested defaults). Your rules live in `profile.yaml` (budget, size, flat type, deal-breakers, priorities, `budget_mode` lite/standard/deep for £20 plans and chat-only use). The hard follow-up questions the agent must ask are in `references/questions.md`.

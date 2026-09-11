@@ -70,7 +70,9 @@ Offer this once, in the user's language, if they say they do not know what they 
 
 **Say it roughly like this:**
 
-> If you have five minutes, talk instead of typing. Use any dictation tool you already have — the microphone key on your phone keyboard, or the dictation built into your laptop; free dictation apps such as Otter or Notta do the same job, and any of them works, including recording a voice memo and pasting the transcript. Then just talk, and ramble: the best place you have ever lived and what made it good, the worst one and what made it bad, hotels and short stays you loved or hated, even a shop or a café you keep going back to. I will turn it into rules, show you the three sentences I heard, and change nothing in your profile until you say yes.
+> If speaking is easier, use the dictation you already have on your phone or laptop, your usual app, or a voice memo's transcript; any of them works. Tell me about the best and worst places you have stayed, and what made them good or bad. You do not need to organize the story first. I will suggest preferences from it for you to check before saving them.
+
+Optional dictation tools and their free-plan limits are described in [how-to-use.md](how-to-use.md#optional-voice-input); there is no need to name apps in this invitation unless the person asks.
 
 Any transcript works. Bad punctuation, filler words and repetition are fine and are not worth correcting; a transcript in a different language from the report is fine too.
 

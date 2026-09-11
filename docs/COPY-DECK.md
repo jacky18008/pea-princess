@@ -31,8 +31,8 @@ On a phone
 
 | Surface | Blocks | Source |
 |---|---|---|
-| README — the front page | 19 | `README.md` |
-| docs/USING.md — the plain-words walkthrough | 33 | `docs/USING.md` |
+| README — the front page | 20 | `README.md` |
+| docs/USING.md — the plain-words walkthrough | 38 | `docs/USING.md` |
 | docs/INSTALL.md — install page | 11 | `docs/INSTALL.md` |
 | docs/EXPERIMENTS.md — which configuration to run | 7 | `docs/EXPERIMENTS.md` |
 | onboarding.md — what the skill says to a new user | 30 | `skills/vet-flat/references/onboarding.md` |
@@ -40,7 +40,7 @@ On a phone
 | inputs.md — the one message that asks the user for what is missing | 1 | `skills/vet-flat/references/inputs.md` |
 | profiles/ — the sentences a profile carries | 14 | `skills/vet-flat/profiles/*.yaml` |
 | seed.py — the seed card sentences (read-only here) | 25 | `skills/vet-flat/scripts/seed.py` |
-| **Total** | **146** | |
+| **Total** | **152** | |
 
 ---
 
@@ -155,29 +155,29 @@ In the fairy tale only the real princess feels the pea through twenty mattresses
 - write-back: yes
 
 ```text
-Everything is done by typing sentences: install (one pasted line, or a zip upload in a chat app), then ask, paste what it asks for, read the report, and change any setting by saying it. `docs/USING.md` walks through it in five minutes, in English and Chinese.
+Everything is done by typing or dictating sentences: install (one pasted line, or a zip upload in a chat app), then ask, paste what it asks for, read the report, and change any setting by saying it. [The walkthrough](docs/USING.md) explains it in English and Chinese.
 ```
 
 ### deck:readme:11
 
-- source: `README.md` · L55
+- source: `README.md` · L54
+- under: ## No code required · 不用會寫程式
+- lang: zh-TW
+- write-back: yes
+
+```text
+**Prefer speaking? · 不想打字？** Use your device's built-in dictation, or an optional app such as Typeless or Wispr Flow, to put your words into the assistant's text box. 可以直接口述需求、住屋經驗或中途補充，不用先整理成表單。See [voice input and free-plan limits](docs/USING.md#speak-instead-of-typing).
+```
+
+### deck:readme:12
+
+- source: `README.md` · L57
 - under: ## Start here, on any platform
 - lang: en
 - write-back: yes
 
 ```text
 Ask **"What can this do?"** (or 這能幹嘛？). The answer comes from `skills/vet-flat/references/onboarding.md`: a short pitch, three starting points (a listing → vet it; an area or destination → sweep; no idea → a ten-fact primer and six questions with suggested defaults). Your rules live in `profile.yaml` (budget, size, flat type, deal-breakers, priorities, `budget_mode` lite/standard/deep for £20 plans and chat-only use). The hard follow-up questions the agent must ask are in `references/questions.md`.
-```
-
-### deck:readme:12
-
-- source: `README.md` · L58
-- under: ## Benchmark (facts must be right on every model; verdicts may differ)
-- lang: en
-- write-back: yes
-
-```text
-`evals/evals.json` has 8 real flats across 7 boroughs plus 2 conversation cases ("what can this do", "I have no idea"), with truth produced by the repo's own fetchers on 2026-09-03. `bench/grade.py` scores fact recall, fabrications, citations, unknown-honesty and hard-filter consistency; `bench/run.py --dry-run` prints the exact command for Claude Code, Codex, Gemini CLI or an OpenAI-compatible API. See `bench/README.md`.
 ```
 
 ### deck:readme:13
@@ -188,7 +188,7 @@ Ask **"What can this do?"** (or 這能幹嘛？). The answer comes from `skills/
 - write-back: yes
 
 ```text
-**Which configuration to run:** `docs/EXPERIMENTS.md` records the original flat-vetting comparisons. The [later context ablation](docs/ablation-2026-09-09/results.md) includes generation costs and source reviews: extra summarization, structured memory and multiple retrieval calls did not save tokens at the tested sizes. Keep one agent with full context as the starting point; the four-role pipeline remains experimental. These studies measure different tasks, not a universal model ranking.
+`evals/evals.json` has 8 real flats across 7 boroughs plus 2 conversation cases ("what can this do", "I have no idea"), with truth produced by the repo's own fetchers on 2026-09-03. `bench/grade.py` scores fact recall, fabrications, citations, unknown-honesty and hard-filter consistency; `bench/run.py --dry-run` prints the exact command for Claude Code, Codex, Gemini CLI or an OpenAI-compatible API. See `bench/README.md`.
 ```
 
 ### deck:readme:14
@@ -199,7 +199,7 @@ Ask **"What can this do?"** (or 這能幹嘛？). The answer comes from `skills/
 - write-back: yes
 
 ```text
-**Long-running projects and changing requirements:** the [session harness](docs/session-harness.md) saves exact user requests, revisioned requirements and conditional exceptions, source snapshots, goals, TODOs and execution state. The managed runner inserts the current packet itself and rejects stale results. Short `AGENTS.md` / `CLAUDE.md` files link to detailed rules; pointers alone cannot ensure reading. [Lifecycle validation](docs/session-harness-validation.md) tests recovery without new model calls, not quality equivalence or token savings.
+**Which configuration to run:** `docs/EXPERIMENTS.md` records the original flat-vetting comparisons. The [later context ablation](docs/ablation-2026-09-09/results.md) includes generation costs and source reviews: extra summarization, structured memory and multiple retrieval calls did not save tokens at the tested sizes. Keep one agent with full context as the starting point; the four-role pipeline remains experimental. These studies measure different tasks, not a universal model ranking.
 ```
 
 ### deck:readme:15
@@ -210,7 +210,7 @@ Ask **"What can this do?"** (or 這能幹嘛？). The answer comes from `skills/
 - write-back: yes
 
 ```text
-**Try a whole persona conversation:** run `python3 tools/persona_playground.py` and open the printed local URL. The [interactive lab](docs/persona-playground.md) uses your local Codex login for dynamic persona replies and assistant answers, with step/run/pause, queued human questions, scenario amendments, private history and shared usage ceilings. All 16 cards are available in a clearly labelled chat adaptation; this is a local alpha, with no public deployment or hidden model judge.
+**Long-running projects and changing requirements:** the [session harness](docs/session-harness.md) saves exact user requests, revisioned requirements and conditional exceptions, source snapshots, goals, TODOs and execution state. The managed runner inserts the current packet itself and rejects stale results. Short `AGENTS.md` / `CLAUDE.md` files link to detailed rules; pointers alone cannot ensure reading. [Lifecycle validation](docs/session-harness-validation.md) tests recovery without new model calls, not quality equivalence or token savings.
 ```
 
 ### deck:readme:16
@@ -221,7 +221,7 @@ Ask **"What can this do?"** (or 這能幹嘛？). The answer comes from `skills/
 - write-back: yes
 
 ```text
-**Community feedback, stage 1:** open the [local options form](community/index.html) and follow the [guide](docs/community-feedback-stage1.md). Public JSON contains controlled choices; optional text stays on the author's device. Local validation, import and search use a fictional demo catalog. There is no online submission service or real review dataset yet.
+**Try a whole persona conversation:** run `python3 tools/persona_playground.py` and open the printed local URL. The [interactive lab](docs/persona-playground.md) uses your local Codex login for dynamic persona replies and assistant answers, with step/run/pause, queued human questions, scenario amendments, private history and shared usage ceilings. All 16 cards are available in a clearly labelled chat adaptation; this is a local alpha, with no public deployment or hidden model judge.
 ```
 
 ### deck:readme:17
@@ -232,12 +232,23 @@ Ask **"What can this do?"** (or 這能幹嘛？). The answer comes from `skills/
 - write-back: yes
 
 ```text
-**Whole conversations, not one answer:** `docs/JOURNEYS.md` scores nine scripted multi-turn journeys, and `docs/PERSONAS.md` goes one step further — sixteen fictional people played by a model, with a deterministic controller holding their documents so nothing can be invented, a judge that has to quote its evidence, and a paired probe per person that moves exactly one setting. `python3 bench/personas.py --matrix pilot --dry-run` prints the whole plan without calling a model.
+**Community feedback, stage 1:** open the [local options form](community/index.html) and follow the [guide](docs/community-feedback-stage1.md). Public JSON contains controlled choices; optional text stays on the author's device. Local validation, import and search use a fictional demo catalog. There is no online submission service or real review dataset yet.
 ```
 
 ### deck:readme:18
 
-- source: `README.md` · L76
+- source: `README.md` · L70
+- under: ## Benchmark (facts must be right on every model; verdicts may differ)
+- lang: en
+- write-back: yes
+
+```text
+**Whole conversations, not one answer:** `docs/JOURNEYS.md` scores nine scripted multi-turn journeys, and `docs/PERSONAS.md` goes one step further — sixteen fictional people played by a model, with a deterministic controller holding their documents so nothing can be invented, a judge that has to quote its evidence, and a paired probe per person that moves exactly one setting. `python3 bench/personas.py --matrix pilot --dry-run` prints the whole plan without calling a model.
+```
+
+### deck:readme:19
+
+- source: `README.md` · L78
 - under: ## Sources you will not find here
 - lang: en
 - write-back: yes
@@ -246,9 +257,9 @@ Ask **"What can this do?"** (or 這能幹嘛？). The answer comes from `skills/
 Rightmove, Zoopla, OnTheMarket, OpenRent, HomeViews, Trustpilot, Airbnb, Booking.com are listed by name only. Their terms forbid automated access, so this project gives no method for them; the skill asks you for the page (a PDF, screenshots or the text) and does not open listing links itself.
 ```
 
-### deck:readme:19
+### deck:readme:20
 
-- source: `README.md` · L79
+- source: `README.md` · L81
 - under: ## Licence and attribution (proposed)
 - lang: en
 - write-back: yes
@@ -354,6 +365,28 @@ The assistant uses real rental examples with source links and dates. A public ad
 ### deck:using:9
 
 - source: `docs/USING.md` · L22
+- under: ### Speak instead of typing
+- lang: en
+- write-back: yes
+
+```text
+If speaking is easier, use your device's built-in dictation or an app you already like to enter text in the assistant's chat box. [Typeless](https://www.typeless.com/pricing) and [Wispr Flow](https://wisprflow.ai/pricing) are optional examples; both list free plans with usage limits, which vary by plan or platform (checked 11 September 2026). Check the linked pages for current allowances; installing or paying for another app is not required.
+```
+
+### deck:using:10
+
+- source: `docs/USING.md` · L24
+- under: ### Speak instead of typing
+- lang: en
+- write-back: yes
+
+```text
+Describe what you want, a home you liked or disliked, or a change of mind in your own words. You do not need to prepare a polished prompt or a form. Before sending, glance at names, postcodes, amounts, dates and words such as “not” or “only if” so a transcription error does not change your conditions. This is speech-to-text input; it does not require the assistant to support a voice call.
+```
+
+### deck:using:11
+
+- source: `docs/USING.md` · L28
 - under: ### Learn by comparing
 - lang: en
 - write-back: yes
@@ -362,9 +395,9 @@ The assistant uses real rental examples with source links and dates. A public ad
 Start with differences you can react to: a shorter commute versus more space, a quiet bedroom versus a busy road, lower rent versus uncertain bills. The assistant explains the likely consequences, then helps you inspect the evidence or prepare a viewing check. You can ask about London areas, rental budgets, paperwork or common problems whenever they become relevant. Current market and legal claims need current sources.
 ```
 
-### deck:using:10
+### deck:using:12
 
-- source: `docs/USING.md` · L26
+- source: `docs/USING.md` · L32
 - under: ### Read the recommendation
 - lang: en
 - write-back: yes
@@ -373,9 +406,9 @@ Start with differences you can react to: a shorter commute versus more space, a 
 The answer begins with what to do next and why. Numbers keep their source and uncertainty: “landlord estimate: 20 minutes, not checked” is different from a journey planner prediction for your destination and arrival time. A quote matching the landlord's message does not prove the claim is true. Unknown information remains unknown; a low estimate alone does not confirm that a home meets your limit.
 ```
 
-### deck:using:11
+### deck:using:13
 
-- source: `docs/USING.md` · L28
+- source: `docs/USING.md` · L34
 - under: ### Read the recommendation
 - lang: en
 - write-back: yes
@@ -384,9 +417,9 @@ The answer begins with what to do next and why. Numbers keep their source and un
 A fuller report covers the money, paperwork, size, bills, move-in timing and other checks relevant to the home. These are things the assistant works through, not a form you must fill out before it helps. It asks for the few missing items that matter next and keeps other gaps visible.
 ```
 
-### deck:using:12
+### deck:using:14
 
-- source: `docs/USING.md` · L32
+- source: `docs/USING.md` · L38
 - under: ### Change your mind or interrupt
 - lang: en
 - write-back: yes
@@ -395,9 +428,9 @@ A fuller report covers the money, paperwork, size, bills, move-in timing and oth
 Say “Raise my total monthly limit to £2,300”, “Quiet matters more than light”, or “A longer commute is okay, but never over 45 minutes”. The assistant applies clear instructions, explains the effect in plain words and preserves conditions and previous requirements. It asks only when your meaning is materially ambiguous or it proposes a change itself.
 ```
 
-### deck:using:13
+### deck:using:15
 
-- source: `docs/USING.md` · L34
+- source: `docs/USING.md` · L40
 - under: ### Change your mind or interrupt
 - lang: en
 - write-back: yes
@@ -406,9 +439,9 @@ Say “Raise my total monthly limit to £2,300”, “Quiet matters more than li
 Ask a side question at any point. It should answer it, keep the original work available, and resume without making you repeat your preferences. Saving across conversations depends on the host's file and memory support; the assistant must say when it cannot save something.
 ```
 
-### deck:using:14
+### deck:using:16
 
-- source: `docs/USING.md` · L38
+- source: `docs/USING.md` · L44
 - under: ### Before arriving or committing
 - lang: en
 - write-back: yes
@@ -417,9 +450,9 @@ Ask a side question at any point. It should answer it, keep the original work av
 Compare temporary accommodation if it would give you time to view longer-term homes. Check actual cancellation, payment and departure terms; no accommodation type guarantees a refund or same-day exit. Build an arrival plan from your dates and verified costs, leaving gaps explicit.
 ```
 
-### deck:using:15
+### deck:using:17
 
-- source: `docs/USING.md` · L40
+- source: `docs/USING.md` · L46
 - under: ### Before arriving or committing
 - lang: en
 - write-back: yes
@@ -428,9 +461,9 @@ Compare temporary accommodation if it would give you time to view longer-term ho
 Use the report to decide what to investigate, then see the flat and speak with the agent or landlord. Take the agreement away to read; do not sign at the viewing. The assistant gives legal and payment guidance at the decision it affects, with the applicable date and agreement type.
 ```
 
-### deck:using:16
+### deck:using:18
 
-- source: `docs/USING.md` · L42
+- source: `docs/USING.md` · L48
 - under: ### Before arriving or committing
 - lang: en
 - write-back: yes
@@ -439,9 +472,9 @@ Use the report to decide what to investigate, then see the flat and speak with t
 **Your own little secretary.** Anything personal or local that the shared skill does not check — the walk to your gym, a school's catchment, a noise source you know about, a data set you trust — goes into `extensions/` in your copy as a one-page add-on (there is a template). Add-ons are labelled in the report, never change the verdict by themselves, read no listing or review sites, and never describe an area by who lives there.
 ```
 
-### deck:using:17
+### deck:using:19
 
-- source: `docs/USING.md` · L46
+- source: `docs/USING.md` · L52
 - under: ## 繁體中文
 - lang: zh-TW
 - write-back: yes
@@ -450,9 +483,9 @@ Use the report to decide what to investigate, then see the flat and speak with t
 不用寫程式，也不用先填完整問卷或挑技術設定。按照[安裝說明](INSTALL.md)加入技能後，可以直接說：
 ```
 
-### deck:using:18
+### deck:using:20
 
-- source: `docs/USING.md` · L48
+- source: `docs/USING.md` · L54
 - under: ## 繁體中文
 - lang: zh-TW
 - write-back: yes
@@ -461,9 +494,9 @@ Use the report to decide what to investigate, then see the flat and speak with t
 - 「我十月要去倫敦，先給我例子，教我怎麼挑。」
 ```
 
-### deck:using:19
+### deck:using:21
 
-- source: `docs/USING.md` · L49
+- source: `docs/USING.md` · L55
 - under: ## 繁體中文
 - lang: zh-TW
 - write-back: yes
@@ -472,9 +505,9 @@ Use the report to decide what to investigate, then see the flat and speak with t
 - 「我想找安靜的一房，每月總花費（房租加帳單）不要超過 £2,200。」
 ```
 
-### deck:using:20
+### deck:using:22
 
-- source: `docs/USING.md` · L50
+- source: `docs/USING.md` · L56
 - under: ## 繁體中文
 - lang: zh-TW
 - write-back: yes
@@ -483,9 +516,9 @@ Use the report to decide what to investigate, then see the flat and speak with t
 - 「比較這兩間，告訴我看房時要查什麼。」
 ```
 
-### deck:using:21
+### deck:using:23
 
-- source: `docs/USING.md` · L51
+- source: `docs/USING.md` · L57
 - under: ## 繁體中文
 - lang: zh-TW
 - write-back: yes
@@ -494,9 +527,9 @@ Use the report to decide what to investigate, then see the flat and speak with t
 - 「先插問一下：擔保人是做什麼的？」
 ```
 
-### deck:using:22
+### deck:using:24
 
-- source: `docs/USING.md` · L53
+- source: `docs/USING.md` · L59
 - under: ## 繁體中文
 - lang: zh-TW
 - write-back: yes
@@ -505,9 +538,9 @@ Use the report to decide what to investigate, then see the flat and speak with t
 助理會先用例子或你提供的房源做出有用的比較，再從你的反應了解偏好。通常一次問零到兩題，必要確認最多三題；「還不知道」也可以，不必先把所有條件想清楚。
 ```
 
-### deck:using:23
+### deck:using:25
 
-- source: `docs/USING.md` · L55
+- source: `docs/USING.md` · L61
 - under: ## 繁體中文
 - lang: zh-TW
 - write-back: yes
@@ -516,9 +549,31 @@ Use the report to decide what to investigate, then see the flat and speak with t
 能搜尋時，真實房源會附來源與日期；不能搜尋時，教學例子會明確標示為虛構，不會把假設價格說成倫敦現在的行情。需要你貼房源、戶型圖或其他文件時，會說明用途，並繼續做不受影響的部分。聊天軟體有選項介面就用選項，沒有就直接打字。
 ```
 
-### deck:using:24
+### deck:using:26
 
-- source: `docs/USING.md` · L57
+- source: `docs/USING.md` · L63
+- under: ## 繁體中文
+- lang: zh-TW
+- write-back: yes
+
+```text
+**不想打字，可以用語音輸入。** 用手機或電腦內建的聽寫，或你習慣的語音轉文字工具，把內容輸入助理的對話框即可；[Typeless](https://www.typeless.com/pricing) 和 [Wispr Flow](https://wisprflow.ai/pricing) 都是可選例子。兩者目前都有免費方案，但有用量限制，依平台與方案而異（2026-09-11 查核，最新額度看官方頁面）；不需要為了使用這個 skill 另外安裝或付費。
+```
+
+### deck:using:27
+
+- source: `docs/USING.md` · L65
+- under: ## 繁體中文
+- lang: zh-TW
+- write-back: yes
+
+```text
+可以直接說需求、過去住過的好房子或雷點，也能中途改主意，不用先整理成表單或漂亮的提示詞。送出前看一下校名、郵遞區號、金額、日期，以及「不要」「只有……才可以」有沒有辨識正確。這是把聲音轉成文字，不要求助理本身支援語音通話。
+```
+
+### deck:using:28
+
+- source: `docs/USING.md` · L67
 - under: ## 繁體中文
 - lang: zh-TW
 - write-back: yes
@@ -527,9 +582,9 @@ Use the report to decide what to investigate, then see the flat and speak with t
 可以先比較「通勤近一點，還是空間大一點」、「臥室安靜，還是生活機能方便」、「租金低一點，還是帳單比較確定」。邊看邊問倫敦的區域、預算、租屋流程或常見問題，也可以請助理教你如何在看房時查證。涉及目前行情或法律的說法，應附上查過的來源。
 ```
 
-### deck:using:25
+### deck:using:29
 
-- source: `docs/USING.md` · L59
+- source: `docs/USING.md` · L69
 - under: ## 繁體中文
 - lang: zh-TW
 - write-back: yes
@@ -538,9 +593,9 @@ Use the report to decide what to investigate, then see the flat and speak with t
 答案先說下一步和理由。數字會保留來源與限制：「房東估計通勤 20 分鐘，還沒查證」不等於實際通勤已確認；逐字核對房東訊息，也不代表內容一定正確。每月總花費會說明房租、能源、水、網路與適用的市政稅哪些已知、哪些只是估計。
 ```
 
-### deck:using:26
+### deck:using:30
 
-- source: `docs/USING.md` · L61
+- source: `docs/USING.md` · L71
 - under: ## 繁體中文
 - lang: zh-TW
 - write-back: yes
@@ -549,9 +604,9 @@ Use the report to decide what to investigate, then see the flat and speak with t
 中途改條件直接說：「總預算提高到 £2,300」、「安靜比採光重要」、「通勤可以久一點，但超過 45 分鐘就不要」。助理會套用明確指示，用白話說明影響，保留例外和其他條件；不需要再確認同一個要求。只有意思不明確，或助理自己提議修改時，才需要釐清。
 ```
 
-### deck:using:27
+### deck:using:31
 
-- source: `docs/USING.md` · L63
+- source: `docs/USING.md` · L73
 - under: ## 繁體中文
 - lang: zh-TW
 - write-back: yes
@@ -560,9 +615,9 @@ Use the report to decide what to investigate, then see the flat and speak with t
 隨時可以插問其他問題，再回到原本的找房工作，不必重新交代偏好。跨對話保存取決於你使用的軟體；助理不能假裝已經存好。
 ```
 
-### deck:using:28
+### deck:using:32
 
-- source: `docs/USING.md` · L65
+- source: `docs/USING.md` · L75
 - under: ## 繁體中文
 - lang: zh-TW
 - write-back: yes
@@ -571,9 +626,9 @@ Use the report to decide what to investigate, then see the flat and speak with t
 還沒抵達時，可以比較暫住方案，替實地看房留時間。取消、退款和退房條件都要看實際條款，不能只因為是旅館或服務式公寓就當成有保障。看房時親自確認環境、和仲介或房東談清楚；合約帶回去讀，看房當天不簽約。法律與付款提醒會放在相關決定旁，不會每次開場都貼一整段。
 ```
 
-### deck:using:29
+### deck:using:33
 
-- source: `docs/USING.md` · L67
+- source: `docs/USING.md` · L77
 - under: ## 繁體中文
 - lang: zh-TW
 - write-back: yes
@@ -582,9 +637,9 @@ Use the report to decide what to investigate, then see the flat and speak with t
 **自己的小秘書。** 共用技能沒查、但你在意的東西，例如到健身房的步行時間、學區、你知道的噪音來源、你信任的資料集，寫成一頁放進你自己那份的 `extensions/` 資料夾（有範本）。這些加購項目在報告裡會標示出來、不會自己改變判決、不讀房源和評價網站、也不用「住的是誰」來描述一個地區。
 ```
 
-### deck:using:30
+### deck:using:34
 
-- source: `docs/USING.md` · L71
+- source: `docs/USING.md` · L81
 - under: ## 简体中文
 - lang: zh-CN
 - write-back: yes
@@ -593,9 +648,20 @@ Use the report to decide what to investigate, then see the flat and speak with t
 直接聊天就能开始，不用先填问卷。可以说「先给我例子，教我怎么挑」，或贴两套房源请助理比较。它会先做有用的分析，再从你的反应了解偏好；通常一次问零到两题，必要确认最多三题。支持选项界面时使用真实选项，没有就直接打字。
 ```
 
-### deck:using:31
+### deck:using:35
 
-- source: `docs/USING.md` · L73
+- source: `docs/USING.md` · L83
+- under: ## 简体中文
+- lang: zh-CN
+- write-back: yes
+
+```text
+**不想打字，可以用语音输入。** 使用设备内置的听写或你习惯的语音转文字工具，将内容输入助理的聊天框；[Typeless](https://www.typeless.com/pricing) 和 [Wispr Flow](https://wisprflow.ai/pricing) 是可选例子。两者目前都有免费方案，但有用量限制，依平台和方案而异（2026-09-11 查核，最新额度看官方页面），不必另行安装或付费。直接说需求、住屋经历或临时改动即可；发送前核对名称、邮编、金额、日期及否定词、附带条件。无需先填表，也不要求助理支持语音通话。
+```
+
+### deck:using:36
+
+- source: `docs/USING.md` · L85
 - under: ## 简体中文
 - lang: zh-CN
 - write-back: yes
@@ -604,9 +670,9 @@ Use the report to decide what to investigate, then see the flat and speak with t
 每月总花费包括房租和账单；数字会说明来源、哪些只是估计。真实房源需要来源与日期，不能搜索时的教学例子会标成虚构。你可以随时插问、改变预算或增加条件，助理应保留原本的工作，不让你重新填写全部资料。跨对话保存取决于软件能力，不能假装已经保存。
 ```
 
-### deck:using:32
+### deck:using:37
 
-- source: `docs/USING.md` · L75
+- source: `docs/USING.md` · L87
 - under: ## 简体中文
 - lang: zh-CN
 - write-back: yes
@@ -615,9 +681,9 @@ Use the report to decide what to investigate, then see the flat and speak with t
 先用比较学会取舍，再安排查证和看房。退款、付款、签约规则要看实际条款与适用法律；合约带回去读，看房当天不签约。
 ```
 
-### deck:using:33
+### deck:using:38
 
-- source: `docs/USING.md` · L77
+- source: `docs/USING.md` · L89
 - under: ## 简体中文
 - lang: zh-CN
 - write-back: yes
@@ -953,7 +1019,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:8
 
-- source: `skills/vet-flat/references/onboarding.md` · L205
+- source: `skills/vet-flat/references/onboarding.md` · L207
 - under: ## 3. Primer for someone with no idea (ten facts, one screen; cite `references/sources.yaml` ids where numbers appear)
 - lang: en
 - write-back: yes
@@ -964,7 +1030,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:9
 
-- source: `skills/vet-flat/references/onboarding.md` · L206
+- source: `skills/vet-flat/references/onboarding.md` · L208
 - under: ## 3. Primer for someone with no idea (ten facts, one screen; cite `references/sources.yaml` ids where numbers appear)
 - lang: en
 - write-back: yes
@@ -975,7 +1041,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:10
 
-- source: `skills/vet-flat/references/onboarding.md` · L207
+- source: `skills/vet-flat/references/onboarding.md` · L209
 - under: ## 3. Primer for someone with no idea (ten facts, one screen; cite `references/sources.yaml` ids where numbers appear)
 - lang: en
 - write-back: yes
@@ -986,7 +1052,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:11
 
-- source: `skills/vet-flat/references/onboarding.md` · L208
+- source: `skills/vet-flat/references/onboarding.md` · L210
 - under: ## 3. Primer for someone with no idea (ten facts, one screen; cite `references/sources.yaml` ids where numbers appear)
 - lang: en
 - write-back: yes
@@ -997,7 +1063,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:12
 
-- source: `skills/vet-flat/references/onboarding.md` · L209
+- source: `skills/vet-flat/references/onboarding.md` · L211
 - under: ## 3. Primer for someone with no idea (ten facts, one screen; cite `references/sources.yaml` ids where numbers appear)
 - lang: en
 - write-back: yes
@@ -1008,7 +1074,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:13
 
-- source: `skills/vet-flat/references/onboarding.md` · L210
+- source: `skills/vet-flat/references/onboarding.md` · L212
 - under: ## 3. Primer for someone with no idea (ten facts, one screen; cite `references/sources.yaml` ids where numbers appear)
 - lang: en
 - write-back: yes
@@ -1019,7 +1085,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:14
 
-- source: `skills/vet-flat/references/onboarding.md` · L211
+- source: `skills/vet-flat/references/onboarding.md` · L213
 - under: ## 3. Primer for someone with no idea (ten facts, one screen; cite `references/sources.yaml` ids where numbers appear)
 - lang: en
 - write-back: yes
@@ -1030,7 +1096,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:15
 
-- source: `skills/vet-flat/references/onboarding.md` · L212
+- source: `skills/vet-flat/references/onboarding.md` · L214
 - under: ## 3. Primer for someone with no idea (ten facts, one screen; cite `references/sources.yaml` ids where numbers appear)
 - lang: en
 - write-back: yes
@@ -1041,7 +1107,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:16
 
-- source: `skills/vet-flat/references/onboarding.md` · L213
+- source: `skills/vet-flat/references/onboarding.md` · L215
 - under: ## 3. Primer for someone with no idea (ten facts, one screen; cite `references/sources.yaml` ids where numbers appear)
 - lang: en
 - write-back: yes
@@ -1052,7 +1118,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:17
 
-- source: `skills/vet-flat/references/onboarding.md` · L214
+- source: `skills/vet-flat/references/onboarding.md` · L216
 - under: ## 3. Primer for someone with no idea (ten facts, one screen; cite `references/sources.yaml` ids where numbers appear)
 - lang: en
 - write-back: yes
@@ -1063,7 +1129,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:18
 
-- source: `skills/vet-flat/references/onboarding.md` · L220
+- source: `skills/vet-flat/references/onboarding.md` · L222
 - under: ## 4. Short answers to common questions
 - lang: en
 - write-back: yes
@@ -1074,7 +1140,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:19
 
-- source: `skills/vet-flat/references/onboarding.md` · L221
+- source: `skills/vet-flat/references/onboarding.md` · L223
 - under: ## 4. Short answers to common questions
 - lang: en
 - write-back: yes
@@ -1085,7 +1151,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:20
 
-- source: `skills/vet-flat/references/onboarding.md` · L222
+- source: `skills/vet-flat/references/onboarding.md` · L224
 - under: ## 4. Short answers to common questions
 - lang: en
 - write-back: yes
@@ -1096,7 +1162,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:21
 
-- source: `skills/vet-flat/references/onboarding.md` · L223
+- source: `skills/vet-flat/references/onboarding.md` · L225
 - under: ## 4. Short answers to common questions
 - lang: en
 - write-back: yes
@@ -1107,7 +1173,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:22
 
-- source: `skills/vet-flat/references/onboarding.md` · L224
+- source: `skills/vet-flat/references/onboarding.md` · L226
 - under: ## 4. Short answers to common questions
 - lang: en
 - write-back: yes
@@ -1118,7 +1184,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:23
 
-- source: `skills/vet-flat/references/onboarding.md` · L225
+- source: `skills/vet-flat/references/onboarding.md` · L227
 - under: ## 4. Short answers to common questions
 - lang: en
 - write-back: yes
@@ -1129,7 +1195,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:24
 
-- source: `skills/vet-flat/references/onboarding.md` · L226
+- source: `skills/vet-flat/references/onboarding.md` · L228
 - under: ## 4. Short answers to common questions
 - lang: en
 - write-back: yes
@@ -1140,7 +1206,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:25
 
-- source: `skills/vet-flat/references/onboarding.md` · L227
+- source: `skills/vet-flat/references/onboarding.md` · L229
 - under: ## 4. Short answers to common questions
 - lang: en
 - write-back: yes
@@ -1151,7 +1217,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:26
 
-- source: `skills/vet-flat/references/onboarding.md` · L228
+- source: `skills/vet-flat/references/onboarding.md` · L230
 - under: ## 4. Short answers to common questions
 - lang: en
 - write-back: yes
@@ -1162,7 +1228,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:27
 
-- source: `skills/vet-flat/references/onboarding.md` · L229
+- source: `skills/vet-flat/references/onboarding.md` · L231
 - under: ## 4. Short answers to common questions
 - lang: en
 - write-back: yes
@@ -1173,7 +1239,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:28
 
-- source: `skills/vet-flat/references/onboarding.md` · L230
+- source: `skills/vet-flat/references/onboarding.md` · L232
 - under: ## 4. Short answers to common questions
 - lang: en
 - write-back: yes
@@ -1184,7 +1250,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:29
 
-- source: `skills/vet-flat/references/onboarding.md` · L231
+- source: `skills/vet-flat/references/onboarding.md` · L233
 - under: ## 4. Short answers to common questions
 - lang: en
 - write-back: yes
@@ -1195,7 +1261,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:30
 
-- source: `skills/vet-flat/references/onboarding.md` · L232
+- source: `skills/vet-flat/references/onboarding.md` · L234
 - under: ## 4. Short answers to common questions
 - lang: en
 - write-back: yes
