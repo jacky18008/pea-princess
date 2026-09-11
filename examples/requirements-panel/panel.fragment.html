@@ -1,0 +1,280 @@
+<div id="pea-requirements-preview" lang="zh-TW" aria-label="Pea Princess 我的需求與摘要預覽">
+  <style>
+    #pea-requirements-preview {
+      --pea-bg: light-dark(#f6f5f0, #171d1b); --pea-panel: light-dark(#fffefa, #202925);
+      --pea-ink: light-dark(#223a33, #e6eee9); --pea-muted: light-dark(#586a62, #adbbb3);
+      --pea-line: light-dark(#d9e1d8, #425149); --pea-accent: light-dark(#226349, #a4dabb);
+      --pea-on-accent: light-dark(#ffffff, #123725); --pea-tint: light-dark(#e9f1e8, #2b3d32);
+      --pea-warn: light-dark(#855a12, #efd094); --pea-warn-bg: light-dark(#fff2d6, #3f3420);
+      --pea-error: light-dark(#a12d28, #ffb0a5);
+      color: var(--pea-ink); background: var(--pea-bg); font: 14px/1.6 system-ui, sans-serif;
+      border: 1px solid var(--pea-line); border-radius: 20px; overflow: clip;
+      color-scheme: inherit; width: 100%; box-sizing: border-box;
+    }
+    #pea-requirements-preview * { box-sizing: border-box; }
+    #pea-requirements-preview .pea-topbar { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 18px 24px; border-bottom: 1px solid var(--pea-line); flex-wrap: wrap; }
+    #pea-requirements-preview .pea-brand { display: flex; gap: 10px; align-items: center; font-weight: 500; }
+    #pea-requirements-preview .pea-monogram { display: grid; place-items: center; width: 32px; height: 32px; background: var(--pea-accent); color: var(--pea-on-accent); border-radius: 50%; }
+    #pea-requirements-preview .pea-caption, #pea-requirements-preview small { color: var(--pea-muted); font-size: 12px; }
+    #pea-requirements-preview .pea-demo { color: var(--pea-muted); font-size: 12px; }
+    #pea-requirements-preview .pea-content { padding: 26px; }
+    #pea-requirements-preview .pea-intro { display: flex; justify-content: space-between; gap: 20px; align-items: end; margin-bottom: 22px; flex-wrap: wrap; }
+    #pea-requirements-preview h1 { font-size: 25px; letter-spacing: -.03em; font-weight: 500; line-height: 1.3; margin: 0 0 5px; }
+    #pea-requirements-preview h2 { font-size: 17px; font-weight: 500; margin: 0; }
+    #pea-requirements-preview h3 { font-size: 14px; font-weight: 500; margin: 0 0 8px; }
+    #pea-requirements-preview p { margin: 0; }
+    #pea-requirements-preview .pea-grid { display: grid; grid-template-columns: minmax(0, 1.06fr) minmax(0, 1fr); align-items: start; gap: 20px; }
+    #pea-requirements-preview[data-layout="stack"] .pea-grid { grid-template-columns: minmax(0, 1fr); }
+    #pea-requirements-preview .pea-panel { padding: 22px; background: var(--pea-panel); border: 1px solid var(--pea-line); border-radius: 15px; min-width: 0; }
+    #pea-requirements-preview .pea-panel-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+    #pea-requirements-preview .pea-status { font-size: 12px; color: var(--pea-accent); background: var(--pea-tint); border-radius: 6px; padding: 3px 8px; }
+    #pea-requirements-preview .pea-status[data-stale="true"] { color: var(--pea-warn); background: var(--pea-warn-bg); }
+    #pea-requirements-preview .pea-field { display: grid; gap: 6px; margin-bottom: 17px; min-width: 0; }
+    #pea-requirements-preview .pea-field > label { font-weight: 500; }
+    #pea-requirements-preview .pea-pair { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+    #pea-requirements-preview input:not([type="checkbox"]), #pea-requirements-preview select, #pea-requirements-preview textarea {
+      width: 100%; min-width: 0; border: 1px solid var(--pea-line); border-radius: 8px; background: var(--pea-panel); color: var(--pea-ink); padding: 10px 11px; font: inherit; font-size: 16px;
+    }
+    #pea-requirements-preview input::placeholder { color: var(--pea-muted); }
+    #pea-requirements-preview .pea-scenario { width: 270px; max-width: 100%; margin: 0; }
+    #pea-requirements-preview .pea-scenario select { font-size: 14px; }
+    #pea-requirements-preview fieldset { margin: 0 0 18px; padding: 0; border: 0; min-width: 0; }
+    #pea-requirements-preview legend { margin-bottom: 8px; padding: 0; font-weight: 500; }
+    #pea-requirements-preview .pea-checks { display: flex; gap: 8px 15px; flex-wrap: wrap; }
+    #pea-requirements-preview .pea-check { display: flex; align-items: center; gap: 7px; min-height: 35px; cursor: pointer; }
+    #pea-requirements-preview .pea-check input { width: 17px; height: 17px; accent-color: var(--pea-accent); margin: 0; }
+    #pea-requirements-preview .pea-divider { margin: 4px 0 18px; border: 0; border-top: 1px solid var(--pea-line); }
+    #pea-requirements-preview .pea-conditional { color: var(--pea-muted); font-size: 12px; }
+    #pea-requirements-preview button { min-height: 40px; border-radius: 8px; padding: 9px 14px; border: 1px solid var(--pea-line); color: var(--pea-ink); background: var(--pea-panel); font: inherit; font-weight: 500; cursor: pointer; }
+    #pea-requirements-preview .pea-primary { width: 100%; background: var(--pea-accent); color: var(--pea-on-accent); border-color: var(--pea-accent); }
+    #pea-requirements-preview .pea-footnote { display: block; margin-top: 8px; }
+    #pea-requirements-preview .pea-error { color: var(--pea-error); margin-bottom: 10px; }
+    #pea-requirements-preview .pea-right { display: grid; gap: 16px; min-width: 0; }
+    #pea-requirements-preview dl { margin: 0; }
+    #pea-requirements-preview .pea-row { display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--pea-line); }
+    #pea-requirements-preview .pea-row:first-child { padding-top: 0; }
+    #pea-requirements-preview .pea-row:last-child { border-bottom: 0; padding-bottom: 0; }
+    #pea-requirements-preview dt { color: var(--pea-muted); }
+    #pea-requirements-preview dd { margin: 0; overflow-wrap: anywhere; }
+    #pea-requirements-preview .pea-summary-heading { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+    #pea-requirements-preview .pea-report { border-top: 4px solid var(--pea-accent); }
+    #pea-requirements-preview .pea-report[data-stale="true"] { border-top-color: var(--pea-warn); }
+    #pea-requirements-preview .pea-stale { margin: 0 0 14px; padding: 9px 11px; background: var(--pea-warn-bg); color: var(--pea-warn); border-radius: 7px; }
+    #pea-requirements-preview .pea-report-copy { display: grid; gap: 10px; }
+    #pea-requirements-preview .pea-report-copy p { overflow-wrap: anywhere; }
+    #pea-requirements-preview .pea-unknowns { margin: 15px 0 0; padding: 14px 0 0; border-top: 1px solid var(--pea-line); }
+    #pea-requirements-preview .pea-unknowns ul { margin: 0; padding-left: 20px; color: var(--pea-muted); }
+    #pea-requirements-preview details { border-top: 1px solid var(--pea-line); padding-top: 14px; margin-top: 18px; }
+    #pea-requirements-preview summary { cursor: pointer; font-weight: 500; }
+    #pea-requirements-preview .pea-history { margin: 12px 0 0; padding-left: 20px; }
+    #pea-requirements-preview .pea-history li { margin: 0 0 9px; }
+    #pea-requirements-preview .pea-history small { display: block; }
+    #pea-requirements-preview .pea-export { margin-top: 20px; }
+    #pea-requirements-preview .pea-export textarea { margin-top: 12px; min-height: 220px; font: 12px/1.6 ui-monospace, monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
+    #pea-requirements-preview .pea-export-actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
+    #pea-requirements-preview [hidden] { display: none !important; }
+    @media (max-width: 800px) {
+      #pea-requirements-preview .pea-grid { grid-template-columns: minmax(0, 1fr); }
+      #pea-requirements-preview .pea-content { padding: 18px; }
+      #pea-requirements-preview .pea-topbar { padding: 16px 18px; }
+    }
+    @media (max-width: 420px) {
+      #pea-requirements-preview .pea-panel { padding: 17px; }
+      #pea-requirements-preview .pea-pair { grid-template-columns: minmax(0, 1fr); gap: 0; }
+      #pea-requirements-preview .pea-scenario { width: 100%; }
+      #pea-requirements-preview h1 { font-size: 23px; }
+      #pea-requirements-preview .pea-row { grid-template-columns: 64px minmax(0, 1fr); gap: 8px; }
+    }
+    @media (pointer: coarse) {
+      #pea-requirements-preview button, #pea-requirements-preview .pea-check, #pea-requirements-preview summary { min-height: 44px; }
+      #pea-requirements-preview summary { display: flex; align-items: center; }
+    }
+  </style>
+  <header class="pea-topbar">
+    <div class="pea-brand"><span class="pea-monogram" aria-hidden="true">P</span><span>Pea Princess <span class="pea-caption">／ 需求工作台</span></span></div>
+    <span class="pea-demo">互動範例・尚未連接 agent</span>
+  </header>
+  <main class="pea-content">
+    <div class="pea-intro">
+      <div><h1>先說大概，也能開始。</h1><p class="pea-caption">這是選用的需求面板；不用提供公司或學校名稱。</p></div>
+      <div class="pea-field pea-scenario"><label for="pea-scenario">載入範例情境</label><select id="pea-scenario"><option value="jobseeker">正在找工作，目的地未定</option><option value="work_area">工作地點只透露區域</option><option value="known_place">已知校區／大樓（自行填寫）</option></select></div>
+    </div>
+    <div class="pea-grid">
+      <section class="pea-panel" aria-labelledby="pea-form-heading">
+        <div class="pea-panel-head"><h2 id="pea-form-heading">我的需求</h2><span class="pea-status" id="pea-draft-status">範例 r1</span></div>
+        <form id="pea-form" novalidate>
+          <div class="pea-field"><label for="pea-search-area">想住的區域（可留空）</label><input id="pea-search-area" type="text" value="Paddington, London" maxlength="180" placeholder="例如：Paddington 附近"><small>這是找房範圍，不代表你的工作地點。</small></div>
+          <div class="pea-field"><label for="pea-place">通勤目的地（可留空）</label><input id="pea-place" type="text" value="" maxlength="180" placeholder="輸入地址、地點、車站或區域" aria-describedby="pea-place-note"><small id="pea-place-note">不用提供公司或學校名稱。本範例只記錄一個目的地。</small></div>
+          <div class="pea-field"><label for="pea-precision">目的地精確到哪裡？</label><select id="pea-precision"><option value="district">區域</option><option value="station">車站</option><option value="address">地址</option><option value="unknown" selected>尚未確定</option></select><small id="pea-precision-note"></small></div>
+          <hr class="pea-divider">
+          <div class="pea-pair">
+            <div class="pea-field"><label for="pea-budget">每月預算上限（GBP）</label><input id="pea-budget" type="number" min="1" step="0.01" value="2200" placeholder="可留空" inputmode="decimal" aria-describedby="pea-budget-note"><small id="pea-budget-note">你的支出上限，不是房源報價。</small></div>
+            <div class="pea-field"><label for="pea-basis">這筆預算包含</label><select id="pea-basis"><option value="total_monthly">房租＋帳單</option><option value="rent_only">只有房租</option><option value="unknown">還沒決定</option></select></div>
+          </div>
+          <div class="pea-pair">
+            <div class="pea-field"><label for="pea-bedrooms">房型</label><select id="pea-bedrooms"><option value="1">一房</option><option value="2">兩房</option><option value="studio">套房（studio）</option><option value="unknown">尚未決定</option></select></div>
+            <div class="pea-field"><label for="pea-move-in">希望入住日期</label><input id="pea-move-in" type="date" aria-describedby="pea-date-note"><small id="pea-date-note">不確定可以留空。</small></div>
+          </div>
+          <fieldset><legend>比較時在意的偏好</legend><div class="pea-checks"><label class="pea-check"><input id="pea-quiet" type="checkbox" checked>安靜</label><label class="pea-check"><input id="pea-light" type="checkbox">採光</label><label class="pea-check"><input id="pea-commute" type="checkbox">通勤方便</label></div><small>這些是偏好，不會自動變成淘汰條件。</small></fieldset>
+          <div class="pea-field"><label for="pea-ground">地面層的接受條件</label><select id="pea-ground"><option value="dry_only">確認乾燥，才可以考慮</option><option value="exclude">不考慮地面層</option><option value="undecided">尚未決定</option></select><span class="pea-conditional" id="pea-ground-note"></span><small>此範例只示範乾燥條件；隱私、窗鎖等其他條件需另行記錄。</small></div>
+          <p class="pea-error" id="pea-error" role="alert" hidden></p>
+          <button type="submit" class="pea-primary">產生需求摘要</button>
+          <small class="pea-footnote">只在此頁暫存；重新整理會清除，不會傳送給 agent。</small>
+        </form>
+      </section>
+      <div class="pea-right">
+        <section class="pea-panel" aria-labelledby="pea-current-heading">
+          <div class="pea-panel-head"><h2 id="pea-current-heading">目前填寫的需求</h2><span class="pea-caption">隨欄位更新</span></div>
+          <dl id="pea-current"></dl>
+        </section>
+        <section class="pea-panel pea-report" id="pea-report" aria-labelledby="pea-report-heading">
+          <div class="pea-summary-heading"><h2 id="pea-report-heading">需求摘要</h2><span class="pea-status" id="pea-report-status">範例摘要 r1</span></div>
+          <p class="pea-caption">規則產生的介面預覽・非研究結果</p>
+          <p class="pea-stale" id="pea-stale" hidden>欄位已變更。以下仍是上一版，請重新產生摘要。</p>
+          <div class="pea-report-copy" id="pea-report-copy"></div>
+          <div class="pea-unknowns"><h3>尚待確認</h3><ul id="pea-unknowns"></ul></div>
+          <details><summary>已產生摘要的修訂紀錄 <span id="pea-history-count">1</span></summary><small>只保存產生摘要時的狀態；原始對話及中途修改需另外保存。</small><ol class="pea-history" id="pea-history"></ol></details>
+        </section>
+      </div>
+    </div>
+    <details class="pea-export"><summary>檢視／複製結構化文字</summary><label class="pea-caption" for="pea-export-text">包含目前草稿、最後產生的摘要、版本及已產生摘要的修訂紀錄；不含完整對話或每次編輯。</label><textarea id="pea-export-text" readonly spellcheck="false"></textarea><div class="pea-export-actions"><button type="button" id="pea-select-export">全選文字</button><small>可自行複製保存；本頁不會寫入你的正式需求。</small></div></details>
+    <p id="pea-announcement" aria-live="polite" class="pea-caption"></p>
+  </main>
+  <script>
+    (() => {
+      "use strict";
+      const root = document.getElementById("pea-requirements-preview");
+      const el = id => root.querySelector("#" + id);
+      const copy = value => JSON.parse(JSON.stringify(value));
+      const precisionLabels = {district: "區域", station: "車站", address: "地址", unknown: "尚未確定"};
+      const roomLabels = {"1": "一房", "2": "兩房", studio: "套房（studio）", unknown: "房型尚未決定"};
+      const priorityLabels = {quiet: "安靜", light: "採光", commute: "通勤方便"};
+      const fieldLabels = {scenario: "範例情境", search_area: "想住區域", destination: "通勤目的地", budget: "預算與計算範圍", bedrooms: "房型", move_in: "入住日期", priorities: "偏好", ground_floor: "地面層條件"};
+      const design = {layout: "side"};
+      const state = {revision: 1, snapshot: null, report: null, history: []};
+      function read() {
+        const raw = el("pea-budget").value.trim();
+        const valid = el("pea-budget").validity.valid && (raw === "" || (Number.isFinite(Number(raw)) && Number(raw) > 0));
+        return {
+          scenario: el("pea-scenario").value,
+          search_area: el("pea-search-area").value.trim() || null,
+          destination: {text: el("pea-place").value.trim(), precision: el("pea-precision").value, identity_required: false},
+          budget: {amount: raw && valid ? Number(raw) : null, currency: "GBP", period: "month", basis: el("pea-basis").value, input_valid: valid, raw},
+          bedrooms: el("pea-bedrooms").value, move_in: el("pea-move-in").value || null,
+          priorities: Object.keys(priorityLabels).filter(key => el("pea-" + key).checked),
+          ground_floor: {policy: el("pea-ground").value, required_condition: el("pea-ground").value === "dry_only" ? "dryness_verified" : null, evidence_status: "not_checked"}
+        };
+      }
+      function money(draft) {
+        if (!draft.budget.input_valid) return "金額無效，請修正";
+        if (draft.budget.amount === null) return "預算上限尚未確定";
+        const value = "£" + draft.budget.amount.toLocaleString("en-GB", {maximumFractionDigits: 2}) + "／月";
+        return value + ({total_monthly: "，房租＋帳單", rent_only: "，只含房租", unknown: "，包含項目尚未決定"}[draft.budget.basis]);
+      }
+      function destination(draft) {
+        return draft.destination.text ? draft.destination.text + "（" + precisionLabels[draft.destination.precision] + "）" : "目的地尚未確定";
+      }
+      function ground(draft) {
+        return {dry_only: "只有確認乾燥才考慮；目前未查證", exclude: "不考慮地面層", undecided: "尚未決定，不能視為接受"}[draft.ground_floor.policy];
+      }
+      function commuteNote(draft) {
+        if (!draft.destination.text || draft.destination.precision === "unknown") return "目的地還不明確，無法核對通勤。";
+        if (draft.destination.precision === "district") return "目前只到區域，不能把區域估計當成精確通勤。";
+        if (draft.destination.precision === "station") return "目前以車站為參考，最後一段步行與實際路程仍待確認。";
+        return "已提供地址文字，但尚未定位、查詢路程或驗證通勤。";
+      }
+      function preference(draft) { return draft.priorities.length ? draft.priorities.map(key => priorityLabels[key]).join("、") + "（偏好）" : "目前未選偏好"; }
+      function rows(draft) {
+        return [["想住區域", draft.search_area || "尚未確定"], ["通勤目的地", destination(draft)], ["每月上限", money(draft)], ["房型", roomLabels[draft.bedrooms]], ["入住日期", draft.move_in || "尚未確定"], ["偏好", preference(draft)], ["地面層", ground(draft)]];
+      }
+      function buildReport(draft, revision) {
+        const unknowns = [commuteNote(draft)];
+        if (!draft.search_area) unknowns.push("想住區域尚未確定。");
+        if (draft.budget.amount === null) unknowns.push("每月預算上限尚未確定。");
+        if (draft.budget.basis === "rent_only") unknowns.push("帳單尚未估算；房租上限不能當成每月總花費上限。");
+        else if (draft.budget.basis === "unknown") unknowns.push("需先釐清預算是否包含帳單。");
+        else unknowns.push("尚未取得任何房源的房租與帳單，未核對是否在預算內。");
+        if (!draft.move_in) unknowns.push("入住日期尚未確定。");
+        if (draft.bedrooms === "unknown") unknowns.push("房型尚未決定。");
+        if (draft.ground_floor.policy === "dry_only") unknowns.push("乾燥證據尚未取得；地面層不能標成符合條件。");
+        if (draft.ground_floor.policy === "undecided") unknowns.push("地面層是否接受尚未決定。");
+        return {revision, kind: "deterministic_interface_preview", research_performed: false,
+          commute: {status: "not_checked", exact_commute_validated: false, destination_precision: draft.destination.precision},
+          paragraphs: ["想住區域：" + (draft.search_area || "尚未確定") + "。通勤目的地：" + destination(draft) + "。", "房型：" + roomLabels[draft.bedrooms] + "；" + money(draft) + "。入住日期：" + (draft.move_in || "尚未確定") + "。", "比較偏好：" + preference(draft) + "。地面層：" + ground(draft) + "。"],
+          unknowns};
+      }
+      function addText(parent, tag, text, className) {
+        const node = document.createElement(tag); node.textContent = text;
+        if (className) node.className = className; parent.append(node); return node;
+      }
+      function stale(draft) { return JSON.stringify(draft) !== JSON.stringify(state.snapshot); }
+      function exportPacket(draft) {
+        return {schema_version: "pea-princess/requirements-preview/1", mode: "interactive_example", connected_to_agent: false, persisted: false,
+          draft_revision: state.revision + (stale(draft) ? 1 : 0), draft,
+          summary_status: stale(draft) ? "stale" : "current", last_generated_summary: {requirements: state.snapshot, report: state.report}, history: state.history};
+      }
+      function render() {
+        const draft = read(), changed = stale(draft);
+        root.dataset.layout = design.layout;
+        el("pea-draft-status").textContent = changed ? "草稿 r" + (state.revision + 1) : "已產生 r" + state.revision;
+        el("pea-draft-status").dataset.stale = String(changed);
+        el("pea-precision-note").textContent = commuteNote(draft);
+        el("pea-ground-note").textContent = ground(draft);
+        el("pea-current").replaceChildren();
+        rows(draft).forEach(([label, value]) => {
+          const row = document.createElement("div"); row.className = "pea-row";
+          addText(row, "dt", label); addText(row, "dd", value); el("pea-current").append(row);
+        });
+        el("pea-stale").hidden = !changed; el("pea-report").dataset.stale = String(changed);
+        el("pea-report-status").textContent = (changed ? "已過期 r" : "摘要 r") + state.report.revision;
+        el("pea-report-status").dataset.stale = String(changed);
+        el("pea-report-copy").replaceChildren();
+        state.report.paragraphs.forEach(text => addText(el("pea-report-copy"), "p", text));
+        el("pea-unknowns").replaceChildren();
+        state.report.unknowns.forEach(text => addText(el("pea-unknowns"), "li", text));
+        el("pea-history-count").textContent = String(state.history.length);
+        el("pea-history").replaceChildren();
+        state.history.slice().reverse().forEach(entry => {
+          const item = addText(el("pea-history"), "li", "r" + entry.revision + " · " + entry.description);
+          addText(item, "small", "想住 " + (entry.requirements.search_area || "未定") + " · 通勤 " + destination(entry.requirements) + " · " + money(entry.requirements));
+        });
+        el("pea-export-text").value = JSON.stringify(exportPacket(draft), null, 2);
+      }
+      function generate(event) {
+        event.preventDefault(); const draft = read();
+        el("pea-error").hidden = true;
+        if (!draft.budget.input_valid) {
+          el("pea-error").textContent = "預算請填大於 0 的金額，或留空表示尚未確定。";
+          el("pea-error").hidden = false; el("pea-budget").focus(); return;
+        }
+        if (stale(draft)) {
+          const fields = Object.keys(fieldLabels).filter(key => JSON.stringify(draft[key]) !== JSON.stringify(state.snapshot[key]));
+          state.revision += 1; state.snapshot = copy(draft); state.report = buildReport(draft, state.revision);
+          state.history.push({revision: state.revision, description: "更新" + fields.map(key => fieldLabels[key]).join("、"), requirements: copy(draft)});
+        }
+        render(); el("pea-announcement").textContent = "已產生需求摘要 r" + state.revision + "；仍未連接 agent 或查詢房源。";
+      }
+      function loadScenario() {
+        const scenario = el("pea-scenario").value;
+        el("pea-search-area").value = "Paddington, London";
+        el("pea-place").value = scenario === "work_area" ? "Paddington" : "";
+        el("pea-precision").value = scenario === "work_area" ? "district" : scenario === "known_place" ? "address" : "unknown";
+        el("pea-budget").value = "2200"; el("pea-basis").value = "total_monthly"; el("pea-bedrooms").value = "1"; el("pea-move-in").value = "";
+        el("pea-quiet").checked = true; el("pea-light").checked = false; el("pea-commute").checked = false; el("pea-ground").value = "dry_only";
+        el("pea-error").hidden = true; render();
+        el("pea-announcement").textContent = "已載入範例；目的地可自行填寫或留空，產生摘要後才會新增版本。";
+      }
+      state.snapshot = read(); state.report = buildReport(state.snapshot, 1);
+      state.history.push({revision: 1, description: "範例起始需求", requirements: copy(state.snapshot)});
+      el("pea-form").addEventListener("input", () => { el("pea-announcement").textContent = ""; render(); });
+      el("pea-form").addEventListener("change", render); el("pea-form").addEventListener("submit", generate);
+      el("pea-scenario").addEventListener("change", loadScenario);
+      el("pea-select-export").addEventListener("click", () => { el("pea-export-text").focus(); el("pea-export-text").select(); });
+      render();
+      if (globalThis.Tweak) {
+        const tweak = new Tweak({container: root, onChange: render});
+        tweak.addSelect(design, "layout", {label: "需求與摘要的排列", options: [{label: "左右並排", value: "side"}, {label: "摘要在下方", value: "stack"}]});
+      }
+    })();
+  </script>
+</div>
