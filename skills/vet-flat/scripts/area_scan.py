@@ -29,7 +29,7 @@ Usage:
 Give --street whenever the street name is known: a postcode or outcode centroid can sit on the
 wrong street, and the scan then says how far off it was and runs from the street itself.
 
-Output is one JSON object of about 4-6k characters with a fixed shape (schema vet-flat/area-scan/2):
+Output is one JSON object of about 7-9k characters (2.5-3k tokens) with a fixed shape (schema vet-flat/area-scan/2):
 where, street, quiet, noise, crime, works, living_environment, reading (plain sentences), sources,
 not_found. Each block carries ok/note from its register; a failed register is reported, never
 guessed. Standard library only, Python 3.9; network through the other scripts' _fetch (curl, cached).
@@ -56,9 +56,8 @@ STEP_M = 120      # distance between the sampled points along the street
 OFF_STREET_M = 40  # beyond this, the given point is called a centroid, not a door
 NAMED_RADIUS_M = 1500  # a named street is looked for this far out: an outcode centroid can be a kilometre off
 NOTABLE_SINCE = 2024
-NOTABLE_RULE = ("decided or valid since %d and either big (5+ storeys, 10+ homes, a tall-building hint) or a works signal "
-                "(demolition of a building, basement, redevelopment, piling, crane, hoarding, a construction/dust/logistics "
-                "management plan); householder extensions, dormers, sheds and signs are not notable; nearest first" % NOTABLE_SINCE)
+NOTABLE_RULE = ("since %d and either big (5+ storeys, 10+ homes, tall-building hint) or a works signal (demolition, basement, "
+                "piling, crane, hoarding, construction/dust plan); householder works excluded; nearest first" % NOTABLE_SINCE)
 BIG_WORDS = re.compile(r"(?i)demoli(?:tion|sh)\b(?! of the (?:existing |detached )?(?:garage|shed|outbuilding|cycle store|refuse|bin|conservatory|fence|wall|porch))"
                        r"|basement|redevelop|new[- ]build|excavat|piling|crane|hoarding|scaffold"
                        r"|construction (?:logistics|management|environmental|traffic) plan|demolition and construction|\bCEMP\b|\bCMP\b|\bCLP\b|dust management"
@@ -357,8 +356,10 @@ def compose(where, crime, planning, roads, living, notes, noise=None, street=Non
     if planning and planning.get("ok"):
         rows = planning.get("results") or []
         rows = sorted(rows, key=lambda r: (r.get("distance_m") is None, r.get("distance_m") or 0))
-        keep = ("reference", "address", "description", "status", "decision", "decision_date", "distance_m", "storeys", "residential_units_proposed")
-        brief = lambda r: {k: (_cut(r.get(k), 80) if k in ("address", "description") else r.get(k)) for k in keep}
+        keep = ("reference", "address", "description", "status", "decision_date", "distance_m", "storeys", "residential_units_proposed")
+        def brief(r):
+            b = {k: (_cut(r.get(k), 64 if k == "description" else 40) if k in ("address", "description") else r.get(k)) for k in keep}
+            return {k: v for k, v in b.items() if v not in (None, "", 0)}
         top = [brief(r) for r in rows[:5]]
         notable, sites = [], {}
         for r in rows:
@@ -373,7 +374,7 @@ def compose(where, crime, planning, roads, living, notes, noise=None, street=Non
             b["why"], b["related_submissions"] = why, 0
             sites[site] = b
             notable.append(b)
-        notable = notable[:5]
+        notable = notable[:3]
         seen = len(rows)
         total = planning.get("total_matching") or planning.get("count") or seen
         far = max([r.get("distance_m") or 0 for r in rows] or [0])

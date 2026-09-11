@@ -1349,7 +1349,7 @@ noise maps (`noise.py`) at points along the street; police crime in a ~300 m box
 planning applications within 250 m (the nearest five; "notable recent" = since 2024 and either big or a
 works-about-to-start signal such as a demolition method statement, dust plan or hoarding, with
 householder extensions filtered out and one site listed once); the 2025 living-environment deciles —
-and prints one JSON of about 5,000–6,000 characters with a fixed shape (`vet-flat/area-scan/2`):
+and prints one JSON of about 7,000–9,000 characters (2,500–3,000 tokens) with a fixed shape (`vet-flat/area-scan/2`):
 `where`, `street`, `quiet`, `noise`, `crime`, `works`, `living_environment`, `reading` (plain sentences
 plus the "quiet ≠ safety" and "area, not the flat" caveats), `sources`, `not_found`. A failed register
 is listed, never guessed.
@@ -1362,5 +1362,5 @@ planning within 500 m (about 19 requests). When the given point is more than 40 
 the reading says so ("a centroid, not a door") and every register runs from the street point: on
 2026-09-11 the W6 outcode centroid sat 236 m from Southerton Road, which the expensive free-research
 run had found by hand. Measured the same day: the question answered by free web research cost one
-host 815,000 tokens in a single turn; this call is about 1,800 tokens to read. Needs a postcode (from
+host 815,000 tokens in a single turn; this call is about 2,500–3,000 tokens to read (measured on the Southerton Road case: lite 7.2k, standard 8.4k, deep 9.0k characters). Needs a postcode (from
 the listing, the EPC or the person) or a point; give `--street` whenever the name is known.

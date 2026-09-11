@@ -69,7 +69,7 @@ class TestCompose(unittest.TestCase):
         w = self.out["works"]
         self.assertEqual(12, w["count"]); self.assertEqual(1, w["tall_building_hints"])
         self.assertEqual("25/AP/0002", w["nearest_five"][0]["reference"], "sorted by distance")
-        self.assertLessEqual(len(w["nearest_five"][1]["description"]), 80)
+        self.assertLessEqual(len(w["nearest_five"][1]["description"]), 65); self.assertNotIn("storeys", w["nearest_five"][0], "empty fields are dropped")
 
     def test_living_environment_and_the_closing_caveat(self):
         self.assertEqual(1, self.out["living_environment"]["outdoors_decile"])
