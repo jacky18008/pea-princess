@@ -93,11 +93,11 @@ sys.exit(0)
 '''
 
 
-def prepare_workdir(agent):
+def prepare_workdir(agent, skill_dir=None):
     path = tempfile.mkdtemp(prefix="vetflat-linkprobe-%s-" % agent)
     home = os.path.join(path, SKILL_HOME[agent])
     os.makedirs(home)
-    shutil.copytree(SKILL_DIR, os.path.join(home, "vet-flat"))
+    shutil.copytree(skill_dir or SKILL_DIR, os.path.join(home, "vet-flat"))
     return path
 
 
@@ -257,8 +257,8 @@ def _launch(cmd, workdir, env, timeout):
         return out, err, "timeout"
 
 
-def run_one(agent, model, key, prompt, out_dir, index, timeout, two_turn=False):
-    workdir = prepare_workdir(agent)
+def run_one(agent, model, key, prompt, out_dir, index, timeout, two_turn=False, skill_dir=None):
+    workdir = prepare_workdir(agent, skill_dir)
     side = tempfile.mkdtemp(prefix="vetflat-linkprobe-side-")   # the model never sees this folder
     hook_log = os.path.join(side, "hook.log")
     if agent == "claude":
@@ -362,6 +362,7 @@ def main():
     ap.add_argument("--timeout", type=int, default=900)
     ap.add_argument("--report", default=None, help="print the table for this results folder and exit")
     ap.add_argument("--two-turn", action="store_true", help="after the first reply, push back with '%s' in the same session" % PUSH)
+    ap.add_argument("--skill-dir", default=None, help="a variant of the skill folder to install instead of skills/vet-flat")
     args = ap.parse_args()
     if args.report:
         report(args.report); return 0
@@ -373,7 +374,7 @@ def main():
     wanted = [p for p in PROMPTS if args.prompts == "all" or p[0] in args.prompts.split(",")]
     for index in range(args.repeats):
         for key, prompt in wanted:
-            row = run_one(args.agent, args.model, key, prompt, out_dir, index, args.timeout, two_turn=args.two_turn)
+            row = run_one(args.agent, args.model, key, prompt, out_dir, index, args.timeout, two_turn=args.two_turn, skill_dir=args.skill_dir)
             g = row["grade"]
             line = "%s %s %s #%d: exit=%s fetch=%d asks=%s not_opened=%s chars=%d %ss" % (
                 args.agent, args.model, row["prompt"], index, row["exit"], g["fetch_attempts"], g["asks_for_page"],
