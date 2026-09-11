@@ -185,8 +185,11 @@ def codex_invoke(request, folder):
     policy = request.get('tool_policy', 'text_only')
     if policy not in ('text_only', 'live_research'): raise LabError('研究工具政策無效。')
     host_skills = [str(Path.home()/'.agents/skills'/name) for name in ('pea-princess','vet-flat')]
+    # 2026-09-11: live research runs in a sandbox with network, so the skill's own scripts (open registers,
+    # compact JSON) can run; read-only had no network, and the model fell back to web search (one turn: 815k tokens).
+    sandbox = ['--sandbox', 'workspace-write', '-c', 'sandbox_workspace_write.network_access=true'] if policy == 'live_research' else ['--sandbox', 'read-only']
     command = [executable, 'exec', '--ignore-user-config', '--ephemeral',
-               '--cd', str(work), '--sandbox', 'read-only', '--skip-git-repo-check',
+               '--cd', str(work)] + sandbox + ['--skip-git-repo-check',
                '--model', request['model'], '-c', 'model_reasoning_effort="low"',
                '-c', 'project_doc_max_bytes=0',
                '--enable', 'skip_host_skill_discovery',

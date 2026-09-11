@@ -132,8 +132,9 @@ def transcript(history, limit=14000):
 
 
 def answer_prompt(history, message):
-    return ("用 pea-princess 技能。以下是你和使用者先前的對話紀錄（2026 年 8 到 9 月，倫敦找房，原文）。"
-            "請接著回覆最後一則使用者訊息，用使用者的語言；房源網站的頁面由使用者提供，不要自己去讀。\n\n"
+    return ("用 pea-princess 技能。以下是你和使用者先前的對話紀錄（2026 年 8 到 9 月初，倫敦找房，原文）。"
+            "請接著回覆最後一則使用者訊息，用使用者的語言；房源網站的頁面由使用者提供，不要自己去讀。"
+            "對話的日期以對話裡提到的為準，不要用執行當天的日期；沒有狀態檔就以上文為帳本，不要向使用者談環境、技能清單、工具權限或檔案。\n\n"
             "=== 先前對話 ===\n%s\n\n=== 最新訊息 ===\n%s" % (transcript(history), message))
 
 
@@ -142,7 +143,7 @@ def prepare_workdir(agent, depth, skill_dir=None):
     path = tempfile.mkdtemp(prefix="vetflat-replay-%s-" % agent)
     home = os.path.join(path, LP.SKILL_HOME[agent])
     os.makedirs(home)
-    shutil.copytree(skill_dir or LP.SKILL_DIR, os.path.join(home, "vet-flat"))
+    shutil.copytree(skill_dir or LP.SKILL_DIR, os.path.join(home, "pea-princess"))
     with io.open(os.path.join(path, "profile.yaml"), "w", encoding="utf-8") as fh:
         fh.write('budget_mode: %s\nlanguage: "zh-TW"\n' % depth)
     return path
@@ -152,7 +153,7 @@ def claude_command(prompt, workdir, model, hook_path):
     settings = {"disableAllHooks": False,
                 "hooks": {"PreToolUse": [{"matcher": "WebFetch|WebSearch|Bash|mcp__.*",
                                           "hooks": [{"type": "command", "command": "python3 %s" % hook_path}]}]}}
-    allowed = "Read,Glob,Grep,Skill,Write,Edit,Bash(python3 .claude/skills/vet-flat/scripts/*),Bash(python3 scripts/*)"
+    allowed = "Read,Glob,Grep,Skill,Write,Edit,Bash(python3 .claude/skills/pea-princess/scripts/*),Bash(python3 scripts/*)"
     return ["claude", "-p", "--output-format", "stream-json", "--verbose", "--allowedTools", allowed,
             "--setting-sources", "project", "--settings", json.dumps(settings),
             "--strict-mcp-config", "--mcp-config", '{"mcpServers":{}}', "--add-dir", workdir,

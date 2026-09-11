@@ -769,6 +769,8 @@ def main():
     p.add_argument("--radius", type=int, default=250, help="metres (default 250)")
     p.add_argument("--since", type=int, default=2018, help="year; 0 disables the date filter")
     p.add_argument("--limit", type=int, default=200)
+    p.add_argument("--brief", action="store_true",
+                   help="the nearest 40 only, ten fields each: what a model needs to read, not the whole record")
     p.add_argument("--bbox", action="store_true",
                    help="use the OSGB36 easting/northing bounding box instead of geo_distance")
 
@@ -790,6 +792,12 @@ def main():
     a = ap.parse_args()
     if a.cmd == "near":
         out = near(a.lat, a.lng, a.radius, a.since, a.limit, bbox=a.bbox, verbose=a.verbose)
+        if getattr(a, "brief", False) and isinstance(out.get("results"), list):
+            keep = ("reference", "address", "description", "status", "decision", "decision_date", "distance_m",
+                    "storeys", "residential_units_proposed", "tall_building_hint", "portal_url")
+            rows = sorted(out["results"], key=lambda r: (r.get("distance_m") is None, r.get("distance_m") or 0))[:40]
+            out["results"] = [{k: ((r.get(k) or "")[:90] if k in ("description", "address") else r.get(k)) for k in keep} for r in rows]
+            out["brief"] = "nearest 40 of %d, ten fields each; drop --brief for the full records" % out.get("count", len(rows))
     elif a.cmd == "search":
         out = search(a.text, a.lpa, a.since, a.limit, verbose=a.verbose)
     elif a.cmd == "stages":
