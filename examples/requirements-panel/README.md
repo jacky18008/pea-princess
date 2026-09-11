@@ -42,6 +42,8 @@ Start with one conversation of roughly five or six user turns, then one differen
 
 Grok Bot's official documentation describes [messages during ongoing work](https://docs.x.ai/grok-bot/chat-and-collaboration), [file inputs and reviewable outputs](https://docs.x.ai/grok-bot/files-and-results), and [saved skills](https://docs.x.ai/grok-bot/skills-routines-and-automations) (checked 2026-09-11). These support a human-led chat-and-files test. They do not establish that arbitrary interactive HTML executes in every preview, that all native questions offer free text, or that a cloud Bot can reach a laptop's localhost.
 
+Local copies of the first two official pages are listed in [the saved-page index](../../docs/grok-reference-pages-2026-09-11.md), with original source URLs and retrieval metadata.
+
 The previous native automation attempt produced [zero valid quality samples](../../docs/grok-native-followup-2026-09-11.md). Input corruption and an unverified installed package prevented a clean run. A new Bot also referenced older test context, so a new name alone is not proof of isolation. Record the package hash, actual workspace and any pre-existing context in a new test.
 
 ## What remains before a shared live dashboard
