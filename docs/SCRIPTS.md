@@ -1357,10 +1357,12 @@ is listed, never guessed.
 Depth changes the requests, not the size of the summary: **lite** = the given point, four registers
 and road noise there (about 5 requests); **standard** = the scan moves onto the street, samples road
 noise at three points about 120 m apart, adds the 2017 band and the stage of the biggest recent
-application (about 10 requests, 40–50 s); **deep** = standard plus rail and night-time noise and
+application (about 10 requests, 15–20 s cold: the registers are queried in parallel and the crime box is the centre box only); **deep** = standard plus rail and night-time noise and
 planning within 500 m (about 19 requests). When the given point is more than 40 m from the street
 the reading says so ("a centroid, not a door") and every register runs from the street point: on
 2026-09-11 the W6 outcode centroid sat 236 m from Southerton Road, which the expensive free-research
 run had found by hand. Measured the same day: the question answered by free web research cost one
 host 815,000 tokens in a single turn; this call is about 2,500–3,000 tokens to read (measured on the Southerton Road case: lite 7.2k, standard 8.4k, deep 9.0k characters). Needs a postcode (from
-the listing, the EPC or the person) or a point; give `--street` whenever the name is known.
+the listing, the EPC or the person) or a point; give `--street` whenever the name is known. The first line on
+stderr says what is being scanned and where a copy of the JSON is saved (`--out`, `--no-save`), so a host whose
+tool call times out before the scan returns can still read the result from the file.

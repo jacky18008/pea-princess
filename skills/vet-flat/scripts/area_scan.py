@@ -37,11 +37,14 @@ guessed. Standard library only, Python 3.9; network through the other scripts' _
 from __future__ import unicode_literals
 
 import argparse
+import io
 import json
 import math
 import os
 import re
 import sys
+import tempfile
+import threading
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
@@ -459,11 +462,33 @@ def add_stage(out, planning_raw, verbose=False):
             top["reference"], top.get("distance_m"), " ".join(means)[:400]))
 
 
+def _parallel(jobs):
+    """Run {name: (fn, args, kwargs)} in threads; each result is (value, error) as from _safe.
+    The registers are different hosts, so the per-host throttle in _fetch still holds within each."""
+    results = {}
+    def run(name, fn, args, kwargs):
+        results[name] = _safe(fn, *args, **kwargs)
+    threads = [threading.Thread(target=run, args=(n, f, a, k), daemon=True) for n, (f, a, k) in jobs.items()]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+    return results
+
+
+def result_path(postcode, lat, lng, street, depth):
+    slug = re.sub(r"[^A-Za-z0-9]+", "-", (street or postcode or "%s-%s" % (lat, lng))).strip("-").lower()[:40]
+    return os.path.join(tempfile.gettempdir(), "vet-flat-scan-%s-%s.json" % (slug or "point", depth))
+
+
 def scan(postcode=None, lat=None, lng=None, months=6, crime_half_m=150, planning_radius=250, roads_radius=300,
-         depth="standard", street=None, verbose=False):
+         depth="standard", street=None, verbose=False, announce=None):
     import geo, crime as crime_mod, planning as planning_mod, roads as roads_mod, living_env, noise as noise_mod  # noqa: E402
     tier = TIERS.get(depth) or TIERS["standard"]
     notes = []
+    if announce:
+        announce("area_scan: %s, depth %s. The registers are queried in parallel, 15-60 s; the JSON comes on stdout and is also saved to %s\n" % (
+            street or postcode or "%s,%s" % (lat, lng), depth, result_path(postcode, lat, lng, street, depth)))
     where = {"postcode": postcode, "lat": lat, "lng": lng, "district": None, "how_located": "lat/lng given" if lat is not None else None}
     if lat is None or lng is None:
         if not postcode:
@@ -486,15 +511,24 @@ def scan(postcode=None, lat=None, lng=None, months=6, crime_half_m=150, planning
             pts = [(p["lat"], p["lng"]) for p in st["points"]]
             where["scan_point"] = {"lat": at_lat, "lng": at_lng, "why": "moved onto %s" % st["name"]}
     pr = tier["planning_radius"] or planning_radius
-    c, e1 = _safe(crime_mod.box, at_lat, at_lng, crime_half_m, months, verbose=verbose)
+    # sensitivity=False: the centre box only (6 monthly requests, not 30 with the four 20 m shifts): a street
+    # scan wants the count and its denominator, not the shift analysis, and the police API is ~6 s a request
+    jobs = {"crime": (crime_mod.box, (at_lat, at_lng, crime_half_m, months), {"verbose": verbose, "sensitivity": False}),
+            "planning": (planning_mod.near, (at_lat, at_lng, pr), {"verbose": verbose}),
+            "roads": (roads_mod.near, (at_lat, at_lng, roads_radius), {"verbose": verbose}),
+            "noise": (noise_mod.lookup, (pts,), {"rail": tier["rail"], "night": tier["night"], "with_band": tier["band"], "verbose": verbose})}
+    if postcode:
+        jobs["living"] = (living_env.lookup, (), {"postcode": postcode, "verbose": verbose})
+    got = _parallel(jobs)
+    c, e1 = got["crime"]
+    p, e2 = got["planning"]
+    r, e3 = got["roads"]
+    n, e5 = got["noise"]
+    l, e4 = got["living"] if postcode else (None, "living environment needs a postcode")
     if c and c.get("ok") and not c.get("total"):
-        wide, e1b = _safe(crime_mod.box, at_lat, at_lng, crime_half_m * 2, months, verbose=verbose)
+        wide, e1b = _safe(crime_mod.box, at_lat, at_lng, crime_half_m * 2, months, verbose=verbose, sensitivity=False)
         if wide and wide.get("ok"):
             c["wider_box"] = {"half_m": crime_half_m * 2, "total": wide.get("total"), "months": wide.get("months_counted")}
-    p, e2 = _safe(planning_mod.near, at_lat, at_lng, pr, verbose=verbose)
-    r, e3 = _safe(roads_mod.near, at_lat, at_lng, roads_radius, verbose=verbose)
-    n, e5 = _safe(noise_mod.lookup, pts, rail=tier["rail"], night=tier["night"], with_band=tier["band"], verbose=verbose)
-    l, e4 = _safe(living_env.lookup, postcode=postcode, verbose=verbose) if postcode else (None, "living environment needs a postcode")
     for name, err in (("crime", e1), ("planning", e2), ("roads", e3), ("noise", e5), ("living environment", e4)):
         if err:
             notes.append("%s: %s" % (name, err))
@@ -516,12 +550,26 @@ def main():
     ap.add_argument("--roads-radius", type=int, default=300)
     ap.add_argument("--depth", choices=("lite", "standard", "deep"), default="standard", help="the person's budget mode; see the module docstring")
     ap.add_argument("--street", help="the street's name when known; the scan moves onto it and says how far off the point was")
+    ap.add_argument("--out", help="also write the JSON here (default: a file under the temp dir, named in the first stderr line)")
+    ap.add_argument("--no-save", action="store_true")
     ap.add_argument("--verbose", action="store_true")
     a = ap.parse_args()
     if not a.postcode and (a.lat is None or a.lng is None):
         ap.print_help()
         return 2
-    out = scan(a.postcode, a.lat, a.lng, a.months, a.crime_half_m, a.planning_radius, a.roads_radius, a.depth, a.street, a.verbose)
+    def announce(msg):
+        sys.stderr.write(msg)
+        sys.stderr.flush()
+    out = scan(a.postcode, a.lat, a.lng, a.months, a.crime_half_m, a.planning_radius, a.roads_radius, a.depth, a.street, a.verbose,
+               announce=announce)
+    if not a.no_save:
+        path = a.out or result_path(a.postcode, a.lat, a.lng, a.street, a.depth)
+        try:
+            with io.open(path, "w", encoding="utf-8") as fh:
+                json.dump(out, fh, ensure_ascii=False, indent=1)
+            out["saved_to"] = path
+        except OSError as exc:
+            out.setdefault("not_found", []).append("could not save a copy: %s" % exc)
     json.dump(out, sys.stdout, ensure_ascii=False, indent=1)
     print()
     return 0 if out.get("ok") else 1

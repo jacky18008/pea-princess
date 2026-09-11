@@ -247,6 +247,29 @@ class TestStreetAndNoise(unittest.TestCase):
         self.assertEqual({"half_m": 300, "total": 155, "months": 6}, out["crime"]["wider_box"])
 
 
+class TestParallelScan(unittest.TestCase):
+    def test_the_registers_run_in_threads_and_land_in_the_same_shape(self):
+        import time
+        calls = []
+        def slow(name, value):
+            def fn(*a, **kw):
+                calls.append(name); time.sleep(0.2); return value
+            return fn
+        t0 = time.time()
+        got = AS._parallel({"a": (slow("a", 1), (), {}), "b": (slow("b", 2), (), {}), "c": (slow("c", None), (), {})})
+        self.assertLess(time.time() - t0, 0.5, "three 0.2 s jobs ran together, not one after another")
+        self.assertEqual({"a": (1, None), "b": (2, None)}, {k: got[k] for k in ("a", "b")})
+        def boom(*a, **kw):
+            raise RuntimeError("register down")
+        self.assertEqual(None, AS._parallel({"x": (boom, (), {})})["x"][0])
+        self.assertIn("register down", AS._parallel({"x": (boom, (), {})})["x"][1])
+
+    def test_the_result_file_name_is_a_slug_under_the_temp_dir(self):
+        p = AS.result_path(None, 51.49, -0.22, "Southerton Road", "standard")
+        self.assertTrue(p.endswith("vet-flat-scan-southerton-road-standard.json"), p)
+        self.assertTrue(AS.result_path("N6 5QD", None, None, None, "lite").endswith("vet-flat-scan-n6-5qd-lite.json"))
+
+
 class TestCli(unittest.TestCase):
     def test_no_location_is_a_usage_error(self):
         proc = subprocess.run([sys.executable, os.path.join(SCRIPTS, "area_scan.py")], capture_output=True, text=True)
