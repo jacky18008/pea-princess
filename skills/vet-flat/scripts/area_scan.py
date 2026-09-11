@@ -55,6 +55,7 @@ def names(block, limit=3):
 def compose(where, crime, planning, roads, living, notes):
     """The fixed shape, from the raw outputs of the four scripts (any may be None)."""
     out = {"schema": SCHEMA, "ok": True, "retrieved_at": now_iso(), "where": where,
+           "next": "This is the whole street scan for this point. Write the answer from it; do not run crime.py, planning.py, roads.py or living_env.py again for the same point.",
            "quiet": None, "crime": None, "works": None, "living_environment": None,
            "reading": [], "sources": [], "not_found": list(notes)}
     reading = out["reading"]

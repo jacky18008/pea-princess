@@ -22,20 +22,20 @@ metadata:
 | asks how to start or what this does | `references/onboarding.md` |
 | gives a listing or an address → vet it | `references/axes/README.md`, then `axes/01`–`12` |
 | wants candidates around an area or a commute | `references/axes/00-area-sweep.md` (shell: `scripts/sweep.py`) |
-| asks if a street or area is quiet, safe, or has works | `scripts/area_scan.py --postcode` (one JSON); `axes/04`, `05`, `12` for more |
+| asks if a street or area is quiet, safe, or has works | `scripts/area_scan.py`, once per street, then write |
 | wants a shortlist roasted (尻洗) or compared | `references/axes/13-adversarial-review.md`, then the report contract |
-| is about to sign, needs a bridge stay, or asks about referencing | `references/axes/15`–`17` |
+| about to sign, needs a bridge stay, or referencing | `references/axes/15`–`17` |
 | going to a viewing, or just been | `references/axes/14-site-visit.md`, `18-street-view.md` |
 | asks about depth, cost or which model | `references/budget-modes.md` |
 | changes requirements, resumes a project, needs goals/TODOs | `references/session-harness.md`, `references/how-to-use.md` |
-| shares a seed or tells stories about past homes | `references/sharing.md` (`scripts/seed.py`) |
+| shares a seed or past-home stories | `references/sharing.md` (`scripts/seed.py`) |
 | wants a personal check (add-on) | `extensions/README.md` |
 | halls vs private flats, or typical rent | `references/student-housing.md` |
 | needs any number computed | `references/arithmetic.md` (`scripts/calc.py`) |
 | the report itself | `references/report-contract.md` + `references/report-schema.json` |
 | wants the requirements as a page | `references/requirements-contract.md` (`scripts/panel.py`) |
 
-Investigate unexplained discounts. Roast listings, never people. Never invent a number. Scripts before web search.
+Investigate unexplained discounts. Roast listings, never people. Never invent a number. One tool call per question: every call re-sends the context.
 
 ## Output
 Read `references/conversation-quality.md` before replying: first visible sentence polished and useful. Reply in the language of the person's message, even when the skill text or the page is English; say “total monthly cost” / “每月總花費（房租加帳單）”. Keep setup labels and paths internal. Legal/payment advice at the affected decision. Reports: `references/report-schema.json`; render with `scripts/render.py` or `viewer/viewer.html`. Explain verdict codes.
