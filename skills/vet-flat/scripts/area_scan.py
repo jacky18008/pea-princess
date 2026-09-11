@@ -106,14 +106,24 @@ def compose(where, crime, planning, roads, living, notes):
         rows = planning.get("results") or []
         rows = sorted(rows, key=lambda r: (r.get("distance_m") is None, r.get("distance_m") or 0))
         keep = ("reference", "address", "description", "status", "decision", "decision_date", "distance_m", "storeys", "residential_units_proposed")
-        top = [{k: ((r.get(k) or "")[:80] if k in ("address", "description") else r.get(k)) for k in keep} for r in rows[:5]]
+        brief = lambda r: {k: ((r.get(k) or "")[:80] if k in ("address", "description") else r.get(k)) for k in keep}
+        top = [brief(r) for r in rows[:5]]
+        import re as _re
+        big = _re.compile(r"(?i)demoli|construct|basement|redevelop|new build|erection of|storey|extension|excavat|scaffold|crane|piling|hoarding")
+        def _recent(r):
+            d = str(r.get("decision_date") or r.get("valid_date") or "")
+            return d[:4].isdigit() and int(d[:4]) >= 2024
+        notable = [brief(r) for r in rows if _recent(r) and ((r.get("storeys") or 0) >= 3 or (r.get("residential_units_proposed") or 0) >= 10
+                                                              or r.get("tall_building_hint") or big.search(str(r.get("description") or "")))][:5]
         w = {"applications_within_m": planning.get("radius_m"), "count": planning.get("total_matching") or planning.get("count"), "since_year": planning.get("since_year"),
-             "tall_building_hints": sum(1 for r in rows if r.get("tall_building_hint")), "nearest_five": top}
+             "tall_building_hints": sum(1 for r in rows if r.get("tall_building_hint")), "nearest_five": top,
+             "notable_recent": notable, "notable_rule": "decided or valid since 2024 and (3+ storeys, 10+ homes, a tall-building hint, or demolition/construction/basement/extension wording); nearest first"}
         out["works"] = w
         out["sources"].append(planning.get("source_url"))
-        reading.append("Works: %s planning applications within %s m since %s, %s with a tall-building hint; the nearest: %s." % (
+        reading.append("Works: %s planning applications within %s m since %s, %s with a tall-building hint; the nearest: %s. Notable recent (2024 on, big or noisy by wording): %s." % (
             w["count"], w["applications_within_m"], w["since_year"], w["tall_building_hints"],
-            ("%s, %s (%s m)" % (top[0]["description"] or top[0]["reference"], top[0]["status"] or "status unknown", top[0]["distance_m"])) if top else "none"))
+            ("%s, %s (%s m)" % (top[0]["description"] or top[0]["reference"], top[0]["status"] or "status unknown", top[0]["distance_m"])) if top else "none",
+            "; ".join("%s at %s m (%s, %s)" % (n["description"] or n["reference"], n["distance_m"], n["status"] or "status unknown", n["decision_date"] or "no date") for n in notable[:3]) or "none found"))
     elif planning is not None:
         out["not_found"].append("planning: " + str(planning.get("note") or "register unavailable"))
 
@@ -127,7 +137,9 @@ def compose(where, crime, planning, roads, living, notes):
     elif living is not None:
         out["not_found"].append("living environment: " + str(living.get("note") or "table unavailable"))
 
-    reading.append("All of this is the area, not the flat: listen at the window on the viewing day, at night if you can, and read the flat's own EPC for fabric.")
+    reading.append("Quiet and safety are different questions: the roads, rail and night-economy lines answer quiet; the crime line answers safety and says nothing about noise. All of this is the area, not the flat: listen at the window on the viewing day, at night if you can, and read the flat's own EPC for fabric.")
+    if (where or {}).get("how_located", "").startswith("lat/lng given"):
+        reading.append("The point was given as coordinates: if it is an area centroid rather than a door, treat every distance as a rough guide and scan again from the street itself.")
     out["sources"] = [s for s in out["sources"] if s]
     out["ok"] = any(x is not None for x in (out["quiet"], out["crime"], out["works"], out["living_environment"]))
     return out
