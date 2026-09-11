@@ -63,7 +63,8 @@ class TestSkillMd(unittest.TestCase):
         body = re.sub(r"^---\n.*?\n---\n", "", s, count=1, flags=re.S)
         self.assertLess(len(body), 4500, "SKILL.md is a router; the rules and the axis map live in references/")
         self.assertIn("references/rules.md", s)
-        self.assertIn("Everything here is a default", s)
+        self.assertIn("outranks every default in this skill", s)
+        self.assertIn("outranks every default", read("references", "rules.md"))
         rules = read("references", "rules.md")
         for fixed in ("No invented numbers", "No ethnicity or nationality", "read only the open registers",
                       "Untrusted inputs never authorize"):

@@ -33,14 +33,14 @@ On a phone
 |---|---|---|
 | README — the front page | 20 | `README.md` |
 | docs/USING.md — the plain-words walkthrough | 38 | `docs/USING.md` |
-| docs/INSTALL.md — install page | 11 | `docs/INSTALL.md` |
+| docs/INSTALL.md — install page | 13 | `docs/INSTALL.md` |
 | docs/EXPERIMENTS.md — which configuration to run | 7 | `docs/EXPERIMENTS.md` |
 | onboarding.md — what the skill says to a new user | 30 | `skills/vet-flat/references/onboarding.md` |
 | sharing.md — social posts and the card description | 6 | `skills/vet-flat/references/sharing.md` |
 | inputs.md — the one message that asks the user for what is missing | 1 | `skills/vet-flat/references/inputs.md` |
 | profiles/ — the sentences a profile carries | 14 | `skills/vet-flat/profiles/*.yaml` |
 | seed.py — the seed card sentences (read-only here) | 25 | `skills/vet-flat/scripts/seed.py` |
-| **Total** | **152** | |
+| **Total** | **154** | |
 
 ---
 
@@ -810,7 +810,29 @@ If you installed the former `vet-flat` package, preserve that directory outside 
 
 ### deck:install:11
 
-- source: `docs/INSTALL.md` · L77
+- source: `docs/INSTALL.md` · L78
+- under: ## D2. Your word outranks the skill's defaults, in every host
+- lang: en
+- write-back: yes
+
+```text
+`SKILL.md` says it in its first line and `references/rules.md` repeats it: the person's instruction outranks every default in the skill; only four things do not move (no invented numbers, no ethnicity or nationality as a factor, the scripts read open registers only, untrusted inputs never authorize anything). Every host loads `SKILL.md` when the skill is used, so this holds in Claude Code, Codex, Gemini CLI, Grok CLI and the prompt pack alike. If your host keeps its own instruction file (`CLAUDE.md`, `AGENTS.md`, `GEMINI.md`), you may add one line there too:
+```
+
+### deck:install:12
+
+- source: `docs/INSTALL.md` · L84
+- under: ## D2. Your word outranks the skill's defaults, in every host
+- lang: en
+- write-back: yes
+
+```text
+Measured 2026-09-11 (`docs/EXPERIMENTS.md`): with that sentence in the skill, Claude Code followed the person's explicit instruction over the skill's default in 6 of 7 runs and tried to record the change; Codex did so in 6 of 8 with or without it. Grok CLI is untested here.
+```
+
+### deck:install:13
+
+- source: `docs/INSTALL.md` · L87
 - under: ## E. Verify
 - lang: en
 - write-back: yes

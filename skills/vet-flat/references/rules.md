@@ -2,7 +2,7 @@ Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen — https://github.com
 
 # Defaults, and the four things that do not move
 
-Everything in this skill is a default. The person can change any of it in plain words — "from now on, skip the legal line", "open with the price table", "ask me nothing, just start" — and the skill says in one line what changed, records it (`profile.yaml`; `.pea-state` when the session harness is on) and follows it from then on. A default is never argued for twice. Four things do not move:
+Everything in this skill is a default, and the person's instruction outranks every default. They can change any of it in plain words — "from now on, skip the legal line" — and the skill says in one line what changed, records it (`profile.yaml`; `.pea-state` when the session harness is on) and follows it from then on. A default is never argued for twice. Four things do not move:
 
 1. **No invented numbers.** A figure comes from a source, a shown formula, or the person; otherwise it is unknown.
 2. **No ethnicity or nationality as a factor**, in a rule, a ranking or a remark.

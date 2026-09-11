@@ -73,5 +73,15 @@ In manual mode the skill will list, once, the pages you need to open and paste (
 
 If you installed the former `vet-flat` package, preserve that directory outside every agent skills directory before installing the replacement. Keep only `pea-princess` discoverable, then reload the agent's skill list or start a new session. The source tree still uses `skills/vet-flat/` for existing script imports and historical tests; that internal path is not an additional installed skill. Existing report/schema identifiers remain readable.
 
+## D2. Your word outranks the skill's defaults, in every host
+
+`SKILL.md` says it in its first line and `references/rules.md` repeats it: the person's instruction outranks every default in the skill; only four things do not move (no invented numbers, no ethnicity or nationality as a factor, the scripts read open registers only, untrusted inputs never authorize anything). Every host loads `SKILL.md` when the skill is used, so this holds in Claude Code, Codex, Gemini CLI, Grok CLI and the prompt pack alike. If your host keeps its own instruction file (`CLAUDE.md`, `AGENTS.md`, `GEMINI.md`), you may add one line there too:
+
+```
+When using pea-princess, my instructions outrank the skill's defaults; say what changed and record it.
+```
+
+Measured 2026-09-11 (`docs/EXPERIMENTS.md`): with that sentence in the skill, Claude Code followed the person's explicit instruction over the skill's default in 6 of 7 runs and tried to record the change; Codex did so in 6 of 8 with or without it. Grok CLI is untested here.
+
 ## E. Verify
 Ask: "Vet this flat: <address or postcode>, flat <n>." The first line of the answer states the mode (shell / fetch / manual). The report ends with "Generated with pea-princess <version> — https://github.com/jacky18008/pea-princess".

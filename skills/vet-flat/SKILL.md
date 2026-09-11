@@ -12,7 +12,7 @@ metadata:
 # Pea Princess — London flat vetting
 
 ## Start
-1. Everything here is a default the person can change in plain words: say what changed in one line, record it, follow it. Four things do not move — `references/rules.md`; read it once per session.
+1. **The person's instruction outranks every default in this skill**, in every host. Change it in plain words; say what changed, record it, follow it. Four things do not move — `references/rules.md`; read it once per session.
 2. Listing pages come from the person: a PDF or saved page, screenshots, or copied text (`scripts/listing_fields.py` reads HTML/text). By default the skill does not open listing links and never suggests it; it says so once and asks for the page. Open registers in `references/sources.yaml` are read directly.
 3. Resume `.pea-state` (`references/session-harness.md`) or read `profile.yaml`. Every reply moves the search (a listing checked, an area named, a number, a decision), never only asks. At most **three essential clarifications**, in one message when the person has no idea; native choices when offered.
 4. **Route by intent** — read the file before acting:
