@@ -184,6 +184,13 @@
           "checked_date": "2026-09-11",
           "clause": "Body unavailable to research tool",
           "evidence": "The official page opened but returned no extractable body. Its current public search-API availability or retirement could not be verified from that response."
+        },
+        {
+          "id": "zoopla_ai_distribution_20260424",
+          "url": "https://business.zoopla.co.uk/zoopla-signs-enterprise-agreement-with-open-ai",
+          "title": "Zoopla signs enterprise agreement with OpenAI",
+          "clause": "Expanding your reach: Listings now in ChatGPT; Results from AI so far",
+          "evidence": "Official24Apr2026 announcement says all listings integrated in Zoopla ChatGPT app. Its80%views/150%leads figures concern early AI-search tests within Zoopla app; not external-agent causal evidence."
         }
       ],
       "automation": {
@@ -240,20 +247,36 @@
       "recommended_access": {
         "now": "Use official saved-search emails/push and independently licensed original-agent sources for report data.",
         "no_paste_candidate": "Authorised access to the user’s own alert mailbox avoids manual pasting; resolve the content-processing/reuse scope before treating it as a licensed integration.",
-        "licensed_route": "Provider agreement for the actual local-agent workflow, or a separately licensed data supplier whose Zoopla rights explicitly cover it."
+        "licensed_route": "Provider agreement for the actual local-agent workflow, or a separately licensed data supplier whose Zoopla rights explicitly cover it.",
+        "announced_hosted_ai_route": "Official Zoopla app in ChatGPT; first verify current availability and permitted data use. No activation or listing request made."
       },
       "uncertainty": [
         "Current developer-home content was not readable; no categorical claim of API retirement or nonexistence.",
-        "Whether a particular statutory exception applies is separate from this provider-terms audit."
+        "Whether a particular statutory exception applies is separate from this provider-terms audit.",
+        "Initial audit omitted announced official ChatGPT app; corrected same day. Supported-host distribution does not establish arbitrary-agent or Codex access."
       ],
       "official_urls": [
         "https://www.zoopla.co.uk/terms/",
         "https://help.zoopla.co.uk/hc/en-gb/articles/360005969458-How-do-I-create-email-alerts-and-saved-searches",
         "https://support.zoopla.co.uk/hc/en-gb/articles/360015664558-Premium-Listings-Tech-documentation",
         "https://support.zoopla.co.uk/hc/en-gb/sections/360004580137-API-s",
-        "https://developers.zoopla.co.uk/"
+        "https://developers.zoopla.co.uk/",
+        "https://business.zoopla.co.uk/zoopla-signs-enterprise-agreement-with-open-ai"
       ],
-      "legal_status": "Published provider wording and bounded research findings; not a judicial enforceability determination or declaration of illegality."
+      "legal_status": "Published provider wording and bounded research findings; not a judicial enforceability determination or declaration of illegality.",
+      "hosted_ai_distribution": {
+        "status": "officially_announced_provider_app",
+        "host": "ChatGPT",
+        "sources": [
+          "zoopla_ai_distribution_20260424"
+        ],
+        "scope": "Provider-operated AI discovery is a material omitted route in initial audit. It is distinct from public API or arbitrary scraping permission.",
+        "rentals": "Official app-directory search index describes UK buy/rent; live directory open redirected to general plugins page.",
+        "user_account_availability": "not_tested",
+        "codex_integration": "not_established",
+        "retention_and_cross_model_use": "not_established",
+        "directory_url": "https://chatgpt.com/apps/zoopla/asdk_app_694547c513008191a7b8f44c95fb14c3?locale=pt-BR"
+      }
     },
     {
       "id": "onthemarket",
@@ -547,5 +570,6 @@
       ],
       "legal_status": "Published provider wording and bounded research findings; not a judicial enforceability determination or declaration of illegality."
     }
-  ]
+  ],
+  "same_day_correction": "See ai-distribution-addendum.md for the omitted Zoopla provider-operated ChatGPT route and exposure analysis."
 }

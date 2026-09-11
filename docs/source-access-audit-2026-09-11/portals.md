@@ -7,7 +7,7 @@ The evidence register is [portals.json](portals.json). Every provider has dated 
 | Provider | Automated discovery / user-directed agent | Content/report use | Official no-paste candidate |
 |---|---|---|---|
 | [Rightmove](https://www.rightmove.co.uk/c/terms-of-use/) | Broad restriction; direct-human wording, §§5.2, 5.5. | Offered-download allowance is narrow; software linking/assets also restricted, §§8.3, 13.4–13.5. | Personal alert emails; separately authorised original-agent source. |
-| [Zoopla](https://www.zoopla.co.uk/terms/) | Automated methods restricted, with applicable-law qualification. | Personal extracts do not clear the automation step. | Saved-search email/push; independently permitted agent source. |
+| [Zoopla](https://www.zoopla.co.uk/terms/) | Automated methods restricted, with applicable-law qualification. | Personal extracts do not clear the automation step. | Announced official Zoopla ChatGPT app; current account availability untested. Saved-search email/push and independently permitted agent sources remain candidates. |
 | [OnTheMarket](https://www.onthemarket.com/terms/) | §3.3 expressly excepts qualifying Permitted Programs. | Separate storage/reproduction/linking restrictions remain. | Conditional compliant reader, or official alerts; further report-use assessment needed. |
 | [OpenRent](https://www.openrent.co.uk/terms) | Harvesting restricted; isolated assistive reading not expressly classified. | Copying needs permission. | Official personal alerts; direct-landlord alternative only if available. |
 | [SpareRoom](https://www.spareroom.co.uk/content/default/terms-uk/) | Harvesting and unapproved integrations restricted. | Personal-use conditions restrict reproduction in other works. | Official personal alerts; independent advertiser source where available. |
@@ -23,3 +23,7 @@ For the no-paste product, the concrete routes to assess are: official alerts int
 Official alert setup sources: [Rightmove](https://faq.rightmove.co.uk/support/solutions/articles/7000048758-how-to-register-for-property-alerts), [Zoopla](https://help.zoopla.co.uk/hc/en-gb/articles/360005969458-How-do-I-create-email-alerts-and-saved-searches), [OnTheMarket](https://www.onthemarket.com/content/how-to-use-onthemarkets-tools-to-conduct-the-best-property-search/), [OpenRent](https://help.openrent.co.uk/hc/en-gb/articles/360018359252-How-do-the-search-bar-and-email-alerts-work), [SpareRoom](https://www.spareroom.co.uk/content/info-faq/why-email-alerts/).
 
 This is a documentation-only audit. Unknown access grants remain unknown, and it changes no source policy or runtime behaviour.
+
+## Same-day correction: provider-operated AI distribution
+
+The initial audit missed Zoopla’s [24 April 2026 announcement](https://business.zoopla.co.uk/zoopla-signs-enterprise-agreement-with-open-ai) of its official ChatGPT app carrying listings. This is a relevant no-paste discovery route for its supported host, not a public scraping/API licence. Current availability on this user’s account, Codex access, retained data and cross-model analysis remain unverified. Its reported AI-search view/lead gains concern tests in Zoopla’s own app, not measured ChatGPT-referral effects. See the [dated addendum](ai-distribution-addendum.md).

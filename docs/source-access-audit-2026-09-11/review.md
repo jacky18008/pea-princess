@@ -22,3 +22,7 @@
 JSON可解析、索引唯一、JSON Pointer可解、source reference可對照、Markdown本機連結存在，以及來源inventory雜湊一致均已檢查。`git diff --check` 檢查本輪檔案。檔案清單與SHA-256保存在 [validation.json](validation.json)，其雜湊只證明本輪報告內容，不是官方原頁真實性的證明。
 
 本次只交付文件與索引。沒有修改目前運行中的skill、抓取helper、來源白名單、playground或評估器；沒有建立或啟用新API／帳號。後續待辦及驗收條件在 [implementation-plan.md](implementation-plan.md)。因此「查核已完成」不等於「所有來源都能串接」或「產品已可公開上線」。
+
+## Same-day correction
+
+Provider/API-only searches missed the announced Zoopla ChatGPT app. Root and an independent agent verified the official announcement and separated it from arbitrary scraping and current account availability; the initial report was incomplete on supported-host AI discovery. See [addendum](ai-distribution-addendum.md). No current listing integration or external-referral causal experiment was performed.
