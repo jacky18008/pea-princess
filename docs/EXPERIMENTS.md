@@ -804,3 +804,47 @@ DNS outage invalidated about thirty rows, retried and superseded; the Claude rep
 matched only one spelling of a script call, so script-backed answers were sometimes refused (widened
 behind `--claude-allow` for the next round); Codex sub-agent tokens are not in any replay figure; the
 original answers came from a stronger model than any of these, so "beats original" is a high bar.
+
+## Street scan v2 (2026-09-11 night): the street itself, noise in dB, depth tiers — two hosts, blind read
+
+The token A/B above had the expensive free-research run winning the blind read 3/3 for three reasons the
+one-call scan could not answer: the outcode centroid was off the street, the Defra noise map had a dB
+value, and a demolition/construction site sat 134 m away. Arm `after` (skill snapshot cc6f1c2, branch
+`exp/area-scan-tiers`) puts the three into `area_scan.py` (`--street NAME`, the scan moved onto the
+street, road noise sampled at three points via `noise.py`, `--depth lite|standard|deep`, the notable-works
+date bug fixed) against arm `before` (tag `baseline-scan-2026-09-11`, the one-call scan as shipped that
+morning). Same prompt as the token A/B (the two Foxtons streets, outcode centroids given); each arm's
+skill installed in a private HOME; `bench/street_ab.py`; blind pairwise read by Opus 5 with a checklist.
+
+| Host | Pairs | Blind winner | Centroid-off-street noticed (after / before) | Noise dB with a source | Works-about-to-start named | Quiet ≠ safety kept apart | Numbers without a source in the sentence (after / before) |
+|---|---|---|---|---|---|---|---|
+| Claude Sonnet 5 | 3 | after 3/3 | 3/3 vs 2/3 | 3/3 vs 0/3 | 3/3 vs 0/3 | 3/3 vs 2/3 | 6, 3, 23 vs 13, 2, 12 |
+| Codex gpt-5.6-terra | 3 | after 2/3 | 3/3 vs 2/3 | 2/3 vs 0/3 | 1/3 vs 1/3 | 0/3 vs 2/3 | 34, 14, 20 vs 0, 3, 9 |
+
+| Host | Arm | Input tokens per answer, all threads (pairs 0/1/2) | Wall (s) |
+|---|---|---|---|
+| Claude Sonnet 5 | before | 0.19M / 0.20M / 0.18M | 120 / 112 / 130 |
+| Claude Sonnet 5 | after | 0.17M / 0.15M / 0.17M | 76 / 70 / 74 |
+| Codex terra | before | 1.05M / 2.30M / 0.63M | 263 / 394 / 214 |
+| Codex terra | after | 4.93M / 3.98M / 9.15M | 531 / 381 / 510 |
+
+Reading: on Claude the arm wins outright — every pair found the modelled noise level with its source
+and a works signal, the scan moved off the centroid, and the answer cost fewer tokens and half the time.
+On Codex the substance wins 2/3 but the cost runs 1.7–14× the baseline, and the reason is not the scan:
+Codex spawns a sub-agent per street to run it, the sub-agent holds no skill text, picked `--depth deep`,
+then spent 50–90 calls reading the script source, listing files and grepping the machine-wide temp cache
+for raw register dumps by coordinate (the scan itself is one call and 7–9k characters). The Codex
+"numbers without a source" count is the same effect seen from the other side: the answers carry many
+measured figures with the source named once at the end rather than in each sentence, which the checkpoint
+adopted the same night (rule 4, "every number has a home") is meant to fix; the Claude "before" pair 1
+also reported "0 crimes" from the centroid box as "quiet", which the scan now re-runs at 600 m and explains.
+
+Harness notes for anyone repeating this: (1) the first Claude run of this A/B answered without data in
+5 of 6 runs because the replay allow-list matched only one spelling of the script call — widened with
+`--claude-allow`; (2) Codex sub-agent threads are invisible in `codex exec --json` and are read from the
+rollout files (`--account`); (3) later arms isolate each run's fetch cache and temp dir.
+
+Follow-up arms on Codex (same prompt, 3 pairs each; results appended when done): `after-b` = the scan's
+first output key says "complete, do not read the source or cache" (de7332c); `after-c` = SKILL.md and
+rules.md say "in this thread, never a sub-agent" (c2124f7); `nomulti` = both arms with
+`codex exec --disable multi_agent`, to price the sub-agent pattern itself.
