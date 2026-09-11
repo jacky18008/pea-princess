@@ -327,8 +327,22 @@ def numbers_without_cue(text):
     return out
 
 
-def judge_v2(row_inputs, timeout=600):
+# What this person has said, across the whole search, about how they want to be answered. A standing
+# prior for the judge (the person's own rules), not the reaction to any one answer.
+PERSON_PROFILE = """=== 這位使用者的既有要求（他在整段找房過程中說過的，不是對某一答的反應）===
+- 每次都要講清楚上下文：先一兩句回顧上次看到哪、現在在談什麼；主詞和名詞寫全，不用代號、不用代名詞帶過。
+- 數字要解釋意思：這是好是壞、跟什麼比、對決定有什麼影響；不能只丟數字。
+- 不要罐頭句、不要「很 AI」的空話；他很忙，要看得快。
+- 指出錯誤時，要修正所有受影響的結論，不是只道歉。
+- 喜歡具體、跟自己經驗連得起來的提醒（例如「別讓一頓好吃的飯掩蓋房子本身的缺陷」）。
+- 需求會隨看房演進（採光從直射改成有晨光、面積可談），這是正常，不該被當成之前答錯。
+"""
+
+
+def judge_v2(row_inputs, timeout=600, use_profile=False):
     prompt = JUDGE_V2_PROMPT
+    if use_profile:
+        prompt = prompt.replace("=== 案例重點 ===", PERSON_PROFILE + "\n=== 案例重點 ===", 1)
     for key, value in row_inputs.items():
         prompt = prompt.replace("{%s}" % key, value or "（無）")
     cmd = ["claude", "-p", "--output-format", "json", "--tools", "", "--allowedTools", "", "--disable-slash-commands",
@@ -369,18 +383,39 @@ def row_key(r):
     return "%s|%s|%s|%s|%s|%s" % (r["case"], r.get("turn", "ask"), r["agent"], r["model"], r["depth"], r.get("label", ""))
 
 
-def load_rows_merged(out_dir):
-    """rows.jsonl plus judge_v2.jsonl merged by key; the batch appends to the first, rejudge to the second."""
+def row_failed(r):
+    a = r.get("answer") or {}
+    reply = (a.get("reply") or "").strip()
+    return a.get("exit") not in (0, "0") or not reply or reply.startswith("API Error") or "ENOTFOUND" in reply[:200]
+
+
+def reply_sha(r):
+    import hashlib
+    return hashlib.sha256(((r.get("answer") or {}).get("reply") or "").encode("utf-8")).hexdigest()[:16]
+
+
+def load_rows_merged(out_dir, keep_failed=False):
+    """rows.jsonl plus judge_v2.jsonl merged; one row per key — the latest successful one when there is
+    one (a retry after an outage supersedes the failed row); a v2 verdict attaches only to the reply it judged."""
     path = os.path.join(out_dir, "rows.jsonl")
     rows = [json.loads(l) for l in io.open(path, encoding="utf-8") if l.strip()]
+    best = {}
+    for r in rows:
+        k = row_key(r)
+        cur = best.get(k)
+        if cur is None or (row_failed(cur) and not row_failed(r)) or (row_failed(cur) == row_failed(r)):
+            best[k] = r
+    rows = list(best.values())
+    if not keep_failed:
+        pass  # failed rows stay visible in the report as failures unless superseded
     v2path = os.path.join(out_dir, "judge_v2.jsonl")
     if os.path.exists(v2path):
         v2 = {}
         for l in io.open(v2path, encoding="utf-8"):
             if l.strip():
-                d = json.loads(l); v2[d["key"]] = d
+                d = json.loads(l); v2[(d["key"], d.get("sha"))] = d
         for r in rows:
-            d = v2.get(row_key(r))
+            d = v2.get((row_key(r), reply_sha(r))) or (v2.get((row_key(r), None)) if not any(kk[0] == row_key(r) and kk[1] for kk in v2) else None)
             if d:
                 r["judge_v2"] = d["judge_v2"]; r["programmatic"] = d["programmatic"]
     return rows
@@ -396,7 +431,7 @@ def rejudge(out_dir, only_missing=True, limit=None):
     for r in rows:
         if only_missing and r.get("judge_v2", {}).get("verdict"):
             continue
-        if not (r["answer"].get("reply") or "").strip():
+        if row_failed(r):
             continue
         if limit and done >= limit:
             break
@@ -406,7 +441,7 @@ def rejudge(out_dir, only_missing=True, limit=None):
         r["programmatic"] = programmatic(r["answer"]["reply"], r["answer"].get("tools"), r["answer"].get("listing_fetch_attempts"), message)
         done += 1
         with io.open(v2path, "a", encoding="utf-8") as fh:
-            fh.write(json.dumps({"key": row_key(r), "judge_v2": r["judge_v2"], "programmatic": r["programmatic"]}, ensure_ascii=False) + "\n")
+            fh.write(json.dumps({"key": row_key(r), "sha": reply_sha(r), "judge_v2": r["judge_v2"], "programmatic": r["programmatic"]}, ensure_ascii=False) + "\n")
         v = r["judge_v2"].get("verdict") or {}
         print("rejudged %s %s %s/%s: gates=%s T=%s sat=%s vs=%s nums=%d" % (
             r["case"], r.get("turn"), r["model"], r["depth"], "".join((v.get("gates") or {}).get(g, {}).get("status", "?")[0] for g in ("G1", "G2", "G3")),
@@ -415,7 +450,7 @@ def rejudge(out_dir, only_missing=True, limit=None):
     return done
 
 
-def calibrate(out_dir, cases, turn="ask"):
+def calibrate(out_dir, cases, turn="ask", use_profile=False):
     """How far is the judge from the person? Give the judge the ORIGINAL answer as if it were new,
     with the reaction hidden, and ask satisfy; then classify the real reaction; compare."""
     corpus = os.path.abspath(DEFAULT_CORPUS)
@@ -426,7 +461,7 @@ def calibrate(out_dir, cases, turn="ask"):
         if not original.strip():
             continue
         inputs = v2_inputs(case_focus(corpus, case_id), history, message, "（校準：此欄不提供）", "（校準：此欄不提供）", original)
-        pred = judge_v2(inputs)
+        pred = judge_v2(inputs, use_profile=use_profile)
         cls_prompt = ("下面是使用者在看到助理的回答後說的話。請判斷它主要是：praise（滿意或肯定）、complaint（不滿、抱怨、批評）、"
                       "correction（指出錯誤要求修正）、shift（目標或條件改變，不評價回答）、neutral（追問或探索，看不出滿不滿意）。"
                       "回傳 JSON：{\"polarity\": \"praise|complaint|correction|shift|neutral\", \"quote\": \"依據原句\"}\n\n=== 反應 ===\n" + reaction[:2000])
@@ -448,7 +483,7 @@ def calibrate(out_dir, cases, turn="ask"):
             case_id, rows[-1]["predicted_satisfy"], (polarity or {}).get("polarity"), expected), flush=True)
     folder = os.path.join(out_dir, "calibration")
     os.makedirs(folder, exist_ok=True)
-    with io.open(os.path.join(folder, "judge-vs-reactions-%s.json" % turn), "w", encoding="utf-8") as fh:
+    with io.open(os.path.join(folder, "judge-vs-reactions-%s%s.json" % (turn, "-profile" if use_profile else "")), "w", encoding="utf-8") as fh:
         json.dump(rows, fh, ensure_ascii=False, indent=1)
     scored = [r for r in rows if r["expected_satisfy"] is not None and r["predicted_satisfy"] is not None]
     agree = sum(1 for r in scored if r["predicted_satisfy"] == r["expected_satisfy"])
@@ -547,17 +582,31 @@ def main():
     ap.add_argument("--out", default=None)
     ap.add_argument("--report", default=None)
     ap.add_argument("--rejudge", default=None, help="results folder: judge v2 every row that lacks one (answers are not re-run)")
+    ap.add_argument("--retry-failed", default=None, help="results folder: re-run every configuration row that failed (API error, empty, non-zero exit); new rows are appended")
     ap.add_argument("--rejudge-limit", type=int, default=None)
     ap.add_argument("--calibrate", default=None, help="results folder: judge the ORIGINAL answers blind and compare with the real reactions")
+    ap.add_argument("--judge-profile", action="store_true", help="give the judge the person's standing preferences (their own rules, not any reaction)")
     args = ap.parse_args()
     if args.report:
         report(args.report); return 0
     if args.rejudge:
         n = rejudge(args.rejudge, limit=args.rejudge_limit); print("rejudged %d rows" % n); report(args.rejudge); return 0
+    if args.retry_failed:
+        failed = [r for r in load_rows_merged(args.retry_failed) if row_failed(r)]
+        if args.agent:
+            failed = [r for r in failed if r["agent"] == args.agent]
+        print("retrying %d failed rows" % len(failed), flush=True)
+        for r in failed:
+            class A: pass
+            a = A(); a.corpus = args.corpus; a.agent = r["agent"]; a.model = r["model"]; a.depth = r["depth"]; a.turn = r.get("turn", "ask")
+            a.label = r.get("label", ""); a.skill_dir = args.skill_dir; a.timeout = args.timeout; a.no_judge = args.no_judge
+            row = run_case(a, r["case"], args.retry_failed)
+            print("retried %s %s %s/%s %s: exit=%s chars=%d" % (r["case"], a.turn, a.model, a.depth, a.label, row["answer"]["exit"], len(row["answer"]["reply"] or "")), flush=True)
+        report(args.retry_failed); return 0
     if args.calibrate:
         corpus = os.path.abspath(args.corpus)
         ids = sorted(os.path.basename(p)[:-3] for folder in ("cases-v3", "short-stay-cases") for p in glob.glob(os.path.join(corpus, folder, "*.md"))) if args.cases == "all" else [c.strip() for c in args.cases.split(",") if c.strip()]
-        calibrate(args.calibrate, ids, args.turn); return 0
+        calibrate(args.calibrate, ids, args.turn, use_profile=args.judge_profile); return 0
     if not args.agent:
         ap.error("--agent is required unless --report")
     out_dir = args.out or os.path.join(HERE, "private", "history-replay-%s" % datetime.date.today().isoformat())
