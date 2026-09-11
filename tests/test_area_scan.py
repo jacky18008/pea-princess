@@ -6,6 +6,7 @@ https://github.com/jacky18008/pea-princess - CC BY 4.0
 """
 from __future__ import unicode_literals
 
+import copy
 import json
 import os
 import subprocess
@@ -83,6 +84,90 @@ class TestCompose(unittest.TestCase):
         self.assertIn("crime: curl error 6", out["not_found"]); self.assertIn("planning: timeout", out["not_found"])
         self.assertTrue(out["ok"], "roads alone still makes a scan")
         self.assertTrue(all("Crime:" not in s for s in out["reading"]))
+
+
+class TestPartialPlanning(unittest.TestCase):
+    def compose_rows(self, rows):
+        return AS.compose(WHERE, CRIME, dict(PLANNING, results=rows), ROADS, LIVING, [])
+
+    def test_valid_date_without_decision_date_keeps_notable_and_other_registers(self):
+        # The full source schema has a nullable decision_date; compact rows omit it.
+        for missing in (True, False):
+            with self.subTest(compact=missing):
+                row = dict(PLANNING["results"][0], valid_date="15/08/2024")
+                if missing:
+                    row.pop("decision_date")
+                else:
+                    row["decision_date"] = None
+                original = copy.deepcopy(row)
+                out = self.compose_rows([row])
+                self.assertTrue(out["ok"])
+                self.assertEqual(583, out["crime"]["total"])
+                self.assertEqual(120, out["quiet"]["main_road_nearest_m"])
+                self.assertEqual(1, out["living_environment"]["outdoors_decile"])
+                self.assertEqual(row["reference"], out["works"]["notable_recent"][0]["reference"])
+                self.assertIn("no decision date", " ".join(out["reading"]))
+                self.assertEqual(original, row, "summarising must not rewrite source records")
+
+    def test_optional_display_fields_can_each_be_absent_null_or_empty(self):
+        for field in ("description", "reference", "address", "status", "distance_m"):
+            for value in (None, "", "absent"):
+                with self.subTest(field=field, value=value):
+                    row = dict(PLANNING["results"][0])
+                    if value == "absent":
+                        row.pop(field)
+                    else:
+                        row[field] = value
+                    out = self.compose_rows([row])
+                    self.assertEqual(1, len(out["works"]["notable_recent"]))
+                    self.assertNotIn("None", " ".join(out["reading"]))
+
+    def test_zero_distance_is_known_and_retained_in_both_views(self):
+        out = self.compose_rows([dict(PLANNING["results"][0], distance_m=0)])
+        for key in ("nearest_five", "notable_recent"):
+            self.assertEqual(0, out["works"][key][0]["distance_m"])
+        self.assertIn("at 0 m", " ".join(out["reading"]))
+
+    def test_unknown_distance_does_not_become_zero_or_a_coverage_radius(self):
+        row = {"reference": "26/AP/0001", "valid_date": "15/08/2024", "storeys": 12}
+        out = self.compose_rows([row])
+        self.assertIsNone(out["works"]["seen_out_to_m"])
+        text = " ".join(out["reading"])
+        self.assertIn("distance unknown", text)
+        self.assertIn("status unknown", text)
+        self.assertIn("26/AP/0001", text)
+        works_text = next(s for s in out["reading"] if s.startswith("Works:"))
+        self.assertNotIn("at 0 m", works_text)
+        self.assertNotIn("out to 0 m", works_text)
+        self.assertNotIn("(0 m)", works_text)
+
+    def test_unknown_distances_sort_last_without_claiming_complete_extent(self):
+        unknown = dict(PLANNING["results"][0], reference="unknown", distance_m="")
+        known = dict(PLANNING["results"][1], reference="known", distance_m=40)
+        out = self.compose_rows([unknown, known])
+        self.assertEqual(["known", "unknown"], [r["reference"] for r in out["works"]["nearest_five"]])
+        self.assertIsNone(out["works"]["seen_out_to_m"])
+
+    def test_anonymous_sparse_rows_are_not_claimed_to_be_the_same_site(self):
+        out = self.compose_rows([{"valid_date": "2025-01-01", "storeys": 12},
+                                 {"valid_date": "2025-02-01", "storeys": 6}])
+        self.assertEqual(2, len(out["works"]["notable_recent"]))
+        self.assertTrue(all(r["related_submissions"] == 0 for r in out["works"]["notable_recent"]))
+        self.assertIn("description unavailable", " ".join(out["reading"]))
+
+    def test_scan_returns_partial_registers_without_network(self):
+        from unittest.mock import patch
+        import crime, planning, roads, noise
+        row = dict(PLANNING["results"][0], valid_date="15/08/2024", decision_date=None)
+        with patch.object(crime, "box", return_value=CRIME), \
+                patch.object(planning, "near", return_value=dict(PLANNING, results=[row])), \
+                patch.object(roads, "near", return_value=ROADS), \
+                patch.object(noise, "lookup", return_value={"ok": False, "note": "offline fixture"}):
+            out = AS.scan(lat=WHERE["lat"], lng=WHERE["lng"], depth="lite")
+        self.assertTrue(out["ok"])
+        self.assertEqual(583, out["crime"]["total"])
+        self.assertEqual(1, len(out["works"]["notable_recent"]))
+        self.assertIn("no decision date", " ".join(out["reading"]))
 
 
 NOISE = {"schema": "vet-flat/noise/1", "ok": True, "points": [{"road_lden_db": 61.5}, {"road_lden_db": 57.4}],

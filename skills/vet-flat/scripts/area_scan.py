@@ -355,11 +355,16 @@ def compose(where, crime, planning, roads, living, notes, noise=None, street=Non
 
     if planning and planning.get("ok"):
         rows = planning.get("results") or []
-        rows = sorted(rows, key=lambda r: (r.get("distance_m") is None, r.get("distance_m") or 0))
+        rows = sorted(rows, key=lambda r: (r.get("distance_m") in (None, ""), r.get("distance_m") or 0))
         keep = ("reference", "address", "description", "status", "decision_date", "distance_m", "storeys", "residential_units_proposed")
         def brief(r):
             b = {k: (_cut(r.get(k), 64 if k == "description" else 40) if k in ("address", "description") else r.get(k)) for k in keep}
-            return {k: v for k, v in b.items() if v not in (None, "", 0)}
+            # Optional fields may be absent even in full records; zero metres is known.
+            return {k: v for k, v in b.items() if v not in (None, "")}
+        def label(r):
+            return r.get("description") or r.get("reference") or r.get("address") or "description unavailable"
+        def distance(r):
+            return "%s m" % r["distance_m"] if r.get("distance_m") not in (None, "") else "distance unknown"
         top = [brief(r) for r in rows[:5]]
         notable, sites = [], {}
         for r in rows:
@@ -367,29 +372,31 @@ def compose(where, crime, planning, roads, living, notes, noise=None, street=Non
             if not why:
                 continue
             site = re.sub(r"\W+", " ", str(r.get("address") or "")).strip().lower()[:40] or r.get("reference")
-            if site in sites:   # condition discharges and amendments for one permission: count them, list the site once
+            if site and site in sites:   # condition discharges and amendments for one permission: count them, list the site once
                 sites[site]["related_submissions"] += 1
                 continue
             b = brief(r)
             b["why"], b["related_submissions"] = why, 0
-            sites[site] = b
+            if site:
+                sites[site] = b
             notable.append(b)
         notable = notable[:3]
         seen = len(rows)
         total = planning.get("total_matching") or planning.get("count") or seen
-        far = max([r.get("distance_m") or 0 for r in rows] or [0])
+        distances = [r["distance_m"] for r in rows if r.get("distance_m") not in (None, "")]
+        far = max(distances) if distances and len(distances) == seen else None
         w = {"applications_within_m": planning.get("radius_m"), "count": total, "rows_seen": seen,
-             "seen_out_to_m": int(far) if seen and total and seen < total else None, "since_year": planning.get("since_year"),
+             "seen_out_to_m": int(far) if far is not None and total and seen < total else None, "since_year": planning.get("since_year"),
              "tall_building_hints": sum(1 for r in rows if r.get("tall_building_hint")), "nearest_five": top,
              "notable_recent": notable, "notable_rule": NOTABLE_RULE}
         out["works"] = w
         out["sources"].append(planning.get("source_url"))
         reading.append("Works: %s planning applications within %s m since %s%s, %s with a tall-building hint; the nearest: %s. Notable recent (%s): %s." % (
             w["count"], w["applications_within_m"], w["since_year"],
-            (" (the nearest %d read, out to %d m)" % (seen, far)) if w["seen_out_to_m"] else "", w["tall_building_hints"],
-            ("%s, %s (%s m)" % (top[0]["description"] or top[0]["reference"], top[0]["status"] or "status unknown", top[0]["distance_m"])) if top else "none",
+            (" (the nearest %d read, out to %d m)" % (seen, far)) if w["seen_out_to_m"] is not None else "", w["tall_building_hints"],
+            ("%s, %s (%s)" % (label(top[0]), top[0].get("status") or "status unknown", distance(top[0]))) if top else "none",
             "since %d, big or a works-about-to-start signal" % NOTABLE_SINCE,
-            "; ".join("%s at %s m (%s, %s; %s%s)" % (n["description"] or n["reference"], n["distance_m"], n["status"] or "status unknown", n["decision_date"] or "no decision date", n["why"],
+            "; ".join("%s at %s (%s, %s; %s%s)" % (label(n), distance(n), n.get("status") or "status unknown", n.get("decision_date") or "no decision date", n["why"],
                                                      (", +%d related submissions for the same site" % n["related_submissions"]) if n["related_submissions"] else "") for n in notable[:3]) or "none found"))
     elif planning is not None:
         out["not_found"].append("planning: " + str(planning.get("note") or "register unavailable"))
