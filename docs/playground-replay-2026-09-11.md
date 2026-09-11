@@ -32,3 +32,15 @@
 `GET /api/session/{id}/replay` 只預覽；`POST` 同一路徑接受 `source_sha256`、`model`、`max_calls`、`max_tokens`、`client_id`，建立另一個 session，無模型派送。既有 control 的 `step/run/pause` 處理新計畫。API 沿用 loopback、Host／Origin、自訂 header 及 JSON 邊界。相同操作重送不重複建立；來源改動會拒絕舊預覽；建立中斷的半成品不能被視為完成或開始模型呼叫。
 
 本輪採離線 actor stub 與瀏覽器操作驗證控制流程，沒有新增實際模型呼叫，不把測試通過稱作新模型品質驗收。結果和部署紀錄會另列於本文件的交付紀錄。
+
+## 交付紀錄（2026-09-11）
+
+實作先在隔離 worktree 提交為 `8f53e3c`，套用至 main 為 `07dbff7`；Claude 同時新增的 corpus replay/reviewer 腳本沒有被覆寫或執行。
+
+- `test_playground*.py`：137 tests 通過。獨立 reviewer 另外執行 extraction 17、integration 13、UI harness 1，合計 31 tests 通過。
+- 全 repo 離線檢查執行 2,465 tests、18 skipped。初次唯一 error 是新 worktree 缺少 ignored 歷史 ablation fixture；複製既存私人快照的 15 個檔案後，受影響模組 12 tests 通過，沒有修改實作來跳過此測試。沒有再跑整套，未留下已知未解測試失敗。
+- 真實 HTTP 與 headless 瀏覽器使用離線 actor stub，完成預覽、改模型、建立零派送、step 一輪、run 完成另一輪、新舊回答並排及附件保存；browser page error 為零。首次瀏覽器測試等待了折疊區內的隱藏文字而逾時，修正測試操作為先展開區塊後通過；該次 stub 記錄保留。
+- 獨立 review 發現的缺少附件目的資料夾、建立中斷後不應回傳成功，以及附件-only 回合對照缺少數量三項，均已修正並回歸。未見未解 P1／P2 阻斷。
+- `http://127.0.0.1:8765/` 已重啟至私人 frozen runtime `20260911T172513Z-3384c2de76ac`，manifest SHA-256 `6e7159b612b6b2037481d8e25c068742999a312ef1cc1296921485f5fe0ae3d2`。19 段原 session.json 前後 hash 全部相同；已在部署後瀏覽器打開既存真人對話的重測預覽，沒有按建立或執行。
+
+既有 19 段中，6 段有可重測的真人完整問答，3 段真人尚無完成問答，其餘 10 段是合成人物／早期 persona 格式，第一版不轉成真人重測。全部仍可閱讀、匯出。本輪沒有新的受測模型派送，也沒有宣稱新版對話品質已通過。私人完整證據在 `.pea-playground/replay-smoke-20260911/`，包括來源／新 session、stub request、瀏覽器圖、部署保存核對、測試 log、fixture restoration hashes 與獨立 review。
