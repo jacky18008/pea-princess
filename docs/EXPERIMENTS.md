@@ -662,3 +662,25 @@ weakening Claude's hierarchy but by having the file itself grant the person the 
 then record the change, which is the natural-language-settings behaviour the author wanted. Sample sizes are
 small (one to two runs per cell); the direction is consistent, the counts are not estimates of rates.
 
+## Intake probe (2026-09-11): the first reply to "I have no idea"
+
+`bench/intake_probe.py`, one turn, the person says they have no idea where to start (Chinese: a KCL offer,
+term at the end of September; English: a job near Liverpool Street in October). Nothing is fetched. The
+probe counts the questions asked (through the host's question tool or in the text), whether a typed
+answer (destination, figure, date) was forced into invented options, and whether the reply did
+something before asking. Claude Code in print mode never calls its option picker (it knows nobody can
+answer), so "typed vs picker" needs an interactive session — the persona playground — and is not
+measured here.
+
+| Skill wording | Chinese prompt loaded the skill | Questions (Chinese / English) | What went wrong |
+|---|---|---|---|
+| before typed questions (snapshot) | 0 of 4 Claude runs | 1–6 / 1–4 | without the skill the host answers as a generic relocation helper: visa, CAS, halls; Opus asked "你用哪一國護照", Codex asked nationality and residence |
+| typed questions + "which tool asks which" | 0 of 4 | 1–7 / 1–4 | same: the wording cannot act when the skill is not loaded |
+| + description names the no-idea, moving-to-London case in both languages | **4 of 4** (Sonnet ×2, Opus, Haiku), English 4 of 4 | 3–4 / 2–4 | the three typed questions (campus, monthly ceiling, arrival date) with "not sure is fine"; no nationality or visa question; the reply opens with a judgement (book a cancellable short stay, view before signing, never pay before viewing); Opus ×2 asked four, one over the rule |
+
+Reading: for the no-idea person the decisive fix was the skill's trigger, not the question wording —
+a description that names the situation in the person's language. Opus's Chinese reply carried rent
+bands labelled "an estimate, not a quote" without naming the reference they came from; the "cite the
+source" default applies to first replies too. Codex terra: before 0–1 questions, after 1–6, both with
+its web search; not re-run after the description change.
+
