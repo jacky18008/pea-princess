@@ -278,19 +278,19 @@ def run_case(args, case_id, out_dir):
 
 def report(out_dir):
     rows = [json.loads(l) for l in io.open(os.path.join(out_dir, "rows.jsonl"), encoding="utf-8") if l.strip()]
-    print("| agent | model | depth | turn | cases | task (0-2) | quality (1-5) | satisfy (0-2) | beats original | invented numbers | listing fetch tries | median chars | answer cost USD |")
-    print("|---|---|---|---|---|---|---|---|---|---|---|---|---|")
-    keys = sorted({(r["agent"], r["model"], r["depth"], r.get("turn", "ask")) for r in rows})
-    for agent, model, depth, turn in keys:
-        g = [r for r in rows if (r["agent"], r["model"], r["depth"], r.get("turn", "ask")) == (agent, model, depth, turn)]
+    print("| agent | model | depth | turn | label | cases | task (0-2) | quality (1-5) | satisfy (0-2) | beats original | invented numbers | listing fetch tries | median chars | answer cost USD |")
+    print("|---|---|---|---|---|---|---|---|---|---|---|---|---|---|")
+    keys = sorted({(r["agent"], r["model"], r["depth"], r.get("turn", "ask"), r.get("label", "")) for r in rows})
+    for agent, model, depth, turn, label in keys:
+        g = [r for r in rows if (r["agent"], r["model"], r["depth"], r.get("turn", "ask"), r.get("label", "")) == (agent, model, depth, turn, label)]
         v = [r["judge"]["verdict"] for r in g if r.get("judge") and r["judge"].get("verdict")]
         mean = lambda k: (sum(float(x.get(k, 0) or 0) for x in v) / len(v)) if v else 0.0
         wins = sum(1 for x in v if x.get("vs_history") == "new")
         chars = sorted(len(r["answer"]["reply"] or "") for r in g)
         cost = sum((r["answer"]["usage"] or {}).get("cost_usd") or 0 for r in g)
         fetch = sum(1 for r in g if r["answer"]["listing_fetch_attempts"])
-        print("| %s | %s | %s | %s | %d | %.2f | %.2f | %.2f | %d/%d | %.1f | %d | %d | %.2f |" % (
-            agent, model, depth, turn, len(g), mean("task"), mean("quality"), mean("satisfy"), wins, len(v), mean("invented_numbers"), fetch,
+        print("| %s | %s | %s | %s | %s | %d | %.2f | %.2f | %.2f | %d/%d | %.1f | %d | %d | %.2f |" % (
+            agent, model, depth, turn, label, len(g), mean("task"), mean("quality"), mean("satisfy"), wins, len(v), mean("invented_numbers"), fetch,
             chars[len(chars) // 2] if chars else 0, cost))
     print()
     for r in rows:
