@@ -645,11 +645,9 @@ def _opening(rows, candidates, checks, recommendation, labels):
     if len(rents) >= 2:
         low, high = rents[0], rents[-1]
         if low[0] == high[0]:
-            opening = labels[low[1]] + "與" + labels[high[1]] + "的廣告房租同為" + _formatted("rent_pcm", float(low[0]))
-            return opening + "；再比較其他條件，仍待核實。"
-        else:
-            opening = labels[low[1]] + "的廣告房租比" + labels[high[1]] + "每月低 £" + _format_number(float(high[0] - low[0]))
-        return opening + "；可從價格差異繼續比較，其他條件仍待核實。"
+            return labels[low[1]] + "與" + labels[high[1]] + "的廣告房租相同，都是" + _formatted("rent_pcm", float(low[0])) + "；差別要看面積、樓層和還沒核實的條件。"
+        return (labels[low[1]] + "比" + labels[high[1]] + "每月便宜 £" + _format_number(float(high[0] - low[0]))
+                + "；兩間廣告上的數字都還沒核實。")
     if rents:
         return labels[rents[0][1]] + "廣告房租為" + _formatted("rent_pcm", float(rents[0][0])) + "，可先核對它與目前條件的差距；目前沒有一間已核實全部條件。"
     if ranked:
@@ -680,70 +678,91 @@ def _render(constraints, evidence, checks, recommendation, proposal, metadata, u
         return {"message": message, "questions": questions}
     opening = _opening(rows, candidates, checks, recommendation, labels)
     paragraphs = [opening]
+
+    # The person's own question is answered before anything else is compared. Only
+    # the heating question is modelled today; the answer is one line across candidates.
+    inquiry_by_candidate = {(row["candidate_id"], row["field"]): row for row in inquiries}
+    if any(field == "heating_included" for _cid, field in inquiry_by_candidate):
+        answers = []
+        for candidate_id in candidates:
+            if (candidate_id, "heating_included") not in inquiry_by_candidate:
+                continue
+            fact = candidates[candidate_id]["fields"]["heating_included"]
+            answers.append(labels[candidate_id] + ("廣告沒寫，目前未確認" if fact["value"] is None else
+                                                  "來源寫明包含（尚非房東確認）" if fact["value"] is True else
+                                                  "來源寫明不包含（尚非房東確認）"))
+        paragraphs.append("暖氣費是否包含：" + "；".join(answers) + "。")
+
+    # One table for the numbers people compare first; a link and the save date per row.
+    header = "| 房源 | 房租／月 | 房數 | 樓層 | 廣告面積 |\n|---|---:|---:|---|---:|"
+    lines = [header]
+    verdicts, mentions = [], []
     for index, proposal_row in enumerate(proposal["candidates"]):
         candidate_id = evidence["candidates"][index]["id"]
         candidate, result = candidates[candidate_id], checks["candidates"][candidate_id]
         fields = candidate["fields"]
-        displayed_unknown_fields = set()
-        parts = []
-        for field in ("rent_pcm", "bedrooms", "floor", "area_m2"):
-            fact = fields[field]
-            if fact["value"] is not None:
-                qualifier = "約 " if field == "area_m2" and re.search(r"approx|約", fact["quote"], re.I) else ""
-                parts.append(_formatted(field, fact["value"]) if field == "floor" else
-                             FIELDS[field][2] + " " + qualifier + _formatted(field, fact["value"]))
-        detail = "；".join(parts) if parts else "尚無足夠的單戶數值可比較"
-        if result["failed_requirement_ids"]:
-            failures = []
-            for key in result["failed_requirement_ids"]:
-                check, row = result["checks"][key], rows[key]
-                failures.append(_requirement_label(row) + "，來源列為" + _formatted(row["field"], check["value"]))
-            conclusion = "排除：" + "；".join(failures) + "。"
-        else:
-            pending_labels, matching_labels = [], []
-            for key in result["open_requirement_ids"]:
-                row, check = rows[key], result["checks"][key]
-                if row["field"] == "listing_identity":
-                    continue
-                label = _requirement_label(row)
-                if check["comparison"] is True:
-                    matching_labels.append(FIELDS[row["field"]][2] if row["field"] in ("rent_pcm", "monthly_total", "bedrooms", "floor", "area_m2", "epc_internal_area_m2") else label)
-                else:
-                    pending_labels.append(label)
-                    displayed_unknown_fields.add(row["field"])
-            conclusion = ""
-            if matching_labels:
-                conclusion += "廣告記載的" + "、".join(dict.fromkeys(matching_labels)) + "符合目前條件，仍須核實。"
-            if pending_labels:
-                conclusion += "待確認：" + "、".join(dict.fromkeys(pending_labels)) + "。"
-            if not conclusion:
-                conclusion = "此處僅比較來源記載。"
-        if result["advisory_failed_requirement_ids"]:
-            advisory = ["「" + _requirement_label(rows[key]) + "」" for key in result["advisory_failed_requirement_ids"]]
-            conclusion += "來源記載不符偏好：" + "、".join(advisory) + "；這項偏好未作為排除條件。"
-        # Actor labels are private proposal metadata. They can contain verdicts.
         retrieved = metadata[proposal_row["source_url"]]["retrieved_at"]
         dated = re.match(r"\d{4}-\d{2}-\d{2}", retrieved or "")
-        date_text = "保存於 " + dated.group() if dated else "保存日期未提供"
-        paragraphs.append("**" + labels[candidate_id] + "**（[房源廣告](" + proposal_row["source_url"].replace("(", "%28").replace(")", "%29") + ")，" + date_text + "）：" + detail + "。" + conclusion)
-        focus = []
+        url = proposal_row["source_url"].replace("(", "%28").replace(")", "%29")
+        cell = "**" + labels[candidate_id] + "**（[廣告](" + url + ")" + ("，" + dated.group() if dated else "") + "）"
+        def show(field):
+            fact = fields[field]
+            if fact["value"] is None:
+                return "—"
+            if field == "rent_pcm":
+                return "£" + _format_number(fact["value"])
+            if field == "bedrooms":
+                return _format_number(fact["value"])
+            if field == "area_m2":
+                approx = "約 " if re.search(r"approx|約", fact["quote"] or "", re.I) else ""
+                return approx + _format_number(fact["value"]) + " m²"
+            return _formatted(field, fact["value"])
+        lines.append("| " + cell + " | " + " | ".join(show(f) for f in ("rent_pcm", "bedrooms", "floor", "area_m2")) + " |")
+        if result["failed_requirement_ids"]:
+            failures = [_failure_text(labels[candidate_id], rows[key], result["checks"][key])
+                        for key in result["failed_requirement_ids"]]
+            verdicts.append("排除：" + "；".join(failures) + "。")
+        if result["advisory_failed_requirement_ids"]:
+            advisory = ["「" + _requirement_label(rows[key]) + "」" for key in result["advisory_failed_requirement_ids"]]
+            verdicts.append(labels[candidate_id] + "的來源記載不符偏好" + "、".join(advisory) + "，這項偏好不作為排除條件。")
+        # Something the source says about a focus field that is not in the table and
+        # was not the person's question: one clause, marked unverified.
         for field in effective_focus_fields:
-            if field in ("rent_pcm", "bedrooms", "floor", "area_m2"):
+            if field in ("rent_pcm", "bedrooms", "floor", "area_m2") or (candidate_id, field) in inquiry_by_candidate:
                 continue
             fact = fields[field]
-            if (candidate_id, field) in inquiry_fields and field == "heating_included":
-                answer = ("尚無可核對的說明，目前未確認" if fact["value"] is None else
-                          "來源寫明包含，尚非房東確認" if fact["value"] is True else
-                          "來源寫明不包含，尚非房東確認")
-                focus.append("暖氣費是否包含：" + answer)
-            elif field in displayed_unknown_fields:
-                continue
+            if fact["value"] is not None:
+                mentions.append(labels[candidate_id] + FIELDS[field][2] + "：來源列為" + _formatted(field, fact["value"]) + "（未核實）")
+    paragraphs.append("\n".join(lines))
+    if verdicts:
+        paragraphs.append("\n".join(verdicts))
+    if mentions:
+        paragraphs.append("；".join(mentions) + "。")
+
+    # At most three next checks, as actions, the ranked candidate first. Everything
+    # else that is still open stays in the record, not in the reply.
+    steps, reported = [], []
+    for todo in recommendation["todos"]:
+        result = checks["candidates"][todo["candidate_id"]]
+        unknown_named, reported_named = [], []
+        for key in todo["requirement_ids"]:
+            row = rows[key]
+            if result["checks"][key]["comparison"] is True:
+                reported_named.append(FIELDS[row["field"]][2] if row["field"] in FIELDS else _requirement_label(row))
             else:
-                focus.append(FIELDS[field][2] + "：" + ("來源列為" + _formatted(field, fact["value"]) + "，仍待核實" if fact["value"] is not None else "未確認"))
-        if focus:
-            paragraphs.append("；".join(focus) + "。")
-    if presentation["todos"]:
-        paragraphs.append("下一步：" + "；".join(presentation["todos"]) + "。")
+                unknown_named.append(_requirement_label(row) + ("（比對平面圖與臥室窗外影像）"
+                                                                if row["field"] == "bedroom_faces_main_road" else ""))
+        if unknown_named:
+            steps.append("查證" + labels[todo["candidate_id"]] + "的" + "、".join(dict.fromkeys(unknown_named)))
+        reported.extend(dict.fromkeys(reported_named))
+    if reported:
+        steps.append("廣告上的" + "、".join(dict.fromkeys(reported)) + "在看房和合約上核實")
+    for text in presentation["information_todos"]:
+        steps.append(text.split("（補充資訊）：", 1)[0] + "：" + text.split("（補充資訊）：", 1)[1] if "（補充資訊）：" in text else text)
+    if steps:
+        shown = steps[:3]
+        more = "（另有 %d 項留在紀錄）" % (len(steps) - 3) if len(steps) > 3 else ""
+        paragraphs.append("接下來：" + "；".join(shown) + "。" + more)
     if unresolved:
         excerpts = [quote if len(quote) <= 200 else quote[:199] + "…" for quote in unresolved[:3]]
         remainder = "，另有 " + str(len(unresolved) - 3) + " 項" if len(unresolved) > 3 else ""

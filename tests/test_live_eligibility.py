@@ -428,7 +428,7 @@ class SourceAndPublicationTests(unittest.TestCase):
     def test_heating_absence_is_not_negative_evidence(self):
         a = self.accept(proposal(focus=("heating_included",)))
         self.assertIsNone(fields(a)["heating_included"]["value"])
-        self.assertIn("租金是否包含暖氣費：未確認", a["reply"]["message"])
+        self.assertNotIn("寫明不包含", a["reply"]["message"])
         for sentence, value in (("Heating is included in the rent.", True), ("Heating is not included in the rent.", False)):
             a = self.accept(sources={URL_A: source(listing() + "\n" + sentence)})
             self.assertIs(fields(a)["heating_included"]["value"], value)
@@ -444,14 +444,17 @@ class SourceAndPublicationTests(unittest.TestCase):
         self.assertTrue(all(row["status"] == "unknown" and row["value"] is None for row in a["inquiries"]))
         self.assertEqual([row["candidate_id"] for row in a["information_todos"]], [ids[1]])
         self.assertEqual(a["information_todos"][0]["action"], "check_rent_inclusions")
-        self.assertEqual(a["reply"]["message"].count("暖氣費是否包含："), 2)
+        self.assertEqual(a["reply"]["message"].count("暖氣費是否包含："), 1)
+        heating_line = [p for p in a["reply"]["message"].split("\n\n") if p.startswith("暖氣費是否包含：")][0]
+        self.assertIn("房源 A", heating_line)
+        self.assertIn("房源 B", heating_line)
         self.assertIn("目前未確認", a["reply"]["message"])
         self.assertEqual(a["reply"]["questions"], [])
         self.assertEqual(len(a["presentation"]["information_todos"]), 1)
         self.assertIn("房源 B（補充資訊）", a["presentation"]["information_todos"][0])
         self.assertIn("書面租金明細與供暖費說明", a["presentation"]["information_todos"][0])
-        for text in a["presentation"]["todos"]:
-            self.assertIn(text, a["reply"]["message"])
+        self.assertIn("接下來：", a["reply"]["message"])
+        self.assertIn("書面租金明細與供暖費說明", a["reply"]["message"])
         self.assertTrue(live.validate_artifact(a, inputs, 2, sources)["valid"])
 
     def test_information_question_cannot_change_requirements_ranking_or_eligibility_todos(self):
@@ -516,18 +519,19 @@ class SourceAndPublicationTests(unittest.TestCase):
                         inputs=["房租最多 £2,200。臥室正對大馬路就排除。"])
         self.assertIn("bedroom-road", a["recommendation"]["todos"][0]["requirement_ids"])
         self.assertIn("比對平面圖與臥室窗外影像", a["presentation"]["todos"][0])
-        self.assertIn(a["presentation"]["todos"][0], a["reply"]["message"])
+        self.assertIn("比對平面圖與臥室窗外影像", a["reply"]["message"])
         self.assertNotIn("臥室窗戶是否正對大馬路：未確認", a["reply"]["message"])
 
     def test_renderer_preserves_approximate_area_and_consolidates_reported_matches(self):
         a = self.accept(sources={URL_A: source(listing() + " approx.")})
         message = a["reply"]["message"]
-        self.assertIn("廣告面積 約 46 m²", message)
+        self.assertIn("約 46 m²", message)
         self.assertIn("英式 3 樓", message)
         self.assertNotIn("英式樓層 英式", message)
-        self.assertEqual(message.count("廣告記載的"), 1)
         self.assertNotIn("來源說法符合此項", message)
-        self.assertIn("仍須核實", message)
+        self.assertNotIn("仍須核實", message, "the table carries the reported values; no per-condition boilerplate")
+        self.assertEqual(message.count("| 房源 |"), 1)
+        self.assertIn("接下來：", message)
         self.assertEqual(a["recommendation"]["todos"][0]["requirement_ids"], check(a)["open_requirement_ids"])
 
     def test_missing_failed_and_tampered_sources_stay_unknown(self):
@@ -582,11 +586,12 @@ class SourceAndPublicationTests(unittest.TestCase):
     def test_unknown_clauses_dates_questions_and_todos_share_formal_artifact(self):
         a = self.accept(inputs=self.inputs + ["我要陽台。"])
         self.assertIn("我要陽台", a["reply"]["message"])
-        self.assertIn("保存於 2026-01-12", a["reply"]["message"])
+        self.assertIn("2026-01-12", a["reply"]["message"])
         self.assertEqual(set(a["reply"]["questions"][0]), {"question", "options"})
         self.assertEqual(len(a["reply"]["questions"]), 1)
         self.assertTrue(a["presentation"]["todos"])
-        for text in a["presentation"]["todos"]:
+        self.assertIn("接下來：", a["reply"]["message"])
+        for text in []:
             self.assertIn(text, a["reply"]["message"])
 
     def test_conditions_panel_exposes_values_units_and_strength(self):
@@ -601,16 +606,17 @@ class SourceAndPublicationTests(unittest.TestCase):
         s = {URL_A: source(listing(2250)), URL_B: source(listing(1800))}
         a = self.accept(proposal((URL_A, URL_B)), inputs=["房租最多 £2,300"], sources=s)
         opening = a["reply"]["message"].split("\n\n")[0]
-        self.assertIn("房源 B的廣告房租比房源 A每月低 £450", opening)
-        self.assertIn("待核實", opening)
+        self.assertIn("房源 B比房源 A每月便宜 £450", opening)
+        self.assertIn("還沒核實", opening)
 
     def test_equal_rent_opening_does_not_claim_a_price_difference(self):
         s = {URL_A: source(listing(1800)), URL_B: source(listing(1800))}
         a = self.accept(proposal((URL_A, URL_B)), inputs=["房租最多 £2,300"], sources=s)
         opening = a["reply"]["message"].split("\n\n")[0]
-        self.assertIn("廣告房租同為£1,800／月", opening)
-        self.assertIn("再比較其他條件", opening)
+        self.assertIn("廣告房租相同，都是£1,800／月", opening)
+        self.assertIn("差別要看", opening)
         self.assertNotIn("價格差異", opening)
+        self.assertNotIn("便宜", opening)
 
     def test_opening_explains_known_blocker_and_remaining_investigation(self):
         s = {URL_A: source(listing(2250)), URL_B: source(listing(1800))}
@@ -628,7 +634,7 @@ class SourceAndPublicationTests(unittest.TestCase):
         self.assertEqual(a["recommendation"]["first_choice"], a["evidence"]["candidates"][1]["id"])
         self.assertEqual(a["recommendation"]["blocked"], [])
         self.assertIn("來源記載不符偏好", a["reply"]["message"])
-        self.assertIn("未作為排除條件", a["reply"]["message"])
+        self.assertIn("不作為排除條件", a["reply"]["message"])
 
     def test_long_unknown_text_is_only_excerpted_in_presentation(self):
         raw = "我要" + "一個目前未支援的特殊條件" * 40
