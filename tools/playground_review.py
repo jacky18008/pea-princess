@@ -78,6 +78,31 @@ def _pairs(pairs):
     return result
 
 
+class _ObjectPairs(list):
+    """Keep object keys intact when classifying a rejected telemetry line."""
+
+
+def _unambiguous_item_envelope(line):
+    """Identify a non-terminal envelope without accepting its nested payload.
+
+    Some CLI web-search items repeat an item ID key. That remains an integrity
+    gap, but cannot hide another terminal event if the outer object is unique
+    and explicitly an item event. Syntax errors, nonfinite numbers and duplicate
+    outer keys are never recoverable through this classification.
+    """
+    try:
+        pairs = json.loads(line, object_pairs_hook=_ObjectPairs,
+                           parse_constant=lambda _: (_ for _ in ()).throw(ValueError('nonfinite JSON number')))
+        if not isinstance(pairs, _ObjectPairs):
+            return False
+        envelope = _pairs(pairs)
+        return (set(envelope) == {'type', 'item'}
+                and envelope.get('type') in ('item.started', 'item.updated', 'item.completed')
+                and isinstance(envelope.get('item'), _ObjectPairs))
+    except (ValueError, TypeError):
+        return False
+
+
 def _read(folder, relative):
     path = _path(folder, relative)
     descriptor = os.open(str(path), os.O_RDONLY | getattr(os, 'O_NOFOLLOW', 0) | getattr(os, 'O_NONBLOCK', 0))
@@ -178,7 +203,7 @@ def _usage(record, binding, gaps):
         gaps.append('missing raw stdout; usage is unknown')
         return result
     terminals, malformed = [], False
-    for line in raw.splitlines():
+    for line_number, line in enumerate(raw.splitlines(), 1):
         if not line.strip():
             continue
         try:
@@ -189,7 +214,11 @@ def _usage(record, binding, gaps):
             if event.get('type') == 'turn.completed':
                 terminals.append(event.get('usage'))
         except (ValueError, TypeError):
-            malformed = True
+            if _unambiguous_item_envelope(line):
+                gaps.append('raw non-terminal item payload has duplicate JSON keys at stdout line %d; '
+                            'tool identity/content is ambiguous; terminal counters checked separately' % line_number)
+            else:
+                malformed = True
     usage = record.get('direct_terminal_usage')
     fields = ('input_tokens', 'cached_input_tokens', 'output_tokens')
     valid = (not malformed and len(terminals) == 1

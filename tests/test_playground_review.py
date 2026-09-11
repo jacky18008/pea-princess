@@ -492,6 +492,91 @@ class PlaygroundReviewTests(unittest.TestCase):
         self.add_call(raw=raw)
         self.assert_unknown_with_reply(self.detail())
 
+    def test_duplicate_tool_ids_preserve_bound_terminal_usage_and_visible_gap(self):
+        raw = '\n'.join([
+            '{"type":"item.started","item":{"id":"item_5","type":"web_search","id":"exec-search"}}',
+            '{"type":"item.completed","item":{"id":"item_5","type":"web_search","id":"exec-search",'
+            '"output":"Retained synthetic search result"}}',
+            json.dumps({"type": "turn.completed", "usage": {
+                "input_tokens": 100, "cached_input_tokens": 80, "output_tokens": 10}}),
+        ]) + '\n'
+        self.add_call(raw=raw)
+        before = self.source_bytes()
+        detail = self.detail()
+        expected = {"input_tokens": 100, "cached_input_tokens": 80, "uncached_input_tokens": 20,
+                    "output_tokens": 10, "processed_tokens": 110, "seconds": 2.5}
+        self.assertEqual(expected, detail["usage"])
+        self.assertFalse(detail["integrity"]["ok"])
+        self.assertEqual(2, len(detail["integrity"]["gaps"]))
+        for number, gap in enumerate(detail["integrity"]["gaps"], 1):
+            self.assertIn('stdout line %d' % number, gap)
+            self.assertIn('tool identity/content is ambiguous', gap)
+        self.assertTrue(detail["source"]["record_sha256"])
+        self.assertIn('Retained synthetic search result', detail["tools"][0]["output"]["text"])
+        index = review.build_index(self.folder, self.session)
+        self.assertEqual(expected, index["calls"][0]["usage"])
+        self.assertEqual({"value": 110, "known_sum": 110, "unknown_calls": 0},
+                         index["totals"]["processed_tokens"])
+        self.assertEqual(detail["integrity"]["gaps"], index["gaps"][0]["gaps"])
+        self.assertEqual(before, self.source_bytes())
+
+    def terminal_usage(self, raw, **changes):
+        record = {"launch_result": {"stdout": raw, "seconds": 2.5},
+                  "terminal_usage_events": 1, "direct_terminal_usage": {
+                      "input_tokens": 100, "cached_input_tokens": 80, "output_tokens": 10}}
+        record.update(changes)
+        gaps = []
+        return review._usage(record, True, gaps), gaps
+
+    def test_item_payload_exception_cannot_hide_ambiguous_or_malformed_events(self):
+        terminal = '{"type":"turn.completed","usage":{"input_tokens":100,"cached_input_tokens":80,"output_tokens":10}}'
+        invalid = [
+            'not JSON',
+            '[]',
+            '{"type":"item.started","item":',
+            '{"type":"turn.completed","type":"item.started","item":{"id":"a","id":"b"}}',
+            '{"type":"item.started","item":{},"item":{"id":"a","id":"b"}}',
+            '{"type":"item.started","item":{"id":"a","id":"b","value":NaN}}',
+            '{"type":"unknown","item":{"id":"a","id":"b"}}',
+            '{"type":"item.started","item":{"id":"a","id":"b"},"usage":{}}',
+            '{"type":"turn.completed","usage":{"input_tokens":1,"input_tokens":100,"cached_input_tokens":80,"output_tokens":10}}',
+            '{"type":"turn.completed","usage":{"input_tokens":100,"cached_input_tokens":80,"output_tokens":NaN}}',
+        ]
+        for line in invalid:
+            with self.subTest(line=line):
+                usage, gaps = self.terminal_usage(line + '\n' + terminal)
+                self.assertTrue(gaps)
+                self.assertIsNone(usage['processed_tokens'])
+                self.assertIsNone(usage['input_tokens'])
+
+    def test_duplicate_item_payload_cannot_supply_missing_or_multiple_terminal_usage(self):
+        item = '{"type":"item.completed","item":{"id":"a","id":"b","output":{"type":"turn.completed",' \
+               '"usage":{"input_tokens":100,"cached_input_tokens":80,"output_tokens":10}}}}'
+        terminal = '{"type":"turn.completed","usage":{"input_tokens":100,"cached_input_tokens":80,"output_tokens":10}}'
+        for raw in (item, '\n'.join((item, terminal, terminal))):
+            with self.subTest(raw=raw):
+                usage, gaps = self.terminal_usage(raw)
+                self.assertIsNone(usage['processed_tokens'])
+                self.assertTrue(any('tokens are unknown' in gap for gap in gaps))
+
+    def test_duplicate_item_payload_does_not_relax_terminal_counter_checks(self):
+        item = '{"type":"item.completed","item":{"id":"a","id":"b"}}'
+        terminal = '{"type":"turn.completed","usage":{"input_tokens":100,"cached_input_tokens":80,"output_tokens":10}}'
+        cases = [
+            (terminal, {"terminal_usage_events": count}) for count in (0, 2, True)
+        ] + [
+            (terminal, {"direct_terminal_usage": {"input_tokens":101,"cached_input_tokens":80,"output_tokens":10}}),
+            ('{"type":"turn.completed","usage":{"input_tokens":100,"input_tokens":100,"cached_input_tokens":80,"output_tokens":10}}', {}),
+            ('{"type":"turn.completed","usage":{"input_tokens":100,"cached_input_tokens":80,"output_tokens":10},"usage":{}}', {}),
+            ('{"type":"turn.completed","usage":{"input_tokens":true,"cached_input_tokens":80,"output_tokens":10}}', {}),
+            ('{"type":"turn.completed","usage":{"input_tokens":100,"cached_input_tokens":80,"output_tokens":10,"total_tokens":111}}', {}),
+        ]
+        for raw, changes in cases:
+            with self.subTest(raw=raw, changes=changes):
+                usage, gaps = self.terminal_usage(item + '\n' + raw, **changes)
+                self.assertIsNone(usage['processed_tokens'])
+                self.assertTrue(gaps)
+
     def test_direct_and_raw_terminal_counter_mismatch_is_a_gap(self):
         self.add_call(record_changes={"direct_terminal_usage": {
             "input_tokens": 999, "cached_input_tokens": 80, "output_tokens": 10}})
