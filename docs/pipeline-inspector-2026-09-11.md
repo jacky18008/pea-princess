@@ -75,6 +75,10 @@ Independent review identified and prompted fixes for omitted clarification contr
 
 The isolated full suite passed 2,374 tests with 18 skips. A final bounded follow-up added preview/save freshness checks and explicit options/Markdown-export coverage; those affected checks were rerun separately.
 
+Final verification: 77 inspector-related checks and 31 platform checks passed on the isolated final overlay. In the actual in-app browser, a retained call's tool input/output expanded correctly; an older Persona's two clarification questions and their options remained visible; the full six-message conversation and its intervening questions loaded; a clearly labelled unscored interface-test note saved. JSON and Markdown buttons produced real local files whose size, JSON contents and hashes were checked. All 18 pre-existing `session.json` hashes remained unchanged. No model calls were made for inspector validation.
+
+The browser's ordinary narrow panel exercised the responsive layout; a separate full-width desktop or mobile-device visual certification is not claimed. The served runtime retains the same tested skill bytes across the export fix. Concurrent edits to the main repository's skill were excluded from that final runtime using the isolated checkout and recorded manifest.
+
 ## Remaining limits
 
 Native Grok Bot observations do not have this Codex CLI receipt format. Its separately preserved transcript is not imported as fake calls or assigned zero tokens. Cross-provider import requires an explicit observation schema and provenance before sharing these numeric comparisons. Automated long-conversation scoring and automatic issue-to-prompt changes remain separate experiments.
