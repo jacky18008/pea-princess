@@ -1,0 +1,194 @@
+{
+  "schema_version": 1,
+  "checked_date": "2026-09-11",
+  "scope": "Public official policy/documentation only; UK consumer context; no accounts, provider contact, API invocation or listing crawling.",
+  "product": "Permanently free local installable skill; user's own agent; no own model, hosted worker, shared scraped database or payments.",
+  "status_definitions": {
+    "personal_native_use": "Ordinary human use within the site's terms; not permission for an agent to collect content.",
+    "permission_required": "An explicit restriction requires provider permission or an applicable agreement.",
+    "conditional_license": "Documented licensed route exists but the product has not established eligibility or the required grant.",
+    "unknown_not_authorized": "Reviewed evidence does not settle permission; do not infer an affirmative licence.",
+    "no_general_search_grant": "Reviewed API scope does not establish general guest-side discovery access."
+  },
+  "providers": [
+    {
+      "id": "airbnb",
+      "name": "Airbnb",
+      "checked_date": "2026-09-11",
+      "sources": [
+        {"id": "terms", "url": "https://www.airbnb.co.uk/help/article/2908", "clauses": "European terms (EEA/Switzerland/UK), 11.1; 29", "paraphrase": "Automated access/collection is prohibited; content use, copying and display are limited. A separate affiliate distribution programme exists."},
+        {"id": "api", "url": "https://www.airbnb.com/help/article/3418", "clauses": "Updated 2025-10-15; 1.1, 1.3-1.4, 2.1-2.2", "paraphrase": "Host-service programmes require agreements, scoped access and security review. API restrictions include static copies and pricing/financial analysis; a limited royalty-free licence is not open admission."},
+        {"id": "wishlist", "url": "https://www.airbnb.com/help/article/1236", "clauses": "Creating and sharing wishlists", "paraphrase": "Users can save listings and share view-only wishlists or invite collaborators."}
+      ],
+      "operations": {
+        "automated_site_discovery_read": {"status": "permission_required", "sources": ["terms"]},
+        "user_directed_ai_browser_read": {"status": "permission_required", "sources": ["terms"], "note": "Automated means are covered; user's direction is not a listed exception."},
+        "human_native_view": {"status": "personal_native_use", "sources": ["terms", "wishlist"]},
+        "local_raw_cache": {"status": "permission_required", "sources": ["terms", "api"]},
+        "redisplay_photos_reviews": {"status": "permission_required", "sources": ["terms", "api"]},
+        "licensed_general_search_api": {"status": "no_general_search_grant", "sources": ["api", "terms"]}
+      },
+      "api": {"eligibility": "Approved Host Services programmes with contractual scopes; affiliate distribution separately exists but admission for this skill is unestablished.", "inventory_scope": "Host/property/channel/operations services; not a demonstrated arbitrary guest-side research API.", "fees": "Limited licence described as royalty-free; programme charges and product eligibility unknown.", "free_local_default": false},
+      "no_paste_route": {"level": "human_handoff", "route": "Native wishlist/share-link viewing. Saving requires the user's own account; none was created or used.", "automatic_fact_ingestion": false},
+      "uncertainty": ["Partner-specific agreements were not available.", "Wishlist sharing does not grant automated extraction or long-term review/photo reuse.", "No general official alert/export/brochure feed was established."]
+    },
+    {
+      "id": "booking_com",
+      "name": "Booking.com",
+      "checked_date": "2026-09-11",
+      "sources": [
+        {"id": "terms", "url": "https://www.booking.com/content/terms.en-gb.html", "clauses": "Current A15.1-A15.3", "paraphrase": "Prior express written permission is required for automated access and collection, including noncommercial use and AI assistants interacting with a user's browser."},
+        {"id": "demand", "url": "https://developers.booking.com/demand/docs", "clauses": "Integration types", "paraphrase": "Demand supports content-only, search/look/redirect, and search/look/book integrations."},
+        {"id": "admission", "url": "https://developers.booking.com/demand/docs/getting-started/prerequisites", "clauses": "Prerequisites", "paraphrase": "Managed affiliate partnership, agreed contract, account management and API credentials are prerequisites."},
+        {"id": "connectivity", "url": "https://developers.booking.com/connectivity/docs", "clauses": "Connectivity overview", "paraphrase": "Connectivity partners manage connected accommodation inventory, prices and reservations; this is not general consumer discovery permission."}
+      ],
+      "operations": {
+        "automated_site_discovery_read": {"status": "permission_required", "sources": ["terms"]},
+        "user_directed_ai_browser_read": {"status": "permission_required", "sources": ["terms"]},
+        "human_native_view": {"status": "personal_native_use", "sources": ["terms"]},
+        "local_raw_cache": {"status": "permission_required", "sources": ["terms"], "note": "Demand retention terms require separate assessment."},
+        "redisplay_photos_reviews": {"status": "permission_required", "sources": ["terms"], "note": "An API relationship alone does not establish all content reuse rights."},
+        "licensed_general_search_api": {"status": "conditional_license", "sources": ["demand", "admission"]}
+      },
+      "api": {"eligibility": "Managed affiliate partner with signed contract; no universally available access established.", "inventory_scope": "Demand offers partner travel discovery; Connectivity is connected-property management.", "fees": "Unknown; no applicable public tariff established.", "free_local_default": false},
+      "no_paste_route": {"level": "conditional_licensed_machine_read", "route": "Demand search/look/redirect is a relevant architecture if licensed. Immediate fallback is ordinary human native-site viewing.", "automatic_fact_ingestion": "Only under an applicable partner grant."},
+      "uncertainty": ["Contract-specific caching, images, reviews, AI processing and per-install credential rights remain unknown.", "Personal booking-data portability is not a market-inventory licence.", "Terms effective date not established; current page checked on the stated date."]
+    },
+    {
+      "id": "expedia",
+      "name": "Expedia UK / Expedia Group APIs",
+      "checked_date": "2026-09-11",
+      "sources": [
+        {"id": "terms", "url": "https://www.expedia.co.uk/lp/b/terms-of-service", "clauses": "Section 2: Our rules", "paraphrase": "Personal travel use is permitted; automated/manual content collection, copying, circumvention and unapproved deep linking are restricted."},
+        {"id": "rapid", "url": "https://developers.expediagroup.com/docs/products/rapid/setup/getting-started", "clauses": "Partner application, credentials and launch", "paraphrase": "Rapid requires partner approval, API credentials and a site review before production."},
+        {"id": "reviews", "url": "https://developers.expediagroup.com/rapid/lodging/content/guest-reviews", "clauses": "How it works; Launch requirements", "paraphrase": "Approved travel shopping/booking displays can receive up to 100 reviews per property; review caching is limited to 48 hours and launch rules apply."},
+        {"id": "content", "url": "https://developers.expediagroup.com/rapid/lodging/content/about-content-api", "clauses": "Content API overview", "paraphrase": "Rapid supplies partner property content and catalogues; this is licensed distribution rather than property-owner-only management."},
+        {"id": "redirect_admission", "url": "https://developers.expediagroup.com/xap-apis/api/start-guide/getting-started", "clauses": "Note; Steps 1-5", "paraphrase": "Travel Redirect requires approved partner onboarding. The page currently says all new API applications are paused."},
+        {"id": "redirect", "url": "https://developers.expediagroup.com/travel-redirect-api/api/integration-guide/integration-types", "clauses": "How it works", "paraphrase": "Partners search inventory, display offers and redirect through links returned by the licensed service."}
+      ],
+      "operations": {
+        "automated_site_discovery_read": {"status": "permission_required", "sources": ["terms"]},
+        "user_directed_ai_browser_read": {"status": "permission_required", "sources": ["terms"]},
+        "human_native_view": {"status": "personal_native_use", "sources": ["terms"]},
+        "local_raw_cache": {"status": "conditional_license", "sources": ["terms", "reviews"], "note": "No consumer-page collection grant; API review cache maximum 48 hours."},
+        "redisplay_photos_reviews": {"status": "conditional_license", "sources": ["reviews", "content"], "note": "Partner-specific content rights and launch/disclosure rules apply."},
+        "licensed_general_search_api": {"status": "conditional_license", "sources": ["rapid", "redirect_admission", "redirect"]}
+      },
+      "api": {"eligibility": "Rapid approved partner/site review; Travel Redirect new applications currently paused.", "inventory_scope": "Rapid and Travel Redirect offer travel distribution/search; not interchangeable with supply-side connectivity APIs.", "fees": "Unknown; applicable numerical partner tariff not established.", "free_local_default": false},
+      "no_paste_route": {"level": "conditional_licensed_machine_read", "route": "Approved Rapid or Travel Redirect integration; native homepage/human search immediately. Do not assume arbitrary deep-link construction is permitted.", "automatic_fact_ingestion": "Conditional on partner access, not available by default."},
+      "uncertainty": ["Free local skill eligibility and per-install credential distribution are unestablished.", "API review display does not itself grant permanent archival or arbitrary model processing.", "Travel Redirect pause is a current documented admission blocker, not a claim that Rapid is also paused."]
+    },
+    {
+      "id": "premier_inn",
+      "name": "Premier Inn UK",
+      "checked_date": "2026-09-11",
+      "sources": [
+        {"id": "terms", "url": "https://www.premierinn.com/gb/en/terms/terms-of-use.html", "clauses": "3, 5, 7", "paraphrase": "Personal access is allowed; unauthorised access/security interference is prohibited. Intellectual property is reserved, with a single personal viewing copy exception to written-consent requirements."},
+        {"id": "distribution", "url": "https://www.premierinn.com/gb/en/business/distribution-partners.html", "clauses": "Become a TMC Partner; Direct Connect API and GDS", "paraphrase": "Approved distribution can connect booking tools to brand inventory, content, rates, availability and booking management through direct or technology/GDS partnerships."}
+      ],
+      "operations": {
+        "automated_site_discovery_read": {"status": "unknown_not_authorized", "sources": ["terms"]},
+        "user_directed_ai_browser_read": {"status": "unknown_not_authorized", "sources": ["terms"]},
+        "human_native_view": {"status": "personal_native_use", "sources": ["terms"]},
+        "local_raw_cache": {"status": "permission_required", "sources": ["terms"], "note": "Beyond the expressly limited single personal viewing copy."},
+        "redisplay_photos_reviews": {"status": "permission_required", "sources": ["terms"]},
+        "licensed_general_search_api": {"status": "conditional_license", "sources": ["distribution"], "note": "Brand inventory distribution, not a universal accommodation catalogue."}
+      },
+      "api": {"eligibility": "TMC/distribution partnership; suitability for this free local skill unknown.", "inventory_scope": "Premier Inn inventory through Direct Connect, technology partners or GDS.", "fees": "Unknown; no applicable public tariff established.", "free_local_default": false},
+      "no_paste_route": {"level": "human_handoff", "route": "Native personal hotel search/viewing; licensed distribution could provide machine facts only after separate eligibility is established.", "automatic_fact_ingestion": false},
+      "uncertainty": ["No explicit general read-only bot or user-directed AI permission was established in the reviewed terms.", "Not classified as a proven blanket robot ban.", "No applicable open brochure/export/alert feed or API content retention licence established."]
+    },
+    {
+      "id": "travelodge",
+      "name": "Travelodge UK",
+      "checked_date": "2026-09-11",
+      "sources": [
+        {"id": "booking_terms", "url": "https://www.travelodge.co.uk/about/booking-terms-conditions/", "clauses": "Current booking terms, applicable from 2026-06-16", "paraphrase": "The official page supplies booking conditions and a downloadable version; these do not establish a general website automation/content licence."},
+        {"id": "distribution", "url": "https://www.travelodge.co.uk/our-business/media/press-release/travelodge-partners-with-technology-platform-katanox/", "clauses": "Katanox partnership announcement", "paraphrase": "The partnership distributes richer content, visuals, rates and room choices to travel-management companies and supports booking changes."}
+      ],
+      "operations": {
+        "automated_site_discovery_read": {"status": "unknown_not_authorized", "sources": ["booking_terms"]},
+        "user_directed_ai_browser_read": {"status": "unknown_not_authorized", "sources": ["booking_terms"]},
+        "human_native_view": {"status": "personal_native_use", "sources": ["booking_terms"], "note": "Ordinary consumer use; not a separate content licence."},
+        "local_raw_cache": {"status": "unknown_not_authorized", "sources": ["booking_terms"]},
+        "redisplay_photos_reviews": {"status": "unknown_not_authorized", "sources": ["booking_terms"]},
+        "licensed_general_search_api": {"status": "conditional_license", "sources": ["distribution"], "note": "B2B brand distribution is documented; open self-service search access is not."}
+      },
+      "api": {"eligibility": "TMC/B2B distribution through Katanox; local skill admission unknown.", "inventory_scope": "Travelodge accommodation distribution, not just an owner's private property-management data.", "fees": "Unknown.", "free_local_default": false},
+      "no_paste_route": {"level": "human_handoff", "route": "Native human hotel search/viewing. Approved B2B distribution is a conditional future option.", "automatic_fact_ingestion": false},
+      "uncertainty": ["Complete applicable website-use and content reuse terms were not established in this bounded review.", "Old booking PDFs and terms of an unrelated consumer panel were not treated as current main-site permissions.", "A downloadable booking-terms PDF is not a feed of hotel facts."]
+    },
+    {
+      "id": "homeviews",
+      "name": "HomeViews",
+      "checked_date": "2026-09-11",
+      "sources": [
+        {"id": "terms", "url": "https://www.homeviews.com/terms-of-use", "clauses": "Updated 2025-11-13; Licence to use website; General restrictions; Acceptable use; Commercial relationships", "paraphrase": "Limited personal noncommercial viewing/caching/printing is permitted. Systematic or automated collection needs prior written consent; republication and redistribution are restricted. Business marketing subscriptions provide scoped content rights."}
+      ],
+      "operations": {
+        "automated_site_discovery_read": {"status": "permission_required", "sources": ["terms"]},
+        "user_directed_ai_browser_read": {"status": "permission_required", "sources": ["terms"], "note": "Automated collection is explicitly covered; mere direction by the user is not an exception."},
+        "human_native_view": {"status": "personal_native_use", "sources": ["terms"]},
+        "local_raw_cache": {"status": "conditional_license", "sources": ["terms"], "note": "Limited personal caching does not permit automated acquisition or a redistributable archive."},
+        "redisplay_photos_reviews": {"status": "permission_required", "sources": ["terms"]},
+        "licensed_general_search_api": {"status": "unknown_not_authorized", "sources": ["terms"]}
+      },
+      "api": {"eligibility": "No general review-search API established in reviewed official terms; business marketing rights are distinct.", "inventory_scope": "Subscriptions for companies' marketing use do not establish arbitrary third-party development-review access.", "fees": "General API availability/fees unknown; do not infer zero price from free profile-claim tools.", "free_local_default": false},
+      "no_paste_route": {"level": "human_handoff", "route": "Human reads the native review page; machine collection requires written permission.", "automatic_fact_ingestion": false},
+      "uncertainty": ["No general official review export or alert feed was established.", "The personal cache exception is not a blanket AI processing or content redistribution licence."]
+    },
+    {
+      "id": "trustpilot",
+      "name": "Trustpilot",
+      "checked_date": "2026-09-11",
+      "sources": [
+        {"id": "guidelines", "url": "https://legal.trustpilot.com/forreviewers/guidelines-for-reviewers", "clauses": "May 2025 v2; reading reviews; account removal/data misuse", "paraphrase": "Anyone can read reviews free. The guidelines prohibit unauthorised copying, collection and commercial exploitation; this wording alone does not settle every noncommercial automated read."},
+        {"id": "data_solutions", "url": "https://developers.trustpilot.com/data-solutions-get-started", "clauses": "Display API; Insights API; Getting started; data deletion", "paraphrase": "Display provides business data and latest five reviews; Insights provides fuller review access. Partner setup and an organisation key are required, with deletion handling."},
+        {"id": "cache", "url": "https://developers.trustpilot.com/ds-caching-best-practices/", "clauses": "Caching business IDs and review data", "paraphrase": "Business IDs may be retained indefinitely; review data shown to users must refresh every 24 hours."}
+      ],
+      "operations": {
+        "automated_site_discovery_read": {"status": "unknown_not_authorized", "sources": ["guidelines"], "note": "Commercial scraping explicitly restricted; exact noncommercial automation rule not established."},
+        "user_directed_ai_browser_read": {"status": "unknown_not_authorized", "sources": ["guidelines"]},
+        "human_native_view": {"status": "personal_native_use", "sources": ["guidelines"]},
+        "local_raw_cache": {"status": "conditional_license", "sources": ["data_solutions", "cache"], "note": "Licensed API route has refresh/deletion duties; consumer-site archival grant unestablished."},
+        "redisplay_photos_reviews": {"status": "conditional_license", "sources": ["data_solutions", "cache"], "note": "Review display is scoped; separate photo/avatar rights are not inferred."},
+        "licensed_general_search_api": {"status": "conditional_license", "sources": ["data_solutions"]}
+      },
+      "api": {"eligibility": "Data Solutions onboarding/partner manager and organisation credentials; broad review access differs from one's own Business APIs.", "inventory_scope": "Business/review discovery through Display or Insights, according to access granted.", "fees": "Unknown; no applicable public tariff established.", "free_local_default": false},
+      "no_paste_route": {"level": "human_handoff", "route": "Free native review reading now; Data Solutions can remove pasting only under an applicable grant.", "automatic_fact_ingestion": "Conditional future API route."},
+      "uncertainty": ["The official Terms of Use for Consumers link returned a tool retrieval error; no claim of complete consumer contract review.", "Admission of a free distributed skill, AI processing rights and fees remain unknown.", "Refresh duties are not permission to keep all raw deleted reviews permanently."]
+    },
+    {
+      "id": "google_maps_places",
+      "name": "Google Maps / Places reviews",
+      "checked_date": "2026-09-11",
+      "sources": [
+        {"id": "consumer", "url": "https://www.google.com/help/terms_maps/", "clauses": "1-2", "paraphrase": "Ordinary Maps use is available; copying, redistribution, bulk downloads and certain competing datasets are restricted, including conduct on a user's behalf."},
+        {"id": "platform", "url": "https://cloud.google.com/maps-platform/terms", "clauses": "3.2.3(a)-(c), (g)", "paraphrase": "Platform content extraction, caching beyond exceptions and derivative uses are restricted; model training and alteration of search-result integrity are also constrained."},
+        {"id": "places_policy", "url": "https://developers.google.com/maps/documentation/places/web-service/policies", "clauses": "Content storage; attribution; reviews and photos", "paraphrase": "Places generally prohibits prefetching/storage beyond exceptions such as place IDs. Google and author attribution obligations apply to displayed results, reviews and photos."},
+        {"id": "billing", "url": "https://developers.google.com/maps/documentation/places/web-service/usage-and-billing", "clauses": "Usage and billing", "paraphrase": "Places requires billing and credentials; pay-as-you-go charges depend on requested features/SKUs."},
+        {"id": "urls", "url": "https://developers.google.com/maps/documentation/urls/get-started", "clauses": "Overview", "paraphrase": "Documented universal Maps links launch searches or directions without an API key."}
+      ],
+      "operations": {
+        "automated_site_discovery_read": {"status": "unknown_not_authorized", "sources": ["consumer"], "note": "Bulk extraction is restricted; isolated agent reading has no affirmative grant established here."},
+        "user_directed_ai_browser_read": {"status": "unknown_not_authorized", "sources": ["consumer"]},
+        "human_native_view": {"status": "personal_native_use", "sources": ["consumer", "urls"]},
+        "local_raw_cache": {"status": "permission_required", "sources": ["platform", "places_policy"], "note": "Raw review archives are not covered by the place-ID exception."},
+        "redisplay_photos_reviews": {"status": "conditional_license", "sources": ["places_policy", "platform"], "note": "API display requires scoped usage and attribution; no blanket redistribution grant."},
+        "licensed_general_search_api": {"status": "conditional_license", "sources": ["billing", "places_policy"]}
+      },
+      "api": {"eligibility": "Maps Platform project, enabled billing and valid credentials; applicable agreement depends on billing-account location.", "inventory_scope": "Place search/details and limited returned review content, not a complete review archive.", "fees": "Pay-as-you-go by SKU confirmed; exact current tariff/free allowance not verified. No claim that an expired promotional credit still applies.", "free_local_default": false},
+      "no_paste_route": {"level": "human_handoff", "route": "Documented Maps URLs open searches without an API key. A separately licensed Places adapter would have billing, storage and display conditions.", "automatic_fact_ingestion": false},
+      "uncertainty": ["No inference that a model-training ban alone prohibits every one-off inference; separate copying/derivative/transfer restrictions still need assessment.", "UK billing ordinarily differs from EEA terms; verify actual account location before integration.", "Maps URL handoff does not return review text to the skill."]
+    }
+  ],
+  "global_limits": [
+    "Statuses are evidence-based product-routing decisions, not adjudications of contract enforceability or statutory exceptions.",
+    "No permission was inferred from robots, public accessibility, absence of a located restriction, user instructions or a search-result snippet.",
+    "Search-engine discovery of a provider URL is separate from fetching that provider's page; search-service terms and downstream rights must both be considered.",
+    "No API's general availability establishes that the developer may distribute shared credentials to arbitrary local installs.",
+    "No accounts, payments, partner contacts or permission requests were initiated.",
+    "No unrestricted official alert/export/brochure feed for arbitrary listings/reviews was established; missing routes remain unknown rather than declared nonexistent.",
+    "All source passages are paraphrased; verbatim quoted words per source: zero."
+  ]
+}

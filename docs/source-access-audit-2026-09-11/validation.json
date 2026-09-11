@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "checked_date": "2026-09-11",
+  "provider_product_records": 54,
+  "inventory_ids": 53,
+  "mapped_ids": 53,
+  "unmapped_ids": [],
+  "checks_passed": [
+    "json_parse",
+    "unique_registry_ids",
+    "json_pointer_resolution",
+    "inventory_id_set_equality",
+    "inventory_sha256",
+    "coverage_record_ids",
+    "portal_and_shortstay_evidence_refs",
+    "local_markdown_links",
+    "git_diff_cached_check"
+  ],
+  "not_tested": [
+    "runtime_adapters",
+    "actual_listing_fetches",
+    "account_or_licence_admission",
+    "model_quality",
+    "all_borough_terms",
+    "legal_enforceability"
+  ],
+  "file_sha256": {
+    "README.md": "e3737fe3816ff226d52f091bef72d38ed31ff97f5e5e4fb8ce0d995f2949ed18",
+    "agents-operators.json": "da1527510719953d17ea46b80e4391850130bf37c5dd549b0c89210f17cbeb49",
+    "agents-operators.md": "2fe505143c057b6fa240a9ce09240614c63487c26d8a319108110bfe63255dc6",
+    "government-open-data.json": "631f57702fe757df4cd6fcb2f8a1572a5e342070d72d146bd4a9f3c26fbd72d8",
+    "government-open-data.md": "5882b5b77d24785bd8d9fedf9edb5347a4e403596cc9f171306137903ff63bf2",
+    "implementation-plan.md": "00d4cb1c2f93cb607dc6a1b4fd8449fd2f3b8bd1c60b46e8df26578caaad974c",
+    "portals.json": "c5ad87991154e4e92b425acca7d1b5c854602f735ab44e3b1ed26fde47c4d4af",
+    "portals.md": "efd4a66b4ded1b0ccca22f40e7cf9949d3d47b3ece2301d98c33a0da1bc7c1dc",
+    "registry.json": "58d7b6c684d46e9ddec9475685ec0ece48224d029174033651c3be1afa3b35a9",
+    "review.md": "530410ff3f4216f51447224aab7f080e7b5e1dce845f9ebd96be109bfd0cfd2d",
+    "shortstay-reviews.json": "ca3015a05558772d9737b0fb06114486374aa8adbeb3585b929571dac95ab426",
+    "shortstay-reviews.md": "4d2a3d969c7727e5c5ffe5e4bd02ecfbd3704b29542b9130015238d8bfe8e132",
+    "source-coverage.json": "0b87174dc9d533844d25bbff5adb4cccee6b9180e29187887cb1babd8b9c8349",
+    "supplemental-public-data.json": "7099eb4c56f36692fe16c40d0879441bc03c236576139002b9091f3994941227",
+    "supplemental-public-data.md": "20ea5d8b04c20b24492fcb56d8b356f81c341abfef1d9f55b816477adb6cd9c5"
+  }
+}

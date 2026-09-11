@@ -1,0 +1,581 @@
+{
+  "schema_version": 1,
+  "audit_date": "2026-09-11",
+  "project_context_revision": 275,
+  "scope": "Supplemental public-data access evidence for a permanently free local skill using the user's own agent. Documentation only; no runtime allowlist decisions.",
+  "method": {
+    "primary_official_sources_only": true,
+    "contacts_sent": 0,
+    "accounts_created": 0,
+    "purchases": 0,
+    "listing_crawls": 0,
+    "model_experiments": 0,
+    "live_authenticated_api_tests": 0,
+    "state_or_runtime_changes": false,
+    "retention": "Paraphrases and official URLs only; no full-page legal snapshots retained.",
+    "retrieval_note": "Read official pages and official indexed excerpts. Login/JavaScript/error cases are marked. Search results from third parties were not used as evidence."
+  },
+  "status_interpretation": [
+    "Statuses describe evidence, not legal verdicts.",
+    "Unknown or permission_not_established is neither permission nor a finding of illegality.",
+    "A documented API licenses a delivery mechanism only to the extent its terms and underlying content rights permit.",
+    "A public webpage, an OGL footer on a publication, and a dataset-specific reuse licence are distinct.",
+    "Robots is a separate access protocol; no content licence is inferred from allowance or silence.",
+    "No-contact/no-account/no-payment constraints apply to this audit. Future pathways are not actions taken."
+  ],
+  "providers": [
+    {
+      "id": "companies_house",
+      "name": "Companies House — public register/API",
+      "terms_urls": [
+        "https://www.gov.uk/government/publications/companies-house-accreditation-to-information-fair-traders-scheme/public-task-copyright-and-crown-copyright"
+      ],
+      "api_urls": [
+        "https://developer.company-information.service.gov.uk/get-started",
+        "https://developer.company-information.service.gov.uk/developer-guidelines",
+        "https://www.api.gov.uk/ch/companies-house/"
+      ],
+      "evidence": [
+        {
+          "section": "Copyright §§2.1–3",
+          "paraphrase": "Companies House-created material and public-register filings have different legal bases. The register is disclosed under statutory approvals; Companies House places no reuse restrictions of its own, but third-party copyright and other law remain relevant."
+        },
+        {
+          "section": "Developer guidelines",
+          "paraphrase": "Official API allows 600 requests per five minutes; repeated excess or attempts to bypass limits may cause a ban."
+        }
+      ],
+      "operations": {
+        "official_api_read": "documented_conditional",
+        "website_ai_read": "scope_unclear",
+        "bulk_download": "not_audited",
+        "local_cache_report": "conditional_register_reuse",
+        "public_republication": "third_party_and_personal_data_review"
+      },
+      "eligibility": "Developer account/application and API key; only read endpoints are relevant here.",
+      "cost": {
+        "currency": "GBP",
+        "api_read": 0
+      },
+      "no_paste_route": "Use the official company-search/profile API, retaining company number, source and checked date. HTML scraping is unnecessary for supported fields.",
+      "uncertainty": "No live key or API call was tested. Publication rights over each filed document and personal information are not established by the API's availability.",
+      "checked_date": "2026-09-11",
+      "quotes": [],
+      "robots": {
+        "status": "not_rechecked",
+        "licence_inference": "none"
+      }
+    },
+    {
+      "id": "land_registry_price_paid",
+      "name": "HM Land Registry — Price Paid Data",
+      "terms_urls": [
+        "https://www.gov.uk/government/statistical-data-sets/price-paid-data-downloads"
+      ],
+      "api_urls": [
+        "https://www.gov.uk/guidance/about-the-price-paid-data",
+        "https://landregistry.data.gov.uk/landregistry/query"
+      ],
+      "evidence": [
+        {
+          "section": "Using or publishing PPD",
+          "paraphrase": "PPD is OGL v3 with required HMLR attribution. Address fields include OS/Royal Mail rights: the supplied permission covers personal/noncommercial use and residential-price-information display; other address uses require separate permission."
+        },
+        {
+          "section": "Download options",
+          "paraphrase": "Official monthly/yearly/full CSV and linked-data routes are provided. Separate conditions apply to UPRN and INSPIRE lookup tables."
+        }
+      ],
+      "operations": {
+        "official_api_read": "documented_conditional",
+        "website_ai_read": "documented_report_tool",
+        "bulk_download": "documented_conditional",
+        "local_cache_report": "licensed_with_attribution_and_address_conditions",
+        "public_republication": "licensed_with_attribution_and_address_conditions"
+      },
+      "eligibility": "Public download; no account required for linked public files.",
+      "cost": {
+        "currency": "GBP",
+        "data_download": 0
+      },
+      "no_paste_route": "Download an appropriate official CSV once, query locally and apply monthly updates; use the documented report/linked-data route for small searches.",
+      "uncertainty": "Sale-price history is not current rental stock, a current valuation or proof of ownership. Do not extend PPD permission to title registers or unrelated address databases.",
+      "checked_date": "2026-09-11",
+      "quotes": [],
+      "robots": {
+        "status": "not_rechecked",
+        "licence_inference": "none"
+      }
+    },
+    {
+      "id": "land_registry_title",
+      "name": "HM Land Registry — title register/title plan",
+      "terms_urls": [
+        "https://www.gov.uk/get-information-about-property-and-land/search-the-register"
+      ],
+      "api_urls": [],
+      "evidence": [
+        {
+          "section": "Buy copies / Fees",
+          "paraphrase": "Online title-register and title-plan copies cost £7 each; official copies cost £11 each. Ordinary downloaded copies are not official proof of ownership."
+        }
+      ],
+      "operations": {
+        "official_api_read": "unknown",
+        "website_ai_read": "scope_unclear",
+        "bulk_download": "permission_not_established",
+        "local_cache_report": "purchased_document_scope_unconfirmed",
+        "public_republication": "permission_not_established"
+      },
+      "eligibility": "Use the official purchasing flow if independently authorised; account/payment conditions were not exercised.",
+      "cost": {
+        "currency": "GBP",
+        "online_title_register": 7,
+        "online_title_plan": 7,
+        "official_copy_each": 11
+      },
+      "no_paste_route": "A user who already lawfully has a title PDF can select the local file for limited analysis; do not initiate a purchase in the free/no-payment workflow.",
+      "uncertainty": "Price Paid's OGL does not license title PDFs. Local PDF processing and onward disclosure still depend on document rights and personal-data context.",
+      "checked_date": "2026-09-11",
+      "quotes": [],
+      "robots": {
+        "status": "not_rechecked",
+        "licence_inference": "none"
+      }
+    },
+    {
+      "id": "voa_council_tax",
+      "name": "Valuation Office Agency — Council Tax band lookup",
+      "terms_urls": [
+        "https://www.gov.uk/government/publications/addresses-council-tax-bands-effective-dates/response-to-request-for-access-to-council-tax-database"
+      ],
+      "api_urls": [
+        "https://www.tax.service.gov.uk/check-council-tax-band/search"
+      ],
+      "evidence": [
+        {
+          "section": "Response to bulk disclosure request",
+          "paraphrase": "VOA says its web application supports checking a property and nearby bands. It declined bulk-list disclosure, citing its statutory functions and taxpayer-confidentiality duties."
+        }
+      ],
+      "operations": {
+        "official_api_read": "no_public_api_verified",
+        "website_ai_read": "scope_unclear",
+        "bulk_download": "official_bulk_disclosure_declined",
+        "local_cache_report": "scope_unclear",
+        "public_republication": "permission_not_established"
+      },
+      "eligibility": null,
+      "cost": null,
+      "no_paste_route": "Provide the official band-lookup link; a single user-directed AI interaction needs service-access review. Do not quietly substitute a bulk collector or rateable-value business dataset.",
+      "uncertainty": "The disclosure decision concerns VOA's release of bulk data; it is not a ruling that every individual automated lookup is unlawful. Live service was not readable in this audit. GOV.UK publication OGL is not a bulk licence for the underlying list.",
+      "checked_date": "2026-09-11",
+      "quotes": [],
+      "robots": {
+        "status": "not_rechecked",
+        "licence_inference": "none"
+      }
+    },
+    {
+      "id": "find_case_law",
+      "name": "The National Archives — Find Case Law",
+      "terms_urls": [
+        "https://caselaw.nationalarchives.gov.uk/open-justice-licence/version/2",
+        "https://caselaw.nationalarchives.gov.uk/when-you-need-permission"
+      ],
+      "api_urls": [
+        "https://nationalarchives.github.io/ds-find-caselaw-docs/public",
+        "https://caselaw.nationalarchives.gov.uk/licence-application-process"
+      ],
+      "evidence": [
+        {
+          "section": "Open Justice Licence v2",
+          "paraphrase": "Ordinary reading/copying/citation is licensed subject to attribution, currency, court restrictions and third-party exclusions. Computational analysis and search-engine indexing are excluded."
+        },
+        {
+          "section": "When permission is needed",
+          "paraphrase": "Guidance distinguishes individual reading/downloads from systematic automated processing across many judgments. It lists AI products, NLP and vector databases among analysis examples; licence application is free."
+        }
+      ],
+      "operations": {
+        "official_api_read": "conditional_on_purpose_licence",
+        "website_ai_read": "single_case_ai_scope_unclear",
+        "bulk_download": "separate_computational_licence_required_for_analysis",
+        "local_cache_report": "OJL_conditions_and_analysis_scope",
+        "public_republication": "OJL_conditions_and_analysis_scope"
+      },
+      "eligibility": "Ordinary OJL use needs no application; computational use needs an approved separate licence.",
+      "cost": {
+        "currency": "GBP",
+        "licence_application": 0,
+        "licence_charge": null
+      },
+      "no_paste_route": "For ordinary use, link to or download the specific needed judgment under OJL conditions. Before automated judgment analysis/RAG, resolve licence scope; no application sent.",
+      "uncertainty": "Do not equate public API with unrestricted AI reuse or equate every single-case AI reading with bulk analysis. Exact local-agent use needs clarification where guidance examples overlap.",
+      "checked_date": "2026-09-11",
+      "quotes": [],
+      "robots": {
+        "status": "not_rechecked",
+        "licence_inference": "none"
+      }
+    },
+    {
+      "id": "google_street_view",
+      "name": "Google Street View",
+      "terms_urls": [
+        "https://cloud.google.com/maps-platform/terms",
+        "https://developers.google.com/maps/documentation/streetview/policies",
+        "https://www.google.com/intl/en/help/terms_maps/"
+      ],
+      "api_urls": [
+        "https://developers.google.com/maps/documentation/streetview/usage-and-billing"
+      ],
+      "evidence": [
+        {
+          "section": "Platform §3.2.3",
+          "paraphrase": "Platform terms restrict scraping, storage outside the services, derived content and model improvement (including training/testing/validation/fine-tuning). Consumer terms separately restrict copying and mass downloading."
+        },
+        {
+          "section": "Street View policies/billing",
+          "paraphrase": "Static API requires billing and a key/OAuth token; imagery display needs attribution. Panorama IDs have an indefinite-storage exception, which is not an image-cache permission. EEA billing addresses have separate terms."
+        }
+      ],
+      "operations": {
+        "official_api_read": "documented_billed_restricted",
+        "website_ai_read": "consumer_terms_scope_unclear",
+        "bulk_download": "express_terms_restriction",
+        "local_cache_report": "image_cache_and_derived_content_restricted",
+        "public_republication": "only_permitted_display_paths"
+      },
+      "eligibility": "Google project, enabled billing and authentication for Static API.",
+      "cost": {
+        "currency": null,
+        "amount": null,
+        "model": "pay_as_you_go_billing_required"
+      },
+      "no_paste_route": "Link to the official Street View viewer for user inspection. A permitted API display integration is a separate review, not a free offline-image source.",
+      "uncertainty": "One-off AI inference is not synonymous with model training, but derived-content and extraction terms still need assessment. UK/non-EEA Platform terms were read; do not apply them unchanged to EEA customers.",
+      "checked_date": "2026-09-11",
+      "quotes": [],
+      "robots": {
+        "status": "not_rechecked",
+        "licence_inference": "none"
+      }
+    },
+    {
+      "id": "mapillary",
+      "name": "Mapillary",
+      "terms_urls": [
+        "https://www.mapillary.com/terms",
+        "https://help.mapillary.com/hc/en-us/articles/115001770409-CC-BY-SA-license-for-open-data",
+        "https://help.mapillary.com/hc/en-us/articles/8348198426396-Mapillary-FAQ"
+      ],
+      "api_urls": [
+        "https://help.mapillary.com/hc/en-us/articles/360010234680-Accessing-imagery-and-data-through-the-Mapillary-API",
+        "https://github.com/mapillary/api-demo",
+        "https://www.mapillary.com/developer/api-documentation/"
+      ],
+      "evidence": [
+        {
+          "section": "Official help: imagery licence / pricing",
+          "paraphrase": "Official help says imagery is CC-BY-SA and the service is free. Credit the creator and image/source link and satisfy share-alike when applicable."
+        },
+        {
+          "section": "Official API demo",
+          "paraphrase": "The provider documents API integration, obtaining a token and attribution for downloaded imagery/data. The demo token is not treated here as a grant to embed that credential in our product."
+        }
+      ],
+      "operations": {
+        "official_api_read": "documented_full_terms_review_pending",
+        "website_ai_read": "scope_unclear",
+        "bulk_download": "service_limits_and_terms_unverified",
+        "local_cache_report": "imagery_licence_conditional",
+        "public_republication": "imagery_attribution_sharealike_conditional"
+      },
+      "eligibility": "Own developer token for intended integration; no account was created.",
+      "cost": {
+        "currency": "GBP",
+        "platform_use": 0
+      },
+      "no_paste_route": "Strong candidate for official API retrieval and attributed local imagery, after checking full developer/service terms and actual coverage; use user-owned credentials.",
+      "uncertainty": "Full terms returned a login page. Image licence does not automatically cover all derived map-data datasets, API access limits or model-provider retention/training. Specific CC version was not established from the accessible help text.",
+      "checked_date": "2026-09-11",
+      "quotes": [],
+      "robots": {
+        "status": "not_rechecked",
+        "licence_inference": "none"
+      }
+    },
+    {
+      "id": "kartaview",
+      "name": "KartaView",
+      "terms_urls": [
+        "https://kartaview.org/terms"
+      ],
+      "api_urls": [
+        "https://kartaview.org/doc/photos",
+        "https://kartaview.org/doc/authentication",
+        "https://kartaview.org/doc/api-response"
+      ],
+      "evidence": [
+        {
+          "section": "Terms §4, modified 17 June 2025",
+          "paraphrase": "Street imagery and 3D spatial data use CC-BY-SA 4.0; code uses MIT. Data may be copied/distributed/adapted with applicable licence compliance and Grab/KartaView contributor credit."
+        },
+        {
+          "section": "Official photo API documentation",
+          "paraphrase": "Provider documents photo GET endpoints at api.openstreetcam.org/2.0/photo/. Current authentication and operational quotas were not resolved."
+        }
+      ],
+      "operations": {
+        "official_api_read": "documented_auth_limits_unverified",
+        "website_ai_read": "licence_conditional_service_scope_unclear",
+        "bulk_download": "content_licence_does_not_set_service_quota",
+        "local_cache_report": "CC_BY_SA_4_0_conditional",
+        "public_republication": "CC_BY_SA_4_0_conditional"
+      },
+      "eligibility": null,
+      "cost": {
+        "currency": null,
+        "amount": 0,
+        "scope": "platform described as free; API commercial service commitments not established"
+      },
+      "no_paste_route": "Promising official photo-API/open-imagery route once current read authentication and rate limits are checked; preserve capture date, creator/source and licence.",
+      "uncertainty": "Terms and detailed API content were available through official indexed results; direct pages were JS/error responses. No data call or coverage check. Do not mix MIT code licence with image licence.",
+      "checked_date": "2026-09-11",
+      "quotes": [],
+      "robots": {
+        "status": "not_rechecked",
+        "licence_inference": "none"
+      }
+    },
+    {
+      "id": "wayback",
+      "name": "Internet Archive — Wayback Machine",
+      "terms_urls": [
+        "https://archive.org/about/terms",
+        "https://archivesupport.zendesk.com/hc/en-us/articles/360014759692-Rights"
+      ],
+      "api_urls": [
+        "https://archive.org/help/wayback_api.php"
+      ],
+      "evidence": [
+        {
+          "section": "Wayback APIs",
+          "paraphrase": "Availability API identifies an accessible archived capture and its timestamp; CDX supports capture-metadata queries."
+        },
+        {
+          "section": "Official Rights help",
+          "paraphrase": "Internet Archive does not guarantee the copyright status of hosted material. Presence in an archive is not a reuse licence from the original owner."
+        }
+      ],
+      "operations": {
+        "official_api_read": "documented_capture_metadata",
+        "website_ai_read": "underlying_content_rights_unresolved",
+        "bulk_download": "permission_not_established",
+        "local_cache_report": "underlying_content_rights_unresolved",
+        "public_republication": "underlying_content_rights_unresolved"
+      },
+      "eligibility": "Availability API documentation shows no account/key requirement.",
+      "cost": null,
+      "no_paste_route": "Use capture-metadata lookup to link to a specific dated historical page; analyse or retain page content only when that content's rights/access scope are resolved.",
+      "uncertainty": "Full current Archive terms rendered only a JavaScript notice. Do not use Wayback as automatic permission to retrieve a blocked source or as evidence of current listing availability.",
+      "checked_date": "2026-09-11",
+      "quotes": [],
+      "robots": {
+        "status": "not_rechecked",
+        "licence_inference": "none"
+      }
+    },
+    {
+      "id": "client_money_protect",
+      "name": "Client Money Protect — member lookup",
+      "terms_urls": [
+        "https://www.clientmoneyprotect.co.uk/terms-and-conditions/"
+      ],
+      "api_urls": [],
+      "evidence": [
+        {
+          "section": "Property rights",
+          "paraphrase": "Terms reserve site copyright and other IP to mydeposits; no positive automation/data-reuse grant was found."
+        }
+      ],
+      "operations": {
+        "official_api_read": "no_public_api_verified",
+        "website_ai_read": "scope_unclear",
+        "bulk_download": "permission_not_established",
+        "local_cache_report": "permission_not_established",
+        "public_republication": "permission_not_established"
+      },
+      "eligibility": null,
+      "cost": null,
+      "no_paste_route": "Direct the user to the scheme's official search; automation/feed permission needs confirmation. Public register access does not establish a bulk-data licence.",
+      "uncertainty": "This is one protection provider, not every permitted scheme. No company lookup performed. An absent match is not proof of legal noncompliance.",
+      "checked_date": "2026-09-11",
+      "quotes": [],
+      "robots": {
+        "status": "not_rechecked",
+        "licence_inference": "none"
+      }
+    },
+    {
+      "id": "property_redress",
+      "name": "Property Redress — agent register",
+      "terms_urls": [
+        "https://www.propertyredress.co.uk/"
+      ],
+      "api_urls": [],
+      "evidence": [
+        {
+          "section": "Footer and policies",
+          "paraphrase": "Main site reserves copyright; linked terms of reference concern the scheme, not a verified public API or website-reuse licence."
+        }
+      ],
+      "operations": {
+        "official_api_read": "no_public_api_verified",
+        "website_ai_read": "scope_unclear",
+        "bulk_download": "permission_not_established",
+        "local_cache_report": "permission_not_established",
+        "public_republication": "permission_not_established"
+      },
+      "eligibility": null,
+      "cost": null,
+      "no_paste_route": "Link to the official agent-finder workflow. No licensed feed or automatic no-paste adapter was established in this bounded search.",
+      "uncertainty": "The complaints/member portal and logo-download permissions do not license a public membership dataset. Check business identity/branch and other schemes before interpreting absence.",
+      "checked_date": "2026-09-11",
+      "quotes": [],
+      "robots": {
+        "status": "not_rechecked",
+        "licence_inference": "none"
+      }
+    },
+    {
+      "id": "tpo",
+      "name": "The Property Ombudsman — register",
+      "terms_urls": [
+        "https://www.tpos.co.uk/copyright/"
+      ],
+      "api_urls": [],
+      "evidence": [
+        {
+          "section": "Copyright notice",
+          "paraphrase": "Copying, downloading, storage, adaptation and transmission generally require prior written permission, except statutory exceptions or express permissions."
+        }
+      ],
+      "operations": {
+        "official_api_read": "no_public_api_verified",
+        "website_ai_read": "scope_unclear_copying_restricted",
+        "bulk_download": "express_terms_restriction",
+        "local_cache_report": "permission_or_exception_required",
+        "public_republication": "permission_or_exception_required"
+      },
+      "eligibility": null,
+      "cost": null,
+      "no_paste_route": "Link to official consumer/register search. A reusable local extraction/report adapter needs permission/scope resolution; none obtained.",
+      "uncertainty": "robots.txt retrieval failed in this pass, so earlier protocol observations were not reverified. Copyright notice is a stated position, not a ruling that every factual mention is unlawful.",
+      "checked_date": "2026-09-11",
+      "quotes": [],
+      "robots": {
+        "status": "retrieval_failed",
+        "licence_inference": "none"
+      }
+    },
+    {
+      "id": "propertymark",
+      "name": "Propertymark — Find an expert",
+      "terms_urls": [
+        "https://www.propertymark.co.uk/",
+        "https://www.propertymark.co.uk/privacy-policy.html"
+      ],
+      "api_urls": [],
+      "evidence": [
+        {
+          "section": "Main navigation/footer",
+          "paraphrase": "Public expert-finder is available, but no website/data automation licence was established. Member-only resources and business templates are separate products."
+        }
+      ],
+      "operations": {
+        "official_api_read": "no_public_api_verified",
+        "website_ai_read": "scope_unclear",
+        "bulk_download": "permission_not_established",
+        "local_cache_report": "permission_not_established",
+        "public_republication": "permission_not_established"
+      },
+      "eligibility": null,
+      "cost": null,
+      "no_paste_route": "Open official expert-finder for the user; a feed/automated lookup remains unresolved.",
+      "uncertainty": "A privacy policy is not a data-reuse licence. robots.txt retrieval failed. Voluntary accreditation absence is not proof of unlawful trading.",
+      "checked_date": "2026-09-11",
+      "quotes": [],
+      "robots": {
+        "status": "retrieval_failed",
+        "licence_inference": "none"
+      }
+    },
+    {
+      "id": "heat_trust",
+      "name": "Heat Trust — registered sites",
+      "terms_urls": [
+        "https://heattrust.org/our-members"
+      ],
+      "api_urls": [],
+      "evidence": [
+        {
+          "section": "Registered-site scope and trademark",
+          "paraphrase": "Membership applies to registered networks and relevant contractual supply arrangements, not every site of a listed operator. Heat Trust permits its trademark only for registered participants/sites."
+        }
+      ],
+      "operations": {
+        "official_api_read": "no_public_api_verified",
+        "website_ai_read": "scope_unclear",
+        "bulk_download": "permission_not_established",
+        "local_cache_report": "permission_not_established",
+        "public_republication": "permission_not_established"
+      },
+      "eligibility": null,
+      "cost": null,
+      "no_paste_route": "Link to the specific official registered-sites page/map; confirm the exact network rather than an operator logo. No published licensed feed was established.",
+      "uncertainty": "No positive automation/reuse terms located in this bounded pass. Government-regulation status does not turn this private scheme register into OGL data.",
+      "checked_date": "2026-09-11",
+      "quotes": [],
+      "robots": {
+        "status": "not_rechecked",
+        "licence_inference": "none"
+      }
+    },
+    {
+      "id": "ofgem",
+      "name": "Ofgem — published guidance/data",
+      "terms_urls": [
+        "https://www.ofgem.gov.uk/c-ofgem-2026"
+      ],
+      "api_urls": [],
+      "evidence": [
+        {
+          "section": "Copyright and disclaimer",
+          "paraphrase": "Ofgem Crown content is reusable free under OGL, excluding logos and identified third-party content; hyperlinks and video embeds are allowed."
+        }
+      ],
+      "operations": {
+        "official_api_read": "specific_api_not_audited",
+        "website_ai_read": "Crown_content_OGL_conditional",
+        "bulk_download": "dataset_and_service_specific_review",
+        "local_cache_report": "Crown_content_OGL_conditional",
+        "public_republication": "Crown_content_OGL_conditional"
+      },
+      "eligibility": "Public Crown content; specific registers/datasets may have separate conditions.",
+      "cost": {
+        "currency": "GBP",
+        "Crown_content_reuse": 0
+      },
+      "no_paste_route": "Read/download relevant official guidance and published datasets with attribution. Review separate register endpoints before automating them.",
+      "uncertainty": "General website copyright permission does not verify every external or signed-in register, API, third-party dataset or service rate limit.",
+      "checked_date": "2026-09-11",
+      "quotes": [],
+      "robots": {
+        "status": "not_rechecked",
+        "licence_inference": "none"
+      }
+    }
+  ]
+}

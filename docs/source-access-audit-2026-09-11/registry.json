@@ -1,0 +1,386 @@
+{
+  "schema_version": 1,
+  "checked_date": "2026-09-11",
+  "is_enforcement_allowlist": false,
+  "meaning": "Index into evidence records. A record is coverage, not permission. Provider operations have separate assessments; unknown stays unknown.",
+  "records": [
+    {
+      "id": "rightmove",
+      "name": "Rightmove",
+      "file": "portals.json",
+      "json_pointer": "/providers/0",
+      "report": "portals.md"
+    },
+    {
+      "id": "zoopla",
+      "name": "Zoopla",
+      "file": "portals.json",
+      "json_pointer": "/providers/1",
+      "report": "portals.md"
+    },
+    {
+      "id": "onthemarket",
+      "name": "OnTheMarket",
+      "file": "portals.json",
+      "json_pointer": "/providers/2",
+      "report": "portals.md"
+    },
+    {
+      "id": "openrent",
+      "name": "OpenRent",
+      "file": "portals.json",
+      "json_pointer": "/providers/3",
+      "report": "portals.md"
+    },
+    {
+      "id": "spareroom",
+      "name": "SpareRoom",
+      "file": "portals.json",
+      "json_pointer": "/providers/4",
+      "report": "portals.md"
+    },
+    {
+      "id": "foxtons",
+      "name": "Foxtons",
+      "file": "agents-operators.json",
+      "json_pointer": "/providers/0",
+      "report": "agents-operators.md"
+    },
+    {
+      "id": "savills",
+      "name": "Savills",
+      "file": "agents-operators.json",
+      "json_pointer": "/providers/1",
+      "report": "agents-operators.md"
+    },
+    {
+      "id": "knight_frank",
+      "name": "Knight Frank UK",
+      "file": "agents-operators.json",
+      "json_pointer": "/providers/2",
+      "report": "agents-operators.md"
+    },
+    {
+      "id": "dexters",
+      "name": "Dexters",
+      "file": "agents-operators.json",
+      "json_pointer": "/providers/3",
+      "report": "agents-operators.md"
+    },
+    {
+      "id": "chestertons",
+      "name": "Chestertons",
+      "file": "agents-operators.json",
+      "json_pointer": "/providers/4",
+      "report": "agents-operators.md"
+    },
+    {
+      "id": "jll_residential",
+      "name": "JLL residential UK",
+      "file": "agents-operators.json",
+      "json_pointer": "/providers/5",
+      "report": "agents-operators.md"
+    },
+    {
+      "id": "grainger",
+      "name": "Grainger",
+      "file": "agents-operators.json",
+      "json_pointer": "/providers/6",
+      "report": "agents-operators.md"
+    },
+    {
+      "id": "get_living",
+      "name": "Get Living",
+      "file": "agents-operators.json",
+      "json_pointer": "/providers/7",
+      "report": "agents-operators.md"
+    },
+    {
+      "id": "fizzy_living",
+      "name": "Fizzy Living",
+      "file": "agents-operators.json",
+      "json_pointer": "/providers/8",
+      "report": "agents-operators.md"
+    },
+    {
+      "id": "airbnb",
+      "name": "Airbnb",
+      "file": "shortstay-reviews.json",
+      "json_pointer": "/providers/0",
+      "report": "shortstay-reviews.md"
+    },
+    {
+      "id": "booking_com",
+      "name": "Booking.com",
+      "file": "shortstay-reviews.json",
+      "json_pointer": "/providers/1",
+      "report": "shortstay-reviews.md"
+    },
+    {
+      "id": "expedia",
+      "name": "Expedia UK / Expedia Group APIs",
+      "file": "shortstay-reviews.json",
+      "json_pointer": "/providers/2",
+      "report": "shortstay-reviews.md"
+    },
+    {
+      "id": "premier_inn",
+      "name": "Premier Inn UK",
+      "file": "shortstay-reviews.json",
+      "json_pointer": "/providers/3",
+      "report": "shortstay-reviews.md"
+    },
+    {
+      "id": "travelodge",
+      "name": "Travelodge UK",
+      "file": "shortstay-reviews.json",
+      "json_pointer": "/providers/4",
+      "report": "shortstay-reviews.md"
+    },
+    {
+      "id": "homeviews",
+      "name": "HomeViews",
+      "file": "shortstay-reviews.json",
+      "json_pointer": "/providers/5",
+      "report": "shortstay-reviews.md"
+    },
+    {
+      "id": "trustpilot",
+      "name": "Trustpilot",
+      "file": "shortstay-reviews.json",
+      "json_pointer": "/providers/6",
+      "report": "shortstay-reviews.md"
+    },
+    {
+      "id": "google_maps_places",
+      "name": "Google Maps / Places reviews",
+      "file": "shortstay-reviews.json",
+      "json_pointer": "/providers/7",
+      "report": "shortstay-reviews.md"
+    },
+    {
+      "id": "epc",
+      "name": "MHCLG EPC / Get energy performance data",
+      "file": "government-open-data.json",
+      "json_pointer": "/providers/0",
+      "report": "government-open-data.md"
+    },
+    {
+      "id": "postcodes_io",
+      "name": "Postcodes.io",
+      "file": "government-open-data.json",
+      "json_pointer": "/providers/1",
+      "report": "government-open-data.md"
+    },
+    {
+      "id": "police_uk",
+      "name": "data.police.uk",
+      "file": "government-open-data.json",
+      "json_pointer": "/providers/2",
+      "report": "government-open-data.md"
+    },
+    {
+      "id": "tfl",
+      "name": "TfL Unified API / Transport Data Service",
+      "file": "government-open-data.json",
+      "json_pointer": "/providers/3",
+      "report": "government-open-data.md"
+    },
+    {
+      "id": "planning_data_england",
+      "name": "MHCLG Planning Data（新增候選）",
+      "file": "government-open-data.json",
+      "json_pointer": "/providers/4",
+      "report": "government-open-data.md"
+    },
+    {
+      "id": "gla_planning",
+      "name": "Planning London Datahub / London Datastore",
+      "file": "government-open-data.json",
+      "json_pointer": "/providers/5",
+      "report": "government-open-data.md"
+    },
+    {
+      "id": "planit",
+      "name": "PlanIt UK",
+      "file": "government-open-data.json",
+      "json_pointer": "/providers/6",
+      "report": "government-open-data.md"
+    },
+    {
+      "id": "borough_portals",
+      "name": "各 borough planning / committee portals",
+      "file": "government-open-data.json",
+      "json_pointer": "/providers/7",
+      "report": "government-open-data.md"
+    },
+    {
+      "id": "street_manager",
+      "name": "DfT Street Manager roadworks（新增候選）",
+      "file": "government-open-data.json",
+      "json_pointer": "/providers/8",
+      "report": "government-open-data.md"
+    },
+    {
+      "id": "osm",
+      "name": "OpenStreetMap / Overpass",
+      "file": "government-open-data.json",
+      "json_pointer": "/providers/9",
+      "report": "government-open-data.md"
+    },
+    {
+      "id": "defra_noise",
+      "name": "Defra strategic noise datasets",
+      "file": "government-open-data.json",
+      "json_pointer": "/providers/10",
+      "report": "government-open-data.md"
+    },
+    {
+      "id": "laq_n",
+      "name": "London Air / Imperial ERG API",
+      "file": "government-open-data.json",
+      "json_pointer": "/providers/11",
+      "report": "government-open-data.md"
+    },
+    {
+      "id": "ea_flood",
+      "name": "Environment Agency long-term flood risk",
+      "file": "government-open-data.json",
+      "json_pointer": "/providers/12",
+      "report": "government-open-data.md"
+    },
+    {
+      "id": "ons_nomis",
+      "name": "ONS / Nomis aggregate income and labour statistics（新增候選）",
+      "file": "government-open-data.json",
+      "json_pointer": "/providers/13",
+      "report": "government-open-data.md"
+    },
+    {
+      "id": "govuk_content",
+      "name": "GOV.UK guidance / bank holidays / tribunal publication pages",
+      "file": "government-open-data.json",
+      "json_pointer": "/providers/14",
+      "report": "government-open-data.md"
+    },
+    {
+      "id": "legislation",
+      "name": "The National Archives legislation.gov.uk",
+      "file": "government-open-data.json",
+      "json_pointer": "/providers/15",
+      "report": "government-open-data.md"
+    },
+    {
+      "id": "gla_rogue_checker",
+      "name": "GLA Rogue Landlord and Agent Checker",
+      "file": "government-open-data.json",
+      "json_pointer": "/providers/16",
+      "report": "government-open-data.md"
+    },
+    {
+      "id": "companies_house",
+      "name": "Companies House — public register/API",
+      "file": "supplemental-public-data.json",
+      "json_pointer": "/providers/0",
+      "report": "supplemental-public-data.md"
+    },
+    {
+      "id": "land_registry_price_paid",
+      "name": "HM Land Registry — Price Paid Data",
+      "file": "supplemental-public-data.json",
+      "json_pointer": "/providers/1",
+      "report": "supplemental-public-data.md"
+    },
+    {
+      "id": "land_registry_title",
+      "name": "HM Land Registry — title register/title plan",
+      "file": "supplemental-public-data.json",
+      "json_pointer": "/providers/2",
+      "report": "supplemental-public-data.md"
+    },
+    {
+      "id": "voa_council_tax",
+      "name": "Valuation Office Agency — Council Tax band lookup",
+      "file": "supplemental-public-data.json",
+      "json_pointer": "/providers/3",
+      "report": "supplemental-public-data.md"
+    },
+    {
+      "id": "find_case_law",
+      "name": "The National Archives — Find Case Law",
+      "file": "supplemental-public-data.json",
+      "json_pointer": "/providers/4",
+      "report": "supplemental-public-data.md"
+    },
+    {
+      "id": "google_street_view",
+      "name": "Google Street View",
+      "file": "supplemental-public-data.json",
+      "json_pointer": "/providers/5",
+      "report": "supplemental-public-data.md"
+    },
+    {
+      "id": "mapillary",
+      "name": "Mapillary",
+      "file": "supplemental-public-data.json",
+      "json_pointer": "/providers/6",
+      "report": "supplemental-public-data.md"
+    },
+    {
+      "id": "kartaview",
+      "name": "KartaView",
+      "file": "supplemental-public-data.json",
+      "json_pointer": "/providers/7",
+      "report": "supplemental-public-data.md"
+    },
+    {
+      "id": "wayback",
+      "name": "Internet Archive — Wayback Machine",
+      "file": "supplemental-public-data.json",
+      "json_pointer": "/providers/8",
+      "report": "supplemental-public-data.md"
+    },
+    {
+      "id": "client_money_protect",
+      "name": "Client Money Protect — member lookup",
+      "file": "supplemental-public-data.json",
+      "json_pointer": "/providers/9",
+      "report": "supplemental-public-data.md"
+    },
+    {
+      "id": "property_redress",
+      "name": "Property Redress — agent register",
+      "file": "supplemental-public-data.json",
+      "json_pointer": "/providers/10",
+      "report": "supplemental-public-data.md"
+    },
+    {
+      "id": "tpo",
+      "name": "The Property Ombudsman — register",
+      "file": "supplemental-public-data.json",
+      "json_pointer": "/providers/11",
+      "report": "supplemental-public-data.md"
+    },
+    {
+      "id": "propertymark",
+      "name": "Propertymark — Find an expert",
+      "file": "supplemental-public-data.json",
+      "json_pointer": "/providers/12",
+      "report": "supplemental-public-data.md"
+    },
+    {
+      "id": "heat_trust",
+      "name": "Heat Trust — registered sites",
+      "file": "supplemental-public-data.json",
+      "json_pointer": "/providers/13",
+      "report": "supplemental-public-data.md"
+    },
+    {
+      "id": "ofgem",
+      "name": "Ofgem — published guidance/data",
+      "file": "supplemental-public-data.json",
+      "json_pointer": "/providers/14",
+      "report": "supplemental-public-data.md"
+    }
+  ]
+}

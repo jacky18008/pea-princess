@@ -1,0 +1,345 @@
+{
+  "schema_version": 1,
+  "checked_date": "2026-09-11",
+  "inventory_path": "skills/vet-flat/references/sources.yaml",
+  "inventory_sha256": "ccc08458d8a20910bfbb344a38c3d813ec144b3e96dda76c2fca6f711b8b310f",
+  "inventory_ids": 53,
+  "mapped_ids": 53,
+  "unmapped_ids": [],
+  "coverage_is_permission": false,
+  "scope_limit": "Provider and product records, not every UK website or each borough; partial and inaccessible evidence retained. New providers may not yet be runtime sources.",
+  "coverage": [
+    {
+      "source_id": "postcodes_io_lookup",
+      "record_ids": [
+        "postcodes_io"
+      ]
+    },
+    {
+      "source_id": "postcodes_io_nearest",
+      "record_ids": [
+        "postcodes_io"
+      ]
+    },
+    {
+      "source_id": "epc_find_by_postcode",
+      "record_ids": [
+        "epc"
+      ]
+    },
+    {
+      "source_id": "epc_find_by_street",
+      "record_ids": [
+        "epc"
+      ]
+    },
+    {
+      "source_id": "epc_certificate_page",
+      "record_ids": [
+        "epc"
+      ]
+    },
+    {
+      "source_id": "epc_json_api_absent",
+      "record_ids": [
+        "epc"
+      ],
+      "correction": "Negative test is for one old host/path only; a current official EPC data API exists."
+    },
+    {
+      "source_id": "epc_open_data_bulk",
+      "record_ids": [
+        "epc"
+      ]
+    },
+    {
+      "source_id": "police_uk_crimes_street",
+      "record_ids": [
+        "police_uk"
+      ]
+    },
+    {
+      "source_id": "police_uk_crime_last_updated",
+      "record_ids": [
+        "police_uk"
+      ]
+    },
+    {
+      "source_id": "police_uk_crimes_street_dates",
+      "record_ids": [
+        "police_uk"
+      ]
+    },
+    {
+      "source_id": "police_uk_neighbourhoods",
+      "record_ids": [
+        "police_uk"
+      ]
+    },
+    {
+      "source_id": "tfl_journey_planner",
+      "record_ids": [
+        "tfl"
+      ]
+    },
+    {
+      "source_id": "tfl_stoppoint_search",
+      "record_ids": [
+        "tfl"
+      ]
+    },
+    {
+      "source_id": "tfl_line_status_range",
+      "record_ids": [
+        "tfl"
+      ]
+    },
+    {
+      "source_id": "govuk_bank_holidays",
+      "record_ids": [
+        "govuk_content"
+      ]
+    },
+    {
+      "source_id": "gla_planning_datahub_post",
+      "record_ids": [
+        "gla_planning"
+      ]
+    },
+    {
+      "source_id": "gla_planning_datahub_get",
+      "record_ids": [
+        "gla_planning"
+      ]
+    },
+    {
+      "source_id": "planit_applications_api",
+      "record_ids": [
+        "planit"
+      ]
+    },
+    {
+      "source_id": "borough_planning_portals",
+      "record_ids": [
+        "borough_portals"
+      ],
+      "coverage_limit": "Placeholder mapped; individual borough terms not fully audited."
+    },
+    {
+      "source_id": "council_committee_reports",
+      "record_ids": [
+        "borough_portals"
+      ],
+      "coverage_limit": "Placeholder mapped; individual borough terms not fully audited."
+    },
+    {
+      "source_id": "osm_overpass",
+      "record_ids": [
+        "osm"
+      ]
+    },
+    {
+      "source_id": "defra_noise_road_mapping",
+      "record_ids": [
+        "defra_noise"
+      ]
+    },
+    {
+      "source_id": "defra_noise_agglomerations",
+      "record_ids": [
+        "defra_noise"
+      ],
+      "correction": "Mapped dataset is Round2 urban boundary polygons, not noise measurements."
+    },
+    {
+      "source_id": "laqn_monitoring_sites",
+      "record_ids": [
+        "laq_n"
+      ]
+    },
+    {
+      "source_id": "laqn_hourly_index",
+      "record_ids": [
+        "laq_n"
+      ]
+    },
+    {
+      "source_id": "ea_long_term_flood_risk",
+      "record_ids": [
+        "ea_flood"
+      ]
+    },
+    {
+      "source_id": "companies_house_html",
+      "record_ids": [
+        "companies_house"
+      ]
+    },
+    {
+      "source_id": "companies_house_api",
+      "record_ids": [
+        "companies_house"
+      ]
+    },
+    {
+      "source_id": "land_registry_price_paid_sparql",
+      "record_ids": [
+        "land_registry_price_paid"
+      ]
+    },
+    {
+      "source_id": "land_registry_title_register",
+      "record_ids": [
+        "land_registry_title"
+      ]
+    },
+    {
+      "source_id": "client_money_protect",
+      "record_ids": [
+        "client_money_protect"
+      ]
+    },
+    {
+      "source_id": "property_redress_agent_finder",
+      "record_ids": [
+        "property_redress"
+      ]
+    },
+    {
+      "source_id": "property_ombudsman_find_a_member",
+      "record_ids": [
+        "tpo"
+      ]
+    },
+    {
+      "source_id": "propertymark_find_an_expert",
+      "record_ids": [
+        "propertymark"
+      ]
+    },
+    {
+      "source_id": "gla_rogue_landlord_checker",
+      "record_ids": [
+        "gla_rogue_checker"
+      ]
+    },
+    {
+      "source_id": "ftt_property_chamber_decisions",
+      "record_ids": [
+        "govuk_content",
+        "find_case_law"
+      ],
+      "coverage_limit": "GOV.UK content terms and separate Case Law analysis licence do not automatically cover every attached judgment."
+    },
+    {
+      "source_id": "find_case_law",
+      "record_ids": [
+        "find_case_law"
+      ]
+    },
+    {
+      "source_id": "heat_trust_members",
+      "record_ids": [
+        "heat_trust"
+      ]
+    },
+    {
+      "source_id": "ofgem_heat_networks",
+      "record_ids": [
+        "ofgem"
+      ]
+    },
+    {
+      "source_id": "voa_council_tax_band",
+      "record_ids": [
+        "voa_council_tax"
+      ]
+    },
+    {
+      "source_id": "legislation_renters_rights_act_2025",
+      "record_ids": [
+        "legislation"
+      ]
+    },
+    {
+      "source_id": "govuk_rent_in_advance_guidance",
+      "record_ids": [
+        "govuk_content"
+      ]
+    },
+    {
+      "source_id": "govuk_student_tenancies",
+      "record_ids": [
+        "govuk_content"
+      ]
+    },
+    {
+      "source_id": "legislation_rra_commencement_no2",
+      "record_ids": [
+        "legislation"
+      ]
+    },
+    {
+      "source_id": "legislation_deregulation_2015_s44",
+      "record_ids": [
+        "legislation"
+      ]
+    },
+    {
+      "source_id": "legislation_tenant_fees_act_2019",
+      "record_ids": [
+        "legislation"
+      ]
+    },
+    {
+      "source_id": "legislation_housing_act_2004_s213",
+      "record_ids": [
+        "legislation"
+      ]
+    },
+    {
+      "source_id": "google_streetview_metadata",
+      "record_ids": [
+        "google_street_view"
+      ]
+    },
+    {
+      "source_id": "google_streetview_static_image",
+      "record_ids": [
+        "google_street_view"
+      ]
+    },
+    {
+      "source_id": "mapillary_images",
+      "record_ids": [
+        "mapillary"
+      ]
+    },
+    {
+      "source_id": "kartaview_openstreetcam",
+      "record_ids": [
+        "kartaview"
+      ]
+    },
+    {
+      "source_id": "wayback_availability",
+      "record_ids": [
+        "wayback"
+      ]
+    },
+    {
+      "source_id": "commercial_portals_and_review_sites",
+      "record_ids": [
+        "rightmove",
+        "zoopla",
+        "onthemarket",
+        "openrent",
+        "homeviews",
+        "trustpilot",
+        "google_maps_places",
+        "airbnb",
+        "booking_com"
+      ]
+    }
+  ]
+}

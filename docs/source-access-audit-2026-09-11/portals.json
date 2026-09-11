@@ -1,0 +1,551 @@
+{
+  "schema_version": 1,
+  "checked_date": "2026-09-11",
+  "scope": "Five UK rental portals; permanently free local installable skill run by the user’s own agent; no hosted worker, shared scraped database or payments.",
+  "method": "Official terms, help and API/partner documentation read through web research. No accounts, provider contacts, paid access, listing API requests, crawler execution, model experiments or runtime policy changes.",
+  "interpretation": [
+    "Provider terms, statutory rights and technical accessibility are separate. Restricted_by_published_terms is not a court judgment; not_established is neither permission nor a declaration of illegality.",
+    "Public visibility, search-engine indexing, robots absence and third-party scraper availability do not establish a licence. OnTheMarket robots is considered because its terms explicitly incorporate it.",
+    "An alert subscription authorises delivery; a mailbox connector’s user permission only addresses mailbox access. It does not independently grant portal content extraction/reuse rights.",
+    "No fully verified end-to-end automatic discovery, reading and private-report licence was established across all five sites.",
+    "Original advertiser pages must be independently assessed; finding the same property elsewhere does not license a copy taken from a portal.",
+    "No source documents establish that removing fees changes the automation permissions. API eligibility or price is unknown unless stated.",
+    "Clause numbers for OpenRent and SpareRoom follow their nested numbered lists; named headings and paraphrases identify the precise provision."
+  ],
+  "providers": [
+    {
+      "id": "rightmove",
+      "name": "Rightmove",
+      "checked_date": "2026-09-11",
+      "sources": [
+        {
+          "id": "rm-terms",
+          "url": "https://www.rightmove.co.uk/c/terms-of-use/",
+          "title": "Terms of use; page states updated February 2026",
+          "checked_date": "2026-09-11",
+          "clause": "5.2; 5.5.1–5.5.2; 7.1; 8.3; 13.1–13.5",
+          "evidence": "Automated access, collection and interaction are restricted. Without Legal-team written consent, information access requires direct human interaction. Offered downloads are limited to service use; broader copying/storage needs consent. Software links and embedded assets also require consent; homepage linking has conditions. Personal registration is free for adults."
+        },
+        {
+          "id": "rm-alerts",
+          "url": "https://faq.rightmove.co.uk/support/solutions/articles/7000048758-how-to-register-for-property-alerts",
+          "title": "How to register for property alerts",
+          "checked_date": "2026-09-11",
+          "clause": "Creating alerts; delivery frequency",
+          "evidence": "A free account can save a search and receive email alerts instantly, daily, every three days or weekly."
+        },
+        {
+          "id": "rm-alert-limits",
+          "url": "https://customerfaq.rightmove.co.uk/support/solutions/articles/7000098933-how-the-property-alerts-work",
+          "title": "How the Property Alerts work",
+          "checked_date": "2026-09-11",
+          "clause": "Email content",
+          "evidence": "An email body contains at most 14 matching new/reduced listings. Additional matches are represented by a count and a link back to search, so the email body is not a complete feed."
+        },
+        {
+          "id": "rm-adf",
+          "url": "https://www.rightmove.co.uk/adf.html",
+          "title": "Automated Datafeed specifications",
+          "checked_date": "2026-09-11",
+          "clause": "Realtime Datafeed; ADF Guide; testing/go-live process",
+          "evidence": "Documented interfaces send and remove the participating advertiser’s properties and retrieve its branch property list. Integration/testing and member-branch go-live steps are described. This is an upload/member interface, not permission to search the full rental catalogue."
+        },
+        {
+          "id": "rm-api-home",
+          "url": "https://api-docs.rightmove.co.uk/get-started",
+          "title": "API documentation: get started",
+          "checked_date": "2026-09-11",
+          "clause": "App registration and API keys",
+          "evidence": "Documentation describes account/app registration and API credentials; this does not establish consumer rental-search eligibility."
+        },
+        {
+          "id": "rm-risk",
+          "url": "https://www.rightmove.co.uk/property-data/property-risk-alerts/",
+          "title": "Property Risk Alerts",
+          "checked_date": "2026-09-11",
+          "clause": "Delivery via online platform or API",
+          "evidence": "A professional property-risk product offers platform/API delivery. The page does not establish a free, general rental-discovery feed or this skill’s eligibility."
+        }
+      ],
+      "automation": {
+        "status": "restricted_by_published_terms",
+        "evidence_ids": [
+          "rm-terms"
+        ],
+        "note": "No free/local exception found."
+      },
+      "user_directed_agent_browser": {
+        "status": "permission_not_established",
+        "evidence_ids": [
+          "rm-terms"
+        ],
+        "note": "An AI operating a browser is not expressly exempted from the direct-human requirement."
+      },
+      "reuse": {
+        "status": "limited_downloads_broader_reuse_requires_consent",
+        "evidence_ids": [
+          "rm-terms"
+        ],
+        "note": "Do not equate private caching, report reproduction or software deeplinks with the offered-download allowance."
+      },
+      "api": {
+        "status": "member_upload_api_verified_consumer_search_not_established",
+        "evidence_ids": [
+          "rm-adf",
+          "rm-api-home",
+          "rm-risk"
+        ],
+        "note": "A third-party scraper subscription would not itself prove Rightmove authorisation."
+      },
+      "alerts": {
+        "status": "official_email_alerts_available",
+        "evidence_ids": [
+          "rm-alerts",
+          "rm-alert-limits"
+        ],
+        "note": "Subscription is verified; permission for an agent to extract/reuse the delivered content is not established."
+      },
+      "export_feed": {
+        "status": "consumer_search_export_not_established",
+        "evidence_ids": [
+          "rm-adf",
+          "rm-alert-limits"
+        ],
+        "note": "No official consumer rental CSV/RSS/feed licence verified in this bounded review."
+      },
+      "access_eligibility_and_fees": {
+        "human_account": "Free; natural person aged 18+ (rm-terms).",
+        "alerts": "Free-account route (rm-alerts).",
+        "adf": "Advertiser/member branch and integration process; fees unknown.",
+        "consumer_search_api": "Eligibility and fees unknown.",
+        "property_risk_api": "Professional product; this use case’s eligibility and price unknown."
+      },
+      "recommended_access": {
+        "now": "Use the provider’s own subscribed alert service for discovery. For an agent-produced report, prefer the same property’s original advertiser source if that source separately permits the intended access and reuse.",
+        "no_paste_candidate": "The user can authorise their own mail connector to access received alerts; treat content extraction/reuse as unresolved, and do not automatically follow portal links.",
+        "licensed_route": "A specific written licence covering local agents, discovery/read, temporary copies, private reports and links would resolve the missing portal permissions; no request was sent."
+      },
+      "uncertainty": [
+        "No end-to-end licensed local-agent route established.",
+        "API terms page returned no extractable body in this research tool; no licence conclusion relies on its unseen content.",
+        "Original advertiser access is an independent source audit, not an exception to portal terms."
+      ],
+      "official_urls": [
+        "https://www.rightmove.co.uk/c/terms-of-use/",
+        "https://faq.rightmove.co.uk/support/solutions/articles/7000048758-how-to-register-for-property-alerts",
+        "https://customerfaq.rightmove.co.uk/support/solutions/articles/7000098933-how-the-property-alerts-work",
+        "https://www.rightmove.co.uk/adf.html",
+        "https://api-docs.rightmove.co.uk/get-started",
+        "https://www.rightmove.co.uk/property-data/property-risk-alerts/"
+      ],
+      "legal_status": "Published provider wording and bounded research findings; not a judicial enforceability determination or declaration of illegality."
+    },
+    {
+      "id": "zoopla",
+      "name": "Zoopla",
+      "checked_date": "2026-09-11",
+      "sources": [
+        {
+          "id": "zp-terms",
+          "url": "https://www.zoopla.co.uk/terms/",
+          "title": "Terms of Use",
+          "checked_date": "2026-09-11",
+          "clause": "Headings: How you may use content on our Site; No text or data mining, or web scraping",
+          "evidence": "Terms restrict conducting or facilitating automated access, copying, monitoring and analytical mining, expressly subject to non-excludable applicable law. Personal attributed extracts are allowed, without modification or separating images from text. Commercial use needs a licence; the adjacent AI-development wording does not establish a blanket prohibition of every personal AI use."
+        },
+        {
+          "id": "zp-alerts",
+          "url": "https://help.zoopla.co.uk/hc/en-gb/articles/360005969458-How-do-I-create-email-alerts-and-saved-searches",
+          "title": "How do I create email alerts and saved searches?",
+          "checked_date": "2026-09-11",
+          "clause": "Website saved searches; creating email alerts from saved searches",
+          "evidence": "Signed-in users can save Buy/Rent searches and set email notifications; the app also offers instant push notifications. The guide says there is no limit on the number of email alerts."
+        },
+        {
+          "id": "zp-premium-api",
+          "url": "https://support.zoopla.co.uk/hc/en-gb/articles/360015664558-Premium-Listings-Tech-documentation",
+          "title": "Premium Listings: Tech documentation",
+          "checked_date": "2026-09-11",
+          "clause": "Product activation API; authentication",
+          "evidence": "The documented API activates Premium Listings for a customer’s properties. Product permissions/authentication are required. It is not a consumer interface for downloading all rental listings."
+        },
+        {
+          "id": "zp-api-index",
+          "url": "https://support.zoopla.co.uk/hc/en-gb/sections/360004580137-API-s",
+          "title": "Zoopla Member Support: APIs",
+          "checked_date": "2026-09-11",
+          "clause": "Premium Listings documentation index",
+          "evidence": "The official member-support index links Premium Listings APIs."
+        },
+        {
+          "id": "zp-developer-home",
+          "url": "https://developers.zoopla.co.uk/",
+          "title": "Getting Started with Zoopla",
+          "checked_date": "2026-09-11",
+          "clause": "Body unavailable to research tool",
+          "evidence": "The official page opened but returned no extractable body. Its current public search-API availability or retirement could not be verified from that response."
+        }
+      ],
+      "automation": {
+        "status": "restricted_by_published_terms_subject_to_applicable_law",
+        "evidence_ids": [
+          "zp-terms"
+        ],
+        "note": "Free distribution does not supply a terms exemption."
+      },
+      "user_directed_agent_browser": {
+        "status": "no_express_exception_found",
+        "evidence_ids": [
+          "zp-terms"
+        ],
+        "note": "User instruction does not by itself remove the automated-method restriction."
+      },
+      "reuse": {
+        "status": "personal_extract_allowance_separate_from_automation",
+        "evidence_ids": [
+          "zp-terms"
+        ],
+        "note": "The extract allowance does not itself authorise the automated collection step or unrestricted cache/report/image reuse."
+      },
+      "api": {
+        "status": "member_product_api_verified_consumer_search_not_established",
+        "evidence_ids": [
+          "zp-premium-api",
+          "zp-api-index",
+          "zp-developer-home"
+        ],
+        "note": "No reliance on old developer keys or third-party claims that an API has closed."
+      },
+      "alerts": {
+        "status": "official_saved_search_notifications_available",
+        "evidence_ids": [
+          "zp-alerts"
+        ],
+        "note": "A received email is a possible no-paste input; third-party automated processing/reuse permission is not established."
+      },
+      "export_feed": {
+        "status": "consumer_search_export_not_established",
+        "evidence_ids": [
+          "zp-alerts",
+          "zp-premium-api"
+        ],
+        "note": "Saved searches and product APIs are not a verified consumer export/feed licence."
+      },
+      "access_eligibility_and_fees": {
+        "human_site": "Site access is stated free in zp-terms.",
+        "alerts": "Signed-in user; no separate alert price stated in reviewed guide.",
+        "premium_api": "Customer product permissions; pricing and this skill’s eligibility unknown.",
+        "consumer_search_api": "Availability, eligibility and fees unknown."
+      },
+      "recommended_access": {
+        "now": "Use official saved-search emails/push and independently licensed original-agent sources for report data.",
+        "no_paste_candidate": "Authorised access to the user’s own alert mailbox avoids manual pasting; resolve the content-processing/reuse scope before treating it as a licensed integration.",
+        "licensed_route": "Provider agreement for the actual local-agent workflow, or a separately licensed data supplier whose Zoopla rights explicitly cover it."
+      },
+      "uncertainty": [
+        "Current developer-home content was not readable; no categorical claim of API retirement or nonexistence.",
+        "Whether a particular statutory exception applies is separate from this provider-terms audit."
+      ],
+      "official_urls": [
+        "https://www.zoopla.co.uk/terms/",
+        "https://help.zoopla.co.uk/hc/en-gb/articles/360005969458-How-do-I-create-email-alerts-and-saved-searches",
+        "https://support.zoopla.co.uk/hc/en-gb/articles/360015664558-Premium-Listings-Tech-documentation",
+        "https://support.zoopla.co.uk/hc/en-gb/sections/360004580137-API-s",
+        "https://developers.zoopla.co.uk/"
+      ],
+      "legal_status": "Published provider wording and bounded research findings; not a judicial enforceability determination or declaration of illegality."
+    },
+    {
+      "id": "onthemarket",
+      "name": "OnTheMarket",
+      "checked_date": "2026-09-11",
+      "sources": [
+        {
+          "id": "otm-terms",
+          "url": "https://www.onthemarket.com/terms/",
+          "title": "Terms",
+          "checked_date": "2026-09-11",
+          "clause": "2.2; 3.2–3.5; 5.1–5.2",
+          "evidence": "Clause 3.3 excepts a Permitted Program that uniquely identifies itself in User-Agent and fully follows the Robots Exclusion Protocol. Clause 2.2 separately restricts storage, copying and reuse beyond downloading for site use. Clauses 3.4–3.5 restrict external/deep links and framing. Security circumvention is prohibited; registration is single-user."
+        },
+        {
+          "id": "otm-robots",
+          "url": "https://www.onthemarket.com/robots.txt",
+          "title": "Robots rules incorporated by terms clause 3.3",
+          "checked_date": "2026-09-11",
+          "clause": "User-agent-specific groups and generic group",
+          "evidence": "Rules differ by crawler. Generic exclusions include many price/bedroom/radius/property-type/map query combinations, contact/account routes, some property-image/floorplan/EPC routes and agent-website redirects. The observed generic group does not blanket-disallow every property-detail page. Robots is relevant because clause 3.3 incorporates it, not because robots independently grants reuse rights."
+        },
+        {
+          "id": "otm-alerts",
+          "url": "https://www.onthemarket.com/content/how-to-use-onthemarkets-tools-to-conduct-the-best-property-search/",
+          "title": "How to use OnTheMarket’s tools; dated 10 August 2026",
+          "checked_date": "2026-09-11",
+          "clause": "5. Set up instant property alerts; saved favourites",
+          "evidence": "Official tools include saved favourites and instant alerts for matching listings, price reductions and availability changes. This describes a consumer feature, not an external-agent content licence."
+        },
+        {
+          "id": "otm-alert-home",
+          "url": "https://www.onthemarket.com/",
+          "title": "Homepage",
+          "checked_date": "2026-09-11",
+          "clause": "Set up a property alert",
+          "evidence": "The homepage offers Buy/Rent matching alerts delivered to the subscriber’s inbox."
+        },
+        {
+          "id": "otm-feed",
+          "url": "https://www.onthemarket.com/content/how-to-use-only-with-us-to-draw-serious-attention-to-your-property-listings/",
+          "title": "Only With Us: advertiser guide",
+          "checked_date": "2026-09-11",
+          "clause": "How can you list your properties as Only With Us?",
+          "evidence": "Agents can upload their own properties through OnTheMarket Expert or a feed provider. This is an advertiser upload route, not an all-market search API."
+        }
+      ],
+      "automation": {
+        "status": "conditional_permitted_program_route",
+        "evidence_ids": [
+          "otm-terms",
+          "otm-robots"
+        ],
+        "note": "No runtime compliance test performed."
+      },
+      "user_directed_agent_browser": {
+        "status": "conditional_not_a_separate_user_instruction_exemption",
+        "evidence_ids": [
+          "otm-terms",
+          "otm-robots"
+        ],
+        "note": "Same clause 3.3 test; no separate exemption."
+      },
+      "reuse": {
+        "status": "separate_permission_gap",
+        "evidence_ids": [
+          "otm-terms"
+        ],
+        "note": "Access does not establish private-report/caching rights."
+      },
+      "api": {
+        "status": "advertiser_upload_route_only_verified",
+        "evidence_ids": [
+          "otm-feed"
+        ],
+        "note": "No public rental-search API licence established."
+      },
+      "alerts": {
+        "status": "official_email_alerts_available",
+        "evidence_ids": [
+          "otm-alerts",
+          "otm-alert-home"
+        ],
+        "note": "Own-mailbox ingestion remains a candidate with unresolved downstream content scope."
+      },
+      "export_feed": {
+        "status": "consumer_export_not_established",
+        "evidence_ids": [
+          "otm-feed"
+        ],
+        "note": "Advertiser feed direction is into the portal."
+      },
+      "access_eligibility_and_fees": {
+        "permitted_program": "See otm-terms clause 3.3; fee not stated.",
+        "alerts": "Consumer subscription/account route; separate alert fee not stated in reviewed sources.",
+        "advertiser_feed": "Participating advertiser and supported feed provider; fees unknown.",
+        "consumer_search_api": "Availability, eligibility and fees unknown."
+      },
+      "recommended_access": {
+        "now": "Assess the conditional reader alongside independently authorised original-agent sources.",
+        "no_paste_candidate": "Conditional reader or official alerts; downstream reuse unresolved.",
+        "licensed_route": "Clarify or license the separate reuse gap."
+      },
+      "uncertainty": [
+        "No particular host or URL sequence cleared.",
+        "Private local report treatment needs assessment."
+      ],
+      "official_urls": [
+        "https://www.onthemarket.com/terms/",
+        "https://www.onthemarket.com/robots.txt",
+        "https://www.onthemarket.com/content/how-to-use-onthemarkets-tools-to-conduct-the-best-property-search/",
+        "https://www.onthemarket.com/",
+        "https://www.onthemarket.com/content/how-to-use-only-with-us-to-draw-serious-attention-to-your-property-listings/"
+      ],
+      "legal_status": "Published provider wording and bounded research findings; not a judicial enforceability determination or declaration of illegality."
+    },
+    {
+      "id": "openrent",
+      "name": "OpenRent",
+      "checked_date": "2026-09-11",
+      "sources": [
+        {
+          "id": "or-terms",
+          "url": "https://www.openrent.co.uk/terms",
+          "title": "Terms & Conditions",
+          "checked_date": "2026-09-11",
+          "clause": "General terms: Your obligations and conduct, nested 1.1.5 and 1.1.7; 1.2; landlord content licence 5.7",
+          "evidence": "Terms prohibit using software or other means to harvest information and copying website material without permission. Credentials must be secured. A landlord’s licence to OpenRent is not a general licence to unrelated consumers or tool publishers."
+        },
+        {
+          "id": "or-alerts",
+          "url": "https://help.openrent.co.uk/hc/en-gb/articles/360018359252-How-do-the-search-bar-and-email-alerts-work",
+          "title": "How do the search bar and email alerts work?",
+          "checked_date": "2026-09-11",
+          "clause": "How do I find the newest properties available?",
+          "evidence": "The official search offers Create Email Alert under the map. Matching new-property messages are sent up to once daily. Listings connect directly with landlords."
+        },
+        {
+          "id": "or-alert-tutorial",
+          "url": "https://help.openrent.co.uk/hc/en-gb/articles/360024544292-How-do-I-set-up-an-email-alert",
+          "title": "How do I set up an email alert?",
+          "checked_date": "2026-09-11",
+          "clause": "Video tutorial",
+          "evidence": "An official alert setup tutorial exists; its embedded video was not analysed. The substantive procedure is supported by or-alerts."
+        }
+      ],
+      "automation": {
+        "status": "harvesting_restricted_by_published_terms",
+        "evidence_ids": [
+          "or-terms"
+        ],
+        "note": "No free/local exception identified."
+      },
+      "user_directed_agent_browser": {
+        "status": "not_expressly_classified",
+        "evidence_ids": [
+          "or-terms"
+        ],
+        "note": "Terms do not define whether each isolated assistive read is harvesting; no affirmative local-agent carveout found."
+      },
+      "reuse": {
+        "status": "copying_requires_permission",
+        "evidence_ids": [
+          "or-terms"
+        ],
+        "note": "No independent permission for persistent cache, copied advert text/images or report republication verified."
+      },
+      "api": {
+        "status": "official_search_api_not_found_in_bounded_review",
+        "evidence_ids": [],
+        "note": "Official-domain API/feed searches and reviewed help/terms did not establish a rental-search API licence; this is not proof none exists."
+      },
+      "alerts": {
+        "status": "official_daily_email_alerts_available",
+        "evidence_ids": [
+          "or-alerts"
+        ],
+        "note": "Permission to create/receive alerts does not establish a downstream automation or reuse licence."
+      },
+      "export_feed": {
+        "status": "consumer_export_or_feed_not_established",
+        "evidence_ids": [],
+        "note": "No official consumer rental export/feed documentation located."
+      },
+      "access_eligibility_and_fees": {
+        "alerts": "Consumer search alert signup; any separate fees or enhanced-tier conditions were not established in the reviewed guide.",
+        "consumer_search_api": "Availability, eligibility and fees unknown.",
+        "automation_licence": "Eligibility and fees unknown."
+      },
+      "recommended_access": {
+        "now": "Use official personal search alerts. Original landlord websites are an option only where they actually exist and independently permit the intended use; OpenRent is frequently the direct landlord source.",
+        "no_paste_candidate": "The user’s own authorised mailbox can supply received alerts without copying and pasting; permission for extracting/caching their content remains unresolved.",
+        "licensed_route": "Provider permission for the concrete local reading/report workflow, or an independently authorised landlord source."
+      },
+      "uncertainty": [
+        "No complete approved automated discovery-to-report path established.",
+        "A blanket claim that every AI-assisted read is illegal would go beyond these terms.",
+        "Do not promise an original letting-agent page for a direct-landlord listing."
+      ],
+      "official_urls": [
+        "https://www.openrent.co.uk/terms",
+        "https://help.openrent.co.uk/hc/en-gb/articles/360018359252-How-do-the-search-bar-and-email-alerts-work",
+        "https://help.openrent.co.uk/hc/en-gb/articles/360024544292-How-do-I-set-up-an-email-alert"
+      ],
+      "legal_status": "Published provider wording and bounded research findings; not a judicial enforceability determination or declaration of illegality."
+    },
+    {
+      "id": "spareroom",
+      "name": "SpareRoom",
+      "checked_date": "2026-09-11",
+      "sources": [
+        {
+          "id": "sr-terms",
+          "url": "https://www.spareroom.co.uk/content/default/terms-uk/",
+          "title": "Terms",
+          "checked_date": "2026-09-11",
+          "clause": "3.1; 3.3; 3.4.7–3.4.8; 6.4.1; 10.4",
+          "evidence": "Registration/search are free. Software or other integrations need express written consent; harvesting and unauthorised integrations are prohibited. Personal noncommercial viewing/downloading/printing is conditional: no inclusion in another work, alteration or third-party distribution. Managed Service serves large advertisers, under extra terms and separate pricing; it is not a consumer search feed."
+        },
+        {
+          "id": "sr-alerts",
+          "url": "https://www.spareroom.co.uk/content/info-faq/why-email-alerts/",
+          "title": "Why set up email alerts?",
+          "checked_date": "2026-09-11",
+          "clause": "Search profile and notification preferences",
+          "evidence": "Completing a search profile, with an optional Room Wanted ad, enables daily summaries of matching ads from the prior 24 hours and instant alerts. Preferences can be changed in the account. Posting a public wanted ad is not presented as mandatory."
+        }
+      ],
+      "automation": {
+        "status": "harvesting_and_unapproved_integrations_restricted",
+        "evidence_ids": [
+          "sr-terms"
+        ],
+        "note": "The integration restriction matters even where code never calls itself a scraper."
+      },
+      "user_directed_agent_browser": {
+        "status": "no_express_local_agent_exemption",
+        "evidence_ids": [
+          "sr-terms"
+        ],
+        "note": "A site-specific agent integration needs consent under the wording; incidental general assistive reading is not separately defined."
+      },
+      "reuse": {
+        "status": "personal_use_subject_to_reproduction_limits",
+        "evidence_ids": [
+          "sr-terms"
+        ],
+        "note": "A personal-use label alone does not clear report copies or cached/reproduced advert images."
+      },
+      "api": {
+        "status": "consumer_search_api_not_established",
+        "evidence_ids": [
+          "sr-terms"
+        ],
+        "note": "No public rental-search API licence found. Advertiser managed services do not establish one."
+      },
+      "alerts": {
+        "status": "official_daily_and_instant_email_alerts_available",
+        "evidence_ids": [
+          "sr-alerts"
+        ],
+        "note": "Agent extraction and reuse of delivered content are not licensed expressly by the alert help page."
+      },
+      "export_feed": {
+        "status": "consumer_export_or_feed_not_established",
+        "evidence_ids": [
+          "sr-terms"
+        ],
+        "note": "No consumer data-export route verified for finding other people’s current adverts."
+      },
+      "access_eligibility_and_fees": {
+        "human_account_and_search": "Free (sr-terms).",
+        "alerts": "Search profile; optional Room Wanted ad; separate fee not stated in reviewed help page.",
+        "managed_service": "Large advertisers, provider discretion, extra terms and separate pricing; actual fee unknown.",
+        "consumer_search_api": "Availability, eligibility and fees unknown.",
+        "integration_permission": "Express written consent; eligibility and fees unknown."
+      },
+      "recommended_access": {
+        "now": "Use official personal alerts/search. Independently permitted original advertiser pages are an alternative only when available.",
+        "no_paste_candidate": "Use an authorised personal mail connector for received alerts only after resolving the scope of automated processing/reuse; a public Room Wanted ad need not be created for this research.",
+        "licensed_route": "Express consent for the proposed integration plus sufficient content-use rights, rather than relying on free membership."
+      },
+      "uncertainty": [
+        "An advertiser’s own upload/managed account does not establish access to everyone else’s listings.",
+        "Many room adverts have no separate original-agent page.",
+        "No complete licensed local-agent workflow was established."
+      ],
+      "official_urls": [
+        "https://www.spareroom.co.uk/content/default/terms-uk/",
+        "https://www.spareroom.co.uk/content/info-faq/why-email-alerts/"
+      ],
+      "legal_status": "Published provider wording and bounded research findings; not a judicial enforceability determination or declaration of illegality."
+    }
+  ]
+}

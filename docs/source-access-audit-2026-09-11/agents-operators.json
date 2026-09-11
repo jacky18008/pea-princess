@@ -1,0 +1,459 @@
+{
+  "schema_version": 1,
+  "audit_date": "2026-09-11",
+  "project_context_revision": 275,
+  "scope": "Free local skill operated by the user's own agent; evidence audit only, not legal advice or executable source permission.",
+  "method": {
+    "official_terms_and_robots_only": true,
+    "listing_pages_opened": 0,
+    "brochures_downloaded": 0,
+    "accounts_created": 0,
+    "contacts_sent": 0,
+    "model_experiments": 0,
+    "policy_or_runtime_changes": false,
+    "retention": "Paraphrases and URLs only; no immutable full-page legal snapshot retained.",
+    "source_retrieval_note": "Some terms were supplied as full official indexed search results; failures and scope mismatches are recorded explicitly."
+  },
+  "status_definitions": {
+    "unknown": "No sufficient applicable primary text obtained; neither permission nor legal prohibition established.",
+    "express_terms_restriction": "Reviewed terms expressly restrict this activity; contractual enforceability and statutory exceptions are outside this audit.",
+    "scope_unclear": "A limited licence exists, but this precise derived/private/cloud use is not established.",
+    "conditional_personal_copy": "Permission wording supports the described personal copy, subject to notices and other terms.",
+    "restriction_likely_applies_scope_unconfirmed": "Applying broad anti-scraping wording to an AI browser is an inference; user direction alone is not an exemption.",
+    "permission_not_established": "The proposed operation is not supported by a verified grant; this is not a conclusion of illegality."
+  },
+  "interpretation": [
+    "Robot rules are protocol declarations, not contract/IP licences.",
+    "Personal download permission does not automatically cover automated discovery, cloud-model transmission, persistent raw HTML, multiple normalized copies, or republication.",
+    "Private factual analysis and reprinting copyright excerpts/images are separate operations; this audit does not ban analysis of lawfully obtained facts.",
+    "No public inventory read API was located in the bounded official-domain searches. Owner upload/CRM/supplier portals are not a substitute.",
+    "Suggested file-based no-paste routes still require the user to select/save or share a document unless automated access is separately supported; they are not zero-touch integrations."
+  ],
+  "searches": [
+    "site:foxtons.co.uk API feed",
+    "site:dexters.co.uk API feed",
+    "site:chestertons.co.uk API feed",
+    "site:knightfrank.co.uk API feed",
+    "site:graingerplc.co.uk API feed",
+    "site:getliving.com API feed",
+    "site:fizzyliving.com API feed",
+    "site:savills.co.uk API property licence",
+    "site:jll.com API residential listings",
+    "Official-domain terms and brochure/download searches for all providers; unrelated auction, service-brochure and country variants not treated as rental access grants."
+  ],
+  "providers": [
+    {
+      "id": "foxtons",
+      "name": "Foxtons",
+      "terms_urls": [
+        "https://www.foxtons.co.uk/help/termsconditions"
+      ],
+      "api_urls": [],
+      "terms_retrieval": "Official indexed page text read; copyright section available.",
+      "clauses": [
+        {
+          "section": "Copyright and Trade Marks / Licence to re-copy for Limited Purposes",
+          "paraphrase": "Limited re-copy requires source and web-address credit and passing terms to recipients; other incorporation is restricted and commercial copying excluded."
+        }
+      ],
+      "operations": {
+        "automated_discovery": "unknown",
+        "user_directed_ai_browser": "unknown",
+        "personal_download_cache": "conditional_limited_copy",
+        "private_report_excerpts": "scope_unclear",
+        "public_republication_images": "permission_not_established"
+      },
+      "robots": {
+        "url": "https://www.foxtons.co.uk/robots.txt",
+        "status": "read",
+        "finding": "General-agent rules disallow /api/, /json/, account paths and several search patterns; not a rights licence."
+      },
+      "brochure": {
+        "status": "official_download_ui_observed_in_search_index",
+        "url": "https://www.foxtons.co.uk/properties-for-sale/e3/chpk1650614",
+        "scope": "Indexed listing offers PDF brochure; no listing opened or brochure downloaded in this audit. Availability is interface evidence, not automation/republication permission."
+      },
+      "contact_url": "https://www.foxtons.co.uk/help/contact",
+      "no_paste_route": "User selects official PDF download, then supplies the file instead of copying page text. Automated retrieval and derivative/cloud processing need scope clarification; full-page snapshots are not clearly licensed.",
+      "uncertainty": "No express permission for the complete AI discovery/capture/report pipeline found.",
+      "current_snapshot_hosts": [
+        "www.foxtons.co.uk"
+      ],
+      "checked_date": "2026-09-11",
+      "api_access": {
+        "status": "no_public_consumer_read_api_found_in_bounded_search",
+        "eligibility": null,
+        "cost": null,
+        "note": "No account, contact or payment made. Absence in search is not proof no private feed exists."
+      },
+      "quotes": []
+    },
+    {
+      "id": "savills",
+      "name": "Savills",
+      "terms_urls": [
+        "https://www.savills.co.uk/footer/terms-and-conditions.aspx"
+      ],
+      "api_urls": [],
+      "terms_retrieval": "Terms and main homepage returned403. Official Savills Insight page links this terms URL; no current main-UK terms body obtained.",
+      "clauses": [],
+      "operations": {
+        "automated_discovery": "unknown",
+        "user_directed_ai_browser": "unknown",
+        "personal_download_cache": "unknown",
+        "private_report_excerpts": "unknown",
+        "public_republication_images": "permission_not_established"
+      },
+      "robots": {
+        "url": "https://www.savills.co.uk/robots.txt",
+        "status": "read",
+        "finding": "Path/query restrictions and separate named-agent exclusions. This is www only, not search.savills.com permission."
+      },
+      "brochure": {
+        "status": "not_established_for_residential_rentals",
+        "url": null,
+        "scope": "Auction legal packs appeared in search but were excluded as a different service with login/auction terms."
+      },
+      "contact_url": null,
+      "no_paste_route": "No verified rental download/feed route established in this bounded audit; obtain the current UK terms and a relevant permission route before claiming integration support.",
+      "uncertainty": "Unknown is not a finding that personal AI use is legally prohibited. Other-country Savills terms and auction terms were not substituted.",
+      "current_snapshot_hosts": [],
+      "checked_date": "2026-09-11",
+      "api_access": {
+        "status": "no_public_consumer_read_api_found_in_bounded_search",
+        "eligibility": null,
+        "cost": null,
+        "note": "No account, contact or payment made. Absence in search is not proof no private feed exists."
+      },
+      "quotes": []
+    },
+    {
+      "id": "knight_frank",
+      "name": "Knight Frank UK",
+      "terms_urls": [
+        "https://www.knightfrank.co.uk/legals/terms-conditions"
+      ],
+      "api_urls": [],
+      "terms_retrieval": "Current UK main-site terms opened from residential homepage footer.",
+      "clauses": [
+        {
+          "section": "Intellectual property",
+          "paraphrase": "Personal noncommercial computer copies allowed with attribution and no modification; spidering/screen/database scraping to obtain information including listings expressly restricted."
+        }
+      ],
+      "operations": {
+        "automated_discovery": "express_terms_restriction",
+        "user_directed_ai_browser": "restriction_likely_applies_scope_unconfirmed",
+        "personal_download_cache": "conditional_personal_copy",
+        "private_report_excerpts": "scope_unclear",
+        "public_republication_images": "permission_not_established"
+      },
+      "robots": {
+        "url": "https://www.knightfrank.co.uk/robots.txt",
+        "status": "read",
+        "finding": "Query/path and named-agent restrictions; a robots-allowed path does not override the listing-scraping clause."
+      },
+      "brochure": {
+        "status": "general_publications_observed_not_unit_feed",
+        "url": "https://www.knightfrank.co.uk/",
+        "scope": "Homepage links publications/brochures; no rental-unit brochure retrieved."
+      },
+      "contact_url": "https://www.knightfrank.co.uk/contact-us",
+      "no_paste_route": "A user-selected personal download can avoid text copying; do not equate it with permission for an AI to scrape listings or modify/reissue downloaded material.",
+      "uncertainty": "Main UK terms were used; more restrictive office-space-only terms were not misapplied to residential.",
+      "current_snapshot_hosts": [],
+      "checked_date": "2026-09-11",
+      "api_access": {
+        "status": "no_public_consumer_read_api_found_in_bounded_search",
+        "eligibility": null,
+        "cost": null,
+        "note": "No account, contact or payment made. Absence in search is not proof no private feed exists."
+      },
+      "quotes": []
+    },
+    {
+      "id": "dexters",
+      "name": "Dexters",
+      "terms_urls": [
+        "https://www.dexters.co.uk/terms-and-conditions"
+      ],
+      "api_urls": [],
+      "terms_retrieval": "Official indexed terms text read.",
+      "clauses": [
+        {
+          "section": "Copyright notice",
+          "paraphrase": "Individual sections may be downloaded/printed for personal information with proprietary notices. Other reproduction/modification/transmission is restricted without written consent."
+        }
+      ],
+      "operations": {
+        "automated_discovery": "unknown",
+        "user_directed_ai_browser": "unknown",
+        "personal_download_cache": "conditional_personal_sections",
+        "private_report_excerpts": "scope_unclear",
+        "public_republication_images": "permission_not_established"
+      },
+      "robots": {
+        "url": "https://www.dexters.co.uk/robots.txt",
+        "status": "not_retrieved",
+        "finding": "Web tool error; no conclusion about contents."
+      },
+      "brochure": {
+        "status": "specific_unit_pdf_not_verified",
+        "url": null,
+        "scope": "Personal-section download is supported by terms; no public rental brochure/feed documentation found in this search."
+      },
+      "contact_url": "https://www.dexters.co.uk/",
+      "no_paste_route": "User saves the relevant individual section locally with notices; agent reads that selected file. This removes copying/pasting, not the unresolved automated-access/derivative-use question.",
+      "uncertainty": "No express crawler grant or ban found in reviewed terms; silence is not permission.",
+      "current_snapshot_hosts": [],
+      "checked_date": "2026-09-11",
+      "api_access": {
+        "status": "no_public_consumer_read_api_found_in_bounded_search",
+        "eligibility": null,
+        "cost": null,
+        "note": "No account, contact or payment made. Absence in search is not proof no private feed exists."
+      },
+      "quotes": []
+    },
+    {
+      "id": "chestertons",
+      "name": "Chestertons",
+      "terms_urls": [
+        "https://www.chestertons.co.uk/terms"
+      ],
+      "api_urls": [],
+      "terms_retrieval": "Official indexed website terms read.",
+      "clauses": [
+        {
+          "section": "Intellectual Property Rights / Fair Use",
+          "paraphrase": "Personal noncommercial viewing/download/print allowed. Commercial scraping requires permission; automated/excessive/harmful use may be blocked. Other reproduction/distribution requires written consent."
+        }
+      ],
+      "operations": {
+        "automated_discovery": "personal_automation_unresolved",
+        "user_directed_ai_browser": "personal_automation_unresolved",
+        "personal_download_cache": "conditional_personal_copy",
+        "private_report_excerpts": "scope_unclear",
+        "public_republication_images": "permission_not_established"
+      },
+      "robots": {
+        "url": "https://www.chestertons.co.uk/robots.txt",
+        "status": "not_retrieved",
+        "finding": "Web tool error; no conclusion about contents."
+      },
+      "brochure": {
+        "status": "service_brochure_available_not_listing_feed",
+        "url": "https://www.chestertons.co.uk/corporate-relocation",
+        "scope": "Official service page offers a downloadable relocation brochure; not a current property feed."
+      },
+      "contact_url": "https://www.chestertons.co.uk/general-enquiry",
+      "no_paste_route": "Personal downloads are a promising file-based route. Clarify low-rate user-directed AI access and private report excerpts rather than relabel personal automation as commercial scraping.",
+      "uncertainty": "Commercial-only scraping wording is not an express grant for personal bots; linking is separately limited to homepage.",
+      "current_snapshot_hosts": [],
+      "checked_date": "2026-09-11",
+      "api_access": {
+        "status": "no_public_consumer_read_api_found_in_bounded_search",
+        "eligibility": null,
+        "cost": null,
+        "note": "No account, contact or payment made. Absence in search is not proof no private feed exists."
+      },
+      "quotes": []
+    },
+    {
+      "id": "jll_residential",
+      "name": "JLL residential UK",
+      "terms_urls": [
+        "https://www.jll.com/en-uk/terms-of-use"
+      ],
+      "api_urls": [],
+      "terms_retrieval": "JLL UK/global terms opened; residential.jll.co.uk homepage returned403, so residential-specific incorporation not confirmed.",
+      "clauses": [
+        {
+          "section": "No unlawful or prohibited use / Content; Limited license",
+          "paraphrase": "Automated queries require advance written permission; scraping/systematic collections restricted. Personal consumer-browser viewing/cache/storage allowed subject to conditions."
+        },
+        {
+          "section": "Owner Content",
+          "paraphrase": "Owners may submit their inventory to JLL. This is not a public licence/API for retrieving other owners' listings."
+        }
+      ],
+      "operations": {
+        "automated_discovery": "express_restriction_on_reviewed_terms_scope_pending",
+        "user_directed_ai_browser": "restriction_likely_applies_scope_unconfirmed",
+        "personal_download_cache": "conditional_consumer_browser_scope_pending",
+        "private_report_excerpts": "scope_unclear",
+        "public_republication_images": "permission_not_established"
+      },
+      "robots": {
+        "url": "https://residential.jll.co.uk/robots.txt",
+        "status": "not_retrieved",
+        "finding": "Web tool error; no conclusion about contents."
+      },
+      "brochure": {
+        "status": "not_verified",
+        "url": null,
+        "scope": "No current residential brochure/download workflow verified."
+      },
+      "contact_url": "https://www.jll.com/en-uk/contact",
+      "no_paste_route": "Ask for residential-specific sanctioned download/feed terms; generic browser licence does not negate the express automation restriction.",
+      "uncertainty": "No residential-specific legal linkage verified. Do not substitute Portuguese residential or unrelated MyLettings portal terms.",
+      "current_snapshot_hosts": [],
+      "checked_date": "2026-09-11",
+      "api_access": {
+        "status": "no_public_consumer_read_api_found_in_bounded_search",
+        "eligibility": null,
+        "cost": null,
+        "note": "No account, contact or payment made. Absence in search is not proof no private feed exists."
+      },
+      "quotes": []
+    },
+    {
+      "id": "grainger",
+      "name": "Grainger",
+      "terms_urls": [
+        "https://www.graingerplc.co.uk/site-services/terms-of-use",
+        "https://corporate.graingerplc.co.uk/terms-conditions"
+      ],
+      "api_urls": [],
+      "terms_retrieval": "Official www and corporate terms read; www homepage footer confirmed terms link. prod homepage failed.",
+      "clauses": [
+        {
+          "section": "www: Intellectual Property Rights",
+          "paraphrase": "Reasonably needed personal PRINT copies may keep notices; other use prohibited; images need written permission."
+        },
+        {
+          "section": "corporate: Copyright / Trade Mark Notices",
+          "paraphrase": "Reproduction/download/distribution broadly requires written permission; separate corporate scope."
+        }
+      ],
+      "operations": {
+        "automated_discovery": "permission_not_established",
+        "user_directed_ai_browser": "unknown",
+        "personal_download_cache": "print_only_exception_other_use_restricted",
+        "private_report_excerpts": "permission_not_established",
+        "public_republication_images": "permission_not_established"
+      },
+      "robots": {
+        "url": "https://www.graingerplc.co.uk/robots.txt",
+        "additional_urls": [
+          "https://prod.graingerplc.co.uk/robots.txt"
+        ],
+        "status": "not_retrieved",
+        "finding": "Web tool errors; no conclusion about either host."
+      },
+      "brochure": {
+        "status": "not_verified",
+        "url": null,
+        "scope": "No public machine-readable inventory/download licence located."
+      },
+      "contact_url": "https://www.graingerplc.co.uk/get-in-touch",
+      "no_paste_route": "A specific permission or licensed file route is needed before presenting automatic HTML retention as covered by the personal-print exception.",
+      "uncertainty": "prod host scope not established; corporate terms cannot automatically be treated as residential terms.",
+      "current_snapshot_hosts": [
+        "www.graingerplc.co.uk",
+        "prod.graingerplc.co.uk"
+      ],
+      "checked_date": "2026-09-11",
+      "api_access": {
+        "status": "no_public_consumer_read_api_found_in_bounded_search",
+        "eligibility": null,
+        "cost": null,
+        "note": "No account, contact or payment made. Absence in search is not proof no private feed exists."
+      },
+      "quotes": []
+    },
+    {
+      "id": "get_living",
+      "name": "Get Living",
+      "terms_urls": [
+        "https://www.getliving.com/terms-and-conditions/"
+      ],
+      "api_urls": [],
+      "terms_retrieval": "Official general website terms read; separated from tenancy/promotional terms on same page.",
+      "clauses": [
+        {
+          "section": "User Conduct / Rights Granted and Rights Reserved",
+          "paraphrase": "Personal use only; permits insubstantial excerpts on disk for viewing, one copy, notices intact. Other uses need express authorisation; emails subject to terms too."
+        }
+      ],
+      "operations": {
+        "automated_discovery": "unknown",
+        "user_directed_ai_browser": "unknown",
+        "personal_download_cache": "one_insubstantial_copy_for_viewing",
+        "private_report_excerpts": "scope_unclear",
+        "public_republication_images": "permission_not_established"
+      },
+      "robots": {
+        "url": "https://www.getliving.com/robots.txt",
+        "status": "not_retrieved",
+        "finding": "Web tool error; no conclusion about contents."
+      },
+      "brochure": {
+        "status": "rental_listing_brochure_not_verified",
+        "url": null,
+        "scope": "FAQ mentions resident Homebox brochure; not a public listing feed or permission for property collection."
+      },
+      "contact_url": "https://www.getliving.com/terms-and-conditions/",
+      "no_paste_route": "A single limited personal excerpt may avoid manual transcription, but capture plus normalized text/backups may exceed one-copy wording; seek a suitable file/use permission.",
+      "uncertainty": "No explicit grant for automated discovery or cloud-model processing; no commercial intent does not expand the one-copy exception.",
+      "current_snapshot_hosts": [
+        "www.getliving.com"
+      ],
+      "checked_date": "2026-09-11",
+      "api_access": {
+        "status": "no_public_consumer_read_api_found_in_bounded_search",
+        "eligibility": null,
+        "cost": null,
+        "note": "No account, contact or payment made. Absence in search is not proof no private feed exists."
+      },
+      "quotes": []
+    },
+    {
+      "id": "fizzy_living",
+      "name": "Fizzy Living",
+      "terms_urls": [
+        "https://www.fizzyliving.com/terms-and-conditions",
+        "https://fizzyliving.com/legal/t-cs-for-special-offers"
+      ],
+      "api_urls": [],
+      "terms_retrieval": "Homepage-linked Terms & Conditions opened; it contains special-offer promotion terms, not website reuse licensing.",
+      "clauses": [
+        {
+          "section": "Terms & Conditions / T&Cs / Special offer terms",
+          "paraphrase": "Scope is resident promotion eligibility and rewards. It supplies no website crawling/copying permission."
+        }
+      ],
+      "operations": {
+        "automated_discovery": "unknown",
+        "user_directed_ai_browser": "unknown",
+        "personal_download_cache": "unknown",
+        "private_report_excerpts": "unknown",
+        "public_republication_images": "permission_not_established"
+      },
+      "robots": {
+        "url": "https://www.fizzyliving.com/robots.txt",
+        "status": "not_retrieved",
+        "finding": "Web tool error; no conclusion about contents."
+      },
+      "brochure": {
+        "status": "not_verified",
+        "url": null,
+        "scope": "No public listing brochure/feed permission found."
+      },
+      "contact_url": "https://www.fizzyliving.com/contact-us",
+      "no_paste_route": "Request relevant website/API/file permission through operator contact; no automated route verified by this audit.",
+      "uncertainty": "Missing relevant licensing text is unknown, not a legal prohibition or affirmative permission. Greystar privacy link is not a content licence.",
+      "current_snapshot_hosts": [
+        "www.fizzyliving.com"
+      ],
+      "checked_date": "2026-09-11",
+      "api_access": {
+        "status": "no_public_consumer_read_api_found_in_bounded_search",
+        "eligibility": null,
+        "cost": null,
+        "note": "No account, contact or payment made. Absence in search is not proof no private feed exists."
+      },
+      "quotes": []
+    }
+  ]
+}
