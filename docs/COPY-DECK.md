@@ -232,7 +232,7 @@ Ask **"What can this do?"** (or 這能幹嘛？). The answer comes from `skills/
 - write-back: yes
 
 ```text
-Rightmove, Zoopla, OnTheMarket, OpenRent, HomeViews, Trustpilot, Airbnb, Booking.com are listed by name only. Their terms forbid automated access, so this project gives no method for them; the skill asks you to paste the page.
+Rightmove, Zoopla, OnTheMarket, OpenRent, HomeViews, Trustpilot, Airbnb, Booking.com are listed by name only. Their terms forbid automated access, so this project gives no method for them; the skill asks you for the page text or a saved copy and never opens a listing link, even when you paste one.
 ```
 
 ### deck:readme:18
@@ -849,7 +849,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 - write-back: yes
 
 ```text
-1. **I have a listing** → paste the link or the page text and I roast it (the 12 checks).
+1. **I have a listing** → copy the page text (or save the page) and hand it over — not the link, which I never open — and I roast it (the 12 checks).
 ```
 
 ### deck:onboarding:5

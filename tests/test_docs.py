@@ -287,3 +287,42 @@ class TestSharing(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestNoLinkFetching(unittest.TestCase):
+    """A listing link is never an input the skill acts on: the host would fetch it, and that
+    is the automated access the skill's terms position rules out (2026-09-11). The person
+    hands over the page text or a saved copy; a link is answered with the one sentence."""
+
+    def _skill_texts(self):
+        out = {}
+        for folder, _dirs, files in os.walk(SKILL):
+            for name in files:
+                if name.endswith((".md", ".yaml", ".yml")):
+                    path = os.path.join(folder, name)
+                    out[os.path.relpath(path, SKILL)] = open(path, encoding="utf-8").read()
+        return out
+
+    def test_no_skill_text_asks_for_a_link(self):
+        bad = re.compile(r"(?i)\b(paste|send|share|give me|drop|post)\s+(me\s+)?(the\s+|a\s+|your\s+)?(link|url)s?\b"
+                         r"|\b(link|url) or (the )?(page|text)\b|貼(上)?(網址|連結)")
+        hits = ["%s: %s" % (rel, m.group(0)) for rel, text in self._skill_texts().items()
+                for m in bad.finditer(text)]
+        self.assertEqual([], hits, hits)
+
+    def test_the_router_says_a_link_is_never_opened(self):
+        s = read("SKILL.md")
+        self.assertIn("A listing link is never opened", s)
+        self.assertIn("fetch/browser tool", s)
+        self.assertIn("never read by skill or host tools", s)
+
+    def test_the_menu_asks_for_the_page_not_the_link(self):
+        s = read("references", "onboarding.md")
+        line = [l for l in s.splitlines() if l.startswith("1. **I have a listing**")][0]
+        self.assertIn("copy the page text", line)
+        self.assertIn("not the link", line)
+
+    def test_the_one_sentence_rule_covers_fetch_tools_and_alert_emails(self):
+        s = read("references", "listing-fields.md")
+        self.assertIn("not with a fetch tool, a browser tool or curl", s)
+        self.assertIn("The links inside it are not opened either", s)

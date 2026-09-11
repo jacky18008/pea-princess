@@ -31,7 +31,7 @@ Read the open registers directly; listing pages are saved or pasted by the perso
 | Identity, floor area, age, heating | `scripts/epc.py search --postcode` then `cert` | The certificate page for the exact flat (or the search page listing all flats) | find-energy-certificate.service.gov.uk → "Find an energy certificate" → postcode | Paste the whole page text, or the certificate number |
 | Whole-building EPC profile | `scripts/epc.py building --postcode` | Nothing; skip or ask for the search-page text | same | Paste |
 | Floor plan and orientation | (no API) | The floor plan image and any developer plan with a compass | Listing page, developer brochure | Image upload (jpg/png/pdf) |
-| Listing text, price history | (portal terms forbid automated access) | The listing page saved as HTML or its full text, plus the URL | Rightmove / Zoopla / OnTheMarket / OpenRent | "Save page as… (complete)" or select-all-copy |
+| Listing text, price history | (portal terms forbid automated access) | The listing page saved as HTML or its full text, plus the URL as the citation (never opened) | Rightmove / Zoopla / OnTheMarket / OpenRent | "Save page as… (complete)" or select-all-copy |
 | Owner / landlord entity | `scripts/company.py` (Companies House, open) | The Land Registry title register PDF | search-property-information.service.gov.uk (£7, needs GOV.UK sign-in) | PDF upload |
 | Resident reviews | (site terms forbid automated access) | The full reviews page text for the named development | HomeViews, Google Maps, Trustpilot | Paste text (all pages, oldest first) |
 | Planning near the site | GLA Planning Datahub (open) | Application numbers and the officer report PDF | The borough planning portal (see `boroughs.yaml`) | Paste numbers / upload PDF |

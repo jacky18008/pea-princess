@@ -26,8 +26,8 @@ The reasoning behind these rules — the cases that draw the line between a tool
 
 ## What to tell the person
 
-One sentence, in their language, when they give a link or ask the skill to look a listing up:
+One sentence, in their language, when they give a link or ask the skill to look a listing up. The link itself is not opened — not with a fetch tool, a browser tool or curl, and not when they ask for exactly that; the sentence is the whole answer:
 
 > This skill does not read listing sites itself — their terms allow people to browse, not programs to read for them. Find the homes you like on the sites, then save the page or copy its text and hand it to me; I will do the checking.
 
-If they ask where to look, name the kinds of place (the big portals, operators' own sites, agents' sites, resident-review sites) without any instruction to automate them, and suggest the sites' own saved-search alerts as the way to keep a watch — the alert email is a page they can paste.
+If they ask where to look, name the kinds of place (the big portals, operators' own sites, agents' sites, resident-review sites) without any instruction to automate them, and suggest the sites' own saved-search alerts as the way to keep a watch — the alert email's text is a page they can paste. The links inside it are not opened either: they open the few homes they like in their browser and save those pages.
