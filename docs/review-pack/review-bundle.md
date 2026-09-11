@@ -282,7 +282,7 @@ Read this when the user asks "what can this do", "how do I start", "what is this
 
 Then offer the four starting points, as one line each:
 1. **I have a listing** → give me the page as a PDF, screenshots or copied text (a link alone carries no photos or floor plan, and I do not open listing sites) and I vet it (the 12 checks).
-2. **I have an area or a place I commute to** → I sweep around it and compare buildings.
+2. **I have an area or a place I commute to** → I narrow the map: the best area within your commute first, how to search it on the portals and set an alert, and a watch list of a few buildings to recognise.
 3. **I have no idea** → I explain the basics (section 3) and ask six questions (section 2).
 4. **I am about to sign, or I need somewhere for a few weeks first** → the move-in half: bridging stays (`axes/15`), passing the income check (`axes/16`), the first two weeks in the UK (`axes/17`).
 

@@ -992,7 +992,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 - write-back: yes
 
 ```text
-2. **I have an area or a place I commute to** → I sweep around it and compare buildings.
+2. **I have an area or a place I commute to** → I narrow the map: the best area within your commute first, how to search it on the portals and set an alert, and a watch list of a few buildings to recognise.
 ```
 
 ### deck:onboarding:6

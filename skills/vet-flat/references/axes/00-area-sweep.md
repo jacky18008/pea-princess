@@ -72,6 +72,14 @@ Produce, in this order:
 7. **At most `sweep_max_decision_questions` decision questions** put back to the user, and a per-candidate list of at most two questions for the agent.
 8. A viewing-day plan: what must be in writing before leaving the house, at most three flats in one area in a day, and the on-site-only list from `14-site-visit.md`.
 
+## Stage 7 — What the person sees first: the map, then a watch list
+The sweep's tables are for the report. The reply is smaller, and it sends the person to the portals with a precise search rather than a long list of buildings:
+1. **One area first** — the best area within the commute limit — unless the person asks for more. Offer the second and third areas after two weeks without a suitable listing, or on request. Say why this area: commute minutes, typical rent band for the home type (cite the source), crime reading, works underway.
+2. **The search, in the person's own hands**: the postcode district(s) to search, the filters that encode the profile (bedrooms, rent band, furnished or not, available-from), and "set a saved-search alert on the site and forward me the alert email text". The search and the alert are theirs; the skill names no way to automate either.
+3. **The watch list**: the top three to five buildings of that area, one line each — building, street, one reason from the registers (floor-area band, age, heating, works nearby, crime, walk to the station) — and how to recognise them in a search result or an alert email (building name, street). Never more than five per area in the reply; the rest stay in the report's `candidates[]` with their reasons.
+4. **What happens next**: when an alert email or a listing page arrives, the gate questions first (F1–F8), then the full check on the two or three worth viewing.
+Buildings are durable and supply is daily: the watch list tells the person what to recognise, the alert does the waiting.
+
 ## Traps and lessons
 - **Name collisions.** Two developments can share a name in different postcodes; check the postcode before moving any review, crime figure or planning record between them.
 - **Two flats in one building are not two options.** They share the works risk and the crime box.
