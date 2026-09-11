@@ -18,11 +18,12 @@ import sys
 import time
 import uuid
 import playground_skill
+import build_dist
 
 ROOT = Path(__file__).resolve().parents[1]
 GENERATED = 'dist/prompt-pack/INSTRUCTIONS.md'
 REQUIRED = (
-    'tools/persona_playground.py', 'tools/session_runner.py', 'tools/playground_settings.py',
+    'tools/persona_playground.py', 'tools/session_runner.py', 'tools/playground_settings.py', 'tools/build_dist.py',
     'tools/conversation_reply.py', 'tools/public_source_snapshot.py', 'tools/playground_review.py', 'tools/playground_attachments.py', 'tools/playground_replay.py', 'tools/playground_skill.py',
     'bench/personas.py', 'bench/journeys.py', 'bench/durable_run.py',
     'bench/call_control.py', 'bench/launch.py',
@@ -123,6 +124,28 @@ def remove_staging(path):
     shutil.rmtree(path, ignore_errors=True)
 
 
+def verify_default_archive(root, bundle):
+    """Match the builder's indexed working bytes, never mtime or Git HEAD alone."""
+    try:
+        members = build_dist.public_members(root)
+        expected = {}
+        for _, rel in members:
+            name = rel[len('skills/vet-flat/'):] if rel.startswith('skills/vet-flat/') else rel
+            expected[name] = read_source(root, rel)[0]
+    except (ValueError, OSError) as error:
+        raise FreezeError('Cannot verify default public ZIP against current source: ' + str(error)) from error
+    actual = bundle['files']
+    missing = sorted(set(expected) - set(actual))
+    extra = sorted(set(actual) - set(expected))
+    changed = sorted(name for name in set(expected) & set(actual) if expected[name] != actual[name])
+    if missing or extra or changed:
+        details = '; '.join(label + ': ' + ', '.join(names[:8]) for label, names in
+                            (('missing', missing), ('extra', extra), ('changed', changed)) if names)
+        raise FreezeError('Default public skill ZIP is stale or differs from current indexed working files (' +
+                          details + '). Rebuild with python3 tools/build_dist.py, or explicitly select '
+                          '--skill-archive PATH for a historical comparison. No server was started.')
+
+
 def freeze(root=ROOT, state_dir=None, skill_archive=None):
     """Copy current bytes once, verify their stability, then publish a snapshot."""
     root = Path(root).resolve()
@@ -136,6 +159,8 @@ def freeze(root=ROOT, state_dir=None, skill_archive=None):
     staging.mkdir(mode=0o700)
     try:
         public_bundle = playground_skill.load_archive(skill_archive if skill_archive is not None else root / 'dist/pea-princess-skill.zip')
+        if skill_archive is None:
+            verify_default_archive(root, public_bundle)
         indexed = tracked(root)
         names = [name for name in indexed if regular(root, name)]
         # Existing generated prompt instructions are a required runtime input,
@@ -164,6 +189,8 @@ def freeze(root=ROOT, state_dir=None, skill_archive=None):
                 raise FreezeError('Runtime file changed during freeze; restart when edits settle: ' + name)
         public_skill = playground_skill.install_archive(public_bundle, staging)
         playground_skill.verify_source(public_bundle)
+        if skill_archive is None:
+            verify_default_archive(root, public_bundle)
         for name, item in public_skill['files'].items():
             records[public_skill['skill_path'] + '/' + name] = dict(item, origin='public-skill-archive')
         records[public_skill['archive_path']] = {'sha256':public_skill['archive_sha256'],
@@ -175,6 +202,8 @@ def freeze(root=ROOT, state_dir=None, skill_archive=None):
                     'created_at': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
                     'git_head': head.stdout.decode('ascii').strip() if head.returncode == 0 else None,
                     'files': records, 'public_skill':public_skill,
+                    'public_skill_selection': {'mode': 'default_current_source' if skill_archive is None else 'explicit_archive',
+                                               'working_source_verified': True if skill_archive is None else None},
                     'note': 'Host hashes describe current working bytes, including uncommitted tracked edits. The actor skill is the exact separately retained public ZIP identified by public_skill; Git HEAD alone does not identify this snapshot.'}
         raw = json.dumps(manifest, ensure_ascii=False, sort_keys=True, indent=2).encode('utf-8') + b'\n'
         (staging / 'runtime-manifest.json').write_bytes(raw)
@@ -203,7 +232,7 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--port', type=int, default=8765)
     parser.add_argument('--state-dir', type=Path, default=ROOT / '.pea-playground')
-    parser.add_argument('--skill-archive', type=Path, default=ROOT / 'dist/pea-princess-skill.zip', help='Exact public pea-princess ZIP to freeze; never rebuilt or replaced by development files.')
+    parser.add_argument('--skill-archive', type=Path, help='Explicit historical/public ZIP selection: preserve its exact bytes without requiring current-source equality. Without this option, dist/pea-princess-skill.zip must match current indexed source; nothing is rebuilt automatically.')
     parser.add_argument('--freeze-only', action='store_true', help='Print the snapshot receipt without starting a server.')
     args = parser.parse_args(argv)
     if not 1024 <= args.port <= 65535:

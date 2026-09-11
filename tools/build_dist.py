@@ -106,11 +106,12 @@ def tracked_files(root, paths):
     return sorted(set(os.fsdecode(p) for p in output.split(b"\0") if p))
 
 
-def public_members():
+def public_members(root=None):
+    root = ROOT if root is None else root
     rows = []
-    for rel in tracked_files(ROOT, ["skills/vet-flat", "viewer/viewer.html"]):
+    for rel in tracked_files(root, ["skills/vet-flat", "viewer/viewer.html"]):
         if distributable(rel):
-            rows.append((checked_file(ROOT, rel), rel))
+            rows.append((checked_file(root, rel), rel))
     if not any(rel == "skills/vet-flat/SKILL.md" for _, rel in rows):
         raise ValueError("tracked skills/vet-flat/SKILL.md is required")
     return rows

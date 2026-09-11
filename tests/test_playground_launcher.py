@@ -28,6 +28,8 @@ class LauncherTests(unittest.TestCase):
         # Production prompt pack is ignored/untracked, and explicitly named.
         self.git('rm', '--cached', launcher.GENERATED)
         self.archive = self.root / 'dist/pea-princess-skill.zip'
+        # These snapshot tests deliberately select a release different from the
+        # synthetic controller tree. Default freshness has separate regressions.
         self.make_archive(self.archive)
 
     def make_archive(self, path, text='Public packaged instructions.'):
@@ -52,7 +54,7 @@ class LauncherTests(unittest.TestCase):
     def test_current_working_bytes_are_frozen_and_later_changes_do_not_affect_them(self):
         name = 'skills/vet-flat/SKILL.md'
         self.write(name, 'Uncommitted current skill.')
-        result = launcher.freeze(self.root)
+        result = launcher.freeze(self.root, skill_archive=self.archive)
         snapshot = Path(result['snapshot'])
         manifest_bytes = Path(result['manifest']).read_bytes()
         manifest = json.loads(manifest_bytes)
@@ -88,7 +90,7 @@ class LauncherTests(unittest.TestCase):
         link = self.root / 'tools/linked.py'
         link.symlink_to(self.root / 'docs/personal-note.md')
         self.git('add', 'tools/linked.py')
-        result = launcher.freeze(self.root)
+        result = launcher.freeze(self.root, skill_archive=self.archive)
         snapshot = Path(result['snapshot'])
         for name in excluded + ('tools/linked.py',):
             self.assertFalse((snapshot / name).exists(), name)
@@ -105,7 +107,7 @@ class LauncherTests(unittest.TestCase):
             return original(root, name)
         with mock.patch.object(launcher, 'read_source', side_effect=changing):
             with self.assertRaisesRegex(launcher.FreezeError, 'changed during freeze'):
-                launcher.freeze(self.root)
+                launcher.freeze(self.root, skill_archive=self.archive)
         self.assertEqual([], list((self.root / '.pea-playground/runtime').iterdir()))
 
     def test_required_symlink_or_missing_file_is_rejected_before_startup(self):
@@ -113,14 +115,14 @@ class LauncherTests(unittest.TestCase):
         file.unlink()
         file.symlink_to(self.root / 'tools/session_runner.py')
         with self.assertRaisesRegex(launcher.FreezeError, 'Required runtime files unavailable'):
-            launcher.freeze(self.root)
+            launcher.freeze(self.root, skill_archive=self.archive)
         self.assertEqual([], list((self.root / '.pea-playground/runtime').iterdir()))
 
     def test_existing_session_bytes_and_limits_remain_unchanged_and_argv_is_literal(self):
         session = self.write('.pea-playground/0123456789abcdef0123456789abcdef/session.json',
                              '{"limits":{"max_calls":2},"calls":[{},{}]}')
         before = session.read_bytes()
-        result = launcher.freeze(self.root)
+        result = launcher.freeze(self.root, skill_archive=self.archive)
         self.assertEqual(before, session.read_bytes())
         command = launcher.server_command(result['snapshot'], result['state_dir'], 8765,
                                            python='/literal/path with spaces/python')
@@ -142,7 +144,7 @@ class LauncherTests(unittest.TestCase):
     def test_missing_or_changing_public_archive_fails_without_publishing(self):
         self.archive.unlink()
         with self.assertRaises(launcher.FreezeError):
-            launcher.freeze(self.root)
+            launcher.freeze(self.root, skill_archive=self.archive)
         self.assertEqual([], list((self.root / '.pea-playground/runtime').iterdir()))
         self.make_archive(self.archive)
         original = launcher.playground_skill.install_archive
@@ -152,7 +154,7 @@ class LauncherTests(unittest.TestCase):
             return result
         with mock.patch.object(launcher.playground_skill, 'install_archive', side_effect=changing):
             with self.assertRaisesRegex(launcher.FreezeError, 'changed during freeze'):
-                launcher.freeze(self.root)
+                launcher.freeze(self.root, skill_archive=self.archive)
         self.assertEqual([], list((self.root / '.pea-playground/runtime').iterdir()))
 
 
