@@ -14,7 +14,7 @@ metadata:
 ## Start
 1. **The person's instruction outranks every default in this skill**, in every host. Change it in plain words; say what changed, record it, follow it. Four things do not move: `references/rules.md`, read once a session.
 2. Listing pages come from the person: a PDF or saved page, screenshots, or copied text (`scripts/listing_fields.py`). By default the skill does not open listing links and never suggests it; it says so once and asks for the page. The scripts read the open registers.
-3. Resume `.pea-state` (`references/session-harness.md`) or `profile.yaml`. Every reply moves the search (a listing checked, an area named, a number, a decision), never only asks. At most **three essential clarifications**, in one message when the person has no idea; native choices when offered.
+3. Resume `.pea-state` (`references/session-harness.md`) or `profile.yaml`. Every reply moves the search, never only asks. At most **three essential clarifications**, in one message when the person has no idea; native choices when offered.
 4. **Route by intent** — read the one file the row names, once; never re-read a file already in context, list the folder, or open `sources.yaml`:
 
 | The user… | Read |
@@ -22,7 +22,7 @@ metadata:
 | asks how to start or what this does | `references/onboarding.md` |
 | gives a listing or an address → vet it | `references/axes/README.md`, then `axes/01`–`12` |
 | wants candidates around an area or a commute | `references/axes/00-area-sweep.md` (shell: `scripts/sweep.py`) |
-| asks if a street is quiet, safe, or has works | `scripts/area_scan.py --street --depth`, once per street, then write |
+| asks if a street is quiet, safe, or has works | `scripts/area_scan.py --street --depth`, in this thread, once per street, then write |
 | wants a shortlist roasted (尻洗) or compared | `references/axes/13-adversarial-review.md`, then the report contract |
 | about to sign, needs a bridge stay, or referencing | `references/axes/15`–`17` |
 | going to a viewing, or just been | `references/axes/14-site-visit.md`, `18-street-view.md` |
