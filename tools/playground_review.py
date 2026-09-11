@@ -18,6 +18,7 @@ import re
 import stat
 import tempfile
 import uuid
+from session_runner import _input_files, _manifest_tool_policy
 
 VERSION = 2
 MAX_ARTIFACT_BYTES = 32 * 1024 * 1024
@@ -293,14 +294,24 @@ def _inspect(folder, session, row, detail):
     base = '.pea-state/runs/' + call_id
     gaps = []
     manifest, record, record_hash, binding = None, None, None, True
+    request_binding, files, files_present, files_valid = False, [], False, True
     receipt = row.get('receipt')
     reply = receipt.get('answer') if isinstance(receipt, dict) else None
     reply_path = 'session.calls[%s].receipt.answer' % call_id
     try:
         manifest = _envelope(folder, base + '/manifest.json')
         request = manifest['request']
+        files_present = 'input_files' in request
+        if files_present:
+            try:
+                if request['input_files'] is None:
+                    raise ValueError('saved input_files must be a list')
+                files = _input_files(request['input_files'])
+            except (ValueError, TypeError):
+                files_valid = False
+                raise ValueError('invalid input file metadata')
         version = manifest.get('version')
-        policy = manifest.get('tool_policy', 'text_only')
+        policy = _manifest_tool_policy(manifest)
         if (type(version) is not int or version not in (1, 2) or manifest['id'] != call_id
                 or _digest(request) != manifest['request_hash']
                 or request['packet_revision'] != manifest['packet']['revision']
@@ -319,6 +330,7 @@ def _inspect(folder, session, row, detail):
         saved_request = _envelope(folder, base + '/physical/requests/' + hashlib.sha256(b'answer').hexdigest() + '.json')
         if saved_request != {'call_id': 'answer', 'family': 'codex', 'request': request}:
             raise ValueError('physical request differs from manifest')
+        request_binding = True
     except (OSError, ValueError, KeyError, TypeError) as exc:
         gaps.append('request evidence: ' + str(exc))
         binding = False
@@ -408,6 +420,13 @@ def _inspect(folder, session, row, detail):
             for marker in ('\n\nAnswer the current input', '\n\nThe tester has changed', '\n\nHOST CHECKED-DELIVERY CONTRACT'):
                 current = current.split(marker, 1)[0]
         result.update(prompt=_block(prompt, base + '/manifest.json#value.request.prompt'),
+                      input_files={'status': ('not_recorded' if not files_present and request_binding else
+                                              'invalid' if not files_valid else
+                                              'bound' if request_binding else 'unbound'),
+                                   'items': files,
+                                   'request_sha256': manifest.get('request_hash') if request_binding else None,
+                                   'source_path': base + '/manifest.json#value.request.input_files',
+                                   'note': 'Binding status concerns saved supplied metadata only, not proof of delivery, file contents or model reading. image=true marks the current image handoff; false does not mean the file was absent from prior turns.'},
                       current_input=_block(current, base + '/manifest.json#value.request.prompt',
                                            'Extracted prompt span; full prompt is authoritative. No explicit marker means unavailable.'),
                       reply=_block(reply, reply_path, 'Retained reply; integrity or quality failure does not erase it.'),
@@ -695,6 +714,7 @@ def export_markdown(packet):
         sections.extend(['## 選定呼叫', _fenced(selected.get('call_id'))])
         for key, label in (('raw_actor_reply', '原始模型輸出'), ('current_input', '當輪輸入'),
                            ('prompt', '送給模型的完整提示（或明示截斷）'),
+                           ('input_files', '提供給這次呼叫的附件收據（不代表模型已讀取）'),
                            ('displayed_reply', '畫面回覆'), ('displayed_questions', '畫面選項')):
             block = selected.get(key, selected.get('reply') if key == 'raw_actor_reply' else None)
             sections.extend(['### ' + label, _fenced(block.get('text') if isinstance(block, dict) and 'text' in block else block)])

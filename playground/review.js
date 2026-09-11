@@ -16,6 +16,18 @@
   d.append(node('p',`${block?.truncated?'顯示前段；完整內容共 '+numbers(block.total_chars)+' 字。 ':''}${block?.source_path||''}`, 'fine'));
   if(block?.sha256)d.append(node('code',`SHA-256 ${block.sha256}`));return d;
  }
+ function attachmentList(receipt){
+  const section=node('div',undefined,'review-attachments');section.append(node('h4',receipt?.status==='message_metadata'?'訊息附件':'附件收據'));
+  const status=receipt?.status;
+  section.append(node('p',status==='message_metadata'?'這則訊息保存的附件資料；不代表某次模型呼叫已收到或讀取。':status==='bound'?'以下附件資料已綁定這次保存的請求；不代表模型已讀取或內容已核實。':status==='not_recorded'?'這份舊請求沒有附件欄位；不能推定當時未提供其他材料。':'附件收據缺少有效的請求關聯，不能當成已送交或已讀的證據。','fine'));
+  const list=node('ul');for(const file of receipt?.items||[]){
+   const row=node('li');row.append(node('strong',file.name),node('span',` · ${numbers(file.bytes)} bytes · ${file.source_kind||'使用者提供'}`),node('code',`ID ${file.id}`));
+   if(status!=='message_metadata')row.append(node('span',file.image?' · 本次標記為圖片輸入':' · 供應材料紀錄（未標記為本次圖片輸入）'));
+   row.append(node('p',file.path,'fine'),node('code',`SHA-256 ${file.sha256}`));
+   if(file.original_path)row.append(node('p','原始路徑：'+file.original_path,'fine'));
+   if(file.mime_type)row.append(node('p',file.mime_type,'fine'));list.append(row);
+  }section.append(list);return section;
+ }
  function stash(){if(!sid||!callId)return;drafts.set(key(),{rating:el('review-rating').value,severity:el('review-severity').value,note:el('review-note').value,tags:[...el('review-tags').querySelectorAll('input:checked')].map(x=>x.value)});}
  function restore(){const d=drafts.get(key())||{rating:'unrated',severity:'none',note:'',tags:[]};el('review-rating').value=d.rating;el('review-severity').value=d.severity;el('review-note').value=d.note;for(const x of el('review-tags').querySelectorAll('input'))x.checked=d.tags.includes(x.value);}
  function renderNotes(){
@@ -46,7 +58,7 @@
   box.append(head);
   const usage=card('02 · 這次呼叫的用量');const grid=node('div',undefined,'review-totals');
   for(const [k,label] of [['input_tokens','輸入（含快取）'],['cached_input_tokens','其中快取輸入'],['uncached_input_tokens','非快取輸入'],['output_tokens','輸出'],['processed_tokens','合計 tokens'],['seconds','耗時（秒）']]){const cell=node('div');cell.append(node('strong',numbers(d.usage[k])),node('small',label));grid.append(cell);}usage.append(grid,node('p','合計＝輸入＋輸出，快取不重複加計。這是 provider 回報的 token 用量，並非帳單金額。','fine'));box.append(usage);
-  const inputs=card('03 · 輸入與送給模型的內容');inputs.append(disclosure('這次要回答的輸入',d.current_input),disclosure('實際完整提示內容（含注入的條件與歷史）',d.prompt));box.append(inputs);
+  const inputs=card('03 · 輸入與送給模型的內容');inputs.append(disclosure('這次要回答的輸入',d.current_input),disclosure('實際完整提示內容（含注入的條件與歷史）',d.prompt),attachmentList(d.input_files));box.append(inputs);
   const tools=card('04 · 工具與研究過程');
   tools.append(node('p',d.tool_invocation_count===null?'工具紀錄未取得；不能推定沒有使用工具。':d.tool_invocation_count===0?'已保存紀錄中沒有工具執行。':`${d.tool_invocation_count} 次工具執行；${d.tool_failed_count} 次失敗。同一工具的開始與完成事件只計一次。`,'fine'));
   for(const t of d.tools||[]){const c=node('details',undefined,'review-tool');c.append(node('summary',`${t.id} · ${t.type} · ${t.status}`),disclosure('工具輸入',t.input),disclosure('工具輸出',t.output),disclosure('原始工具事件內容',t.raw));tools.append(c);}if(d.tools_truncated)tools.append(node('p','工具清單超過顯示上限，請查原始保存檔。','review-notice'));tools.append(disclosure('保存的工具事件（不含隱藏推理）',d.raw_tool_events));box.append(tools);
@@ -78,7 +90,7 @@
  el('review-form').onsubmit=async event=>{event.preventDefault();if(!detail||saving)return;stash();const savedKey=key(),savedSid=sid,payload={...drafts.get(savedKey),call_id:callId,reviewer:'human',expected_source:Object.fromEntries(['record_sha256','message_sha256','displayed_sha256'].map(k=>[k,detail.source[k]??null]))};const fingerprint=JSON.stringify(payload);let intent=intents.get(savedKey);if(!intent||intent.fingerprint!==fingerprint){intent={fingerprint,id:crypto.randomUUID()};intents.set(savedKey,intent);}saving=true;el('review-save').disabled=true;
   try{await api(`/api/session/${savedSid}/reviews`,{...payload,client_id:intent.id});intents.delete(savedKey);drafts.delete(savedKey);const notes=await api(`/api/session/${savedSid}/reviews`);if(sid===savedSid){reviews=notes.reviews;renderNotes();if(key()===savedKey)restore();}toast('評閱已保存，原始對話沒有變更。');}catch(e){toast(e.message);}finally{saving=false;el('review-save').disabled=!detail||!(detail.source?.record_sha256||detail.source?.message_sha256);}
  };
- el('review-conversation').ontoggle=async()=>{if(!el('review-conversation').open||!sid)return;const requested=sid,request=generation;el('review-conversation-body').replaceChildren(node('p','讀取完整對話…','fine'));try{const packet=await api(`/api/session/${requested}/review-packet`);if(request!==generation||requested!==sid)return;const body=el('review-conversation-body');body.replaceChildren();for(const m of packet.messages){const c=card(m.role==='human'?'使用者':m.role==='persona'?'合成人物':m.role==='assistant'?'回答者':'紀錄');c.append(renderReply(m.display_text??m.text));for(const q of m.questions||[]){c.append(node('p',q.question));const list=node('ul');for(const option of q.options||[])list.append(node('li',option));c.append(list);}body.append(c);}}catch(e){if(request===generation)el('review-conversation-body').replaceChildren(node('p',e.message));}};
+ el('review-conversation').ontoggle=async()=>{if(!el('review-conversation').open||!sid)return;const requested=sid,request=generation;el('review-conversation-body').replaceChildren(node('p','讀取完整對話…','fine'));try{const packet=await api(`/api/session/${requested}/review-packet`);if(request!==generation||requested!==sid)return;const body=el('review-conversation-body');body.replaceChildren();for(const m of packet.messages){const c=card(m.role==='human'?'使用者':m.role==='persona'?'合成人物':m.role==='assistant'?'回答者':'紀錄');c.append(renderReply(m.display_text??m.text));if(m.attachments?.length)c.append(attachmentList({status:'message_metadata',items:m.attachments}));for(const q of m.questions||[]){c.append(node('p',q.question));const list=node('ul');for(const option of q.options||[])list.append(node('li',option));c.append(list);}body.append(c);}}catch(e){if(request===generation)el('review-conversation-body').replaceChildren(node('p',e.message));}};
  el('show-review').onclick=open;el('show-chat').onclick=()=>{stash();visible=false;el('chat-view').hidden=false;el('review-view').hidden=true;el('show-chat').setAttribute('aria-pressed','true');el('show-review').setAttribute('aria-pressed','false');if(location.hash.startsWith('#review/'))history.replaceState(null,'',location.pathname);};
  el('review-session').onchange=()=>loadSession(el('review-session').value);el('review-refresh').onclick=()=>sid?loadSession(sid,callId):open();el('review-json').onclick=()=>download('json');el('review-md').onclick=()=>download('md');
  window.PeaReview={sessionUpdated(s){if(visible&&s.id===sid)el('review-notice').textContent=s.busy?'模型執行中。完成後按「重新讀取紀錄」查看工具與用量。':'查看的是已保存快照；可按「重新讀取紀錄」取得最新內容。';}};

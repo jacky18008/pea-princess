@@ -24,6 +24,43 @@ IDENTIFIER = re.compile(r"[A-Za-z0-9][A-Za-z0-9_-]{0,79}\Z")
 TOOL_POLICIES = ("text_only", "live_research")
 
 
+def _input_files(value):
+    """Validate supplied metadata only; never open or resolve attachment paths."""
+    if value is None:
+        return []
+    if not isinstance(value, list) or len(value) > 48:
+        raise ValueError("input_files must contain at most 48 files")
+    required = {"id", "name", "bytes", "sha256", "path", "image", "source_kind"}
+    result, identifiers = [], set()
+    for row in value:
+        if not isinstance(row, dict) or not required.issubset(row) or set(row) - required - {"original_path", "mime_type"}:
+            raise ValueError("invalid input file metadata fields")
+        for key, maximum in (("id", 80), ("name", 255), ("source_kind", 80), ("path", 4096), ("original_path", 4096), ("mime_type", 255)):
+            if key not in row:
+                continue
+            text = row[key]
+            if (not isinstance(text, str) or not text.strip() or len(text) > maximum
+                    or any(ord(c) < 32 or 127 <= ord(c) <= 159 for c in text)):
+                raise ValueError("invalid input file " + key)
+        if not IDENTIFIER.fullmatch(row["id"]) or row["id"] in identifiers:
+            raise ValueError("input file IDs must be valid and unique")
+        if type(row["bytes"]) is not int or not 0 <= row["bytes"] <= 9007199254740991:
+            raise ValueError("input file bytes must be a nonnegative safe integer")
+        if type(row["image"]) is not bool:
+            raise ValueError("input file image must be boolean")
+        if not isinstance(row["sha256"], str) or not re.fullmatch(r"[0-9a-f]{64}", row["sha256"]):
+            raise ValueError("input file sha256 must be lowercase SHA-256")
+        for key in ("path", "original_path"):
+            if key in row and not Path(row[key]).is_absolute():
+                raise ValueError("input file paths must be absolute")
+        # original_path is untouched provenance, never the attachment handoff path.
+        if ".." in Path(row["path"]).parts:
+            raise ValueError("input file path must be without traversal")
+        identifiers.add(row["id"])
+        result.append(dict(row))
+    return result
+
+
 def _tool_policy(value):
     if not isinstance(value, str) or value not in TOOL_POLICIES:
         raise ValueError("unknown tool policy")
@@ -37,7 +74,7 @@ def _manifest_tool_policy(manifest):
     if type(version) is not int or not isinstance(request, dict):
         raise ValueError("step manifest integrity mismatch")
     if version == 1:
-        if "tool_policy" in manifest or "tool_policy" in request:
+        if "tool_policy" in manifest or "tool_policy" in request or "input_files" in request:
             raise ValueError("legacy manifest cannot contain a tool policy")
         return "text_only"
     if version != 2:
@@ -45,6 +82,12 @@ def _manifest_tool_policy(manifest):
     policy = _tool_policy(manifest.get("tool_policy"))
     if request.get("tool_policy") != policy:
         raise ValueError("request tool policy is not bound to this step")
+    if "input_files" in request:
+        if request["input_files"] is None:
+            raise ValueError("saved input_files must be a list")
+        files = _input_files(request["input_files"])
+        if files and policy != "live_research":
+            raise ValueError("input files require live_research")
     return policy
 
 
@@ -174,8 +217,11 @@ def _codex_invoke(request, folder):
 
 def run_step(project, call_id, task_id, model, prompt, token_budget_id,
              max_chars=24000, timeout=180, invoke=None, max_prompt_chars=MAX_PROMPT_CHARS,
-             response_schema=None, presentation="audit", tool_policy="text_only"):
+             response_schema=None, presentation="audit", tool_policy="text_only", input_files=None):
     tool_policy = _tool_policy(tool_policy)
+    input_files = _input_files(input_files)
+    if input_files and (tool_policy != "live_research" or not callable(invoke)):
+        raise ValueError("input files require live_research and a custom invoke adapter")
     if presentation not in ("audit", "conversation"):
         raise ValueError("unknown presentation")
     if response_schema is not None and (not isinstance(response_schema, dict) or
@@ -235,6 +281,8 @@ def run_step(project, call_id, task_id, model, prompt, token_budget_id,
     request = {"model": model, "prompt": assembled, "timeout_seconds": timeout,
                "packet_revision": packet["revision"], "packet_event_hash": packet["event_hash"],
                "tool_policy": tool_policy}
+    if input_files:
+        request["input_files"] = input_files
     if response_schema is not None:
         request["response_schema"] = json.loads(json.dumps(response_schema))
     manifest = {"version": 2, "id": call_id, "task_id": task_id, "tool_policy": tool_policy,

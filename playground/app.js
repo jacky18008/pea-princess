@@ -1,12 +1,63 @@
 "use strict";
 const $=id=>document.getElementById(id);
-let catalog=null, current=null, selected=null, lastRevision=null, polling=false, messageIntent=null, createIntent=null, actionIntent=null, creating=false;
+let catalog=null, current=null, selected=null, lastRevision=null, polling=false, createIntent=null, actionIntent=null, creating=false;
 const choiceDrafts=new Map(), choiceIntents=new Map(), choiceSending=new Set(), messageSending=new Set();
+// Drafts remain in memory only. Uploaded bytes never enter browser storage or exports.
+const initialDraft={attachments:[],path:""},messageDrafts=new Map(),messageIntents=new Map(),pickerTargets=new Map();
+const INITIAL_DRAFT="initial",MAX_ATTACHMENT_BYTES=25*1024*1024,MAX_ATTACHMENTS=6;
 const statuses={ready:"等待開始",paused:"已暫停",running:"對話進行中",ended:"Persona 結束",budget:"到達上限",error:"需要處理",interrupted:"待恢復"};
 const modeNames={live:"Agent 對話測試",fixture:"合成人物測試 · 虛構資料"};
 const capabilityDefaults={live:"顯示模型原始回覆，保存你的追問與條件變更；房源資料可直接貼入。",fixture:"合成人物測試；僅使用已提供的虛構材料，不執行即時搜尋。"};
 function isLive(s){return s?.research_mode==="live";}
 function node(tag,text,cls){const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;}
+function attachmentDraft(key){if(key===INITIAL_DRAFT)return initialDraft;if(!messageDrafts.has(key))messageDrafts.set(key,{text:"",amendment:false,path:"",attachments:[]});return messageDrafts.get(key);}
+function saveComposerDraft(){if(!selected)return;const draft=attachmentDraft(selected);draft.text=$("message").value;draft.amendment=$("amendment").checked;draft.path=$("message-path").value;}
+function restoreComposerDraft(){const draft=selected?attachmentDraft(selected):{text:"",amendment:false,path:""};$("message").value=draft.text;$("amendment").checked=draft.amendment;$("message-path").value=draft.path;}
+function acceptsAttachments(s){return isLive(s)&&s.output_mode==="agent";}
+function attachmentTarget(prefix){return prefix==="initial"?(!creating&&catalog&&$("research-mode").value==="live"?INITIAL_DRAFT:null):(canCompose(current)&&acceptsAttachments(current)&&!messageSending.has(selected)?selected:null);}
+function attachmentIds(draft){return draft.attachments.filter(item=>item.state==="ready").map(item=>item.meta.id);}
+function attachmentPending(draft){return draft.attachments.some(item=>item.state!=="ready");}
+function fileSize(bytes){return Number.isFinite(bytes)?(bytes<1024?`${bytes} B`:bytes<1024*1024?`${Math.ceil(bytes/1024)} KB`:`${(bytes/1024/1024).toFixed(1)} MB`):"";}
+function renderAttachmentDraft(prefix,key){
+ const area=$(prefix+"-attachments"),list=$(prefix+"-file-list"),draft=key?attachmentDraft(key):{attachments:[]};
+ area.hidden=prefix==="initial"?$("research-mode").value!=="live":!acceptsAttachments(current);
+ const allowed=attachmentTarget(prefix)!==null,full=draft.attachments.length>=MAX_ATTACHMENTS;
+ for(const suffix of ["pick","files","path","path-add"])$(prefix+"-"+suffix).disabled=!allowed||full;
+ list.replaceChildren();for(const item of draft.attachments){
+  const row=node("div",undefined,"attachment-chip"+(item.state==="error"?" attachment-error":"")),info=node("div",undefined,"attachment-info");
+  info.append(node("span",item.meta?.name||item.name,"attachment-name"),node("small",item.state==="uploading"?"正在加入…":item.state==="error"?item.error:[fileSize(item.meta.bytes),"待送出"].filter(Boolean).join(" · ")));
+  const remove=node("button","×");remove.type="button";remove.disabled=prefix==="initial"?creating:messageSending.has(key);remove.setAttribute("aria-label",`移除 ${item.meta?.name||item.name}`);
+  remove.onclick=()=>{if(prefix==="initial"?creating:messageSending.has(key))return;draft.attachments=draft.attachments.filter(value=>value!==item);attachmentsUpdated(key);};row.append(info,remove);list.append(row);
+ }
+}
+function attachmentsUpdated(key){if(key===INITIAL_DRAFT)creationMode();else if(key===selected)syncComposer();}
+function readFileBase64(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onerror=()=>reject(Error("無法讀取檔案，請重新選擇。"));reader.onabort=()=>reject(Error("檔案讀取已取消。"));reader.onload=()=>{const value=String(reader.result||""),comma=value.indexOf(",");if(comma<0)reject(Error("無法讀取檔案，請重新選擇。"));else resolve(value.slice(comma+1));};reader.readAsDataURL(file);});}
+async function addAttachment(key,source){
+ const draft=attachmentDraft(key);if(draft.attachments.length>=MAX_ATTACHMENTS){toast("每則最多加入 6 份檔案，請先移除一份。");return;}
+ const item={key:crypto.randomUUID(),name:source.file?.name||source.path,state:"uploading"};draft.attachments.push(item);attachmentsUpdated(key);
+ try{
+  if(source.file&&source.file.size>MAX_ATTACHMENT_BYTES)throw Error("檔案超過 25 MB，請選擇較小的檔案。");
+  const payload=source.file?{name:source.file.name,content_base64:await readFileBase64(source.file)}:{path:source.path};
+  if(!draft.attachments.includes(item))return;
+  const meta=await api("/api/attachments",payload);if(!meta||typeof meta.id!=="string"||!meta.id)throw Error("檔案未加入，請移除後再試一次。");
+  item.meta=meta;item.state="ready";
+ }catch(error){item.state="error";item.error=error.message||"檔案未加入，請移除後再試一次。";}finally{attachmentsUpdated(key);}
+}
+function addFiles(key,files){return Promise.all(Array.from(files).map(file=>addAttachment(key,{file})));}
+function wireAttachments(prefix,dropId){
+ const picker=$(prefix+"-files"),path=$(prefix+"-path"),drop=$(dropId);
+ $(prefix+"-pick").onclick=()=>{const key=attachmentTarget(prefix);if(key===null)return;pickerTargets.set(prefix,key);picker.value="";picker.click();};
+ picker.onchange=()=>{const key=pickerTargets.get(prefix)??attachmentTarget(prefix);pickerTargets.delete(prefix);const files=Array.from(picker.files||[]);picker.value="";if(key!==null)return addFiles(key,files);};
+ path.oninput=()=>{const key=prefix==="initial"?INITIAL_DRAFT:selected;if(key)attachmentDraft(key).path=path.value;};
+ const addPath=()=>{const key=attachmentTarget(prefix),value=path.value.trim();if(key===null||!value)return;const draft=attachmentDraft(key);if(draft.attachments.length>=MAX_ATTACHMENTS){toast("每則最多加入 6 份檔案，請先移除一份。");return;}draft.path="";path.value="";return addAttachment(key,{path:value});};
+ $(prefix+"-path-add").onclick=addPath;path.onkeydown=event=>{if(event.key==="Enter"){event.preventDefault();return addPath();}};
+ const hasFiles=event=>Array.from(event.dataTransfer?.types||[]).includes("Files");
+ drop.ondragover=event=>{if(!hasFiles(event))return;event.preventDefault();if(attachmentTarget(prefix)!==null){event.dataTransfer.dropEffect="copy";drop.setAttribute("data-file-drag","true");}};
+ drop.ondragleave=()=>drop.setAttribute("data-file-drag","false");
+ drop.ondrop=event=>{drop.setAttribute("data-file-drag","false");const files=event.dataTransfer?.files;if(!files?.length)return;event.preventDefault();const key=attachmentTarget(prefix);if(key!==null)return addFiles(key,files);};
+ drop.onpaste=event=>{const files=event.clipboardData?.files;if(!files?.length)return;const key=attachmentTarget(prefix);if(key===null)return;event.preventDefault();return addFiles(key,files);};
+}
+function renderMessageAttachments(items){const list=node("div",undefined,"message-attachments");for(const meta of items){if(!meta||typeof meta.name!=="string")continue;const row=node("div",undefined,"attachment-chip");row.append(node("span",meta.name,"attachment-name"),node("small",fileSize(meta.bytes)));list.append(row);}return list;}
 // Presentation only: a deliberately small Markdown subset, built with text
 // nodes/elements. Unsupported syntax stays visible; source messages never change.
 function replyLink(value){
@@ -118,7 +169,7 @@ function limitNotice(s){
 }
 function canCompose(s){return Boolean(s&&s.id===selected&&s.compatible!==false&&!limitNotice(s)&&!["error","interrupted","budget"].includes(s.status));}
 function canAdvance(s,action){return Boolean(s&&s.id===selected&&!s.busy&&s.compatible!==false&&!limitNotice(s)&&!["error","interrupted","ended","budget"].includes(s.status)&&(!isLive(s)||(action==="step"&&(s.next_actor||s.pending_count>0))));}
-function syncComposer(){const blocked=!canCompose(current);$("message").disabled=blocked;$("amendment").disabled=blocked||isLive(current);$("send").disabled=blocked||messageSending.has(selected);}
+function syncComposer(){const blocked=!canCompose(current);$("message").disabled=blocked;$("amendment").disabled=blocked||isLive(current);$("send").disabled=blocked||messageSending.has(selected)||(selected&&attachmentPending(attachmentDraft(selected)));renderAttachmentDraft("message",selected);}
 function canChoose(s,index,id){return canCompose(s)&&s.id===id&&index===s.messages.length-1&&!s.busy&&!s.pending_count&&!choiceSending.has(`${id}:${index}`);}
 function clarificationForm(s,m,index){
  const key=`${s.id}:${index}`, form=node("form",undefined,"clarifications");
@@ -140,7 +191,8 @@ function creationMode(){
  const live=$("research-mode").value==="live",request=$("initial-request").value;
  $("live-setup").hidden=!live;$("fixture-setup").hidden=live;
  $("create").textContent=live?"建立測試對話":"建立合成測試";
- $("create").disabled=creating||!catalog||(live?(!request.trim()||request.length>8000):!$("persona").value);
+ $("create").disabled=creating||!catalog||(live?((!request.trim()&&!attachmentIds(initialDraft).length)||request.length>8000||attachmentPending(initialDraft)):!$("persona").value);
+ renderAttachmentDraft("initial",INITIAL_DRAFT);
  $("call-limit-note").textContent=(live?"":"包含回答與合成人物。")+"每次呼叫之間檢查上限，可能超出一則；不自動重試。思考強度固定 low。";
  if(!current&&!selected){$("session-label").textContent=modeNames[live?"live":"fixture"];$("title").textContent=live?"寫下需求，開始研究":"挑一個合成人物，開始測試";$("run").hidden=live;$("step").textContent=live?"研究並回覆":"下一步";$("capability-status").textContent=capabilityDefaults[live?"live":"fixture"];$("empty-title").textContent=live?"把選項查清楚，再一起決定":"觀察合成人物的多輪對話";$("empty-note").textContent=live?"從大致需求開始，逐步比較來源、費用與取捨。你可以隨時補充問題或修改條件。":"人物會追問、補充虛構材料，也可能失去耐心。你可以中途插話，觀察 Codex 如何接續。";$("turn-label").textContent=live?"真人輸入":"合成人物回合";}
 }
@@ -157,7 +209,7 @@ function currentChecks(s){
  if(a.presentation?.todos?.length){body.append(node("h3","目前待辦"));const list=node("ul");for(const text of a.presentation.todos)list.append(node("li",text));body.append(list);}
 }
 async function list(){const rows=await api("/api/sessions");$("sessions").replaceChildren();for(const s of rows.sessions){const b=node("button",s.name,"session-card"+(s.id===selected?" active":""));b.append(node("small",`${isLive(s)?"真實研究":"合成測試"} · ${statusLabel(s)} · ${s.calls} calls · ${s.tokens===null?"用量未知":s.tokens.toLocaleString()+" tokens"}`));b.onclick=()=>select(s.id);$("sessions").append(b);}}
-async function select(id){selected=id;lastRevision=null;current=null;$("title").textContent="正在讀取這段對話…";$("messages").replaceChildren();if($("current-checks"))$("current-checks").hidden=true;if($("current-checks-body"))$("current-checks-body").replaceChildren();for(const key of ["step","run","pause","send","message","amendment","export"])$(key).disabled=true;try{localStorage.setItem("pea-lab-session",id);}catch(_){}await refresh();await list();}
+async function select(id){saveComposerDraft();selected=id;lastRevision=null;current=null;restoreComposerDraft();syncComposer();$("title").textContent="正在讀取這段對話…";$("messages").replaceChildren();if($("current-checks"))$("current-checks").hidden=true;if($("current-checks-body"))$("current-checks-body").replaceChildren();for(const key of ["step","run","pause","send","message","amendment","export"])$(key).disabled=true;try{localStorage.setItem("pea-lab-session",id);}catch(_){}await refresh();await list();}
 function render(s){current=s;globalThis.PeaReview?.sessionUpdated(s);currentChecks(s);const live=isLive(s);$("title").textContent=s.name;$("session-label").textContent=live?`${s.output_mode==="agent"?"Agent 對話測試":"真實找房研究"} · ${s.model}`:`合成人物測試 · 虛構資料 · ${s.persona_id} · ${s.model}`;$("status").textContent=statusLabel(s);$("phase").textContent=s.phase_label||"";$("turn-label").textContent=live?"真人輸入":"合成人物回合";$("turn").textContent=live?String(s.persona_turn):`${s.persona_turn}/${s.patience_turns}`;$("calls").textContent=`${s.calls}/${s.limits.max_calls}`;const knownTokens=Number.isFinite(s.tokens);$("tokens").textContent=knownTokens?s.tokens.toLocaleString():(s.busy||s.pending_call?"計算中":"用量未知");$("usage-bar").hidden=!knownTokens;$("usage-bar").style.width=knownTokens?`${Math.max(0,Math.min(100,100*s.tokens/s.limits.max_tokens))}%`:"";$("usage-note").textContent=`上限 ${s.limits.max_tokens.toLocaleString()} · 回答 ${s.actor_calls.assistant} 次`+(live?"":`／合成人物 ${s.actor_calls.persona} 次`);
  const capNotice=limitNotice(s);$("step").textContent=live?"研究並回覆":"下一步";$("step").disabled=!canAdvance(s,"step");$("run").hidden=live;$("run").disabled=!canAdvance(s,"run");$("pause").disabled=!s.busy&&!s.auto;$("export").disabled=false;$("recover").hidden=!(s.pending_call&&!s.busy);$("message-label").textContent=live?"繼續討論":"加入這段對話";$("amendment-label").hidden=live;$("send").textContent=live?"送出並研究 ↑":"插入問題 ↑";syncComposer();$("banner").hidden=!(capNotice||s.notice);$("banner").textContent=[capNotice,s.notice].filter(Boolean).join("\n");$("queue-note").textContent=live?(s.pending_count?`${s.pending_count} 則問題已保存，會依序研究並回覆。`:"送出後繼續研究；研究途中也能補充需求。"):(s.pending_count?`${s.pending_count} 則插話已保存，將於目前這則完成後優先回答。`:"插話會保存，於目前這則完成後優先回答。");
  $("capability-status").textContent=typeof s.capability_status==="string"&&s.capability_status?s.capability_status:capabilityDefaults[live?"live":"fixture"];
@@ -165,13 +217,34 @@ function render(s){current=s;globalThis.PeaReview?.sessionUpdated(s);currentChec
  if(live){$("behavior").replaceChildren(node("p",capNotice?"已達用量上限，可閱讀與匯出已保存的內容。":s.compatible===false?"這段紀錄目前只能閱讀與匯出。":["error","interrupted","budget"].includes(s.status)?"研究尚未完成，請查看上方狀態。":s.busy?"正在研究你的問題。":s.next_actor||s.pending_count?"需求已保存，可以開始研究。":"回答已保存，等你補充問題或調整條件。"));}
  else{$("behavior").replaceChildren(node("p",`情緒：${s.mood} · 尚可 ${Math.max(0,s.patience_turns-s.persona_turn)} 回合`),node("p",`合成人物持有 ${s.held_documents.length} 份文件`));for(const e of s.events.slice(-7))$("behavior").append(node("div",`第 ${e[0]} 回合 · ${e[1]}`,"event"));}
  $("mode-limit-note").textContent=live?(s.output_mode==="agent"?"這裡顯示模型原始回答供測試；不代表已通過房源條件核對。完整輸入、回答、工具紀錄與用量保存在本機。":"研究結果應附來源連結與查詢時間，並區分刊登資訊、推估及尚未確認的可租狀態。"):"合成人物的後續訊息由 Codex 產生，使用分開的歷史。測試僅使用所提供的虛構材料，沒有即時查詢；不代表真實在租房源。";
- const box=$("messages"), nearBottom=box.scrollHeight-box.scrollTop-box.clientHeight<180;box.replaceChildren();s.messages.forEach((m,index)=>{const article=node("article",undefined,`message ${m.role}`);article.append(node("div",m.role==="assistant"?"Codex":m.role==="human"?(live?"你":m.kind==="amendment"?"你 · 情境變更":"你 · 插話"):m.role==="persona"?`${s.name} · 合成人物`:"紀錄","speaker"));if(m.pending)article.firstChild.append(node("small","已保存・排隊中"));if(m.comparison_status==="historical")article.append(node("small","先前的比較；目前條件或來源已更新。","fine"));article.append(renderReply(m.display_text??m.text));if(m.questions?.length)article.append(clarificationForm(s,m,index));box.append(article);});if(s.busy){const pending=node("article",undefined,"message system");pending.append(node("div",s.phase_label+"…","bubble"));box.append(pending);}if(nearBottom||lastRevision===null)box.scrollTop=box.scrollHeight;
+ const box=$("messages"), nearBottom=box.scrollHeight-box.scrollTop-box.clientHeight<180;box.replaceChildren();s.messages.forEach((m,index)=>{const article=node("article",undefined,`message ${m.role}`);article.append(node("div",m.role==="assistant"?"Codex":m.role==="human"?(live?"你":m.kind==="amendment"?"你 · 情境變更":"你 · 插話"):m.role==="persona"?`${s.name} · 合成人物`:"紀錄","speaker"));if(m.pending)article.firstChild.append(node("small","已保存・排隊中"));if(m.comparison_status==="historical")article.append(node("small","先前的比較；目前條件或來源已更新。","fine"));article.append(renderReply(m.display_text??m.text));if(Array.isArray(m.attachments)&&m.attachments.length)article.append(renderMessageAttachments(m.attachments));if(m.questions?.length)article.append(clarificationForm(s,m,index));box.append(article);});if(s.busy){const pending=node("article",undefined,"message system");pending.append(node("div",s.phase_label+"…","bubble"));box.append(pending);}if(nearBottom||lastRevision===null)box.scrollTop=box.scrollHeight;
 }
 async function refresh(){if(!selected||polling)return;polling=true;try{const requestedId=selected;const s=await api(`/api/session/${requestedId}`);if(selected!==requestedId)return;if(s.revision!==lastRevision||s.compatible!==current?.compatible||s.comparison_status!==current?.comparison_status||s.notice!==current?.notice){render(s);lastRevision=s.revision;}}catch(e){toast(e.message);}finally{polling=false;}}
 async function action(action){if(["step","run"].includes(action)&&!canAdvance(current,action)){if(limitNotice(current))toast(limitNotice(current));return;}try{const id=selected,fingerprint=JSON.stringify([id,action]);if(!actionIntent||actionIntent.fingerprint!==fingerprint)actionIntent={fingerprint,id:crypto.randomUUID()};const intent=actionIntent;await api(`/api/session/${id}/control`,{action,client_id:intent.id});if(actionIntent===intent)actionIntent=null;await refresh();await list();}catch(e){toast(e.message);}}
 $("persona").onchange=()=>{profile();creationMode();};$("research-mode").onchange=creationMode;$("initial-request").oninput=creationMode;$("refresh").onclick=()=>list().catch(e=>toast(e.message));$("step").onclick=()=>action("step");$("run").onclick=()=>action("run");$("pause").onclick=()=>action("pause");$("recover").onclick=()=>action("recover");
-$("create").onclick=async()=>{if(creating||!catalog)return;const research_mode=$("research-mode").value,live=research_mode==="live",initial_request=$("initial-request").value;if(live&&(!initial_request.trim()||initial_request.length>8000)){toast("請先寫下找房需求，最多 8,000 字。");return;}creating=true;creationMode();try{const settings={research_mode,...(live?{initial_request,output_mode:"agent"}:{persona_id:$("persona").value}),model:$("model").value,max_calls:Number($("max-calls").value),max_tokens:Number($("max-tokens").value),seed:1};const fingerprint=JSON.stringify(settings);if(!createIntent||createIntent.fingerprint!==fingerprint)createIntent={fingerprint,id:crypto.randomUUID()};const s=await api("/api/sessions",{...settings,client_id:createIntent.id});createIntent=null;await select(s.id);}catch(e){toast(e.message);}finally{creating=false;creationMode();}};
-$("composer").onsubmit=async e=>{e.preventDefault();const text=$("message").value,id=selected;if(!text.trim()||!canCompose(current)||messageSending.has(id))return;const kind=!isLive(current)&&$("amendment").checked?"amendment":"question";messageSending.add(id);syncComposer();try{const fingerprint=JSON.stringify([id,text,kind]);if(!messageIntent||messageIntent.fingerprint!==fingerprint)messageIntent={fingerprint,id:crypto.randomUUID()};const intent=messageIntent;await api(`/api/session/${id}/message`,{text,kind,client_id:intent.id});if(messageIntent===intent)messageIntent=null;if(selected===id&&$("message").value===text){$("message").value="";$("amendment").checked=false;}await refresh();}catch(err){toast(err.message);}finally{messageSending.delete(id);syncComposer();}};
+wireAttachments("initial","live-setup");wireAttachments("message","composer");
+$("message").oninput=saveComposerDraft;$("amendment").onchange=saveComposerDraft;
+$("create").onclick=async()=>{
+ if(creating||!catalog)return;const research_mode=$("research-mode").value,live=research_mode==="live",initial_request=$("initial-request").value,attachments=live?attachmentIds(initialDraft):[];
+ if(live&&((!initial_request.trim()&&!attachments.length)||initial_request.length>8000)){toast("請寫下找房需求或加入檔案，文字最多 8,000 字。");return;}
+ if(live&&attachmentPending(initialDraft)){toast("請等檔案加入完成，或移除未成功的檔案。");return;}
+ creating=true;creationMode();try{
+  const settings={research_mode,...(live?{initial_request,output_mode:"agent",attachments}:{persona_id:$("persona").value}),model:$("model").value,max_calls:Number($("max-calls").value),max_tokens:Number($("max-tokens").value),seed:1};
+  const fingerprint=JSON.stringify(settings);if(!createIntent||createIntent.fingerprint!==fingerprint)createIntent={fingerprint,id:crypto.randomUUID()};
+  const s=await api("/api/sessions",{...settings,client_id:createIntent.id});createIntent=null;initialDraft.attachments=initialDraft.attachments.filter(item=>!attachments.includes(item.meta?.id));await select(s.id);
+ }catch(e){toast(e.message);}finally{creating=false;creationMode();}
+};
+$("composer").onsubmit=async e=>{
+ e.preventDefault();const text=$("message").value,id=selected;if(!canCompose(current)||messageSending.has(id))return;
+ saveComposerDraft();const draft=attachmentDraft(id),attachments=acceptsAttachments(current)?attachmentIds(draft):[];
+ if((!text.trim()&&!attachments.length)||attachmentPending(draft))return;
+ const kind=!isLive(current)&&$("amendment").checked?"amendment":"question";messageSending.add(id);syncComposer();try{
+  const fingerprint=JSON.stringify([id,text,kind,attachments]);let intent=messageIntents.get(id);if(!intent||intent.fingerprint!==fingerprint){intent={fingerprint,id:crypto.randomUUID()};messageIntents.set(id,intent);}
+  await api(`/api/session/${id}/message`,{text,kind,attachments,client_id:intent.id});if(messageIntents.get(id)===intent)messageIntents.delete(id);
+  draft.attachments=draft.attachments.filter(item=>!attachments.includes(item.meta?.id));if(draft.text===text){draft.text="";draft.amendment=false;}
+  if(selected===id&&$("message").value===text){$("message").value="";$("amendment").checked=false;}await refresh();
+ }catch(err){toast(err.message);}finally{messageSending.delete(id);syncComposer();}
+};
 $("export").onclick=async()=>{try{const s=await api(`/api/session/${selected}/export`);const url=URL.createObjectURL(new Blob([JSON.stringify(s,null,2)],{type:"application/json"}));const a=node("a");a.href=url;a.download=isLive(s)?`PRIVATE-research-${s.id.slice(0,8)}.json`:`PRIVATE-persona-${s.persona_id}-${s.id.slice(0,8)}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch(e){toast(e.message);}};
 async function start(){try{catalog=await api("/api/catalog");const modes=["live","fixture"].filter(mode=>(catalog.research_modes||["fixture"]).includes(mode));$("research-mode").replaceChildren(...modes.map(mode=>{const o=node("option",modeNames[mode]);o.value=mode;return o;}));$("research-mode").value=modes[0]||"fixture";$("persona").replaceChildren(...catalog.personas.map(p=>{const o=node("option",`${p.id} · ${p.name}`);o.value=p.id;return o;}));$("model").replaceChildren(...catalog.models.map(m=>{const o=node("option",m);o.value=m;return o;}));profile();creationMode();$("connection").textContent="本機研究介面已連接";await list();let previous=null;try{previous=localStorage.getItem("pea-lab-session");}catch(_){}if(previous)await select(previous);setInterval(refresh,1200);}catch(e){$("connection").textContent="連線未就緒";toast(e.message);}}
 start();
