@@ -107,7 +107,11 @@ def run_arm_claude(arm, skill_dir, prompt, model, out_dir, pair, timeout):
     """Claude Code with the arm's skill installed in a private project (history_replay.run_answer)."""
     import history_replay as H
     t0 = datetime.datetime.utcnow()
-    res = H.run_answer("claude", model, "standard", prompt, timeout, skill_dir=skill_dir)
+    # The replay's allow-list only matches "python3 .claude/skills/pea-princess/scripts/..." typed from the
+    # workdir; Claude ran the scan with cd, absolute paths and from the scripts folder, and every one was
+    # refused (5 of 6 runs on 2026-09-11 had no data). The deny hook still blocks curl/wget/URLs.
+    res = H.run_answer("claude", model, "standard", prompt, timeout, skill_dir=skill_dir,
+                       extra_allowed="Bash(python3 *),Bash(cd *)")
     os.makedirs(os.path.join(out_dir, "raw"), exist_ok=True)
     io.open(os.path.join(out_dir, "raw", "claude-%s-%d.jsonl" % (arm, pair)), "w", encoding="utf-8").write(res.get("stdout") or "")
     cmds = []

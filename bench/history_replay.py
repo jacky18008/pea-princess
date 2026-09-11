@@ -167,11 +167,13 @@ def prepare_workdir(agent, depth, skill_dir=None):
     return path
 
 
-def claude_command(prompt, workdir, model, hook_path):
+def claude_command(prompt, workdir, model, hook_path, extra_allowed=None):
     settings = {"disableAllHooks": False,
                 "hooks": {"PreToolUse": [{"matcher": "WebFetch|WebSearch|Bash|mcp__.*",
                                           "hooks": [{"type": "command", "command": "python3 %s" % hook_path}]}]}}
     allowed = "Read,Glob,Grep,Skill,Write,Edit,Bash(python3 .claude/skills/pea-princess/scripts/*),Bash(python3 scripts/*)"
+    if extra_allowed:  # e.g. "Bash(python3 *),Bash(cd *)": the deny hook still refuses curl, wget and URLs
+        allowed += "," + extra_allowed
     return ["claude", "-p", "--output-format", "stream-json", "--verbose", "--allowedTools", allowed,
             "--setting-sources", "project", "--settings", json.dumps(settings),
             "--strict-mcp-config", "--mcp-config", '{"mcpServers":{}}', "--add-dir", workdir,
@@ -184,7 +186,7 @@ def codex_command(prompt, workdir, model):
         (["--model", model] if model else []) + ["--", prompt]
 
 
-def run_answer(agent, model, depth, prompt, timeout, skill_dir=None):
+def run_answer(agent, model, depth, prompt, timeout, skill_dir=None, extra_allowed=None):
     workdir = prepare_workdir(agent, depth, skill_dir)
     side = tempfile.mkdtemp(prefix="vetflat-replay-side-")
     hook_log = os.path.join(side, "hook.log")
@@ -192,7 +194,7 @@ def run_answer(agent, model, depth, prompt, timeout, skill_dir=None):
         hook_path = os.path.join(side, "probe_hook.py")
         with io.open(hook_path, "w", encoding="utf-8") as fh:
             fh.write(LP.HOOK % {"net": repr(LP.HOOK_DENY.pattern)})
-        cmd = claude_command(prompt, workdir, model, hook_path)
+        cmd = claude_command(prompt, workdir, model, hook_path, extra_allowed)
     else:
         cmd = codex_command(prompt, workdir, model)
     env = dict(os.environ, LINK_PROBE_LOG=hook_log)
@@ -518,7 +520,7 @@ def run_case(args, case_id, out_dir):
     focus = case_focus(corpus, case_id)
     today = case_date(os.path.abspath(args.corpus or DEFAULT_CORPUS), case_id, args.turn) if getattr(args, "inject_date", False) else None
     prompt = answer_prompt(history, message, today)
-    ans = run_answer(args.agent, args.model, args.depth, prompt, args.timeout, args.skill_dir)
+    ans = run_answer(args.agent, args.model, args.depth, prompt, args.timeout, args.skill_dir, extra_allowed=getattr(args, "claude_allow", None))
     raw = os.path.join(out_dir, "raw", "%s-%s-%s-%s-%s.jsonl" % (case_id, args.turn, args.agent, (args.model or "default").replace("/", "_"), args.depth))
     os.makedirs(os.path.dirname(raw), exist_ok=True)
     with io.open(raw, "w", encoding="utf-8") as fh:
@@ -604,6 +606,8 @@ def main():
     ap.add_argument("--retry-failed", default=None, help="results folder: re-run every configuration row that failed (API error, empty, non-zero exit); new rows are appended")
     ap.add_argument("--rejudge-limit", type=int, default=None)
     ap.add_argument("--calibrate", default=None, help="results folder: judge the ORIGINAL answers blind and compare with the real reactions")
+    ap.add_argument("--claude-allow", default=None,
+                    help='extra Claude permission rules, e.g. "Bash(python3 *),Bash(cd *)"; the replay allow-list matches only one spelling of the script call')
     ap.add_argument("--inject-date", action="store_true",
                     help="tell the answerer the date of the message it answers (from the case's JSON sidecar); the reviews found models using the run date otherwise")
     ap.add_argument("--judge-profile", action="store_true", help="give the judge the person's standing preferences (their own rules, not any reaction)")
