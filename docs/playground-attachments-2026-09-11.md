@@ -27,3 +27,5 @@ The actor can use its available read-only tools for documents such as text files
 Offline checks cover upload/path validation, nonregular files, mutation, safe names, idempotent submission, session switching, request binding and review output. Browser checks exercise the actual upload endpoint and current interface without dispatching a model.
 
 After the implementation is frozen, use synthetic files for at most two real Codex actor calls with a combined session ceiling of 80,000 processed tokens. The first checks supplied text, an image and a PDF; a follow-up checks attachment-only delivery and preservation across turns if needed. Stop on provider errors or limits, without automatic retries. Preserve original inputs, files, output, tool observations, usage and failures. This is a functional smoke test, not a conversation-quality or token-savings study. Results are recorded separately after execution.
+
+Completed results and deployment evidence: [verification record](playground-attachments-results-2026-09-11.md).
