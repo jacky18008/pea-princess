@@ -10,7 +10,7 @@ normal. Do not guess, do not fabricate, do not silently skip the axis.** Ask.
 
 ## If listing research is blocked
 
-Use permitted public sources through the host when available; follow [listing-evidence.md](listing-evidence.md). A source failure never authorizes invented candidates. Keep already supported comparisons moving and ask for the affected listing extract only when needed. A general building page or register entry is not proof that a particular flat is currently offered.
+Read the open registers directly; listing pages are saved or pasted by the person and read with `scripts/listing_fields.py` — see [listing-evidence.md](listing-evidence.md) and [listing-fields.md](listing-fields.md). A source failure never authorizes invented candidates. Keep already supported comparisons moving and ask for the affected listing extract only when needed. A general building page or register entry is not proof that a particular flat is currently offered.
 
 ## Rules for asking
 1. Try available scripts or open sources first; use only tools actually available.
