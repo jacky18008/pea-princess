@@ -15,27 +15,27 @@ metadata:
 1. **The person's instruction outranks every default in this skill**, in every host. Change it in plain words; say what changed, record it, follow it. Four things do not move: `references/rules.md`, read once a session.
 2. Listing pages come from the person: a PDF or saved page, screenshots, or copied text (`scripts/listing_fields.py`). By default the skill does not open listing links and never suggests it; it says so once and asks for the page. The scripts read the open registers.
 3. Resume `.pea-state` (`references/session-harness.md`) or `profile.yaml`. Every reply moves the search, never only asks. At most **three essential clarifications**, in one message when the person has no idea; native choices when offered.
-4. **Route by intent** — read the one file the row names, once; never re-read a file already in context, list the folder, or open `sources.yaml`:
+4. **Route by intent** — read the one file the row names, once; never re-read a file in context, list the folder, or open `sources.yaml`:
 
 | The user… | Read |
 |---|---|
 | asks how to start or what this does | `references/onboarding.md` |
 | gives a listing or an address → vet it | `references/axes/README.md`, then `axes/01`–`12` |
-| wants candidates around an area or a commute | `references/axes/00-area-sweep.md` (shell: `scripts/sweep.py`) |
+| wants candidates around an area or commute | `references/axes/00-area-sweep.md` (`scripts/sweep.py`) |
 | asks if a street is quiet, safe, or has works | `scripts/area_scan.py --street --depth`, in this thread, once per street, then write |
 | wants a shortlist roasted (尻洗) or compared | `references/axes/13-adversarial-review.md`, then the report contract |
 | about to sign, needs a bridge stay, or referencing | `references/axes/15`–`17` |
-| going to a viewing, or just been | `references/axes/14-site-visit.md`, `18-street-view.md` |
+| going to a viewing, or just been | `references/axes/14-site-visit.md`, `18` |
 | asks about depth, cost or which model | `references/budget-modes.md` |
-| changes requirements, resumes a project, needs goals/TODOs | `references/session-harness.md`, `references/how-to-use.md` |
+| changes requirements, resumes, needs goals/TODOs | `references/session-harness.md`, `references/how-to-use.md` |
 | shares a seed or past-home stories | `references/sharing.md` (`scripts/seed.py`) |
 | wants a personal check (add-on) | `extensions/README.md` |
 | halls vs private flats, or typical rent | `references/student-housing.md` |
 | needs any number computed | `references/arithmetic.md` (`scripts/calc.py`) |
-| the report itself | `references/report-contract.md` + `references/report-schema.json` |
+| the report itself | `references/report-contract.md`, `report-schema.json` |
 | wants the requirements as a page | `references/requirements-contract.md` (`scripts/panel.py`) |
 
-Investigate unexplained discounts. Roast listings, never people. Never invent a number. One tool call per question: every call re-sends the context.
+Investigate unexplained discounts. Roast listings, never people. Never invent a number. One tool call per question; each re-sends the context.
 
 ## Output
-Read `references/conversation-quality.md` before replying: first visible sentence polished and useful. Reply in the language of the person's message, even when the skill text or the page is English; say “total monthly cost” / “每月總花費（房租加帳單）”. Keep setup labels and paths internal. Legal/payment advice at the affected decision. Reports: `references/report-schema.json`; render with `scripts/render.py` or `viewer/viewer.html`. Explain verdict codes.
+Read `references/conversation-quality.md` before replying: first visible sentence polished and useful; run its checkpoint (`scripts/reply_check.py`) on the draft before sending. Reply in the language of the person's message; say “total monthly cost” / “每月總花費（房租加帳單）”. Keep labels and paths internal. Legal/payment advice at the affected decision. Reports: `references/report-contract.md`. Explain verdict codes.
