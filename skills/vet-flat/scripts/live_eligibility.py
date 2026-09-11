@@ -35,7 +35,7 @@ except ImportError:
 
 
 SCHEMA = "vet-flat/live-eligibility/1"
-PARSER_VERSION = "bounded-text/1"
+PARSER_VERSION = "bounded-text/2"
 FIELDS = {
     "rent_pcm": ("number", "GBP/month", "房租"),
     "monthly_total": ("number", "GBP/month", "每月總花費"),
@@ -143,16 +143,31 @@ def _clauses(text):
     return clauses
 
 
-def _routing_clause(clause):
-    comparison_field = r"(?:房租|租金|房數|面積|樓層|暖氣費|暖氣|臥室朝向|噪音|安靜程度)"
-    comparison_request = re.fullmatch(r"(?:請)?(?:先看|先比較|比較)" + comparison_field +
-                                     r"(?:(?:、|與|和|及)" + comparison_field + r")*", clause)
+def _information_field(clause):
+    """Recognize the existing bounded source question, without housing intent."""
     heating_question = (
         re.fullmatch(r"(?:暖氣|供暖)(?:費|費用)?(?:有)?(?:包含|包|含)(?:在)?(?:房租|租金)(?:裡|內|中)?嗎", clause) or
         re.fullmatch(r"(?:房租|租金)(?:是否|有沒有)(?:包含|包|含)(?:暖氣|供暖)(?:費|費用)?(?:嗎)?", clause) or
         re.fullmatch(r"is heating(?: cost)? included in (?:the )?rent", clause, re.I) or
         re.fullmatch(r"does (?:the )?rent include heating(?: costs?)?", clause, re.I))
-    return bool(comparison_request or heating_question or re.fullmatch(r"(?:如果沒有符合的就(?:說明是哪裡卡住|直接說沒有)|保留原要求|先比較已知條件|我會補充確切條件)", clause) or
+    return "heating_included" if heating_question else None
+
+
+def _question_quote(text, clause):
+    # _clauses() removes punctuation for parsing. Restore a question terminator
+    # where present while retaining an exact substring of the original request.
+    start = text.rfind(clause)
+    end = start + len(clause)
+    if start >= 0 and end < len(text) and text[end] in "?？":
+        return text[start:end + 1]
+    return clause
+
+
+def _routing_clause(clause):
+    comparison_field = r"(?:房租|租金|房數|面積|樓層|暖氣費|暖氣|臥室朝向|噪音|安靜程度)"
+    comparison_request = re.fullmatch(r"(?:請)?(?:先看|先比較|比較)" + comparison_field +
+                                     r"(?:(?:、|與|和|及)" + comparison_field + r")*", clause)
+    return bool(comparison_request or _information_field(clause) or re.fullmatch(r"(?:如果沒有符合的就(?:說明是哪裡卡住|直接說沒有)|保留原要求|先比較已知條件|我會補充確切條件)", clause) or
                 re.fullmatch(r"if (?:none|no (?:candidate|listing)s?) (?:match|matches|meet(?:s)? (?:the )?(?:requirements|conditions)),? (?:say so|explain why)", clause, re.I))
 
 
@@ -263,7 +278,8 @@ def _parse_clause(clause):
 def normalize(user_inputs, revision):
     """Compile a small explicit zh/en grammar from ordered, host-authored requests.
 
-    Return {constraints, unresolved_intent: [exact clauses], provenance}. Every
+    Return {constraints, unresolved_intent: [exact clauses], information_requests,
+    provenance}. Information requests are separate from housing conditions. Every
     unresolved clause has a mandatory unknown predicate. Conditions are never
     accepted from actor output, and ambiguous updates never retire earlier ones.
     """
@@ -271,11 +287,18 @@ def normalize(user_inputs, revision):
     _require(type(user_inputs) is list and all(type(v) is str and v.strip() for v in user_inputs),
              "user_inputs must be an array of nonempty strings")
     _require(sum(len(v) for v in user_inputs) <= 96000, "user instruction packet exceeds supported bound")
-    active, origins, unresolved = {}, {}, {}
+    active, origins, unresolved, information_requests = {}, {}, {}, {}
     for index, text in enumerate(user_inputs):
         pending_rows, pending_origins, covered_message, conflicts = {}, {}, set(), set()
         clarification_answer = "我會補充確切條件" in _clauses(text)
         clauses = [(clause, _URL.sub("", clause).strip()) for clause in _clauses(text)]
+        for original, parsed in clauses:
+            field = _information_field(parsed)
+            if field:
+                information_requests[field] = {
+                    "id": "information-" + field.replace("_", "-"), "field": field,
+                    "request_id": "input-%d" % (index + 1), "quote": _question_quote(text, original),
+                    "scope": "current_candidates"}
         clauses = [(original, parsed) for original, parsed in clauses if parsed and not _routing_clause(parsed)]
         conditional_message = any(
             re.search(r"如果|除非|除外|例外|若|只要.+就|\b(?:if|unless|except|provided)\b|as long as", clause, re.I)
@@ -354,6 +377,7 @@ def normalize(user_inputs, revision):
                        user_requests={"input-%d" % (i + 1): text for i, text in enumerate(user_inputs)},
                        exceptions=[])
     return dict(constraints=constraints, unresolved_intent=[v["text"] for v in unresolved.values()],
+                information_requests=[information_requests[k] for k in sorted(information_requests)],
                 provenance={"parser_version": PARSER_VERSION, "user_inputs_sha256": _hash(user_inputs),
                             "requirements": origins, "complete_natural_language_understanding": False})
 
@@ -548,20 +572,49 @@ def _requirement_label(row):
     if field == "quiet":
         return "屋內安靜" if row["mandatory"] else "偏好屋內安靜"
     suffix = {"lte": "不超過", "gte": "至少", "eq": "為"}[row["operator"]]
+    if field == "floor":
+        return "樓層" + suffix + _formatted(field, value)
     return FIELDS[field][2] + suffix + _formatted(field, value)
 
 
-def _presentation(constraints, evidence, recommendation):
+def _information_artifacts(information_requests, evidence, recommendation, pins):
+    """Compile source answers and research obligations, never eligibility rows."""
+    selected = {row["candidate_id"] for pool in ("ranking", "backups") for row in recommendation[pool]}
+    inquiries, todos = [], []
+    for request in information_requests:
+        for candidate in evidence["candidates"]:
+            fact = candidate["fields"][request["field"]]
+            inquiry = {
+                "information_request_id": request["id"], "candidate_id": candidate["id"],
+                "field": request["field"], "request_id": request["request_id"],
+                "request_quote": request["quote"], "status": "unknown" if fact["qualifier"] == "unknown" else "source_reported",
+                "value": fact["value"], "source_id": fact["source_id"], "quote": fact["quote"],
+                "reason": fact.get("reason"), "binding": deepcopy(pins)}
+            inquiries.append(inquiry)
+            if inquiry["status"] == "unknown" and candidate["id"] in selected:
+                todos.append({
+                    "id": "research-" + request["id"] + "-" + candidate["id"],
+                    "candidate_id": candidate["id"], "information_request_id": request["id"],
+                    "field": request["field"], "action": "check_rent_inclusions", "binding": deepcopy(pins)})
+    return inquiries, todos
+
+
+def _presentation(constraints, evidence, recommendation, information_todos):
     rows = {row["id"]: row for row in constraints["requirements"]}
     labels = {row["id"]: "房源 " + chr(65 + index) for index, row in enumerate(evidence["candidates"])}
     todos = []
     for todo in recommendation["todos"]:
-        labels_to_check = list(dict.fromkeys(_requirement_label(rows[key]) for key in todo["requirement_ids"]))
+        labels_to_check = list(dict.fromkeys(
+            _requirement_label(rows[key]) + ("（比對平面圖與臥室窗外影像）"
+                                            if rows[key]["field"] == "bedroom_faces_main_road" else "")
+            for key in todo["requirement_ids"]))
         todos.append(labels[todo["candidate_id"]] + "：查證" + "、".join(labels_to_check))
     conditions = [("必要條件：" if row["mandatory"] else "偏好：") +
                   _requirement_label(row).removeprefix("偏好")
                   for row in constraints["requirements"] if row["field"] in FIELDS]
-    return {"todos": todos, "conditions": conditions}
+    information_texts = [labels[todo["candidate_id"]] + "（補充資訊）：查找書面租金明細與供暖費說明，確認暖氣費是否包含"
+                         for todo in information_todos]
+    return {"todos": todos + information_texts, "conditions": conditions, "information_todos": information_texts}
 
 
 def _failure_text(label, row, check):
@@ -604,10 +657,12 @@ def _opening(rows, candidates, checks, recommendation, labels):
     return "目前的來源不足以確認單戶房源，還不能作符合條件的候選比較。"
 
 
-def _render(constraints, evidence, checks, recommendation, proposal, metadata, unresolved, presentation):
+def _render(constraints, evidence, checks, recommendation, proposal, metadata, unresolved, presentation,
+            effective_focus_fields, inquiries):
     rows = {row["id"]: row for row in constraints["requirements"]}
     candidates = {row["id"]: row for row in evidence["candidates"]}
     labels = {row["id"]: "房源 " + chr(65 + index) for index, row in enumerate(evidence["candidates"])}
+    inquiry_fields = {(row["candidate_id"], row["field"]) for row in inquiries}
     questions = []
     if unresolved:
         excerpt = unresolved[0] if len(unresolved[0]) <= 130 else unresolved[0][:129] + "…"
@@ -619,18 +674,24 @@ def _render(constraints, evidence, checks, recommendation, proposal, metadata, u
             questions = [{"question": "你說的預算 " + amount + "，是每月只算房租，還是包含帳單的全部花費？",
                           "options": ["房租上限 " + amount, "每月總花費上限 " + amount]}]
     if not candidates:
-        return {"message": "目前還沒有可核對的單戶房源。提供具體房源連結後，可以依目前條件比較；尚未辨明的條件會保留待確認。", "questions": questions}
+        message = "目前還沒有可核對的單戶房源。提供具體房源連結後，可以依目前條件比較；尚未辨明的條件會保留待確認。"
+        if "heating_included" in effective_focus_fields:
+            message += "暖氣費是否包含也尚無來源可確認。"
+        return {"message": message, "questions": questions}
     opening = _opening(rows, candidates, checks, recommendation, labels)
     paragraphs = [opening]
     for index, proposal_row in enumerate(proposal["candidates"]):
         candidate_id = evidence["candidates"][index]["id"]
         candidate, result = candidates[candidate_id], checks["candidates"][candidate_id]
         fields = candidate["fields"]
+        displayed_unknown_fields = set()
         parts = []
         for field in ("rent_pcm", "bedrooms", "floor", "area_m2"):
             fact = fields[field]
             if fact["value"] is not None:
-                parts.append(FIELDS[field][2] + " " + _formatted(field, fact["value"]))
+                qualifier = "約 " if field == "area_m2" and re.search(r"approx|約", fact["quote"], re.I) else ""
+                parts.append(_formatted(field, fact["value"]) if field == "floor" else
+                             FIELDS[field][2] + " " + qualifier + _formatted(field, fact["value"]))
         detail = "；".join(parts) if parts else "尚無足夠的單戶數值可比較"
         if result["failed_requirement_ids"]:
             failures = []
@@ -639,14 +700,24 @@ def _render(constraints, evidence, checks, recommendation, proposal, metadata, u
                 failures.append(_requirement_label(row) + "，來源列為" + _formatted(row["field"], check["value"]))
             conclusion = "排除：" + "；".join(failures) + "。"
         else:
-            conclusions = []
+            pending_labels, matching_labels = [], []
             for key in result["open_requirement_ids"]:
                 row, check = rows[key], result["checks"][key]
                 if row["field"] == "listing_identity":
                     continue
                 label = _requirement_label(row)
-                conclusions.append(label + ("：來源說法符合此項，仍待核實" if check["comparison"] is True else "：待確認"))
-            conclusion = "；".join(dict.fromkeys(conclusions)) + "。" if conclusions else "目前記錄的條件已核對；仍須確認實際租賃條件。"
+                if check["comparison"] is True:
+                    matching_labels.append(FIELDS[row["field"]][2] if row["field"] in ("rent_pcm", "monthly_total", "bedrooms", "floor", "area_m2", "epc_internal_area_m2") else label)
+                else:
+                    pending_labels.append(label)
+                    displayed_unknown_fields.add(row["field"])
+            conclusion = ""
+            if matching_labels:
+                conclusion += "廣告記載的" + "、".join(dict.fromkeys(matching_labels)) + "符合目前條件，仍須核實。"
+            if pending_labels:
+                conclusion += "待確認：" + "、".join(dict.fromkeys(pending_labels)) + "。"
+            if not conclusion:
+                conclusion = "此處僅比較來源記載。"
         if result["advisory_failed_requirement_ids"]:
             advisory = ["「" + _requirement_label(rows[key]) + "」" for key in result["advisory_failed_requirement_ids"]]
             conclusion += "來源記載不符偏好：" + "、".join(advisory) + "；這項偏好未作為排除條件。"
@@ -656,11 +727,19 @@ def _render(constraints, evidence, checks, recommendation, proposal, metadata, u
         date_text = "保存於 " + dated.group() if dated else "保存日期未提供"
         paragraphs.append("**" + labels[candidate_id] + "**（[房源廣告](" + proposal_row["source_url"].replace("(", "%28").replace(")", "%29") + ")，" + date_text + "）：" + detail + "。" + conclusion)
         focus = []
-        for field in proposal["focus_fields"]:
+        for field in effective_focus_fields:
             if field in ("rent_pcm", "bedrooms", "floor", "area_m2"):
                 continue
             fact = fields[field]
-            focus.append(FIELDS[field][2] + "：" + ("來源列為" + _formatted(field, fact["value"]) + "，仍待核實" if fact["value"] is not None else "未確認"))
+            if (candidate_id, field) in inquiry_fields and field == "heating_included":
+                answer = ("尚無可核對的說明，目前未確認" if fact["value"] is None else
+                          "來源寫明包含，尚非房東確認" if fact["value"] is True else
+                          "來源寫明不包含，尚非房東確認")
+                focus.append("暖氣費是否包含：" + answer)
+            elif field in displayed_unknown_fields:
+                continue
+            else:
+                focus.append(FIELDS[field][2] + "：" + ("來源列為" + _formatted(field, fact["value"]) + "，仍待核實" if fact["value"] is not None else "未確認"))
         if focus:
             paragraphs.append("；".join(focus) + "。")
     if presentation["todos"]:
@@ -722,11 +801,16 @@ def accept(proposal, user_inputs, revision, sources):
                 "action": "investigate", "requirement_ids": row["open_requirement_ids"], "binding": deepcopy(pins)})
     validation = eligibility.validate_recommendation(constraints, evidence, recommendation, **pins)
     _require(validation["valid"] is True, "internal recommendation validation failed")
-    presentation = _presentation(constraints, evidence, recommendation)
-    reply = _render(constraints, evidence, checks, recommendation, proposal, metadata, normalized["unresolved_intent"], presentation)
+    effective_focus_fields = sorted(set(proposal["focus_fields"]) |
+                                    {row["field"] for row in normalized["information_requests"]})
+    inquiries, information_todos = _information_artifacts(normalized["information_requests"], evidence, recommendation, pins)
+    presentation = _presentation(constraints, evidence, recommendation, information_todos)
+    reply = _render(constraints, evidence, checks, recommendation, proposal, metadata, normalized["unresolved_intent"], presentation,
+                    effective_focus_fields, inquiries)
     return dict(schema_version=SCHEMA, proposal=proposal, normalization=normalized,
                 constraints=constraints, evidence=evidence, pins=pins, checks=checks,
                 recommendation=recommendation, reply=reply, presentation=presentation, source_metadata=metadata,
+                effective_focus_fields=effective_focus_fields, inquiries=inquiries, information_todos=information_todos,
                 notes={"parser_version": PARSER_VERSION, "source_truth_verified": False,
                        "complete_natural_language_understanding": False,
                        "ranking_basis": "Advisory failures, open-check count, recorded monthly rent, stable URL identifier; no claim of best housing quality",

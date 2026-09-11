@@ -84,6 +84,48 @@ class LiveLabTests(unittest.TestCase):
             with self.subTest(extra=extra),self.assertRaises(p.LabError):self.create(**extra)
         self.assertEqual([],list(self.root.glob('*/session.json')));self.assertEqual([],self.requests)
 
+    def test_followup_inquiry_survives_actor_omission_export_and_reopen(self):
+        urls = ['https://www.getliving.com/apartments/unit-a',
+                'https://www.getliving.com/apartments/unit-b']
+        def capture(url, folder):
+            folder.mkdir(mode=0o700)
+            rent = '2,250' if url == urls[0] else '1,800'
+            body = ('1 bedroom apartment\nRent: £' + rent + ' per month\nArea: 50 m²\n').encode('utf-8')
+            (folder/'text.txt').write_bytes(body)
+            return {'source_url':url,'ok':True,'http_status':200,'retrieved_at':'2026-09-11T10:00:00Z',
+                    'text_sha256':hashlib.sha256(body).hexdigest()}
+        def invoke(request, folder):
+            self.requests.append(copy.deepcopy(request))
+            return terminal([{'source_url':url,'label':'Discovery only'} for url in urls], ['rent_pcm'])
+        self.lab.invoke = invoke
+        sid = self.create(initial_request='房租上限 £2300。我要一房。')
+        question = '房租上限改成 £2100。暖氣費包含在房租裡嗎？'
+        with mock.patch.object(public_source_snapshot, 'capture', side_effect=capture):
+            self.step(sid)
+            self.lab.message(sid, intent(text=question, kind='question'))
+            self.join()
+        view = self.lab.snapshot(sid)
+        artifact = view['current_comparison']
+        self.assertEqual('current', view['comparison_status'], view['notice'])
+        self.assertEqual(1, len(artifact['recommendation']['blocked']))
+        self.assertEqual(1, len(artifact['recommendation']['ranking']))
+        selected = artifact['recommendation']['ranking'][0]['candidate_id']
+        self.assertEqual([selected], [row['candidate_id'] for row in artifact['information_todos']])
+        self.assertIn('暖氣', artifact['reply']['message'])
+        self.assertTrue(any('暖氣' in row for row in artifact['presentation']['todos']))
+        self.assertFalse(any(row['field'] == 'heating_included' for row in artifact['constraints']['requirements']))
+        exported = self.lab.export(sid)
+        self.assertEqual(artifact, exported['current_comparison'])
+        self.assertEqual(artifact['reply']['message'], view['messages'][-1]['text'])
+        self.assertEqual(question, exported['interventions'][0]['text'])
+        self.assertEqual('historical', view['messages'][1]['comparison_status'])
+        self.lab.close()
+        self.lab = p.Lab(self.root, invoke=lambda *args: self.fail('reopen must not call model'))
+        reopened = self.lab.snapshot(sid)
+        self.assertEqual(artifact, reopened['current_comparison'])
+        self.assertEqual(2, reopened['calls'])
+        self.assertEqual(40, reopened['tokens'])
+
     def test_one_human_step_publishes_host_reply_and_retains_raw_web_events_without_persona(self):
         web={'type':'item.completed','item':{'id':'web1','type':'web_search','query':'permitted public operator'}}
         raw='{"type":"item.completed","item":{"type":"agent_message","text":"Useful progress."}}\n'

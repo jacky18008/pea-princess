@@ -174,6 +174,16 @@ class NormalizeTests(unittest.TestCase):
             self.assertEqual(n["unresolved_intent"], [])
             self.assertEqual(requirements(n)["rent-ceiling"]["value"], 2100)
 
+    def test_latest_information_question_retains_exact_origin_without_a_condition(self):
+        inputs = ["房租最多 £2,100。", "房租是否包含暖氣費？", "暖氣費包含在房租裡嗎？先不找新房源。"]
+        n = live.normalize(inputs, 3)
+        self.assertEqual(n["information_requests"], [{
+            "id": "information-heating-included", "field": "heating_included",
+            "request_id": "input-3", "quote": "暖氣費包含在房租裡嗎？", "scope": "current_candidates"}])
+        self.assertEqual(n["constraints"]["requirements"], live.normalize(inputs[:1], 3)["constraints"]["requirements"])
+        self.assertEqual(n["constraints"]["user_requests"]["input-3"], inputs[2])
+        self.assertEqual(n["unresolved_intent"], [])
+
     def test_known_field_comparison_request_is_not_a_constraint(self):
         text = ("房租上限 £2300。我要一房，希望安靜。請比較下面兩間，先看房租、房數與面積，不用找新的房源。\n"
                 "https://example.org/properties-to-rent/unit-a\nhttps://example.org/properties-to-rent/unit-b")
@@ -422,6 +432,103 @@ class SourceAndPublicationTests(unittest.TestCase):
         for sentence, value in (("Heating is included in the rent.", True), ("Heating is not included in the rent.", False)):
             a = self.accept(sources={URL_A: source(listing() + "\n" + sentence)})
             self.assertIs(fields(a)["heating_included"]["value"], value)
+
+    def test_user_heating_question_survives_actor_focus_omission_with_selected_only_todo(self):
+        inputs = ["房租最多 £2,300。我要一房。", "房租上限改成 £2,100。暖氣費包含在房租裡嗎？"]
+        sources = {URL_A: source(listing(2250)), URL_B: source(listing(1800))}
+        a = self.accept(proposal((URL_A, URL_B)), inputs=inputs, sources=sources, revision=2)
+        ids = [row["id"] for row in a["evidence"]["candidates"]]
+        self.assertEqual(a["proposal"]["focus_fields"], [])
+        self.assertEqual(a["effective_focus_fields"], ["heating_included"])
+        self.assertEqual([row["candidate_id"] for row in a["inquiries"]], ids)
+        self.assertTrue(all(row["status"] == "unknown" and row["value"] is None for row in a["inquiries"]))
+        self.assertEqual([row["candidate_id"] for row in a["information_todos"]], [ids[1]])
+        self.assertEqual(a["information_todos"][0]["action"], "check_rent_inclusions")
+        self.assertEqual(a["reply"]["message"].count("暖氣費是否包含："), 2)
+        self.assertIn("目前未確認", a["reply"]["message"])
+        self.assertEqual(a["reply"]["questions"], [])
+        self.assertEqual(len(a["presentation"]["information_todos"]), 1)
+        self.assertIn("房源 B（補充資訊）", a["presentation"]["information_todos"][0])
+        self.assertIn("書面租金明細與供暖費說明", a["presentation"]["information_todos"][0])
+        for text in a["presentation"]["todos"]:
+            self.assertIn(text, a["reply"]["message"])
+        self.assertTrue(live.validate_artifact(a, inputs, 2, sources)["valid"])
+
+    def test_information_question_cannot_change_requirements_ranking_or_eligibility_todos(self):
+        inputs = ["房租最多 £2,100。我要一房。"]
+        sources = {URL_A: source(listing(1800)), URL_B: source(listing(1800) + "\nHeating is not included in the rent.")}
+        p = proposal((URL_A, URL_B))
+        baseline = self.accept(p, inputs=inputs, sources=sources)
+        queried = self.accept(p, inputs=inputs + ["暖氣費包含在房租裡嗎？"], sources=sources)
+        self.assertEqual(baseline["constraints"]["requirements"], queried["constraints"]["requirements"])
+        self.assertEqual(baseline["presentation"]["conditions"], queried["presentation"]["conditions"])
+        self.assertEqual(baseline["evidence"], queried["evidence"])
+        for key in ("first_choice", "ranking", "backups", "blocked", "not_selected"):
+            self.assertEqual(baseline["recommendation"][key], queried["recommendation"][key])
+        for left, right in zip(baseline["recommendation"]["todos"], queried["recommendation"]["todos"]):
+            self.assertEqual({k: v for k, v in left.items() if k != "binding"},
+                             {k: v for k, v in right.items() if k != "binding"})
+        self.assertTrue(all("heating_included" not in row["requirement_ids"] for row in queried["recommendation"]["todos"]))
+        self.assertEqual(len(queried["information_todos"]), 1)
+
+    def test_reported_heating_answers_are_qualified_and_do_not_become_eligibility_failures(self):
+        for sentence, value, answer in (("Heating is included in the rent.", True, "來源寫明包含"),
+                                        ("Heating is not included in the rent.", False, "來源寫明不包含")):
+            with self.subTest(value=value):
+                a = self.accept(inputs=["房租最多 £2,200。暖氣費包含在房租裡嗎？"],
+                                sources={URL_A: source(listing() + "\n" + sentence)})
+                inquiry = a["inquiries"][0]
+                self.assertEqual(inquiry["status"], "source_reported")
+                self.assertIs(inquiry["value"], value)
+                self.assertEqual(inquiry["quote"], sentence)
+                self.assertIn(inquiry["quote"], a["evidence"]["sources"][inquiry["source_id"]])
+                self.assertIn(answer, a["reply"]["message"])
+                self.assertIn("尚非房東確認", a["reply"]["message"])
+                self.assertEqual(a["information_todos"], [])
+                self.assertEqual(check(a)["failed_requirement_ids"], [])
+
+    def test_source_or_actor_question_is_not_a_user_information_request(self):
+        p = proposal(focus=("heating_included",))
+        p["candidates"][0]["label"] = "暖氣費包含在房租裡嗎？"
+        a = self.accept(p, sources={URL_A: source(listing() + "\n暖氣費包含在房租裡嗎？")})
+        self.assertEqual(a["normalization"]["information_requests"], [])
+        self.assertEqual(a["inquiries"], [])
+        self.assertEqual(a["information_todos"], [])
+
+    def test_information_artifact_and_provenance_rewrites_fail_validation(self):
+        inputs = ["房租最多 £2,200。", "暖氣費包含在房租裡嗎？"]
+        a = self.accept(inputs=inputs, revision=2)
+        for mutate in (lambda x: x["effective_focus_fields"].clear(),
+                       lambda x: x["normalization"]["information_requests"][0].update(request_id="input-1"),
+                       lambda x: x["inquiries"][0].update(status="source_reported", value=True),
+                       lambda x: x["inquiries"][0].update(request_quote="租金必須含暖氣"),
+                       lambda x: x["information_todos"].clear(),
+                       lambda x: x["presentation"]["information_todos"].clear(),
+                       lambda x: x["presentation"]["todos"].pop()):
+            altered = deepcopy(a)
+            mutate(altered)
+            self.assertFalse(live.validate_artifact(altered, inputs, 2, self.sources)["valid"])
+        self.assertTrue(all(row["binding"] == a["pins"] for row in a["inquiries"] + a["information_todos"]))
+        self.assertFalse(live.validate_artifact(a, inputs, 3, self.sources)["valid"])
+
+    def test_unknown_road_todo_gives_a_concrete_check_without_dropping_conditions(self):
+        a = self.accept(proposal(focus=("bedroom_faces_main_road",)),
+                        inputs=["房租最多 £2,200。臥室正對大馬路就排除。"])
+        self.assertIn("bedroom-road", a["recommendation"]["todos"][0]["requirement_ids"])
+        self.assertIn("比對平面圖與臥室窗外影像", a["presentation"]["todos"][0])
+        self.assertIn(a["presentation"]["todos"][0], a["reply"]["message"])
+        self.assertNotIn("臥室窗戶是否正對大馬路：未確認", a["reply"]["message"])
+
+    def test_renderer_preserves_approximate_area_and_consolidates_reported_matches(self):
+        a = self.accept(sources={URL_A: source(listing() + " approx.")})
+        message = a["reply"]["message"]
+        self.assertIn("廣告面積 約 46 m²", message)
+        self.assertIn("英式 3 樓", message)
+        self.assertNotIn("英式樓層 英式", message)
+        self.assertEqual(message.count("廣告記載的"), 1)
+        self.assertNotIn("來源說法符合此項", message)
+        self.assertIn("仍須核實", message)
+        self.assertEqual(a["recommendation"]["todos"][0]["requirement_ids"], check(a)["open_requirement_ids"])
 
     def test_missing_failed_and_tampered_sources_stay_unknown(self):
         for sources in ({}, {URL_A: source(listing(), ok=False)}, {URL_A: source(listing(), sha256="0" * 64)}):
