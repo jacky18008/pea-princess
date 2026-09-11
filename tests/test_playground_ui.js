@@ -110,11 +110,53 @@ async function main(){
  context.markdownState={...state('A'),messages:[{role:'assistant',text:'ORIGINAL **kept**',display_text:'Visible **reply**'},{role:'human',text:'[do not execute](javascript:bad())'}]};
  const sourceBefore=JSON.stringify(context.markdownState);run('render(markdownState)');assert.equal(JSON.stringify(context.markdownState),sourceBefore,'source messages and display_text remain untouched');
  assert.equal(tags(elements.messages.children[0],'strong')[0].textContent,'reply');assert.equal(elements.messages.children[1].children[1].textContent,'[do not execute](javascript:bad())');
+ // The current comparison uses the host artifact's request, unresolved-intent
+ // and presentation fields. Preserve long original text without HTML parsing.
+ const longRequest='請完整保留：<script>evil()</script> <img src=https://tracker.test/request onerror=evil()> [不可執行](javascript:evil()) **原話**\n'+'要求未更動。'.repeat(1100);
+ const unresolved='<svg onload=evil()> Ground floor only if entirely dry. </svg>';
+ const todo='房源 A：查證每月總花費不超過 £2,200、指定入住日期的可租性';
+ const artifact={schema_version:'vet-flat/live-eligibility/1',
+  constraints:{user_requests:{'input-1':longRequest,'input-2':unresolved}},
+  normalization:{unresolved_intent:[unresolved]},
+  presentation:{conditions:['每月總花費不超過 £2,200'],todos:[todo]}};
+ context.checkedLive={...liveState('A'),revision:2,status:'paused',next_actor:null,
+  comparison_status:'current',current_comparison:artifact,
+  messages:[{role:'assistant',text:'房源 A 尚有條件待查證。',comparison_status:'current'}]};
+ const artifactBefore=JSON.stringify(artifact);let gateSnapshot=context.checkedLive;
+ handler=url=>url==='/api/session/A'?response(gateSnapshot):undefined;
+ await run('refresh()');
+ const checkPanel=elements['current-checks'],checkBody=elements['current-checks-body'];
+ assert.equal(checkPanel.hidden,false);assert.ok(longRequest.length>6000&&longRequest.length<=8000);
+ const requestDetails=tags(checkBody,'details')[0];
+ assert.equal(tags(requestDetails,'summary')[0].textContent,'已保存的需求與追問');
+ assert.deepEqual(tags(requestDetails,'li').map(el=>el.textContent),[longRequest,unresolved]);
+ const sectionRows=heading=>{const index=checkBody.children.findIndex(el=>el.tag==='h3'&&el.textContent===heading);assert.ok(index>=0);const list=checkBody.children[index+1];assert.equal(list.tag,'ul');return tags(list,'li').map(el=>el.textContent);};
+ assert.deepEqual(sectionRows('尚待釐清的原話'),[unresolved]);
+ assert.deepEqual(sectionRows('目前待辦'),[todo]);
+ for(const tag of ['script','img','iframe','svg','object','style','link','a','strong'])assert.equal(tags(checkBody,tag).length,0,tag+' cannot be created by original request text');
+ assert.equal(tags(requestDetails,'li')[0].children.length,0,'the original request is literal text, not parsed markup');
+ const beforeChecksRender=network.length;run('render(checkedLive)');assert.equal(network.length,beforeChecksRender,'presenting a comparison cannot fetch resources');
+ assert.equal(JSON.stringify(artifact),artifactBefore,'presenting the comparison cannot rewrite its artifact');
+ // Source integrity can change without a session revision. The status alone
+ // must remove the old result, including all hidden body content.
+ for(const status of ['stale','historical','invalid']){
+  gateSnapshot={...context.checkedLive,comparison_status:status};await run('refresh()');
+  assert.equal(checkPanel.hidden,true,status+' comparison is unavailable');assert.equal(checkBody.children.length,0);assert.equal(checkBody.textContent,'');
+  gateSnapshot=context.checkedLive;await run('refresh()');assert.equal(checkPanel.hidden,false);
+ }
+ context.missingComparison={...context.checkedLive,comparison_status:'not_checked',current_comparison:null};run('render(missingComparison)');
+ assert.equal(checkPanel.hidden,true);assert.equal(checkBody.textContent,'');
+ context.fixtureWithComparison={...state('A'),research_mode:'fixture',comparison_status:'current',current_comparison:artifact};
+ run('render(fixtureWithComparison)');assert.equal(checkPanel.hidden,true,'the synthetic lane never displays live checks');assert.equal(checkBody.children.length,0);
+ run('render(checkedLive)');assert.equal(checkPanel.hidden,false);
  let resolveOld;handler=url=>url==='/api/session/A'?new Promise(resolve=>resolveOld=resolve):undefined;
  const old=run('refresh()');await settle();await run("select('B')");
  assert.equal(elements.send.disabled,true);assert.equal(elements.title.textContent,'正在讀取這段對話…');
- resolveOld(response(state('A')));await old;assert.notEqual(elements.title.textContent,'Person A');handler=null;
+ assert.equal(checkPanel.hidden,true,'selection removes the old comparison before the next session loads');assert.equal(checkBody.textContent,'');
+ resolveOld(response(context.checkedLive));await old;assert.notEqual(elements.title.textContent,'真實找房研究');
+ assert.equal(checkPanel.hidden,true,'a late response cannot restore the previous session comparison');assert.equal(checkBody.children.length,0);handler=null;
  await run('refresh()');assert.equal(elements.title.textContent,'Person B');assert.equal(elements.send.disabled,false);
+ assert.equal(checkPanel.hidden,true);assert.equal(checkBody.textContent,'');
  let fail=true;handler=(url,opts)=>{if(url.endsWith('/message')&&opts.method==='POST'){if(fail){fail=false;throw Error('uncertain response');}return response({ok:true});}};
  elements.message.value='Preserve this exact question.';
  await elements.composer.onsubmit({preventDefault(){}});assert.equal(elements.message.value,'Preserve this exact question.');

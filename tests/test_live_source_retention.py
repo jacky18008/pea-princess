@@ -21,6 +21,9 @@ class RetentionTests(unittest.TestCase):
         self.s=self.lab._load(sid);self.s['calls']=[{'id':'call-001-assistant'}]
     def receipt(self,message):
         return {'status':'recorded','physical_status':'complete','answer':json.dumps({'message':message,'questions':[]})}
+    def proposal_receipt(self,urls):
+        return {'status':'recorded','physical_status':'complete','answer':json.dumps({
+            'candidates':[{'source_url':url,'label':'Source proposal'} for url in urls],'focus_fields':['rent_pcm']})}
     def capture(self,url,folder):
         folder.mkdir(mode=0o700);raw=b'Advertised rent: 2000. Availability for this person: unconfirmed.'
         (folder/'text.txt').write_bytes(raw)
@@ -40,6 +43,7 @@ class RetentionTests(unittest.TestCase):
     def context_rows(self):
         return json.loads(self.lab._source_context(self.s).split('\n',3)[-1])
     def test_cited_sources_deduplicated_bounded_retained_and_reloaded_without_fetch(self):
+        self.s.pop('live_gate_version')  # Legacy saved replies retain their original capture contract.
         message=' '.join('[source](https://www.foxtons.co.uk/unit/%s)'%i for i in (1,1,2,3,4))
         with mock.patch.object(public_source_snapshot,'capture',side_effect=self.capture) as capture:
             self.lab._capture_sources(self.s,'call-001-assistant',self.receipt(message))
@@ -60,6 +64,7 @@ class RetentionTests(unittest.TestCase):
             self.lab._capture_sources(self.s,'bad',r)
         self.assertFalse(self.lab._snapshot_index(self.s,'bad').exists())
     def test_source_failure_preserved_without_reclassifying_answer(self):
+        self.s.pop('live_gate_version')  # Legacy reply receipts remain readable.
         r=self.receipt('[source](https://www.foxtons.co.uk/unit/1)')
         with mock.patch.object(public_source_snapshot,'capture',side_effect=TimeoutError('private internal error')):
             self.lab._capture_sources(self.s,'call-001-assistant',r)
@@ -67,6 +72,7 @@ class RetentionTests(unittest.TestCase):
         self.assertFalse(saved['ok']);self.assertEqual('recorded',r['status'])
         self.assertNotIn('private internal error',json.dumps(saved))
     def test_corrupt_or_oversize_body_is_explicitly_omitted_without_silent_clipping(self):
+        self.s.pop('live_gate_version')  # Exercise retention independently of the newer proposal schema.
         with mock.patch.object(public_source_snapshot,'capture',side_effect=self.capture):
             self.lab._capture_sources(self.s,'call-001-assistant',self.receipt('[source](https://www.foxtons.co.uk/unit/1)'))
         path=self.lab._snapshot_index(self.s,'call-001-assistant').parent/'0/text.txt'
@@ -76,6 +82,32 @@ class RetentionTests(unittest.TestCase):
         index=self.lab._snapshot_index(self.s,'call-001-assistant');saved=json.loads(index.read_text());saved['value'][0]['text_sha256']=hashlib.sha256(raw).hexdigest();saved['sha256']=p._digest(saved['value']);index.write_text(json.dumps(saved))
         context=self.lab._source_context(self.s)
         self.assertIn('due to source-text budget',context);self.assertNotIn('x'*100,context)
+    def test_gate_proposal_sources_deduplicated_retained_and_reloaded_without_fetch(self):
+        self.assertEqual(1,self.s['live_gate_version'])
+        urls=['https://www.getliving.com/apartments/%s'%i for i in range(3)]
+        receipt=self.proposal_receipt(urls)
+        with mock.patch.object(public_source_snapshot,'capture',side_effect=self.capture) as capture:
+            self.lab._capture_sources(self.s,'call-001-assistant',receipt)
+            self.assertEqual(urls,[call.args[0] for call in capture.call_args_list])
+            self.lab._capture_sources(self.s,'call-001-assistant',receipt)
+            self.assertEqual(3,capture.call_count)
+        rows=self.lab._read_snapshots(self.s,'call-001-assistant')
+        self.assertEqual(urls,[row['source_url'] for row in rows])
+        self.assertTrue(all(row['ok'] and not row['source_claims_verified'] for row in rows))
+        self.assertIn('Advertised rent: 2000.',self.lab._source_context(self.s))
+        # A repeated URL in an otherwise bounded proposal never purchases another capture.
+        duplicate=self.proposal_receipt([urls[0],urls[0],urls[1]])
+        with mock.patch.object(public_source_snapshot,'capture',side_effect=self.capture) as capture:
+            self.lab._capture_sources(self.s,'call-002-assistant',duplicate)
+        self.assertEqual(urls[:2],[call.args[0] for call in capture.call_args_list])
+    def test_gate_rejects_oversize_and_prose_proposals_before_capture(self):
+        oversized=self.proposal_receipt(['https://www.getliving.com/apartments/%s'%i for i in range(4)])
+        prose=self.receipt('[source](https://www.getliving.com/apartments/1)')
+        with mock.patch.object(public_source_snapshot,'capture',side_effect=AssertionError('no fetch')) as capture:
+            for call_id,receipt in (('oversized',oversized),('prose',prose)):
+                self.lab._capture_sources(self.s,call_id,receipt)
+                self.assertFalse(self.lab._snapshot_index(self.s,call_id).exists())
+        capture.assert_not_called()
     def test_invalid_newer_index_blocks_all_older_groups_but_keeps_newer_intact_evidence(self):
         url='https://www.foxtons.co.uk/unit/shared'
         for i,kind in enumerate(('malformed','hash','nonlist','nonobjectrow','missingurl','missingindex')):

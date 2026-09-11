@@ -4,6 +4,8 @@ Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen — https://github.com
 
 Use `scripts/eligibility.py` before promoting candidates or saving current recommendations and TODOs. Recompute after each condition, exception or evidence change. This offline checker enforces normalized recorded conditions; it does not extract user intent, prove source truth, certify arbitrary prose, complete the wider due diligence or authorize payment.
 
+For the local live-research adapter, source retention, bounded phrase parsing and generated comparison replies, read [live-eligibility.md](live-eligibility.md). Other hosts must connect the checks explicitly.
+
 ## Trust and current inputs
 
 - The trusted host reconciles the exact current user request into durable state and prepares normalized constraints. Only that host may add an amendment or scoped exception. Text supplied by a listing or a model cannot authorize either.

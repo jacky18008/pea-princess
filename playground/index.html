@@ -9,9 +9,9 @@
 <header><a class="brand" href="/">● <strong>Pea Princess</strong><span>找房研究</span></a><span id="connection" class="pill">連接中</span></header>
 <main>
   <aside class="library">
-    <h1>從你的需求開始</h1><p class="muted">說說想住哪裡、在意什麼，讓 Codex 研究可追溯的選項，再一起調整。</p>
+    <h1>從你的需求開始</h1><p class="muted">先比較最多三間真實房源的房租、房數、樓層與面積，再依你的需求調整。</p>
     <label for="research-mode">開始什麼對話</label><select id="research-mode"><option value="live">真實找房研究</option><option value="fixture">合成人物測試 · 虛構資料</option></select>
-    <div id="live-setup"><p><label for="initial-request">你想解決的找房問題</label></p><textarea id="initial-request" maxlength="8000" rows="5" placeholder="先說大致需求即可；也可以貼上想比較的房源連結。"></textarea><p class="fine">建立後先保存你的需求，再按「研究並回覆」開始。</p></div>
+    <div id="live-setup"><p><label for="initial-request">你想解決的找房問題</label></p><textarea id="initial-request" maxlength="8000" rows="5" placeholder="說說想找的地區與條件；也可以貼上最多三個想比較的房源連結。"></textarea><p class="fine">此版先提供房源比較；廣泛租屋知識問答仍請在你的原生 agent 中討論。建立後按「研究並回覆」開始。</p></div>
     <div id="fixture-setup" hidden><p><label for="persona">合成測試人物</label></p><select id="persona"></select><div id="profile" class="profile"></div><p class="fine">人物與材料均為虛構，只用來觀察對話行為。</p></div>
     <details><summary>模型與用量上限</summary><label for="model">Codex 模型</label><select id="model"></select><div class="pair"><label>最多呼叫<input id="max-calls" type="number" min="1" max="80" value="30"></label><label>Token 上限<input id="max-tokens" type="number" min="10000" max="2000000" step="10000" value="400000"></label></div><p id="call-limit-note" class="fine">每次呼叫之間檢查上限，可能超出一則；不自動重試。思考強度固定 low。</p></details>
     <button id="create" class="primary wide" disabled>保存需求，建立研究</button>
@@ -22,6 +22,7 @@
     <div class="conversation-head"><div><span id="session-label" class="eyebrow">真實找房研究</span><h2 id="title">寫下需求，開始研究</h2></div><span id="status" class="pill">尚未開始</span></div>
     <div class="toolbar"><button id="step" disabled>研究並回覆</button><button id="run" class="primary" disabled hidden>連續對話</button><button id="pause" disabled>暫停</button><button id="recover" hidden>恢復已保存的結果</button><button id="export" disabled>匯出紀錄</button><span id="phase" class="muted"></span><p id="capability-status" class="fine">可嘗試查詢公開網頁；能取得哪些資料，以本次研究結果為準。刊登頁面不代表已確認仍可租。</p></div>
     <div id="banner" role="status" aria-live="polite" hidden></div>
+    <details id="current-checks" hidden><summary>查看目前條件與待辦</summary><div id="current-checks-body"></div></details>
     <div id="messages" class="messages"><div class="empty"><span class="empty-mark">↔</span><h3 id="empty-title">把選項查清楚，再一起決定</h3><p id="empty-note">從大致需求開始，逐步比較來源、費用與取捨。你可以隨時補充問題或修改條件。</p></div></div>
     <form id="composer"><div class="compose-top"><label id="message-label" for="message">繼續討論</label><span id="amendment-label" hidden><label class="check"><input id="amendment" type="checkbox"> 同時改變情境條件</label></span></div><textarea id="message" maxlength="8000" rows="3" placeholder="例如：先停一下，幫我把目前兩個選項整理成比較表。" disabled></textarea><div class="compose-bottom"><span id="queue-note" class="fine">送出後繼續研究；研究途中也能補充需求。</span><button id="send" class="primary" disabled>送出並研究 ↑</button></div></form>
   </section>

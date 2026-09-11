@@ -33,6 +33,18 @@ from call_control import _atomic_json, _digest
 from durable_run import cli_record
 import launch
 import conversation_reply
+import live_eligibility
+
+LIVE_REPLY_SCHEMA = {
+    'type':'object','additionalProperties':False,'required':['candidates','focus_fields'],
+    'properties':{
+        'candidates':{'type':'array','maxItems':3,'items':{
+            'type':'object','additionalProperties':False,'required':['source_url','label'],
+            'properties':{'source_url':{'type':'string','maxLength':1500},
+                          'label':{'type':'string','maxLength':100}}}},
+        'focus_fields':{'type':'array','maxItems':5,'items':{'type':'string','enum':[
+            'rent_pcm','monthly_total','bedrooms','floor','area_m2','epc_internal_area_m2',
+            'quiet','bedroom_faces_main_road','heating_included','availability']}}}}
 
 MODELS = ('gpt-6-astra', 'gpt-5.6-terra', 'gpt-5.6-sol')
 STATE_FIELDS = ('turn', 'released', 'events', 'invalid', 'impatience', 'paste_misses',
@@ -78,6 +90,7 @@ def source_hashes():
              ROOT/'skills/vet-flat/scripts/session_state.py', ROOT/'evals/personas.json',
              ROOT/'tools/conversation_reply.py', ROOT/'tools/public_source_snapshot.py', ROOT/'playground/conversation-policy.md']
     paths += [ROOT/'dist/prompt-pack/INSTRUCTIONS.md', ROOT/'skills/vet-flat/SKILL.md']
+    paths += [ROOT/'skills/vet-flat/scripts/live_eligibility.py', ROOT/'skills/vet-flat/scripts/eligibility.py']
     paths += sorted((ROOT/'skills/vet-flat/references').rglob('*.md'))
     return {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in paths}
 
@@ -117,7 +130,7 @@ def live_system(text):
             label+=' (selected introduction and sections 1–2; stops before section 2b)'
         sections.append((label,body))
     sections.append(('LOCAL CONVERSATION POLICY', (ROOT/'playground/conversation-policy.md').read_text()))
-    sections.append(('LIVE RESEARCH CAPABILITIES', '''RESEARCH MODE: live. This is a real human-led research request, not a persona or fixture test. Use the supplied current repository instructions; do not load installed host skills, unrelated files, credentials, connectors or earlier private sessions. Only read-only public web research is authorized, subject to the skill's source restrictions. Do not use shell tools, write files, sign in, contact anyone, reserve, book or pay. A referenced script is not available in this lane: use permitted public web evidence or the documented manual arithmetic/checking fallback and do not claim program validation. Do not run the whole sweep or additional agents automatically. For a small discovery request, do one batched search, open up to two original candidate pages, and allow at most one replacement lookup. Then answer with the evidence obtained, even if only one candidate or a specific gap remains; do not broaden repeatedly just to fill two slots. This is a work plan, not a program-enforced tool-call limit. Full area due diligence is a later step when requested. Work on one useful bounded next step. The host preserves exact human inputs, history and receipts; it has not automatically normalized numeric eligibility conditions. Never claim the host has verified factual eligibility.
+    sections.append(('LIVE RESEARCH CAPABILITIES', '''RESEARCH MODE: live. This is a real human-led research request, not a persona or fixture test. Use the supplied current repository instructions; do not load installed host skills, unrelated files, credentials, connectors or earlier private sessions. Only read-only public web research is authorized, subject to the skill's source restrictions. Do not use shell tools, write files, sign in, contact anyone, reserve, book or pay. The actor cannot run scripts in this lane. The host separately runs a limited deterministic conditions/source adapter on the returned discovery proposal; do not claim that this verifies source truth or all natural-language requirements. Do not run the whole sweep or additional agents automatically. For a small discovery request, do one batched search, open up to two original candidate pages, and allow at most one replacement lookup. Then answer with the evidence obtained, even if only one candidate or a specific gap remains; do not broaden repeatedly just to fill two slots. This is a work plan, not a program-enforced tool-call limit. Full area due diligence is a later step when requested. Work on one useful bounded next step. The host preserves exact human inputs, history and receipts. Its supported conditions and source fields are compiled separately; ambiguous or unsupported clauses remain open, not waived. Never claim the host has verified actual suitability.
 Web search is enabled for this call but a search/page may fail. Cite actual source URLs and the checked date beside factual claims; precise timestamps belong in retained source records, not a technical timing paragraph in ordinary conversation; preserve source publication dates where relevant. Use a tool's actual timestamp when available. Otherwise say the source was checked during this request and label the supplied host request time as request time, not an exact per-source retrieval time. Never fabricate timestamp precision. A search snippet is a lead, an advertisement is an advertised offer, and neither confirms that a unit is available for this person's dates or terms. Confirmed availability requires explicit dated evidence tied to the exact unit, period and terms. State what is advertised, confirmed, estimated or unresolved. If public access fails, say what failed and continue with known evidence; never substitute fictional listings unless the human explicitly asks for a teaching example. Do not inherit example floors, budgets, destinations or housing exclusions as this person's preferences. Later actual human inputs supersede earlier instructions only within their stated scope.'''))
     return '\n\n'.join(title+'\n'+body for title, body in sections)
 
@@ -315,7 +328,7 @@ class Lab:
                 rid='human-initial'
                 event(store,'request.capture',id=rid,text=opening,source='interactive-human:initial')
                 event(store,'requirement.add',id='live-user-inputs',value=[opening],strength='must',scope='live-research-user-instructions',provenance=dict(provenance(opening,rid),request_id=rid))
-                event(store,'request.resolve',id=rid,resolution='applied',note='Exact human request retained as ordered instructions; no automatic semantic eligibility extraction.')
+                event(store,'request.resolve',id=rid,resolution='applied',note='Exact human request retained; the host checks supported conditions and retains unresolved meaning.')
             s={'schema_version':1,'id':sid,'revision':0,'created_at':time.time(),'creation':copy.deepcopy(data),
                'research_mode':mode,
                'model':data['model'],'limits':{'max_calls':data['max_calls'],'max_tokens':data['max_tokens']},'seed':data['seed'],
@@ -325,6 +338,7 @@ class Lab:
                'messages':[{'role':'human' if mode == 'live' else 'persona','text':opening,'turn':1}], 'interventions':[], 'amendments':[],
                'queue':[], 'calls':[], 'pending_call':None,'preparing_input':None,'next_actor':'assistant','auto':False,'pause_requested':False,
                'status':'ready','notice':'','actions':[],'client_ids':{},'stop_reason':None}
+            if mode=='live':s.update(live_gate_version=1,intent_epoch=1,current_acceptance=None)
             self._action(s,'created',data);self._save(s)
             return {'id':sid}
 
@@ -341,6 +355,13 @@ class Lab:
                 notice=('程式已更新；既有紀錄仍可閱讀或匯出，請等待測試台重新啟動。 '+notice).strip()
             elif not compatible: notice=('這是舊版保存的對話；可以閱讀或匯出，請建立新對話測試新版。 '+notice).strip()
             if s['amendments'] and not live: notice=('此情境已被你的條件變更修改，不再是原始 benchmark。 '+notice).strip()
+            gate=self._current_gate(s) if s.get('live_gate_version')==1 else None
+            messages=copy.deepcopy(s['messages'])
+            if gate:
+                for message in messages:
+                    if message.get('acceptance_id'):
+                        message['comparison_status']='current' if gate['status']=='current' and message['acceptance_id']==s['current_acceptance'] else 'historical'
+                if gate['status']=='invalid':notice=('來源或核對紀錄已變更；目前比較暫停使用。 '+notice).strip()
             return {'id':sid,'revision':s['revision'],'persona_id':s['card'].get('id'),'name':'真實找房研究' if live else s['card']['name'],
               'research_mode':mode,'capability_status':CAPABILITIES[mode],'next_actor':s['next_actor'],
               'model':s['model'],'status':s['status'],'auto':s['auto'],'busy':self.busy==sid,'notice':notice,'compatible':compatible,
@@ -348,7 +369,9 @@ class Lab:
               'phase_label':('Codex 正在回答' if phase=='assistant' else 'Persona 正在想下一個問題') if self.busy==sid else '',
               'persona_turn':s['persona_turn'],'patience_turns':s['card'].get('patience_turns'),'calls':len(s['calls']),
               'tokens':tokens,'limits':s['limits'],'actor_calls':{role:sum(r['actor']==role for r in s['calls']) for role in ('assistant','persona')},
-              'messages':copy.deepcopy(s['messages'])+[{'role':'human','text':m['text'],'kind':m['kind'],'pending':True} for m in s['queue']],
+              'messages':messages+[{'role':'human','text':m['text'],'kind':m['kind'],'pending':True} for m in s['queue']],
+              'comparison_status':gate['status'] if gate else 'unavailable',
+              'current_comparison':gate['artifact'] if gate and gate['status']=='current' and compatible else None,
               'pending_count':len(s['queue']),'mood':c.get('mood'),'held_documents':[d['name'] for d in c.get('released',[])],
               'events':c.get('events',[]),'criteria':s['card'].get('success',[]),'stop_reason':s['stop_reason'],
               'quality':'not_evaluated','amended':bool(s['amendments']),'pending_call':bool(s['pending_call'] or s.get('preparing_input'))}
@@ -362,12 +385,16 @@ class Lab:
         with self.lock:
             s=self._load(sid)
             live=s.get('research_mode')=='live'
+            gate=self._current_gate(s) if s.get('live_gate_version')==1 else None
             return {'private':True,'id':sid,'persona_id':s['card'].get('id'),'model':s['model'],
                     'research_mode':s.get('research_mode','fixture'),'capability_status':CAPABILITIES['live' if live else 'fixture'],
                     'mode':'human-led public research; no synthetic persona' if live else 'chat-adapted dynamic persona; same-family Codex',
                     'messages':s['messages'],'pending_messages':s['queue'],'actions':s['actions'],'calls':s['calls'],
-                    'controller':s['controller'],'amendments':s['amendments'],'sources':s['sources'],
+                    'controller':s['controller'],'amendments':s['amendments'],'interventions':s['interventions'],'sources':s['sources'],
                     'runtime_settings':s.get('runtime_settings'),
+                    'comparison_status':gate['status'] if gate else 'unavailable',
+                    'current_comparison':gate['artifact'] if gate and gate['status']=='current' and s['sources']==source_hashes() else None,
+                    'history_note':'Earlier messages and raw call proposals are retained historical evidence, not the current recommendation. Use current_comparison only when present.',
                     'stop_reason':s['stop_reason'],'quality':'not_evaluated','state_revision':self._store(s).show()['revision']}
 
     def _dedupe(self,s,data):
@@ -392,8 +419,25 @@ class Lab:
             if s['status'] in ('error','interrupted','budget'): raise LabError('先處理目前停止原因，才能繼續花費。')
             if len(s['queue'])>=10: raise LabError('目前最多排隊 10 則問題。')
             if data['kind']=='amendment' and sum(len(t) for t in s['amendments'])+sum(len(q['text']) for q in s['queue'] if q['kind']=='amendment')+len(data['text'])>18000: raise LabError('條件變更已達這段測試的容量上限。')
-            s['queue'].append(copy.deepcopy(data));s['pause_requested']=False
+            queued=copy.deepcopy(data)
+            if s.get('live_gate_version')==1:
+                # The UI retains the complete question/answer transcript, but
+                # host-authored question wording is not a new human condition.
+                current=self._current_gate(s)
+                if current['status']=='current':
+                    for question in current['artifact']['reply']['questions']:
+                        prefix=question['question']+'\n'
+                        if data['text'].startswith(prefix) and data['text'][len(prefix):].strip():
+                            queued['intent_text']=data['text'][len(prefix):]
+                            queued['clarification_origin']={'acceptance_id':s['current_acceptance'],'question':question['question']}
+                            break
+            s['queue'].append(queued);s['pause_requested']=False
+            if s.get('live_gate_version')==1:
+                # The saved inbox invalidates publication immediately, including
+                # ordinary questions that contain a changed condition.
+                s['intent_epoch']+=1
             self._action(s,'human_input_queued',data);self._save(s)
+            if s.get('live_gate_version')==1:self._capture_live_inbox(s)
             if self.busy is None: self._start(sid,auto=False)
             return {'ok':True,'queued':True}
 
@@ -428,6 +472,42 @@ class Lab:
         s=self._load(sid);s.update(auto=auto,pause_requested=False,status='running',notice='');self._save(s)
         self.busy=sid;self.worker=threading.Thread(target=self._work,args=(sid,),daemon=True);self.worker.start()
 
+    def _capture_live_inbox(self,s):
+        store=self._store(s)
+        for item in s['queue']:
+            rid='human-'+uuid.UUID(item['client_id']).hex
+            previous=store.show()['requests'].get(rid)
+            if previous is None:
+                event(store,'request.capture',id=rid,text=item['text'],source='interactive-human:'+item['kind'])
+            elif previous['text']!=item['text']:raise LabError('已保存的原始插話不一致。')
+
+    def _live_inputs(self,s):
+        return [body for role,body in s['history'] if role=='user']
+
+    def _prepare_live_inputs(self,s):
+        # Resolve one durable batch before dispatch. All requests were captured
+        # at receipt, so consuming only one would leave another pending barrier.
+        self._capture_live_inbox(s)
+        store=self._store(s);items=copy.deepcopy(s['queue'])
+        s['preparing_input']=items[0]['client_id'];self._save(s)
+        ordered=self._live_inputs(s)+[item.get('intent_text',item['text']) for item in items]
+        last=items[-1];rid='human-'+uuid.UUID(last['client_id']).hex
+        if store.show()['requirements']['live-user-inputs']['value']!=ordered:
+            event(store,'requirement.update',id='live-user-inputs',changes={'value':ordered},
+                  provenance=dict(provenance(last['text'],rid),request_id=rid))
+        for item in items:
+            rid='human-'+uuid.UUID(item['client_id']).hex
+            if store.show()['requests'][rid]['status']=='pending':
+                event(store,'request.resolve',id=rid,resolution='applied',note='Exact ordered input retained. Host checks supported conditions; unresolved clauses cannot authorize a waiver.')
+            s['history'].append(['user',item.get('intent_text',item['text'])]);s['persona_turn']+=1
+            s['messages'].append({'role':'human','text':item['text'],'kind':item['kind']})
+            s['interventions'].append({'role':'human','text':item['text'],'kind':item['kind'],
+                                      'intent_text':item.get('intent_text',item['text']),
+                                      'clarification_origin':item.get('clarification_origin')})
+            if item['kind']=='amendment':s['amendments'].append(item['text'])
+        s['queue']=[]
+        return '\n\n'.join(item.get('intent_text',item['text']) for item in items)
+
     def _prepare(self,s):
         if self.runtime_sources!=source_hashes():raise LabError('程式已更新，請等待測試台重新啟動。')
         if s['sources']!=source_hashes(): raise LabError('實作已更新。這段紀錄保持原樣，請建立新對話使用新版。')
@@ -437,7 +517,9 @@ class Lab:
         store=self._store(s);budget=store.show()['budgets']['tokens']
         if len(s['calls'])>=s['limits']['max_calls'] or budget['spent']>=s['limits']['max_tokens'] or budget['unknown_spend']:
             s.update(status='budget',auto=False,notice='已到達呼叫／token 上限，或有未確認用量。沒有啟動下一則。');return None
-        if s['queue']:
+        if s['queue'] and s.get('live_gate_version')==1:
+            raw=self._prepare_live_inputs(s);actor='assistant';origin='human'
+        elif s['queue']:
             s['preparing_input']=s['queue'][0]['client_id'];self._save(s)
             item=s['queue'].pop(0);origin='human';actor='assistant';raw=item['text']
             request_id='human-'+uuid.UUID(item['client_id']).hex
@@ -482,27 +564,160 @@ class Lab:
             system=live_system('\n'.join(body for role,body in s['history'] if role=='user')) if live else s['system']
             prompt=system+'\n\nFULL CONVERSATION\n'+transcript+'\n\nCURRENT INPUT TO ANSWER\n'+pending_user
             if s['amendments'] and not live:prompt+='\n\nThe tester has changed the synthetic scenario. Apply these exact amendments in order, preserving their scope and conditional predicates; do not revert to older conflicting facts:\n'+json.dumps(s['amendments'],ensure_ascii=False)
-            prompt+='\n\nAnswer the current input directly using the supplied response schema: message is useful plain-language progress, questions are optional choice controls (zero to three). Do not duplicate questions in message. '
+            prompt+='\n\nAnswer the current input directly using the supplied response schema: message is useful plain-language progress, questions are optional choice controls (zero to three). Do not duplicate questions in message. ' if s.get('live_gate_version')!=1 else ''
             prompt+=('Public read-only web research is enabled. Cite actual external source URLs and the date checked; keep precise timing metadata out of ordinary prose. Preserve advertised versus confirmed availability, and report unsuccessful searches honestly. No synthetic persona, private-file access, shell, file writes or external contact. Host request time before dispatch: '+time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())+' (not an exact per-source retrieval timestamp).' if live else 'No runtime metadata, internal source citations, tools, file writes, browsing or external contact.')
             prompt+=' Preserve the conversation and make progress on the person’s actual needs.'
             if live: prompt+=self._source_context(s)
+            if s.get('live_gate_version')==1:
+                from public_source_snapshot import ALLOWED_HOSTS
+                known=self._known_gate_candidates(s)
+                normalized=live_eligibility.normalize(self._live_inputs(s),s['intent_epoch'])
+                prompt+='\n\nHOST CHECKED-DELIVERY CONTRACT\n'+json.dumps(normalized,ensure_ascii=False)
+                prompt+='\nKnown candidate source URLs (retain these when comparing, never silently drop one): '+json.dumps(known,ensure_ascii=False)
+                prompt+='\nThe host can independently capture HTTPS pages only on these exact public hosts: '+json.dumps(sorted(ALLOWED_HOSTS))+'. Prefer supported direct unit pages when discovering candidates. An unsupported source remains a retained gap, never permission to bypass capture restrictions.'
+                prompt+='\nThis host now computes the formal comparison, ranking and TODOs itself. Return ONLY candidates with source_url and a short location label, plus focus_fields for the current question, using the supplied schema. Do not return message, prose, facts, conditions, verdicts, ranking, TODOs or pins. Your output is an untrusted discovery proposal, not the visible reply. The host independently captures the original cited unit pages and extracts supported fields; missing evidence stays unknown. Prefer direct unit URLs. If the user requests no new listings, reuse the known sources and select the relevant focus fields. If no source was obtained, return an empty candidate list. Do not invent a URL to complete the schema.'
         if len(prompt)>160000:raise LabError('完整對話超出本輪 160,000 字元容量；已停止，未裁切。')
         call_id='call-%03d-%s'%(len(s['calls'])+1,actor)
         s['pending_call']={'id':call_id,'actor':actor,'origin':origin,'turn':turn,'started_at':time.time()}
+        if s.get('live_gate_version')==1:
+            s['pending_call'].update(intent_epoch=s['intent_epoch'],input_sha256=_digest(self._live_inputs(s)))
         s['preparing_input']=None
         s['calls'].append({'id':call_id,'actor':actor,'status':'pending','tokens':None})
+        if s.get('live_gate_version')==1:s['calls'][-1]['source_capture_required']=True
         s['status']='running';self._save(s)
         return prompt
 
     def _snapshot_index(self, s, call_id):
         return self._folder(s['id'])/'source-snapshots'/call_id/'index.json'
 
+    def _read_acceptance(self,s):
+        key=s.get('current_acceptance')
+        if key is None:return None
+        if not isinstance(key,str) or not re.fullmatch(r'call-[0-9]+-assistant',key):raise LabError('核對紀錄識別碼無效。')
+        path=regular(self._folder(s['id'])/'acceptance'/key/'artifact.json')
+        saved=parse_json(path.read_text())
+        if set(saved)!={'value','sha256'} or _digest(saved['value'])!=saved['sha256']:raise LabError('核對紀錄完整性檢查失敗。')
+        return saved['value']
+
+    def _known_gate_candidates(self,s):
+        saved=self._read_acceptance(s)
+        return copy.deepcopy(saved['artifact']['proposal']['candidates']) if saved else []
+
+    def _gate_proposal(self,s,receipt):
+        value=parse_json(receipt['answer'])
+        if not isinstance(value,dict) or set(value)!={'candidates','focus_fields'} or not isinstance(value['candidates'],list):raise LabError('研究提案格式無效。')
+        incoming=value['candidates'];known=self._known_gate_candidates(s)
+        if len(incoming)>3 or not isinstance(value['focus_fields'],list) or len(value['focus_fields'])>5 or any(field not in live_eligibility.FOCUS_FIELDS for field in value['focus_fields']):
+            raise LabError('研究提案超出本次可比較的欄位或房源數量。')
+        candidates=[];seen=set()
+        for row in known+incoming:
+            if not isinstance(row,dict) or set(row)!={'source_url','label'} or not isinstance(row['source_url'],str) or not isinstance(row['label'],str):raise LabError('房源提案格式無效。')
+            if not row['source_url'] or len(row['source_url'])>1500 or len(row['label'])>100:raise LabError('房源連結或名稱長度無效。')
+            if row['source_url'] not in seen:candidates.append(row);seen.add(row['source_url'])
+        if len(candidates)>3:raise LabError('這段比較最多保留三間房源；新提案已保存，但尚未加入比較。')
+        return {'candidates':candidates,'focus_fields':value['focus_fields']}
+
+    def _gate_sources(self,s):
+        # Only host-retained full original text is eligible input. Never ingest
+        # an actor-written fact or the earlier assistant's prose as a source.
+        sources={}
+        calls=[{'id':key} for key in s.get('imported_source_calls',[])]+s['calls']
+        for call in reversed(calls):
+            group=self._read_snapshots(s,call['id'])
+            if call.get('source_capture_skipped')=='stale_before_capture' and not self._snapshot_index(s,call['id']).parent.exists():continue
+            if call.get('source_capture_required') and call['status']!='pending' and not self._snapshot_index(s,call['id']).is_file():
+                raise LabError('本輪來源保存尚未完成；沒有改用舊資料。')
+            if any(row.get('snapshot_group_error') for row in group):
+                # Fail the acceptance rather than reverting to any older version.
+                raise LabError('來源快照不完整；已停止更新候選，沒有改用舊資料。')
+            for i,row in enumerate(group):
+                url=row.get('source_url',row.get('url'))
+                if url in sources:continue
+                source={'ok':False,'text':'','retrieved_at':row.get('retrieved_at'),
+                        'sha256':None,'identity':'unknown','note':row.get('note')}
+                if row.get('ok'):
+                    try:
+                        raw=regular(self._snapshot_index(s,call['id']).parent/str(i)/'text.txt').read_bytes()
+                        if hashlib.sha256(raw).hexdigest()!=row.get('text_sha256'):raise ValueError('source hash mismatch')
+                        text=raw.decode('utf-8')
+                        # This is a limited unit-page signal, not source truth;
+                        # the offline adapter further rejects mixed-unit profiles.
+                        unit=bool(re.search(r'\b[1-9]\s*(?:bedroom|bed)\s+(?:flat|apartment|house|maisonette)\b',text,re.I))
+                        source.update(ok=True,text=text,sha256=hashlib.sha256(raw).hexdigest(),identity='unit' if unit else 'unknown')
+                    except (ValueError,OSError,UnicodeError):source['note']='Source text is missing or integrity invalid.'
+                sources[url]=source
+        return sources
+
+    def _current_gate(self,s):
+        try:
+            saved=self._read_acceptance(s)
+            if saved is None:return {'status':'not_checked','artifact':None}
+            if s['sources']!=source_hashes() or self.runtime_sources!=source_hashes():
+                return {'status':'historical','artifact':None}
+            state=self._store(s).show()
+            if (s['queue'] or saved['intent_epoch']!=s['intent_epoch'] or saved['input_sha256']!=_digest(self._live_inputs(s))
+                    or state['requirements']['live-user-inputs']['value']!=self._live_inputs(s)
+                    or any(r['status']=='pending' for r in state['requests'].values())):
+                return {'status':'stale','artifact':None}
+            result=live_eligibility.validate_artifact(saved['artifact'],self._live_inputs(s),s['intent_epoch'],self._gate_sources(s))
+            if not result['valid']:return {'status':'invalid','artifact':None}
+            return {'status':'current','artifact':saved['artifact']}
+        except (ValueError,OSError,KeyError,TypeError):return {'status':'invalid','artifact':None}
+
+    def _accept_live(self,s,pending,receipt):
+        if s['sources']!=source_hashes() or self.runtime_sources!=source_hashes():
+            raise LabError('核對程式版本已更新；原提案保留，沒有用新版改寫舊結果。')
+        proposal=self._gate_proposal(s,receipt)
+        inputs=self._live_inputs(s);sources=self._gate_sources(s)
+        authoritative=self._store(s).show()
+        if (authoritative['requirements']['live-user-inputs']['value']!=inputs
+                or any(r['status']=='pending' for r in authoritative['requests'].values())):
+            raise LabError('目前需求仍待整理；沒有發布舊條件下的候選。')
+        artifact=live_eligibility.accept(proposal,inputs,s['intent_epoch'],sources)
+        valid=live_eligibility.validate_artifact(artifact,inputs,s['intent_epoch'],sources)
+        if not valid['valid']:raise LabError('候選核對未通過，原始提案已保存。')
+        value={'intent_epoch':s['intent_epoch'],'input_sha256':_digest(inputs),
+               'source_state_revision':authoritative['revision'],'artifact':artifact,
+               'raw_record_sha256':receipt['record_sha256'],'call_id':pending['id']}
+        path=regular(self._folder(s['id'])/'acceptance'/pending['id']/'artifact.json')
+        if path.exists():
+            old=parse_json(path.read_text())
+            if set(old)!={'value','sha256'} or _digest(old['value'])!=old['sha256'] or old['value']!=value:raise LabError('已保存的核對版本不同；沒有覆寫。')
+        else:
+            path.parent.mkdir(parents=True,mode=0o700)
+            _atomic_json(path,{'value':value,'sha256':_digest(value)})
+        s['current_acceptance']=pending['id']
+        return artifact['reply']
+
+    def _discard_stale_live(self,s,pending,receipt):
+        # These assertions come from the verified physical receipt and spend
+        # ledger, never from a flag submitted by a model or source page.
+        if receipt['physical_status']!='complete' or type(receipt['processed_tokens']) is not int:return False
+        store=self._store(s);state=store.show();dispatch=state['dispatches'].get(pending['id'])
+        if dispatch is None:return False
+        if dispatch['status'] in ('completed','discarded'):return True
+        if dispatch['status'] not in ('pending','stale') or not s['queue']:return False
+        spends=[v for v in state['budgets']['tokens']['spends'] if v['dispatch_id']==pending['id']]
+        if len(spends)!=1 or spends[0]['amount']!=receipt['processed_tokens']:return False
+        item=s['queue'][-1];rid='human-'+uuid.UUID(item['client_id']).hex
+        captured=state['requests'].get(rid)
+        if not captured or captured['text']!=item['text']:return False
+        event(store,'dispatch.discard',id=pending['id'],process_stopped=True,usage_accounted=True,
+              reason='A newer saved user input invalidated this completed proposal. Known physical usage is retained; the proposal is not published and is never retried.',
+              provenance=dict(provenance(item['text'],rid),request_id=rid))
+        return True
+
     def _capture_sources(self, s, call_id, receipt):
         """Independent post-answer captures; never reconstruct missing CLI results."""
-        if receipt.get('status')!='recorded' or receipt.get('physical_status')!='complete':return
-        try: message=conversation_reply.decode(receipt['answer'])['message']
+        if receipt.get('status')!='recorded' or receipt.get('physical_status')!='complete':
+            return 'stale_before_capture' if receipt.get('status') in ('stale','discarded') and receipt.get('physical_status')=='complete' else None
+        try:
+            if s.get('live_gate_version')==1:
+                urls=[c['source_url'] for c in self._gate_proposal(s,receipt)['candidates']]
+            else:
+                message=conversation_reply.decode(receipt['answer'])['message']
+                urls=list(dict.fromkeys(re.findall(r'https://[^\s<>\)]+',message)))
         except (ValueError,TypeError,KeyError):return
-        urls=list(dict.fromkeys(re.findall(r'https://[^\s<>\)]+',message)))
         index=self._snapshot_index(s,call_id);folder=index.parent
         regular(index)
         if folder.exists():return  # interrupted capture is never an automatic retry
@@ -579,11 +794,29 @@ class Lab:
         row['seconds']=max(0,time.time()-pending['started_at'])
         row['source_snapshots']=self._read_snapshots(s,pending['id']) if s.get('research_mode')=='live' else []
         s['pending_call']=None
+        if s.get('live_gate_version')==1 and (pending.get('intent_epoch')!=s['intent_epoch']
+                or pending.get('input_sha256')!=_digest(self._live_inputs(s)) or s['queue']):
+            row['acceptance_status']='stale'
+            if not self._discard_stale_live(s,pending,receipt):
+                s['pending_call']=pending
+                s.update(status='interrupted',auto=False,pause_requested=True,notice='新條件已保存；前一則的執行或用量尚未完成核對，因此暫停後續研究。')
+                return
+            s.update(status='paused',auto=False,notice='已收到更新；剛完成的舊條件提案保留在紀錄，未發布成目前的比較。')
+            return
         if receipt['physical_status']!='complete' or receipt['status']!='recorded' or not receipt['current_for_requirements'] or not receipt['answer'].strip():
             s.update(status='error',auto=False,notice='模型呼叫未通過完整性／用量檢查。原始紀錄已保留，沒有自動重試。');return
         live=s.get('research_mode')=='live'
         answer=receipt['answer'];actor=pending['actor'];c=None if live else self._control(s);questions=[]
-        if actor=='assistant' and s.get('reply_format')=='choices-v1':
+        if actor=='assistant' and s.get('live_gate_version')==1:
+            try:
+                reply=self._accept_live(s,pending,receipt)
+                row['acceptance_status']='accepted';row['acceptance_id']=pending['id']
+                answer=conversation_reply.transcript(reply);questions=reply['questions']
+            except (ValueError,TypeError,KeyError,OSError) as error:
+                row['acceptance_status']='rejected'
+                s.update(status='error',auto=False,notice=str(error) if isinstance(error,LabError) else '候選資料未通過核對；原始提案和用量已保留，沒有顯示未核對建議。')
+                return
+        elif actor=='assistant' and s.get('reply_format')=='choices-v1':
             try: reply=conversation_reply.decode(answer)
             except (ValueError,TypeError):
                 s.update(status='error',auto=False,notice='回答格式未通過檢查；原文及用量已保存，沒有自動重試。');return
@@ -603,6 +836,7 @@ class Lab:
         else:
             message={'role':'assistant','text':answer,'responding_to':pending['origin']}
             if s.get('reply_format')=='choices-v1':message.update(display_text=reply['message'],questions=questions)
+            if s.get('live_gate_version')==1:message['acceptance_id']=pending['id']
             s['messages'].append(message);s['history'].append(['assistant',answer])
             if live:
                 s.update(next_actor=None,auto=False)
@@ -624,7 +858,8 @@ class Lab:
                 with self.lock:
                     s=self._load(sid)
                     if s['pause_requested']:s['status']='paused';self._save(s);break
-                    if s['status'] in ('ended','error','budget') and not s['queue']:break
+                    if s['status'] in ('error','interrupted','budget'):break
+                    if s['status']=='ended' and not s['queue']:break
                     prompt=self._prepare(s)
                     if prompt is None:self._save(s);break
                     pending=copy.deepcopy(s['pending_call'])
@@ -632,11 +867,15 @@ class Lab:
                        max_chars=96000,timeout=300 if s.get('research_mode')=='live' else 180,invoke=self.invoke,max_prompt_chars=160000,
                        presentation='conversation',
                        tool_policy='live_research' if s.get('research_mode')=='live' else 'text_only',
-                       response_schema=conversation_reply.SCHEMA if pending['actor']=='assistant' and s.get('reply_format')=='choices-v1' else None)
-                if s.get('research_mode')=='live':self._capture_sources(s,pending['id'],receipt)
+                       response_schema=LIVE_REPLY_SCHEMA if s.get('live_gate_version')==1 else conversation_reply.SCHEMA if pending['actor']=='assistant' and s.get('reply_format')=='choices-v1' else None)
+                capture_status=self._capture_sources(s,pending['id'],receipt) if s.get('research_mode')=='live' else None
                 with self.lock:
-                    s=self._load(sid);self._finish(s,receipt);self._save(s)
-                    if s['status'] in ('error','budget'):break
+                    s=self._load(sid)
+                    if capture_status=='stale_before_capture':
+                        next(r for r in s['calls'] if r['id']==pending['id'])['source_capture_skipped']=capture_status
+                        self._save(s)
+                    self._finish(s,receipt);self._save(s)
+                    if s['status'] in ('error','interrupted','budget'):break
                     if not s['auto'] and pending['actor']=='assistant' and not s['queue']:break
                     if s['status']=='ended' and not s['queue']:break
         except Exception as error:
@@ -646,13 +885,17 @@ class Lab:
                 if s['pending_call']:
                     try:
                         receipt=session_runner.recover(self._folder(sid),s['pending_call']['id']);self._finish(s,receipt)
-                        recovered=receipt['status']=='recorded' and receipt['physical_status']=='complete'
+                        last=s['calls'][-1]
+                        recovered=(receipt['status']=='recorded' and receipt['physical_status']=='complete'
+                                   and s['status'] not in ('error','interrupted')
+                                   and (s.get('live_gate_version')!=1 or last.get('acceptance_status')=='accepted'))
                     except Exception:pass
                 if recovered:
                     s.update(status='ended' if s['stop_reason'] else 'paused',auto=False,pause_requested=True,
                              notice='已從原有紀錄恢復這則回答；沒有重新呼叫模型。確認後可繼續。')
-                else:s.update(status='interrupted' if s['pending_call'] or s.get('preparing_input') else 'error',auto=False,
-                              notice=str(error) if isinstance(error,LabError) else '這一步未完成；紀錄已保留。恢復不會重新呼叫模型。')
+                elif s['status'] not in ('error','interrupted'):
+                    s.update(status='interrupted' if s['pending_call'] or s.get('preparing_input') else 'error',auto=False,
+                             notice=str(error) if isinstance(error,LabError) else '這一步未完成；紀錄已保留。恢復不會重新呼叫模型。')
                 self._action(s,'stopped',{'error_type':type(error).__name__});self._save(s)
         finally:
             with self.lock:
