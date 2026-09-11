@@ -182,6 +182,12 @@ This distinction matters for legitimate mid-conversation changes in user priorit
 The evaluator appended a correction and rates this as a moderate protocol and
 traceability mismatch, not proven violation of a hard user spending limit.
 
+One root-authored review was entered through the human form, which hardcodes the
+reviewer label as human despite the note explicitly saying it was AI review.
+The append-only record is retained, with an agent-labelled correction and a
+private machine-readable exclusion from human-response metrics. Both notes are
+AI feedback. Agent reviewers should use the reviews API with `reviewer: agent`.
+
 Before another quality run, prioritize the formatter crash, explicit effective-depth
 and scope-change recording, pending-scan/result reuse, and partial source coverage.
 An experiment that requires fixed depth must state it to the actor and check it;
