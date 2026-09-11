@@ -116,7 +116,8 @@ def run_arm_claude(arm, skill_dir, prompt, model, out_dir, pair, timeout):
             ev = json.loads(line)
         except ValueError:
             continue
-        for block in ((ev.get("message") or {}).get("content") or []) if isinstance(ev, dict) else []:
+        content = ((ev.get("message") or {}).get("content") or []) if isinstance(ev, dict) else []
+        for block in (content if isinstance(content, list) else []):
             if isinstance(block, dict) and block.get("type") == "tool_use":
                 inp = block.get("input") or {}
                 cmds.append("%s %s" % (block.get("name"), (inp.get("command") or inp.get("file_path") or inp.get("pattern") or json.dumps(inp, ensure_ascii=False)[:200])))
