@@ -18,16 +18,17 @@ under `bridging` except `first_weeks`. Free text inside allowed fields is not an
 apart from postcode removal, names, addresses and other personal details can remain there.
 Review the card and decoded fields before sharing. Base64url is encoding, not encryption.
 
-Shared: name (yours, for the seed), flat type, budget as a band, budget_mode, commute district,
-move-in month, must_haves, avoid, priorities, my_questions, floor rules, light rules,
-quiet_over_light, bridging.first_weeks, story_summary.
+Shared: name (yours, for the seed), flat type, budget as a band, budget_mode, must_haves, avoid,
+priorities, my_questions, floor rules, light rules, quiet_over_light, bridging.first_weeks, and
+the story_summary only with --with-story. Never the commute district or the move-in month: a
+seed carries taste, not whereabouts (2026-09-11).
 
 Usage:
   seed.py export --profile profile.yaml
   seed.py export --profile profile.yaml --name "quiet, high, morning sun"
   seed.py export --profile profile.yaml --journey journey.json
   seed.py export --profile profile.yaml --exact            # real numbers instead of a band
-  seed.py export --profile profile.yaml --commute-area "Zone 1"   # or --hide-commute
+  seed.py export --profile profile.yaml --with-story      # adds the (scrubbed) story summary
   seed.py export --profile profile.yaml --json             # the machine object, for other tools
   seed.py import "PP1.eyJ2IjoxLC..."
   seed.py import seed-card.txt --out profile.yaml
@@ -97,12 +98,10 @@ KEY_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_-]*$")
 MONTHS = ["January", "February", "March", "April", "May", "June",
           "July", "August", "September", "October", "November", "December"]
 
-# Who the card is for. "public" (the default) carries no place, no date and no story: the
-# person reading it fills in their own commute and dates, so nothing in a public post can be
-# combined with a workplace or a school to point at where somebody lives. "friend" adds the
-# commute district, the move-in month and the story summary, for a private message to someone
-# the person trusts; the command says so out loud when it writes one.
-AUDIENCES = ("public", "friend")
+# One card, always safe to post: it never carries the commute district, the move-in month or
+# any date, so nothing in it can be combined with a workplace or a school to point at where
+# somebody lives. The person reading a seed fills in their own commute and dates. The story
+# summary (free text) is left out unless asked for with --with-story, and is scrubbed of places.
 BOROUGHS = ("Barking and Dagenham", "Barnet", "Bexley", "Brent", "Bromley", "Camden", "City of London", "Croydon",
             "Ealing", "Enfield", "Greenwich", "Hackney", "Hammersmith and Fulham", "Haringey", "Harrow",
             "Havering", "Hillingdon", "Hounslow", "Islington", "Kensington and Chelsea", "Kingston upon Thames",
@@ -417,16 +416,12 @@ def best_aspects(scores):
     return [name for score, name in sorted(pairs, key=lambda p: (-p[0], p[1])) if score >= top][:3]
 
 
-def shareable(profile, name=None, exact=False, commute_area=None, hide_commute=False,
-              audience="public", removed=None):
+def shareable(profile, name=None, exact=False, with_story=False, removed=None):
     """Everything on the allow-list, and nothing else, from a parsed profile.yaml.
 
-    audience="public" (default): no commute area, no move-in month, no story summary — a
-    public post carries taste, not whereabouts. audience="friend": the district (or the label
-    given), the month and the story, for a private message. Free text is scrubbed of places
-    either way; `removed` (a list) collects what the scrub took out."""
-    if audience not in AUDIENCES:
-        raise ValueError("audience must be one of %s" % ", ".join(AUDIENCES))
+    Never the commute area or the move-in month: a seed carries taste, not whereabouts. The
+    story summary only with with_story=True. Free text is scrubbed of places; `removed` (a
+    list) collects what the scrub took out."""
     profile = profile or {}
     removed = removed if removed is not None else []
     budget = profile.get("budget") or {}
@@ -444,12 +439,7 @@ def shareable(profile, name=None, exact=False, commute_area=None, hide_commute=F
     if exact and budget.get("all_in_pcm_ceiling") and budget.get("rent_pcm_target"):
         money = "%s (rent target £%s)" % (money, format(int(budget["rent_pcm_target"]), ","))
 
-    if audience == "public" or hide_commute:
-        area = None
-    elif commute_area:
-        area = strip_postcodes(str(commute_area).strip())[:40] or None
-    else:
-        area = district((commute or {}).get("destination"))
+    area = None
 
     seed = {
         "version": SEED_VERSION,
@@ -458,7 +448,7 @@ def shareable(profile, name=None, exact=False, commute_area=None, hide_commute=F
         "budget_band": money,
         "budget_mode": profile.get("budget_mode") or None,
         "commute_area": area,
-        "move_in_month": month_of(window.get("earliest"), window.get("latest")) if audience == "friend" else None,
+        "move_in_month": None,
         "must_haves": [scrub_places(x, removed) for x in clean_list(profile.get("must_haves"))],
         "avoid": [scrub_places(x, removed) for x in clean_list(profile.get("avoid"))],
         "priorities": clean_list(profile.get("priorities"), limit=3),
@@ -476,7 +466,7 @@ def shareable(profile, name=None, exact=False, commute_area=None, hide_commute=F
         "quiet_over_light": bool(profile.get("quiet_over_light")),
         "first_weeks": (bridging.get("first_weeks") if isinstance(bridging, dict) else None) or None,
         "story_summary": (scrub_places(str(profile["story_summary"]), removed)[:600]
-                          if profile.get("story_summary") and audience == "friend" else None),
+                          if profile.get("story_summary") and with_story else None),
     }
     return seed
 
@@ -1001,12 +991,8 @@ def cmd_export(args):
     profile = read_yaml(args.profile)
     if not isinstance(profile, dict) or not profile:
         die("%s does not look like a profile.yaml" % args.profile)
-    if args.audience == "public" and (args.commute_area or args.hide_commute):
-        die("--commute-area and --hide-commute only mean something with --for friend; "
-            "a public card never carries a place", 2)
     removed = []
-    seed = shareable(profile, name=args.name, exact=args.exact, commute_area=args.commute_area,
-                     hide_commute=args.hide_commute, audience=args.audience, removed=removed)
+    seed = shareable(profile, name=args.name, exact=args.exact, with_story=args.with_story, removed=removed)
     journey = None
     if args.journey:
         if not os.path.exists(args.journey):
@@ -1027,18 +1013,15 @@ def cmd_export(args):
                    "trimmed_from_code": trimmed,
                    "scrubbed_from_profile": dropped_fields(profile),
                    "shared_fields": [k for k, _ in ALLOW],
-                   "audience": args.audience, "places_removed": removed,
+                   "places_removed": removed,
                    "note": "preferences and bands only; see references/sharing.md"},
                   sys.stdout, ensure_ascii=False, indent=1)
         print()
         return 0
     sys.stdout.write(text)
-    if args.audience == "public":
-        sys.stdout.write("\n(Public card: no place, no date, no story. Whoever uses it fills in their own.)\n")
-    else:
-        sys.stderr.write("FRIEND CARD: this one says where you go each day (%s), when you move (%s) and how you live. "
-                         "Send it only to someone you trust; never post it.\n"
-                         % (seed.get("commute_area") or "not given", seed.get("move_in_month") or "not given"))
+    sys.stdout.write("\n(This card carries no place and no date. Whoever uses it fills in their own commute and dates.)\n")
+    if seed.get("story_summary"):
+        sys.stderr.write("the story summary is in this card because you asked; it is free text — read it once more for anything that points at you\n")
     if removed:
         sys.stderr.write("place-like words removed from the free text: %s\n" % "; ".join(removed[:12]))
     sys.stderr.write("read the card once more for employer, school or shop names before sharing: no list can catch those\n")
@@ -1105,13 +1088,8 @@ def build_parser():
     export.add_argument("--name", help='a label for this seed, e.g. "quiet, high, morning sun"')
     export.add_argument("--exact", action="store_true",
                         help="share the real budget numbers instead of a band")
-    export.add_argument("--commute-area", dest="commute_area",
-                        help='say the area by hand, e.g. "Zone 1" (default: the postcode district)')
-    export.add_argument("--for", dest="audience", choices=AUDIENCES, default="public",
-                        help="public (default): taste only, no place or date; friend: adds the commute "
-                             "district, the move-in month and the story, for a private message")
-    export.add_argument("--hide-commute", dest="hide_commute", action="store_true",
-                        help="leave the commute area out altogether")
+    export.add_argument("--with-story", dest="with_story", action="store_true",
+                        help="include the story summary (free text, scrubbed of places); off by default")
     export.add_argument("--reveal-address", dest="reveal_address", action="store_true",
                         help="print the chosen flat's address from journey.json (off by default)")
     export.add_argument("--max-code", dest="max_code", type=int, default=DEFAULT_MAX_CODE,

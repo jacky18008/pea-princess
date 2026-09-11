@@ -480,7 +480,7 @@ Use the report to decide what to investigate, then see the flat and speak with t
 - write-back: yes
 
 ```text
-**Share what you learned, not where you live.** Ask the assistant for your seed and post it: it carries your taste, deal-breakers and the questions you make every flat answer, never where you go each day or when you move. Around it, say what helped you; leave out your employer, school, station and moving date. A friend card that includes those exists for private messages only.
+**Share what you learned, not where you live.** Ask the assistant for your seed and post it: it carries your taste, deal-breakers and the questions you make every flat answer, never where you go each day or when you move. Around it, say what helped you; leave out your employer, school, station and moving date. There is no version that includes them: a friend who needs everything gets your profile file, not a seed.
 ```
 
 ### deck:using:20
@@ -656,7 +656,7 @@ Use the report to decide what to investigate, then see the flat and speak with t
 - write-back: yes
 
 ```text
-**分享你學到的，不分享你住哪。** 跟助理要一組「種子」貼出去：它帶的是你的口味、地雷和你要求每間房回答的問題，從來不含你每天去哪、什麼時候搬。貼文裡寫對你有幫助的事就好，別補上公司、學校、車站和搬家日。含這些的「給朋友版」只給私訊用。
+**分享你學到的，不分享你住哪。** 跟助理要一組「種子」貼出去：它帶的是你的口味、地雷和你要求每間房回答的問題，從來不含你每天去哪、什麼時候搬。貼文裡寫對你有幫助的事就好，別補上公司、學校、車站和搬家日。沒有任何一種版本會帶這些；真的要給朋友全部，就直接給設定檔，不用種子。
 ```
 
 ### deck:using:36
@@ -722,7 +722,7 @@ Use the report to decide what to investigate, then see the flat and speak with t
 - write-back: yes
 
 ```text
-**分享你学到的，不分享你住哪。** 跟助理要一组「种子」贴出去：它带的是你的口味、地雷和你要求每套房回答的问题，从来不含你每天去哪、什么时候搬。帖子里写对你有帮助的事就好，别补上公司、学校、车站和搬家日。含这些的「给朋友版」只给私信用。
+**分享你学到的，不分享你住哪。** 跟助理要一组「种子」贴出去：它带的是你的口味、地雷和你要求每套房回答的问题，从来不含你每天去哪、什么时候搬。帖子里写对你有帮助的事就好，别补上公司、学校、车站和搬家日。没有任何一种版本会带这些；真的要给朋友全部，就直接给设置文件，不用种子。
 ```
 
 ---
@@ -1333,7 +1333,7 @@ The three social posts, the two questions worth copying, and what to say to some
 
 ### deck:sharing:1
 
-- source: `skills/vet-flat/references/sharing.md` · L83-L84
+- source: `skills/vet-flat/references/sharing.md` · L82-L83
 - under: ## 3. Share your questions
 - lang: en
 - write-back: yes
@@ -1345,7 +1345,7 @@ The three social posts, the two questions worth copying, and what to say to some
 
 ### deck:sharing:2
 
-- source: `skills/vet-flat/references/sharing.md` · L86
+- source: `skills/vet-flat/references/sharing.md` · L85
 - under: ## 3. Share your questions
 - lang: en
 - write-back: yes
@@ -1356,7 +1356,7 @@ The three social posts, the two questions worth copying, and what to say to some
 
 ### deck:sharing:3
 
-- source: `skills/vet-flat/references/sharing.md` · L132-L138
+- source: `skills/vet-flat/references/sharing.md` · L131-L137
 - under: ## 4. The social post, ready to send
 - lang: en
 - write-back: yes
@@ -1373,7 +1373,7 @@ The three social posts, the two questions worth copying, and what to say to some
 
 ### deck:sharing:4
 
-- source: `skills/vet-flat/references/sharing.md` · L142-L148
+- source: `skills/vet-flat/references/sharing.md` · L141-L147
 - under: ## 4. The social post, ready to send
 - lang: zh-TW
 - write-back: yes
@@ -1390,7 +1390,7 @@ The three social posts, the two questions worth copying, and what to say to some
 
 ### deck:sharing:5
 
-- source: `skills/vet-flat/references/sharing.md` · L152-L158
+- source: `skills/vet-flat/references/sharing.md` · L151-L157
 - under: ## 4. The social post, ready to send
 - lang: zh-CN
 - write-back: yes
@@ -1407,7 +1407,7 @@ The three social posts, the two questions worth copying, and what to say to some
 
 ### deck:sharing:6
 
-- source: `skills/vet-flat/references/sharing.md` · L209-L213
+- source: `skills/vet-flat/references/sharing.md` · L208-L212
 - under: ## 6. Importing somebody else's seed
 - lang: en
 - write-back: yes
@@ -1625,7 +1625,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:1
 
-- source: `skills/vet-flat/scripts/seed.py` · L645
+- source: `skills/vet-flat/scripts/seed.py` · L635
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1636,7 +1636,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:2
 
-- source: `skills/vet-flat/scripts/seed.py` · L647
+- source: `skills/vet-flat/scripts/seed.py` · L637
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1647,7 +1647,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:3
 
-- source: `skills/vet-flat/scripts/seed.py` · L649
+- source: `skills/vet-flat/scripts/seed.py` · L639
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1658,7 +1658,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:4
 
-- source: `skills/vet-flat/scripts/seed.py` · L651
+- source: `skills/vet-flat/scripts/seed.py` · L641
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1669,7 +1669,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:5
 
-- source: `skills/vet-flat/scripts/seed.py` · L656
+- source: `skills/vet-flat/scripts/seed.py` · L646
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1680,7 +1680,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:6
 
-- source: `skills/vet-flat/scripts/seed.py` · L658
+- source: `skills/vet-flat/scripts/seed.py` · L648
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1691,7 +1691,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:7
 
-- source: `skills/vet-flat/scripts/seed.py` · L660
+- source: `skills/vet-flat/scripts/seed.py` · L650
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1702,7 +1702,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:8
 
-- source: `skills/vet-flat/scripts/seed.py` · L665
+- source: `skills/vet-flat/scripts/seed.py` · L655
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1713,7 +1713,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:9
 
-- source: `skills/vet-flat/scripts/seed.py` · L667
+- source: `skills/vet-flat/scripts/seed.py` · L657
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1724,7 +1724,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:10
 
-- source: `skills/vet-flat/scripts/seed.py` · L668
+- source: `skills/vet-flat/scripts/seed.py` · L658
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1735,7 +1735,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:11
 
-- source: `skills/vet-flat/scripts/seed.py` · L668
+- source: `skills/vet-flat/scripts/seed.py` · L658
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1746,7 +1746,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:12
 
-- source: `skills/vet-flat/scripts/seed.py` · L673
+- source: `skills/vet-flat/scripts/seed.py` · L663
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1757,7 +1757,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:13
 
-- source: `skills/vet-flat/scripts/seed.py` · L675-L676
+- source: `skills/vet-flat/scripts/seed.py` · L665-L666
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1769,7 +1769,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:14
 
-- source: `skills/vet-flat/scripts/seed.py` · L678-L679
+- source: `skills/vet-flat/scripts/seed.py` · L668-L669
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1781,7 +1781,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:15
 
-- source: `skills/vet-flat/scripts/seed.py` · L680
+- source: `skills/vet-flat/scripts/seed.py` · L670
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1792,7 +1792,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:16
 
-- source: `skills/vet-flat/scripts/seed.py` · L681
+- source: `skills/vet-flat/scripts/seed.py` · L671
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1803,7 +1803,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:17
 
-- source: `skills/vet-flat/scripts/seed.py` · L683
+- source: `skills/vet-flat/scripts/seed.py` · L673
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1814,7 +1814,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:18
 
-- source: `skills/vet-flat/scripts/seed.py` · L687
+- source: `skills/vet-flat/scripts/seed.py` · L677
 - under: def sentences(
 - lang: en
 - write-back: no (read-only)
@@ -1825,7 +1825,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:19
 
-- source: `skills/vet-flat/scripts/seed.py` · L794
+- source: `skills/vet-flat/scripts/seed.py` · L784
 - under: def journey_lines(
 - lang: en
 - write-back: no (read-only)
@@ -1836,7 +1836,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:20
 
-- source: `skills/vet-flat/scripts/seed.py` · L802
+- source: `skills/vet-flat/scripts/seed.py` · L792
 - under: def journey_lines(
 - lang: en
 - write-back: no (read-only)
@@ -1847,7 +1847,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:21
 
-- source: `skills/vet-flat/scripts/seed.py` · L806
+- source: `skills/vet-flat/scripts/seed.py` · L796
 - under: def journey_lines(
 - lang: en
 - write-back: no (read-only)
@@ -1858,7 +1858,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:22
 
-- source: `skills/vet-flat/scripts/seed.py` · L819
+- source: `skills/vet-flat/scripts/seed.py` · L809
 - under: def card(
 - lang: en
 - write-back: no (read-only)
@@ -1869,7 +1869,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:23
 
-- source: `skills/vet-flat/scripts/seed.py` · L823
+- source: `skills/vet-flat/scripts/seed.py` · L813
 - under: def card(
 - lang: en
 - write-back: no (read-only)
@@ -1880,7 +1880,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:24
 
-- source: `skills/vet-flat/scripts/seed.py` · L834-L835
+- source: `skills/vet-flat/scripts/seed.py` · L824-L825
 - under: def card(
 - lang: en
 - write-back: no (read-only)
@@ -1892,7 +1892,7 @@ Fragments the card assembles at run time; `%s` is filled in from the profile. Sh
 
 ### deck:seed:25
 
-- source: `skills/vet-flat/scripts/seed.py` · L838-L839
+- source: `skills/vet-flat/scripts/seed.py` · L828-L829
 - under: def card(
 - lang: en
 - write-back: no (read-only)

@@ -47,7 +47,7 @@ Use the report to decide what to investigate, then see the flat and speak with t
 
 **Your own little secretary.** Anything personal or local that the shared skill does not check — the walk to your gym, a school's catchment, a noise source you know about, a data set you trust — goes into `extensions/` in your copy as a one-page add-on (there is a template). Add-ons are labelled in the report, never change the verdict by themselves, read no listing or review sites, and never describe an area by who lives there.
 
-**Share what you learned, not where you live.** Ask the assistant for your seed and post it: it carries your taste, deal-breakers and the questions you make every flat answer, never where you go each day or when you move. Around it, say what helped you; leave out your employer, school, station and moving date. A friend card that includes those exists for private messages only.
+**Share what you learned, not where you live.** Ask the assistant for your seed and post it: it carries your taste, deal-breakers and the questions you make every flat answer, never where you go each day or when you move. Around it, say what helped you; leave out your employer, school, station and moving date. There is no version that includes them: a friend who needs everything gets your profile file, not a seed.
 
 ## 繁體中文
 
@@ -78,7 +78,7 @@ Use the report to decide what to investigate, then see the flat and speak with t
 
 **自己的小秘書。** 共用技能沒查、但你在意的東西，例如到健身房的步行時間、學區、你知道的噪音來源、你信任的資料集，寫成一頁放進你自己那份的 `extensions/` 資料夾（有範本）。這些加購項目在報告裡會標示出來、不會自己改變判決、不讀房源和評價網站、也不用「住的是誰」來描述一個地區。
 
-**分享你學到的，不分享你住哪。** 跟助理要一組「種子」貼出去：它帶的是你的口味、地雷和你要求每間房回答的問題，從來不含你每天去哪、什麼時候搬。貼文裡寫對你有幫助的事就好，別補上公司、學校、車站和搬家日。含這些的「給朋友版」只給私訊用。
+**分享你學到的，不分享你住哪。** 跟助理要一組「種子」貼出去：它帶的是你的口味、地雷和你要求每間房回答的問題，從來不含你每天去哪、什麼時候搬。貼文裡寫對你有幫助的事就好，別補上公司、學校、車站和搬家日。沒有任何一種版本會帶這些；真的要給朋友全部，就直接給設定檔，不用種子。
 
 ## 简体中文
 
@@ -92,4 +92,4 @@ Use the report to decide what to investigate, then see the flat and speak with t
 
 **自己的小秘书。** 共用技能没查、但你在意的东西，例如到健身房的步行时间、学区、你知道的噪音来源、你信任的数据集，写成一页放进你自己那份的 `extensions/` 文件夹（有模板）。这些加购项目在报告里会标示出来、不会自己改变判决、不读房源和评价网站、也不用「住的是谁」来描述一个地区。
 
-**分享你学到的，不分享你住哪。** 跟助理要一组「种子」贴出去：它带的是你的口味、地雷和你要求每套房回答的问题，从来不含你每天去哪、什么时候搬。帖子里写对你有帮助的事就好，别补上公司、学校、车站和搬家日。含这些的「给朋友版」只给私信用。
+**分享你学到的，不分享你住哪。** 跟助理要一组「种子」贴出去：它带的是你的口味、地雷和你要求每套房回答的问题，从来不含你每天去哪、什么时候搬。帖子里写对你有帮助的事就好，别补上公司、学校、车站和搬家日。没有任何一种版本会带这些；真的要给朋友全部，就直接给设置文件，不用种子。

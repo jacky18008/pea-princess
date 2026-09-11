@@ -41,23 +41,22 @@ profile; a seed leaves their machine only because they decided it should.
 
 ## 2. What is shared, in plain words
 
-There are two cards, and the default is the safe one.
+One card, always safe to post. It carries taste and nothing that points at a place or a time:
+the kind of home; the budget **as a band** ("£2,000–2,400 all-in"), not the real ceiling;
+deal-breakers, must-haves and the top three priorities; **the questions they make every report
+answer**; the floor and light rules; whether quiet beats light; how deep they run the checks; the
+plan for the first weeks. Never the commute district, never the move-in month — not even for a
+friend: a district plus a month plus a public workplace is enough for someone to work out where a
+person lives, and a private message is one screenshot away from public. Whoever uses the seed
+fills in their own commute and dates anyway. Someone who really wants to hand a friend everything
+sends their own `profile.yaml`, not a seed.
 
-**The public card** (`seed.py export`, the default) carries taste and nothing that points at a
-place or a time: the kind of home; the budget **as a band** ("£2,000–2,400 all-in"), not the real
-ceiling; deal-breakers, must-haves and the top three priorities; **the questions they make every
-report answer**; the floor and light rules; whether quiet beats light; how deep they run the
-checks; the plan for the first weeks. No commute district, no move-in month, no story summary.
-The reason is concrete: a district plus a month plus a public workplace is enough for someone to
-work out where a person lives. Whoever uses the seed fills in their own commute and dates anyway.
-
-**The friend card** (`seed.py export --for friend`) adds the commute district (or a coarser label
-with `--commute-area`), the move-in month and the story summary. It is for a private message to
-someone the person trusts; the command says so when it writes one. Never post a friend card.
-
-In both, free text is scrubbed of postcodes, outward codes, London borough names, "X station" and
-"X Road"-style names, and the command lists what it removed. Employer, school and shop names are
-on no list: read the card once more before it goes anywhere.
+The story summary (three sentences of what makes a home good for them) is free text, so it is
+left out unless the person asks (`--with-story`); then it is scrubbed and the command says to read
+it once more. All free text — the label, deal-breakers, must-haves, questions, story — is scrubbed
+of postcodes, outward codes, London borough names, "X station" and "X Road"-style names, and the
+command lists what it removed. Employer, school and shop names are on no list: read the card once
+more before it goes anywhere.
 
 Excluded as structured profile fields: full address/postcode, personal or company identity,
 employer/school, guarantor route, income, savings, introduction, exact dates, tenancy terms,
@@ -123,9 +122,9 @@ Fill in the code, and the "what I found" line if there is a `journey.json`. Post
 underneath, or in a reply if the code is long.
 
 Encourage the sharing and say the one rule in the same breath, in the person's language:
-"Share your taste and your tips; keep your whereabouts. The public card already leaves out where
-you go and when you move — don't add your employer, school, station or moving date in the post
-around it." One sentence, at the moment they are about to post; not a paragraph of warnings.
+"Share your taste and your tips; keep your whereabouts. The card already leaves out where you go
+and when you move — don't add your employer, school, station or moving date in the post around
+it." One sentence, at the moment they are about to post; not a paragraph of warnings.
 
 **English**
 

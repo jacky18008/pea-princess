@@ -204,15 +204,13 @@ class TestScrub(SeedCase):
                     "self_intro_template", "move_in_window/earliest"):
             self.assertIn(key, dropped)
 
-    def test_money_is_a_band_and_dates_are_a_month(self):
-        sd = self.seed(audience="friend")
-        self.assertEqual(sd["budget_band"], "£2,000–2,400 total per month")
-        self.assertEqual(sd["move_in_month"], "2026-10")
-        self.assertEqual(sd["commute_area"], "WC2R")
+    def test_money_is_a_band(self):
+        self.assertEqual(self.seed()["budget_band"], "£2,000–2,400 total per month")
 
-    def test_a_public_card_carries_no_place_no_date_no_story(self):
-        """2026-09-11: a public post must not let a workplace plus a district plus a month point at
-        where somebody lives. The person reading a seed fills in their own commute and dates."""
+    def test_a_seed_never_carries_a_place_or_a_date(self):
+        """2026-09-11: a shared seed must not let a workplace plus a district plus a month point at
+        where somebody lives — not even one meant for a friend. The person reading a seed fills in
+        their own commute and dates; the story summary is free text and comes only on request."""
         sd = self.seed()
         self.assertIsNone(sd["commute_area"])
         self.assertIsNone(sd["move_in_month"])
@@ -235,21 +233,23 @@ class TestScrub(SeedCase):
 
     def test_places_inside_questions_and_avoid_lines_are_scrubbed_in_both_audiences(self):
         text = FULL_PROFILE.replace('  - "Is the bedroom on the quiet side?"', '  - "Is Canning Town station too loud at night?"')
-        for audience in ("public", "friend"):
+        for with_story in (False, True):
             removed = []
-            sd = seed.shareable(seed.parse_yaml(text), audience=audience, removed=removed)
+            sd = seed.shareable(seed.parse_yaml(text), with_story=with_story, removed=removed)
             self.assertNotIn("Canning Town", json.dumps(sd, ensure_ascii=False))
             self.assertTrue(removed)
+        self.assertIsNotNone(seed.shareable(seed.parse_yaml(FULL_PROFILE), with_story=True)["story_summary"])
 
     def test_exact_is_opt_in_only(self):
         exact = seed.shareable(seed.read_yaml(self.profile), exact=True)["budget_band"]
         self.assertEqual(exact, "\u00a32,400 total per month (rent target \u00a32,200)")
         self.assertNotIn("2,200", json.dumps(self.seed(), ensure_ascii=False))
 
-    def test_the_commute_can_be_narrowed_by_hand_or_dropped_for_a_friend(self):
-        self.assertEqual(self.seed(audience="friend", commute_area="Zone 1")["commute_area"], "Zone 1")
-        self.assertIsNone(self.seed(audience="friend", hide_commute=True)["commute_area"])
-        self.assertIsNone(self.seed(commute_area="Zone 1")["commute_area"], "public ignores any area")
+    def test_an_old_code_with_a_district_still_imports_but_only_as_a_comment(self):
+        old = dict(seed.to_min_json(self.seed()), c="WC2R", w="2026-10")
+        text = seed.profile_yaml(seed.from_min_json(old), seed.encode(old))
+        self.assertIn("the seed only carried the district WC2R", text)
+        self.assertIsNone(seed.parse_yaml(text)["commute"]["destination"])
 
     def test_a_band_rounds_the_way_the_reference_says(self):
         self.assertEqual(seed.band(2400), "£2,000–2,400 total per month")
@@ -286,12 +286,12 @@ class TestCode(SeedCase):
         self.assertLess(len(code), 400, "the template profile makes a %d-character code" % len(code))
 
     def test_a_long_seed_drops_the_summary_and_says_so(self):
-        code, minimal, trimmed = seed.make_code(self.seed(name="a seed", audience="friend"), 400)
+        code, minimal, trimmed = seed.make_code(self.seed(name="a seed", with_story=True), 400)
         self.assertNotIn("s", minimal)
         self.assertTrue(trimmed and "story_summary" in trimmed[0])
-        self.assertIn("leaves out the story_summary", seed.card(self.seed(name="a seed", audience="friend"), code,
+        self.assertIn("leaves out the story_summary", seed.card(self.seed(name="a seed", with_story=True), code,
                                                                 trimmed=trimmed))
-        full, obj, none_trimmed = seed.make_code(self.seed(name="a seed", audience="friend"), 0)
+        full, obj, none_trimmed = seed.make_code(self.seed(name="a seed", with_story=True), 0)
         self.assertIn("s", obj)
         self.assertEqual(none_trimmed, [])
 
@@ -496,11 +496,11 @@ class TestImport(SeedCase):
         self.assertIn("guarantor_route", stdout)
         self.assertIn("Written to", stdout)
 
-    def test_the_band_and_the_district_come_back_as_comments_not_values(self):
-        code, _, _ = seed.make_code(self.seed(audience="friend"), 0)
+    def test_the_band_comes_back_as_a_comment_not_a_value(self):
+        code, _, _ = seed.make_code(self.seed(), 0)
         text = seed.profile_yaml(seed.from_min_json(seed.decode(code)), code)
         self.assertIn("# FILL IN — the seed said £2,000–2,400 total per month", text)
-        self.assertIn("the seed only carried the district WC2R", text)
+        self.assertNotIn("WC2R", text)
         self.assertIsNone(seed.parse_yaml(text)["budget"]["all_in_pcm_ceiling"])
 
     def test_it_refuses_to_overwrite_without_being_told_to(self):
