@@ -750,3 +750,56 @@ absolute Codex figure in this file that predates this correction is a main-threa
 cost is 1.6–3.6× higher. The replay rows for Codex (`bench/private/history-replay-2026-09-11/`) have the
 same gap and their thread ids are in the raw streams; account them before quoting a Codex token number.
 
+## Private-corpus replay (2026-09-11): fifteen real turns, the checkpoint variants, and the models
+
+Fifteen curated turns from the author's own 2026 flat search (`docs/private-conversation-corpus.md`;
+the corpus never leaves the machine) were replayed with the skill installed: the conversation before
+one answer is frozen, the person's message is handed to the host, the new answer is judged by Opus 5
+against the person's real reaction to the original answer (judge v2: three gates — facts, authority,
+hard requirements — eight 0–3 dimensions, first visible sentence, satisfaction 0–2, beats-original;
+plus two programmatic counts, numbers with no source cue in the sentence and questions asked).
+Calibration on the original answers: 9/14 exact on satisfaction, the judge compressing praise and
+complaints alike toward "1", so satisfaction is read as coarse and the programmatic counts as the
+steadiest signal. `bench/history_replay.py`; results under `bench/private/history-replay-2026-09-11/`.
+
+### The checkpoint variants (Sonnet 5, standard, the "ask" turn, 15 cases each)
+
+Variant-a added a six-rule "Before sending" checkpoint (a go-ahead is executed, promises are a ledger,
+the conversation is the ledger, every number has a home, plain words, never the machinery) and
+`scripts/reply_check.py`; variant-b added rule 0, "open with the answer, never praise first", after
+variant-a's three first-sentence regressions were all 問得好 / 你說得對. main-2 is the unchanged
+skill run a second time: the run-to-run noise.
+
+| Arm | G1 facts / G2 authority / G3 hard req. pass | First sentence pass | T mean (0–3) | Task (0–2) | Satisfy (0–2) | Beats original | Numbers w/o cue | Questions |
+|---|---|---|---|---|---|---|---|---|
+| main | 2 / 13 / 14 | 9 | 1.43 | 1.00 | 0.80 | 2/15 | 3.3 | 1.2 |
+| main-2 (7 of 15 judged so far) | 0 / 6 / 3 | 3 | 1.46 | 1.00 | 1.00 | 0/7 | 4.4 | 1.6 |
+| variant-a | 5 / 14 / 13 | 6 | 1.41 | 0.87 | 0.67 | 0/15 | 2.9 | 0.5 |
+| variant-b | 4 / 13 / 9 | 11 | 1.46 | 1.00 | 0.80 | 0/15 | 2.2 | 0.7 |
+
+Reading: variant-b keeps task and satisfaction level with main, opens with the answer more often
+(11 vs 9, against main-2's pace of about 6), passes the facts gate more often (4 vs 2 vs 0), and moves
+the two steady counts the right way (numbers without a cue 3.3 → 2.2, questions 1.2 → 0.7). It loses
+on the hard-requirements gate against main (9 vs 14) but not against main-2's pace, and on
+beats-original (0 vs 2 vs 0), both inside the noise between main and main-2. Adopted (commit on
+2026-09-11 night) with those two numbers written down; the next variant is measured against the new
+main. Single runs of fifteen: direction, not rates.
+
+### The models on the same fifteen turns (standard, "ask" turn; rows still being judged are marked)
+
+| Host / model | Cases judged | G1 / G2 / G3 pass | First sentence | T mean | Task | Satisfy | Beats original | Numbers w/o cue | Questions |
+|---|---|---|---|---|---|---|---|---|---|
+| Claude Haiku 4.5 | 15 | 5 / 7 / 1 | 0 | 0.26 | 0.13 | 0.00 | 0/15 | 1.7 | 0.1 |
+| Claude Sonnet 5, lite | 15 | 3 / 13 / 10 | 9 | 1.51 | 1.07 | 0.80 | 0/15 | 4.5 | 0.8 |
+| Claude Sonnet 5, standard | 15 | 2 / 13 / 14 | 9 | 1.43 | 1.00 | 0.80 | 2/15 | 3.3 | 1.2 |
+| Claude Opus 5 | 14 | 6 / 11 / 9 | 6 | 1.44 | 1.00 | 0.71 | 6/14 | 3.8 | 2.9 |
+| Codex gpt-5.6-terra | 12 | 7 / 11 / 9 | 10 | 1.86 | 1.33 | 1.17 | 5/12 | 2.8 | 0.6 |
+| Codex gpt-5.6-sol | 5 (7 outage rows retried later) | 4 / 5 / 5 | 5 | 2.31 | 1.80 | 1.20 | 2/5 | 0.2 | 0.4 |
+
+Reading: on these turns Codex terra is the strongest of the cheap configurations (first sentence 10/12,
+T 1.86, beats-original 5/12) and Haiku is not usable for this conversation (task 0.13). Opus answers
+more and asks more (2.9 questions a reply; the reviews found it long for a tired person). Caveats: a
+DNS outage invalidated about thirty rows, retried and superseded; the Claude replay allow-list
+matched only one spelling of a script call, so script-backed answers were sometimes refused (widened
+behind `--claude-allow` for the next round); Codex sub-agent tokens are not in any replay figure; the
+original answers came from a stronger model than any of these, so "beats original" is a high bar.
