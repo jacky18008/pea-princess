@@ -61,6 +61,13 @@ class TestScriptAndAsking(unittest.TestCase):
         self.assertEqual([], RC.scan("查好了：這三間裡兩間過關。", previous="都同意，Go"))
 
 
+class TestOpening(unittest.TestCase):
+    def test_a_praise_opener_is_flagged_and_an_answer_is_not(self):
+        self.assertEqual(["opening"], kinds(RC.scan("問得好——這件事要分兩層看。")))
+        self.assertEqual(["opening"], kinds(RC.scan("**你說得對**，橋接不是額外成本。")))
+        self.assertEqual([], RC.scan("橋接不是額外成本：那一週你付的是週租，不是長租的房租。"))
+
+
 class TestCli(unittest.TestCase):
     def test_exit_code_and_json(self):
         proc = subprocess.run([sys.executable, os.path.join(SCRIPTS, "reply_check.py"), "-", "--json"],

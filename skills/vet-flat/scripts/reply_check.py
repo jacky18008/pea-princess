@@ -25,6 +25,8 @@ What it checks (2026-09-11, from the replay review of fifteen real cases):
   script    simplified Chinese characters inside a reply written in traditional Chinese.
   asking    more than three question marks; or any question when the person's last message was a
             go-ahead (Go / gp / 都同意 / 繼續 / 照做 / continue / go ahead): execute and report.
+  opening   the first sentence is praise or agreement (問得好, 你說得對, great question): open with
+            the answer instead.
 Standard library only, Python 3.9.
 """
 from __future__ import unicode_literals
@@ -48,6 +50,8 @@ FILENAME = re.compile(r"\b[\w\-]+\.(?:py|yaml|yml|md|json|html)\b")
 SKILL_NAMES = re.compile(r"\b(vet-flat|pea-princess|vet_flat)\b", re.I)
 INTERNAL = re.compile(r"(fixed form|budget mode|money-gate|money gate|landmine|\blite\b|\bstandard\b|\bdeep\b|殺手項|固定表單|預算模式|地雷碼|證據等級)", re.I)
 QUESTION = re.compile(r"[?？]")
+PRAISE_OPENER = re.compile(r"^\s*[*_#>\-]*\s*(問得好|問得對|好問題|你說得對|你說的對|你的直覺是對的|說得好|這個問題很好|很好的問題|沒錯|對，|對的|"
+                           r"great question|good question|you'?re right|you are right|that'?s a great|excellent question|fair point|absolutely)", re.I)
 GO_AHEAD = re.compile(r"(?i)\b(go|gp|continue|go ahead|do it|proceed|yes)\b|都同意|同意|繼續|照做|照這樣|去做|開始吧|可以|好，?做|沒問題")
 SIMPLIFIED = set("这说们时间对问题见车电东门长结应该认为与从发产权让还进过现经国单号计设层楼费钱价买卖办处务实际总条约签订视听讲话语书录读写点线区块图机关开风气热体验检证据确识质数议论选择优标备参决则规围绕码头脑岁维护积极响")
 
@@ -78,6 +82,9 @@ def scan(text, previous=None):
     simp = [c for c in (text or "") if c in SIMPLIFIED]
     if trad > 40 and simp:
         findings.append({"kind": "script", "fragment": "".join(sorted(set(simp)))[:40], "say": "繁體回覆裡混了簡體字：%d 個。" % len(simp)})
+    first = (text or "").strip()
+    if PRAISE_OPENER.search(first):
+        findings.append({"kind": "opening", "fragment": first[:60], "say": "開頭是稱讚或附和；第一句要直接給答案、洞見或取捨。"})
     q = len(QUESTION.findall(text or ""))
     if q > 3:
         findings.append({"kind": "asking", "fragment": "%d 個問號" % q, "say": "問題超過三個；留下會改變下一步的那幾個，其餘用預設。"})
