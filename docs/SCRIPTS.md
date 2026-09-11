@@ -1305,3 +1305,15 @@ $ living_env.py lookup --postcode "N21 1BD"
   "how_to_use": "Context for axis 12, never a filter and never a verdict. ..." }
 ```
 
+## `panel.py` — the requirements page from profile.yaml (no network, no key)
+```
+panel.py --profile profile.yaml > requirements.html
+panel.py --profile profile.yaml --out requirements.html --summary "Two areas within 30 minutes." --next "Send me a listing page" --revision 3
+```
+Writes `viewer/requirements.html` with the profile's page keys inlined (destination and its
+precision, commute limits, the monthly ceiling, home type, move-in window, priorities,
+deal-breakers, depth, language, the person's own questions) and, optionally, the assistant's
+summary and next steps. Only those keys go into the page: story summaries and seeds stay in the
+profile. The person opens the file from disk in any browser, edits, and copies the YAML back.
+Without a shell, the same page takes a pasted profile. Contract: `references/requirements-contract.md`.
+

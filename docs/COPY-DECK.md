@@ -133,7 +133,7 @@ All in `skills/vet-flat/scripts/`; each prints one JSON object with `source_url`
 - write-back: yes
 
 ```text
-Report layout for people without a shell: open `viewer/viewer.html` in a browser and paste the JSON.
+Report layout for people without a shell: open `viewer/viewer.html` in a browser and paste the JSON. The requirements form is the same idea in the other direction: `viewer/requirements.html` (or `scripts/panel.py --profile profile.yaml`) shows the profile as a page, and a filled form copies back as `profile.yaml`. No assistant writes HTML; the model writes YAML and JSON, the two pages render them.
 ```
 
 ### deck:readme:9
@@ -1003,7 +1003,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 - write-back: yes
 
 ```text
-3. **I have no idea** → I explain one useful starting step and ask only what that step needs (section 2).
+3. **I have no idea** → I explain one useful starting step and ask only what that step needs (section 2). Prefer a form? `viewer/requirements.html` asks the same things; copy its YAML back.
 ```
 
 ### deck:onboarding:7

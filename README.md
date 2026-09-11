@@ -43,7 +43,7 @@ All in `skills/vet-flat/scripts/`; each prints one JSON object with `source_url`
 | `roads.py` | OpenStreetMap via Overpass (open) | nearest main road, surface rail, tunnel portals, night economy, smell sources, supermarkets, obstruction candidates with bearing and angle |
 | `render.py` | — | `report.json` → HTML or Markdown, validated against `references/report-schema.json` |
 
-Report layout for people without a shell: open `viewer/viewer.html` in a browser and paste the JSON.
+Report layout for people without a shell: open `viewer/viewer.html` in a browser and paste the JSON. The requirements form is the same idea in the other direction: `viewer/requirements.html` (or `scripts/panel.py --profile profile.yaml`) shows the profile as a page, and a filled form copies back as `profile.yaml`. No assistant writes HTML; the model writes YAML and JSON, the two pages render them.
 
 ## Why "Pea Princess"
 In the fairy tale only the real princess feels the pea through twenty mattresses. Here **you** are the princess. This tool lifts the mattresses one by one: it reads the registers, counts the crimes, checks the planning applications and the company filings, and tells you where the pea might be. Only you can feel it: go and see the flat, walk the street, talk to the agent and the landlord. The report is a filter, and when you are in a hurry it is only a filter. Its first duty is to say what it does not know and ask you for it.

@@ -166,6 +166,8 @@ commute:
   # Where you must get to most days: a full address or a station name. Required.
   # The skill has no default destination and will not guess one.
   destination:
+  # How exact the destination is: unknown | district | station | address. Below 'address' the commute is an estimate.
+  destination_precision:
   # The time you have to arrive, as HH:MM, 24-hour. Journey times are measured for this time,
   # because a 20-minute trip at 11:00 can be a 40-minute trip at 08:45.
   arrive_by: "09:00"
