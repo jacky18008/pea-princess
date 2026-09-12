@@ -24,7 +24,17 @@ Usage:
     area_scan.py --postcode "N6 5QD"
     area_scan.py --lat 51.5732 --lng -0.1462 --street "Milton Park"      # the street is known: say so
     area_scan.py --postcode "N6 5QD" --depth lite
-    area_scan.py --postcode "N6 5QD" --depth deep --months 6 --crime-half-m 150 --roads-radius 300
+    area_scan.py --postcode "N6 5QD" --depth deep --escalation-reason "requested closer rail/night review"
+    area_scan.py --postcode "N6 5QD" --result-dir /private/session/research-results
+
+Set VETFLAT_SCAN_RESULT_DIR to a session-owned directory outside a host's temporary call folder.
+Otherwise private results live in .pea-state/area-scans under the current working directory.
+Identical requests reuse original timestamped observations, including partial/failure snapshots;
+they do not silently refresh. Pending/interrupted results never automatically start another scan.
+The store holds at most 128 requests with 1 MiB per snapshot. Its hashes detect corruption, not
+source truth or malicious edits by this same OS user. Use --no-save only to explicitly opt out.
+VETFLAT_RESEARCH_DEPTH selects the baseline (otherwise standard); changing --depth requires a
+recorded --escalation-reason, which is not itself proof of user authorization.
 
 Give --street whenever the street name is known: a postcode or outcode centroid can sit on the
 wrong street, and the scan then says how far off it was and runs from the street itself.
@@ -37,7 +47,6 @@ guessed. Standard library only, Python 3.9; network through the other scripts' _
 from __future__ import unicode_literals
 
 import argparse
-import io
 import json
 import math
 import os
@@ -45,6 +54,7 @@ import re
 import sys
 import tempfile
 import threading
+import area_scan_store as scan_store
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
@@ -392,6 +402,12 @@ def compose(where, crime, planning, roads, living, notes, noise=None, street=Non
              "seen_out_to_m": int(far) if far is not None and total and seen < total else None, "since_year": planning.get("since_year"),
              "tall_building_hints": sum(1 for r in rows if r.get("tall_building_hint")), "nearest_five": top,
              "notable_recent": notable, "notable_rule": NOTABLE_RULE}
+        w["coverage"] = {"requested_radius_m": planning.get("radius_m"), "rows_read": seen,
+                         "total_matching": total, "all_matching_rows_read": seen >= total,
+                         "furthest_read_m": far, "distance_origin": "street scan point, not a flat door"}
+        if seen < total:
+            out["not_found"].append("planning coverage: only %s of %s matching rows read within %s m; furthest read distance %s m; unreturned rows remain unknown" %
+                                    (seen, total, planning.get("radius_m"), far if far is not None else "unknown"))
         out["works"] = w
         out["sources"].append(planning.get("source_url"))
         reading.append("Works: %s planning applications within %s m since %s%s, %s with a tall-building hint; the nearest: %s. Notable recent (%s): %s." % (
@@ -404,21 +420,34 @@ def compose(where, crime, planning, roads, living, notes, noise=None, street=Non
     elif planning is not None:
         out["not_found"].append("planning: " + str(planning.get("note") or "register unavailable"))
 
-    if noise and noise.get("ok"):
+    if noise is not None:
         sm = noise.get("summary") or {}
+        attempted = len(noise.get("points") or [])
+        noise_coverage = {k: {"attempted": attempted, "numeric_values": v.get("n", 0),
+                             "not_drawn": v.get("not_drawn", 0),
+                             "successful": v.get("n", 0) + v.get("not_drawn", 0),
+                             "failed": max(0, attempted - v.get("n", 0) - v.get("not_drawn", 0))}
+                          for k, v in sm.items() if isinstance(v, dict)}
         nz = {"road_lden_db": (sm.get("road_lden_db") or {}).get("at_point"),
               "road_lden_range_db": [(sm.get("road_lden_db") or {}).get("min"), (sm.get("road_lden_db") or {}).get("max")],
               "road_lnight_db": (sm.get("road_lnight_db") or {}).get("at_point") if sm.get("road_lnight_db") else None,
               "rail_lden_db": (sm.get("rail_lden_db") or {}).get("at_point") if sm.get("rail_lden_db") else None,
               "rail_not_drawn": (sm.get("rail_lden_db") or {}).get("not_drawn") if sm.get("rail_lden_db") else None,
               "band_2017_road": ((noise.get("band_2017") or {}).get("road_lden")),
-              "points": len(noise.get("points") or []), "scale": noise.get("scale")}
+              "points": attempted, "scale": noise.get("scale"), "available": bool(noise.get("ok")),
+              "coverage": noise_coverage}
         out["noise"] = nz
         out["sources"].extend(noise.get("sources") or [])
         reading.extend([r for r in (noise.get("reading") or []) if not r.startswith("These are modelled")])
         out["not_found"].extend("noise: " + x for x in (noise.get("not_found") or []))
-    elif noise is not None:
-        out["not_found"].append("noise: " + str((noise.get("not_found") or ["map unavailable"])[0]))
+        for layer, cov in noise_coverage.items():
+            text = "Noise coverage %s: %s/%s requests succeeded (%s numeric, %s not drawn); %s failed." % (
+                layer, cov["successful"], cov["attempted"], cov["numeric_values"], cov["not_drawn"], cov["failed"])
+            reading.append(text)
+            if cov["failed"]:
+                out["not_found"].append(text)
+        if not noise.get("ok") and not noise.get("not_found"):
+            out["not_found"].append("noise: map unavailable")
 
     if living and living.get("ok"):
         le = {"outdoors_decile": (living.get("outdoors") or {}).get("decile"), "indoors_decile": (living.get("indoors") or {}).get("decile"),
@@ -434,7 +463,7 @@ def compose(where, crime, planning, roads, living, notes, noise=None, street=Non
     if (where or {}).get("how_located", "").startswith("lat/lng given") and not (street and street.get("ok")):
         reading.append("The point was given as coordinates: if it is an area centroid rather than a door, treat every distance as a rough guide and scan again with --street NAME.")
     out["sources"] = [s for s in out["sources"] if s]
-    out["ok"] = any(x is not None for x in (out["quiet"], out["noise"], out["crime"], out["works"], out["living_environment"]))
+    out["ok"] = any(x is not None for x in (out["quiet"], out["crime"], out["works"], out["living_environment"])) or bool(noise and noise.get("ok"))
     return out
 
 
@@ -451,7 +480,7 @@ def add_stage(out, planning_raw, verbose=False):
             lpa = r.get("lpa_name")
             break
     s, err = _safe(planning_mod.stages, top["reference"], lpa, verbose=verbose)
-    if err or not s or not s.get("record"):
+    if err or not s or s.get("ok") is False or not s.get("record"):
         out["not_found"].append("stage of %s: %s" % (top["reference"], err or (s or {}).get("note") or "not found"))
         return
     means = [m for m in (s.get("what_this_means") or []) if m][:3]
@@ -487,8 +516,8 @@ def scan(postcode=None, lat=None, lng=None, months=6, crime_half_m=150, planning
     tier = TIERS.get(depth) or TIERS["standard"]
     notes = []
     if announce:
-        announce("area_scan: %s, depth %s. The registers are queried in parallel, 15-60 s; the JSON comes on stdout and is also saved to %s\n" % (
-            street or postcode or "%s,%s" % (lat, lng), depth, result_path(postcode, lat, lng, street, depth)))
+        announce("area_scan: %s, depth %s. Independent registers are queried in parallel; wait for this run, do not start a duplicate.\n" % (
+            street or postcode or "%s,%s" % (lat, lng), depth))
     where = {"postcode": postcode, "lat": lat, "lng": lng, "district": None, "how_located": "lat/lng given" if lat is not None else None}
     if lat is None or lng is None:
         if not postcode:
@@ -532,9 +561,33 @@ def scan(postcode=None, lat=None, lng=None, months=6, crime_half_m=150, planning
     for name, err in (("crime", e1), ("planning", e2), ("roads", e3), ("noise", e5), ("living environment", e4)):
         if err:
             notes.append("%s: %s" % (name, err))
-    out = compose(where, c, p, r, l, notes, noise=n, street=st, depth=depth)
+    try:
+        out = compose(where, c, p, r, l, notes, noise=n, street=st, depth=depth)
+    except Exception as exc:
+        # A malformed register must not discard successfully retrieved neighbours.
+        out = compose(where, None, None, None, None, notes, street=st, depth=depth)
+        out["not_found"].append("combined summary failed: %s; preserving independent register summaries" % type(exc).__name__)
+        for label, values in (("crime", (c, None, None, None, None)), ("planning", (None, p, None, None, None)),
+                              ("roads", (None, None, r, None, None)), ("living", (None, None, None, l, None)),
+                              ("noise", (None, None, None, None, n))):
+            if not any(v is not None for v in values):
+                continue
+            try:
+                part = compose(where, *values[:4], [], noise=values[4], depth=depth)
+                for key in ("quiet", "noise", "crime", "works", "living_environment"):
+                    if part.get(key) is not None:
+                        out[key] = part[key]
+                out["sources"].extend(part["sources"])
+                out["not_found"].extend(part["not_found"])
+                out["reading"].extend(part["reading"][:-1])
+                out["ok"] = out["ok"] or part["ok"]
+            except Exception as part_exc:
+                out["not_found"].append("%s summary unavailable: %s" % (label, type(part_exc).__name__))
     if tier["stages"]:
-        add_stage(out, p, verbose=verbose)
+        try:
+            add_stage(out, p, verbose=verbose)
+        except Exception as exc:
+            out["not_found"].append("planning stage summary unavailable: %s" % type(exc).__name__)
     return out
 
 
@@ -548,28 +601,60 @@ def main():
     ap.add_argument("--crime-half-m", type=float, default=150)
     ap.add_argument("--planning-radius", type=int, default=250)
     ap.add_argument("--roads-radius", type=int, default=300)
-    ap.add_argument("--depth", choices=("lite", "standard", "deep"), default="standard", help="the person's budget mode; see the module docstring")
+    ap.add_argument("--depth", choices=("lite", "standard", "deep"), help="effective depth; defaults to requested baseline")
+    ap.add_argument("--requested-depth", choices=("lite", "standard", "deep"), help="baseline, otherwise VETFLAT_RESEARCH_DEPTH or standard")
+    ap.add_argument("--escalation-reason", help="required when effective depth differs from baseline; a recorded reason is not authorization proof")
     ap.add_argument("--street", help="the street's name when known; the scan moves onto it and says how far off the point was")
-    ap.add_argument("--out", help="also write the JSON here (default: a file under the temp dir, named in the first stderr line)")
+    ap.add_argument("--result-dir", help="private durable results directory; otherwise VETFLAT_SCAN_RESULT_DIR or .pea-state/area-scans")
+    ap.add_argument("--lock-wait-seconds", type=float, default=2, help="bounded wait for an existing scan (0–30 seconds)")
+    ap.add_argument("--out", help="also atomically export returned JSON to this private directory (0700)")
     ap.add_argument("--no-save", action="store_true")
     ap.add_argument("--verbose", action="store_true")
     a = ap.parse_args()
+    baseline = a.requested_depth or os.environ.get("VETFLAT_RESEARCH_DEPTH", "standard")
+    if baseline not in TIERS:
+        ap.error("VETFLAT_RESEARCH_DEPTH must be lite, standard or deep")
+    a.depth = a.depth or baseline
+    reason = (a.escalation_reason or "").strip()
+    if a.depth != baseline and not reason:
+        ap.error("a depth different from the baseline requires --escalation-reason before any lookup")
+    if not math.isfinite(a.lock_wait_seconds) or not 0 <= a.lock_wait_seconds <= 30:
+        ap.error("--lock-wait-seconds must be between 0 and 30")
+    if any(v is not None and not math.isfinite(v) for v in (a.lat, a.lng)) or (a.lat is not None and not -90 <= a.lat <= 90) or (a.lng is not None and not -180 <= a.lng <= 180):
+        ap.error("coordinates must be finite latitude/longitude")
+    if not 1 <= a.months <= 24 or not all(1 <= v <= 5000 for v in (a.crime_half_m, a.planning_radius, a.roads_radius)):
+        ap.error("months must be 1–24 and radii 1–5000 metres")
+    if any(len(v or "") > 500 for v in (a.postcode, a.street, reason)):
+        ap.error("location and reason text must be at most 500 characters")
     if not a.postcode and (a.lat is None or a.lng is None):
         ap.print_help()
         return 2
     def announce(msg):
         sys.stderr.write(msg)
         sys.stderr.flush()
-    out = scan(a.postcode, a.lat, a.lng, a.months, a.crime_half_m, a.planning_radius, a.roads_radius, a.depth, a.street, a.verbose,
-               announce=announce)
-    if not a.no_save:
-        path = a.out or result_path(a.postcode, a.lat, a.lng, a.street, a.depth)
+    request = {k: getattr(a, k) for k in ("postcode", "lat", "lng", "months", "crime_half_m", "planning_radius", "roads_radius", "depth", "street")}
+    request.update(requested_depth=baseline, escalation_reason=reason or None,
+                   effective_planning_radius=TIERS[a.depth]["planning_radius"] or a.planning_radius)
+    def perform():
+        return scan(a.postcode, a.lat, a.lng, a.months, a.crime_half_m, a.planning_radius, a.roads_radius,
+                    a.depth, a.street, a.verbose, announce=announce)
+    if a.no_save:
+        out = perform()
+        out["execution"] = {"requested_depth": baseline, "effective_depth": a.depth, "escalation_reason": reason or None,
+                            "reason_is_authorization_proof": False}
+    else:
+        root = a.result_dir or os.environ.get("VETFLAT_SCAN_RESULT_DIR") or os.path.join(os.getcwd(), ".pea-state", "area-scans")
         try:
-            with io.open(path, "w", encoding="utf-8") as fh:
-                json.dump(out, fh, ensure_ascii=False, indent=1)
-            out["saved_to"] = path
-        except OSError as exc:
-            out.setdefault("not_found", []).append("could not save a copy: %s" % exc)
+            identity = scan_store.source_identity(HERE)
+            out = scan_store.run(root, request, identity, perform, now_iso, a.lock_wait_seconds)
+        except (OSError, ValueError) as exc:
+            out = scan_store.status_result("storage_error", "Scanner identity unavailable: %s; no lookup performed" % exc)
+    if a.out:
+        try:
+            with scan_store.directory(os.path.dirname(os.path.abspath(a.out))) as (_, fd):
+                scan_store.atomic_json(fd, os.path.basename(a.out), out)
+        except (OSError, ValueError) as exc:
+            out.setdefault("not_found", []).append("could not export a copy: %s" % exc)
     json.dump(out, sys.stdout, ensure_ascii=False, indent=1)
     print()
     return 0 if out.get("ok") else 1
