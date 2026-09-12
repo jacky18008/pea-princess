@@ -16,8 +16,8 @@ exit code is 1 when anything was found, so a host can gate on it.
 
 What it checks (2026-09-11, from the replay review of fifteen real cases):
   numbers   a money amount, percentage, duration, count, distance or area whose sentence carries
-            no source, no formula and no "you said": mark it as an estimate with its basis, cite
-            the register or page, or take it out. Dates and clock times are skipped.
+            no source, web citation, formula or "you said": mark it as an estimate with its basis,
+            cite the register or page, or take it out. Dates and clock times are skipped.
   jargon    circled numbers (信⑲), single-letter evidence marks (G/S/C/I/U as labels), landmine
             and route codes (L4, D3), backticked identifiers, file names, skill names, internal
             words (evidence class, fixed form, budget mode, landmine, money-gate, lite/standard/deep
@@ -35,6 +35,7 @@ What it checks (2026-09-11, from the replay review of fifteen real cases):
             sentence: explain it once, in the person's language.
   claims    "已驗證 / 已核對 / 已合併 / verified / confirmed" with nothing verifiable beside it
             (no figure, quote, colon or name): say what was checked and what it showed.
+            Explicitly negated claims are skipped; a URL alone is not a verification result.
 The 2026-09-11 checkpoint reviews of Opus and Codex terra on the same fifteen cases added the last
 four kinds (local paths, third person, unexplained codes, empty claims).
 Standard library only, Python 3.9.
@@ -69,16 +70,71 @@ ACRONYM = re.compile(r"(?<![A-Za-z])(CEMP|CMP|CLP|AQDMP|PRS|BTR|HMO|AST|EICR|TDS
 EXPLAINED = re.compile(r"[（(][^）)]{2,60}[）)]|[：:]|即|也就是|指的是|意思是|means|i\.e\.|that is")
 EMPTY_CLAIM = re.compile(r"(已(?:經)?(?:驗證|核對|確認|合併|更新|交代|寫進|寫入|記錄|同步)|\b(?:verified|confirmed|reconciled|merged)\b)", re.I)
 CONTENT_CUE = re.compile(r"[：:「」“”\d£%]|→|改前|改後|from .* to ")
+WEB_START = re.compile(r"https?://", re.I)
+MARKDOWN_WEB_START = re.compile(r"\[[^\]\n]*\]\(\s*<?https?://", re.I)
+CLAIM_NEGATION = re.compile(
+    r"(?:並非|並不是|不是|尚未|仍未|還未|未曾|沒有|未|不|"
+    r"不能(?:視為|當作|說)|不(?:代表|等於)|"
+    r"\b(?:not|never)(?:\s+(?:yet|been|independently|fully|necessarily))*|"
+    r"\b(?:hasn|haven|isn|aren|wasn|weren)['’]t(?:\s+been)?)\s*$", re.I)
 GO_AHEAD = re.compile(r"(?i)\b(go|gp|continue|go ahead|do it|proceed|yes)\b|都同意|同意|繼續|照做|照這樣|去做|開始吧|可以|好，?做|沒問題")
 SIMPLIFIED = set("这说们时间对问题见车电东门长结应该认为与从发产权让还进过现经国单号计设层楼费钱价买卖办处务实际总条约签订视听讲话语书录读写点线区块图机关开风气热体验检证据确识质数议论选择优标备参决则规围绕码头脑岁维护积极响")
 
 
+def _web_spans(text):
+    """Locate web citations without fetching them or treating their bytes as evidence."""
+    for match in WEB_START.finditer(text):
+        end, depth = match.end(), 0
+        while end < len(text):
+            char = text[end]
+            if char.isspace() or char in '<>"\'[]{}「」“”。，！？；':
+                break
+            if char == '(':
+                depth += 1
+            elif char == ')':
+                if not depth:
+                    break
+                depth -= 1
+            end += 1
+        # Bare URLs commonly end a sentence; its punctuation is not part of the link.
+        while end > match.end() and text[end - 1] in '.,!?;:':
+            end -= 1
+        if end > match.end():
+            yield match.start(), end
+
+
+def _sentences(text):
+    """Preserve decimal amounts, web URLs and inline-link labels when splitting prose."""
+    protected = bytearray(len(text))
+    for start, end in _web_spans(text):
+        protected[start:end] = b'\1' * (end - start)
+    for match in MARKDOWN_WEB_START.finditer(text):
+        protected[match.start():match.end()] = b'\1' * (match.end() - match.start())
+    start = 0
+    for match in re.finditer(r"[。.!?！？\n]", text):
+        pos = match.start()
+        decimal = text[pos] == '.' and pos > 0 and pos + 1 < len(text) and text[pos - 1].isdigit() and text[pos + 1].isdigit()
+        if not protected[pos] and not decimal:
+            yield text[start:pos + 1]
+            start = pos + 1
+    if start < len(text):
+        yield text[start:]
+
+
+def _without_web_urls(text):
+    # A URL's colon or numeric path is not a stated verification result or rent figure.
+    chars = list(text)
+    for start, end in _web_spans(text):
+        chars[start:end] = ' ' * (end - start)
+    return ''.join(chars)
+
+
 def scan(text, previous=None):
     findings = []
-    for sent in re.split(r"(?<=[。.!?！？\n])", text or ""):
-        cleaned = DATE_LIKE.sub(" ", sent)
+    for sent in _sentences(text or ""):
+        cleaned = DATE_LIKE.sub(" ", _without_web_urls(sent))
         nums = NUMBER.findall(cleaned)
-        if nums and not SOURCE_CUE.search(cleaned):
+        if nums and not SOURCE_CUE.search(cleaned) and not any(_web_spans(sent)):
             findings.append({"kind": "numbers", "fragment": sent.strip()[:160],
                              "say": "這句有數字但沒有出處、算式或「你說的」：%s。標「估」並給依據、引用登記冊或頁面，或拿掉。" % "、".join(n.strip() for n in nums[:4])})
     for m in CIRCLED.finditer(text or ""):
@@ -109,11 +165,14 @@ def scan(text, previous=None):
         if body_has_chinese or m.group(0).lower() == "the user":
             findings.append({"kind": "address", "fragment": text[max(0, m.start() - 12):m.end() + 12].strip(), "say": "正文用第三人稱叫對方；改成「你」。"})
             break
-    for sent in re.split(r"(?<=[。.!?！？\n])", text or ""):
-        codes = BOARD_CODE.findall(sent) + ACRONYM.findall(sent)
-        if codes and not EXPLAINED.search(sent):
+    for sent in _sentences(text or ""):
+        content = _without_web_urls(sent)
+        codes = BOARD_CODE.findall(content) + ACRONYM.findall(content)
+        explanation = re.sub(r"[（(]\s*[）)]", "", content)
+        if codes and not EXPLAINED.search(explanation):
             findings.append({"kind": "terms", "fragment": sent.strip()[:120], "say": "代號或縮寫沒解釋：%s。同一句用白話說它是什麼。" % "、".join(sorted(set(codes)))})
-        if EMPTY_CLAIM.search(sent) and not CONTENT_CUE.search(sent):
+        affirmative = any(not CLAIM_NEGATION.search(content[:match.start()]) for match in EMPTY_CLAIM.finditer(content))
+        if affirmative and not CONTENT_CUE.search(content):
             findings.append({"kind": "claims", "fragment": sent.strip()[:120], "say": "說已經驗證／合併／更新，卻沒附內容；寫出查了什麼、結果是什麼。"})
     q = len(QUESTION.findall(text or ""))
     if q > 3:

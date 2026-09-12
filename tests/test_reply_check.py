@@ -35,6 +35,36 @@ class TestNumbers(unittest.TestCase):
     def test_dates_and_times_are_not_numbers(self):
         self.assertEqual([], RC.scan("2026-05-01 起適用。9/21 開學。09:00 到。"))
 
+    def test_web_citations_stay_with_the_numbered_claim(self):
+        replies = [
+            "[房源頁](https://www.example.org/uk/flat) 列出「£2,250 pcm」「484 sq ft」。",
+            "[Example.co.uk](https://www.example.org/flat?view=facts) lists £2,250 pcm.",
+            "£2,250 pcm (https://www.example.org/flat).",
+            "租金 £2,250，https://www.example.org/flat。",
+            "[房源頁](https://www.example.org/flat_(first.floor)) 列出 £2,250。",
+        ]
+        for reply in replies:
+            with self.subTest(reply=reply):
+                self.assertNotIn("numbers", kinds(RC.scan(reply)))
+
+    def test_a_link_in_another_sentence_does_not_source_a_number(self):
+        replies = [
+            "See https://www.example.org/flat. Rent is £2,250.",
+            "See [page](https://www.example.org/flat). Rent is £2,250.",
+            "£2,250 pcm. See https://www.example.org/flat.",
+            "[房源頁](https://www.example.org/flat)\n租金 £2,250。",
+            "£2,250 pcm (file:///tmp/page).",
+        ]
+        for reply in replies:
+            with self.subTest(reply=reply):
+                self.assertIn("numbers", kinds(RC.scan(reply)))
+
+    def test_decimal_points_do_not_detach_sources_or_hide_amounts(self):
+        self.assertNotIn("numbers", kinds(RC.scan("根據頁面，每月 £2,250.50，面積 44.9 平方公尺。")))
+        found = [f for f in RC.scan("面積 44.9 平方公尺。") if f["kind"] == "numbers"]
+        self.assertEqual(1, len(found))
+        self.assertIn("44.9 平方公尺", found[0]["say"])
+
 
 class TestJargon(unittest.TestCase):
     def test_codes_files_skill_names_and_internal_words(self):
@@ -87,10 +117,38 @@ class TestReviewAdditions(unittest.TestCase):
         self.assertEqual([], [f for f in RC.scan("這一戶先保留（HOLD：等押金證明再決定）。") if f["kind"] == "terms"])
         self.assertIn("terms", kinds(RC.scan("隔壁交了 CEMP，工程快開始了。")))
         self.assertEqual([], [f for f in RC.scan("隔壁交了 CEMP（施工環境管理計畫，開工前的文件），工程快開始了。") if f["kind"] == "terms"])
+        self.assertIn("terms", kinds(RC.scan("隔壁交了 CEMP [文件](https://www.example.org/record)。")))
 
     def test_an_empty_claim_is_flagged_and_a_full_one_is_not(self):
         self.assertIn("claims", kinds(RC.scan("排序已驗證。房租來自你給的頁面。")))
         self.assertEqual([], [f for f in RC.scan("排序已核對：Anchor 從第 3 升到第 1，因為 Bale 的面積來自能源證書是 41 平方公尺。") if f["kind"] == "claims"])
+
+    def test_negated_verification_is_not_an_affirmative_claim(self):
+        replies = [
+            "以上是廣告聲稱，並非已確認的可租狀態。",
+            "這不是已驗證的房源。",
+            "不能視為已確認的可租狀態。",
+            "Availability is not confirmed.",
+            "Availability has not yet been independently verified.",
+            "Availability hasn't been confirmed.",
+            "Availability was never verified.",
+        ]
+        for reply in replies:
+            with self.subTest(reply=reply):
+                self.assertNotIn("claims", kinds(RC.scan(reply)))
+
+    def test_negation_does_not_excuse_another_affirmative_claim(self):
+        replies = [
+            "這不是已確認的租金，但可租狀態已確認。",
+            "The rent is not confirmed, but availability is confirmed.",
+            "Availability is not only confirmed but guaranteed.",
+            "沒有照片，但可租狀態已確認。",
+            "已確認可租。[房源頁](https://www.example.org/flat)。",
+            "可租狀態已確認 [房源頁](https://www.example.org/flat/2250)。",
+        ]
+        for reply in replies:
+            with self.subTest(reply=reply):
+                self.assertIn("claims", kinds(RC.scan(reply)))
 
 
 class TestCli(unittest.TestCase):
