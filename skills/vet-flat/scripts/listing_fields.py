@@ -23,6 +23,10 @@ possible property postcodes stay unknown rather than taking the first hit. These
 context clues do not establish a verified property address.
 Nothing here is written for one website: no site names, no page selectors.
 
+PDF and other binary inputs are refused before decoding, even if renamed to .txt.
+For a PDF, first convert it locally with ``pdftotext -layout input.pdf output.txt``,
+then pass ``--text output.txt``. Only UTF-8 HTML/plain text is accepted.
+
 What it refuses: a web address. It prints an error asking the person to open the
 page in their browser and save or copy it. There is no network code in this file and
 none may be added (tests check the imports).
@@ -46,6 +50,32 @@ from html.parser import HTMLParser
 
 REFUSAL = ("This tool does not open web pages. Open the listing in your browser, save "
            "the page (or copy the text), and pass the file.")
+
+FORMAT_REFUSAL = ("Unsupported PDF/binary or non-UTF-8 input. This tool accepts saved HTML or UTF-8 plain text, "
+                  "not raw PDF files. For a PDF, first run locally: pdftotext -layout INPUT.pdf OUTPUT.txt; "
+                  "then run listing_fields.py --text OUTPUT.txt. No listing fields were extracted.")
+BINARY_SUFFIXES = frozenset(('.pdf', '.png', '.jpg', '.jpeg', '.gif', '.webp', '.tif', '.tiff',
+                             '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.zip', '.gz',
+                             '.mp3', '.mp4', '.mov', '.woff', '.woff2'))
+BINARY_SIGNATURES = (b'%PDF-', b'\x89PNG\r\n\x1a\n', b'\xff\xd8\xff', b'GIF87a', b'GIF89a',
+                     b'PK\x03\x04', b'PK\x05\x06', b'\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1',
+                     b'\x1f\x8b', b'RIFF', b'II*\x00', b'MM\x00*')
+
+
+def decode_saved_text(raw, name='-'):
+    """Reject binary bytes rather than replacing them and extracting invented text."""
+    if isinstance(raw, str):
+        raw = raw.encode('utf-8')  # Supports an explicitly supplied StringIO stdin.
+    head = raw[:1024].lstrip(b'\xef\xbb\xbf \t\r\n')
+    if (os.path.splitext(name)[1].lower() in BINARY_SUFFIXES or
+            head.startswith(BINARY_SIGNATURES) or b'%PDF-' in raw[:1024] or
+            any(byte < 32 and byte not in (9, 10, 12, 13) for byte in raw) or b'\x7f' in raw):
+        raise ValueError(FORMAT_REFUSAL)
+    try:
+        return raw.decode('utf-8-sig')
+    except UnicodeError as error:
+        raise ValueError(FORMAT_REFUSAL) from error
+
 
 URL_LIKE = re.compile(r"^\s*(?:https?://|www\.)\S+\s*$", re.I)
 POSTCODE = re.compile(r"\b([A-Z]{1,2}\d[A-Z\d]?)\s*(\d[A-Z]{2})\b", re.I)
@@ -510,14 +540,16 @@ def main(argv=None):
     if looks_like_url(args.source):
         print(json.dumps({"error": REFUSAL}, ensure_ascii=False))
         return 2
-    if args.source == "-":
-        raw = sys.stdin.read()
-    else:
-        if not os.path.exists(args.source):
-            print(json.dumps({"error": "no such file: %s" % args.source}, ensure_ascii=False))
-            return 2
-        with io.open(args.source, encoding="utf-8", errors="replace") as fh:
-            raw = fh.read()
+    try:
+        if args.source == "-":
+            raw = getattr(sys.stdin, 'buffer', sys.stdin).read()
+        else:
+            with open(args.source, 'rb') as fh:
+                raw = fh.read()
+        raw = decode_saved_text(raw, args.source)
+    except (OSError, ValueError) as error:
+        print(json.dumps({"error": str(error)}, ensure_ascii=False))
+        return 2
     if looks_like_url(raw):
         print(json.dumps({"error": REFUSAL}, ensure_ascii=False))
         return 2

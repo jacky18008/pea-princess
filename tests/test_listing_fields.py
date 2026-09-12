@@ -193,6 +193,53 @@ class TestPropertyPostcode(unittest.TestCase):
         self.assert_unknown('<script type="application/ld+json">'+json.dumps({'@type':'Apartment','address':{'postalCode':'N4'}})+'</script>', 'html')
 
 
+class TestBinaryInput(unittest.TestCase):
+    def run_file(self, body, suffix='.txt', flags=()):
+        with tempfile.TemporaryDirectory() as folder:
+            path = os.path.join(folder, 'saved'+suffix)
+            with open(path, 'wb') as handle:
+                handle.write(body)
+            return subprocess.run([sys.executable, os.path.join(SCRIPTS, 'listing_fields.py'), *flags, path], capture_output=True)
+
+    def assert_format_error(self, result):
+        self.assertEqual(2, result.returncode, result.stdout + result.stderr)
+        rec = json.loads(result.stdout)
+        self.assertEqual({'error'}, set(rec))
+        self.assertIn('pdftotext -layout', rec['error'])
+        self.assertIn('UTF-8', rec['error'])
+        self.assertNotIn('postcode_candidates', rec)
+        self.assertEqual(b'', result.stderr)
+
+    def test_raw_pdf_is_refused_even_when_its_stream_looks_like_listing_text(self):
+        self.assert_format_error(self.run_file(b'%PDF-1.7\n1 0 obj <</Text (N8 1AA 2 bedrooms)>>\n%%EOF', '.pdf'))
+
+    def test_pdf_magic_is_refused_under_text_name_and_text_flag(self):
+        self.assert_format_error(self.run_file(b'%PDF-1.7\nN8 1AA 2 bedrooms', '.txt', ('--text',)))
+
+    def test_pdf_stdin_is_rejected_before_any_fields_are_returned(self):
+        result = subprocess.run([sys.executable, os.path.join(SCRIPTS, 'listing_fields.py'), '--text', '-'],
+                                input=b'%PDF-1.7\nN8 1AA 2 bedrooms', capture_output=True)
+        self.assert_format_error(result)
+
+    def test_common_binary_magics_are_rejected_regardless_of_extension(self):
+        for magic in (b'\x89PNG\r\n\x1a\n', b'GIF89a', b'PK\x03\x04', b'RIFF', b'\xff\xd8\xff'):
+            with self.subTest(magic=magic):
+                self.assert_format_error(self.run_file(magic+b'N8 1AA 2 bedrooms', '.txt'))
+
+    def test_invalid_utf8_and_binary_controls_are_not_replaced_with_text(self):
+        for raw in (b'N8 1AA\xff2 bedrooms', b'N8 1AA\x002 bedrooms'):
+            with self.subTest(raw=raw):
+                self.assert_format_error(self.run_file(raw))
+
+    def test_utf8_plain_text_stdin_still_parses_rent_and_postcode(self):
+        result = subprocess.run([sys.executable, os.path.join(SCRIPTS, 'listing_fields.py'), '--text', '-'],
+                                input='£1,800 pcm\nProperty postcode: N4 2BB\f'.encode('utf-8'), capture_output=True)
+        self.assertEqual(0, result.returncode, result.stderr)
+        rec = json.loads(result.stdout)
+        self.assertEqual(1800, rec['fields']['rent']['value'])
+        self.assertEqual('N4 2BB', rec['fields']['postcode']['value'])
+
+
 class TestItNeverFetches(unittest.TestCase):
     """The rule that keeps this tool on the Amstrad side of the line: no network code, and
     a web address is refused with an instruction to save the page instead."""
