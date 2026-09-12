@@ -3,6 +3,7 @@ import contextlib
 import io
 import json
 import shutil
+import socket
 import subprocess
 from pathlib import Path
 import sys
@@ -322,6 +323,29 @@ class DevSyncTests(unittest.TestCase):
         builder.assert_called_once()
         self.assertEqual('/immutable/new', supervisor.receipt['snapshot'])
         self.assertEqual('Saved historical session bytes.', self.session.read_text())
+
+    def test_port_preflight_allows_owned_server_time_wait_after_http_close(self):
+        # The HTTP server sets SO_REUSEADDR; accepted connections can remain in
+        # TIME_WAIT after its listening socket closes during a normal refresh.
+        with socket.socket() as listener:
+            listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            listener.bind(('127.0.0.1', 0))
+            port = listener.getsockname()[1]
+            listener.listen(1)
+            with socket.create_connection(('127.0.0.1', port), timeout=2) as client:
+                accepted, _ = listener.accept()
+                with accepted:
+                    accepted.shutdown(socket.SHUT_WR)
+                    self.assertEqual(b'', client.recv(1))
+        sync._port_available(port)
+
+    def test_port_preflight_still_rejects_an_actual_listening_server(self):
+        with socket.socket() as listener:
+            listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            listener.bind(('127.0.0.1', 0))
+            listener.listen(1)
+            with self.assertRaisesRegex(sync.SyncError, 'Port is occupied'):
+                sync._port_available(listener.getsockname()[1])
 
     def test_default_launcher_starts_service_without_freezing_in_caller(self):
         with mock.patch.object(sync, 'service_command', return_value={'running': True}) as command, \

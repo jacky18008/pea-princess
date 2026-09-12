@@ -165,6 +165,8 @@ def idle_lock(service_dir):
 def _port_available(port):
     try:
         with socket.socket() as probe:
+            # Match ThreadingHTTPServer: old accepted sockets may be in TIME_WAIT.
+            probe.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             probe.bind(('127.0.0.1', port))
     except OSError as error:
         raise SyncError('Port is occupied; stop the previous lab deliberately before starting this service.') from error
