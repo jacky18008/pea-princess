@@ -539,6 +539,16 @@ python3 bench/journeys.py --regrade bench/results/journeys-2026-09-05
 
 ## Caveats
 
+**Codex token figures in the tables above are the main thread only.** Codex spawns sub-agent threads
+to run the scripts and `codex exec --json` does not report them; `bench/ab/account_codex.py --results
+<folder>` reads the rollout files and adds them. Re-read on 2026-09-12 for the 2026-09-03 core sweep:
+`codex-B-lean-sol` standard runs were 8.0–13.4M in the main thread but 12.1–22.7M across 4–7 threads
+(80–169 sub-agent calls); the lite arms (`codex-C-terra-lite`, `codex-C-luna-lite`) ran in one thread and
+their figures stand. The direction of every Codex comparison holds; the standard-mode absolutes are
+1.5–1.7× higher than printed. The skill now tells Codex to run the street scan in the main thread, and
+INSTALL.md documents the user-side switch (`[agents] enabled = false`).
+
+
 **Every Codex row dated before 2026-09-07 ran with live fetching broken.** The
 workspace-write sandbox denied the cache write, so those runs could only read what the
 truth refresh or an earlier Claude run had already fetched. Where the cache was warm they
