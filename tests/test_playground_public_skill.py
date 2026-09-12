@@ -21,9 +21,9 @@ class PublicSkillIntegrationTests(unittest.TestCase):
         self.skill = self.root/'skills/pea-princess'
         (self.skill/'references').mkdir(parents=True)
         (self.skill/'SKILL.md').write_text('name: pea-princess\nPUBLIC ZIP DISTINCT INSTRUCTIONS')
-        for name in p.live_references('compare two homes')+['inputs.md']:
+        for name in p.live_references('compare two homes')+['inputs.md','rules.md']:
             (self.skill/'references'/name).write_text('PUBLIC ZIP REFERENCE '+name+
-                '\n## 2b. Tell me about the places you have lived\nUNREQUESTED STORY')
+                ('\n## 2b. Tell me about the places you have lived\nUNREQUESTED STORY' if name=='onboarding.md' else ''))
         self.artifact = {'name':'pea-princess','kind':'public_zip','sha256':'a'*64,
                          'file_count':5,'path':str(self.skill)}
         for patch in (
@@ -58,7 +58,10 @@ class PublicSkillIntegrationTests(unittest.TestCase):
         self.assertIn('PUBLIC ZIP DISTINCT INSTRUCTIONS',prompt)
         self.assertIn(str(self.skill),prompt)
         self.assertNotIn(str(ROOT/'skills/vet-flat'),prompt)
-        self.assertNotIn('UNREQUESTED STORY',prompt.split('REFERENCE onboarding.md')[1].split('REFERENCE listing-evidence.md')[0])
+        self.assertIn('PUBLIC ZIP REFERENCE rules.md',prompt)
+        self.assertIn('PUBLIC ZIP REFERENCE conversation-quality.md',prompt)
+        self.assertNotIn('REFERENCE onboarding.md',prompt)
+        self.assertNotIn('LOCAL CONVERSATION POLICY',prompt)
         for data in (self.lab.catalog(),self.lab.snapshot(sid),self.lab.export(sid),self.lab.inspect(sid)['session']):
             self.assertEqual(self.artifact,data['skill_artifact'])
 

@@ -111,8 +111,8 @@ def source_status(runtime_root):
 
 
 @contextmanager
-def dispatch_guard(runtime_root):
-    """Hold across preparation, calls and finalization; a busy worker cannot restart."""
+def operation_guard(runtime_root):
+    """Protect state writes from restart; pause/review remain usable while stale."""
     try:
         config = _config(runtime_root)
     except (OSError, ValueError, TypeError) as error:
@@ -127,12 +127,19 @@ def dispatch_guard(runtime_root):
         except BlockingIOError as error:
             raise SyncError('Developer runtime is switching; wait for the service to become ready.') from error
         try:
-            status = source_status(runtime_root)
-            if not status['current']:
-                raise SyncError(status['reason'])
             yield
         finally:
             fcntl.flock(handle, fcntl.LOCK_UN)
+
+
+@contextmanager
+def dispatch_guard(runtime_root):
+    """Hold across preparation, calls and finalization; require current sources."""
+    with operation_guard(runtime_root):
+        status = source_status(runtime_root)
+        if not status['current']:
+            raise SyncError(status['reason'])
+        yield
 
 
 def _lock_file(path):

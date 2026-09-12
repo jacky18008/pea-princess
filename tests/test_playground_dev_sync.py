@@ -75,6 +75,18 @@ class DevSyncTests(unittest.TestCase):
         self.assertEqual(before, Path(receipt['manifest']).read_bytes())
         self.assertEqual('Saved historical session bytes.', self.session.read_text())
 
+    def test_state_write_lease_allows_pause_while_stale_but_blocks_restart(self):
+        receipt, service = self.managed_snapshot()
+        self.write('tools/persona_playground.py', 'Changed while a call runs')
+        with sync.operation_guard(receipt['snapshot']):
+            with sync.idle_lock(service) as idle:
+                self.assertFalse(idle)
+        with sync.idle_lock(service) as idle:
+            self.assertTrue(idle)
+        with self.assertRaises(sync.SyncError):
+            with sync.dispatch_guard(receipt['snapshot']):
+                self.fail('stale source must not dispatch')
+
     def test_unavailable_source_or_service_fails_closed(self):
         receipt, service = self.managed_snapshot()
         self.assertFalse(sync.source_status(receipt['snapshot'])['current'], 'no supervisor owns the lock')

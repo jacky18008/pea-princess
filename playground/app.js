@@ -2,6 +2,7 @@
 const $=id=>document.getElementById(id);
 let catalog=null, current=null, selected=null, lastRevision=null, polling=false, createIntent=null, actionIntent=null, creating=false;
 const choiceDrafts=new Map(), choiceIntents=new Map(), choiceSending=new Set(), messageSending=new Set();
+let booted=false,catalogPolling=false;
 let replayPreview=null,replayLoading=false,replayCreating=false,replayPreviewRequest=0;
 const replayIntents=new Map(),replayComparisonOpen=new Map();
 // Drafts remain in memory only. Uploaded bytes never enter browser storage or exports.
@@ -30,6 +31,18 @@ function renderSkillArtifact(prefix,artifact){
  if(published){const hash=artifact.sha256.toLowerCase();label.textContent=`${scope} · pea-princess 公開 ZIP · ${hash.slice(0,12)}`;label.title=`pea-princess 公開 ZIP\nSHA-256: ${hash}\n${artifact.file_count} 個檔案`;detail.append(node("p",`${artifact.file_count} 個檔案 · SHA-256`),node("code",hash));}
  else if(["development","development_tree"].includes(artifact?.kind)){label.textContent=`${scope} · 開發版本，未核對公開 ZIP`;detail.append(node("p","目前沒有已核對的公開 ZIP 指紋。"));}
  else{label.textContent=prefix==="catalog-skill"?"新對話 · skill 來源未確認":"此對話 · 舊版或來源未確認";detail.append(node("p",prefix==="catalog-skill"?"目前沒有完整的公開 ZIP 版本紀錄。":"這段紀錄沒有可確認的公開 ZIP 指紋。"));}
+}
+function renderSourceSync(){
+ const sync=catalog?.source_sync,target=$("source-sync");
+ if(!sync){target.textContent="尚未確認來源同步狀態";return;}
+ target.textContent=sync.mode==="managed"?(sync.current?`公開來源已同步 · ${sync.runtime_digest?.slice(0,12)||""}`:"公開來源有更新，正在同步；完成後可建立新測試。") :"固定版本測試 · 不自動跟隨來源更新";
+ target.title=sync.reason||"";
+}
+async function refreshCatalog(){
+ if(catalogPolling)return;catalogPolling=true;
+ try{if(!booted){await start();return;}catalog=await api("/api/catalog");$("connection").textContent="本機研究介面已連接";renderSourceSync();creationMode();syncReplayControls();}
+ catch(error){if(catalog)catalog={...catalog,source_sync:{mode:"managed",current:false,reason:"等待測試台連線恢復"}};$("connection").textContent="等待測試台重新連線";renderSourceSync();creationMode();}
+ finally{catalogPolling=false;}
 }
 function attachmentDraft(key){if(key===INITIAL_DRAFT)return initialDraft;if(!messageDrafts.has(key))messageDrafts.set(key,{text:"",amendment:false,path:"",attachments:[]});return messageDrafts.get(key);}
 function saveComposerDraft(){if(!selected)return;const draft=attachmentDraft(selected);draft.text=$("message").value;draft.amendment=$("amendment").checked;draft.path=$("message-path").value;}
@@ -213,13 +226,13 @@ function creationMode(){
  renderSkillArtifact("catalog-skill",catalog?.skill_artifact);
  $("live-setup").hidden=!live;$("fixture-setup").hidden=live;
  $("create").textContent=live?"建立測試對話":"建立合成測試";
- $("create").disabled=creating||!catalog||!validExecutionSelections(executionSelections())||(live?((!request.trim()&&!attachmentIds(initialDraft).length)||request.length>8000||attachmentPending(initialDraft)):!$("persona").value);
+ $("create").disabled=creating||!catalog||catalog.source_sync?.current===false||!validExecutionSelections(executionSelections())||(live?((!request.trim()&&!attachmentIds(initialDraft).length)||request.length>8000||attachmentPending(initialDraft)):!$("persona").value);
  for(const key of Object.keys(executionLabels))$(key.replaceAll("_","-")).disabled=creating||!executionOptions(key).length;
  renderAttachmentDraft("initial",INITIAL_DRAFT);
  $("call-limit-note").textContent=(live?"":"包含回答與合成人物。")+"每次呼叫之間檢查上限，可能超出一則；不自動重試。";
  if(!current&&!selected){$("session-label").textContent=modeNames[live?"live":"fixture"];$("title").textContent=live?"寫下需求，開始研究":"挑一個合成人物，開始測試";$("run").hidden=live;$("step").textContent=live?"研究並回覆":"下一步";$("capability-status").textContent=capabilityDefaults[live?"live":"fixture"];$("empty-title").textContent=live?"把選項查清楚，再一起決定":"觀察合成人物的多輪對話";$("empty-note").textContent=live?"從大致需求開始，逐步比較來源、費用與取捨。你可以隨時補充問題或修改條件。":"人物會追問、補充虛構材料，也可能失去耐心。你可以中途插話，觀察 Codex 如何接續。";$("turn-label").textContent=live?"真人輸入":"合成人物回合";}
 }
-function canPreviewReplay(){return Boolean(current?.id===selected&&isLive(current)&&!current.busy&&!current.pending_call&&catalog);}
+function canPreviewReplay(){return Boolean(current?.id===selected&&isLive(current)&&!current.busy&&!current.pending_call&&catalog&&catalog.source_sync?.current!==false);}
 function replaySettings(){return {model:$("replay-model").value,max_calls:Number($("replay-max-calls").value),max_tokens:Number($("replay-max-tokens").value),...executionSelections("replay-")};}
 function validReplaySettings(settings){return catalog?.models.includes(settings.model)&&Number.isInteger(settings.max_calls)&&settings.max_calls>=1&&settings.max_calls<=80&&Number.isInteger(settings.max_tokens)&&settings.max_tokens>=10000&&settings.max_tokens<=2000000&&validExecutionSelections(settings);}
 function syncReplayControls(){
@@ -335,5 +348,7 @@ $("composer").onsubmit=async e=>{
  }catch(err){toast(err.message);}finally{messageSending.delete(id);syncComposer();}
 };
 $("export").onclick=async()=>{try{const s=await api(`/api/session/${selected}/export`);const url=URL.createObjectURL(new Blob([JSON.stringify(s,null,2)],{type:"application/json"}));const a=node("a");a.href=url;a.download=isLive(s)?`PRIVATE-research-${s.id.slice(0,8)}.json`:`PRIVATE-persona-${s.persona_id}-${s.id.slice(0,8)}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch(e){toast(e.message);}};
-async function start(){try{catalog=await api("/api/catalog");const modes=["live","fixture"].filter(mode=>(catalog.research_modes||["fixture"]).includes(mode));$("research-mode").replaceChildren(...modes.map(mode=>{const o=node("option",modeNames[mode]);o.value=mode;return o;}));$("research-mode").value=modes[0]||"fixture";$("persona").replaceChildren(...catalog.personas.map(p=>{const o=node("option",`${p.id} · ${p.name}`);o.value=p.id;return o;}));$("model").replaceChildren(...catalog.models.map(m=>{const o=node("option",m);o.value=m;return o;}));initializeExecutionSelectors();resetCreationDepth();profile();creationMode();$("connection").textContent="本機研究介面已連接";await list();let previous=null;try{previous=localStorage.getItem("pea-lab-session");}catch(_){}if(previous)await select(previous);setInterval(refresh,1200);}catch(e){$("connection").textContent="連線未就緒";toast(e.message);}}
+async function start(){try{catalog=await api("/api/catalog");const modes=["live","fixture"].filter(mode=>(catalog.research_modes||["fixture"]).includes(mode));$("research-mode").replaceChildren(...modes.map(mode=>{const o=node("option",modeNames[mode]);o.value=mode;return o;}));$("research-mode").value=modes[0]||"fixture";$("persona").replaceChildren(...catalog.personas.map(p=>{const o=node("option",`${p.id} · ${p.name}`);o.value=p.id;return o;}));$("model").replaceChildren(...catalog.models.map(m=>{const o=node("option",m);o.value=m;return o;}));initializeExecutionSelectors();resetCreationDepth();profile();creationMode();renderSourceSync();booted=true;$("connection").textContent="本機研究介面已連接";await list();let previous=null;try{previous=localStorage.getItem("pea-lab-session");}catch(_){}if(previous)await select(previous);}catch(e){$("connection").textContent="連線未就緒";toast(e.message);}}
 start();
+setInterval(()=>{if(booted)refresh();},1200);
+setInterval(refreshCatalog,3000);

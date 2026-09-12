@@ -327,7 +327,7 @@ class TestNoLinkFetching(unittest.TestCase):
 
     def test_the_router_says_a_link_is_never_opened(self):
         s = read("SKILL.md")
-        self.assertIn("does not open listing links and never suggests it", s)
+        self.assertIn("Never open listing links or suggest fetching them", s)
         rules = read("references", "rules.md")
         self.assertIn("the skill does not read them", rules)
         self.assertIn("PDF, screenshots or text", rules)

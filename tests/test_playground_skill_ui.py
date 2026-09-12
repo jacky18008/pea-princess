@@ -49,6 +49,15 @@ async function main(){
  const previous=run('refresh()');await settle();await run("select('B')");assert.equal(elements['session-skill'].hidden,true);assert.equal(elements['session-skill-label'].textContent,'');
  resolveOld(response(saved('R')));await previous;assert.equal(elements['session-skill'].hidden,true);
  override=null;await run('refresh()');assert.match(elements['session-skill-label'].textContent,/來源未確認/);assert.equal(elements['session-skill-label'].title,'');
+ // Catalog refresh follows source revisions without losing the current test or selections.
+ override=url=>url==='/api/catalog'?response({research_modes:['live','fixture'],models:['gpt-6-astra'],skill_artifact:publicArtifact,source_sync:{mode:'managed',current:false,reason:'edited'},personas:[{id:'P4',name:'Brett',identity:'Viewing tomorrow',language:'en',patience_turns:3}]}):undefined;
+ elements['initial-request'].value='Keep this unsent request';elements['model'].value='gpt-6-astra';
+ await run('refreshCatalog()');assert.match(elements['source-sync'].textContent,/正在同步/);
+ assert.equal(elements.create.disabled,true);assert.equal(elements['replay-open'].disabled,true);
+ assert.equal(elements['initial-request'].value,'Keep this unsent request');assert.equal(elements.model.value,'gpt-6-astra');
+ override=url=>url==='/api/catalog'?response({research_modes:['live','fixture'],models:['gpt-6-astra'],skill_artifact:publicArtifact,source_sync:{mode:'managed',current:true,runtime_digest:'d'.repeat(64)},personas:[{id:'P4',name:'Brett',identity:'Viewing tomorrow',language:'en',patience_turns:3}]}):undefined;
+ await run('refreshCatalog()');assert.match(elements['source-sync'].textContent,/已同步.*dddddddddddd/);
+ assert.equal(elements.create.disabled,false);assert.equal(elements['initial-request'].value,'Keep this unsent request');
  assert.equal(captured.length,0);console.log('skill provenance UI checks passed');
 }
 main().catch(error=>{console.error(error);process.exitCode=1;});

@@ -12,17 +12,18 @@ metadata:
 # Pea Princess — London flat vetting
 
 ## Start
-1. **The person's instruction outranks every default in this skill**, in every host. Change it in plain words; say what changed, record it, follow it. Four things do not move: `references/rules.md`, read once a session.
-2. Listing pages come from the person: a PDF or saved page, screenshots, or copied text (`scripts/listing_fields.py`). By default the skill does not open listing links and never suggests it; it says so once and asks for the page. The scripts read the open registers.
-3. Resume `.pea-state` (`references/session-harness.md`) or `profile.yaml`. Every reply moves the search, never only asks. At most **three essential clarifications**, in one message when the person has no idea; native choices when offered.
-4. **Route by intent** — read the one file the row names, once; never re-read a file in context, list the folder, or open `sources.yaml`:
+1. **The person's instruction outranks every default in this skill.** Record and follow changes. Four rules persist: `references/rules.md`, read once a session.
+2. Use supplied listing PDFs, saved pages, screenshots or text (`scripts/listing_fields.py`). Never open listing links or suggest fetching them. Ask only for missing listing evidence. Research open registers with shipped scripts.
+3. Resume `.pea-state` (`references/session-harness.md`) or `profile.yaml`. Every reply advances the search. Ask at most **three essential questions** together; use native choices when available.
+4. **Route by intent** — read only the linked files needed now; never reread context, list folders, or open `sources.yaml`:
 
 | The user… | Read |
 |---|---|
 | asks how to start or what this does | `references/onboarding.md` |
-| gives a listing or an address → vet it | `references/axes/README.md`, then `axes/01`–`12` |
+| compares specified advertised fields | `references/inputs.md`; use supplied pages, compare only requested fields |
+| requests a full flat assessment | `references/axes/README.md`, then relevant linked axes |
 | wants candidates around an area or commute | `references/axes/00-area-sweep.md` (`scripts/sweep.py`) |
-| asks if a street is quiet, safe, or has works | `scripts/area_scan.py --street --depth`, in this thread, once per street, then write |
+| asks if a street is quiet, safe, or has works | `references/street-research.md`; run the scan in this thread, reuse saved results on follow-up |
 | wants a shortlist roasted (尻洗) or compared | `references/axes/13-adversarial-review.md`, then the report contract |
 | about to sign, needs a bridge stay, or referencing | `references/axes/15`–`17` |
 | going to a viewing, or just been | `references/axes/14-site-visit.md`, `18` |

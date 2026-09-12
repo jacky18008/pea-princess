@@ -245,6 +245,12 @@ class CodexTransportTests(unittest.TestCase):
                     seen.append(command)
                     self.assertEqual(str(Path(kwargs['cwd'])/'.pea-cache'),kwargs['env']['VETFLAT_CACHE'])
                     self.assertEqual('1',kwargs['env']['PYTHONDONTWRITEBYTECODE'])
+                    if policy=='live_research':
+                        self.assertEqual(str(folder/'research-results'),kwargs['env']['VETFLAT_SCAN_RESULT_DIR'])
+                        self.assertEqual('standard',kwargs['env']['VETFLAT_RESEARCH_DEPTH'])
+                        self.assertEqual(str(folder/'research-results'),command[command.index('--add-dir')+1])
+                        self.assertEqual('multi_agent',command[command.index('--disable')+1])
+                    else:self.assertNotIn('--add-dir',command)
                     answer=command[command.index('--output-last-message')+1]
                     code='import sys,json;sys.stdin.read();open(sys.argv[1],"w").write("answer");print(json.dumps({"type":"item.completed","item":{"type":"agent_message","text":"Visible progress."}}));print(json.dumps({"type":"turn.completed","usage":{"input_tokens":15,"output_tokens":5,"cached_input_tokens":0}}))'
                     return subprocess.Popen([sys.executable,'-c',code,answer],**kwargs)

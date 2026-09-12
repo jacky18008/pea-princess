@@ -52,7 +52,11 @@ A managed runtime manifest contains `dev_sync.source_root`, `source_digest` and
 catalog's read-only current/stale status, including unavailable source or service.
 `dispatch_guard(runtime_root)` checks freshness and holds a shared file lock for
 the **entire worker**, including preparation, physical calls and finalization.
-The worker must recheck source status before each additional queued/replay call.
+The worker rechecks source status before each additional queued/replay call.
+HTTP mutations hold `operation_guard`, a shared lease without a freshness check,
+so pausing an active call and saving review notes remain possible while source
+edits wait. Creating a test and preparing a model call separately require fresh
+sources. Both leases last through durable state writes.
 Source editors do not share this lock: it detects the source state when checked,
 not a transactional lock on every concurrent editor's write.
 
@@ -80,3 +84,27 @@ not that their old package equals today's source.
 
 Tests use mocked builds/servers and synthetic repositories; they test lifecycle,
 locking, source identity and history preservation, not model answer quality.
+
+## Research continuity in the agent test lane
+
+The host exposes only `<session>/research-results` as the additional writable
+directory and sets `VETFLAT_SCAN_RESULT_DIR` and `VETFLAT_RESEARCH_DEPTH`. Temporary
+scratch files disappear after each call. The public `area_scan.py` saves private
+envelopes containing the exact request, source identity, retrieval time, result
+and hash. Repeating an identical scan reuses complete, partial or failed results;
+in-flight matching work waits briefly and reports pending instead of duplicating
+network work. An abandoned producer reports interruption, with no automatic retry.
+
+Each subsequent prompt includes bounded verified metadata and exact paths, not
+an invented prose summary. The model can read the original envelope's `result`
+field. Hash checks establish unchanged bytes, not source truth, complete coverage
+or bedroom-level certainty. Changed preferences alone do not make observations
+newer. Each call's `research_results` in the export records the observations seen
+after that call; failed supplementary observation writes remain explicit gaps
+and do not suppress a completed paid answer.
+
+The agent lane receives the actual public SKILL, rules and conversation-quality
+references. Other documents load by task intent. The earlier extra conversation
+policy and automatic intake/reference bundle are no longer injected here;
+fixture and checked-delivery lanes retain their own contracts. This is a changed
+prompt treatment, requiring model acceptance, not proven lossless compression.
