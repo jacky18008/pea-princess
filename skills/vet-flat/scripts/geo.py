@@ -34,6 +34,7 @@ import argparse
 import json
 import math
 import os
+import re
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -167,6 +168,33 @@ def parse_nearby(obj, lat, lng):
 
 
 # --------------------------------------------------------------- lookup -----
+def lookup_outcode(outcode, verbose=False):
+    """Coarse postal-district centroid, not a property location.
+
+    https://postcodes.io/docs/outcode/lookup/ documents this separate endpoint.
+    """
+    code = str(outcode).strip().upper()
+    if not re.fullmatch(r"[A-Z]{1,2}[0-9][A-Z0-9]?", code):
+        raise ValueError("give one outward code, not an address")
+    url = "%s/outcodes/%s" % (BASE, code)
+    res = fetch(url, cache_ttl=30 * 86400, verbose=verbose,
+                expect=lambda b: '"latitude"' in b or '"error"' in b)
+    out = dict(_envelope(res, url), query={"outcode": code}, lat=None, lng=None,
+               outcode=code, precision="postal_district", method="Outcode centroid; not a home or street location.")
+    obj, error = _json_body(res) if res.get("body") else (None, "empty body")
+    row = obj.get("result") if isinstance(obj, dict) else None
+    valid = isinstance(obj, dict) and obj.get("status") == 200 and isinstance(row, dict) and str(row.get("outcode", "")).upper() == code
+    if valid:
+        lat, lng = row.get("latitude"), row.get("longitude")
+        valid = (type(lat) in (int, float) and type(lng) in (int, float)
+                 and math.isfinite(lat) and math.isfinite(lng) and -90 <= lat <= 90 and -180 <= lng <= 180)
+    if not out["ok"] or not valid:
+        out.update(ok=False, note=error or (obj.get("error") if isinstance(obj, dict) else None) or "outcode centroid unavailable")
+        return out
+    out.update(lat=lat, lng=lng, admin_district=row.get("admin_district"), admin_ward=row.get("admin_ward"))
+    return out
+
+
 def lookup(postcode, verbose=False):
     pc = "".join(postcode.split()).upper()
     url = "%s/postcodes/%s" % (BASE, pc)

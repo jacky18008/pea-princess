@@ -163,7 +163,7 @@ class TestPartialPlanning(unittest.TestCase):
                 patch.object(planning, "near", return_value=dict(PLANNING, results=[row])), \
                 patch.object(roads, "near", return_value=ROADS), \
                 patch.object(noise, "lookup", return_value={"ok": False, "note": "offline fixture"}):
-            out = AS.scan(lat=WHERE["lat"], lng=WHERE["lng"], depth="lite")
+            out = AS.scan(lat=WHERE["lat"], lng=WHERE["lng"], depth="lite", location_source="offline fixture")
         self.assertTrue(out["ok"])
         self.assertEqual(583, out["crime"]["total"])
         self.assertEqual(1, len(out["works"]["notable_recent"]))

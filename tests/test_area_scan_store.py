@@ -229,7 +229,7 @@ class DepthAndCoverageTests(unittest.TestCase):
                "roads": ({"ok": True, "radius_m": 300, "trunk_or_primary_road": {"nearest": {"distance_m": 80}}}, None),
                "noise": ({"ok": False, "not_found": ["HTTP 403"]}, None)}
         with mock.patch.object(area_scan, "_parallel", return_value=got):
-            out = area_scan.scan(lat=51.5, lng=-.1, depth="lite")
+            out = area_scan.scan(lat=51.5, lng=-.1, depth="lite", location_source="offline fixture")
         self.assertTrue(out["ok"])
         self.assertEqual(80, out["quiet"]["main_road_nearest_m"])
         self.assertEqual(1, out["crime"]["total"])

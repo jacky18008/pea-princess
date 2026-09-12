@@ -6,7 +6,14 @@ Use the exact installed script path. A street comparison does not require the
 building-sweep reference or every flat-assessment axis. Identify the street and
 its representative postcode first; a brochure's agent-office address is not the flat.
 
-Run `python3 <skill>/scripts/area_scan.py --postcode "<postcode>" --street "<street>"`.
+Run `python3 <skill>/scripts/area_scan.py --postcode "<full postcode or outward code>" --street "<street name>"`.
+With only an outward code, the script resolves the district through public data and
+uses a representative midpoint on the mapped street. For a connected branched street,
+it uses the longest joined chain and reports branches excluded from the sample route. Report that location and its limits; distances
+are not from the unknown flat and can differ elsewhere on the street. Do not invent
+coordinates or copy example coordinates. Supplied coordinates require
+`--location-source` identifying the user input or retained geocoder evidence;
+that text is not verification by itself. A missing or ambiguous street stops the scan.
 The script uses the configured baseline depth, or standard when none is configured.
 For an explicitly expanded scope, pass `--depth deep --escalation-reason "<why>"`.
 Keep that reason factual; writing it does not grant authority to exceed a user's limit.

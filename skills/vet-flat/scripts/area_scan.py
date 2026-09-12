@@ -20,12 +20,15 @@ Depth (the summary is the same size at every depth; only the requests and the ti
               stage of the biggest recent planning application                        (~10 requests)
     deep      standard + rail and night-time noise layers, planning within 500 m      (~19 requests)
 
-Usage:
-    area_scan.py --postcode "N6 5QD"
-    area_scan.py --lat 51.5732 --lng -0.1462 --street "Milton Park"      # the street is known: say so
-    area_scan.py --postcode "N6 5QD" --depth lite
-    area_scan.py --postcode "N6 5QD" --depth deep --escalation-reason "requested closer rail/night review"
-    area_scan.py --postcode "N6 5QD" --result-dir /private/session/research-results
+Usage (replace placeholders with the person's location, never copy sample coordinates):
+    area_scan.py --postcode "<full postcode or outward code>" --street "<street name>"
+    area_scan.py --postcode "<full postcode>" --depth lite
+    area_scan.py --postcode "<outward code>" --street "<street name>" --depth deep --escalation-reason "requested rail/night review"
+    area_scan.py --lat <latitude> --lng <longitude> --location-source "<user input or saved geocoder evidence>"
+
+An outward code requires a named street. It is resolved through postcodes.io, then
+mapped street geometry supplies a representative midpoint; never use the district
+centroid as the flat. A missing or ambiguous named street stops geographic research.
 
 Set VETFLAT_SCAN_RESULT_DIR to a session-owned directory outside a host's temporary call folder.
 Otherwise private results live in .pea-state/area-scans under the current working directory.
@@ -68,6 +71,7 @@ TIERS = {"lite": dict(street=False, band=False, rail=False, night=False, plannin
 STEP_M = 120      # distance between the sampled points along the street
 OFF_STREET_M = 40  # beyond this, the given point is called a centroid, not a door
 NAMED_RADIUS_M = 1500  # a named street is looked for this far out: an outcode centroid can be a kilometre off
+OUTCODE_RE = re.compile(r"^[A-Z]{1,2}[0-9][A-Z0-9]?$")
 NOTABLE_SINCE = 2024
 NOTABLE_RULE = ("since %d and either big (5+ storeys, 10+ homes, tall-building hint) or a works signal (demolition, basement, "
                 "piling, crane, hoarding, construction/dust plan); householder works excluded; nearest first" % NOTABLE_SINCE)
@@ -174,6 +178,28 @@ def join_lines(lines, tol_m=1.5):
     return lines
 
 
+def connected_street_lines(lines, tol_m=1.5):
+    """Check shared vertices, including junctions inside ways; keep ordering deterministic.
+
+    A named side loop may meet the main way at interior vertices. It is part of
+    the same mapped network, but it need not be part of the sampled chain.
+    Nearby parallel/disconnected roads are not silently bridged.
+    """
+    lines = sorted(min(list(line), list(reversed(line))) for line in lines if len(line) >= 2)
+    if not lines:
+        return None
+    reached, pending = {0}, set(range(1, len(lines)))
+    while pending:
+        linked = {j for j in pending if any(
+            haversine_m(*a, *b) <= tol_m
+            for i in reached for a in lines[i] for b in lines[j])}
+        if not linked:
+            return None
+        reached.update(linked)
+        pending.difference_update(linked)
+    return join_lines(lines)
+
+
 def _nearest_on_segment(plat, plng, a, b):
     """(distance_m, lat, lng, fraction) of the closest point on segment a-b, in a local flat frame."""
     kx = math.cos(math.radians(plat)) * 111320.0
@@ -243,9 +269,10 @@ def choose_street(elements, lat, lng, name=None):
         return None
     by_name = {}
     for w in ways:
-        by_name.setdefault(w["tags"]["name"], []).append(w)
+        by_name.setdefault(w["tags"]["name"].strip().casefold(), []).append(w)
     best = None
-    for n, group in by_name.items():
+    for _, group in sorted(by_name.items()):
+        n = min(w["tags"]["name"].strip() for w in group)
         lines = join_lines([l for w in group for l in _lines(w)])
         for line in lines:
             d, anchor, seg = anchor_on_line(line, lat, lng)
@@ -254,13 +281,14 @@ def choose_street(elements, lat, lng, name=None):
     return best
 
 
-def find_street(lat, lng, name=None, radius=250, verbose=False, runner=None):
+def find_street(lat, lng, name=None, radius=250, verbose=False, runner=None, representative=False):
     """One Overpass request; the street block for the scan (ok False, never a guess, when nothing fits)."""
     import roads as roads_mod
     if name:
         radius = max(radius, NAMED_RADIUS_M)
-    data, meta = (runner or roads_mod.run_overpass)(street_query(lat, lng, radius, name=name), verbose=verbose)
-    out = {"ok": False, "name": name, "note": "", "source_url": (meta or {}).get("source_url"), "retrieved_at": (meta or {}).get("retrieved_at")}
+    query = street_query(lat, lng, radius, name=name)
+    data, meta = (runner or roads_mod.run_overpass)(query, verbose=verbose)
+    out = {"ok": False, "name": name, "note": "", "source_url": (meta or {}).get("source_url"), "retrieved_at": (meta or {}).get("retrieved_at"), "query": query}
     if not data:
         out["note"] = (meta or {}).get("note") or "overpass unavailable"
         return out
@@ -269,11 +297,31 @@ def find_street(lat, lng, name=None, radius=250, verbose=False, runner=None):
         out["note"] = "no named street within %d m%s" % (radius, (" called %r" % name) if name else "")
         return out
     n, highway, d, line, group = best
-    pts = sample_points(line, lat, lng)
+    if representative:
+        components = connected_street_lines([part for way in group for part in _lines(way)])
+        if not components:
+            out["note"] = "Named street has disconnected mapped sections; need a more precise location."
+            return out
+        # Deterministic longest end-joined chain; other connected branches are
+        # explicitly outside the noise-sample route, not folded into its values.
+        line = min(components, key=lambda part: (-polyline_length_m(part), part))
+        midpoint, _ = walk(line, 0, line[0], polyline_length_m(line) / 2)
+        if haversine_m(lat, lng, *midpoint) > radius:
+            out["note"] = "The mapped way extends beyond this location search; its representative midpoint is outside the search radius. Need a more precise location."
+            return out
+        pts = sample_points(line, *midpoint)
+        out["location_coverage"] = {
+            "lookup_radius_m": radius, "joined_chains": len(components),
+            "mapped_total_length_m": int(sum(polyline_length_m(part) for part in components)),
+            "sample_route_length_m": int(polyline_length_m(line)),
+            "note": "Representative points on the longest connected mapped chain returned by this query; not the whole street or a known home. Other branches are not noise-sampled. The outward code is a search seed, not proof of the street's postal district."}
+    else:
+        pts = sample_points(line, lat, lng)
     out.update({"ok": True, "name": n, "highway": highway, "offset_m": int(round(d)),
                 "anchor": {"lat": round(pts[0][0], 6), "lng": round(pts[0][1], 6)},
                 "points": [{"lat": round(a, 6), "lng": round(b, 6)} for a, b in pts],
-                "mapped_length_m": int(polyline_length_m(line)), "ways": len(group)})
+                "mapped_length_m": int(polyline_length_m(line)), "ways": len(group),
+                "anchor_method": ("mapped_street_midpoint" if len(components) == 1 else "longest_connected_chain_midpoint") if representative else "nearest_point_on_mapped_street"})
     return out
 
 
@@ -510,35 +558,75 @@ def result_path(postcode, lat, lng, street, depth):
     return os.path.join(tempfile.gettempdir(), "vet-flat-scan-%s-%s.json" % (slug or "point", depth))
 
 
+def validate_location(postcode, lat, lng, street, location_source):
+    """Shared CLI/import boundary; invalid inputs must not reach network calls."""
+    if (lat is None) != (lng is None):
+        raise ValueError("supply both coordinates, or use --postcode with --street")
+    if lat is not None:
+        if (type(lat) not in (int, float) or type(lng) not in (int, float)
+                or not math.isfinite(lat) or not math.isfinite(lng)
+                or not -90 <= lat <= 90 or not -180 <= lng <= 180):
+            raise ValueError("coordinates must be finite latitude/longitude")
+        if not isinstance(location_source, str) or not location_source.strip():
+            raise ValueError("coordinates need --location-source; never use guessed or example coordinates. Prefer --postcode plus --street.")
+    if not postcode and lat is None:
+        raise ValueError("give --postcode or --lat and --lng")
+    if postcode and OUTCODE_RE.fullmatch(str(postcode).strip().upper()) and not (street or "").split(",", 1)[0].strip():
+        raise ValueError("an outward code needs --street; do not scan a district centroid as a home")
+
+
 def scan(postcode=None, lat=None, lng=None, months=6, crime_half_m=150, planning_radius=250, roads_radius=300,
-         depth="standard", street=None, verbose=False, announce=None):
+         depth="standard", street=None, verbose=False, announce=None, location_source=None):
     import geo, crime as crime_mod, planning as planning_mod, roads as roads_mod, living_env, noise as noise_mod  # noqa: E402
+    validate_location(postcode, lat, lng, street, location_source)
     tier = TIERS.get(depth) or TIERS["standard"]
     notes = []
     if announce:
         announce("area_scan: %s, depth %s. Independent registers are queried in parallel; wait for this run, do not start a duplicate.\n" % (
             street or postcode or "%s,%s" % (lat, lng), depth))
+    coarse = bool(postcode and OUTCODE_RE.fullmatch(str(postcode).strip().upper()))
+    requested_street = street
+    # Brochure headings commonly append district and postcode after commas.
+    if street and "," in street:
+        street = street.split(",", 1)[0].strip()
+    if coarse and not street:
+        raise ValueError("an outward code needs --street; a district centroid is not a property")
     where = {"postcode": postcode, "lat": lat, "lng": lng, "district": None, "how_located": "lat/lng given" if lat is not None else None}
     if lat is None or lng is None:
         if not postcode:
             raise ValueError("give --postcode or --lat and --lng")
-        g, err = _safe(geo.lookup, postcode, verbose)
+        g, err = _safe(geo.lookup_outcode if coarse else geo.lookup, postcode, verbose)
         if err or not g or not g.get("ok"):
             return {"schema": SCHEMA, "ok": False, "retrieved_at": now_iso(), "where": where,
                     "note": "postcode not located: %s" % (err or (g or {}).get("note")), "reading": [], "sources": [], "not_found": ["postcode lookup"]}
         lat, lng = g["lat"], g["lng"]
         where.update({"lat": lat, "lng": lng, "district": g.get("admin_district"), "ward": g.get("admin_ward"),
-                      "how_located": "postcode centroid via postcodes.io (tens of metres off a door)"})
+                      "how_located": "outcode centroid resolved through postcodes.io; locating named street" if coarse else "postcode centroid via postcodes.io (tens of metres off a door)",
+                      "location_source": {"source_url": g.get("source_url"), "retrieved_at": g.get("retrieved_at"), "precision": "postal_district" if coarse else "postcode"}})
+    elif location_source:
+        where["location_source"] = {"caller_reference": location_source, "verified": False}
     st = None
     at_lat, at_lng, pts = lat, lng, [(lat, lng)]
     if tier["street"] or street:
-        st, e0 = _safe(find_street, lat, lng, street, verbose=verbose)
+        street_options = {"verbose": verbose}
+        if coarse:
+            street_options["representative"] = True
+        st, e0 = _safe(find_street, lat, lng, street, **street_options)
         if e0:
             st = {"ok": False, "name": street, "note": e0}
         if st and st.get("ok"):
             at_lat, at_lng = st["anchor"]["lat"], st["anchor"]["lng"]
             pts = [(p["lat"], p["lng"]) for p in st["points"]]
-            where["scan_point"] = {"lat": at_lat, "lng": at_lng, "why": "moved onto %s" % st["name"]}
+            where["scan_point"] = {"lat": at_lat, "lng": at_lng, "why": "mapped street midpoint" if coarse else "moved onto %s" % st["name"]}
+            where["street_location"] = {"requested_label": requested_street, "matched_name": st["name"],
+                "source_url": st.get("source_url"), "retrieved_at": st.get("retrieved_at"), "query": st.get("query"),
+                "method": st.get("anchor_method"), "coverage": st.get("location_coverage"), "property_location_known": False}
+        elif street:
+            return {"schema": SCHEMA, "ok": False, "retrieved_at": now_iso(), "where": where,
+                    "street": st, "note": "Named street not established; no geographic registers queried. " + str((st or {}).get("note", "")),
+                    "reading": [], "sources": [], "not_found": ["named street location"]}
+    if coarse:
+        notes.append("Outward code and mapped street midpoint only; exact home unknown. Distances use that midpoint and can vary along the street.")
     pr = tier["planning_radius"] or planning_radius
     # sensitivity=False: the centre box only (6 monthly requests, not 30 with the four 20 m shifts): a street
     # scan wants the count and its denominator, not the shift analysis, and the police API is ~6 s a request
@@ -546,14 +634,14 @@ def scan(postcode=None, lat=None, lng=None, months=6, crime_half_m=150, planning
             "planning": (planning_mod.near, (at_lat, at_lng, pr), {"verbose": verbose}),
             "roads": (roads_mod.near, (at_lat, at_lng, roads_radius), {"verbose": verbose}),
             "noise": (noise_mod.lookup, (pts,), {"rail": tier["rail"], "night": tier["night"], "with_band": tier["band"], "verbose": verbose})}
-    if postcode:
+    if postcode and not coarse:
         jobs["living"] = (living_env.lookup, (), {"postcode": postcode, "verbose": verbose})
     got = _parallel(jobs)
     c, e1 = got["crime"]
     p, e2 = got["planning"]
     r, e3 = got["roads"]
     n, e5 = got["noise"]
-    l, e4 = got["living"] if postcode else (None, "living environment needs a postcode")
+    l, e4 = got["living"] if postcode and not coarse else (None, "living environment needs a full property postcode")
     if c and c.get("ok") and not c.get("total"):
         wide, e1b = _safe(crime_mod.box, at_lat, at_lng, crime_half_m * 2, months, verbose=verbose, sensitivity=False)
         if wide and wide.get("ok"):
@@ -583,6 +671,8 @@ def scan(postcode=None, lat=None, lng=None, months=6, crime_half_m=150, planning
                 out["ok"] = out["ok"] or part["ok"]
             except Exception as part_exc:
                 out["not_found"].append("%s summary unavailable: %s" % (label, type(part_exc).__name__))
+    if coarse:
+        out["reading"].insert(0, "Using the mapped street midpoint, not a known home location. Distances and sampled values can differ elsewhere along this street.")
     if tier["stages"]:
         try:
             add_stage(out, p, verbose=verbose)
@@ -594,9 +684,10 @@ def scan(postcode=None, lat=None, lng=None, months=6, crime_half_m=150, planning
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter,
                                  epilog="Run it once per street and write from the JSON; the output is complete. --depth is the person's budget mode; standard when unknown. Reading this file's source or the cache adds nothing.")
-    ap.add_argument("--postcode")
+    ap.add_argument("--postcode", help="full postcode, or outward code with --street; resolved from public data")
     ap.add_argument("--lat", type=float)
     ap.add_argument("--lng", type=float)
+    ap.add_argument("--location-source", help="required for supplied coordinates: user input or retained geocoder evidence; a citation alone is not verification")
     ap.add_argument("--months", type=int, default=6)
     ap.add_argument("--crime-half-m", type=float, default=150)
     ap.add_argument("--planning-radius", type=int, default=250)
@@ -624,20 +715,21 @@ def main():
         ap.error("coordinates must be finite latitude/longitude")
     if not 1 <= a.months <= 24 or not all(1 <= v <= 5000 for v in (a.crime_half_m, a.planning_radius, a.roads_radius)):
         ap.error("months must be 1–24 and radii 1–5000 metres")
-    if any(len(v or "") > 500 for v in (a.postcode, a.street, reason)):
+    if any(len(v or "") > 500 for v in (a.postcode, a.street, reason, a.location_source)):
         ap.error("location and reason text must be at most 500 characters")
-    if not a.postcode and (a.lat is None or a.lng is None):
-        ap.print_help()
-        return 2
+    try:
+        validate_location(a.postcode, a.lat, a.lng, a.street, a.location_source)
+    except ValueError as exc:
+        ap.error(str(exc))
     def announce(msg):
         sys.stderr.write(msg)
         sys.stderr.flush()
-    request = {k: getattr(a, k) for k in ("postcode", "lat", "lng", "months", "crime_half_m", "planning_radius", "roads_radius", "depth", "street")}
+    request = {k: getattr(a, k) for k in ("postcode", "lat", "lng", "months", "crime_half_m", "planning_radius", "roads_radius", "depth", "street", "location_source")}
     request.update(requested_depth=baseline, escalation_reason=reason or None,
                    effective_planning_radius=TIERS[a.depth]["planning_radius"] or a.planning_radius)
     def perform():
         return scan(a.postcode, a.lat, a.lng, a.months, a.crime_half_m, a.planning_radius, a.roads_radius,
-                    a.depth, a.street, a.verbose, announce=announce)
+                    a.depth, a.street, a.verbose, announce=announce, location_source=a.location_source)
     if a.no_save:
         out = perform()
         out["execution"] = {"requested_depth": baseline, "effective_depth": a.depth, "escalation_reason": reason or None,
