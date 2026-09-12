@@ -850,10 +850,12 @@ rollout files (`--account`); (3) later arms isolate each run's fetch cache and t
 |---|---|---|---|
 | after (cc6f1c2): the new scan, nothing else | 1.05 / 2.30 / 0.63M → 4.93 / 3.98 / 9.15M | 2 / 2 / 3 | after 2/3 |
 | after-b (de7332c): + the scan's first key says "complete, do not read the source or cache" | 0.54 / 2.48 / 0.90M → 10.66 / 2.18 / 0.31M | 5 / 3 / 2 | after 2/3 |
-| after-c (c2124f7): + SKILL.md and rules.md say "in this thread, never a sub-agent" | 3.80 / 1.59 / 3.85M → 0.71 / 0.68 / 0.48M | 1 / 1 / 0 | pending |
-| after-d (a5806ea): + registers in parallel, centre-only crime box, stderr line + saved copy | see `street-ab-2026-09-11-d/` | — | pending |
+| after-c (c2124f7): + SKILL.md and rules.md say "in this thread, never a sub-agent" | 3.80 / 1.59 / 3.85M → 0.71 / 0.68 / 0.48M | 1 / 1 / 0 | after 2/3 |
+| after-d (a5806ea): + registers in parallel, centre-only crime box, stderr line + saved copy | 0.46 / 1.15 / 2.35M → 0.52 / 0.17 / 0.23M | 0 / 0 / 0 | after 3/3 |
 | nomulti: both arms with `codex exec --disable multi_agent` | 0.39 / 10.17 / 4.20M → 1.45 / 7.57 / 0.17M | 2 / 3 / 0 | — |
 | noagents: both arms with `codex exec -c agents.enabled=false` | 0.29 / 0.50 / 0.13M → 0.15 / 0.84 / 0.52M | 0 / 0 / 0 | after 3/3 |
+
+Adopted (merge of `exp/area-scan-tiers`, 2026-09-12): the final skill (after-d) wins the blind read 3/3 on both hosts with zero sub-agent threads on Codex and tokens at or below the baseline in three pairs of three.
 
 Reading: the scan is not the cost; the sub-agents are. With the collaboration tools removed
 (`agents.enabled=false`) the same two skills cost 0.13–0.84M per answer and the new scan wins the blind
@@ -869,3 +871,26 @@ for the same skill and prompt). `agents.max_concurrent_threads_per_session=0` ma
 put in explicit-request-only mode. The "numbers without a source" column runs higher for the new scan on
 Codex (11–14 vs 5–8): the answers carry the measured figures with the source named once, which the
 adopted checkpoint (every number has a home) targets.
+
+### Round 2 (2026-09-12): variant-c against a fresh baseline, with the date injected
+
+Round 1's replay let the model take the run date as "today" (both checkpoint reviews caught it) and
+refused some script calls (the allow-list matched one spelling). Round 2 fixes both for every arm
+(`--inject-date`, `--claude-allow`), so main-3 is the new baseline (the skill with variant-b adopted) and
+variant-c stacks three rules on it: today is the date of the latest message; a change lists what it
+changes (named listings, before → after); short in, short out (a message under ten characters or "I'm
+tired" gets under 200 characters); plus rule 3 extended (every item the person named gets a direct
+answer; a risk comes with its distance or degree). Sonnet 5, standard, the ask turn, 15 cases, judge v2.
+
+| Arm | G1 / G2 / G3 pass | First sentence | T mean | Task | Satisfy | Beats original | Numbers w/o cue | Questions | Median chars |
+|---|---|---|---|---|---|---|---|---|---|
+| main-3 (variant-b skill, date injected) | 3 / 14 / 10 | 8 | 1.43 | 1.00 | 0.80 | 1/15 | 5.3 | 1.2 | 919 |
+| variant-c | 3 / 14 / 11 | 10 | 1.46 | 1.00 | 0.87 | 1/15 | 3.8 | 0.2 | 659 |
+
+Reading: variant-c is level or better on every v2 column (first sentence 10 vs 8, satisfaction 0.87 vs
+0.80, numbers without a cue 3.8 vs 5.3, questions 0.2 vs 1.2 — the biggest single move of the night) and
+its replies are a third shorter. The older v1 judge scores its task completion lower (1.33 vs 1.53), which
+is the price of "short in, short out" read by a judge that rewards coverage; the v2 task score is equal
+(1.00). Adopted with that caveat written down; the next variant is measured against variant-c's skill.
+Main-3's own numbers-without-cue (5.3, the highest of any arm) is the injected date: the model now
+writes dates and durations it used to leave out, and the count does not exempt them all.
