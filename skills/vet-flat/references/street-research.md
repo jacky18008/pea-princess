@@ -21,6 +21,7 @@ Write from the returned result, including its coverage: successful sample points
 out of those attempted, missing layers, planning rows read and the area actually
 covered. Lden is a day/evening/night weighted measure; Lnight is the night measure.
 These are outdoor area estimates, not measurements inside a particular bedroom.
+Window direction affects exposure; facing away does not establish absence of noise.
 Planning approval does not establish that work has started. Distances are relative
 to the reported scan point until the exact home location is established.
 
