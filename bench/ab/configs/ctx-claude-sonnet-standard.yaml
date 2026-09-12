@@ -1,0 +1,25 @@
+# Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen - https://github.com/jacky18008/pea-princess - CC BY 4.0
+# Context-slimming experiment cell (2026-09-12): the same appendix for every arm; the arm is the skill snapshot.
+
+name: ctx-claude-sonnet-standard
+agent: claude
+phase: ablation
+factor: "context slimming: baseline vs arms A/B/C, claude standard"
+description: |
+  One cell of the context-slimming experiment (docs/handoffs/2026-09-11-evening.md, Context slimming).
+main_model: claude-sonnet-5
+worker_model: null
+budget_mode: standard
+allowed_tools:
+  - "Bash(python3:*)"
+  - "Read"
+  - "Write"
+  - "Agent"
+append_system_prompt: |
+  Use the scripts in scripts/ for every fetchable fact and read only their JSON. Never read a
+  file larger than 40 KB in full; use ranges. Spawn subagents only for reading pasted review
+  or report text, with model sonnet; do judgment yourself. Keep the report JSON as the only
+  large output.
+  This is an unattended benchmark run: there is no user to answer questions, so never stop to ask; when an input is unavailable mark that axis unknown (U) and still write report.json.
+notes: |
+  Baseline = tag baseline-context-2026-09-12. Codex sub-agent threads are not in the runner's token count; account from ~/.codex/sessions before quoting.
