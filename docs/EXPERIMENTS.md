@@ -844,7 +844,28 @@ Harness notes for anyone repeating this: (1) the first Claude run of this A/B an
 `--claude-allow`; (2) Codex sub-agent threads are invisible in `codex exec --json` and are read from the
 rollout files (`--account`); (3) later arms isolate each run's fetch cache and temp dir.
 
-Follow-up arms on Codex (same prompt, 3 pairs each; results appended when done): `after-b` = the scan's
-first output key says "complete, do not read the source or cache" (de7332c); `after-c` = SKILL.md and
-rules.md say "in this thread, never a sub-agent" (c2124f7); `nomulti` = both arms with
-`codex exec --disable multi_agent`, to price the sub-agent pattern itself.
+### The Codex cost, taken apart (same prompt, 3 pairs per arm, all threads counted)
+
+| Arm (what changed) | Input tokens per answer, before → after (pairs 0 / 1 / 2) | Sub-agent threads, after | Blind winner |
+|---|---|---|---|
+| after (cc6f1c2): the new scan, nothing else | 1.05 / 2.30 / 0.63M → 4.93 / 3.98 / 9.15M | 2 / 2 / 3 | after 2/3 |
+| after-b (de7332c): + the scan's first key says "complete, do not read the source or cache" | 0.54 / 2.48 / 0.90M → 10.66 / 2.18 / 0.31M | 5 / 3 / 2 | after 2/3 |
+| after-c (c2124f7): + SKILL.md and rules.md say "in this thread, never a sub-agent" | 3.80 / 1.59 / 3.85M → 0.71 / 0.68 / 0.48M | 1 / 1 / 0 | pending |
+| after-d (a5806ea): + registers in parallel, centre-only crime box, stderr line + saved copy | see `street-ab-2026-09-11-d/` | — | pending |
+| nomulti: both arms with `codex exec --disable multi_agent` | 0.39 / 10.17 / 4.20M → 1.45 / 7.57 / 0.17M | 2 / 3 / 0 | — |
+| noagents: both arms with `codex exec -c agents.enabled=false` | 0.29 / 0.50 / 0.13M → 0.15 / 0.84 / 0.52M | 0 / 0 / 0 | after 3/3 |
+
+Reading: the scan is not the cost; the sub-agents are. With the collaboration tools removed
+(`agents.enabled=false`) the same two skills cost 0.13–0.84M per answer and the new scan wins the blind
+read 3/3 (centroid noticed 3/3, noise dB with a source 2/3, works signal 2/3). With sub-agents on, the
+same "after" skill cost 4–9M because Codex delegated the scan to spawned threads that hold no skill
+text, chose the deepest tier and explored the source and cache. Two levers work, measured: the skill's
+own sentence "in this thread, never a sub-agent" (after-c: 0.48–0.71M with sub-agents still enabled)
+and the user-side switch. `--disable multi_agent` and the `features.multi_agent*` keys do not stop
+spawning in Codex 0.153 (nomulti is a baseline repeat and shows the run-to-run spread: 0.4M to 10.2M
+for the same skill and prompt). `agents.max_concurrent_threads_per_session=0` makes exec exit 1;
+`agents.max_depth` is V1-only. The proactive-delegation mode is a per-turn client setting
+(`MultiAgentMode`: proactive / explicitRequestOnly / custom), not a config key, so `codex exec` cannot be
+put in explicit-request-only mode. The "numbers without a source" column runs higher for the new scan on
+Codex (11–14 vs 5–8): the answers carry the measured figures with the source named once, which the
+adopted checkpoint (every number has a home) targets.
