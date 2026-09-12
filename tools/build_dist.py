@@ -117,18 +117,19 @@ def public_members(root=None):
     return rows
 
 
-def check_script_dependencies(members):
+def check_script_dependencies(members, root=None):
     """Reject omitted local imports without executing code or expanding the index.
 
     Inspect imports at every nesting level. Only modules/packages present beside
     the source scripts are checked; absent names may be standard-library modules.
     Dynamic imports and arbitrary sys.path changes are outside this preflight.
     """
+    root = Path(ROOT if root is None else root)
     allowed = {rel for _, rel in members}
-    scripts = Path(SKILL) / "scripts"
+    scripts = root / "skills" / "vet-flat" / "scripts"
 
     def require(path, importer, directory=False):
-        rel = path.relative_to(ROOT).as_posix()
+        rel = path.relative_to(root).as_posix()
         if path.is_symlink():
             raise ValueError("symlink script dependency: %s -> %s" % (importer, rel))
         included = any(name.startswith(rel + "/") for name in allowed) if directory else rel in allowed

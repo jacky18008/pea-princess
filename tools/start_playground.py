@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Freeze the local test package, then run its server in the foreground.
+"""Start the durable developer service, or freeze an explicitly pinned test package.
 
 No network, model call, credentials or account access. Reads Git-tracked working
 files, plus the explicitly named generated prompt pack used by the existing lab.
@@ -23,7 +23,7 @@ import build_dist
 ROOT = Path(__file__).resolve().parents[1]
 GENERATED = 'dist/prompt-pack/INSTRUCTIONS.md'
 REQUIRED = (
-    'tools/persona_playground.py', 'tools/session_runner.py', 'tools/playground_settings.py', 'tools/build_dist.py',
+    'tools/persona_playground.py', 'tools/playground_dev_sync.py', 'tools/playground_research.py', 'tools/session_runner.py', 'tools/playground_settings.py', 'tools/build_dist.py',
     'tools/conversation_reply.py', 'tools/public_source_snapshot.py', 'tools/playground_review.py', 'tools/playground_attachments.py', 'tools/playground_replay.py', 'tools/playground_skill.py',
     'bench/personas.py', 'bench/journeys.py', 'bench/durable_run.py',
     'bench/call_control.py', 'bench/launch.py',
@@ -146,7 +146,7 @@ def verify_default_archive(root, bundle):
                           '--skill-archive PATH for a historical comparison. No server was started.')
 
 
-def freeze(root=ROOT, state_dir=None, skill_archive=None):
+def freeze(root=ROOT, state_dir=None, skill_archive=None, *, generated_source=None, dev_sync=None):
     """Copy current bytes once, verify their stability, then publish a snapshot."""
     root = Path(root).resolve()
     state_dir = private_directory(state_dir if state_dir is not None else root / '.pea-playground')
@@ -159,13 +159,13 @@ def freeze(root=ROOT, state_dir=None, skill_archive=None):
     staging.mkdir(mode=0o700)
     try:
         public_bundle = playground_skill.load_archive(skill_archive if skill_archive is not None else root / 'dist/pea-princess-skill.zip')
-        if skill_archive is None:
+        if skill_archive is None or dev_sync is not None:
             verify_default_archive(root, public_bundle)
         indexed = tracked(root)
         names = [name for name in indexed if regular(root, name)]
         # Existing generated prompt instructions are a required runtime input,
         # not an invitation to copy the ignored dist directory or private packs.
-        if GENERATED not in names and regular(root, GENERATED):
+        if GENERATED not in names and (generated_source is not None or regular(root, GENERATED)):
             names.append(GENERATED)
         names.sort()
         missing = sorted(set(REQUIRED) - set(names))
@@ -173,8 +173,13 @@ def freeze(root=ROOT, state_dir=None, skill_archive=None):
             raise FreezeError('Required runtime files unavailable: ' + ', '.join(missing))
         records = {}
         observations = {}
+        def source(name):
+            if name == GENERATED and generated_source is not None:
+                path = Path(generated_source)
+                return read_source(path.parent, path.name)
+            return read_source(root, name)
         for name in names:
-            body, observations[name] = read_source(root, name)
+            body, observations[name] = source(name)
             target = staging / name
             target.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
             target.write_bytes(body)
@@ -184,12 +189,12 @@ def freeze(root=ROOT, state_dir=None, skill_archive=None):
         if indexed != tracked(root):
             raise FreezeError('Tracked runtime file list changed during freeze; restart when edits settle.')
         for name in names:
-            body, observed = read_source(root, name)
+            body, observed = source(name)
             if observed != observations[name] or hashlib.sha256(body).hexdigest() != records[name]['sha256']:
                 raise FreezeError('Runtime file changed during freeze; restart when edits settle: ' + name)
         public_skill = playground_skill.install_archive(public_bundle, staging)
         playground_skill.verify_source(public_bundle)
-        if skill_archive is None:
+        if skill_archive is None or dev_sync is not None:
             verify_default_archive(root, public_bundle)
         for name, item in public_skill['files'].items():
             records[public_skill['skill_path'] + '/' + name] = dict(item, origin='public-skill-archive')
@@ -202,9 +207,11 @@ def freeze(root=ROOT, state_dir=None, skill_archive=None):
                     'created_at': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
                     'git_head': head.stdout.decode('ascii').strip() if head.returncode == 0 else None,
                     'files': records, 'public_skill':public_skill,
-                    'public_skill_selection': {'mode': 'default_current_source' if skill_archive is None else 'explicit_archive',
-                                               'working_source_verified': True if skill_archive is None else None},
+                    'public_skill_selection': {'mode': 'default_current_source' if skill_archive is None or dev_sync is not None else 'explicit_archive',
+                                               'working_source_verified': True if skill_archive is None or dev_sync is not None else None},
                     'note': 'Host hashes describe current working bytes, including uncommitted tracked edits. The actor skill is the exact separately retained public ZIP identified by public_skill; Git HEAD alone does not identify this snapshot.'}
+        if dev_sync is not None:
+            manifest['dev_sync'] = dev_sync
         raw = json.dumps(manifest, ensure_ascii=False, sort_keys=True, indent=2).encode('utf-8') + b'\n'
         (staging / 'runtime-manifest.json').write_bytes(raw)
         (staging / 'runtime-manifest.json').chmod(0o400)
@@ -230,21 +237,32 @@ def server_command(snapshot, state_dir, port, python=sys.executable):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--source-root', type=Path, default=ROOT, help='Shared developer checkout to watch.')
+    parser.add_argument('--service', choices=('start', 'status', 'stop', 'logs'), help='Manage the durable developer supervisor; default: start.')
     parser.add_argument('--port', type=int, default=8765)
-    parser.add_argument('--state-dir', type=Path, default=ROOT / '.pea-playground')
-    parser.add_argument('--skill-archive', type=Path, help='Explicit historical/public ZIP selection: preserve its exact bytes without requiring current-source equality. Without this option, dist/pea-princess-skill.zip must match current indexed source; nothing is rebuilt automatically.')
+    parser.add_argument('--state-dir', type=Path, default=None)
+    parser.add_argument('--skill-archive', type=Path, help='Explicit historical/public ZIP selection: preserve its exact bytes without requiring current-source equality. Without this option, dist/pea-princess-skill.zip must match current indexed source; explicit archives stay pinned and are never watched.')
     parser.add_argument('--freeze-only', action='store_true', help='Print the snapshot receipt without starting a server.')
     args = parser.parse_args(argv)
     if not 1024 <= args.port <= 65535:
         parser.error('port must be 1024..65535')
     os.umask(0o077)
+    root = args.source_root.resolve()
+    args.state_dir = args.state_dir or root / '.pea-playground'
+    if args.service and (args.skill_archive is not None or args.freeze_only):
+        parser.error('--service cannot be combined with --skill-archive or --freeze-only')
     try:
-        result = freeze(ROOT, args.state_dir, args.skill_archive)
+        if not args.freeze_only and args.skill_archive is None:
+            import playground_dev_sync
+            print(json.dumps(playground_dev_sync.service_command(
+                args.service or 'start', root, args.state_dir, args.port), ensure_ascii=False), flush=True)
+            return 0
+        result = freeze(root, args.state_dir, args.skill_archive)
         result['url'] = 'http://127.0.0.1:' + str(args.port)
         print(json.dumps(result, ensure_ascii=False), flush=True)
         if not args.freeze_only:
             os.execv(sys.executable, server_command(result['snapshot'], result['state_dir'], args.port))
-    except (FreezeError, OSError) as error:
+    except (ValueError, OSError) as error:
         print(str(error), file=sys.stderr)
         return 1
     return 0
