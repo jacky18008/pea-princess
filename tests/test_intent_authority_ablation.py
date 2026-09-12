@@ -31,6 +31,8 @@ class IntentAuthorityAblationTests(unittest.TestCase):
         (self.skill / "references").mkdir(parents=True)
         (self.skill / "scripts").mkdir()
         (self.skill / "SKILL.md").write_text("Read references/conversation-quality.md.\n")
+        (self.skill / "references/rules.md").write_text("Exact shared rules.\n")
+        (self.skill / "references/inputs.md").write_text("Exact shared input boundaries.\n")
         (self.skill / "references/conversation-quality.md").write_text("Baseline guidance.\n")
         self.git("init", "--quiet")
         self.git("add", ".")
@@ -250,6 +252,66 @@ class IntentAuthorityAblationTests(unittest.TestCase):
         self.assertFalse(checkpoint.exists())
         record = {"launch_result": {"stdout": 'null\n[]\n"scalar"\ninvalid'}, "answer": "final"}
         self.assertEqual([{"id": "a1.1", "role": "assistant", "text": "final"}], A._actor_messages(record, 1))
+
+    def test_focus_inlines_exact_arm_files_without_gold_and_preserves_full_matrix(self):
+        A.prepare(self.out, self.baseline, self.case_paths, self.rubric,
+                  focused=True, max_total_tokens=1000)
+        config = A._read_json(self.out / "frozen/config.json")
+        self.assertFalse(config["allow_tools"])
+        self.assertEqual("standard", config["research_depth"])
+        self.assertEqual(1000, config["max_total_tokens"])
+        def actor(command, cwd, *args, **kwargs):
+            work = Path(cwd)
+            text = command[-1]
+            for name in A.FOCUS_REFERENCES:
+                self.assertIn((work / A.SKILL_PATH / name).read_text(), text)
+            self.assertNotIn("DO_NOT_EXPOSE_GOLD", text)
+            self.assertNotIn("DO_NOT_EXPOSE_RUBRIC", text)
+            self.assertIn("Do not invoke any tool", text)
+            return self.result(work)
+        with mock.patch.object(launch, "run", side_effect=actor) as launched, redirect_stderr(io.StringIO()):
+            pilot = A.run(self.out, max_new_calls=1)
+            self.assertEqual(1, pilot["completed_calls"])
+            self.assertEqual(1, launched.call_count)
+            result = A.run(self.out, max_new_calls=35)
+            A.run(self.out)
+        self.assertEqual(36, launched.call_count)
+        self.assertTrue(result["plan_complete"])
+        self.assertEqual(468, result["usage"]["total_tokens"])
+        A.inspect(self.out, export=True)
+
+    def test_focus_stops_observed_tool_use_and_keeps_usage_and_unrun_slots(self):
+        A.prepare(self.out, self.baseline, self.case_paths, self.rubric,
+                  focused=True, max_total_tokens=1000)
+        def actor(command, cwd, *args, **kwargs):
+            result = self.result(Path(cwd))
+            event = {"type": "item.completed", "item": {"id": "item_tool", "type": "command_execution",
+                     "command": "synthetic forbidden command", "exit_code": 0}}
+            return result._replace(stdout=json.dumps(event) + "\n" + result.stdout)
+        with mock.patch.object(launch, "run", side_effect=actor) as launched:
+            with self.assertRaises(CallControlError):
+                A.run(self.out)
+            with self.assertRaises(CallControlError):
+                A.run(self.out)
+        self.assertEqual(1, launched.call_count)
+        report = A.inspect(self.out, export=True)
+        self.assertEqual(13, report["usage"]["total_tokens"])
+        self.assertEqual(1, report["failed_calls"])
+        self.assertIsNotNone(A._read_json(self.out / "turns/conversation-01-t1.json")["physical_failure"])
+
+    def test_focus_remaining_budget_is_not_reset_to_original_limit(self):
+        A.prepare(self.out, self.baseline, self.case_paths, self.rubric,
+                  focused=True, max_total_tokens=12)
+        with mock.patch.object(launch, "run", side_effect=lambda command, cwd, *a, **kw:
+                               self.result(Path(cwd))) as launched, redirect_stderr(io.StringIO()):
+            with self.assertRaises(CallControlPaused):
+                A.run(self.out)
+        self.assertEqual(1, launched.call_count)
+        self.assertTrue(A.inspect(self.out)["paused"])
+        for limit in (0, -1, True, 2000001):
+            with self.assertRaises(ValueError):
+                A.prepare(self.root / "invalid", self.baseline, self.case_paths,
+                          focused=True, max_total_tokens=limit)
 
 
 if __name__ == "__main__":
