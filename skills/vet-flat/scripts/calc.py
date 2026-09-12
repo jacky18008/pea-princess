@@ -8,6 +8,8 @@ deposit cap 5 weeks' rent when annual rent < £50,000 (6 weeks at or above), hol
 signing and before commencement; it does not classify the agreement. Weekly rent = monthly rent × 12 ÷ 52.
 
 Usage:
+  calc.py arithmetic "2300 - 2250" "61.5 - 57.2"
+  calc.py "2300 - 2250" "484 - 342"
   calc.py deposit --rent-pcm 2400
   calc.py affordability --rent-pcm 2400 --multiple 2.5 [--income 65000] [--guarantor-multiple 4]
   calc.py all-in --rent-pcm 2400 --bills-low 125 --bills-planning 175 --bills-stress 250 [--council-tax 0] [--broadband 30]
@@ -20,8 +22,11 @@ Usage:
   calc.py pct-diff --a 2400 --b 2200
 """
 import argparse
+import ast
+from decimal import Decimal, DecimalException, Inexact, ROUND_HALF_EVEN, localcontext
 import datetime as dt
 import json
+import re
 import sys
 
 WEEKS_PER_YEAR = 52.0
@@ -165,9 +170,83 @@ def pct_diff(a):
     out("pct-diff", vars(a), "(a − b) ÷ b × 100", [f"({a.a} − {a.b}) ÷ {a.b} × 100 = {r2(p)}%"], {"pct": r2(p)})
 
 
-def main():
+ARITHMETIC_CHARS = re.compile(r"[0-9.\s()+*/-]+\Z")
+
+
+def arithmetic_value(expression):
+    """Interpret a bounded numeric AST; never evaluate Python names or code."""
+    if not isinstance(expression, str) or not 1 <= len(expression) <= 256 or not ARITHMETIC_CHARS.fullmatch(expression):
+        raise ValueError('Use at most 256 characters containing only decimal numbers, + - * / and parentheses.')
+    text = expression.strip()
+    try:
+        tree = ast.parse(text, mode='eval')
+    except (SyntaxError, RecursionError) as error:
+        raise ValueError('Invalid arithmetic expression.') from error
+    if sum(1 for _ in ast.walk(tree)) > 128:
+        raise ValueError('Arithmetic expression is too complex.')
+    with localcontext() as context:
+        context.prec, context.Emin, context.Emax = 50, -100, 100
+        context.rounding = ROUND_HALF_EVEN
+        context.clear_flags()
+        def visit(node, depth=0):
+            if depth > 24:
+                raise ValueError('Arithmetic nesting is limited to 24 levels.')
+            if isinstance(node, ast.Expression):
+                return visit(node.body, depth + 1)
+            if isinstance(node, ast.Constant) and type(node.value) in (int, float):
+                literal = ast.get_source_segment(text, node)
+                if len(literal) > 32 or not re.fullmatch(r'(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)', literal):
+                    raise ValueError('Use ordinary decimal literals of at most 32 characters; no exponents.')
+                value = Decimal(literal)
+            elif isinstance(node, ast.UnaryOp) and isinstance(node.op, (ast.UAdd, ast.USub)):
+                value = visit(node.operand, depth + 1)
+                if isinstance(node.op, ast.USub):
+                    value = -value
+            elif isinstance(node, ast.BinOp) and isinstance(node.op, (ast.Add, ast.Sub, ast.Mult, ast.Div)):
+                left, right = visit(node.left, depth + 1), visit(node.right, depth + 1)
+                if isinstance(node.op, ast.Add): value = left + right
+                elif isinstance(node.op, ast.Sub): value = left - right
+                elif isinstance(node.op, ast.Mult): value = left * right
+                else: value = left / right
+            else:
+                raise ValueError('Only numeric + - * / and parentheses are supported; no names, calls or powers.')
+            if not value.is_finite() or abs(value) > Decimal('1e24') or (value and abs(value) < Decimal('1e-24')):
+                raise ValueError('Each nonzero value must have magnitude between 1e-24 and 1e24.')
+            return value
+        try:
+            value = visit(tree)
+        except DecimalException as error:
+            raise ValueError('Undefined arithmetic (for example division by zero) or numeric limit exceeded.') from error
+        result = format(value, 'f') if value else '0'
+        if '.' in result:
+            result = result.rstrip('0').rstrip('.')
+        return {'expression': expression, 'result': result, 'rounded': bool(context.flags[Inexact])}
+
+
+def arithmetic(expressions):
+    if not 1 <= len(expressions) <= 16:
+        raise ValueError('Supply between 1 and 16 quoted arithmetic expressions.')
+    results = [arithmetic_value(expression) for expression in expressions]
+    out('arithmetic', {'expressions': expressions},
+        'numeric + - * / with parentheses; Decimal precision 50, half-even rounding; results are decimal strings',
+        [row['expression'] + ' = ' + row['result'] for row in results], results)
+
+
+def main(argv=None):
+    argv = list(sys.argv[1:] if argv is None else argv)
+    explicit = bool(argv and argv[0] == 'arithmetic')
+    implicit = bool(argv and all(ARITHMETIC_CHARS.fullmatch(value) for value in argv))
+    if (explicit and argv[1:] not in (['--help'], ['-h'])) or implicit:
+        try:
+            arithmetic(argv[1:] if explicit else argv)
+            return 0
+        except ValueError as error:
+            print(json.dumps({'command': 'arithmetic', 'error': str(error)}))
+            return 2
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
+    p = sub.add_parser("arithmetic", help="bounded decimal + - * / expressions")
+    p.add_argument("expressions", nargs="+", help="quote each expression; decimal-string results, 50-digit precision")
     p = sub.add_parser("deposit"); p.add_argument("--rent-pcm", type=float, required=True, dest="rent_pcm"); p.set_defaults(f=deposit)
     p = sub.add_parser("affordability"); p.add_argument("--rent-pcm", type=float, required=True, dest="rent_pcm")
     p.add_argument("--multiple", type=float, default=2.5); p.add_argument("--income", type=float)
@@ -188,9 +267,9 @@ def main():
     p.add_argument("--weeks", type=float, default=3.0); p.add_argument("--setup", type=float, default=0.0); p.add_argument("--years", type=int, default=1); p.set_defaults(f=guarantor_product)
     p = sub.add_parser("pro-rata"); p.add_argument("--rent-pcm", type=float, required=True, dest="rent_pcm"); p.add_argument("--move-in", required=True, dest="move_in"); p.set_defaults(f=pro_rata)
     p = sub.add_parser("pct-diff"); p.add_argument("--a", type=float, required=True); p.add_argument("--b", type=float, required=True); p.set_defaults(f=pct_diff)
-    a = ap.parse_args()
+    a = ap.parse_args(argv)
     a.f(a)
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
