@@ -796,24 +796,43 @@ Beats-original is 0 vs 2 and 1, inside that noise. Adopted (commit 1df20ce, 2026
 those numbers written down; the next variant is measured against the new main. Single runs of
 fifteen: direction, not rates.
 
-### The models on the same fifteen turns (standard, "ask" turn; rows still being judged are marked)
+### The models on the same fifteen turns (final, 2026-09-12; judge v2; single runs)
+
+The "ask" turn (the person's message before the reviewed answer):
+
+| Host / model | Cases judged | G1 facts / G2 authority / G3 hard req. pass | First sentence | T mean (0–3) | Task (0–2) | Satisfy (0–2) | Beats original | Numbers w/o cue | Questions |
+|---|---|---|---|---|---|---|---|---|---|
+| Claude Haiku 4.5, standard | 15 | 5 / 7 / 1 | 0 | 0.26 | 0.13 | 0.00 | 0/15 | 1.7 | 0.1 |
+| Claude Sonnet 5, lite | 15 | 3 / 13 / 10 | 9 | 1.51 | 1.07 | 0.80 | 0/15 | 4.5 | 0.8 |
+| Claude Sonnet 5, standard | 15 | 2 / 13 / 14 | 9 | 1.43 | 1.00 | 0.80 | 2/15 | 3.3 | 1.2 |
+| Claude Opus 5, standard | 14 | 6 / 11 / 9 | 6 | 1.44 | 1.00 | 0.71 | 6/14 | 3.8 | 2.9 |
+| Codex gpt-5.6-terra, lite | 14 | 10 / 13 / 11 | 13 | 2.01 | 1.43 | 1.21 | 3/14 | 1.8 | 0.4 |
+| Codex gpt-5.6-terra, standard | 15 | 10 / 14 / 12 | 13 | 1.93 | 1.40 | 1.13 | 6/15 | 2.8 | 0.5 |
+| Codex gpt-5.6-sol, standard | 11 (4 rows lost to a Codex-side error, then the quota) | 9 / 11 / 11 | 10 | 2.22 | 1.73 | 1.27 | 7/11 | 2.7 | 0.5 |
+
+The "reaction" turn (the person's real reaction to the original answer, answered fresh):
 
 | Host / model | Cases judged | G1 / G2 / G3 pass | First sentence | T mean | Task | Satisfy | Beats original | Numbers w/o cue | Questions |
 |---|---|---|---|---|---|---|---|---|---|
-| Claude Haiku 4.5 | 15 | 5 / 7 / 1 | 0 | 0.26 | 0.13 | 0.00 | 0/15 | 1.7 | 0.1 |
-| Claude Sonnet 5, lite | 15 | 3 / 13 / 10 | 9 | 1.51 | 1.07 | 0.80 | 0/15 | 4.5 | 0.8 |
-| Claude Sonnet 5, standard | 15 | 2 / 13 / 14 | 9 | 1.43 | 1.00 | 0.80 | 2/15 | 3.3 | 1.2 |
-| Claude Opus 5 | 14 | 6 / 11 / 9 | 6 | 1.44 | 1.00 | 0.71 | 6/14 | 3.8 | 2.9 |
-| Codex gpt-5.6-terra | 12 | 7 / 11 / 9 | 10 | 1.86 | 1.33 | 1.17 | 5/12 | 2.8 | 0.6 |
-| Codex gpt-5.6-sol | 5 (7 outage rows retried later) | 4 / 5 / 5 | 5 | 2.31 | 1.80 | 1.20 | 2/5 | 0.2 | 0.4 |
+| Claude Haiku 4.5, standard | 15 | 3 / 14 / 8 | 3 | 0.97 | 0.40 | 0.47 | 2/15 | 3.2 | 1.9 |
+| Claude Sonnet 5, lite | 15 | 0 / 12 / 10 | 7 | 1.37 | 0.87 | 0.67 | 0/15 | 3.0 | 0.5 |
+| Claude Sonnet 5, standard | 15 | 2 / 13 / 11 | 5 | 1.32 | 0.80 | 0.73 | 0/15 | 3.5 | 0.6 |
+| Claude Opus 5, standard | 14 | 4 / 13 / 14 | 11 | 2.25 | 1.50 | 1.43 | 7/14 | 6.1 | 2.0 |
+| Codex gpt-5.6-terra, standard | 14 | 7 / 14 / 13 | 12 | 2.14 | 1.50 | 1.29 | 7/14 | 3.7 | 1.1 |
+| Codex gpt-5.6-sol, standard | 13 | 9 / 13 / 10 | 13 | 2.27 | 1.69 | 1.31 | 7/13 | 2.4 | 0.6 |
 
-Reading: on these turns Codex terra is the strongest of the cheap configurations (first sentence 10/12,
-T 1.86, beats-original 5/12) and Haiku is not usable for this conversation (task 0.13). Opus answers
-more and asks more (2.9 questions a reply; the reviews found it long for a tired person). Caveats: a
-DNS outage invalidated about thirty rows, retried and superseded; the Claude replay allow-list
-matched only one spelling of a script call, so script-backed answers were sometimes refused (widened
-behind `--claude-allow` for the next round); Codex sub-agent tokens are not in any replay figure; the
-original answers came from a stronger model than any of these, so "beats original" is a high bar.
+Reading: on these turns the Codex models score highest on every judged column — sol first (T 2.2–2.3,
+task 1.7, beats-original 7/11 and 7/13), terra close behind, and terra lite is not worse than terra
+standard on the ask turn (fewer numbers without a source, 1.8 vs 2.8). Opus is the strongest Claude
+configuration but asks the most questions (2.9 a reply on the ask turn) and writes the most unsourced
+numbers on the reaction turn (6.1); Sonnet sits a level below on both turns; Haiku is not usable for this
+conversation. The facts gate (G1) is where the Claude models lose most: 2–6 of 15 pass against 9–10 for
+Codex. These rows were run with the skill as of the evening of 2026-09-11 (before the checkpoint variants
+were adopted); the round-2 rows above show what the checkpoint does for Sonnet. Caveats: single runs; a
+DNS outage and, at the end, a Codex-side model-list error and the plan quota cost some rows (retried where
+possible; the counts show what remains); the Claude replay allow-list refused some script calls (fixed for
+round 2 with `--claude-allow`); Codex sub-agent tokens are not in any replay figure; the original answers
+came from a stronger model than any of these, so "beats original" is a high bar.
 
 ## Street scan v2 (2026-09-11 night): the street itself, noise in dB, depth tiers — two hosts, blind read
 
