@@ -323,6 +323,7 @@ def find_street(lat, lng, name=None, radius=250, verbose=False, runner=None, rep
             out["note"] = "The mapped way extends beyond this location search; its representative midpoint is outside the search radius. Need a more precise location."
             return out
         pts = sample_points(line, *midpoint)
+        d = haversine_m(lat, lng, *pts[0])
         out["location_coverage"] = {
             "lookup_radius_m": radius, "joined_chains": len(components),
             "mapped_total_length_m": int(sum(polyline_length_m(part) for part in components)),
