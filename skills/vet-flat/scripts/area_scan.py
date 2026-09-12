@@ -73,8 +73,10 @@ OFF_STREET_M = 40  # beyond this, the given point is called a centroid, not a do
 NAMED_RADIUS_M = 1500  # a named street is looked for this far out: an outcode centroid can be a kilometre off
 OUTCODE_RE = re.compile(r"^[A-Z]{1,2}[0-9][A-Z0-9]?$")
 NOTABLE_SINCE = 2024
-NOTABLE_RULE = ("since %d and either big (5+ storeys, 10+ homes, tall-building hint) or a works signal (demolition, basement, "
-                "piling, crane, hoarding, construction/dust plan); householder works excluded; nearest first" % NOTABLE_SINCE)
+NOTABLE_RULE = ("investigation leads since %d, selected by application scale (5+ storeys, 10+ homes, tall-building hint) "
+                "or subject (demolition, basement, piling, crane, hoarding, construction/dust plan); explicit existing-use "
+                "certificates excluded, small-householder keyword filter applied; nearest first. "
+                "Selection does not establish current or imminent works" % NOTABLE_SINCE)
 BIG_WORDS = re.compile(r"(?i)demoli(?:tion|sh)\b(?! of the (?:existing |detached )?(?:garage|shed|outbuilding|cycle store|refuse|bin|conservatory|fence|wall|porch))"
                        r"|basement|redevelop|new[- ]build|excavat|piling|crane|hoarding|scaffold"
                        r"|construction (?:logistics|management|environmental|traffic) plan|demolition and construction|\bCEMP\b|\bCMP\b|\bCLP\b|dust management"
@@ -82,6 +84,12 @@ BIG_WORDS = re.compile(r"(?i)demoli(?:tion|sh)\b(?! of the (?:existing |detached
                        r"|\b(?:three|four|five|six|seven|eight|nine|ten|\d{1,2})[- ]storey")
 SMALL_WORDS = re.compile(r"(?i)single[- ]storey|rear extension|side extension|roof extension|dormer|outbuilding|garage|cycle store|refuse|shed|fence|"
                          r"advertisement|signage|shopfront|window|door|conservatory|porch|loft|certificate of lawfulness|tree|hedge")
+EXISTING_CERTIFICATE = re.compile(
+    r"(?ix)^\s*(?:application\s+for\s+(?:a\s+)?)?(?:"
+    r"(?:certificate\s+of\s+(?:lawfulness|lawful\s+(?:use|development))|lawful\s+development\s+certificate)"
+    r"[\s(:-]*(?:(?:for|of|in\s+respect\s+of)\s+)?(?:(?:the|an)\s+)?existing\b"
+    r"|certificate\s+of\s+existing\s+lawful\s+(?:use|development)\b"
+    r"|(?:CLEUD|CLE)\s*$|LDC[\s(:-]+existing\b)")
 
 
 def _year(text):
@@ -98,19 +106,24 @@ def _cut(text, n):
 
 
 def notable_why(r, since=NOTABLE_SINCE):
-    """Why a planning row is notable, or None: recent, and either big or a works-about-to-start signal."""
+    """Select recent application subjects/scale for investigation, not evidence of works starting."""
     years = [y for y in (_year(r.get("decision_date")), _year(r.get("valid_date"))) if y]
     if not years or max(years) < since:
+        return None
+    # A certificate about existing use/development is a legal-status record, even
+    # when its subject includes a basement or many homes. Keep it in nearest/raw rows.
+    if any(EXISTING_CERTIFICATE.search(str(r.get(k) or "")) for k in
+           ("description", "application_type", "application_type_full")):
         return None
     big = ((r.get("storeys") or 0) >= 5 or (r.get("residential_units_proposed") or 0) >= 10 or r.get("tall_building_hint"))
     text = str(r.get("description") or "")
     signal = BIG_WORDS.search(text)
     if big:
-        return "big: %s" % ", ".join(x for x in (("%s storeys" % r.get("storeys")) if (r.get("storeys") or 0) >= 5 else "",
+        return "application scale: %s" % ", ".join(x for x in (("%s storeys" % r.get("storeys")) if (r.get("storeys") or 0) >= 5 else "",
                                                 ("%s homes" % r.get("residential_units_proposed")) if (r.get("residential_units_proposed") or 0) >= 10 else "",
                                                 "tall-building hint" if r.get("tall_building_hint") else "") if x)
     if signal and not (SMALL_WORDS.search(text) and not re.search(r"(?i)basement|piling|crane|hoarding|management plan|dust|CEMP|CMP|CLP", text)):
-        return "works signal: " + signal.group(0).lower()[:60]
+        return "application subject: " + signal.group(0).lower()[:60]
     return None
 
 
@@ -387,6 +400,9 @@ def compose(where, crime, planning, roads, living, notes, noise=None, street=Non
             ("nearest at %d m" % min(rail)) if rail else "none within the radius",
             q["radius_m"], q["night_economy_count"] if q["night_economy_count"] is not None else "unknown",
             (" (nearest %s at %d m)" % (q["night_economy_names"][0], q["night_economy_nearest_m"])) if q["night_economy_names"] and q["night_economy_nearest_m"] is not None else ""))
+        if q["facade_note"]:
+            reading[-1] += (" Road proximity is a prompt to check window direction and sound insulation; "
+                            "it does not establish the flat's facade orientation or a quiet side.")
     elif roads is not None:
         out["not_found"].append("roads: " + str(roads.get("note") or "register unavailable"))
 
@@ -458,11 +474,11 @@ def compose(where, crime, planning, roads, living, notes, noise=None, street=Non
                                     (seen, total, planning.get("radius_m"), far if far is not None else "unknown"))
         out["works"] = w
         out["sources"].append(planning.get("source_url"))
-        reading.append("Works: %s planning applications within %s m since %s%s, %s with a tall-building hint; the nearest: %s. Notable recent (%s): %s." % (
+        reading.append("Works: %s planning applications within %s m since %s%s, %s with a tall-building hint; the nearest: %s. Investigation leads (%s): %s. These application records do not establish current or imminent works." % (
             w["count"], w["applications_within_m"], w["since_year"],
             (" (the nearest %d read, out to %d m)" % (seen, far)) if w["seen_out_to_m"] is not None else "", w["tall_building_hints"],
             ("%s, %s (%s)" % (label(top[0]), top[0].get("status") or "status unknown", distance(top[0]))) if top else "none",
-            "since %d, big or a works-about-to-start signal" % NOTABLE_SINCE,
+            "since %d, selected by application scale or subject" % NOTABLE_SINCE,
             "; ".join("%s at %s (%s, %s; %s%s)" % (label(n), distance(n), n.get("status") or "status unknown", n.get("decision_date") or "no decision date", n["why"],
                                                      (", +%d related submissions for the same site" % n["related_submissions"]) if n["related_submissions"] else "") for n in notable[:3]) or "none found"))
     elif planning is not None:

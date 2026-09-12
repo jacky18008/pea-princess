@@ -25,7 +25,7 @@ ROADS = {"ok": True, "source_url": "https://overpass.example/q", "radius_m": 300
          "railway_surface": {"count": 1, "names": ["London Bridge approach"], "nearest": {"distance_m": 210}},
          "tube_surface": {"count": 0, "nearest": None},
          "night_economy": {"count": 4, "names": ["The Example Arms"], "nearest": {"distance_m": 90}},
-         "park_or_green": {"count": 1, "nearest": {"distance_m": 250}}, "facade_note": "one facade faces the main road"}
+         "park_or_green": {"count": 1, "nearest": {"distance_m": 250}}, "facade_note": None}
 CRIME = {"ok": True, "source_url": "https://data.police.uk/api/x", "query": {"half_m": 150}, "total": 583, "months_counted": 6,
          "per_month": {"2026-02": 75, "2026-03": 119, "2026-04": 100, "2026-05": 86, "2026-06": 111, "2026-07": 92},
          "by_category": {"theft-from-the-person": 192, "other-theft": 115, "violent-crime": 100, "anti-social-behaviour": 42, "robbery": 37, "drugs": 14},
@@ -59,6 +59,19 @@ class TestCompose(unittest.TestCase):
         self.assertIn("Rail at surface: nearest at 210 m", self.out["reading"][0])
         self.assertIn("The Example Arms at 90 m", self.out["reading"][0])
 
+    def test_near_road_prompt_remains_a_check_not_a_known_facade(self):
+        import roads
+        near = copy.deepcopy(ROADS)
+        near["trunk_or_primary_road"]["nearest"]["distance_m"] = 30
+        near["facade_note"] = roads.FACADE_NOTE
+        original = copy.deepcopy(near)
+        out = AS.compose(WHERE, None, None, near, None, [])
+        self.assertEqual(30, out["quiet"]["main_road_nearest_m"])
+        self.assertEqual(near["facade_note"], out["quiet"]["facade_note"])
+        self.assertIn("check window direction and sound insulation", out["reading"][0])
+        self.assertIn("does not establish the flat's facade orientation or a quiet side", out["reading"][0])
+        self.assertEqual(original, near)
+
     def test_crime_block_keeps_the_denominator(self):
         c = self.out["crime"]
         self.assertEqual(583, c["total"]); self.assertEqual(6, c["months"]); self.assertEqual(97.2, c["per_month_avg"])
@@ -89,6 +102,51 @@ class TestCompose(unittest.TestCase):
 class TestPartialPlanning(unittest.TestCase):
     def compose_rows(self, rows):
         return AS.compose(WHERE, CRIME, dict(PLANNING, results=rows), ROADS, LIVING, [])
+
+    def test_pending_refused_and_approved_subjects_are_only_investigation_leads(self):
+        for status in ("Under Consideration", "Refused", "Approved"):
+            with self.subTest(status=status):
+                row = {"reference": "26/EXAMPLE/1", "valid_date": "2026-03-01", "status": status,
+                       "description": "Submission of a dust management plan", "distance_m": 20}
+                original = copy.deepcopy(row)
+                out = self.compose_rows([row])
+                notable = out["works"]["notable_recent"][0]
+                self.assertEqual("application subject: dust management", notable["why"])
+                self.assertEqual(status, notable["status"])
+                text = " ".join(out["reading"])
+                self.assertIn("Investigation leads", text)
+                self.assertIn("do not establish current or imminent works", text)
+                self.assertNotIn("works signal", text + out["works"]["notable_rule"])
+                self.assertNotIn("works-about-to-start", text + out["works"]["notable_rule"])
+                self.assertEqual(original, row)
+
+    def test_existing_use_certificate_stays_in_nearest_records_not_notable_works(self):
+        row = {"reference": "26/EXAMPLE/CLE", "valid_date": "2026-03-01", "status": "Approved",
+               "description": "Certificate of lawfulness for the existing use of a basement as a flat",
+               "distance_m": 20, "storeys": 5, "residential_units_proposed": 12}
+        original = copy.deepcopy(row)
+        out = self.compose_rows([row])
+        self.assertEqual([], out["works"]["notable_recent"])
+        self.assertEqual(row["reference"], out["works"]["nearest_five"][0]["reference"])
+        self.assertEqual("Approved", out["works"]["nearest_five"][0]["status"])
+        self.assertEqual(original, row)
+
+    def test_existing_certificate_types_and_wording_exclude_only_explicit_existing_subject(self):
+        for field, value in (
+                ("application_type", "CLE"), ("application_type", "CLEUD"),
+                ("application_type_full", "Lawful Development Certificate (Existing)"),
+                ("application_type_full", "LDC - Existing"),
+                ("description", "Certificate of existing lawful use or development of a basement"),
+                ("description", "Application for a certificate of lawfulness for an existing basement")):
+            with self.subTest(field=field, value=value):
+                row = {"valid_date": "2026-03-01", "description": "Basement", field: value}
+                self.assertIsNone(AS.notable_why(row))
+        for description in (
+                "Certificate of lawfulness for proposed development: extension of the existing basement",
+                "Proposed basement following an earlier certificate of lawfulness for the existing use"):
+            with self.subTest(description=description):
+                row = {"valid_date": "2026-03-01", "description": description}
+                self.assertEqual("application subject: basement", AS.notable_why(row))
 
     def test_valid_date_without_decision_date_keeps_notable_and_other_registers(self):
         # The full source schema has a nullable decision_date; compact rows omit it.
@@ -233,9 +291,9 @@ class TestStreetAndNoise(unittest.TestCase):
 
     def test_notable_works_read_datahub_dates_and_skip_householder_noise(self):
         recent_big = {"decision_date": "08/05/2024", "description": "Demolition of the existing building and erection of a part-three, part-four storey block", "storeys": 4, "residential_units_proposed": 12}
-        self.assertTrue(AS.notable_why(recent_big).startswith("big: 12 homes"))
+        self.assertTrue(AS.notable_why(recent_big).startswith("application scale: 12 homes"))
         discharge = {"decision_date": None, "valid_date": "15/08/2024", "description": "Submission of details of an Air Quality Dust Management Plan (AQDMP)"}
-        self.assertEqual("works signal: dust management", AS.notable_why(discharge))
+        self.assertEqual("application subject: dust management", AS.notable_why(discharge))
         self.assertIsNone(AS.notable_why({"decision_date": "05/04/2023", "description": "Demolition of the existing building"}), "before 2024")
         self.assertIsNone(AS.notable_why({"decision_date": "08/05/2024", "description": "Demolition of the detached garage in the rear garden; erection of a single storey outbuilding"}))
         self.assertIsNone(AS.notable_why({"decision_date": "16/02/2024", "description": "Erection of a rear roof extension involving an increase in the ridge height"}))

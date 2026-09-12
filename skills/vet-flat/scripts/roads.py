@@ -68,8 +68,9 @@ WALK_M_PER_MIN = 80.0          # 4.8 km/h
 STREET_DETOUR = 1.3            # straight line -> walked distance, rule of thumb
 STOREY_M = 3.0                 # assumed floor-to-floor when only building:levels is tagged
 
-FACADE_NOTE = ("the building has a road-facing and a quiet side; ask which side the flat's "
-               "windows face")
+FACADE_NOTE = ("a mapped main road is within %d m of the query point; check the flat's window "
+               "direction and sound insulation. This proximity check does not establish its "
+               "facade orientation or a quiet side" % FACADE_TRIGGER_M)
 
 
 # ------------------------------------------------------------- geometry ----
@@ -575,7 +576,7 @@ def near(lat, lng, radius=300, verbose=False, elements=None, meta=None):
 
 
 def facade_note(lat, lng, radius=300, verbose=False, full=None):
-    """Only the road-facing/quiet-side question, off the same single query."""
+    """Only the road-proximity prompt to check windows, off the same single query."""
     full = full if full is not None else near(lat, lng, radius, verbose=verbose)
     out = dict((k, full.get(k)) for k in
                ("source_url", "http_status", "ok", "note", "retrieved_at", "evidence_class",
@@ -594,7 +595,7 @@ def main():
     ap.add_argument("--verbose", action="store_true", help="print curl commands to stderr")
     sub = ap.add_subparsers(dest="cmd", required=True)
     for name, helptext in (("near", "everything around the point"),
-                           ("facade-note", "just the road-facing/quiet-side question")):
+                           ("facade-note", "just the road-proximity prompt to check windows")):
         p = sub.add_parser(name, help=helptext)
         p.add_argument("--lat", type=float, required=True)
         p.add_argument("--lng", type=float, required=True)

@@ -79,10 +79,33 @@ class TestLevels(unittest.TestCase):
     def test_describe_is_anchored_to_the_who_guideline(self):
         self.assertIn("well under the WHO guideline of 53", N.describe(41.0, "lden"))
         self.assertIn("above the WHO guideline of 53", N.describe(56.0, "lden"))
-        self.assertIn("A-road", N.describe(75.3, "lden"))
+        self.assertIn("at least 17 dB above the WHO guideline of 53", N.describe(75.3, "lden"))
         self.assertIn("45 dB", N.describe(43.0, "lnight"))
         self.assertIn("54", N.describe(50.0, "lden", "rail"))
         self.assertIn("nothing drawn", N.describe(None, "lden"))
+
+    def test_every_threshold_describes_modelled_exposure_not_audibility_or_location(self):
+        for source in ("road", "rail"):
+            for metric in ("lden", "lnight"):
+                who = N.WHO[(source, metric)]
+                for offset in (-12, -8, -5, -1, 0, 4, 5, 6, 7, 9, 10, 11, 12, 16, 17, 25):
+                    with self.subTest(source=source, metric=metric, offset=offset):
+                        text = N.describe(who + offset, metric, source)
+                        self.assertIn("modelled outdoor exposure", text)
+                        self.assertIn("%d dB" % who, text)
+                        self.assertIn("under" if offset < 0 else "above", text)
+                        for unsupported in ("audible", "window open", "constant presence", "quiet",
+                                            "loud", "frontage", "trackside", "right by", "busy-road", "A-road"):
+                            self.assertNotIn(unsupported, text)
+
+    def test_threshold_boundaries_keep_the_existing_comparison_bands(self):
+        self.assertIn("at or above", N.describe(53, "lden"))
+        self.assertIn("7–12 dB above", N.describe(60, "lden"))
+        self.assertIn("12–17 dB above", N.describe(65, "lden"))
+        self.assertIn("at least 17 dB above", N.describe(70, "lden"))
+        self.assertIn("at or above", N.describe(45, "lnight"))
+        self.assertIn("5–10 dB above", N.describe(50, "lnight"))
+        self.assertIn("at least 10 dB above", N.describe(55, "lnight"))
 
 
 class TestLookup(unittest.TestCase):
@@ -96,6 +119,12 @@ class TestLookup(unittest.TestCase):
         self.assertIn("75.3 dB at the point (40.6-75.3 dB across 3 points", out["reading"][0])
         self.assertEqual("70.0-74.9", out["band_2017"]["road_lden"]); self.assertIn("70.0-74.9 dB band", out["reading"][1])
         self.assertIn("not a measurement at the window", out["reading"][-1])
+        self.assertIn("modelled outdoor exposure", out["reading"][0])
+        self.assertIn("not indoor levels, window direction or how often noise will be heard", out["scale"])
+        self.assertIn("road 53 dB, rail 54 dB", out["scale"])
+        self.assertIn("road 45 dB, rail 44 dB", out["scale"])
+        for unsupported in ("quiet back streets", "main-road frontages", "just noticeable", "twice as loud"):
+            self.assertNotIn(unsupported, out["scale"])
         self.assertIn("Crown Copyright", out["licence"])
         self.assertLess(len(json.dumps(out, ensure_ascii=False)), 3500)
 

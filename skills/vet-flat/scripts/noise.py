@@ -67,9 +67,10 @@ BAND_FLOOR = {"lden": 55.0, "lnight": 50.0}   # the 2017 polygons start here
 WHO = {("road", "lden"): 53.0, ("road", "lnight"): 45.0, ("rail", "lden"): 54.0, ("rail", "lnight"): 44.0}  # WHO 2018 guideline values
 LICENCE = "Open Government Licence v3.0; attribution: © Crown Copyright (Defra strategic noise mapping)"
 HALF = 0.00008   # degrees: a 3x3-pixel box about 18 m tall and 11 m wide in London; the centre pixel is read
-SCALE = ("Lden (day-evening-night average, night weighted +10 dB): WHO guideline 53 dB; the map draws main-road "
-         "frontages at 70-75 dB and quiet back streets at 40-50. Lnight (23:00-07:00): WHO guideline 45 dB. "
-         "A 3 dB step is just noticeable; 10 dB sounds about twice as loud.")
+SCALE = ("Lden (day-evening-night average, night weighted +10 dB): WHO guidelines road %d dB, rail %d dB. "
+         "Lnight (23:00-07:00): WHO guidelines road %d dB, rail %d dB. These compare modelled outdoor "
+         "traffic exposure, not indoor levels, window direction or how often noise will be heard."
+         % (WHO[("road", "lden")], WHO[("rail", "lden")], WHO[("road", "lnight")], WHO[("rail", "lnight")]))
 CAVEATS = ["A model of outdoor noise at 4 m height on a 10 m grid from 2021 traffic counts, not a measurement at the window; a closed window, a rear room or a new road layout changes it.",
            "The value read is the map pixel under the point; on a road edge the neighbouring pixel can differ by several dB. Treat differences under 3 dB as noise.",
            "Only road and rail traffic are mapped: no pubs, building sites, bin lorries, neighbours or aircraft."]
@@ -136,32 +137,35 @@ def parse_band(body):
 
 
 def describe(db, metric, source="road"):
-    """Plain words for a level, anchored to the WHO guideline for that source and the map's own bands."""
+    """Compare modelled outdoor exposure to the source's guideline, without predicting audibility."""
     if db is None:
         return "nothing drawn here (below the map's floor)"
     who = WHO[(source, metric)]
-    what = "trains" if source == "rail" else "traffic"
+    guideline = "WHO night guideline" if metric == "lnight" else "WHO guideline"
     if metric == "lnight":
         if db < who - 5:
-            return "very quiet at night, well under the WHO night guideline of %d dB" % who
-        if db < who:
-            return "under the WHO night guideline of %d dB" % who
-        if db < who + 5:
-            return "above the WHO night guideline of %d dB: %s audible at night with the window open" % (who, what)
-        if db < who + 10:
-            return "busy at night, well above the WHO guideline of %d dB" % who
-        return "loud at night, the level the map gives main-road frontages" if source == "road" else "loud at night, a trackside level"
-    if db < who - 8:
-        return "very quiet for a city, well under the WHO guideline of %d dB" % who
-    if db < who:
-        return "quiet, under the WHO guideline of %d dB" % who
-    if db < who + 7:
-        return "above the WHO guideline of %d dB: %s clearly audible" % (who, what)
-    if db < who + 12:
-        return "busy-road level: the windows and which side the bedroom faces matter" if source == "road" else "well above the WHO guideline: trains a constant presence"
-    if db < who + 17:
-        return "loud, near the level the map gives main-road frontages" if source == "road" else "loud, a trackside level"
-    return "very loud, the level the map gives A-road and trunk-road frontages" if source == "road" else "very loud, right by the tracks"
+            relation = "well under"
+        elif db < who:
+            relation = "under"
+        elif db < who + 5:
+            relation = "at or above"
+        elif db < who + 10:
+            relation = "5–10 dB above"
+        else:
+            relation = "at least 10 dB above"
+    elif db < who - 8:
+        relation = "well under"
+    elif db < who:
+        relation = "under"
+    elif db < who + 7:
+        relation = "at or above"
+    elif db < who + 12:
+        relation = "7–12 dB above"
+    elif db < who + 17:
+        relation = "12–17 dB above"
+    else:
+        relation = "at least 17 dB above"
+    return "modelled outdoor exposure %s the %s of %d dB" % (relation, guideline, who)
 
 
 def level(lat, lng, source="road", metric="lden", verbose=False, fetcher=None):

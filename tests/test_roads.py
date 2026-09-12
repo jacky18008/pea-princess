@@ -395,8 +395,19 @@ class TestTooleyStreetFixture(unittest.TestCase):
 
     def test_the_facade_note_is_emitted_verbatim(self):
         self.assertEqual(self.out["facade_note"],
-                         "the building has a road-facing and a quiet side; ask which side the "
-                         "flat's windows face")
+                         "a mapped main road is within 60 m of the query point; check the flat's window "
+                         "direction and sound insulation. This proximity check does not establish its "
+                         "facade orientation or a quiet side")
+
+    def test_proximity_alone_can_trigger_a_prompt_without_building_evidence(self):
+        elements = [{"type": "way", "id": 1, "tags": {"highway": "primary", "name": "Example Road"},
+                     "geometry": [{"lat": 51.5, "lon": -0.101}, {"lat": 51.5, "lon": -0.099}]}]
+        out = roads.near(51.5 + 30 / 111320.0, -0.1, 300, elements=elements)
+        self.assertEqual(30, out["trunk_or_primary_road"]["nearest"]["distance_m"])
+        self.assertEqual(0, out["obstruction_candidates"]["count"])
+        self.assertIn("query point", out["facade_note"])
+        self.assertIn("check the flat's window direction and sound insulation", out["facade_note"])
+        self.assertIn("does not establish its facade orientation or a quiet side", out["facade_note"])
 
     def test_facade_note_subcommand_returns_the_same_answer(self):
         out = roads.facade_note(51.505375, -0.085706, 300, full=self.out)
