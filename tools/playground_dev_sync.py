@@ -11,7 +11,7 @@ import fcntl
 import hashlib
 import json
 import os
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 import signal
 import socket
 import subprocess
@@ -228,6 +228,76 @@ def build_snapshot(root, state_dir, service_dir, expected):
         return receipt
 
 
+def reusable_generation(root, state_dir, service_dir, expected):
+    """Reuse only an independently pinned, fully verified generation, never status.
+
+    This is integrity checking for private same-user records, not authentication
+    against another process that can rewrite all source and receipts.
+    """
+    root, state_dir, service_dir = (Path(p).resolve() for p in (root, state_dir, service_dir))
+    pin = service_dir / 'generation.json'
+    if not pin.exists():
+        return None  # Legacy supervisors did not retain a generation receipt.
+    launcher = _launcher()
+    try:
+        saved = json.loads(launcher.read_source(service_dir, pin.name)[0])
+        if saved.get('source_digest') != expected:
+            return None
+        bindings = {'source_root': str(root), 'state_dir': str(state_dir), 'service_dir': str(service_dir)}
+        if any(saved.get(key) != value for key, value in bindings.items()):
+            raise SyncError('Saved generation belongs to different source/state/service roots.')
+        receipt = saved['receipt']
+        snapshot = Path(receipt['snapshot'])
+        runtime = root / '.pea-playground/runtime'
+        if (snapshot.parent != runtime or snapshot.name.startswith('.') or
+                receipt['manifest'] != str(snapshot / 'runtime-manifest.json') or
+                receipt['state_dir'] != str(state_dir)):
+            raise SyncError('Saved generation paths do not identify this service runtime.')
+        raw, _ = launcher.read_source(snapshot, 'runtime-manifest.json')
+        if hashlib.sha256(raw).hexdigest() != receipt['manifest_sha256']:
+            raise SyncError('Saved runtime manifest no longer matches its generation receipt.')
+        manifest = json.loads(raw)
+        expected_sync = {'source_root': str(root), 'source_digest': expected, 'service_dir': str(service_dir)}
+        if (manifest.get('schema_version') != 1 or manifest.get('snapshot_id') != snapshot.name or
+                manifest.get('source_root') != str(root) or manifest.get('state_dir') != str(state_dir) or
+                manifest.get('dev_sync') != expected_sync):
+            raise SyncError('Saved runtime manifest has different generation bindings.')
+        records = manifest['files']
+        if not isinstance(records, dict) or not records:
+            raise SyncError('Saved runtime manifest has no file inventory.')
+        for name, record in records.items():
+            path = PurePosixPath(name)
+            if path.is_absolute() or '..' in path.parts or str(path) != name:
+                raise SyncError('Saved runtime contains an invalid file path.')
+            body, _ = launcher.read_source(snapshot, name)
+            if len(body) != record['bytes'] or hashlib.sha256(body).hexdigest() != record['sha256']:
+                raise SyncError('Saved runtime file changed: ' + name)
+        actual = set()
+        for path in snapshot.rglob('*'):
+            if path.is_symlink():
+                raise SyncError('Saved runtime contains a symlink.')
+            if path.is_file():
+                actual.add(path.relative_to(snapshot).as_posix())
+        if actual != set(records) | {'runtime-manifest.json'}:
+            raise SyncError('Saved runtime file inventory differs from its manifest.')
+        current = set(launcher.tracked(root)) - {launcher.GENERATED}
+        frozen = {name for name, record in records.items() if record.get('origin') == 'tracked-working-file'}
+        if current != frozen:
+            raise SyncError('Saved runtime controller inventory differs from current indexed source.')
+        for name in current:
+            body, _ = launcher.read_source(root, name)
+            if hashlib.sha256(body).hexdigest() != records[name]['sha256']:
+                raise SyncError('Saved runtime controller differs from current source: ' + name)
+        launcher.playground_skill.artifact_info(snapshot)
+        launcher.verify_default_archive(root, launcher.playground_skill.load_archive(
+            snapshot / manifest['public_skill']['archive_path']))
+        if source_digest(root) != expected:
+            raise SyncError('Source changed while verifying saved generation.')
+        return receipt
+    except (OSError, ValueError, KeyError, TypeError) as error:
+        raise SyncError('Cannot reuse saved developer generation: ' + str(error)) from error
+
+
 class Supervisor:
     """One owned child, immutable generations, stable-input debounce and idle switch."""
     def __init__(self, root, state_dir, service_dir, port, debounce=2.0,
@@ -249,6 +319,7 @@ class Supervisor:
         data = {'state': state, 'pid': os.getpid(), 'server_pid': self.process.pid if self.process else None,
                 'source_root': str(self.root), 'state_dir': str(self.state_dir), 'port': self.port,
                 'snapshot': self.receipt['snapshot'] if self.receipt else None,
+                'receipt': self.receipt,
                 'source_digest': self.observed, 'updated_at': time.time()}
         data.update(extra)
         _write(self.service_dir / 'status.json', data)
@@ -294,8 +365,12 @@ class Supervisor:
                 return True
             if self.pending is None and digest != self.attempted:
                 self.attempted = digest
-                self.publish('building')
-                self.pending = self.builder(self.root, self.state_dir, self.service_dir, digest)
+                self.pending = reusable_generation(self.root, self.state_dir, self.service_dir, digest)
+                if self.pending is not None:
+                    self.publish('reusing_verified_generation')
+                else:
+                    self.publish('building')
+                    self.pending = self.builder(self.root, self.state_dir, self.service_dir, digest)
             if self.pending is not None:
                 with idle_lock(self.service_dir) as idle:
                     if not idle:
@@ -313,6 +388,10 @@ class Supervisor:
                     _wait_server(self.process, self.port)
                     self.receipt, self.pending = self.pending, None
                     self.active_digest = digest
+                    _write(self.service_dir / 'generation.json', {
+                        'source_root': str(self.root.resolve()), 'state_dir': str(self.state_dir.resolve()),
+                        'service_dir': str(self.service_dir.resolve()), 'source_digest': digest,
+                        'receipt': self.receipt})
                     self.publish('ready', receipt=self.receipt)
             elif self.process is not None and self.process.poll() is not None:
                 self.publish('error', error='Owned server exited; no automatic call or process retry. Stop/start the service to recover.')

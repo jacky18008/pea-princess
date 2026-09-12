@@ -68,6 +68,16 @@ model-dispatch paths; merely showing a catalog badge does not enforce freshness.
 The supervisor also verifies the new child is alive and listening before marking
 it ready. An unexpected child exit is reported without automatic process retry.
 
+A successful activation also retains a separate private `generation.json` receipt.
+On deliberate stop/start with unchanged source, the supervisor verifies that
+receipt's manifest hash, the complete frozen file inventory and hashes, current
+controller bytes, the public archive, and source/state/service directory bindings.
+It then starts the exact same snapshot: paths and manifest bytes remain unchanged,
+so same-version conversations remain compatible. Status text alone never
+establishes identity. A changed source/helper version builds a new generation;
+corrupt retained evidence blocks reuse rather than silently rewriting it. Legacy
+services without the generation receipt cannot retroactively establish this pin.
+
 There is no automatic message, replay, retry, session migration or model call on
 refresh. Historical sessions and exports retain their original snapshot identity.
 Create a new session or explicitly replay saved human inputs on the new runtime

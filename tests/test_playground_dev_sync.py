@@ -347,6 +347,87 @@ class DevSyncTests(unittest.TestCase):
             with self.assertRaisesRegex(sync.SyncError, 'Port is occupied'):
                 sync._port_available(listener.getsockname()[1])
 
+    def pinned_generation(self):
+        receipt, service = self.managed_snapshot()
+        pin = {'source_root': str(self.root), 'state_dir': str(self.root / '.pea-playground'),
+               'service_dir': str(service), 'source_digest': sync.source_digest(self.root), 'receipt': receipt}
+        sync._write(service / 'generation.json', pin)
+        return receipt, service, pin
+
+    def test_restart_reuses_verified_generation_without_builder_or_new_manifest(self):
+        receipt, service, pin = self.pinned_generation()
+        original_manifest = Path(receipt['manifest']).read_bytes()
+        sync._write(service / 'status.json', {'state': 'stopped', 'snapshot': '/do/not/trust/status'})
+        supervisor, builder, popen, process = self.supervisor()
+        with contextlib.redirect_stdout(io.StringIO()), mock.patch.object(sync, '_port_available'), mock.patch.object(sync, '_wait_server'):
+            supervisor.tick(0)
+            supervisor.tick(2)
+        builder.assert_not_called()
+        self.assertEqual(receipt, supervisor.receipt)
+        self.assertEqual(original_manifest, Path(receipt['manifest']).read_bytes())
+        self.assertEqual(receipt, sync._json(service / 'generation.json')['receipt'])
+        self.assertEqual(receipt, sync._json(service / 'status.json')['receipt'])
+        self.assertIn(str(Path(receipt['snapshot']) / 'tools/persona_playground.py'), popen.call_args.args[0])
+
+    def test_changed_source_including_helper_does_not_reuse_previous_generation(self):
+        receipt, service, pin = self.pinned_generation()
+        self.write('tools/playground_dev_sync.py', '# A genuinely new helper version')
+        self.assertIsNone(sync.reusable_generation(self.root, self.root / '.pea-playground', service,
+                                                  sync.source_digest(self.root)))
+
+    def test_legacy_status_without_generation_receipt_cannot_authorize_reuse(self):
+        receipt, service = self.managed_snapshot()
+        sync._write(service / 'status.json', {'state': 'ready', 'receipt': receipt})
+        self.assertIsNone(sync.reusable_generation(self.root, self.root / '.pea-playground', service,
+                                                  sync.source_digest(self.root)))
+
+    def test_reuse_rejects_modified_or_extra_snapshot_files(self):
+        for kind in ('changed', 'extra', 'missing', 'symlink'):
+            with self.subTest(kind=kind):
+                receipt, service, pin = self.pinned_generation()
+                path = Path(receipt['snapshot']) / 'tools/persona_playground.py'
+                if kind == 'changed':
+                    path.chmod(0o600)
+                    path.write_text('# Changed frozen bytes')
+                elif kind == 'extra':
+                    (Path(receipt['snapshot']) / 'tools/injected.py').write_text('# Extra file')
+                elif kind == 'missing':
+                    path.unlink()
+                else:
+                    path.unlink()
+                    path.symlink_to(self.root / 'tools/persona_playground.py')
+                with self.assertRaises(sync.SyncError):
+                    sync.reusable_generation(self.root, self.root / '.pea-playground', service, pin['source_digest'])
+
+    def test_reuse_rejects_manifest_tampering_even_if_status_claims_new_hash(self):
+        receipt, service, pin = self.pinned_generation()
+        path = Path(receipt['manifest'])
+        path.chmod(0o600)
+        path.write_bytes(path.read_bytes() + b'\n')
+        sync._write(service / 'status.json', {'state': 'ready', 'receipt': dict(receipt, manifest_sha256='forged')})
+        with self.assertRaisesRegex(sync.SyncError, 'manifest no longer matches'):
+            sync.reusable_generation(self.root, self.root / '.pea-playground', service, pin['source_digest'])
+
+    def test_reuse_rejects_wrong_service_state_or_source_root_binding(self):
+        for field in ('source_root', 'state_dir', 'service_dir'):
+            with self.subTest(field=field):
+                receipt, service, pin = self.pinned_generation()
+                pin[field] = '/somewhere/else'
+                sync._write(service / 'generation.json', pin)
+                with self.assertRaisesRegex(sync.SyncError, 'different source/state/service roots'):
+                    sync.reusable_generation(self.root, self.root / '.pea-playground', service, pin['source_digest'])
+
+    def test_corrupted_generation_blocks_restart_without_silent_rebuild(self):
+        receipt, service, pin = self.pinned_generation()
+        Path(receipt['manifest']).unlink()
+        supervisor, builder, popen, process = self.supervisor()
+        with contextlib.redirect_stdout(io.StringIO()):
+            supervisor.tick(0)
+            supervisor.tick(2)
+        builder.assert_not_called()
+        popen.assert_not_called()
+        self.assertEqual('error', sync._json(service / 'status.json')['state'])
+
     def test_default_launcher_starts_service_without_freezing_in_caller(self):
         with mock.patch.object(sync, 'service_command', return_value={'running': True}) as command, \
                 mock.patch.object(launcher, 'freeze') as freeze, contextlib.redirect_stdout(io.StringIO()):
