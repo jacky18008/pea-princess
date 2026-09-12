@@ -15,7 +15,7 @@ Every other axis keys off this. If identity is unresolved, no axis above it can 
 
 ## Method in shell mode
 1. `python3 scripts/geo.py lookup "<postcode>"` — official coordinates, borough, ward. Use these, never a map pin.
-2. `python3 scripts/epc.py search --postcode "<postcode>"` — every certificate registered at that postcode, with full flat-level addresses.
+2. `python3 scripts/epc.py search --postcode "<postcode>" --brief --match "<flat or building>"` — the certificates at that postcode whose address contains the flat or building, one short row each (drop `--match` to see every one; drop `--brief` for the full rows), with full flat-level addresses.
 3. If the flat is missing: `python3 scripts/epc.py search --street "<street>" --town "<town>"`.
 4. `python3 scripts/geo.py cover --lat <lat> --lng <lng> --radius 250` — the other postcodes that cover the same building footprint; repeat step 2 for each.
 5. `python3 scripts/epc.py building --postcode "<postcode>" --match "<building name>"` — the whole-building profile (how many flats, which address series, whether ground-floor flats exist).

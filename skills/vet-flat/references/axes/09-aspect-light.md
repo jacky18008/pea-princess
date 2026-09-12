@@ -15,8 +15,8 @@ In a London winter, indoor brightness comes from sky openness, floor level and w
 
 ## Method in shell mode
 1. `python3 scripts/geo.py lookup "<postcode>"` and `python3 scripts/geo.py nearby "<postcode>" --radius 100` — what stands around the building.
-2. `python3 scripts/roads.py near --lat <lat> --lng <lng> --radius 150` — the buildings, roads and railways the windows face.
-3. `python3 scripts/planning.py near --lat <lat> --lng <lng> --radius 250` — any consented scheme that will take the sky away, and any daylight assessment naming this building.
+2. `python3 scripts/roads.py near --lat <lat> --lng <lng> --radius 150 --brief` — the buildings, roads and railways the windows face.
+3. `python3 scripts/planning.py near --lat <lat> --lng <lng> --radius 250 --brief` — any consented scheme that will take the sky away, and any daylight assessment naming this building.
 4. Compute the obstruction angle: the height of the facing obstruction over the distance to it, as an angle from the window.
 5. Before the visit: street imagery, see `18-street-view.md`. `python3 scripts/streetview.py check --lat <lat> --lng <lng>` is free and says whether there is a panorama and how old it is; `fetch --toward-lat/--toward-lng` points the camera at the building. Count the storeys of the facing building in the picture and check them against the `building:levels` or `height` tag — OSM heights are often missing or wrong, and a photograph is the cheapest correction available. Class C, dated: quote the capture date with the angle.
 

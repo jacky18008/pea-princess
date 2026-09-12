@@ -174,6 +174,34 @@ def summarise(rows, paon=None):
     return out
 
 
+def brief(out, recent=5):
+    """The price-paid answer with the transaction list replaced by a price summary and the most recent sales:
+    about 2k characters instead of 17k. The full list is one flag away."""
+    keep = ("query", "source_url", "ok", "note", "retrieved_at", "evidence_class", "count", "earliest_transaction", "latest_transaction",
+            "new_build_count", "earliest_new_build_transaction", "earliest_new_build_year", "completion_year_note", "coverage_note", "not_found")
+    small = {k: out[k] for k in keep if k in out}
+    rows = out.get("transactions") or []
+    prices = sorted(int(r["price"]) for r in rows if str(r.get("price") or "").isdigit())
+    if prices:
+        mid = len(prices) // 2
+        small["price_summary"] = {"n": len(prices), "min": prices[0], "median": (prices[mid] if len(prices) % 2 else (prices[mid - 1] + prices[mid]) // 2),
+                                  "max": prices[-1], "by_property_type": {}}
+        for r in rows:
+            t = r.get("property_type") or "unknown"
+            small["price_summary"]["by_property_type"][t] = small["price_summary"]["by_property_type"].get(t, 0) + 1
+    def _key(r):
+        return str(r.get("date") or "")
+    small["recent"] = [{k: r.get(k) for k in ("date", "price", "saon", "paon", "street", "property_type", "new_build") if r.get(k) not in (None, "")}
+                       for r in sorted(rows, key=_key, reverse=True)[:recent]]
+    sb = out.get("same_building_matches")
+    if isinstance(sb, dict):
+        small["same_building_matches"] = {"query": sb.get("query"), "count": sb.get("count"),
+                                          "recent": [{k: r.get(k) for k in ("date", "price", "saon", "new_build") if r.get(k) not in (None, "")}
+                                                     for r in sorted(sb.get("transactions") or [], key=_key, reverse=True)[:recent]]}
+    small["brief"] = True
+    return small
+
+
 def price_paid(postcode, since=None, paon=None, limit=500, method="post", verbose=False):
     pc = normalise_postcode(postcode)
     q = build_query(pc, since=since, limit=limit)
@@ -270,6 +298,7 @@ def main():
     p.add_argument("--paon", help="building name or number, for same_building_matches")
     p.add_argument("--limit", type=int, default=500)
     p.add_argument("--method", choices=["post", "get"], default="post")
+    p.add_argument("--brief", action="store_true", help="price summary and the five most recent sales instead of every transaction")
 
     p = sub.add_parser("title", parents=[common], help="how to buy a title register (manual, no fetch)")
     p.add_argument("--help-only", action="store_true",
@@ -281,6 +310,8 @@ def main():
         if a.cmd == "price-paid":
             out = price_paid(a.postcode, since=a.since, paon=a.paon, limit=a.limit,
                              method=a.method, verbose=a.verbose)
+            if getattr(a, "brief", False):
+                out = brief(out)
         else:
             out = title_help()
     except SystemExit:
