@@ -277,11 +277,12 @@ class TestStagesFixture(unittest.TestCase):
         self.assertEqual(self.rec["decision"], "Approved")
 
     def test_explains_the_status_in_plain_words(self):
-        self.assertTrue(any("permission granted" in x for x in self.lines))
+        self.assertTrue(any("Approval is recorded" in x for x in self.lines))
 
     def test_uses_the_recorded_expiry_not_a_guessed_three_years(self):
-        self.assertTrue(any("could start at any time" in x for x in self.lines))
-        self.assertTrue(any("expires 29/04/2029" in x for x in self.lines))
+        self.assertTrue(any("actual start date remains unknown" in x for x in self.lines))
+        self.assertTrue(any("lapse date of 29/04/2029" in x for x in self.lines))
+        self.assertFalse(any("three years" in x or "must start" in x for x in self.lines))
 
     def test_a_future_expiry_is_not_reported_as_lapsed(self):
         self.assertFalse(any("Lapsed" in x for x in self.lines))
@@ -291,6 +292,104 @@ class TestStagesFixture(unittest.TestCase):
         self.assertEqual(planning._as_date("29/04/2029").month, 4)
         self.assertIsNone(planning._as_date("2029-04-29"))
         self.assertIsNone(planning._as_date(None))
+
+
+class TestStageEvidenceLimits(unittest.TestCase):
+    def test_inconsistent_outcomes_and_pending_aliases_are_checked_both_ways(self):
+        pairs = [('Approved', 'Refused'), ('Approve', 'Under Consideration'),
+                 ('Approved', 'Pending Decision'), ('Granted', 'Received'),
+                 ('Refused', 'Application Under Consideration')]
+        for left, right in pairs:
+            for status, decision in ((left, right), (right, left)):
+                with self.subTest(status=status, decision=decision):
+                    text = ' '.join(planning.explain({'status': status, 'decision': decision}, {}))
+                    self.assertIn('fields conflict', text)
+                    self.assertNotIn('Approval is recorded', text)
+                    self.assertNotIn('Approval relates', text)
+
+    def test_lifecycle_labels_do_not_negate_an_earlier_recorded_decision(self):
+        for status in ('Closed', 'Superseded', 'Lapsed', 'Completed', 'Withdrawn'):
+            with self.subTest(status=status):
+                text = ' '.join(planning.explain({'status': status, 'decision': 'Approved'}, {}))
+                self.assertIn('Status ' + status, text)
+                self.assertNotIn('fields conflict', text)
+                self.assertNotIn('without a planning decision', text)
+                self.assertNotIn('before a decision', text)
+
+    def test_generic_conditions_and_variations_are_not_classified_as_discharge(self):
+        descriptions = [
+            'New dwelling subject to condition 4 for landscaping',
+            'Variation of condition 2 (approved plans)',
+            'New dwelling following approval of details reserved by condition 4',
+        ]
+        for description in descriptions:
+            with self.subTest(description=description):
+                rec = {'status': 'Approved', 'decision': 'Approved', 'description': description,
+                       'application_type_full': 'Full Planning Permission'}
+                text = ' '.join(planning.explain(rec, {}))
+                self.assertIn('record mentions planning conditions', text)
+                self.assertNotIn('Approval relates to submitted condition details', text)
+                self.assertNotIn('not a new general planning permission', text)
+                self.assertNotIn('text concerns pre-occupation', text)
+
+    def test_explicit_application_type_or_current_details_wording_identifies_discharge(self):
+        cases = [{'application_type': 'AOD', 'description': 'Building materials'},
+                 {'application_type_full': 'Discharge of Conditions', 'description': 'Building materials'},
+                 {'description': 'Approval of details reserved by condition 4'},
+                 {'description': 'Application for discharge of condition 4'}]
+        for fields in cases:
+            with self.subTest(fields=fields):
+                rec = dict(fields, status='Approved', decision='Approved')
+                text = ' '.join(planning.explain(rec, {}))
+                self.assertIn('Approval relates to submitted condition details', text)
+                self.assertIn('not evidence that work is starting or finishing', text)
+
+    def test_unknown_decision_wording_is_not_invented_as_approval(self):
+        text = ' '.join(planning.explain({'decision': 'Approval not required'}, {}))
+        self.assertNotIn('Approval is recorded', text)
+
+    def test_explanations_leave_raw_conflicting_fields_and_dates_intact(self):
+        source = {'status': 'Under Consideration', 'decision': 'Approved',
+                  'decision_date': '11/08/2026', 'actual_commencement_date': '12/08/2026',
+                  'actual_completion_date': '01/09/2026', 'lapsed_date': '11/08/2029'}
+        rec = planning.shape(source)
+        before = json.dumps([source, rec], sort_keys=True)
+        text = ' '.join(planning.explain(rec, source))
+        self.assertIn('fields conflict', text)
+        self.assertIn('commencement on 12/08/2026', text)
+        self.assertIn('completion on 01/09/2026', text)
+        self.assertIn('lapse date of 11/08/2029', text)
+        self.assertEqual('Under Consideration', rec['status'])
+        self.assertEqual('Approved', rec['decision'])
+        self.assertEqual('11/08/2026', rec['decision_date'])
+        self.assertEqual(before, json.dumps([source, rec], sort_keys=True))
+
+    def test_pending_status_overrules_inconsistent_approval_field_for_inference(self):
+        rec={'status':'Application Under Consideration','decision':'Approved','decision_date':'11/08/2026',
+             'description':'Demolition of an extension','application_type_full':'Full Planning Permission'}
+        lines=planning.explain(rec,{})
+        text=' '.join(lines)
+        self.assertIn('fields conflict',text)
+        self.assertNotIn('Granted',text);self.assertNotIn('2029',text)
+        self.assertNotIn('Approval is recorded',text)
+    def test_condition_approval_is_not_new_permission_or_imminent_works(self):
+        rec={'status':'Approved','decision':'Approved','decision_date':'10/12/2024',
+             'description':'Approval of details reserved by condition 4 (construction management)',
+             'application_type_full':'Discharge of Conditions'}
+        text=' '.join(planning.explain(rec,{'lapsed_date':'10/12/2027'}))
+        self.assertIn('submitted condition details',text);self.assertIn('not evidence',text)
+        for bad in ('permission granted','works are about to start','must start before','permission expires'):
+            self.assertNotIn(bad,text)
+        self.assertIn('lapse date of 10/12/2027',text)
+    def test_approval_without_expiry_does_not_invent_a_three_year_window(self):
+        text=' '.join(planning.explain({'status':'Approved','decision':'Approved','decision_date':'11/08/2026'},{}))
+        self.assertIn('actual start date remains unknown',text)
+        self.assertNotIn('2029',text);self.assertNotIn('three years',text)
+    def test_recorded_completion_does_not_guarantee_all_disruption_over(self):
+        text=' '.join(planning.explain({'status':'Completed'},{'actual_completion_date':'01/08/2026'}))
+        self.assertIn('completion on 01/08/2026',text)
+        self.assertNotIn('disruption is over',text)
+        self.assertIn('other or later works',text)
 
 
 class TestTallWithConditionsFixture(unittest.TestCase):

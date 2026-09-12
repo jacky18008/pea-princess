@@ -578,21 +578,36 @@ def search(text, lpa=None, since=None, limit=50, verbose=False):
 
 # ------------------------------------------------------------- stages -------
 STATUS_PLAIN = {
-    "approved": "permission granted",
+    "approved": "application recorded as approved",
     "refused": "refused",
-    "withdrawn": "the applicant pulled it before a decision",
-    "superseded": "replaced by a later application on the same site",
-    "lapsed": "the permission expired unused",
-    "completed": "the works are recorded as finished",
+    "withdrawn": "record marked withdrawn; decision history needs checking",
+    "superseded": "record marked superseded; check the replacement record",
+    "lapsed": "record marked lapsed; current permission validity needs checking",
+    "completed": "record marked completed; this alone does not establish physical completion",
     "application received": "just submitted, not yet assessed",
-    "application under consideration": "being assessed now — a decision is coming",
-    "closed": "the file is closed without a planning decision",
+    "application under consideration": "being assessed; no decision timing established",
+    "closed": "record marked closed; decision history needs checking",
     "not required": "the council decided no permission was needed",
     "dismissed": "an appeal against refusal failed",
     "unknown": "the borough did not report a status",
 }
 COND_RE = re.compile(r"approval of details|reserved by condition|discharge of condition|"
                      r"\bAOD\b|condition[s]? \d", re.I)
+DETAILS_RE = re.compile(r"\b(?:approval of details|discharge of conditions?|condition discharge|AOD)\b", re.I)
+DETAILS_OPEN_RE = re.compile(r"^(?:(?:application|submission|request) for )?"
+                             r"(?:approval of details|discharge of conditions?|condition discharge|AOD)\b", re.I)
+VARIATION_RE = re.compile(r"\b(?:variation|removal|vary|remove)\b[^.;]{0,60}\bconditions?\b", re.I)
+STATUS_ALIASES = {
+    "under consideration": "application under consideration",
+    "pending": "application under consideration",
+    "pending decision": "application under consideration",
+    "received": "application received",
+    "approve": "approved",
+    "approved with conditions": "approved",
+    "granted": "approved",
+    "refuse": "refused",
+    "refused permission": "refused",
+}
 PRECOMMENCE_RE = re.compile(r"pre[- ]?commencement|prior to (?:the )?commencement|"
                             r"before (?:any )?(?:works|development) (?:begin|commence)|"
                             r"demolition|site set[- ]?up|construction (?:management|logistics)|"
@@ -621,49 +636,65 @@ def _as_date(d):
 def explain(rec, src):
     """Plain-English 'what does this mean for someone about to sign a tenancy'."""
     lines = []
-    status = (rec.get("status") or rec.get("decision") or "").strip().lower()
-    plain = STATUS_PLAIN.get(status)
+    status_raw, decision_raw = _str(rec.get("status")), _str(rec.get("decision"))
+    status = STATUS_ALIASES.get(status_raw.lower(), status_raw.lower())
+    dec = STATUS_ALIASES.get(decision_raw.lower(), decision_raw.lower())
+    # Unknown labels remain unknown; do not turn every string beginning "approv" into a grant.
+    display_status = status or dec
+    plain = STATUS_PLAIN.get(display_status)
     if plain:
         lines.append("Status %s = %s." % (rec.get("status") or rec.get("decision"), plain))
-    dec, dyear = (rec.get("decision") or "").lower(), _year_of(rec.get("decision_date"))
+    description = _str(src.get("description") or rec.get("description"))
+    types = " ".join(_str(rec.get(key)) for key in
+                     ("application_type", "application_type_full", "development_type"))
+    blob = " ".join((description, types))
+    details = bool(DETAILS_RE.search(types) or DETAILS_OPEN_RE.search(description))
+    # Varying/removing a condition or merely mentioning one does not identify an AOD case.
+    details = details and not bool(VARIATION_RE.search(blob))
+    condition = details or bool(COND_RE.search(blob) or VARIATION_RE.search(blob))
+    states = {status, dec}
+    approved = "approved" in states
+    pending = {"application received", "application under consideration"}
+    conflicting = (states == {"approved", "refused"} or
+                   bool(states & pending and states & {"approved", "refused"}))
     started = _str(src.get("actual_commencement_date")) or None
     finished = _str(src.get("actual_completion_date")) or None
     lapse = _str(src.get("lapsed_date")) or None
-    lapse_d, today = _as_date(lapse), date.today()
-    expired = bool(lapse_d and lapse_d < today)
-    if dec.startswith("approv") and not finished and not expired:
-        deadline = (" The permission expires %s, so works must start before then." % lapse
-                    if lapse_d else
-                    " Permissions normally run three years%s."
-                    % (", i.e. to about %d" % (dyear + 3) if dyear else ""))
-        if started:
-            lines.append("Work started %s and no completion is recorded, so this is most likely "
-                         "a live building site." % started)
-        else:
-            lines.append("Granted%s with no commencement recorded = works could start at any time."
-                         % (" %d" % dyear if dyear else "") + deadline)
+    if conflicting:
+        lines.append("The register's status and decision fields conflict; approval and current works "
+                     "are not established. Check the original decision record.")
+    elif approved and details:
+        lines.append("Approval relates to submitted condition details, not a new general planning "
+                     "permission or proof of work starting.")
+    elif approved:
+        lines.append("Approval is recorded; permission alone does not establish when works start "
+                     "or whether construction is happening now.")
+    if started:
+        lines.append("The register records commencement on %s; current on-site activity is not verified." % started)
+    elif approved and not conflicting:
+        lines.append("No commencement date is recorded; the actual start date remains unknown.")
     if finished:
-        lines.append("Completion recorded %s — the disruption is over." % finished)
-    if expired:
-        lines.append("Lapsed %s: the permission is dead unless it is renewed." % lapse)
-    if (src.get("appeal_status") or src.get("appeal_decision")):
-        lines.append("There is an appeal on file (status %s, decision %s) — a refusal can still "
-                     "turn into a permission."
-                     % (src.get("appeal_status"), src.get("appeal_decision")))
-    blob = " ".join(x for x in [rec.get("description"), rec.get("application_type_full"),
-                                rec.get("development_type")] if x)
-    if COND_RE.search(blob or ""):
-        pre = bool(PRECOMMENCE_RE.search(blob))
-        post = bool(PREOCCUPY_RE.search(blob))
-        lines.append("This is a condition-discharge application, which is a timing signal: "
-                     "pre-commencement conditions (demolition, piling, construction management, "
-                     "hoardings) mean works are about to start; pre-occupation conditions "
-                     "(landscaping, lighting, refuse stores, travel plans) mean the scheme is "
-                     "finishing." + (" The text reads pre-commencement." if pre and not post else
-                                     " The text reads pre-occupation." if post and not pre else
-                                     " The text does not say which type."))
+        lines.append("The register records completion on %s; this does not rule out other or later works." % finished)
+    if lapse:
+        lines.append("The register lists a lapse date of %s; verify the original permission and "
+                     "its conditions before interpreting validity or a construction deadline." % lapse)
+    # Never manufacture an expiry from decision-year + 3, including condition-only records.
+    if src.get("appeal_status") or src.get("appeal_decision"):
+        lines.append("An appeal is recorded (status %s, decision %s); inspect its actual outcome "
+                     "before interpreting permission." % (src.get("appeal_status"), src.get("appeal_decision")))
+    if details:
+        pre, post = bool(PRECOMMENCE_RE.search(blob)), bool(PREOCCUPY_RE.search(blob))
+        lines.append("This concerns condition details. A pre-commencement or pre-occupation condition "
+                     "describes a required stage, not evidence that work is starting or finishing now." +
+                     (" The text concerns pre-commencement matters." if pre and not post else
+                      " The text concerns pre-occupation matters." if post and not pre else
+                      " Its precise stage needs checking in the original condition."))
+    elif condition:
+        lines.append("The record mentions planning conditions; this alone does not identify a "
+                     "condition-discharge application or establish permission scope or current works. "
+                     "Check the application type and original decision.")
     if rec.get("tall_building_hint"):
-        lines.append("Screened as a big scheme (%s) — expect a long build and a possible change "
+        lines.append("Screened as a big scheme (%s) — investigate construction duration and possible changes "
                      "to daylight and views." % "; ".join(rec.get("tall_building_reasons") or []))
     return lines
 
