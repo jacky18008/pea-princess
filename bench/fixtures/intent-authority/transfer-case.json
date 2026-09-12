@@ -1,0 +1,53 @@
+{
+  "case_id": "transfer-area-commute-fee-v1",
+  "language": "zh-Hant",
+  "evidence_mode": "frozen_synthetic",
+  "fixture_preamble": "以下是離線測試專用的虛構房源資料，不對應真實刊登、地址或即時市場。通勤數字是本測試提供的同一平日早晨、到同一目的地的單程門到門估計。請只依這份資料及對話回覆；未提供的資訊維持未知，不需要上網或聯絡他人。",
+  "evidence": [
+    {
+      "source_id": "fixture-A",
+      "candidate_id": "A",
+      "name": "榆庭公寓",
+      "area": "北區",
+      "monthly_advertised_rent_gbp": 1980,
+      "fixed_management_fee": "資料明載：沒有另收每月固定管理費。",
+      "commute_minutes_door_to_door": 46,
+      "commute_interchanges": 1,
+      "property_notes": "一房；室內面積 47 平方公尺。"
+    },
+    {
+      "source_id": "fixture-B",
+      "candidate_id": "B",
+      "name": "槭園公寓",
+      "area": "南區",
+      "monthly_advertised_rent_gbp": 1990,
+      "fixed_management_fee": "資料明載：沒有另收每月固定管理費。",
+      "commute_minutes_door_to_door": 38,
+      "commute_interchanges": 0,
+      "property_notes": "一房；室內面積 44 平方公尺。"
+    },
+    {
+      "source_id": "fixture-C",
+      "candidate_id": "C",
+      "name": "杉灣公寓",
+      "area": "北區",
+      "monthly_advertised_rent_gbp": 2090,
+      "fixed_management_fee": "同一份資料另一欄列有每月 £80 固定管理費，未註明已含在 £2,090 租金內，或須另付。",
+      "commute_minutes_door_to_door": 29,
+      "commute_interchanges": 0,
+      "property_notes": "一房；室內面積 43 平方公尺。"
+    }
+  ],
+  "turns": [
+    {
+      "turn": 1,
+      "role": "user",
+      "content": "先幫我比這三間就好，不用另外找。月租最多 £2,000。北區我比較喜歡，通勤希望抓在 40 分鐘左右，但也想聽你對取捨的判斷。照這份資料，你會建議我先看哪一間？"
+    },
+    {
+      "turn": 2,
+      "role": "user",
+      "content": "一般預算還是 £2,000。C 我可以單獨放到 £2,100，但前提是每月固定管理費已含在租金裡，不能再加收。南區這次我願意看 B，不代表接下來把南區當優先。通勤超過 45 分鐘的先不排看房。先按手上資料重排，也把費用還不確定的地方講清楚，暫時不用問我生活習慣。"
+    }
+  ]
+}

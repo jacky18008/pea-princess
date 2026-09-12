@@ -1,0 +1,46 @@
+{
+  "case_id": "quiet-road-scope-v1",
+  "language": "zh-Hant",
+  "evidence_mode": "frozen_synthetic_adaptation",
+  "fixture_preamble": "這是離線測試專用的虛構房源比較，借用過往案例的數字來測試條件理解；不代表目前真實刊登或完整周邊研究。請只依這份資料及對話回覆。未提供的資訊維持未知，不需要上網或聯絡他人。",
+  "evidence": [
+    {
+      "source_id": "fixture-A",
+      "candidate_id": "A",
+      "name": "房源 A",
+      "monthly_advertised_rent_gbp": 2250,
+      "bedrooms": 1,
+      "advertised_area_m2": 44.96,
+      "epc_internal_area_m2": null,
+      "surroundings": "測試提供的街道觀察：住宅支路。沒有房內或晚間實聽資料。",
+      "bedroom_faces_main_road": null,
+      "bedroom_faces_railway": null,
+      "heating_cost_included_in_rent": null
+    },
+    {
+      "source_id": "fixture-B",
+      "candidate_id": "B",
+      "name": "房源 B",
+      "monthly_advertised_rent_gbp": 1800,
+      "bedrooms": 1,
+      "advertised_area_m2": 31.77,
+      "epc_internal_area_m2": null,
+      "surroundings": "測試提供的街道觀察：距主幹道約 50 公尺，鐵路約 180 公尺。距離是街道層級資料，不能推算室內音量、窗向或是否存在安靜的一側。",
+      "bedroom_faces_main_road": null,
+      "bedroom_faces_railway": null,
+      "heating_cost_included_in_rent": null
+    }
+  ],
+  "turns": [
+    {
+      "turn": 1,
+      "role": "user",
+      "content": "房租上限 £2300，想找一房，偏好安靜。請比較這兩間，先用手上的房租、房數、面積跟周邊資料，給我你的取捨建議，不用找新的房源。"
+    },
+    {
+      "turn": 2,
+      "role": "user",
+      "content": "好，繼續比。房租上限改成 £2100，臥室正對大馬路就排除。暖氣費包含在房租裡嗎？先不找新房源。"
+    }
+  ]
+}
