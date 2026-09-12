@@ -113,6 +113,86 @@ class TestReading(unittest.TestCase):
         self.assertIn("rent", rec["unknown"])
 
 
+class TestPropertyPostcode(unittest.TestCase):
+    def assert_unknown(self, raw, kind='text'):
+        rec = LF.extract(raw, kind)
+        self.assertNotIn('postcode', rec['fields'])
+        self.assertIn('postcode', rec['unknown'])
+        self.assertTrue(rec['postcode_candidates'])
+        self.assertTrue(rec['postcode_note'])
+        return rec
+
+    def test_pdf_style_office_footer_is_not_the_property_outcode(self):
+        rec = self.assert_unknown('1 bedroom flat for rent, Example Road, N4\n£1,800 pcm\n'
+                                  'Our local office\nExample Agency\n12 Demo Street\nLondon\nN8 1AA\nCall 020 0000 0000')
+        self.assertEqual(1800, rec['fields']['rent']['value'])
+        self.assertEqual('office', rec['postcode_candidates'][0]['role'])
+        self.assertIn('Our local office', rec['postcode_candidates'][0]['quote'])
+        self.assertNotIn('address', rec['fields'])
+
+    def test_office_first_does_not_hide_explicit_property_address(self):
+        rec = LF.extract('Our local office\nN8 1AA\nProperty address: 4 Sample Road, N4 2BB', 'text')
+        self.assertEqual('N4 2BB', rec['fields']['postcode']['value'])
+        self.assertIn('excluded', rec['postcode_note'])
+
+    def test_property_first_survives_office_footer(self):
+        rec = LF.extract('Property address: 4 Sample Road, N4 2BB\n£1,800 pcm\nOur local office\nN8 1AA', 'text')
+        self.assertEqual('N4 2BB', rec['fields']['postcode']['value'])
+
+    def test_unassigned_different_postcodes_remain_ambiguous(self):
+        rec = self.assert_unknown('4 Sample Road, N4 2BB\n12 Demo Street, N8 1AA')
+        self.assertIn('Conflicting', rec['postcode_note'])
+        self.assertEqual(2, len(rec['postcode_candidates']))
+
+    def test_jsonld_agent_address_does_not_win_before_dwelling(self):
+        obj = {'@type': 'RealEstateListing', 'agent': {'@type': 'RealEstateAgent', 'address':
+               {'streetAddress': '12 Demo Street', 'postalCode': 'N8 1AA'}},
+               'about': {'@type': 'Apartment', 'address': {'streetAddress': '4 Sample Road', 'postalCode': 'N4 2BB'}}}
+        rec = LF.extract('<script type="application/ld+json">'+json.dumps(obj)+'</script>', 'html')
+        self.assertEqual('N4 2BB', rec['fields']['postcode']['value'])
+        self.assertEqual('4 Sample Road', rec['fields']['address']['value'])
+        self.assertIn('/agent/address/postalCode', rec['postcode_candidates'][0]['quote'])
+
+    def test_jsonld_organization_only_is_not_a_property(self):
+        rec = self.assert_unknown('<script type="application/ld+json">'+json.dumps(
+            {'@type':'Organization', 'address': {'streetAddress':'12 Demo Street', 'postalCode':'N8 1AA'}})+'</script>', 'html')
+        self.assertNotIn('address', rec['fields'])
+
+    def test_embedded_children_do_not_lose_agent_scope(self):
+        raw = '<script>window.data = '+json.dumps({'agentData': {'address':
+            {'streetAddress':'12 Demonstration Street, London', 'postalCode':'N8 1AA'}}})+';</script>'
+        rec = self.assert_unknown(raw, 'html')
+        self.assertTrue(all(c['role']=='office' for c in rec['postcode_candidates']))
+        self.assertNotIn('address', rec['fields'])
+
+    def test_microdata_office_scope_and_whitespace_normalization(self):
+        for tag in ('<span itemprop="postalCode">n81aa</span>', '<meta itemprop="postalCode" content="N8 1AA">'):
+            with self.subTest(tag=tag):
+                rec = self.assert_unknown('<div itemscope itemtype="https://schema.org/RealEstateAgent">'+tag+'</div>', 'html')
+                self.assertTrue(any(c['role']=='office' and c['value']=='N8 1AA' for c in rec['postcode_candidates']))
+
+    def test_microdata_property_sibling_is_not_inherited_office_scope(self):
+        raw = ('<div itemscope itemtype="https://schema.org/RealEstateAgent"><span itemprop="postalCode">N8 1AA</span></div>'
+               '<div itemscope itemtype="https://schema.org/Apartment"><span itemprop="postalCode">N4 2BB</span></div>')
+        self.assertEqual('N4 2BB', LF.extract(raw, 'html')['fields']['postcode']['value'])
+
+    def test_void_agent_link_does_not_leak_scope_into_property_microdata(self):
+        raw = ('<div itemscope itemtype="https://schema.org/Apartment">'
+               '<link itemprop="agent" href="https://example.invalid/agent">'
+               '<span itemprop="postalCode">N4 2BB</span></div>')
+        self.assertEqual('N4 2BB', LF.extract(raw, 'html')['fields']['postcode']['value'])
+
+    def test_contact_metadata_is_not_a_property_postcode(self):
+        self.assert_unknown('<meta property="business:contact_data:postal_code" content="N8 1AA">', 'html')
+
+    def test_structured_and_visible_property_conflict_is_retained(self):
+        raw = '<script type="application/ld+json">'+json.dumps({'@type':'Apartment','address':{'postalCode':'N4 2BB'}})+'</script><p>Property postcode: N8 1AA</p>'
+        self.assertIn('Conflicting', self.assert_unknown(raw,'html')['postcode_note'])
+
+    def test_partial_structured_postcode_is_not_a_full_property_location(self):
+        self.assert_unknown('<script type="application/ld+json">'+json.dumps({'@type':'Apartment','address':{'postalCode':'N4'}})+'</script>', 'html')
+
+
 class TestItNeverFetches(unittest.TestCase):
     """The rule that keeps this tool on the Amstrad side of the line: no network code, and
     a web address is refused with an instruction to save the page instead."""

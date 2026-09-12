@@ -18,6 +18,9 @@ How it reads, in order of trust:
      standard keys (price, numberOfRooms, floorSize, postalCode ...)
   4. the visible text, with plain-language patterns ("£1,800 pcm", "2 bedrooms",
      "3rd floor", "540 sq ft", a UK postcode)
+Postcodes retain candidates and office/entity context across these layers; conflicting
+possible property postcodes stay unknown rather than taking the first hit. These
+context clues do not establish a verified property address.
 Nothing here is written for one website: no site names, no page selectors.
 
 What it refuses: a web address. It prints an error asking the person to open the
@@ -45,9 +48,34 @@ REFUSAL = ("This tool does not open web pages. Open the listing in your browser,
            "the page (or copy the text), and pass the file.")
 
 URL_LIKE = re.compile(r"^\s*(?:https?://|www\.)\S+\s*$", re.I)
-POSTCODE = re.compile(r"\b([A-Z]{1,2}\d[A-Z\d]?)\s*(\d[A-Z]{2})\b")
+POSTCODE = re.compile(r"\b([A-Z]{1,2}\d[A-Z\d]?)\s*(\d[A-Z]{2})\b", re.I)
 OUTCODE = re.compile(r"\b([A-Z]{1,2}\d[A-Z\d]?)\b")
 MONEY = r"£\s?(\d{1,3}(?:,\d{3})+|\d+)(?:\.(\d{2}))?"
+OFFICE_WORDS = re.compile(r"\b(?:office|branch|agency|registered address|contact details|contact us|(?:estate|letting|lettings) agents?)\b", re.I)
+PROPERTY_LABEL = re.compile(r"\b(?:property|listing|flat|apartment|house)\s+(?:address|postcode|location)\b", re.I)
+OFFICE_KEYS = frozenset(('agent', 'agents', 'agency', 'agentdetails', 'estateagent', 'realestateagent',
+                         'office', 'branch', 'broker', 'seller', 'provider', 'publisher', 'author',
+                         'contact', 'contactdetails', 'contactdata', 'agentoffice', 'agentdata', 'agentaddress', 'officeaddress', 'branchaddress', 'organization', 'organisation'))
+OFFICE_TYPES = frozenset(('realestateagent', 'organization', 'organisation', 'localbusiness', 'person'))
+PROPERTY_TYPES = frozenset(('apartment', 'house', 'residence', 'accommodation', 'singlefamilyresidence', 'realestatelisting'))
+
+
+def key_name(value):
+    return re.sub(r"[^a-z0-9]", "", str(value).lower())
+
+
+def entity_role(obj, inherited='unassigned'):
+    if inherited == 'office':
+        return inherited
+    types = obj.get('@type', [])
+    if not isinstance(types, list):
+        types = [types]
+    names = {key_name(str(t).rsplit('/', 1)[-1]) for t in types}
+    if names & OFFICE_TYPES:
+        return 'office'
+    return 'property' if names & PROPERTY_TYPES else inherited
+
+
 WORD_NUM = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "studio": 0}
 
 # Standard keys that carry the same meaning wherever a page embeds them.
@@ -72,6 +100,7 @@ class Collector(HTMLParser):
     """Titles, meta tags, canonical link, script blocks, microdata and visible text."""
 
     SKIP = ("script", "style", "noscript", "template", "svg", "head")
+    VOID = frozenset(("area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"))
 
     def __init__(self):
         HTMLParser.__init__(self, convert_charrefs=True)
@@ -79,6 +108,8 @@ class Collector(HTMLParser):
         self.meta = collections.OrderedDict()
         self.scripts = []                       # (type, text)
         self.microdata = collections.OrderedDict()
+        self.micro_locations = []
+        self._roles = []
         self.text_parts = []
         self._stack = []
         self._script_type = None
@@ -87,7 +118,12 @@ class Collector(HTMLParser):
 
     def handle_starttag(self, tag, attrs):
         a = dict(attrs)
-        self._stack.append(tag)
+        role = entity_role({'@type': (a.get('itemtype') or '').split()}, self._roles[-1] if self._roles else 'unassigned')
+        if key_name(a.get('itemprop', '')) in OFFICE_KEYS:
+            role = 'office'
+        if tag not in self.VOID:
+            self._stack.append(tag)
+            self._roles.append(role)
         if tag == "title":
             self._in_title = True
         elif tag == "meta":
@@ -98,13 +134,13 @@ class Collector(HTMLParser):
             self.canonical = a["href"].strip()
         elif tag == "script":
             self._script_type = (a.get("type") or "").lower()
-        elif a.get("itemprop"):
+        if a.get("itemprop"):
             prop = a["itemprop"].strip()
             value = a.get("content") or a.get("datetime") or a.get("href")
             if value:
-                self.microdata.setdefault(prop, value.strip())
+                self._micro(prop, value.strip(), role)
             else:
-                self._itemprop = prop
+                self._itemprop = (prop, role)
         if tag in ("br", "p", "div", "li", "tr", "h1", "h2", "h3", "h4", "section", "article", "dd", "dt"):
             self.text_parts.append("\n")
 
@@ -115,11 +151,26 @@ class Collector(HTMLParser):
             self._script_type = None
         if self._stack and self._stack[-1] == tag:
             self._stack.pop()
+            self._roles.pop()
         elif tag in self._stack:
-            while self._stack and self._stack.pop() != tag:
-                pass
+            while self._stack:
+                popped = self._stack.pop()
+                self._roles.pop()
+                if popped == tag:
+                    break
         if tag in ("p", "div", "li", "tr", "h1", "h2", "h3", "h4", "section", "article", "dd"):
             self.text_parts.append("\n")
+
+    def _micro(self, prop, value, role):
+        if key_name(prop) in STANDARD_KEYS['postcode'] + STANDARD_KEYS['address']:
+            node = {prop: value}
+            if role == 'office':
+                node = {'agent': node}
+            elif role == 'property':
+                node['@type'] = 'Accommodation'
+            self.micro_locations.append(node)
+        else:
+            self.microdata.setdefault(prop, value)
 
     def handle_data(self, data):
         if self._in_title:
@@ -133,7 +184,7 @@ class Collector(HTMLParser):
         if self._itemprop:
             text = data.strip()
             if text:
-                self.microdata.setdefault(self._itemprop, text)
+                self._micro(self._itemprop[0], text, self._itemprop[1])
                 self._itemprop = None
         self.text_parts.append(data)
 
@@ -173,7 +224,10 @@ def embedded_json_objects(scripts, limit=40):
     for kind, text in scripts:
         if "ld+json" in kind or len(text) < 40:
             continue
+        covered_end = -1
         for start in [m.start() for m in re.finditer(r"\{", text)][:200]:
+            if start <= covered_end:
+                continue
             depth, in_str, esc = 0, False, False
             for i in range(start, min(len(text), start + 400000)):
                 ch = text[i]
@@ -192,6 +246,7 @@ def embedded_json_objects(scripts, limit=40):
                 elif ch == "}":
                     depth -= 1
                     if depth == 0:
+                        covered_end = i
                         chunk = text[start:i + 1]
                         if len(chunk) > 60:
                             try:
@@ -206,13 +261,19 @@ def embedded_json_objects(scripts, limit=40):
     return out
 
 
-def walk(obj, found, path=""):
-    """Collect standard keys anywhere in a nested object; first hit per field wins."""
+def walk(obj, found, path="", postcode_candidates=None, role="unassigned"):
+    """Collect standard fields, retaining postcode candidates with their entity scope."""
     if isinstance(obj, dict):
+        role = entity_role(obj, role)
         for key, value in obj.items():
             lowered = str(key).replace("_", "").replace("-", "").lower()
             for field, names in STANDARD_KEYS.items():
-                if lowered in names and field not in found:
+                if lowered in names and field == 'postcode' and postcode_candidates is not None:
+                    if isinstance(value, (str, int, float)):
+                        postcode_candidates.append({'value': str(value).strip().upper(), 'role': role,
+                            'quote': '%s at %s/%s' % (json.dumps(value, ensure_ascii=False), path, key)})
+                    continue
+                if lowered in names and field not in found and not (role == 'office' and field in ('address', 'postcode')):
                     if isinstance(value, dict):
                         scalar = value.get("value") if "value" in value else (value.get("price") or value.get("name"))
                         unit = value.get("unitCode") or value.get("unitText") or value.get("priceCurrency")
@@ -220,10 +281,58 @@ def walk(obj, found, path=""):
                             found[field] = (scalar, unit, path + "/" + str(key))
                     elif isinstance(value, (str, int, float)) and str(value).strip():
                         found[field] = (value, None, path + "/" + str(key))
-            walk(value, found, path + "/" + str(key))
+            walk(value, found, path + "/" + str(key), postcode_candidates, "office" if lowered in OFFICE_KEYS else role)
     elif isinstance(obj, list):
         for i, item in enumerate(obj[:50]):
-            walk(item, found, path + "[%d]" % i)
+            walk(item, found, path + "[%d]" % i, postcode_candidates, role)
+
+
+def text_postcodes(text):
+    candidates = []
+    for match in POSTCODE.finditer(text):
+        # PDF text may put an office heading several short lines before its postcode.
+        before = text[max(0, match.start() - 500):match.start()]
+        lines = [line.strip() for line in before.splitlines() if line.strip()][-6:]
+        context = '\n'.join(lines)
+        offices = list(OFFICE_WORDS.finditer(context))
+        properties = list(PROPERTY_LABEL.finditer(context))
+        role = 'unassigned'
+        if offices and (not properties or offices[-1].start() > properties[-1].start()):
+            role = 'office'
+        elif properties:
+            role = 'property'
+        candidates.append({'value': (match.group(1) + ' ' + match.group(2)).upper(),
+                           'how': 'text', 'role': role,
+                           'quote': re.sub(r'\s+', ' ', (context + ' ' + text[match.start():match.end()])).strip()[-500:]})
+    return candidates
+
+
+def resolve_postcode(candidates):
+    """An office is not the dwelling; conflicting plausible postcodes stay unknown."""
+    for candidate in candidates:
+        match = POSTCODE.fullmatch(candidate['value'])
+        if match:
+            candidate['value'] = (match.group(1) + ' ' + match.group(2)).upper()
+    office_values = {c['value'] for c in candidates if c['role'] == 'office'}
+    usable = []
+    for candidate in candidates:
+        match = POSTCODE.fullmatch(candidate['value'])
+        if not match or candidate['role'] == 'office':
+            continue
+        if candidate['role'] != 'property' and candidate['value'] in office_values:
+            continue
+        usable.append(candidate)
+    values = {c['value'] for c in usable}
+    if len(values) == 1:
+        chosen = usable[0]
+        return collections.OrderedDict([('value', chosen['value']), ('unit', None),
+                                       ('how', chosen['how']), ('quote', chosen['quote'])]), (
+            'Office/contact postcodes were excluded.' if office_values else None)
+    if len(values) > 1:
+        return None, 'Conflicting possible property postcodes; confirm the property address.'
+    if candidates:
+        return None, 'No unambiguous full property postcode; office/contact or incomplete location values are retained as candidates only.'
+    return None, None
 
 
 # ------------------------------------------------------------------ text --
@@ -241,7 +350,7 @@ def sentence_around(text, start, end, width=110):
     return re.sub(r"\s+", " ", span)[:220]
 
 
-def text_facts(text):
+def text_facts(text, postcode_candidates=None):
     facts = collections.OrderedDict()
 
     def put(field, value, unit, m, how="text"):
@@ -278,9 +387,12 @@ def text_facts(text):
         m = re.search(r"(\d[\d,]*(?:\.\d+)?)\s*(m²|sq\.?\s*m\b|sqm|square\s*met(?:re|er)s?)", text, re.I)
         if m:
             put("floor_area", number(m.group(1)), "m2", m)
-    m = POSTCODE.search(text)
-    if m:
-        put("postcode", (m.group(1) + " " + m.group(2)).upper(), None, m)
+    candidates = text_postcodes(text)
+    if postcode_candidates is not None:
+        postcode_candidates.extend(candidates)
+    selected, _ = resolve_postcode(candidates)
+    if selected:
+        facts['postcode'] = selected
     m = re.search(r"available\s+(?:from\s+)?(now|immediately|\d{1,2}(?:st|nd|rd|th)?\s+\w+\s+\d{4}|\d{4}-\d{2}-\d{2}|\d{1,2}/\d{1,2}/\d{2,4})", text, re.I)
     if m:
         put("available_from", m.group(1), None, m)
@@ -300,10 +412,15 @@ def text_facts(text):
 
 
 # --------------------------------------------------------------- assemble --
-def structured_facts(objects, how):
+def structured_facts(objects, how, postcode_candidates=None):
     found = collections.OrderedDict()
+    candidates = []
     for obj in objects:
-        walk(obj, found)
+        walk(obj, found, postcode_candidates=candidates)
+    for candidate in candidates:
+        candidate['how'] = how
+    if postcode_candidates is not None:
+        postcode_candidates.extend(candidates)
     facts = collections.OrderedDict()
     for field, (value, unit, path) in found.items():
         # "4th floor", "540 sq ft", "£1,595 pcm": a string with its unit inside is read
@@ -327,41 +444,56 @@ def structured_facts(objects, how):
             continue
         facts[field] = collections.OrderedDict([("value", value), ("unit", unit), ("how", how),
                                                 ("quote", "%s at %s" % (json.dumps(value, ensure_ascii=False), path))])
+    selected, _ = resolve_postcode(candidates)
+    if selected:
+        facts['postcode'] = selected
     return facts
 
 
 def extract(raw, kind):
     """(record) for one saved page (kind 'html') or pasted text (kind 'text')."""
     facts = collections.OrderedDict()
+    postcode_candidates = []
     source = collections.OrderedDict([("kind", "saved_page" if kind == "html" else "pasted_text")])
     if kind == "html":
         parser = Collector()
         parser.feed(raw)
         source["title"] = re.sub(r"\s+", " ", parser.title).strip() or None
         source["canonical"] = parser.canonical or parser.meta.get("og:url")
-        for field, fact in structured_facts(jsonld_objects(parser.scripts), "jsonld").items():
+        for field, fact in structured_facts(jsonld_objects(parser.scripts), "jsonld", postcode_candidates).items():
             facts.setdefault(field, fact)
         micro = collections.OrderedDict((k, v) for k, v in parser.microdata.items())
-        for field, fact in structured_facts([micro], "microdata").items():
+        for field, fact in structured_facts([micro] + parser.micro_locations, "microdata", postcode_candidates).items():
             facts.setdefault(field, fact)
-        meta_obj = {k.split(":")[-1]: v for k, v in parser.meta.items()}
-        for field, fact in structured_facts([meta_obj], "meta").items():
+        meta_objects = []
+        for key, value in parser.meta.items():
+            node = {key.split(':')[-1]: value}
+            if any(key_name(part) in OFFICE_KEYS or part == 'business' for part in key.split(':')[:-1]):
+                node = {'contact': node}
+            meta_objects.append(node)
+        for field, fact in structured_facts(meta_objects, "meta", postcode_candidates).items():
             facts.setdefault(field, fact)
-        for field, fact in structured_facts(embedded_json_objects(parser.scripts), "embedded_json").items():
+        for field, fact in structured_facts(embedded_json_objects(parser.scripts), "embedded_json", postcode_candidates).items():
             facts.setdefault(field, fact)
         text = visible_text(parser.text_parts)
     else:
         source["title"] = None
         source["canonical"] = None
         text = raw
-    for field, fact in text_facts(text).items():
+    for field, fact in text_facts(text, postcode_candidates).items():
         facts.setdefault(field, fact)
+    facts.pop('postcode', None)
+    selected, postcode_note = resolve_postcode(postcode_candidates)
+    if selected:
+        facts['postcode'] = selected
     known = list(STANDARD_KEYS.keys())
     return collections.OrderedDict([
         ("schema", "vet-flat/listing-fields/1"),
         ("source", source),
         ("fields", facts),
         ("unknown", [f for f in known if f not in facts]),
+        ("postcode_candidates", postcode_candidates),
+        ("postcode_note", postcode_note),
         ("note", "Values are what the page states; nothing here is verified against a register."),
     ])
 
