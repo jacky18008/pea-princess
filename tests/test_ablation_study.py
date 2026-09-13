@@ -143,7 +143,44 @@ class AblationTests(unittest.TestCase):
         """Exercise every stage, grouped judge shape and adaptive second call offline."""
         with tempfile.TemporaryDirectory() as tmp:
             out = Path(tmp) / "study"
-            a.prepare(out)
+            # The production preparer imports earlier calibration answers.
+            # A clean checkout has no ignored/private experiment directory, so
+            # exercise that import with a deliberately synthetic legacy run.
+            # Only the model transport is stubbed below; preparation, frozen
+            # files, full matrix, controller and usage accounting remain real.
+            legacy = Path(tmp) / "synthetic-legacy"
+            masks = {}
+            for case_id in a.CALIBRATION:
+                masks[case_id] = {"candidate_1": case_id + "-full",
+                                  "candidate_2": case_id + "-compact"}
+                case = {
+                    "id": case_id, "question": "What remains unknown?",
+                    "summary": "Synthetic partial summary.",
+                    "documents": [
+                        {"id": "D1", "title": "Included", "text": "Synthetic supplied evidence."},
+                        {"id": "D2", "title": "Withheld", "text": "Synthetic unsupplied evidence."},
+                    ],
+                    "history": [{"id": "U1", "role": "user", "text": "A synthetic condition remains unknown."}],
+                    "handoff": {"summary": "Synthetic compact memory."},
+                    "gold": {"required_findings": [{"id": case_id + "-F1", "severity": "critical", "description": "Retain uncertainty."}]},
+                }
+                q.write(legacy / "review-packets" / (case_id + ".json"), {"case": case})
+                for arm in ("full", "compact"):
+                    q.write(legacy / "answers" / (case_id + "-" + arm + ".json"), {
+                        "arm": arm, "supplied_document_ids": ["D1"] if arm == "full" else [],
+                        "final_answer": {"answer": "Unknown; synthetic legacy answer.",
+                                         "request_documents": ["D2"]},
+                    })
+            q.write(legacy / "plan.json", {"judge_masks": masks})
+            with patch.object(a, "OLD", legacy):
+                a.prepare(out)
+            calibration = q.read(out / "calibration" / "A1.json")["candidates"]
+            self.assertEqual(["D1"], [d["id"] for d in calibration["candidate_1"]["available_evidence"]["documents"]])
+            self.assertEqual([], calibration["candidate_2"]["available_evidence"]["documents"])
+            self.assertNotIn("request_documents", calibration["candidate_1"]["response"])
+            rental_calibration = q.read(out / "calibration" / "R3.json")["candidates"]
+            self.assertIn("history", rental_calibration["candidate_1"]["available_evidence"])
+            self.assertIn("memory", rental_calibration["candidate_2"]["available_evidence"])
             invoked = []
             def fake(output, call_id, prompt, schema, model, purpose, plan):
                 invoked.append(call_id)

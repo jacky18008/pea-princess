@@ -470,7 +470,9 @@ def _dispatch(out, key, mode):
             body = None
         state["pending"] = {"session": key, "turn": turn, "mode": mode,
                             "before_calls": turn - 1, "request": body,
-                            "questions": questions, "reserved_at": time.time()}
+                            "questions": questions, "reserved_at": time.time(),
+                            "intent_guard_version": snap.get("intent_guard_version"),
+                            "source_call_id": snap.get("messages", [{}])[-1].get("call_id") if mode == "ui" else None}
         _save(out, state)  # Always precedes any irreversible dispatch or UI handoff.
         if mode != "ui":
             path = "/api/session/" + state["sessions"][key]["remote_id"] + ("/control" if mode == "step" else "/message")
@@ -498,6 +500,8 @@ def reserve_ui(out, key):
 
 def _usage(detail):
     value = detail.get("usage", {})
+    if not isinstance(value, dict):
+        return None
     fields = ("input_tokens", "cached_input_tokens", "output_tokens")
     if any(type(value.get(k)) is not int or value[k] < 0 for k in fields):
         return None
@@ -509,7 +513,7 @@ def _usage(detail):
             "processed_tokens": incoming + outgoing}
 
 
-def _choice(spec, pending, submission, actual):
+def _choice(spec, pending, submission, actual, actual_input=None):
     if not isinstance(submission, dict) or submission.get("text") != actual:
         raise CoordinatorError("UI submission must preserve its exact actual transcript")
     question, option, free = (submission.get(k, "") for k in ("question", "option", "free_text"))
@@ -534,8 +538,29 @@ def _choice(spec, pending, submission, actual):
         raise CoordinatorError("UI transcript differs from the actual form serializer")
     if option and not submission.get("selection_reason", "").strip():
         raise CoordinatorError("record why the actual option matches the frozen semantic policy")
-    return {**copy.deepcopy(submission), "choice_coverage": "actual_option" if option else "missing",
-            "native_question": True}
+    recorded = {**copy.deepcopy(submission), "choice_coverage": "actual_option" if option else "missing",
+                "native_question": True}
+    if pending.get("intent_guard_version") == 1:
+        row = actual_input or {}
+        receipt = row.get("clarification_receipt")
+        if (not isinstance(receipt, dict) or receipt.get("call_id") != pending.get("source_call_id")
+                or not isinstance(receipt.get("answers"), list) or len(receipt["answers"]) != 1):
+            raise CoordinatorError("guarded form lacks its actual source-call receipt")
+        answer = receipt["answers"][0]
+        if not isinstance(answer, dict):
+            raise CoordinatorError("invalid guarded form answer receipt")
+        index, selected = answer.get("question_index"), answer.get("option_index")
+        if type(index) is not int or not 0 <= index < len(questions) or questions[index] != found:
+            raise CoordinatorError("guarded form question differs from its reserved control")
+        if option and (type(selected) is not int or not 0 <= selected < len(found["options"]) or found["options"][selected] != option):
+            raise CoordinatorError("guarded form option differs from its reserved control")
+        if (not option and selected is not None) or answer.get("question") != question or answer.get("selected_option") != (option or None) or answer.get("free_text") != free.strip():
+            raise CoordinatorError("guarded form receipt differs from the actual selected answer")
+        authority = "；".join(v for v in (option, free.strip()) if v)
+        if row.get("intent_text") != authority:
+            raise CoordinatorError("assistant question prefix leaked into user intent authority")
+        recorded.update(intent_text=authority, clarification_receipt=copy.deepcopy(receipt))
+    return recorded
 
 
 def record_observed(out, key, submission=None):
@@ -582,7 +607,7 @@ def record_observed(out, key, submission=None):
         if spec["mode"] == "choice":
             if not pending or pending.get("mode") != "ui":
                 raise CoordinatorError("choice recovery requires the saved pre-UI reservation")
-            selected = _choice(spec, pending, submission, actual)
+            selected = _choice(spec, pending, submission, actual, inputs[-1] if inputs else None)
         elif actual != spec["text"]:
             raise CoordinatorError("observed input differs from frozen case text")
         valid = (detail.get("integrity", {}).get("ok") is True

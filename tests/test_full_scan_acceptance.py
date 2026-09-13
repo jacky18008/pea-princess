@@ -444,6 +444,51 @@ class FullScanAcceptanceTests(unittest.TestCase):
         self.assert_blocked_without_post(lambda: coordinator.step(self.out, 'B-r1'))
         self.assertEqual(1, self.host.dispatches)
 
+    def test_null_inspector_usage_is_recorded_unknown_and_halts_without_crashing(self):
+        self.prepare()
+        sid = self.create()
+        coordinator.step(self.out, 'A-r1')
+        self.host.sessions[sid]['details']['call-1']['usage'] = None
+        coordinator.record_observed(self.out, 'A-r1')
+        result = coordinator.report(self.out)
+        self.assertEqual(1, result['recorded_calls'])
+        self.assertIsNone(result['processed_tokens'])
+        self.assertTrue(result['halted'])
+        self.assertEqual(1, self.host.dispatches)
+
+    def test_guarded_choice_preserves_raw_question_but_validates_answer_only_authority(self):
+        question = 'Which scope?'
+        pending = {'questions': [{'question': question, 'options': ['Full scan', 'Advice only']}],
+                   'intent_guard_version': 1, 'source_call_id': 'call-1'}
+        spec = {'text': 'Add these details.'}
+        actual = question + '\nAdd these details.'
+        submission = {'question': question, 'option': '', 'free_text': spec['text'], 'text': actual}
+        receipt = {'call_id': 'call-1', 'answers': [{'question_index': 0, 'question': question,
+                    'option_index': None, 'selected_option': None, 'free_text': spec['text']}]}
+        row = {'text': actual, 'intent_text': spec['text'], 'clarification_receipt': receipt}
+        result = coordinator._choice(spec, pending, submission, actual, row)
+        self.assertEqual(actual, result['text'])
+        self.assertEqual(spec['text'], result['intent_text'])
+        self.assertEqual(receipt, result['clarification_receipt'])
+        for bad in ({}, dict(row, intent_text=actual), dict(row, clarification_receipt=dict(receipt, call_id='stale'))):
+            with self.subTest(bad=bad), self.assertRaises(coordinator.CoordinatorError):
+                coordinator._choice(spec, pending, submission, actual, bad)
+
+    def test_guarded_actual_option_receipt_cannot_select_an_unoffered_control(self):
+        question = 'Which scope?'
+        pending = {'questions': [{'question': question, 'options': ['Full scan', 'Advice only']}],
+                   'intent_guard_version': 1, 'source_call_id': 'call-1'}
+        actual = question + '\nAdvice only'
+        submission = {'question': question, 'option': 'Advice only', 'free_text': '', 'text': actual,
+                      'selection_reason': 'The actual option matches the frozen advice-only policy.'}
+        answer = {'question_index': 0, 'question': question, 'option_index': 1, 'selected_option': 'Advice only', 'free_text': ''}
+        row = {'text': actual, 'intent_text': 'Advice only', 'clarification_receipt': {'call_id': 'call-1', 'answers': [answer]}}
+        result = coordinator._choice({}, pending, submission, actual, row)
+        self.assertEqual('actual_option', result['choice_coverage'])
+        row['clarification_receipt']['answers'][0]['option_index'] = 0
+        with self.assertRaises(coordinator.CoordinatorError):
+            coordinator._choice({}, pending, submission, actual, row)
+
     def test_cached_input_is_inclusive_and_is_not_counted_twice(self):
         self.prepare()
         self.first_call()
