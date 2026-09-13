@@ -12,6 +12,7 @@ import stat
 import time
 import uuid
 from contextlib import contextmanager
+from datetime import datetime, timezone
 
 try:
     import fcntl
@@ -21,7 +22,7 @@ except ImportError:
 VERSION = "vet-flat/area-scan-store/1"
 MAX_RECORDS = 128
 MAX_BYTES = 1024 * 1024
-TERMINAL = ("complete", "partial", "failed")
+TERMINAL = ("complete", "partial", "failed", "timed_out", "interrupted")
 
 
 def encoded(value):
@@ -153,12 +154,83 @@ def validate(record, key=None):
         if (not isinstance(result, dict) or result.get("schema") != "vet-flat/area-scan/2"
                 or record.get("result_sha256") != digest(result)):
             raise ValueError("scan result hash/schema mismatch")
+    checkpoint = record.get("checkpoint")
+    if checkpoint is not None:
+        if (not isinstance(checkpoint, dict) or record.get("checkpoint_sha256") != digest(checkpoint)
+                or not isinstance(checkpoint.get("sources"), dict)):
+            raise ValueError("scan checkpoint hash/schema mismatch")
+        partial = checkpoint.get("result")
+        if partial is not None and (not isinstance(partial, dict) or partial.get("schema") != "vet-flat/area-scan/2"):
+            raise ValueError("invalid partial scan result")
     return record
 
 
 def coverage(out):
     return {"noise": (out.get("noise") or {}).get("coverage"),
             "planning": (out.get("works") or {}).get("coverage")}
+
+
+def _interrupted_record(rec, now):
+    """Only called while holding the producer's exact flock; a PID is not a lease."""
+    out = copy.deepcopy((rec.get("checkpoint") or {}).get("result"))
+    if not out:
+        out = status_result("interrupted", "Prior producer stopped before saving usable research.")
+    note = "Producer lease was released before completion; cause unknown (network failure is not established). No automatic retry."
+    out.setdefault("not_found", []).append(note)
+    out.update(ok=False, scan_status="interrupted", note=note)
+    out["how_to_use"] = "Interrupted scan. Retained completed-source observations are partial evidence; do not claim completed coverage or retry automatically."
+    progress = copy.deepcopy((rec.get("checkpoint") or {}).get("sources") or {})
+    for item in progress.values():
+        if item.get("status") in ("running", "pending"):
+            item.update(status="interrupted", finished_at=now(), note="producer lease released before this source completed")
+    out["source_progress"] = progress
+    rec.update(state="interrupted", saved_at=now(), interrupted_at=now(), result=out, result_sha256=digest(out),
+               diagnosis={"code": "producer_lease_released", "network_cause": "unknown", "automatic_retry": False})
+    return rec
+
+
+def reconcile_running(root, now=None):
+    """Terminalize abandoned records without fetching, polling, killing or PID guessing.
+
+    An exact nonblocking flock decides ownership. A live producer (even after its
+    parent exits) keeps its lease; a reused PID cannot keep a released lease alive.
+    Old snapshots are compatible. Call this on owned mutable stores, not archives.
+    """
+    now = now or (lambda: datetime.now(timezone.utc).replace(microsecond=0).isoformat())
+    result = {"recovered": [], "pending": [], "gaps": []}
+    try:
+        with directory(root) as (_, fd):
+            names = sorted(n for n in os.listdir(fd) if n.endswith(".json"))
+            if len(names) > MAX_RECORDS:
+                raise ValueError("scan store exceeds record limit")
+            for name in names:
+                job = None
+                try:
+                    rec, _ = read_json(fd, name)
+                    validate(rec, name[:-5])
+                    if rec["state"] != "running":
+                        continue
+                    # Never create an absent lease during recovery: that is an integrity gap.
+                    job = open_private(fd, rec["key"] + ".lock")
+                    if not _lock(job, time.monotonic()):
+                        result["pending"].append(rec["key"])
+                        continue
+                    # A producer may have finished between the first read and acquiring its lock.
+                    rec, _ = read_json(fd, name)
+                    validate(rec, name[:-5])
+                    if rec["state"] == "running":
+                        atomic_json(fd, name, _interrupted_record(rec, now))
+                        result["recovered"].append(rec["key"])
+                except (OSError, ValueError, TypeError, KeyError) as exc:
+                    result["gaps"].append({"file": name, "reason": str(exc)[:180]})
+                finally:
+                    if job is not None:
+                        os.close(job)
+    except FileNotFoundError:
+        pass
+    except (OSError, ValueError) as exc:
+        result["gaps"].append({"reason": str(exc)[:180]})
+    return result
 
 
 def verified_index(root, limit=20):
@@ -185,7 +257,10 @@ def verified_index(root, limit=20):
                         "retrieved_at": out.get("retrieved_at"), "source_identity": rec["source_identity"],
                         "arguments": req, "requested_depth": req.get("requested_depth"),
                         "effective_depth": req.get("depth"), "coverage": coverage(out),
-                        "gap_count": len(out.get("not_found") or [])})
+                        "result_present": bool(rec.get("result")),
+                        "checkpoint_at": (rec.get("checkpoint") or {}).get("at"),
+                        "source_progress": out.get("source_progress") or (rec.get("checkpoint") or {}).get("sources") or {},
+                        "gap_count": len(out.get("not_found") or []) if rec.get("result") else None})
                 except (OSError, ValueError, TypeError, KeyError) as exc:
                     if len(result["gaps"]) < 16:
                         result["gaps"].append({"file": name, "reason": str(exc)[:180]})
@@ -224,7 +299,7 @@ def _lock(fd, deadline):
             time.sleep(min(0.05, remaining))
 
 
-def run(root, request, identity, scan_fn, now, wait_seconds=2):
+def run(root, request, identity, scan_fn, now, wait_seconds=2, with_checkpoint=False):
     """One producer per exact request; terminal/failed snapshots never auto-refresh."""
     key = digest({"request": request, "source_identity": identity})
     name = key + ".json"
@@ -254,7 +329,8 @@ def run(root, request, identity, scan_fn, now, wait_seconds=2):
                     rec = None
                 if rec is not None:
                     if rec["state"] == "running":
-                        return status_result("interrupted", "The prior scan stopped before saving a result. No automatic retry; inspect that run before explicitly choosing recovery in a new store.", key, result_path)
+                        rec = _interrupted_record(rec, now)
+                        atomic_json(fd, name, rec)
                     out = copy.deepcopy(rec["result"])
                     out["persistence"] = {"key": key, "path": result_path, "status": rec["state"], "reused": True,
                         "saved_at": rec["saved_at"], "retrieved_at": out.get("retrieved_at"), "automatic_retry": False,
@@ -264,14 +340,39 @@ def run(root, request, identity, scan_fn, now, wait_seconds=2):
                 rec = {"schema": VERSION, "key": key, "request": request, "source_identity": identity,
                        "state": "running", "started_at": now(), "owner_pid": os.getpid()}
                 atomic_json(fd, name, rec)
+                def checkpoint(value):
+                    # Scanner calls this on the producer thread only. Late source workers
+                    # have no storage callback, and cannot overwrite a terminal snapshot.
+                    if rec["state"] != "running":
+                        raise ValueError("cannot update a terminal scan checkpoint")
+                    value = copy.deepcopy(value)
+                    value["at"] = now()
+                    rec.update(checkpoint=value, checkpoint_sha256=digest(value), updated_at=value["at"])
+                    validate(rec, key)
+                    atomic_json(fd, name, rec)
                 try:
-                    out = scan_fn()
+                    out = scan_fn(checkpoint) if with_checkpoint else scan_fn()
                     if not isinstance(out, dict) or out.get("schema") != "vet-flat/area-scan/2":
                         raise ValueError("scanner returned an invalid result")
                 except Exception as exc:
-                    out = status_result("failed", "Scan failed: %s: %s" % (type(exc).__name__, str(exc)[:300]))
+                    out = copy.deepcopy((rec.get("checkpoint") or {}).get("result")) or status_result("failed", "No source result saved.")
+                    note = "Scan failed: %s: %s" % (type(exc).__name__, str(exc)[:300])
+                    out.update(ok=False, scan_status="failed", note=note)
+                    out["how_to_use"] = "Failed scan. Retained completed-source observations are partial evidence; preserve gaps and do not retry automatically."
+                    out.setdefault("not_found", []).append(note)
                     out["retrieved_at"] = now()
-                state = "failed" if not out.get("ok") else ("partial" if out.get("not_found") else "complete")
+                    progress = copy.deepcopy((rec.get("checkpoint") or {}).get("sources") or {})
+                    for item in progress.values():
+                        if item.get("status") in ("pending", "running"):
+                            item.update(status="failed", finished_at=now(), note="producer failed before this source completed")
+                    out["source_progress"] = progress
+                except KeyboardInterrupt as exc:
+                    rec = _interrupted_record(rec, now)
+                    out = rec["result"]
+                    out["note"] = "Scan interrupted: %s; no automatic retry." % (str(exc)[:100] or "keyboard interruption")
+                state = out.get("scan_status")
+                if state not in TERMINAL:
+                    state = "failed" if not out.get("ok") else ("partial" if out.get("not_found") else "complete")
                 out["execution"] = {"requested_depth": request.get("requested_depth"), "effective_depth": request.get("depth"),
                                     "escalation_reason": request.get("escalation_reason"),
                                     "reason_is_authorization_proof": False}
