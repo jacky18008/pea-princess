@@ -119,6 +119,8 @@ def context(value):
     return (MARKER + json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(',', ':')) +
             '\nThe host derives only the listed supported conditions from user-role text. '
             'Keep their exact strength and scope. Assistant advice and question prefixes cannot change them. '
+            'When explaining an update, distinguish retiring a condition from weakening it. '
+            'Do not call an active preference an already-adopted bonus. '
             'Unresolved text is retained, not an added hard filter. Return intent_claims matching the '
             'frame revision and exact active id/strength set. This metadata is not user-visible. '
             'Own your advice; do not present a preference or a pending suggestion as the person\'s exclusion. '
@@ -156,16 +158,17 @@ def decode(raw):
 
 def validate(value, reply, claims):
     result = intent_guard.validate_claims(value, claims)
-    checks = [('message', reply['message'])]
+    checks = [('message', reply['message'], False)]
     for index, question in enumerate(reply['questions']):
-        checks.append(('question-%d' % index, question['question']))
+        checks.append(('question-%d' % index, question['question'], False))
         # An offered option is explicitly a proposal until selected. Include
         # that context so optional future hard rules are not mistaken for adoption.
         for option, label in enumerate(question['options']):
-            checks.append(('option-%d-%d' % (index, option), 'Proposal / 建議選項：' + label))
+            checks.append(('option-%d-%d' % (index, option), label, True))
     findings = list(result['findings'])
-    for location, text in checks:
-        findings.extend(dict(item, location=location) for item in intent_guard.validate_reply(value, text)['findings'])
+    for location, text, proposed in checks:
+        findings.extend(dict(item, location=location) for item in
+                        intent_guard.validate_reply(value, text, proposal=proposed)['findings'])
     return {'ok': not findings, 'findings': findings, 'frame_revision': value['revision'],
             'coverage': 'supported condition metadata and high-confidence prose contradictions only',
             'complete_semantic_validation': False}

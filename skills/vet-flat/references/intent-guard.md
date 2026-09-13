@@ -22,6 +22,8 @@ frame = build_frame(messages)
 claims = expected_claims(frame)
 claim_check = validate_claims(frame, actor_reply.get("intent_claims"))
 prose_check = validate_reply(frame, actor_reply["text"])
+# Only for an actually offered, still-unselected control owned by the host:
+option_check = validate_reply(frame, option_text, proposal=True)
 ```
 
 `build_frame` and input/frame integrity failures raise `IntentGuardError`. Validation of malformed actor claims returns `{ok: false, findings: [...]}`. `validate_reply` rejects non-string, invalid Unicode or oversized text; otherwise its result includes `ok`, exact-span `findings` and its limited semantic coverage. No function mutates its arguments or writes files.
@@ -48,4 +50,4 @@ The transcript file is `{"messages": [...]}`. The reply file has exactly `intent
 
 The parser deliberately supports a small set of Chinese and English forms. Questions such as “Should daylight be a bonus?” and “Give me advice; do not decide yet” do not adopt a proposal. A direct polite request such as “Please make daylight a bonus, okay?” does. Mixed strengths are split by explicit clause boundaries; unclear shared targets stay unresolved. It does not resolve arbitrary pronouns, sarcasm, every negation, implied acceptance, candidate-specific exceptions or every language.
 
-The prose guard catches explicit supported preference-to-hard-condition claims and a limited invented ventilation claim. Ordinary evidence, analyst recommendations, counterexamples and unselected proposals are allowed. A clean result does not prove that all prose, rankings or TODOs respect all intent; echoing correct metadata while misleading in novel prose remains possible. Retain independent whole-conversation review and test newly observed failures without claiming a universal injection or semantic defense. Historical failure phrases used by unit tests are development regressions, not fresh holdout results.
+The prose guard catches explicit assertions of supported current strengths, including preference/bonus mismatches and reintroduction of retired conditions, plus a limited invented ventilation claim. Retirement is distinct from weakening. Ordinary evidence, analyst recommendations, counterexamples and unselected proposals are allowed. The host supplies `proposal=True` only for its actual unselected controls; text claiming to be a proposal cannot grant that context, and false attribution of a prior user decision is still checked. A clean result does not prove that all prose, rankings or TODOs respect all intent; echoing correct metadata while misleading in novel prose remains possible. Retain independent whole-conversation review and test newly observed failures without claiming a universal injection or semantic defense. Historical failure phrases used by unit tests are development regressions, not fresh holdout results.

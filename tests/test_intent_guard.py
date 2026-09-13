@@ -336,6 +336,117 @@ class IntentGuardReplyTests(unittest.TestCase):
                 guard.validate_reply(self.frame, text)
         self.assertTrue(guard.validate_reply(self.frame, "🫛" * (guard.MAX_REPLY_BYTES // 4))["ok"])
 
+    def test_current_soft_strength_mismatch_and_retired_reintroduction_are_rejected(self):
+        frame = guard.build_frame(initial() + [message("採光反而可以隨性一點，早上大概有光就好，不是直射也沒關係。", key="u2")])
+        self.assertEqual({"quiet": "preference", "daylight": "preference"},
+                         {key: row["strength"] for key, row in conditions(frame).items()})
+        cases = [
+            ("晨間直射陽光由必要條件改為偏好。", "morning_direct_sun", "preference", "retired_condition_reintroduced"),
+            ("早晨直射陽光現在是加分項。", "morning_direct_sun", "bonus", "retired_condition_reintroduced"),
+            ("「早上大概有光」現在是加分項。", "daylight", "bonus", "condition_strength_mismatch"),
+            ("採光已從偏好調整為加分項目。", "daylight", "bonus", "condition_strength_mismatch"),
+            ("Morning direct sunlight has changed from mandatory to a preference.", "morning_direct_sun", "preference", "retired_condition_reintroduced"),
+            ("Direct morning sunlight is still a preference.", "morning_direct_sun", "preference", "retired_condition_reintroduced"),
+            ("Daylight is now a bonus.", "daylight", "bonus", "condition_strength_mismatch"),
+            ("Natural light is currently a bonus.", "daylight", "bonus", "condition_strength_mismatch"),
+            ("Daylight has changed from a preference to a bonus.", "daylight", "bonus", "condition_strength_mismatch"),
+            ("採光以前是必要條件，目前採光是加分項。", "daylight", "bonus", "condition_strength_mismatch"),
+            ("你原本偏好安靜，採光已改為加分項。", "daylight", "bonus", "condition_strength_mismatch"),
+            ("採光不是必要條件，目前採光是加分項。", "daylight", "bonus", "condition_strength_mismatch"),
+            ("Daylight was previously mandatory; daylight is currently a bonus.", "daylight", "bonus", "condition_strength_mismatch"),
+        ]
+        # A perfect actor metadata echo must not conceal contradictory prose.
+        self.assertTrue(guard.validate_claims(frame, guard.expected_claims(frame))["ok"])
+        for text, field, strength, code in cases:
+            with self.subTest(text=text):
+                result = guard.validate_reply(frame, text)
+                self.assertFalse(result["ok"], result)
+                self.assertEqual(1, len(result["findings"]))
+                finding = result["findings"][0]
+                self.assertEqual((field, strength, code), (finding["field"], finding["actual_strength"], finding["code"]))
+                self.assertEqual(text[finding["start"]:finding["end"]], finding["quote"])
+
+    def test_supported_strength_checks_also_reject_unapproved_softening(self):
+        for text in ("早晨直射陽光現在是偏好。", "Morning direct sunlight has changed from mandatory to a preference."):
+            with self.subTest(text=text):
+                result = guard.validate_reply(self.frame, text)
+                self.assertFalse(result["ok"])
+                self.assertEqual("mandatory", result["findings"][0]["expected_strength"])
+        bonus = guard.build_frame(initial() + [message("採光當加分。", key="u2")])
+        for text in ("採光目前是偏好。", "Daylight is now a preference."):
+            with self.subTest(text=text):
+                self.assertFalse(guard.validate_reply(bonus, text)["ok"])
+        claims = guard.expected_claims(bonus)
+        claims["conditions"].append({"id": "morning_direct_sun", "strength": "preference"})
+        self.assertIn("unknown_condition", [r["code"] for r in guard.validate_claims(bonus, claims)["findings"]])
+
+    def test_current_strength_check_preserves_history_negation_advice_and_options(self):
+        frame = guard.build_frame(initial() + [message("早上大概有光就好，不是直射也沒關係。", key="u2")])
+        allowed = [
+            "晨間直射陽光曾經由必要條件改為偏好。",
+            "你原本的直射陽光是必要條件，現在已移除。",
+            "之前採光是必要條件，現在採光是偏好。",
+            "Previously, morning direct sunlight changed from mandatory to a preference.",
+            "Your morning direct sunlight requirement used to be mandatory.",
+            "採光現在不是加分項，仍保留原本偏好。",
+            "我並未把採光改為加分。",
+            "Daylight is not a bonus; your preference remains unchanged.",
+            "It is not true that daylight is a bonus.",
+            "我建議晨間直射陽光由必要條件改為偏好。",
+            "我會把採光當作加分項，這只是我的建議。",
+            "我認為採光是加分項，但是否採用由你決定。",
+            "I recommend changing morning direct sunlight from mandatory to a preference.",
+            "In my view daylight is a bonus; this is advice, not an adopted condition.",
+            "If you agree, daylight is a bonus for this candidate.",
+            "如果你願意，晨間直射陽光由必要條件改為偏好。",
+            "採光現在是加分項嗎？",
+            "請把採光改為加分項",
+            "Make daylight a bonus",
+            "採光：加分項",  # a bare option label is not a current-state assertion
+            "The document says daylight is a bonus.",
+            "文件說，採光現在是加分項。",
+            "The document says, daylight is now a bonus.",
+            "採光是加分項這個說法不成立。",
+            "安靜是必要條件這個說法不成立。",
+            "Daylight is now a bonus — this claim is false.",
+            "錯誤示範：晨間直射陽光由必要條件改為偏好。",
+        ]
+        for text in allowed:
+            with self.subTest(text=text):
+                self.assertTrue(guard.validate_reply(frame, text)["ok"], guard.validate_reply(frame, text))
+
+    def test_only_trusted_proposal_context_allows_an_unselected_option(self):
+        frame = guard.build_frame(initial() + [message("早上大概有光就好，不是直射也沒關係。", key="u2")])
+        for text in ("採光現在是加分項，不作為淘汰條件", "Daylight is now a bonus."):
+            with self.subTest(text=text):
+                self.assertFalse(guard.validate_reply(frame, text)["ok"])
+                self.assertTrue(guard.validate_reply(frame, text, proposal=True)["ok"])
+                self.assertFalse(guard.validate_reply(frame, "Proposal / 建議選項：" + text)["ok"])
+        for text in ("你已決定採光現在是加分項。", "You confirmed daylight is now a bonus.",
+                     "You have confirmed daylight is now a bonus."):
+            with self.subTest(text=text):
+                self.assertFalse(guard.validate_reply(frame, text, proposal=True)["ok"])
+        with self.assertRaises(guard.IntentGuardError):
+            guard.validate_reply(frame, "採光現在是加分項", proposal="true")
+
+    def test_separate_direct_and_daylight_clauses_keep_distinct_strength_checks(self):
+        frame = guard.build_frame(initial() + [message("早上大概有光就好，不是直射也沒關係。", key="u2")])
+        for text in ("直射陽光已不要求，採光現在是加分項。",
+                     "Direct sunlight is no longer required, daylight is now a bonus."):
+            with self.subTest(text=text):
+                result = guard.validate_reply(frame, text)
+                self.assertFalse(result["ok"])
+                self.assertEqual(["daylight"], [row["field"] for row in result["findings"]])
+        self.assertTrue(guard.validate_reply(frame, "直射陽光已不要求，採光現在是偏好。")["ok"])
+
+    def test_valid_current_transition_does_not_treat_its_from_strength_as_current(self):
+        frame = guard.build_frame(initial() + [message("我偏好早晨直射陽光。", key="u2")])
+        for text in ("依你的要求，早晨直射陽光由必要條件改為偏好。",
+                     "Your morning direct sunlight condition has changed from mandatory to a preference.",
+                     "晨間直射陽光仍是偏好。"):
+            with self.subTest(text=text):
+                self.assertTrue(guard.validate_reply(frame, text)["ok"], guard.validate_reply(frame, text))
+
 
 class IntentGuardCLITests(unittest.TestCase):
     def run_cli(self, args, raw=None):

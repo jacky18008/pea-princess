@@ -29,7 +29,7 @@ import intent_context
 MAX_INPUT_BYTES = 4 * 1024 * 1024
 MAX_REPLY_BYTES = 128 * 1024
 SCHEMA_VERSION = 1
-GRAMMAR_VERSION = "quiet-light-v1"
+GRAMMAR_VERSION = "quiet-light-v2"
 FIELDS = ("quiet", "morning_direct_sun", "daylight")
 STRENGTHS = ("mandatory", "preference", "bonus")
 
@@ -340,7 +340,69 @@ def validate_claims(frame, claims):
     return {"ok": not findings, "findings": findings}
 
 
-def validate_reply(frame, text):
+_DECLARED_LABELS = {
+    "mandatory": r"硬條件|必要條件|mandatory|required|(?:a\s+)?must|(?:a\s+)?hard\s+(?:condition|requirement|filter)",
+    "preference": r"偏好(?:條件)?|(?:a\s+)?preference|preferred\s+(?:condition|requirement)",
+    "bonus": r"加分(?:項(?:目)?)?|(?:a\s+)?bonus",
+}
+_DECLARED_LABEL = "(?:%s)" % "|".join(_DECLARED_LABELS.values())
+_LABEL_SPACE = r"[\s*_`「」『』\"“”]{0,12}"
+_CHANGE_VERB = r"(?:改為|改成|變為|變成|調整為|調整成|降為|降成|升為|升成|列為|設為|保留為|當作)"
+_EXPLICIT_USER = r"你(?:的|目前的|現在的|已確認的|已(?:經)?(?:決定|確認|指定|設定|要求)|要求|指定|設定|決定|確認)|依你|按照你|根據你|\b(?:your\s+(?:current\s+)?(?:hard\s+)?(?:condition|requirement|filter)|you\s+(?:have\s+)?(?:require|required|confirmed|specified|decided))"
+
+
+def _historical_clause(clause):
+    """An explicitly past condition is not an assertion about the current frame."""
+    return (_matches(r"原本|原先|以前|之前|先前|曾經|當時|過去|起初|一度|\b(?:previously|formerly|earlier|used\s+to)\b", clause)
+            and not _matches(r"現在|目前|如今|現階段|\b(?:now|currently|today)\b", clause))
+
+
+def _context_intro(prefix):
+    """Carry a standalone reporting/history intro, not an unrelated past clause."""
+    history_intro = re.fullmatch(r"\s*(?:以前|過去|之前|曾經|原本|previously|formerly|earlier)\s*[,，:：]\s*", prefix, flags=re.I)
+    return bool(history_intro or (_matches(REPORTED, prefix) and not _matches(TARGET, prefix)))
+
+
+def _denied_assertion(clause):
+    return _matches(r"(?:這個|此|上述)?(?:說法|描述|陳述|主張).{0,8}(?:不成立|不正確|不對|不是真的|錯誤)|\b(?:this|that)\s+(?:claim|statement)\s+is\s+(?:false|incorrect|wrong)\b", clause)
+
+
+def _current_strengths(field, clause, context=None, prefix=""):
+    """Recognize explicit current labels/changes, not implicit semantic preferences.
+
+    A transition's destination is asserted now; its former mandatory label is
+    history. Deliberate advice, reported/negated statements and marked history
+    remain outside this small grammar. Bare option labels are not assertions.
+    """
+    personal_advice = (_matches(r"我(?:會|認為|覺得|傾向)|\b(?:I\s+would|I\s+think|in\s+my\s+(?:view|assessment))\b", clause)
+                       and not _matches(_EXPLICIT_USER, clause))
+    if (_historical_clause(clause) or _context_intro(prefix) or _denied_assertion(clause) or _matches(REPORTED, clause) or _matches(NO_CHANGE, clause)
+            or _matches(SCOPED, context or clause) or _matches(r"[?？]|嗎|是否", clause) or personal_advice
+            or _matches(r"我(?:會)?(?:建議|推薦)|我的建議|可以考慮|是否要|要不要|你可以選|\b(?:I\s+(?:would\s+)?recommend|I\s+suggest|my\s+advice|consider|should\s+we)\b", clause)
+            or _matches(r"(?:錯誤|不實|並非事實|不是說)|\b(?:false\s+that|not\s+true\s+that|incorrect\s+to\s+say)\b", clause)):
+        return []
+    target = {"quiet": QUIET, "morning_direct_sun": r"直射(?:陽光|光線|日照)?|direct\s+(?:morning\s+)?(?:sun(?:light)?|light)",
+              "daylight": LIGHT}[field]
+    # The direct-sun dimension must not be reinterpreted as generic daylight.
+    if field == "daylight" and _matches(DIRECT, clause):
+        return []
+    transition = (r"(?:(?:已經|已|現在|目前)?(?:由|從)" + _LABEL_SPACE + _DECLARED_LABEL + _LABEL_SPACE + _CHANGE_VERB
+                  + r"|\s*(?:(?:has|have|was|is)\s+)?(?:now\s+)?(?:changed|moved|reclassified|downgraded|softened|relaxed|promoted)\s+from\s+"
+                  + _DECLARED_LABEL + r"\s+(?:to|into)\s+)")
+    current = (r"(?:(?:現在|目前|已經|已|仍然|仍|現階段)?(?:是|為|算是|算作|算|屬於|成為|" + _CHANGE_VERB + r")"
+               + r"|\s*(?:(?:is|are|remains?)\s+(?:now\s+|still\s+|currently\s+)?|(?:has|have)\s+(?:now\s+)?(?:become|been\s+(?:set|changed|reclassified|downgraded|promoted)\s+to)\s+))")
+    prefix = "(?:%s)%s(?:條件|要求|condition|requirement)?%s" % (target, _LABEL_SPACE, _LABEL_SPACE)
+    suffix = _LABEL_SPACE + r"(?:你的|你目前的|你設定的|your\s+|only\s+)?" + _LABEL_SPACE
+    found = []
+    for strength, label in _DECLARED_LABELS.items():
+        # Chinese labels can be followed immediately by explanatory prose.
+        pattern = prefix + "(?:" + transition + "|" + current + ")" + suffix + "(?:" + label + r")(?=[^A-Za-z]|\Z)"
+        for match in re.finditer(pattern, clause, flags=re.I):
+            found.append({"strength": strength, "start": match.start(), "end": match.end()})
+    return found
+
+
+def validate_reply(frame, text, *, proposal=False):
     """Check a small set of explicit prose contradictions, not overall quality.
 
     Checks visible answer prose and independently supplied question/option text
@@ -348,6 +410,8 @@ def validate_reply(frame, text):
     Findings include original spans, permitting a reviewer to inspect context.
     """
     _check_frame(frame)
+    if type(proposal) is not bool:
+        raise IntentGuardError("proposal context must be a host-supplied boolean")
     if type(text) is not str:
         raise IntentGuardError("reply text must be a string")
     try:
@@ -357,6 +421,7 @@ def validate_reply(frame, text):
     if size > MAX_REPLY_BYTES:
         raise IntentGuardError("reply text exceeds %d UTF-8 bytes" % MAX_REPLY_BYTES)
     active = {row["field"]: row["strength"] for row in frame["conditions"]}
+    retired = {row["field"] for row in frame["transitions"] if row["to"] is None} - set(active)
     user_text = "\n".join(row["text"] for row in frame["user_statements"])
     masked, _ = _mask_data(text, inline_quotes=False)
     findings = []
@@ -369,21 +434,42 @@ def validate_reply(frame, text):
         advice = _matches(r"我(?:會)?(?:建議|推薦)|我的建議|可以考慮|是否要|要不要|你可以選|\b(?:I\s+(?:would\s+)?recommend|I\s+suggest|my\s+advice|consider|would\s+you\s+like|should\s+we)\b", sentence)
         if counterexample:
             continue
-        explicit_user = _matches(r"你(?:的|目前的|現在的|已確認的|要求|指定|設定|決定|確認)|依你|按照你|根據你|\b(?:your\s+(?:current\s+)?(?:hard\s+)?(?:condition|requirement|filter)|you\s+(?:require|required|confirmed|specified|decided))", sentence)
+        explicit_user = _matches(_EXPLICIT_USER, sentence)
+        if proposal and not explicit_user:
+            continue
         offered_action = _matches(r"\A\s*(?:請)?(?:把|將)|\A\s*(?:make|treat|change|set)\b", sentence)
         offered_question = (_matches(r"[?？]|嗎", sentence)
                             and _matches(r"你(?:要|想|希望|願意)|要不要|\A\s*(?:要|是否)|\b(?:would\s+you\s+like|do\s+you\s+want)\b", sentence))
         if (offered_action or offered_question) and not explicit_user:
             continue
         for field, target in (("quiet", QUIET), ("morning_direct_sun", DIRECT), ("daylight", LIGHT)):
-            if not _matches(target, sentence) or active.get(field) == "mandatory":
+            if not _matches(target, sentence):
                 continue
-            # A direct-sun sentence is checked against that exact dimension,
-            # not the broader daylight preference as well.
-            if field == "daylight" and _matches(DIRECT, sentence):
+            target_clauses = []
+            explicit_mismatch = False
+            for lo, hi in _clauses(masked, start, end):
+                clause = masked[lo:hi]
+                prefix = masked[start:lo]
+                # A direct-sun clause belongs to that exact dimension. A later
+                # generic-daylight clause in the same sentence still needs checking.
+                if field == "daylight" and _matches(DIRECT, clause):
+                    continue
+                if (not _matches(target, clause) or _historical_clause(clause)
+                        or _context_intro(prefix) or _denied_assertion(clause)):
+                    continue
+                assertions = _current_strengths(field, clause, sentence, prefix)
+                for assertion in assertions:
+                    if assertion["strength"] != active.get(field):
+                        left, right = lo, hi
+                        findings.append({"code": "retired_condition_reintroduced" if field in retired else "condition_strength_mismatch",
+                                         "field": field, "expected_strength": active.get(field),
+                                         "actual_strength": assertion["strength"], "quote": text[left:right],
+                                         "start": left, "end": right})
+                        explicit_mismatch = True
+                if not assertions:
+                    target_clauses.append(clause)
+            if explicit_mismatch or active.get(field) == "mandatory":
                 continue
-            target_clauses = [masked[lo:hi] for lo, hi in _clauses(masked, start, end)
-                              if _matches(target, masked[lo:hi])]
             hard = any(_matches(HARD, clause) for clause in target_clauses)
             negated = any(_matches(r"(?:不是|並非|不再是|非|不應(?:是|變成)?|不能(?:當成|變成)|不要.{0,8}(?:當|改)).{0,8}(?:硬條件|必要條件|必須)|\b(?:not|isn't|is\s+not|not\s+a)\s+(?:a\s+)?(?:hard|mandatory|required|must)\b", clause)
                           for clause in target_clauses)

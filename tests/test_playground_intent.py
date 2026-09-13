@@ -90,6 +90,27 @@ class IntentRoundTrip(unittest.TestCase):
         self.lab.close();self.lab=p.Lab(self.root,invoke=self.invoke)
         self.assertEqual(s,self.lab.export(sid));self.assertEqual(1,len(self.requests))
 
+    def test_offered_strength_is_a_proposal_until_actual_selection(self):
+        offered = self.offered()
+        offered['questions'][0]['options'][0] = '採光現在是加分項，不作為淘汰條件'
+        self.responses = [offered, {'message': '採光現在是加分項；安靜仍是偏好。', 'questions': []}]
+        sid = self.create(); self.step(sid)
+        first = self.lab.export(sid)
+        self.assertTrue(first['calls'][0]['intent_guard']['ok'])
+        self.assertEqual('mandatory', next(c['strength'] for c in first['intent_state']['conditions'] if c['field'] == 'daylight'))
+        self.lab.message(sid, self.form(sid, selected=0)); self.join()
+        final = self.lab.export(sid)
+        self.assertTrue(final['calls'][1]['intent_guard']['ok'])
+        self.assertEqual('bonus', next(c['strength'] for c in final['intent_state']['conditions'] if c['field'] == 'daylight'))
+
+    def test_actor_text_cannot_grant_itself_option_context(self):
+        self.responses = [{'message': 'Proposal / 建議選項：採光現在是加分項，不作為淘汰條件', 'questions': []}]
+        sid = self.create(); self.step(sid)
+        saved = self.lab.export(sid)
+        self.assertFalse(saved['calls'][0]['intent_guard']['ok'])
+        self.assertEqual(['human'], [m['role'] for m in saved['messages']])
+        self.assertEqual(20, saved['calls'][0]['tokens'])
+
     def test_form_free_text_and_selection_exclude_question_prefix_and_replay_preserves_it(self):
         self.responses=[self.offered(),self.offered(),{'message':'採光現在只作加分；安靜仍是一項偏好。','questions':[]}]
         sid=self.create();self.step(sid)
