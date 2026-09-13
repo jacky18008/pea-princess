@@ -92,6 +92,38 @@ class LifecycleTests(unittest.TestCase):
             budget.close()
             scan._scan_context.budget = previous
 
+    def test_postcode_scan_checkpoints_unresolved_location_before_geocode(self):
+        import geo, roads, noise, crime, planning, living_env
+        checkpoints = []
+        street = {"ok": True, "name": "Example Road", "anchor": {"lat": 51.5, "lng": -.1},
+                  "points": [{"lat": 51.5, "lng": -.1}], "source_url": "https://example.invalid/street",
+                  "retrieved_at": "offline", "query": "offline named-street fixture"}
+        def perform(checkpoint):
+            def capture(value):
+                checkpoints.append(copy.deepcopy(value))
+                checkpoint(value)
+            return scan.scan(postcode="AA1 1AA", street="Example Road", depth="standard", checkpoint=capture)
+        with mock.patch.object(geo, "lookup", return_value={"ok": True, "lat": 51.5, "lng": -.1,
+                "source_url": "https://example.invalid/geocode", "retrieved_at": "offline"}) as geocode, \
+                mock.patch.object(scan, "find_street", return_value=street) as find_street, \
+                mock.patch.object(crime, "box", return_value={"ok": True, "total": 1, "months_counted": 1, "by_category": {}}), \
+                mock.patch.object(roads, "near", return_value={"ok": True, "radius_m": 300, "trunk_or_primary_road": {"nearest": {"distance_m": 40}}}), \
+                mock.patch.object(noise, "lookup", return_value={"ok": False, "not_found": ["offline noise gap"]}), \
+                mock.patch.object(planning, "near", return_value={"ok": True, "results": [], "total_matching": 0}), \
+                mock.patch.object(living_env, "lookup", return_value={"ok": False, "note": "offline living gap"}), \
+                mock.patch.object(_fetch, "fetch", side_effect=AssertionError("test must not use network")):
+            out = store.run(self.root, dict(REQUEST, depth="standard"), "fixture", perform, lambda: "now", with_checkpoint=True)
+        self.assertTrue(out["ok"], out.get("note"))
+        self.assertEqual("partial", out["persistence"]["status"])
+        self.assertEqual(40, out["quiet"]["main_road_nearest_m"])
+        geocode.assert_called_once_with("AA1 1AA", False)
+        find_street.assert_called_once_with(51.5, -.1, "Example Road", verbose=False)
+        self.assertGreaterEqual(len(checkpoints), 3)
+        self.assertIsNone(checkpoints[0]["result"]["where"]["how_located"])
+        self.assertEqual("running", checkpoints[0]["sources"]["location"]["status"])
+        self.assertEqual("complete", out["source_progress"]["location"]["status"])
+        self.assertEqual("complete", out["source_progress"]["street"]["status"])
+
     def test_deadline_before_later_stage_makes_no_new_source_call(self):
         budget = scan.ScanBudget(.02, .02)
         previous = getattr(scan._scan_context, "budget", None)
