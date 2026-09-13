@@ -2,6 +2,7 @@
 import copy
 import hashlib
 import json
+from agent_reply_fixture import attach_claims
 from pathlib import Path
 import subprocess
 import sys
@@ -29,7 +30,7 @@ class SettingsIntegrationTests(unittest.TestCase):
             return {'id':'answer','status':'complete','exit_code':0,'errors':[],
                     'tool_events':[],'malformed_event_lines':0,'terminal_usage_events':1,
                     'direct_terminal_usage':{'input_tokens':15,'output_tokens':5,'cached_input_tokens':0},
-                    'answer':json.dumps({'message':'先比較價格與空間。','questions':[]})}
+                    'answer':json.dumps(attach_claims({'message':'先比較價格與空間。','questions':[]},request))}
         self.lab=p.Lab(self.root,invoke=invoke);self.addCleanup(self.lab.close)
 
     def create(self,**extra):

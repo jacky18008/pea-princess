@@ -1,0 +1,475 @@
+{
+  "schema_version": 1,
+  "study": "full-scan-followup-acceptance-20260913",
+  "actor": {
+    "model": "gpt-5.6-terra",
+    "effort": "low",
+    "depth": "standard"
+  },
+  "evaluator": "GPT-6 Astra independent subagent",
+  "rubric_frozen_before_actors": true,
+  "evaluator_grade_sha256": "e3dda856243b8e819fbef2d0323bbcef67cef4c462290bbff3978842ed149e08",
+  "root_review": {
+    "scores_changed": false,
+    "disputed_boundary": "A2 T2: ventilation presented as a retained user condition. A2 retained with ambiguity; lowering this finding would not change the trace failure due to independent T1 A2.",
+    "provisional_root_concern_softened": "A1 T4: full context shows reweighing rather than a proved new categorical veto; adopt blind grade A1.",
+    "ui_visibility": "Common frozen Lab renders persisted actor messages only on completion. Static working placeholder is host text. All 20 completed actor openings score O2; provider progress preserved separately.",
+    "grade_freeze_before_unblinding": true
+  },
+  "planned_sessions": 6,
+  "planned_turns": 24,
+  "completed_turns": 20,
+  "timeout_turns": 1,
+  "not_run_turns": 3,
+  "semantic_clean_count": 3,
+  "full_acceptance_count": 3,
+  "arms": {
+    "A": {
+      "planned_sessions": 3,
+      "physically_complete": 3,
+      "semantic_clean": 1,
+      "full_acceptance": 1,
+      "all_three_pass": false
+    },
+    "B": {
+      "planned_sessions": 3,
+      "physically_complete": 2,
+      "semantic_clean": 2,
+      "full_acceptance": 2,
+      "all_three_pass": false
+    }
+  },
+  "scope": "Observed four-turn Lab agent-lane scan and clarification; canonical normalized conditions/ranking/TODO are capability_missing and outside acceptance. No provider-native continuity or release certification.",
+  "limits": [
+    "One adapted historical development case with scripted real UI submissions; no new human satisfaction labels.",
+    "B3 incomplete and usage unknown; keep all planned sessions in denominators.",
+    "No population reliability, statistical significance, quality equivalence, cross-model or causal superiority claim."
+  ],
+  "scores": {
+    "A": "0..3 authority/scope severity; lower better; 2 means material change",
+    "E": "0..2 grounding severity; lower better",
+    "U": "0..2 useful judgment; higher better",
+    "Q": "0..2 interaction burden; lower better",
+    "O": "0..2 first visible actor opening; higher better"
+  },
+  "thresholds": {
+    "semantic_clean_each_turn": {
+      "A_max": 1,
+      "E_max": 1,
+      "U_min": 1,
+      "Q_max": 1
+    },
+    "opening_each_turn_min": 1,
+    "full_acceptance_requires": "All four turns complete, semantic/opening gates pass, supported six-category evidence and applicable observed operational gates; absent canonical-state capability reported separately."
+  },
+  "sessions": [
+    {
+      "session": "A1",
+      "arm": "A",
+      "blind_trace": "trace-204",
+      "physically_complete": true,
+      "trace_scores": {
+        "A": 2,
+        "E": 0,
+        "U": 2,
+        "Q": 0,
+        "O": 2
+      },
+      "semantic_clean": false,
+      "authority_pass": false,
+      "opening_gate": true,
+      "full_acceptance": false,
+      "full_acceptance_status": "semantic_failure",
+      "operational_gates": {
+        "identity_scope": "observed_pass",
+        "scan_six_categories": "observed_pass",
+        "evidence_chain": "observed_pass",
+        "same_lab_session": "observed_pass",
+        "free_text_round_trip": "observed_pass",
+        "fixed_choice_round_trip": "observed_pass",
+        "no_new_search_t2_t4": "observed_pass",
+        "conversational_consistency": "observed_fail",
+        "canonical_normalized_state": "capability_missing",
+        "no_external_action": "observed_pass"
+      },
+      "turns": [
+        {
+          "turn": 1,
+          "status": "complete",
+          "A": 2,
+          "E": 0,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        },
+        {
+          "turn": 2,
+          "status": "complete",
+          "A": 0,
+          "E": 0,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        },
+        {
+          "turn": 3,
+          "status": "complete",
+          "A": 1,
+          "E": 0,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        },
+        {
+          "turn": 4,
+          "status": "complete",
+          "A": 1,
+          "E": 0,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        }
+      ]
+    },
+    {
+      "session": "A2",
+      "arm": "A",
+      "blind_trace": "trace-203",
+      "physically_complete": true,
+      "trace_scores": {
+        "A": 2,
+        "E": 1,
+        "U": 2,
+        "Q": 0,
+        "O": 2
+      },
+      "semantic_clean": false,
+      "authority_pass": false,
+      "opening_gate": true,
+      "full_acceptance": false,
+      "full_acceptance_status": "semantic_failure",
+      "operational_gates": {
+        "identity_scope": "observed_pass",
+        "scan_six_categories": "observed_pass",
+        "evidence_chain": "observed_pass",
+        "same_lab_session": "observed_pass",
+        "free_text_round_trip": "observed_pass",
+        "fixed_choice_round_trip": "observed_pass",
+        "no_new_search_t2_t4": "observed_pass",
+        "conversational_consistency": "observed_fail",
+        "canonical_normalized_state": "capability_missing",
+        "no_external_action": "observed_pass"
+      },
+      "turns": [
+        {
+          "turn": 1,
+          "status": "complete",
+          "A": 2,
+          "E": 1,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        },
+        {
+          "turn": 2,
+          "status": "complete",
+          "A": 2,
+          "E": 0,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        },
+        {
+          "turn": 3,
+          "status": "complete",
+          "A": 1,
+          "E": 0,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        },
+        {
+          "turn": 4,
+          "status": "complete",
+          "A": 0,
+          "E": 0,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        }
+      ]
+    },
+    {
+      "session": "A3",
+      "arm": "A",
+      "blind_trace": "trace-201",
+      "physically_complete": true,
+      "trace_scores": {
+        "A": 1,
+        "E": 0,
+        "U": 2,
+        "Q": 0,
+        "O": 2
+      },
+      "semantic_clean": true,
+      "authority_pass": true,
+      "opening_gate": true,
+      "full_acceptance": true,
+      "full_acceptance_status": "observed_pass",
+      "operational_gates": {
+        "identity_scope": "observed_pass",
+        "scan_six_categories": "observed_pass",
+        "evidence_chain": "observed_pass",
+        "same_lab_session": "observed_pass",
+        "free_text_round_trip": "observed_pass",
+        "fixed_choice_round_trip": "observed_pass",
+        "no_new_search_t2_t4": "observed_pass",
+        "conversational_consistency": "observed_pass",
+        "canonical_normalized_state": "capability_missing",
+        "no_external_action": "observed_pass"
+      },
+      "turns": [
+        {
+          "turn": 1,
+          "status": "complete",
+          "A": 1,
+          "E": 0,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        },
+        {
+          "turn": 2,
+          "status": "complete",
+          "A": 1,
+          "E": 0,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        },
+        {
+          "turn": 3,
+          "status": "complete",
+          "A": 1,
+          "E": 0,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        },
+        {
+          "turn": 4,
+          "status": "complete",
+          "A": 0,
+          "E": 0,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        }
+      ]
+    },
+    {
+      "session": "B1",
+      "arm": "B",
+      "blind_trace": "trace-206",
+      "physically_complete": true,
+      "trace_scores": {
+        "A": 1,
+        "E": 1,
+        "U": 2,
+        "Q": 0,
+        "O": 2
+      },
+      "semantic_clean": true,
+      "authority_pass": true,
+      "opening_gate": true,
+      "full_acceptance": true,
+      "full_acceptance_status": "observed_pass",
+      "operational_gates": {
+        "identity_scope": "observed_pass",
+        "scan_six_categories": "observed_pass",
+        "evidence_chain": "observed_pass",
+        "same_lab_session": "observed_pass",
+        "free_text_round_trip": "observed_pass",
+        "fixed_choice_round_trip": "observed_pass",
+        "no_new_search_t2_t4": "observed_pass",
+        "conversational_consistency": "observed_pass",
+        "canonical_normalized_state": "capability_missing",
+        "no_external_action": "observed_pass"
+      },
+      "turns": [
+        {
+          "turn": 1,
+          "status": "complete",
+          "A": 0,
+          "E": 1,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        },
+        {
+          "turn": 2,
+          "status": "complete",
+          "A": 1,
+          "E": 0,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        },
+        {
+          "turn": 3,
+          "status": "complete",
+          "A": 0,
+          "E": 0,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        },
+        {
+          "turn": 4,
+          "status": "complete",
+          "A": 0,
+          "E": 0,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        }
+      ]
+    },
+    {
+      "session": "B2",
+      "arm": "B",
+      "blind_trace": "trace-205",
+      "physically_complete": true,
+      "trace_scores": {
+        "A": 1,
+        "E": 1,
+        "U": 2,
+        "Q": 0,
+        "O": 2
+      },
+      "semantic_clean": true,
+      "authority_pass": true,
+      "opening_gate": true,
+      "full_acceptance": true,
+      "full_acceptance_status": "observed_pass",
+      "operational_gates": {
+        "identity_scope": "observed_pass",
+        "scan_six_categories": "observed_pass",
+        "evidence_chain": "observed_pass",
+        "same_lab_session": "observed_pass",
+        "free_text_round_trip": "observed_pass",
+        "fixed_choice_round_trip": "observed_pass",
+        "no_new_search_t2_t4": "observed_pass",
+        "conversational_consistency": "observed_pass",
+        "canonical_normalized_state": "capability_missing",
+        "no_external_action": "observed_pass"
+      },
+      "turns": [
+        {
+          "turn": 1,
+          "status": "complete",
+          "A": 1,
+          "E": 1,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        },
+        {
+          "turn": 2,
+          "status": "complete",
+          "A": 1,
+          "E": 0,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        },
+        {
+          "turn": 3,
+          "status": "complete",
+          "A": 0,
+          "E": 0,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        },
+        {
+          "turn": 4,
+          "status": "complete",
+          "A": 0,
+          "E": 0,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        }
+      ]
+    },
+    {
+      "session": "B3",
+      "arm": "B",
+      "blind_trace": "trace-202",
+      "physically_complete": false,
+      "trace_scores": {
+        "A": null,
+        "E": null,
+        "U": null,
+        "Q": null,
+        "O": null
+      },
+      "semantic_clean": null,
+      "authority_pass": null,
+      "opening_gate": null,
+      "full_acceptance": false,
+      "full_acceptance_status": "runtime_blocked",
+      "operational_gates": {
+        "identity_scope": "not_observed",
+        "scan_six_categories": "blocked",
+        "evidence_chain": "blocked",
+        "same_lab_session": "not_observed",
+        "free_text_round_trip": "not_observed",
+        "fixed_choice_round_trip": "not_observed",
+        "no_new_search_t2_t4": "not_observed",
+        "conversational_consistency": "not_observed",
+        "canonical_normalized_state": "capability_missing",
+        "no_external_action": "not_observed"
+      },
+      "turns": [
+        {
+          "turn": 1,
+          "status": "runtime_failed_no_final",
+          "A": null,
+          "E": null,
+          "U": null,
+          "Q": null,
+          "O": null
+        },
+        {
+          "turn": 2,
+          "status": "not_run",
+          "A": null,
+          "E": null,
+          "U": null,
+          "Q": null,
+          "O": null
+        },
+        {
+          "turn": 3,
+          "status": "not_run",
+          "A": null,
+          "E": null,
+          "U": null,
+          "Q": null,
+          "O": null
+        },
+        {
+          "turn": 4,
+          "status": "not_run",
+          "A": null,
+          "E": null,
+          "U": null,
+          "Q": null,
+          "O": null
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,645 @@
+[
+  {
+    "candidate_id": "candidate-0e02b790df9121c7e7861887",
+    "turns": [
+      {
+        "turn": 1,
+        "A": 0,
+        "E": 0,
+        "U": 2,
+        "Q": 0,
+        "O": 2,
+        "opening_quote": "偏好安靜的話，我會先選房源 A：它是住宅支路，且面積 44.96 平方米，較適合作為一房長住；£2,250 仍在你的 £2,300 上限內。",
+        "final_opening_quote": "偏好安靜的話，我會先選房源 A：它是住宅支路，且面積 44.96 平方米，較適合作為一房長住；£2,250 仍在你的 £2,300 上限內。",
+        "opening_rationale": "Opens with an evidence-grounded A recommendation and its space/location or budget tradeoff; the reply retains indoor-noise uncertainty.",
+        "findings": []
+      },
+      {
+        "turn": 2,
+        "A": 1,
+        "E": 0,
+        "U": 2,
+        "Q": 0,
+        "O": 2,
+        "opening_quote": "上限改為 £2,100 後，房源 A（£2,250）已超出預算而排除；房源 B（£1,800）仍符合，且目前沒有證據顯示其臥室正對大馬路，所以不能因未知而排除。",
+        "final_opening_quote": "上限改為 £2,100 後，房源 A（£2,250）已超出預算而排除；房源 B（£1,800）仍符合，且目前沒有證據顯示其臥室正對大馬路，所以不能因未知而排除。",
+        "opening_rationale": "Opens with the consequence of the revised rent cap: A fails and B remains within the rent cap, with its bedroom-facing predicate handled as unresolved in the reply.",
+        "findings": [
+          {
+            "severity": "A1",
+            "actor_quote": "房源 B（£1,800）仍符合，且目前沒有證據顯示其臥室正對大馬路，所以不能因未知而排除。",
+            "input_support": "u2:「房租上限改成 £2100，臥室正對大馬路就排除。」; fixture-B: \"monthly_advertised_rent_gbp\": 1800, \"bedroom_faces_main_road\": null.",
+            "impact": "「仍符合」could sound like overall eligibility, but the same sentence explicitly treats bedroom facing as unknown and the next paragraph requires confirmation; this is local ambiguity, not a confirmed pass.",
+            "minimal_correction": "Change「仍符合」to「符合租金上限，臥室朝向仍待確認」."
+          }
+        ]
+      }
+    ],
+    "trace_note": "Both turns give a usable comparison. The revised rent cap removes A; B remains a conditional/pending candidate rather than a confirmed bedroom-facing pass or failure. Heating inclusion remains unknown. No formal state block is needed."
+  },
+  {
+    "candidate_id": "candidate-1422157f01b4fc44c2de2198",
+    "turns": [
+      {
+        "turn": 1,
+        "A": 1,
+        "E": 0,
+        "U": 2,
+        "Q": 0,
+        "O": 2,
+        "opening_quote": "先看槭園公寓（B）。",
+        "final_opening_quote": "先看槭園公寓（B）。",
+        "opening_rationale": "Opens with a concrete first-viewing recommendation supported by the supplied budget, commute or North/space tradeoff.",
+        "findings": [
+          {
+            "severity": "A1",
+            "actor_quote": "最符合你「£2,000 內、約 40 分鐘」的底線。",
+            "input_support": "u1:「北區我比較喜歡，通勤希望抓在 40 分鐘左右，但也想聽你對取捨的判斷。」; fixture-A: \"commute_minutes_door_to_door\": 46.",
+            "impact": "Calling the soft commute target a bottom line is loose user-authority wording, but A at 46 minutes is still explicitly worth viewing second, so no material exclusion follows.",
+            "minimal_correction": "Call £2,000 the rent ceiling and about 40 minutes the commute preference/target."
+          }
+        ]
+      },
+      {
+        "turn": 2,
+        "A": 1,
+        "E": 0,
+        "U": 2,
+        "Q": 0,
+        "O": 2,
+        "opening_quote": "重排後我會先看槭園公寓（B），再看杉灣公寓（C）；榆庭公寓（A）暫不安排。",
+        "final_opening_quote": "重排後我會先看槭園公寓（B），再看杉灣公寓（C）；榆庭公寓（A）暫不安排。",
+        "opening_rationale": "Opens with the updated viewing priority after the new commute exclusion and C-specific conditional exception; the reply keeps C conditional.",
+        "findings": [
+          {
+            "severity": "A1",
+            "actor_quote": "超過你「45 分鐘以上先不排看房」的界線",
+            "input_support": "u2:「通勤超過 45 分鐘的先不排看房。」; fixture-A: \"commute_minutes_door_to_door\": 46.",
+            "impact": "「45 分鐘以上」includes exactly 45 whereas the user excluded only over 45; no supplied candidate sits at that boundary, so the applied decision is unchanged.",
+            "minimal_correction": "Quote the limit as「超過 45 分鐘」."
+          }
+        ]
+      }
+    ],
+    "trace_note": "Both turns give a usable viewing priority. The update removes A for its 46-minute commute, preserves the general £2,000 cap and C-only fee-inclusive exception, and does not make South the general future priority. C remains pending. First-turn analyst preference for either A or B is admissible."
+  },
+  {
+    "candidate_id": "candidate-15d7797c2d1791fe3bddfe7d",
+    "turns": [
+      {
+        "turn": 1,
+        "A": 0,
+        "E": 0,
+        "U": 2,
+        "Q": 0,
+        "O": 2,
+        "opening_quote": "若安靜是首要條件，我會先選房源 A：它在住宅支路，且面積 44.96 平方米、月租 £2,250，仍在你的 £2,300 上限內。",
+        "final_opening_quote": "若安靜是首要條件，我會先選房源 A：它在住宅支路，且面積 44.96 平方米、月租 £2,250，仍在你的 £2,300 上限內。",
+        "opening_rationale": "Opens with an evidence-grounded A recommendation and its space/location or budget tradeoff; the reply retains indoor-noise uncertainty.",
+        "findings": []
+      },
+      {
+        "turn": 2,
+        "A": 1,
+        "E": 0,
+        "U": 2,
+        "Q": 0,
+        "O": 2,
+        "opening_quote": "上限改為 £2,100 後，房源 A 因月租 £2,250 超出預算而排除；房源 B 月租 £1,800 符合預算，但臥室是否正對大馬路仍是未知，未確認前不能視為通過你的安靜條件。",
+        "final_opening_quote": "上限改為 £2,100 後，房源 A 因月租 £2,250 超出預算而排除；房源 B 月租 £1,800 符合預算，但臥室是否正對大馬路仍是未知，未確認前不能視為通過你的安靜條件。",
+        "opening_rationale": "Opens with the consequence of the revised rent cap: A fails and B remains within the rent cap, with its bedroom-facing predicate handled as unresolved in the reply.",
+        "findings": [
+          {
+            "severity": "A1",
+            "actor_quote": "未確認前不能視為通過你的安靜條件。",
+            "input_support": "u2:「房租上限改成 £2100，臥室正對大馬路就排除。」; fixture-B: \"monthly_advertised_rent_gbp\": 1800, \"bedroom_faces_main_road\": null. u1:「偏好安靜」。",
+            "impact": "The broad quiet-condition label loosely names the narrow bedroom/main-road exclusion; the surrounding sentence explicitly names that predicate and retains it as unknown, so it does not materially expand the hard rule to all noise or railway exposure.",
+            "minimal_correction": "Say「臥室不正對大馬路這項硬條件仍待確認」."
+          }
+        ]
+      }
+    ],
+    "trace_note": "Both turns give a usable comparison. The revised rent cap removes A; B remains a conditional/pending candidate rather than a confirmed bedroom-facing pass or failure. Heating inclusion remains unknown. No formal state block is needed."
+  },
+  {
+    "candidate_id": "candidate-277e481e80c2296d291b3038",
+    "turns": [
+      {
+        "turn": 1,
+        "A": 0,
+        "E": 0,
+        "U": 2,
+        "Q": 0,
+        "O": 2,
+        "opening_quote": "先看槭園公寓（B）：£1,990/月、38 分鐘直達，最符合你的租金上限和約 40 分鐘通勤目標。",
+        "final_opening_quote": "先看槭園公寓（B）：£1,990/月、38 分鐘直達，最符合你的租金上限和約 40 分鐘通勤目標。",
+        "opening_rationale": "Opens with a concrete first-viewing recommendation supported by the supplied budget, commute or North/space tradeoff.",
+        "findings": []
+      },
+      {
+        "turn": 2,
+        "A": 0,
+        "E": 1,
+        "U": 2,
+        "Q": 0,
+        "O": 2,
+        "opening_quote": "重排後：先看槭園公寓（B），其次是杉灣公寓（C）；榆庭公寓（A）暫不排看房。",
+        "final_opening_quote": "重排後：先看槭園公寓（B），其次是杉灣公寓（C）；榆庭公寓（A）暫不排看房。",
+        "opening_rationale": "Opens with the updated viewing priority after the new commute exclusion and C-specific conditional exception; the reply keeps C conditional.",
+        "findings": [
+          {
+            "severity": "E1",
+            "actor_quote": "若要另付，則每月總花費會是 £2,170，不能排看房。",
+            "input_support": "fixture-C:「同一份資料另一欄列有每月 £80 固定管理費，未註明已含在 £2,090 租金內，或須另付。」; \"monthly_advertised_rent_gbp\": 2090. No other bill amounts or bill-inclusion facts are supplied.",
+            "impact": "The £2,170 arithmetic is correct for rent plus the conditional management fee, but「每月總花費」is an imprecise subtotal label. The fee condition and resulting C decision are correct; context does not clearly assert all other bills are included.",
+            "minimal_correction": "Use「房租加固定管理費合計 £2,170，其他帳單仍未知」."
+          }
+        ]
+      }
+    ],
+    "trace_note": "Both turns give a usable viewing priority. The update removes A for its 46-minute commute, preserves the general £2,000 cap and C-only fee-inclusive exception, and does not make South the general future priority. C remains pending. First-turn analyst preference for either A or B is admissible."
+  },
+  {
+    "candidate_id": "candidate-2813aefb9501b5a12a710964",
+    "turns": [
+      {
+        "turn": 1,
+        "A": 0,
+        "E": 0,
+        "U": 2,
+        "Q": 0,
+        "O": 2,
+        "opening_quote": "偏好安靜的話，我會先選房源 A：同為一房、兩者租金都在 £2,300 上限內，且 A 面積較大（44.96 平方公尺），街道資料也只顯示住宅支路。",
+        "final_opening_quote": "偏好安靜的話，我會先選房源 A：同為一房、兩者租金都在 £2,300 上限內，且 A 面積較大（44.96 平方公尺），街道資料也只顯示住宅支路。",
+        "opening_rationale": "Opens with an evidence-grounded A recommendation and its space/location or budget tradeoff; the reply retains indoor-noise uncertainty.",
+        "findings": []
+      },
+      {
+        "turn": 2,
+        "A": 0,
+        "E": 0,
+        "U": 2,
+        "Q": 0,
+        "O": 2,
+        "opening_quote": "新上限 £2,100 下，房源 A（£2,250）已排除；房源 B（£1,800）仍符合租金與一房條件。",
+        "final_opening_quote": "新上限 £2,100 下，房源 A（£2,250）已排除；房源 B（£1,800）仍符合租金與一房條件。",
+        "opening_rationale": "Opens with the consequence of the revised rent cap: A fails and B remains within the rent cap, with its bedroom-facing predicate handled as unresolved in the reply.",
+        "findings": []
+      }
+    ],
+    "trace_note": "Both turns give a usable comparison. The revised rent cap removes A; B remains a conditional/pending candidate rather than a confirmed bedroom-facing pass or failure. Heating inclusion remains unknown. No formal state block is needed."
+  },
+  {
+    "candidate_id": "candidate-2cb0f98cd5e3e309045832b4",
+    "turns": [
+      {
+        "turn": 1,
+        "A": 0,
+        "E": 0,
+        "U": 2,
+        "Q": 0,
+        "O": 2,
+        "opening_quote": "我會先看榆庭公寓：它符合月租上限、在你偏好的北區，且 47 平方公尺是三間中最大；代價是門到門約 46 分鐘、需轉乘一次，比你希望的 40 分鐘多約 6 分鐘。",
+        "final_opening_quote": "我會先看榆庭公寓：它符合月租上限、在你偏好的北區，且 47 平方公尺是三間中最大；代價是門到門約 46 分鐘、需轉乘一次，比你希望的 40 分鐘多約 6 分鐘。",
+        "opening_rationale": "Opens with a concrete first-viewing recommendation supported by the supplied budget, commute or North/space tradeoff.",
+        "findings": []
+      },
+      {
+        "turn": 2,
+        "A": 0,
+        "E": 0,
+        "U": 2,
+        "Q": 0,
+        "O": 2,
+        "opening_quote": "目前唯一可直接排看的是槭園公寓 B：£1,990、無固定管理費、38 分鐘直達；南區只作這次的例外，不改變你偏好北區。",
+        "final_opening_quote": "目前唯一可直接排看的是槭園公寓 B：£1,990、無固定管理費、38 分鐘直達；南區只作這次的例外，不改變你偏好北區。",
+        "opening_rationale": "Opens with the updated viewing priority after the new commute exclusion and C-specific conditional exception; the reply keeps C conditional.",
+        "findings": []
+      }
+    ],
+    "trace_note": "Both turns give a usable viewing priority. The update removes A for its 46-minute commute, preserves the general £2,000 cap and C-only fee-inclusive exception, and does not make South the general future priority. C remains pending. First-turn analyst preference for either A or B is admissible."
+  },
+  {
+    "candidate_id": "candidate-2f89428fd86105c544c352f9",
+    "turns": [
+      {
+        "turn": 1,
+        "A": 0,
+        "E": 0,
+        "U": 2,
+        "Q": 0,
+        "O": 2,
+        "opening_quote": "我會先看榆庭公寓：它在你偏好的北區，47 平方公尺也是三者中最大，月租 £1,980，且沒有固定管理費。",
+        "final_opening_quote": "我會先看榆庭公寓：它在你偏好的北區，47 平方公尺也是三者中最大，月租 £1,980，且沒有固定管理費。",
+        "opening_rationale": "Opens with a concrete first-viewing recommendation supported by the supplied budget, commute or North/space tradeoff.",
+        "findings": []
+      },
+      {
+        "turn": 2,
+        "A": 0,
+        "E": 0,
+        "U": 2,
+        "Q": 0,
+        "O": 2,
+        "opening_quote": "先看槭園公寓 B：它是目前唯一同時符合一般 £2,000 預算、通勤不超過 45 分鐘的選項，且 38 分鐘免轉車，資料明載沒有每月固定管理費。",
+        "final_opening_quote": "先看槭園公寓 B：它是目前唯一同時符合一般 £2,000 預算、通勤不超過 45 分鐘的選項，且 38 分鐘免轉車，資料明載沒有每月固定管理費。",
+        "opening_rationale": "Opens with the updated viewing priority after the new commute exclusion and C-specific conditional exception; the reply keeps C conditional.",
+        "findings": []
+      }
+    ],
+    "trace_note": "Both turns give a usable viewing priority. The update removes A for its 46-minute commute, preserves the general £2,000 cap and C-only fee-inclusive exception, and does not make South the general future priority. C remains pending. First-turn analyst preference for either A or B is admissible."
+  },
+  {
+    "candidate_id": "candidate-32510008b3dfe75ac69e96cb",
+    "turns": [
+      {
+        "turn": 1,
+        "A": 0,
+        "E": 1,
+        "U": 2,
+        "Q": 0,
+        "O": 2,
+        "opening_quote": "先看榆庭公寓：它最符合你偏好北區、月租上限內，且三間中空間最大；代價是通勤約 46 分鐘、要轉一次，比目標多約 6 分鐘。",
+        "final_opening_quote": "先看榆庭公寓：它最符合你偏好北區、月租上限內，且三間中空間最大；代價是通勤約 46 分鐘、要轉一次，比目標多約 6 分鐘。",
+        "opening_rationale": "Opens with a concrete first-viewing recommendation supported by the supplied budget, commute or North/space tradeoff.",
+        "findings": [
+          {
+            "severity": "E1",
+            "actor_quote": "槭園公寓是務實的第二選擇：£1,990、38 分鐘直達，通勤最好，但在南區且面積較小。",
+            "input_support": "fixture-B: \"commute_minutes_door_to_door\": 38; fixture-C: \"commute_minutes_door_to_door\": 29, \"monthly_advertised_rent_gbp\": 2090; u1:「月租最多 £2,000」。",
+            "impact": "B is fastest among the two currently within budget, not among all three. The omitted scope makes the superlative imprecise, but C is already over the hard cap and the eligible-candidate tradeoff is unchanged.",
+            "minimal_correction": "Say「在符合目前預算的兩間中通勤最好」."
+          }
+        ]
+      },
+      {
+        "turn": 2,
+        "A": 0,
+        "E": 0,
+        "U": 2,
+        "Q": 0,
+        "O": 2,
+        "opening_quote": "目前先排槭園公寓 B：£1,990、38 分鐘直達，符合一般 £2,000 預算與通勤不超過 45 分鐘；雖在南區，但這次只是納入比較，不會改成往後的區域優先。",
+        "final_opening_quote": "目前先排槭園公寓 B：£1,990、38 分鐘直達，符合一般 £2,000 預算與通勤不超過 45 分鐘；雖在南區，但這次只是納入比較，不會改成往後的區域優先。",
+        "opening_rationale": "Opens with the updated viewing priority after the new commute exclusion and C-specific conditional exception; the reply keeps C conditional.",
+        "findings": []
+      }
+    ],
+    "trace_note": "Both turns give a usable viewing priority. The update removes A for its 46-minute commute, preserves the general £2,000 cap and C-only fee-inclusive exception, and does not make South the general future priority. C remains pending. First-turn analyst preference for either A or B is admissible."
+  },
+  {
+    "candidate_id": "candidate-3c597e99fff19d866c6f76e2",
+    "turns": [
+      {
+        "turn": 1,
+        "A": 0,
+        "E": 0,
+        "U": 2,
+        "Q": 0,
+        "O": 2,
+        "opening_quote": "我會偏向房源 A：同樣是一房、都在 £2,300 預算內，面積多 13.19 平方公尺（44.96－31.77），而且所在是住宅支路，較符合你偏好安靜的方向。",
+        "final_opening_quote": "我會偏向房源 A：同樣是一房、都在 £2,300 預算內，面積多 13.19 平方公尺（44.96－31.77），而且所在是住宅支路，較符合你偏好安靜的方向。",
+        "opening_rationale": "Opens with an evidence-grounded A recommendation and its space/location or budget tradeoff; the reply retains indoor-noise uncertainty.",
+        "findings": []
+      },
+      {
+        "turn": 2,
+        "A": 1,
+        "E": 0,
+        "U": 2,
+        "Q": 0,
+        "O": 2,
+        "opening_quote": "房源 A 現在超出 £2,100 上限，先排除；房源 B 在預算內，但臥室是否正對大馬路未提供，不能當作符合安靜條件。",
+        "final_opening_quote": "房源 A 現在超出 £2,100 上限，先排除；房源 B 在預算內，但臥室是否正對大馬路未提供，不能當作符合安靜條件。",
+        "opening_rationale": "Opens with the consequence of the revised rent cap: A fails and B remains within the rent cap, with its bedroom-facing predicate handled as unresolved in the reply.",
+        "findings": [
+          {
+            "severity": "A1",
+            "actor_quote": "不能當作符合安靜條件。",
+            "input_support": "u2:「房租上限改成 £2100，臥室正對大馬路就排除。」; fixture-B: \"monthly_advertised_rent_gbp\": 1800, \"bedroom_faces_main_road\": null. u1:「偏好安靜」。",
+            "impact": "The broad quiet-condition label loosely names the narrow bedroom/main-road exclusion; the surrounding sentence explicitly names that predicate and retains it as unknown, so it does not materially expand the hard rule to all noise or railway exposure.",
+            "minimal_correction": "Say「臥室不正對大馬路這項硬條件仍待確認」."
+          }
+        ]
+      }
+    ],
+    "trace_note": "Both turns give a usable comparison. The revised rent cap removes A; B remains a conditional/pending candidate rather than a confirmed bedroom-facing pass or failure. Heating inclusion remains unknown. No formal state block is needed."
+  },
+  {
+    "candidate_id": "candidate-648dc5e14379205fa5445088",
+    "turns": [
+      {
+        "turn": 1,
+        "A": 0,
+        "E": 0,
+        "U": 2,
+        "Q": 0,
+        "O": 2,
+        "opening_quote": "兩間都符合 £2,300 上限與一房條件；若安靜是首要，我會先選房源 A。",
+        "final_opening_quote": "兩間都符合 £2,300 上限與一房條件；若安靜是首要，我會先選房源 A。",
+        "opening_rationale": "Opens with an evidence-grounded A recommendation and its space/location or budget tradeoff; the reply retains indoor-noise uncertainty.",
+        "findings": []
+      },
+      {
+        "turn": 2,
+        "A": 0,
+        "E": 0,
+        "U": 2,
+        "Q": 0,
+        "O": 2,
+        "opening_quote": "房源 A 因 £2,250 超過新上限 £2,100，現已排除；房源 B 為 £1,800，仍在預算內，但臥室是否正對大馬路未知，暫不能確認符合你的排除條件。",
+        "final_opening_quote": "房源 A 因 £2,250 超過新上限 £2,100，現已排除；房源 B 為 £1,800，仍在預算內，但臥室是否正對大馬路未知，暫不能確認符合你的排除條件。",
+        "opening_rationale": "Opens with the consequence of the revised rent cap: A fails and B remains within the rent cap, with its bedroom-facing predicate handled as unresolved in the reply.",
+        "findings": []
+      }
+    ],
+    "trace_note": "Both turns give a usable comparison. The revised rent cap removes A; B remains a conditional/pending candidate rather than a confirmed bedroom-facing pass or failure. Heating inclusion remains unknown. No formal state block is needed."
+  },
+  {
+    "candidate_id": "candidate-6ab8a7eb355d164156c72d62",
+    "turns": [
+      {
+        "turn": 1,
+        "A": 0,
+        "E": 0,
+        "U": 2,
+        "Q": 0,
+        "O": 2,
+        "opening_quote": "若安靜是首要偏好，我會先選房源 A：它在住宅支路，且面積更大；房源 B 雖便宜 £450，但靠主幹道約 50 公尺、鐵路約 180 公尺，安靜風險較高。",
+        "final_opening_quote": "若安靜是首要偏好，我會先選房源 A：它在住宅支路，且面積更大；房源 B 雖便宜 £450，但靠主幹道約 50 公尺、鐵路約 180 公尺，安靜風險較高。",
+        "opening_rationale": "Opens with an evidence-grounded A recommendation and its space/location or budget tradeoff; the reply retains indoor-noise uncertainty.",
+        "findings": []
+      },
+      {
+        "turn": 2,
+        "A": 0,
+        "E": 0,
+        "U": 2,
+        "Q": 0,
+        "O": 2,
+        "opening_quote": "新上限下，房源 A（£2,250）超出 £2,100，先排除；房源 B（£1,800）仍在預算內。",
+        "final_opening_quote": "新上限下，房源 A（£2,250）超出 £2,100，先排除；房源 B（£1,800）仍在預算內。",
+        "opening_rationale": "Opens with the consequence of the revised rent cap: A fails and B remains within the rent cap, with its bedroom-facing predicate handled as unresolved in the reply.",
+        "findings": []
+      }
+    ],
+    "trace_note": "Both turns give a usable comparison. The revised rent cap removes A; B remains a conditional/pending candidate rather than a confirmed bedroom-facing pass or failure. Heating inclusion remains unknown. No formal state block is needed."
+  },
+  {
+    "candidate_id": "candidate-beb41cfcba32aefa6e72f7f4",
+    "turns": [
+      {
+        "turn": 1,
+        "A": 0,
+        "E": 0,
+        "U": 2,
+        "Q": 0,
+        "O": 2,
+        "opening_quote": "若安靜是首要條件，我會選房源 A：面積較大（44.96 平方米）、房租 £2,250，且目前只有住宅支路的街道觀察；房源 B 雖只要 £1,800，但較小（31.77 平方米），又距主幹道約 50 公尺、鐵路約 180 公尺，安靜風險較高。",
+        "final_opening_quote": "若安靜是首要條件，我會選房源 A：面積較大（44.96 平方米）、房租 £2,250，且目前只有住宅支路的街道觀察；房源 B 雖只要 £1,800，但較小（31.77 平方米），又距主幹道約 50 公尺、鐵路約 180 公尺，安靜風險較高。",
+        "opening_rationale": "Opens with an evidence-grounded A recommendation and its space/location or budget tradeoff; the reply retains indoor-noise uncertainty.",
+        "findings": []
+      },
+      {
+        "turn": 2,
+        "A": 1,
+        "E": 0,
+        "U": 2,
+        "Q": 0,
+        "O": 2,
+        "opening_quote": "上限改為 £2,100 後，房源 A 因 £2,250 超預算而排除；房源 B £1,800 仍符合，但臥室是否正對大馬路未知，暫不能確認它通過你的安靜硬條件。",
+        "final_opening_quote": "上限改為 £2,100 後，房源 A 因 £2,250 超預算而排除；房源 B £1,800 仍符合，但臥室是否正對大馬路未知，暫不能確認它通過你的安靜硬條件。",
+        "opening_rationale": "Opens with the consequence of the revised rent cap: A fails and B remains within the rent cap, with its bedroom-facing predicate handled as unresolved in the reply.",
+        "findings": [
+          {
+            "severity": "A1",
+            "actor_quote": "暫不能確認它通過你的安靜硬條件。",
+            "input_support": "u2:「房租上限改成 £2100，臥室正對大馬路就排除。」; fixture-B: \"monthly_advertised_rent_gbp\": 1800, \"bedroom_faces_main_road\": null. u1:「偏好安靜」。",
+            "impact": "The broad quiet-condition label loosely names the narrow bedroom/main-road exclusion; the surrounding sentence explicitly names that predicate and retains it as unknown, so it does not materially expand the hard rule to all noise or railway exposure.",
+            "minimal_correction": "Say「臥室不正對大馬路這項硬條件仍待確認」."
+          }
+        ]
+      }
+    ],
+    "trace_note": "Both turns give a usable comparison. The revised rent cap removes A; B remains a conditional/pending candidate rather than a confirmed bedroom-facing pass or failure. Heating inclusion remains unknown. No formal state block is needed."
+  },
+  {
+    "candidate_id": "candidate-c25558f84b1c660030e8bcd2",
+    "turns": [
+      {
+        "turn": 1,
+        "A": 0,
+        "E": 0,
+        "U": 2,
+        "Q": 0,
+        "O": 2,
+        "opening_quote": "我會先看榆庭公寓：它在你偏好的北區、月租 £1,980 沒超預算，47 平方公尺也是三間最大；代價是通勤 46 分鐘，比你的 40 分鐘目標多 6 分鐘，且要轉乘一次。",
+        "final_opening_quote": "我會先看榆庭公寓：它在你偏好的北區、月租 £1,980 沒超預算，47 平方公尺也是三間最大；代價是通勤 46 分鐘，比你的 40 分鐘目標多 6 分鐘，且要轉乘一次。",
+        "opening_rationale": "Opens with a concrete first-viewing recommendation supported by the supplied budget, commute or North/space tradeoff.",
+        "findings": []
+      },
+      {
+        "turn": 2,
+        "A": 1,
+        "E": 1,
+        "U": 2,
+        "Q": 0,
+        "O": 2,
+        "opening_quote": "先排看槭園公寓（B）：£1,990、沒有另收固定管理費，現有資料下每月總花費是清楚的；通勤 38 分鐘、免轉乘，也在你可接受的南區例外內。",
+        "final_opening_quote": "先排看槭園公寓（B）：£1,990、沒有另收固定管理費，現有資料下每月總花費是清楚的；通勤 38 分鐘、免轉乘，也在你可接受的南區例外內。",
+        "opening_rationale": "Opens with the updated viewing priority after the new commute exclusion and C-specific conditional exception; the reply keeps C conditional.",
+        "findings": [
+          {
+            "severity": "E1",
+            "actor_quote": "現有資料下每月總花費是清楚的",
+            "input_support": "fixture-B: \"monthly_advertised_rent_gbp\": 1990; fixed_management_fee:「資料明載：沒有另收每月固定管理費。」The fixture supplies no utility or other running-cost amounts.",
+            "impact": "The phrasing overstates cost completeness, but「現有資料下」and the adjacent rent/management-fee facts support a narrower fixed-cost reading; B remains the correctly supported priority. Retain this disputed E1/E2 boundary for human review rather than infer a definite all-in price claim.",
+            "minimal_correction": "Say「已知房租及固定管理費清楚；其他帳單未知」."
+          },
+          {
+            "severity": "A1",
+            "actor_quote": "B 因你只為這次開放南區而升為第一",
+            "input_support": "u1:「北區我比較喜歡」; u2:「南區這次我願意看 B，不代表接下來把南區當優先。通勤超過 45 分鐘的先不排看房。」; prior actor:「槭園公寓是較務實的備選」。",
+            "impact": "This compresses the reason for B rising into newly permitted geography even though B was already a backup under a soft North preference; the reply correctly removes A for the new commute rule and does not actually impose a prior South ban.",
+            "minimal_correction": "Explain that B becomes first because A now exceeds the viewing commute limit; South remains acceptable for B on this comparison."
+          }
+        ]
+      }
+    ],
+    "trace_note": "Both turns give a usable viewing priority. The update removes A for its 46-minute commute, preserves the general £2,000 cap and C-only fee-inclusive exception, and does not make South the general future priority. C remains pending. First-turn analyst preference for either A or B is admissible."
+  },
+  {
+    "candidate_id": "candidate-c5854d4a6d6f33b62c0ecf44",
+    "turns": [
+      {
+        "turn": 1,
+        "A": 0,
+        "E": 0,
+        "U": 2,
+        "Q": 0,
+        "O": 2,
+        "opening_quote": "若把安靜放在前面，我會選房源 A：同樣是一房、都在 £2,300 上限內，且位於住宅支路；房源 B 雖每月便宜 £450，但離主幹道約 50 公尺、鐵路約 180 公尺，對安靜偏好是較明顯的風險。",
+        "final_opening_quote": "若把安靜放在前面，我會選房源 A：同樣是一房、都在 £2,300 上限內，且位於住宅支路；房源 B 雖每月便宜 £450，但離主幹道約 50 公尺、鐵路約 180 公尺，對安靜偏好是較明顯的風險。",
+        "opening_rationale": "Opens with an evidence-grounded A recommendation and its space/location or budget tradeoff; the reply retains indoor-noise uncertainty.",
+        "findings": []
+      },
+      {
+        "turn": 2,
+        "A": 0,
+        "E": 0,
+        "U": 2,
+        "Q": 0,
+        "O": 2,
+        "opening_quote": "新上限 £2,100 下，房源 A（£2,250）已超預算；房源 B（£1,800）符合預算，但臥室是否正對大馬路未提供，暫不能確認符合你的排除條件。",
+        "final_opening_quote": "新上限 £2,100 下，房源 A（£2,250）已超預算；房源 B（£1,800）符合預算，但臥室是否正對大馬路未提供，暫不能確認符合你的排除條件。",
+        "opening_rationale": "Opens with the consequence of the revised rent cap: A fails and B remains within the rent cap, with its bedroom-facing predicate handled as unresolved in the reply.",
+        "findings": []
+      }
+    ],
+    "trace_note": "Both turns give a usable comparison. The revised rent cap removes A; B remains a conditional/pending candidate rather than a confirmed bedroom-facing pass or failure. Heating inclusion remains unknown. No formal state block is needed."
+  },
+  {
+    "candidate_id": "candidate-c9e4feae14da9add4be08ccf",
+    "turns": [
+      {
+        "turn": 1,
+        "A": 0,
+        "E": 0,
+        "U": 2,
+        "Q": 0,
+        "O": 2,
+        "opening_quote": "偏好安靜的話，我會選房源 A；它較大，且已知位於住宅支路，對日常噪音的風險較低。",
+        "final_opening_quote": "偏好安靜的話，我會選房源 A；它較大，且已知位於住宅支路，對日常噪音的風險較低。",
+        "opening_rationale": "Opens with an evidence-grounded A recommendation and its space/location or budget tradeoff; the reply retains indoor-noise uncertainty.",
+        "findings": []
+      },
+      {
+        "turn": 2,
+        "A": 0,
+        "E": 0,
+        "U": 2,
+        "Q": 0,
+        "O": 2,
+        "opening_quote": "房源 A 的 £2,250/月已超出新上限 £2,100，現在排除。",
+        "final_opening_quote": "房源 A 的 £2,250/月已超出新上限 £2,100，現在排除。",
+        "opening_rationale": "Opens with the consequence of the revised rent cap: A fails and B remains within the rent cap, with its bedroom-facing predicate handled as unresolved in the reply.",
+        "findings": []
+      }
+    ],
+    "trace_note": "Both turns give a usable comparison. The revised rent cap removes A; B remains a conditional/pending candidate rather than a confirmed bedroom-facing pass or failure. Heating inclusion remains unknown. No formal state block is needed."
+  },
+  {
+    "candidate_id": "candidate-cd1984ccf9bbab3a82fa47f3",
+    "turns": [
+      {
+        "turn": 1,
+        "A": 0,
+        "E": 0,
+        "U": 2,
+        "Q": 0,
+        "O": 2,
+        "opening_quote": "先看槭園公寓：£1,990 內、38 分鐘直達，最穩地符合你的預算與通勤目標。",
+        "final_opening_quote": "先看槭園公寓：£1,990 內、38 分鐘直達，最穩地符合你的預算與通勤目標。",
+        "opening_rationale": "Opens with a concrete first-viewing recommendation supported by the supplied budget, commute or North/space tradeoff.",
+        "findings": []
+      },
+      {
+        "turn": 2,
+        "A": 0,
+        "E": 0,
+        "U": 2,
+        "Q": 0,
+        "O": 2,
+        "opening_quote": "先約槭園公寓（B）：£1,990、38 分鐘直達，費用明載沒有每月固定管理費，現有資料下是唯一可直接排看房的選項。",
+        "final_opening_quote": "先約槭園公寓（B）：£1,990、38 分鐘直達，費用明載沒有每月固定管理費，現有資料下是唯一可直接排看房的選項。",
+        "opening_rationale": "Opens with the updated viewing priority after the new commute exclusion and C-specific conditional exception; the reply keeps C conditional.",
+        "findings": []
+      }
+    ],
+    "trace_note": "Both turns give a usable viewing priority. The update removes A for its 46-minute commute, preserves the general £2,000 cap and C-only fee-inclusive exception, and does not make South the general future priority. C remains pending. First-turn analyst preference for either A or B is admissible."
+  },
+  {
+    "candidate_id": "candidate-d2b06fa3bdeb8d3e3ead6c37",
+    "turns": [
+      {
+        "turn": 1,
+        "A": 0,
+        "E": 0,
+        "U": 2,
+        "Q": 0,
+        "O": 2,
+        "opening_quote": "我會先看槭園公寓：£1,990 在預算內、38 分鐘通勤最貼近你的 40 分鐘目標，而且沒有固定管理費。",
+        "final_opening_quote": "我會先看槭園公寓：£1,990 在預算內、38 分鐘通勤最貼近你的 40 分鐘目標，而且沒有固定管理費。",
+        "opening_rationale": "Opens with a concrete first-viewing recommendation supported by the supplied budget, commute or North/space tradeoff.",
+        "findings": []
+      },
+      {
+        "turn": 2,
+        "A": 0,
+        "E": 2,
+        "U": 2,
+        "Q": 0,
+        "O": 2,
+        "opening_quote": "目前順位是：C（條件成立才看）＞ B ＞ A（暫不看）。",
+        "final_opening_quote": "目前順位是：C（條件成立才看）＞ B ＞ A（暫不看）。",
+        "opening_rationale": "Opens with the updated viewing priority after the new commute exclusion and C-specific conditional exception; the reply keeps C conditional.",
+        "findings": [
+          {
+            "severity": "E2",
+            "actor_quote": "但資料一處說沒有固定管理費，另一處又列每月 £80、未說是否已含租金",
+            "input_support": "fixture-C:「同一份資料另一欄列有每月 £80 固定管理費，未註明已含在 £2,090 租金內，或須另付。」; \"monthly_advertised_rent_gbp\": 2090. No other bill amounts or bill-inclusion facts are supplied. fixture-A and fixture-B, not fixture-C, have「資料明載：沒有另收每月固定管理費。」; u2:「C 我可以單獨放到 £2,100，但前提是每月固定管理費已含在租金裡，不能再加收。」",
+            "impact": "Invents a C source statement denying a fixed management fee, turning the decisive inclusion unknown into a fabricated source conflict; the conditional recommendation is still permissible, but its central fee evidence is false.",
+            "minimal_correction": "Remove the invented no-fee source claim and say only that C lists an £80 fee whose inclusion in £2,090 is unknown."
+          }
+        ]
+      }
+    ],
+    "trace_note": "Both turns give a usable viewing priority. The update removes A for its 46-minute commute, preserves the general £2,000 cap and C-only fee-inclusive exception, and does not make South the general future priority. C remains pending. First-turn analyst preference for either A or B is admissible. Material E2: C is ranked first only conditionally, which is allowed, but the reply fabricates a conflicting C no-management-fee source statement."
+  },
+  {
+    "candidate_id": "candidate-fbc1b0158386edaca9d1c083",
+    "turns": [
+      {
+        "turn": 1,
+        "A": 1,
+        "E": 0,
+        "U": 2,
+        "Q": 0,
+        "O": 2,
+        "opening_quote": "先看槭園公寓：£1,990 在預算內，38 分鐘直達，最符合你「約 40 分鐘」的通勤底線。",
+        "final_opening_quote": "先看槭園公寓：£1,990 在預算內，38 分鐘直達，最符合你「約 40 分鐘」的通勤底線。",
+        "opening_rationale": "Opens with a concrete first-viewing recommendation supported by the supplied budget, commute or North/space tradeoff.",
+        "findings": [
+          {
+            "severity": "A1",
+            "actor_quote": "最符合你「約 40 分鐘」的通勤底線。",
+            "input_support": "u1:「北區我比較喜歡，通勤希望抓在 40 分鐘左右，但也想聽你對取捨的判斷。」; fixture-A: \"commute_minutes_door_to_door\": 46.",
+            "impact": "The word bottom line overstates a soft target locally, but the reply still explicitly recommends 46-minute A as a second viewing, so there is no material user-rule conversion.",
+            "minimal_correction": "Replace「通勤底線」with「通勤目標」."
+          }
+        ]
+      },
+      {
+        "turn": 2,
+        "A": 0,
+        "E": 1,
+        "U": 2,
+        "Q": 0,
+        "O": 2,
+        "opening_quote": "先看槭園公寓 B：£1,990，沒有另收固定管理費，38 分鐘直達；是目前唯一費用與通勤都確定符合條件的選項。",
+        "final_opening_quote": "先看槭園公寓 B：£1,990，沒有另收固定管理費，38 分鐘直達；是目前唯一費用與通勤都確定符合條件的選項。",
+        "opening_rationale": "Opens with the updated viewing priority after the new commute exclusion and C-specific conditional exception; the reply keeps C conditional.",
+        "findings": [
+          {
+            "severity": "E1",
+            "actor_quote": "若另收，每月總花費會是 £2,170，便不符合你的條件。",
+            "input_support": "fixture-C:「同一份資料另一欄列有每月 £80 固定管理費，未註明已含在 £2,090 租金內，或須另付。」; \"monthly_advertised_rent_gbp\": 2090. No other bill amounts or bill-inclusion facts are supplied.",
+            "impact": "The conditional rent-plus-management-fee amount and exclusion are accurate, while the total-cost label could be misread as including unspecified bills; classify as an imprecise subtotal label, not a decisive invented all-in price.",
+            "minimal_correction": "Use「房租加固定管理費合計 £2,170，其他帳單仍未知」."
+          }
+        ]
+      }
+    ],
+    "trace_note": "Both turns give a usable viewing priority. The update removes A for its 46-minute commute, preserves the general £2,000 cap and C-only fee-inclusive exception, and does not make South the general future priority. C remains pending. First-turn analyst preference for either A or B is admissible."
+  }
+]

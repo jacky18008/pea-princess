@@ -168,7 +168,7 @@ async function main(){
  handler=null;context.recoveredState={...state('B'),revision:2,status:'interrupted',pending_call:true};run('render(recoveredState)');
  assert.equal(elements.recover.hidden,false);assert.equal(elements.step.disabled,true);await elements.recover.onclick();
  assert.equal(captured.at(-1).data.action,'recover');
- context.choiceState={...state('B'),revision:3,messages:[{role:'assistant',text:'Stored complete reply',display_text:'Two fictional examples: courtyard or station.',questions:[{question:'Which tradeoff fits you?',options:['Quiet courtyard','Closer station']},{question:'Which campus?',options:['I know the campus','Help me find it']}]}]};
+ context.choiceState={...state('B'),intent_guard_version:1,revision:3,messages:[{role:'assistant',call_id:'call-001-assistant',text:'Stored complete reply',display_text:'Two fictional examples: courtyard or station.',questions:[{question:'Which tradeoff fits you?',options:['Quiet courtyard','Closer station']},{question:'Which campus?',options:['I know the campus','Help me find it']}]}]};
  run('render(choiceState)');let form=elements.messages.children[0].children[2];
  assert.equal(form.children.length,4);assert.equal(form.children[0].children[1].children[0].checked,false);
  assert.equal(form.children[0].children[2].children[0].checked,false);
@@ -181,6 +181,7 @@ async function main(){
  assert.equal(choiceSends[0].data.client_id,choiceSends[1].data.client_id);
  assert.equal(choiceSends[1].data.text,'Which tradeoff fits you?\nQuiet courtyard；<img src=x onerror=alert(1)> but flexible');
  assert.equal(choiceSends[1].data.kind,'question');
+ assert.deepEqual(choiceSends[1].data.clarification,{call_id:'call-001-assistant',answers:[{question_index:0,option_index:0,text:'<img src=x onerror=alert(1)> but flexible'}]});
  context.choiceState.messages.push({role:'human',text:'I prefer the courtyard.'});run('render(choiceState)');
  assert.equal(elements.messages.children[0].children[2].children[0].disabled,true);
  assert.equal(elements.messages.children[0].children[2].children.length,2);

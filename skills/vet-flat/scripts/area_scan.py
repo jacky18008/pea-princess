@@ -36,6 +36,12 @@ Identical requests reuse original timestamped observations, including partial/fa
 they do not silently refresh. Pending/interrupted results never automatically start another scan.
 The store holds at most 128 requests with 1 MiB per snapshot. Its hashes detect corruption, not
 source truth or malicious edits by this same OS user. Use --no-save only to explicitly opt out.
+Each source has a 90-second deadline and the full attempt has 180 seconds by default; both
+can be set explicitly up to 240 seconds. Completed source summaries and source timestamps
+are checkpointed. A timeout retains available evidence but reports scan_status=timed_out,
+never full coverage. ok only means some usable evidence exists. A host may call
+area_scan_store.reconcile_running on its mutable store to close abandoned producer leases;
+this makes no requests. It must not apply recovery mutations to frozen experiment archives.
 VETFLAT_RESEARCH_DEPTH selects the baseline (otherwise standard); changing --depth requires a
 recorded --escalation-reason, which is not itself proof of user authorization.
 
@@ -57,13 +63,74 @@ import re
 import sys
 import tempfile
 import threading
+import signal
+import time
+import copy
 import area_scan_store as scan_store
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from _fetch import now_iso  # noqa: E402
+from _fetch import now_iso, fetch_budget  # noqa: E402
 
 SCHEMA = "vet-flat/area-scan/2"
+DEFAULT_SCAN_SECONDS = 180
+DEFAULT_SOURCE_SECONDS = 90
+_scan_context = threading.local()
+
+
+class ScanBudget:
+    """One finite attempt. Only its supervising thread publishes checkpoints."""
+    def __init__(self, seconds, source_seconds, checkpoint=None):
+        self.deadline = time.monotonic() + seconds
+        self.source_seconds = source_seconds
+        self.checkpoint = checkpoint
+        self.sources = {}
+        self.observations = {}
+        self.where = {}
+        self.street = None
+        self.depth = "standard"
+        self.workers = []
+
+    def snapshot(self):
+        partial = compose(self.where, None, None, None, None, [], street=self.street, depth=self.depth)
+        for label, (value, error) in self.observations.items():
+            if value is None or label not in ("crime", "planning", "roads", "living", "noise"):
+                continue
+            args = [None] * 4
+            if label != "noise":
+                args[("crime", "planning", "roads", "living").index(label)] = value
+            try:
+                part = compose(self.where, *args, [], noise=value if label == "noise" else None, depth=self.depth)
+                for key in ("quiet", "noise", "crime", "works", "living_environment"):
+                    if part.get(key) is not None:
+                        partial[key] = part[key]
+                partial["sources"].extend(part["sources"])
+                partial["reading"].extend(part["reading"][:-1])
+                partial["not_found"].extend(part["not_found"])
+                partial["ok"] = partial["ok"] or part["ok"]
+            except Exception as exc:
+                partial["not_found"].append("%s checkpoint summary unavailable: %s" % (label, type(exc).__name__))
+        for label, progress in self.sources.items():
+            if progress["status"] != "complete":
+                partial["not_found"].append("%s: %s%s" % (label, progress["status"], ": " + progress["note"] if progress.get("note") else ""))
+        partial["source_progress"] = copy.deepcopy(self.sources)
+        partial["scan_status"] = "running"
+        partial["how_to_use"] = "In-progress checkpoint. Only completed source observations are available; this is not a completed scan. Preserve source gaps and do not start another attempt automatically."
+        return {"sources": copy.deepcopy(self.sources), "result": partial}
+
+    def publish(self):
+        if self.checkpoint:
+            self.checkpoint(self.snapshot())
+
+    def close(self):
+        # _fetch cooperatively cancels and reaps owned curl children. A source
+        # stuck in arbitrary Python code is a daemon, has no checkpoint writer,
+        # and further fetch calls are refused; this is not hostile-code isolation.
+        for thread, cancel in self.workers:
+            cancel.set()
+        deadline = time.monotonic() + .5
+        for thread, _ in self.workers:
+            thread.join(max(0, deadline - time.monotonic()))
 STREET_TYPES = re.compile(r"^(motorway|trunk|primary|secondary|tertiary|unclassified|residential|living_street)(_link)?$")
 TIERS = {"lite": dict(street=False, band=False, rail=False, night=False, planning_radius=None, stages=False),
          "standard": dict(street=True, band=True, rail=False, night=False, planning_radius=None, stages=True),
@@ -357,7 +424,7 @@ def names(block, limit=3):
 
 def compose(where, crime, planning, roads, living, notes, noise=None, street=None, depth="standard"):
     """The fixed shape, from the raw outputs of the register scripts (any may be None)."""
-    out = {"how_to_use": "Complete. Write the answer from this JSON. Do not read this script's source, the cache, or the registers again, and do not run crime.py, planning.py, roads.py, noise.py or living_env.py for the same point.",
+    out = {"how_to_use": "Use the available observations in this JSON; check scan_status and source gaps before claiming coverage. Do not read this script's source, the cache, or the registers again, and do not run crime.py, planning.py, roads.py, noise.py or living_env.py for the same point.",
            "schema": SCHEMA, "ok": True, "retrieved_at": now_iso(), "depth": depth, "where": where,
            "street": None, "quiet": None, "noise": None, "crime": None, "works": None, "living_environment": None,
            "reading": [], "sources": [], "not_found": list(notes)}
@@ -525,7 +592,7 @@ def compose(where, crime, planning, roads, living, notes, noise=None, street=Non
         out["not_found"].append("living environment: " + str(living.get("note") or "table unavailable"))
 
     reading.append("Quiet and safety are different questions: the roads, rail, night-economy and noise lines answer quiet; the crime line answers safety and says nothing about noise. All of this is the area, not the flat: listen at the window on the viewing day, at night if you can, and read the flat's own EPC for fabric.")
-    if (where or {}).get("how_located", "").startswith("lat/lng given") and not (street and street.get("ok")):
+    if ((where or {}).get("how_located") or "").startswith("lat/lng given") and not (street and street.get("ok")):
         reading.append("The point was given as coordinates: if it is an area centroid rather than a door, treat every distance as a rough guide and scan again with --street NAME.")
     out["sources"] = [s for s in out["sources"] if s]
     out["ok"] = any(x is not None for x in (out["quiet"], out["crime"], out["works"], out["living_environment"])) or bool(noise and noise.get("ok"))
@@ -544,7 +611,7 @@ def add_stage(out, planning_raw, verbose=False):
         if r.get("reference") == top["reference"]:
             lpa = r.get("lpa_name")
             break
-    s, err = _safe(planning_mod.stages, top["reference"], lpa, verbose=verbose)
+    s, err = _call("planning_stage", planning_mod.stages, top["reference"], lpa, verbose=verbose)
     if err or not s or s.get("ok") is False or not s.get("record"):
         out["not_found"].append("stage of %s: %s" % (top["reference"], err or (s or {}).get("note") or "not found"))
         return
@@ -556,18 +623,86 @@ def add_stage(out, planning_raw, verbose=False):
             top["reference"], top.get("distance_m"), " ".join(means)[:400]))
 
 
+def _bounded_jobs(jobs):
+    """Finite concurrent source attempts; expired sources do not erase neighbours."""
+    budget = getattr(_scan_context, "budget", None)
+    own_budget = budget is None
+    budget = budget or ScanBudget(DEFAULT_SCAN_SECONDS, DEFAULT_SOURCE_SECONDS)
+    results, active = {}, {}
+    completions = {}
+    completion_ready = threading.Condition()
+    def run(name, fn, args, kwargs, deadline, cancelled):
+        with fetch_budget(deadline, cancelled):
+            value = _safe(fn, *args, **kwargs)
+        # Completion publication and deadline expiry share a short lock. There
+        # is no disk I/O under it. A slow checkpoint must not age a queued result
+        # into a timeout or discard its already finished neighbours.
+        with completion_ready:
+            completions[name] = (value, time.monotonic(), now_iso())
+            completion_ready.notify()
+    try:
+        for name, (fn, args, kwargs) in jobs.items():
+            started = now_iso()
+            deadline = min(budget.deadline, time.monotonic() + budget.source_seconds)
+            if deadline <= time.monotonic():
+                results[name] = (None, "scan deadline reached before source started; no request made")
+                budget.sources[name] = {"status": "timed_out", "started_at": None, "finished_at": started, "note": results[name][1]}
+                continue
+            cancelled = threading.Event()
+            thread = threading.Thread(target=run, args=(name, fn, args, kwargs, deadline, cancelled), daemon=True)
+            budget.sources[name] = {"status": "running", "started_at": started, "finished_at": None}
+            active[name] = (deadline, cancelled)
+            budget.workers.append((thread, cancelled))
+            thread.start()
+        budget.publish()
+        while active:
+            changed = False
+            with completion_ready:
+                if not completions:
+                    completion_ready.wait(timeout=max(0, min(.1, min(x[0] for x in active.values()) - time.monotonic())))
+                for name, (value, completed_at, finished_at) in list(completions.items()):
+                    if name not in active:
+                        continue
+                    deadline, cancelled = active.pop(name)
+                    if completed_at >= deadline:
+                        value = (None, "source deadline reached; no automatic retry")
+                        status = "timed_out"
+                        cancelled.set()
+                    else:
+                        status = "failed" if value[1] or (isinstance(value[0], dict) and value[0].get("ok") is False) else "complete"
+                    results[name] = value
+                    budget.observations[name] = value
+                    note = value[1]
+                    if not note and isinstance(value[0], dict):
+                        note = str(value[0].get("note", ""))[:300]
+                    budget.sources[name].update(status=status, finished_at=finished_at, note=note)
+                    changed = True
+                completions.clear()
+                # All available completions are adopted before expiring remaining
+                # jobs; workers cannot publish between this drain and the sweep.
+                for name, (deadline, cancelled) in list(active.items()):
+                    if time.monotonic() >= deadline:
+                        cancelled.set()
+                        results[name] = (None, "source deadline reached; no automatic retry")
+                        budget.sources[name].update(status="timed_out", finished_at=now_iso(), note=results[name][1])
+                        active.pop(name)
+                        changed = True
+            if changed:
+                budget.publish()
+        return results
+    finally:
+        for _, cancelled in active.values():
+            cancelled.set()
+        if own_budget:
+            budget.close()
+
+
 def _parallel(jobs):
-    """Run {name: (fn, args, kwargs)} in threads; each result is (value, error) as from _safe.
-    The registers are different hosts, so the per-host throttle in _fetch still holds within each."""
-    results = {}
-    def run(name, fn, args, kwargs):
-        results[name] = _safe(fn, *args, **kwargs)
-    threads = [threading.Thread(target=run, args=(n, f, a, k), daemon=True) for n, (f, a, k) in jobs.items()]
-    for t in threads:
-        t.start()
-    for t in threads:
-        t.join()
-    return results
+    return _bounded_jobs(jobs)
+
+
+def _call(name, fn, *args, **kwargs):
+    return _bounded_jobs({name: (fn, args, kwargs)})[name]
 
 
 def result_path(postcode, lat, lng, street, depth):
@@ -592,7 +727,7 @@ def validate_location(postcode, lat, lng, street, location_source):
         raise ValueError("an outward code needs --street; do not scan a district centroid as a home")
 
 
-def scan(postcode=None, lat=None, lng=None, months=6, crime_half_m=150, planning_radius=250, roads_radius=300,
+def _scan(postcode=None, lat=None, lng=None, months=6, crime_half_m=150, planning_radius=250, roads_radius=300,
          depth="standard", street=None, verbose=False, announce=None, location_source=None):
     import geo, crime as crime_mod, planning as planning_mod, roads as roads_mod, living_env, noise as noise_mod  # noqa: E402
     validate_location(postcode, lat, lng, street, location_source)
@@ -609,10 +744,13 @@ def scan(postcode=None, lat=None, lng=None, months=6, crime_half_m=150, planning
     if coarse and not street:
         raise ValueError("an outward code needs --street; a district centroid is not a property")
     where = {"postcode": postcode, "lat": lat, "lng": lng, "district": None, "how_located": "lat/lng given" if lat is not None else None}
+    budget = getattr(_scan_context, "budget", None)
+    if budget:
+        budget.where, budget.depth = where, depth
     if lat is None or lng is None:
         if not postcode:
             raise ValueError("give --postcode or --lat and --lng")
-        g, err = _safe(geo.lookup_outcode if coarse else geo.lookup, postcode, verbose)
+        g, err = _call("location", geo.lookup_outcode if coarse else geo.lookup, postcode, verbose)
         if err or not g or not g.get("ok"):
             return {"schema": SCHEMA, "ok": False, "retrieved_at": now_iso(), "where": where,
                     "note": "postcode not located: %s" % (err or (g or {}).get("note")), "reading": [], "sources": [], "not_found": ["postcode lookup"]}
@@ -628,9 +766,11 @@ def scan(postcode=None, lat=None, lng=None, months=6, crime_half_m=150, planning
         street_options = {"verbose": verbose}
         if coarse:
             street_options["representative"] = True
-        st, e0 = _safe(find_street, lat, lng, street, **street_options)
+        st, e0 = _call("street", find_street, lat, lng, street, **street_options)
         if e0:
             st = {"ok": False, "name": street, "note": e0}
+        if budget:
+            budget.street = st
         if st and st.get("ok"):
             at_lat, at_lng = st["anchor"]["lat"], st["anchor"]["lng"]
             pts = [(p["lat"], p["lng"]) for p in st["points"]]
@@ -660,7 +800,7 @@ def scan(postcode=None, lat=None, lng=None, months=6, crime_half_m=150, planning
     n, e5 = got["noise"]
     l, e4 = got["living"] if postcode and not coarse else (None, "living environment needs a full property postcode")
     if c and c.get("ok") and not c.get("total"):
-        wide, e1b = _safe(crime_mod.box, at_lat, at_lng, crime_half_m * 2, months, verbose=verbose, sensitivity=False)
+        wide, e1b = _call("crime_wider_box", crime_mod.box, at_lat, at_lng, crime_half_m * 2, months, verbose=verbose, sensitivity=False)
         if wide and wide.get("ok"):
             c["wider_box"] = {"half_m": crime_half_m * 2, "total": wide.get("total"), "months": wide.get("months_counted")}
     for name, err in (("crime", e1), ("planning", e2), ("roads", e3), ("noise", e5), ("living environment", e4)):
@@ -698,9 +838,35 @@ def scan(postcode=None, lat=None, lng=None, months=6, crime_half_m=150, planning
     return out
 
 
+def scan(postcode=None, lat=None, lng=None, months=6, crime_half_m=150, planning_radius=250, roads_radius=300,
+         depth="standard", street=None, verbose=False, announce=None, location_source=None,
+         deadline_seconds=DEFAULT_SCAN_SECONDS, source_timeout_seconds=DEFAULT_SOURCE_SECONDS, checkpoint=None):
+    if not all(isinstance(v, (int, float)) and math.isfinite(v) and 0 < v <= 240
+               for v in (deadline_seconds, source_timeout_seconds)):
+        raise ValueError("scan and source deadlines must be positive, at most 240 seconds")
+    budget = ScanBudget(deadline_seconds, source_timeout_seconds, checkpoint)
+    previous = getattr(_scan_context, "budget", None)
+    _scan_context.budget = budget
+    try:
+        out = _scan(postcode, lat, lng, months, crime_half_m, planning_radius, roads_radius,
+                    depth, street, verbose, announce, location_source)
+        out["source_progress"] = copy.deepcopy(budget.sources)
+        timed_out = [name for name, item in budget.sources.items() if item["status"] == "timed_out"]
+        if timed_out:
+            out["scan_status"] = "timed_out"
+            out.setdefault("not_found", []).append("Incomplete scan: source deadline reached for %s; retained completed evidence, no automatic retry." % ", ".join(timed_out))
+        else:
+            out["scan_status"] = "failed" if not out.get("ok") else ("partial" if out.get("not_found") else "complete")
+        out["how_to_use"] = "Scan status: %s. %s" % (out["scan_status"], out.get("how_to_use") or "Use only the available observations, preserve missing sources, and do not retry automatically.")
+        return out
+    finally:
+        budget.close()
+        _scan_context.budget = previous
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter,
-                                 epilog="Run it once per street and write from the JSON; the output is complete. --depth is the person's budget mode; standard when unknown. Reading this file's source or the cache adds nothing.")
+                                 epilog="Run it once per street and write from the JSON; check scan_status and source gaps before claiming coverage. --depth is the person's budget mode; standard when unknown. Reading this file's source or the cache adds nothing.")
     ap.add_argument("--postcode", help="full postcode, or outward code with --street; resolved from public data")
     ap.add_argument("--lat", type=float)
     ap.add_argument("--lng", type=float)
@@ -715,6 +881,8 @@ def main():
     ap.add_argument("--street", help="the street's name when known; the scan moves onto it and says how far off the point was")
     ap.add_argument("--result-dir", help="private durable results directory; otherwise VETFLAT_SCAN_RESULT_DIR or .pea-state/area-scans")
     ap.add_argument("--lock-wait-seconds", type=float, default=2, help="bounded wait for an existing scan (0–30 seconds)")
+    ap.add_argument("--deadline-seconds", type=float, default=DEFAULT_SCAN_SECONDS, help="whole scan deadline (default 180, maximum 240 seconds)")
+    ap.add_argument("--source-timeout-seconds", type=float, default=DEFAULT_SOURCE_SECONDS, help="per-source deadline (default 90, maximum 240 seconds)")
     ap.add_argument("--out", help="also atomically export returned JSON to this private directory (0700)")
     ap.add_argument("--no-save", action="store_true")
     ap.add_argument("--verbose", action="store_true")
@@ -728,6 +896,8 @@ def main():
         ap.error("a depth different from the baseline requires --escalation-reason before any lookup")
     if not math.isfinite(a.lock_wait_seconds) or not 0 <= a.lock_wait_seconds <= 30:
         ap.error("--lock-wait-seconds must be between 0 and 30")
+    if not all(math.isfinite(v) and 0 < v <= 240 for v in (a.deadline_seconds, a.source_timeout_seconds)):
+        ap.error("scan and source deadlines must be positive, at most 240 seconds")
     if any(v is not None and not math.isfinite(v) for v in (a.lat, a.lng)) or (a.lat is not None and not -90 <= a.lat <= 90) or (a.lng is not None and not -180 <= a.lng <= 180):
         ap.error("coordinates must be finite latitude/longitude")
     if not 1 <= a.months <= 24 or not all(1 <= v <= 5000 for v in (a.crime_half_m, a.planning_radius, a.roads_radius)):
@@ -743,10 +913,22 @@ def main():
         sys.stderr.flush()
     request = {k: getattr(a, k) for k in ("postcode", "lat", "lng", "months", "crime_half_m", "planning_radius", "roads_radius", "depth", "street", "location_source")}
     request.update(requested_depth=baseline, escalation_reason=reason or None,
-                   effective_planning_radius=TIERS[a.depth]["planning_radius"] or a.planning_radius)
-    def perform():
-        return scan(a.postcode, a.lat, a.lng, a.months, a.crime_half_m, a.planning_radius, a.roads_radius,
-                    a.depth, a.street, a.verbose, announce=announce, location_source=a.location_source)
+                   effective_planning_radius=TIERS[a.depth]["planning_radius"] or a.planning_radius,
+                   deadline_seconds=a.deadline_seconds, source_timeout_seconds=a.source_timeout_seconds)
+    def interrupted(signum, frame):
+        raise KeyboardInterrupt("signal %s" % signum)
+    def perform(checkpoint=None):
+        previous = None
+        if threading.current_thread() is threading.main_thread():
+            previous = signal.signal(signal.SIGTERM, interrupted)
+        try:
+            return scan(a.postcode, a.lat, a.lng, a.months, a.crime_half_m, a.planning_radius, a.roads_radius,
+                        a.depth, a.street, a.verbose, announce=announce, location_source=a.location_source,
+                        deadline_seconds=a.deadline_seconds, source_timeout_seconds=a.source_timeout_seconds,
+                        checkpoint=checkpoint)
+        finally:
+            if previous is not None:
+                signal.signal(signal.SIGTERM, previous)
     if a.no_save:
         out = perform()
         out["execution"] = {"requested_depth": baseline, "effective_depth": a.depth, "escalation_reason": reason or None,
@@ -755,7 +937,7 @@ def main():
         root = a.result_dir or os.environ.get("VETFLAT_SCAN_RESULT_DIR") or os.path.join(os.getcwd(), ".pea-state", "area-scans")
         try:
             identity = scan_store.source_identity(HERE)
-            out = scan_store.run(root, request, identity, perform, now_iso, a.lock_wait_seconds)
+            out = scan_store.run(root, request, identity, perform, now_iso, a.lock_wait_seconds, with_checkpoint=True)
         except (OSError, ValueError) as exc:
             out = scan_store.status_result("storage_error", "Scanner identity unavailable: %s; no lookup performed" % exc)
     if a.out:
@@ -766,7 +948,7 @@ def main():
             out.setdefault("not_found", []).append("could not export a copy: %s" % exc)
     json.dump(out, sys.stdout, ensure_ascii=False, indent=1)
     print()
-    return 0 if out.get("ok") else 1
+    return 0 if out.get("ok") and out.get("scan_status") not in ("timed_out", "interrupted") else 1
 
 
 if __name__ == "__main__":

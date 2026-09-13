@@ -1,0 +1,803 @@
+{
+  "scope": "actor CLI only; versions remain separate; independent model grades are not human ground truth",
+  "versions": {
+    "v1": {
+      "manifest_sha256": "ac4f354ef351a3e3542ab772acdb979ca829f93feb64a98db448d5afd5b16866",
+      "planned": 36,
+      "dispatched": 3,
+      "retained_records": 3,
+      "not_dispatched": 33,
+      "cost": {
+        "records": 3,
+        "known_usage_records": 3,
+        "unknown_usage_records": 0,
+        "usage_complete": true,
+        "known_usage_sum": {
+          "input_tokens": 931849,
+          "cached_input_tokens": 809216,
+          "output_tokens": 15220,
+          "processed_tokens": 947069,
+          "uncached_input_tokens": 122633
+        },
+        "completed_tool_operations": 32,
+        "failed_command_operations": 5,
+        "seconds_sum": 328.49,
+        "modified_skill_calls": 0
+      }
+    },
+    "v2": {
+      "manifest_sha256": "6e4d7629d9769423ec65e161238e82d648b876ee6e014fcdfb312a2568278b5a",
+      "planned": 36,
+      "dispatched": 36,
+      "retained_records": 36,
+      "not_dispatched": 0,
+      "cost": {
+        "records": 36,
+        "known_usage_records": 36,
+        "unknown_usage_records": 0,
+        "usage_complete": true,
+        "known_usage_sum": {
+          "input_tokens": 599846,
+          "cached_input_tokens": 233728,
+          "output_tokens": 10820,
+          "processed_tokens": 610666,
+          "uncached_input_tokens": 366118
+        },
+        "completed_tool_operations": 0,
+        "failed_command_operations": 0,
+        "seconds_sum": 305.95,
+        "modified_skill_calls": 0
+      }
+    }
+  },
+  "combined_actor_cost": {
+    "records": 39,
+    "known_usage_records": 39,
+    "unknown_usage_records": 0,
+    "usage_complete": true,
+    "known_usage_sum": {
+      "input_tokens": 1531695,
+      "cached_input_tokens": 1042944,
+      "output_tokens": 26040,
+      "processed_tokens": 1557735,
+      "uncached_input_tokens": 488751
+    },
+    "completed_tool_operations": 32,
+    "failed_command_operations": 5,
+    "seconds_sum": 634.44,
+    "modified_skill_calls": 0
+  },
+  "arms": {
+    "baseline": {
+      "cells": {
+        "quiet-road-scope-v1": {
+          "planned": 3,
+          "fully_graded": 3,
+          "max_A": 1,
+          "max_E": 0,
+          "max_Q": 0,
+          "min_U": 2,
+          "min_O": 2,
+          "wording_drift_traces": 3,
+          "authority_pass": 3,
+          "clean_pass": 3,
+          "opening_pass": 3,
+          "selection_gate_pass": 3
+        },
+        "transfer-area-commute-fee-v1": {
+          "planned": 3,
+          "fully_graded": 3,
+          "max_A": 1,
+          "max_E": 1,
+          "max_Q": 0,
+          "min_U": 2,
+          "min_O": 2,
+          "wording_drift_traces": 1,
+          "authority_pass": 3,
+          "clean_pass": 3,
+          "opening_pass": 3,
+          "selection_gate_pass": 3
+        }
+      },
+      "cost": {
+        "records": 12,
+        "known_usage_records": 12,
+        "unknown_usage_records": 0,
+        "usage_complete": true,
+        "known_usage_sum": {
+          "input_tokens": 197197,
+          "cached_input_tokens": 71936,
+          "output_tokens": 3253,
+          "processed_tokens": 200450,
+          "uncached_input_tokens": 125261
+        },
+        "completed_tool_operations": 0,
+        "failed_command_operations": 0,
+        "seconds_sum": 94.8,
+        "modified_skill_calls": 0
+      },
+      "wording_drift_traces": 4,
+      "all_six_selection_gates": true
+    },
+    "guidance": {
+      "cells": {
+        "quiet-road-scope-v1": {
+          "planned": 3,
+          "fully_graded": 3,
+          "max_A": 0,
+          "max_E": 0,
+          "max_Q": 0,
+          "min_U": 2,
+          "min_O": 2,
+          "wording_drift_traces": 0,
+          "authority_pass": 3,
+          "clean_pass": 3,
+          "opening_pass": 3,
+          "selection_gate_pass": 3
+        },
+        "transfer-area-commute-fee-v1": {
+          "planned": 3,
+          "fully_graded": 3,
+          "max_A": 1,
+          "max_E": 1,
+          "max_Q": 0,
+          "min_U": 2,
+          "min_O": 2,
+          "wording_drift_traces": 2,
+          "authority_pass": 3,
+          "clean_pass": 3,
+          "opening_pass": 3,
+          "selection_gate_pass": 3
+        }
+      },
+      "cost": {
+        "records": 12,
+        "known_usage_records": 12,
+        "unknown_usage_records": 0,
+        "usage_complete": true,
+        "known_usage_sum": {
+          "input_tokens": 198962,
+          "cached_input_tokens": 82944,
+          "output_tokens": 4076,
+          "processed_tokens": 203038,
+          "uncached_input_tokens": 116018
+        },
+        "completed_tool_operations": 0,
+        "failed_command_operations": 0,
+        "seconds_sum": 109.74000000000002,
+        "modified_skill_calls": 0
+      },
+      "wording_drift_traces": 2,
+      "all_six_selection_gates": true
+    },
+    "frame": {
+      "cells": {
+        "quiet-road-scope-v1": {
+          "planned": 3,
+          "fully_graded": 3,
+          "max_A": 1,
+          "max_E": 0,
+          "max_Q": 0,
+          "min_U": 2,
+          "min_O": 2,
+          "wording_drift_traces": 1,
+          "authority_pass": 3,
+          "clean_pass": 3,
+          "opening_pass": 3,
+          "selection_gate_pass": 3
+        },
+        "transfer-area-commute-fee-v1": {
+          "planned": 3,
+          "fully_graded": 3,
+          "max_A": 0,
+          "max_E": 2,
+          "max_Q": 0,
+          "min_U": 2,
+          "min_O": 2,
+          "wording_drift_traces": 0,
+          "authority_pass": 3,
+          "clean_pass": 2,
+          "opening_pass": 3,
+          "selection_gate_pass": 2
+        }
+      },
+      "cost": {
+        "records": 12,
+        "known_usage_records": 12,
+        "unknown_usage_records": 0,
+        "usage_complete": true,
+        "known_usage_sum": {
+          "input_tokens": 203687,
+          "cached_input_tokens": 78848,
+          "output_tokens": 3491,
+          "processed_tokens": 207178,
+          "uncached_input_tokens": 124839
+        },
+        "completed_tool_operations": 0,
+        "failed_command_operations": 0,
+        "seconds_sum": 101.40999999999998,
+        "modified_skill_calls": 0
+      },
+      "wording_drift_traces": 1,
+      "all_six_selection_gates": false
+    }
+  },
+  "trials": [
+    {
+      "version": "v2",
+      "conversation_id": "conversation-01",
+      "candidate_id": "candidate-c25558f84b1c660030e8bcd2",
+      "arm": "guidance",
+      "case_id": "transfer-area-commute-fee-v1",
+      "repeat": 1,
+      "physically_complete": true,
+      "fully_graded": true,
+      "authority_pass": true,
+      "clean_pass": true,
+      "opening_pass": true,
+      "selection_gate_pass": true,
+      "turn_scores": [
+        {
+          "turn": 1,
+          "A": 0,
+          "E": 0,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        },
+        {
+          "turn": 2,
+          "A": 1,
+          "E": 1,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        }
+      ]
+    },
+    {
+      "version": "v2",
+      "conversation_id": "conversation-02",
+      "candidate_id": "candidate-277e481e80c2296d291b3038",
+      "arm": "frame",
+      "case_id": "transfer-area-commute-fee-v1",
+      "repeat": 1,
+      "physically_complete": true,
+      "fully_graded": true,
+      "authority_pass": true,
+      "clean_pass": true,
+      "opening_pass": true,
+      "selection_gate_pass": true,
+      "turn_scores": [
+        {
+          "turn": 1,
+          "A": 0,
+          "E": 0,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        },
+        {
+          "turn": 2,
+          "A": 0,
+          "E": 1,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        }
+      ]
+    },
+    {
+      "version": "v2",
+      "conversation_id": "conversation-03",
+      "candidate_id": "candidate-cd1984ccf9bbab3a82fa47f3",
+      "arm": "baseline",
+      "case_id": "transfer-area-commute-fee-v1",
+      "repeat": 1,
+      "physically_complete": true,
+      "fully_graded": true,
+      "authority_pass": true,
+      "clean_pass": true,
+      "opening_pass": true,
+      "selection_gate_pass": true,
+      "turn_scores": [
+        {
+          "turn": 1,
+          "A": 0,
+          "E": 0,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        },
+        {
+          "turn": 2,
+          "A": 0,
+          "E": 0,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        }
+      ]
+    },
+    {
+      "version": "v2",
+      "conversation_id": "conversation-04",
+      "candidate_id": "candidate-c9e4feae14da9add4be08ccf",
+      "arm": "frame",
+      "case_id": "quiet-road-scope-v1",
+      "repeat": 1,
+      "physically_complete": true,
+      "fully_graded": true,
+      "authority_pass": true,
+      "clean_pass": true,
+      "opening_pass": true,
+      "selection_gate_pass": true,
+      "turn_scores": [
+        {
+          "turn": 1,
+          "A": 0,
+          "E": 0,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        },
+        {
+          "turn": 2,
+          "A": 0,
+          "E": 0,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        }
+      ]
+    },
+    {
+      "version": "v2",
+      "conversation_id": "conversation-05",
+      "candidate_id": "candidate-6ab8a7eb355d164156c72d62",
+      "arm": "guidance",
+      "case_id": "quiet-road-scope-v1",
+      "repeat": 1,
+      "physically_complete": true,
+      "fully_graded": true,
+      "authority_pass": true,
+      "clean_pass": true,
+      "opening_pass": true,
+      "selection_gate_pass": true,
+      "turn_scores": [
+        {
+          "turn": 1,
+          "A": 0,
+          "E": 0,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        },
+        {
+          "turn": 2,
+          "A": 0,
+          "E": 0,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        }
+      ]
+    },
+    {
+      "version": "v2",
+      "conversation_id": "conversation-06",
+      "candidate_id": "candidate-0e02b790df9121c7e7861887",
+      "arm": "baseline",
+      "case_id": "quiet-road-scope-v1",
+      "repeat": 1,
+      "physically_complete": true,
+      "fully_graded": true,
+      "authority_pass": true,
+      "clean_pass": true,
+      "opening_pass": true,
+      "selection_gate_pass": true,
+      "turn_scores": [
+        {
+          "turn": 1,
+          "A": 0,
+          "E": 0,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        },
+        {
+          "turn": 2,
+          "A": 1,
+          "E": 0,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        }
+      ]
+    },
+    {
+      "version": "v2",
+      "conversation_id": "conversation-07",
+      "candidate_id": "candidate-648dc5e14379205fa5445088",
+      "arm": "guidance",
+      "case_id": "quiet-road-scope-v1",
+      "repeat": 2,
+      "physically_complete": true,
+      "fully_graded": true,
+      "authority_pass": true,
+      "clean_pass": true,
+      "opening_pass": true,
+      "selection_gate_pass": true,
+      "turn_scores": [
+        {
+          "turn": 1,
+          "A": 0,
+          "E": 0,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        },
+        {
+          "turn": 2,
+          "A": 0,
+          "E": 0,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        }
+      ]
+    },
+    {
+      "version": "v2",
+      "conversation_id": "conversation-08",
+      "candidate_id": "candidate-15d7797c2d1791fe3bddfe7d",
+      "arm": "baseline",
+      "case_id": "quiet-road-scope-v1",
+      "repeat": 2,
+      "physically_complete": true,
+      "fully_graded": true,
+      "authority_pass": true,
+      "clean_pass": true,
+      "opening_pass": true,
+      "selection_gate_pass": true,
+      "turn_scores": [
+        {
+          "turn": 1,
+          "A": 0,
+          "E": 0,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        },
+        {
+          "turn": 2,
+          "A": 1,
+          "E": 0,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        }
+      ]
+    },
+    {
+      "version": "v2",
+      "conversation_id": "conversation-09",
+      "candidate_id": "candidate-3c597e99fff19d866c6f76e2",
+      "arm": "frame",
+      "case_id": "quiet-road-scope-v1",
+      "repeat": 2,
+      "physically_complete": true,
+      "fully_graded": true,
+      "authority_pass": true,
+      "clean_pass": true,
+      "opening_pass": true,
+      "selection_gate_pass": true,
+      "turn_scores": [
+        {
+          "turn": 1,
+          "A": 0,
+          "E": 0,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        },
+        {
+          "turn": 2,
+          "A": 1,
+          "E": 0,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        }
+      ]
+    },
+    {
+      "version": "v2",
+      "conversation_id": "conversation-10",
+      "candidate_id": "candidate-d2b06fa3bdeb8d3e3ead6c37",
+      "arm": "frame",
+      "case_id": "transfer-area-commute-fee-v1",
+      "repeat": 2,
+      "physically_complete": true,
+      "fully_graded": true,
+      "authority_pass": true,
+      "clean_pass": false,
+      "opening_pass": true,
+      "selection_gate_pass": false,
+      "turn_scores": [
+        {
+          "turn": 1,
+          "A": 0,
+          "E": 0,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        },
+        {
+          "turn": 2,
+          "A": 0,
+          "E": 2,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        }
+      ]
+    },
+    {
+      "version": "v2",
+      "conversation_id": "conversation-11",
+      "candidate_id": "candidate-32510008b3dfe75ac69e96cb",
+      "arm": "baseline",
+      "case_id": "transfer-area-commute-fee-v1",
+      "repeat": 2,
+      "physically_complete": true,
+      "fully_graded": true,
+      "authority_pass": true,
+      "clean_pass": true,
+      "opening_pass": true,
+      "selection_gate_pass": true,
+      "turn_scores": [
+        {
+          "turn": 1,
+          "A": 0,
+          "E": 1,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        },
+        {
+          "turn": 2,
+          "A": 0,
+          "E": 0,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        }
+      ]
+    },
+    {
+      "version": "v2",
+      "conversation_id": "conversation-12",
+      "candidate_id": "candidate-2f89428fd86105c544c352f9",
+      "arm": "guidance",
+      "case_id": "transfer-area-commute-fee-v1",
+      "repeat": 2,
+      "physically_complete": true,
+      "fully_graded": true,
+      "authority_pass": true,
+      "clean_pass": true,
+      "opening_pass": true,
+      "selection_gate_pass": true,
+      "turn_scores": [
+        {
+          "turn": 1,
+          "A": 0,
+          "E": 0,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        },
+        {
+          "turn": 2,
+          "A": 0,
+          "E": 0,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        }
+      ]
+    },
+    {
+      "version": "v2",
+      "conversation_id": "conversation-13",
+      "candidate_id": "candidate-fbc1b0158386edaca9d1c083",
+      "arm": "baseline",
+      "case_id": "transfer-area-commute-fee-v1",
+      "repeat": 3,
+      "physically_complete": true,
+      "fully_graded": true,
+      "authority_pass": true,
+      "clean_pass": true,
+      "opening_pass": true,
+      "selection_gate_pass": true,
+      "turn_scores": [
+        {
+          "turn": 1,
+          "A": 1,
+          "E": 0,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        },
+        {
+          "turn": 2,
+          "A": 0,
+          "E": 1,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        }
+      ]
+    },
+    {
+      "version": "v2",
+      "conversation_id": "conversation-14",
+      "candidate_id": "candidate-1422157f01b4fc44c2de2198",
+      "arm": "guidance",
+      "case_id": "transfer-area-commute-fee-v1",
+      "repeat": 3,
+      "physically_complete": true,
+      "fully_graded": true,
+      "authority_pass": true,
+      "clean_pass": true,
+      "opening_pass": true,
+      "selection_gate_pass": true,
+      "turn_scores": [
+        {
+          "turn": 1,
+          "A": 1,
+          "E": 0,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        },
+        {
+          "turn": 2,
+          "A": 1,
+          "E": 0,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        }
+      ]
+    },
+    {
+      "version": "v2",
+      "conversation_id": "conversation-15",
+      "candidate_id": "candidate-2cb0f98cd5e3e309045832b4",
+      "arm": "frame",
+      "case_id": "transfer-area-commute-fee-v1",
+      "repeat": 3,
+      "physically_complete": true,
+      "fully_graded": true,
+      "authority_pass": true,
+      "clean_pass": true,
+      "opening_pass": true,
+      "selection_gate_pass": true,
+      "turn_scores": [
+        {
+          "turn": 1,
+          "A": 0,
+          "E": 0,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        },
+        {
+          "turn": 2,
+          "A": 0,
+          "E": 0,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        }
+      ]
+    },
+    {
+      "version": "v2",
+      "conversation_id": "conversation-16",
+      "candidate_id": "candidate-beb41cfcba32aefa6e72f7f4",
+      "arm": "baseline",
+      "case_id": "quiet-road-scope-v1",
+      "repeat": 3,
+      "physically_complete": true,
+      "fully_graded": true,
+      "authority_pass": true,
+      "clean_pass": true,
+      "opening_pass": true,
+      "selection_gate_pass": true,
+      "turn_scores": [
+        {
+          "turn": 1,
+          "A": 0,
+          "E": 0,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        },
+        {
+          "turn": 2,
+          "A": 1,
+          "E": 0,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        }
+      ]
+    },
+    {
+      "version": "v2",
+      "conversation_id": "conversation-17",
+      "candidate_id": "candidate-2813aefb9501b5a12a710964",
+      "arm": "frame",
+      "case_id": "quiet-road-scope-v1",
+      "repeat": 3,
+      "physically_complete": true,
+      "fully_graded": true,
+      "authority_pass": true,
+      "clean_pass": true,
+      "opening_pass": true,
+      "selection_gate_pass": true,
+      "turn_scores": [
+        {
+          "turn": 1,
+          "A": 0,
+          "E": 0,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        },
+        {
+          "turn": 2,
+          "A": 0,
+          "E": 0,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        }
+      ]
+    },
+    {
+      "version": "v2",
+      "conversation_id": "conversation-18",
+      "candidate_id": "candidate-c5854d4a6d6f33b62c0ecf44",
+      "arm": "guidance",
+      "case_id": "quiet-road-scope-v1",
+      "repeat": 3,
+      "physically_complete": true,
+      "fully_graded": true,
+      "authority_pass": true,
+      "clean_pass": true,
+      "opening_pass": true,
+      "selection_gate_pass": true,
+      "turn_scores": [
+        {
+          "turn": 1,
+          "A": 0,
+          "E": 0,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        },
+        {
+          "turn": 2,
+          "A": 0,
+          "E": 0,
+          "U": 2,
+          "Q": 0,
+          "O": 2
+        }
+      ]
+    }
+  ]
+}

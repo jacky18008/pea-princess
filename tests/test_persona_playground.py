@@ -3,6 +3,7 @@ import copy
 import http.client
 import hashlib
 import json
+from agent_reply_fixture import attach_claims
 from pathlib import Path
 import sys
 import tempfile
@@ -24,7 +25,7 @@ def terminal(answer='Recorded synthetic answer with useful concrete next steps.'
 def actor_terminal(request,answer='Recorded synthetic answer with useful concrete next steps.',tokens=20):
     """Only schema-constrained assistant calls return a structured fake response."""
     if request.get('response_schema') is not None:
-        answer=json.dumps(answer if isinstance(answer,dict) else {'message':answer,'questions':[]},ensure_ascii=False)
+        answer=json.dumps(attach_claims(answer if isinstance(answer,dict) else {'message':answer,'questions':[]},request),ensure_ascii=False)
     elif not isinstance(answer,str):
         raise AssertionError('persona callback must stay plain text')
     return terminal(answer,tokens)

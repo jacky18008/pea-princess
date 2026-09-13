@@ -1,0 +1,430 @@
+{
+  "schema": "pea/full-scan-acceptance-measured/1",
+  "model": "gpt-5.6-terra",
+  "reasoning_effort": "low",
+  "research_depth": "standard",
+  "planned_calls": 24,
+  "recorded_calls": 21,
+  "completed_calls": 20,
+  "physical_failures": 1,
+  "unrun_calls": 3,
+  "known_usage": {
+    "input_tokens": 3302655,
+    "cached_input_tokens": 2740736,
+    "uncached_input_tokens": 561919,
+    "output_tokens": 55844,
+    "processed_tokens": 3358499
+  },
+  "total_processed_tokens": null,
+  "unknown_usage_calls": 1,
+  "operator_global_limit": 4000000,
+  "actors_only": true,
+  "evaluator_and_development_usage": "not included or independently metered here",
+  "sessions": [
+    {
+      "id": "baseline-r1",
+      "planned_calls": 4,
+      "recorded_calls": 4,
+      "completed_calls": 4,
+      "missing_calls": [],
+      "known_processed_tokens": 593672,
+      "processed_tokens": 593672,
+      "unknown_usage": false,
+      "tools": 16,
+      "reported_tool_failures": 2,
+      "seconds": 295.32764691599994,
+      "session_admission_limit": 700000,
+      "limit_semantics": "Checked between calls; current call can overshoot."
+    },
+    {
+      "id": "baseline-r2",
+      "planned_calls": 4,
+      "recorded_calls": 4,
+      "completed_calls": 4,
+      "missing_calls": [],
+      "known_processed_tokens": 792320,
+      "processed_tokens": 792320,
+      "unknown_usage": false,
+      "tools": 21,
+      "reported_tool_failures": 4,
+      "seconds": 311.0845572489998,
+      "session_admission_limit": 700000,
+      "limit_semantics": "Checked between calls; current call can overshoot."
+    },
+    {
+      "id": "baseline-r3",
+      "planned_calls": 4,
+      "recorded_calls": 4,
+      "completed_calls": 4,
+      "missing_calls": [],
+      "known_processed_tokens": 557512,
+      "processed_tokens": 557512,
+      "unknown_usage": false,
+      "tools": 18,
+      "reported_tool_failures": 3,
+      "seconds": 262.344036126,
+      "session_admission_limit": 700000,
+      "limit_semantics": "Checked between calls; current call can overshoot."
+    },
+    {
+      "id": "guidance-r1",
+      "planned_calls": 4,
+      "recorded_calls": 4,
+      "completed_calls": 4,
+      "missing_calls": [],
+      "known_processed_tokens": 684363,
+      "processed_tokens": 684363,
+      "unknown_usage": false,
+      "tools": 21,
+      "reported_tool_failures": 1,
+      "seconds": 318.1981024989998,
+      "session_admission_limit": 700000,
+      "limit_semantics": "Checked between calls; current call can overshoot."
+    },
+    {
+      "id": "guidance-r2",
+      "planned_calls": 4,
+      "recorded_calls": 4,
+      "completed_calls": 4,
+      "missing_calls": [],
+      "known_processed_tokens": 730632,
+      "processed_tokens": 730632,
+      "unknown_usage": false,
+      "tools": 23,
+      "reported_tool_failures": 2,
+      "seconds": 316.5276860829997,
+      "session_admission_limit": 700000,
+      "limit_semantics": "Checked between calls; current call can overshoot."
+    },
+    {
+      "id": "guidance-r3",
+      "planned_calls": 4,
+      "recorded_calls": 1,
+      "completed_calls": 0,
+      "missing_calls": [
+        2,
+        3,
+        4
+      ],
+      "known_processed_tokens": 0,
+      "processed_tokens": null,
+      "unknown_usage": true,
+      "tools": 14,
+      "reported_tool_failures": 0,
+      "seconds": 300.1992224999999,
+      "session_admission_limit": 700000,
+      "limit_semantics": "Checked between calls; current call can overshoot."
+    }
+  ],
+  "calls": [
+    {
+      "session": "baseline-r1",
+      "turn": 1,
+      "status": "complete",
+      "usage": {
+        "cached_input_tokens": 189696,
+        "input_tokens": 226361,
+        "output_tokens": 4430,
+        "processed_tokens": 230791,
+        "uncached_input_tokens": 36665
+      },
+      "seconds": 147.82811404100005,
+      "tools": 7,
+      "reported_tool_failures": 2
+    },
+    {
+      "session": "baseline-r1",
+      "turn": 2,
+      "status": "complete",
+      "usage": {
+        "cached_input_tokens": 117760,
+        "input_tokens": 154497,
+        "output_tokens": 2466,
+        "processed_tokens": 156963,
+        "uncached_input_tokens": 36737
+      },
+      "seconds": 62.54282220899995,
+      "tools": 4,
+      "reported_tool_failures": 0
+    },
+    {
+      "session": "baseline-r1",
+      "turn": 3,
+      "status": "complete",
+      "usage": {
+        "cached_input_tokens": 9984,
+        "input_tokens": 23672,
+        "output_tokens": 713,
+        "processed_tokens": 24385,
+        "uncached_input_tokens": 13688
+      },
+      "seconds": 23.349261665999848,
+      "tools": 0,
+      "reported_tool_failures": 0
+    },
+    {
+      "session": "baseline-r1",
+      "turn": 4,
+      "status": "complete",
+      "usage": {
+        "cached_input_tokens": 142080,
+        "input_tokens": 179249,
+        "output_tokens": 2284,
+        "processed_tokens": 181533,
+        "uncached_input_tokens": 37169
+      },
+      "seconds": 61.60744900000009,
+      "tools": 5,
+      "reported_tool_failures": 0
+    },
+    {
+      "session": "guidance-r1",
+      "turn": 1,
+      "status": "complete",
+      "usage": {
+        "cached_input_tokens": 266752,
+        "input_tokens": 306088,
+        "output_tokens": 4945,
+        "processed_tokens": 311033,
+        "uncached_input_tokens": 39336
+      },
+      "seconds": 169.3752112909999,
+      "tools": 10,
+      "reported_tool_failures": 1
+    },
+    {
+      "session": "guidance-r1",
+      "turn": 2,
+      "status": "complete",
+      "usage": {
+        "cached_input_tokens": 105472,
+        "input_tokens": 138783,
+        "output_tokens": 2265,
+        "processed_tokens": 141048,
+        "uncached_input_tokens": 33311
+      },
+      "seconds": 60.290687457999866,
+      "tools": 4,
+      "reported_tool_failures": 0
+    },
+    {
+      "session": "guidance-r1",
+      "turn": 3,
+      "status": "complete",
+      "usage": {
+        "cached_input_tokens": 118528,
+        "input_tokens": 140578,
+        "output_tokens": 2084,
+        "processed_tokens": 142662,
+        "uncached_input_tokens": 22050
+      },
+      "seconds": 50.95285733300011,
+      "tools": 4,
+      "reported_tool_failures": 0
+    },
+    {
+      "session": "guidance-r1",
+      "turn": 4,
+      "status": "complete",
+      "usage": {
+        "cached_input_tokens": 64768,
+        "input_tokens": 88326,
+        "output_tokens": 1294,
+        "processed_tokens": 89620,
+        "uncached_input_tokens": 23558
+      },
+      "seconds": 37.5793464169999,
+      "tools": 3,
+      "reported_tool_failures": 0
+    },
+    {
+      "session": "guidance-r2",
+      "turn": 1,
+      "status": "complete",
+      "usage": {
+        "cached_input_tokens": 212736,
+        "input_tokens": 240081,
+        "output_tokens": 5143,
+        "processed_tokens": 245224,
+        "uncached_input_tokens": 27345
+      },
+      "seconds": 149.0390117909999,
+      "tools": 8,
+      "reported_tool_failures": 1
+    },
+    {
+      "session": "guidance-r2",
+      "turn": 2,
+      "status": "complete",
+      "usage": {
+        "cached_input_tokens": 175360,
+        "input_tokens": 199717,
+        "output_tokens": 2921,
+        "processed_tokens": 202638,
+        "uncached_input_tokens": 24357
+      },
+      "seconds": 67.57001274999993,
+      "tools": 6,
+      "reported_tool_failures": 1
+    },
+    {
+      "session": "guidance-r2",
+      "turn": 3,
+      "status": "complete",
+      "usage": {
+        "cached_input_tokens": 135936,
+        "input_tokens": 169193,
+        "output_tokens": 2097,
+        "processed_tokens": 171290,
+        "uncached_input_tokens": 33257
+      },
+      "seconds": 53.1900627089999,
+      "tools": 5,
+      "reported_tool_failures": 0
+    },
+    {
+      "session": "guidance-r2",
+      "turn": 4,
+      "status": "complete",
+      "usage": {
+        "cached_input_tokens": 89088,
+        "input_tokens": 109750,
+        "output_tokens": 1730,
+        "processed_tokens": 111480,
+        "uncached_input_tokens": 20662
+      },
+      "seconds": 46.72859883299998,
+      "tools": 4,
+      "reported_tool_failures": 0
+    },
+    {
+      "session": "baseline-r2",
+      "turn": 1,
+      "status": "complete",
+      "usage": {
+        "cached_input_tokens": 94208,
+        "input_tokens": 125331,
+        "output_tokens": 4119,
+        "processed_tokens": 129450,
+        "uncached_input_tokens": 31123
+      },
+      "seconds": 108.99414170799992,
+      "tools": 5,
+      "reported_tool_failures": 2
+    },
+    {
+      "session": "baseline-r2",
+      "turn": 2,
+      "status": "complete",
+      "usage": {
+        "cached_input_tokens": 390400,
+        "input_tokens": 431290,
+        "output_tokens": 4596,
+        "processed_tokens": 435886,
+        "uncached_input_tokens": 40890
+      },
+      "seconds": 105.41032887500023,
+      "tools": 10,
+      "reported_tool_failures": 1
+    },
+    {
+      "session": "baseline-r2",
+      "turn": 3,
+      "status": "complete",
+      "usage": {
+        "cached_input_tokens": 87040,
+        "input_tokens": 106939,
+        "output_tokens": 2278,
+        "processed_tokens": 109217,
+        "uncached_input_tokens": 19899
+      },
+      "seconds": 51.34632808299966,
+      "tools": 3,
+      "reported_tool_failures": 1
+    },
+    {
+      "session": "baseline-r2",
+      "turn": 4,
+      "status": "complete",
+      "usage": {
+        "cached_input_tokens": 93184,
+        "input_tokens": 115914,
+        "output_tokens": 1853,
+        "processed_tokens": 117767,
+        "uncached_input_tokens": 22730
+      },
+      "seconds": 45.33375858299996,
+      "tools": 3,
+      "reported_tool_failures": 0
+    },
+    {
+      "session": "baseline-r3",
+      "turn": 1,
+      "status": "complete",
+      "usage": {
+        "cached_input_tokens": 99328,
+        "input_tokens": 131529,
+        "output_tokens": 3777,
+        "processed_tokens": 135306,
+        "uncached_input_tokens": 32201
+      },
+      "seconds": 103.50362166700006,
+      "tools": 5,
+      "reported_tool_failures": 1
+    },
+    {
+      "session": "baseline-r3",
+      "turn": 2,
+      "status": "complete",
+      "usage": {
+        "cached_input_tokens": 119552,
+        "input_tokens": 143349,
+        "output_tokens": 2478,
+        "processed_tokens": 145827,
+        "uncached_input_tokens": 23797
+      },
+      "seconds": 56.739446042000054,
+      "tools": 5,
+      "reported_tool_failures": 1
+    },
+    {
+      "session": "baseline-r3",
+      "turn": 3,
+      "status": "complete",
+      "usage": {
+        "cached_input_tokens": 80896,
+        "input_tokens": 97783,
+        "output_tokens": 2261,
+        "processed_tokens": 100044,
+        "uncached_input_tokens": 16887
+      },
+      "seconds": 52.356204125000204,
+      "tools": 3,
+      "reported_tool_failures": 1
+    },
+    {
+      "session": "baseline-r3",
+      "turn": 4,
+      "status": "complete",
+      "usage": {
+        "cached_input_tokens": 147968,
+        "input_tokens": 174225,
+        "output_tokens": 2110,
+        "processed_tokens": 176335,
+        "uncached_input_tokens": 26257
+      },
+      "seconds": 49.74476429199967,
+      "tools": 5,
+      "reported_tool_failures": 0
+    },
+    {
+      "session": "guidance-r3",
+      "turn": 1,
+      "status": "stopped",
+      "usage": null,
+      "seconds": 300.1992224999999,
+      "tools": 14,
+      "reported_tool_failures": 0
+    }
+  ]
+}

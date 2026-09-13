@@ -23,7 +23,7 @@ import build_dist
 ROOT = Path(__file__).resolve().parents[1]
 GENERATED = 'dist/prompt-pack/INSTRUCTIONS.md'
 REQUIRED = (
-    'tools/persona_playground.py', 'tools/playground_dev_sync.py', 'tools/playground_research.py', 'tools/session_runner.py', 'tools/playground_settings.py', 'tools/build_dist.py',
+    'tools/persona_playground.py', 'tools/playground_dev_sync.py', 'tools/playground_research.py', 'tools/playground_intent.py', 'tools/session_runner.py', 'tools/playground_settings.py', 'tools/build_dist.py',
     'tools/conversation_reply.py', 'tools/public_source_snapshot.py', 'tools/playground_review.py', 'tools/playground_attachments.py', 'tools/playground_replay.py', 'tools/playground_skill.py',
     'bench/personas.py', 'bench/journeys.py', 'bench/durable_run.py',
     'bench/call_control.py', 'bench/launch.py',

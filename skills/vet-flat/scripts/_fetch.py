@@ -18,6 +18,8 @@ import subprocess
 import sys
 import tempfile
 import time
+import threading
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from urllib.parse import parse_qsl, urlsplit
 
@@ -34,6 +36,60 @@ CACHE_DIR = os.environ.get("VETFLAT_CACHE",
                            os.path.join(os.path.expanduser("~"), ".cache", "vet-flat"))
 _cache_dir_resolved = None
 _last_hit = {}
+_scan_budget = threading.local()
+
+
+class FetchCancelled(Exception):
+    """A caller's finite research attempt ended; it does not authorize a retry."""
+
+
+@contextmanager
+def fetch_budget(deadline, cancelled):
+    """Bind an absolute monotonic deadline and cancellation Event to this worker.
+
+    This only bounds cooperating fetch calls, not arbitrary Python parsing. Each
+    curl is owned and reaped here; cancellation prevents subsequent batch calls.
+    """
+    previous = getattr(_scan_budget, "value", None)
+    _scan_budget.value = (deadline, cancelled)
+    try:
+        yield
+    finally:
+        _scan_budget.value = previous
+
+
+def _remaining():
+    budget = getattr(_scan_budget, "value", None)
+    if budget is None:
+        return None
+    remaining = budget[0] - time.monotonic()
+    if budget[1].is_set() or remaining <= 0:
+        raise FetchCancelled("scan source deadline or cancellation reached; no automatic retry")
+    return remaining
+
+
+def _run_curl(cmd, config, timeout):
+    """Preserve ordinary fetch behavior; bound and reap a scan-owned curl."""
+    remaining = _remaining()
+    if remaining is None:
+        return subprocess.run(cmd, input=config, capture_output=True, text=True, timeout=timeout)
+    proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    deadline = time.monotonic() + min(timeout, remaining)
+    first = True
+    try:
+        while True:
+            left = min(deadline - time.monotonic(), _remaining())
+            if left <= 0:
+                raise subprocess.TimeoutExpired(cmd, timeout)
+            try:
+                stdout, stderr = proc.communicate(input=config if first else None, timeout=min(.1, left))
+                return subprocess.CompletedProcess(cmd, proc.returncode, stdout, stderr)
+            except subprocess.TimeoutExpired:
+                first = False
+    finally:
+        if proc.poll() is None:
+            proc.kill()
+        proc.communicate()
 
 
 def cache_dir():
@@ -78,12 +134,18 @@ def _host(url):
 
 
 def _throttle(url, min_gap):
+    _remaining()
     h = _host(url)
     last = _last_hit.get(h)
     if last is not None:
         wait = min_gap - (time.time() - last)
         if wait > 0:
-            time.sleep(wait)
+            budget = getattr(_scan_budget, "value", None)
+            if budget is None:
+                time.sleep(wait)
+            else:
+                budget[1].wait(min(wait, _remaining()))
+                _remaining()
     _last_hit[h] = time.time()
 
 
@@ -187,6 +249,11 @@ def fetch(url, ua=BROWSER_UA, headers=None, method="GET", data=None, timeout=20,
     redirects; choose their final endpoint explicitly. Cached URL metadata can
     contain credentials, so cache files are private, not anonymous or encrypted.
     """
+    try:
+        remaining = _remaining()
+    except FetchCancelled as exc:
+        return dict(url=url, final_url=None, status=0, content_type=None, body="",
+                    retrieved_at=now_iso(), from_cache=False, ok=False, note=str(exc))
     if not _valid_url(url):
         return dict(url=url, final_url=None, status=0, content_type=None, body="",
                     retrieved_at=now_iso(), from_cache=False, ok=False,
@@ -215,7 +282,14 @@ def fetch(url, ua=BROWSER_UA, headers=None, method="GET", data=None, timeout=20,
                 return res
         except Exception:
             meta = None
-    _throttle(url, min_gap)
+    try:
+        _throttle(url, min_gap)
+        remaining = _remaining()
+    except FetchCancelled as exc:
+        return dict(url=url, final_url=None, status=0, content_type=None, body="",
+                    retrieved_at=now_iso(), from_cache=False, ok=False, note=str(exc))
+    if remaining is not None:
+        timeout = min(timeout, remaining)
     temporary = _temporary_path(cache_dir())
     try:
         try:
@@ -227,7 +301,10 @@ def fetch(url, ua=BROWSER_UA, headers=None, method="GET", data=None, timeout=20,
         if verbose:
             print("  $ " + " ".join(cmd[:12]) + " ... (request via stdin)", file=sys.stderr)
         try:
-            out = subprocess.run(cmd, input=config, capture_output=True, text=True, timeout=timeout + 5)
+            out = _run_curl(cmd, config, timeout + 5)
+        except FetchCancelled as exc:
+            return dict(url=url, final_url=None, status=0, content_type=None, body="",
+                        retrieved_at=now_iso(), from_cache=False, ok=False, note=str(exc))
         except subprocess.TimeoutExpired:
             return dict(url=url, final_url=None, status=0, content_type=None, body="",
                         retrieved_at=now_iso(), from_cache=False, ok=False, note="curl timeout")

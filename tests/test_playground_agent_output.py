@@ -1,6 +1,7 @@
 """Offline actual-agent output, human continuity and receipt preservation checks."""
 import copy
 import json
+from agent_reply_fixture import attach_claims
 from pathlib import Path
 import sys
 import tempfile
@@ -19,12 +20,12 @@ def intent(**data):
     return dict(client_id=str(uuid.uuid4()), **data)
 
 
-def terminal(reply):
+def terminal(reply, request=None):
     return {'id': 'answer', 'status': 'complete', 'exit_code': 0, 'errors': [],
             'tool_events': [], 'malformed_event_lines': 0, 'terminal_usage_events': 1,
             'direct_terminal_usage': {'input_tokens': 15, 'output_tokens': 5,
                                       'cached_input_tokens': 0},
-            'answer': json.dumps(reply, ensure_ascii=False)}
+            'answer': json.dumps(attach_claims(reply, request), ensure_ascii=False)}
 
 
 class AgentOutputTests(unittest.TestCase):
@@ -45,7 +46,7 @@ class AgentOutputTests(unittest.TestCase):
         self.requests.append(copy.deepcopy(request))
         if not self.replies:
             raise AssertionError('Unexpected additional actor call')
-        return terminal(self.replies.pop(0))
+        return terminal(self.replies.pop(0), request)
 
     def join(self):
         for _ in range(4):
@@ -88,9 +89,10 @@ class AgentOutputTests(unittest.TestCase):
         self.assertEqual(reply['message'], view['messages'][-1]['display_text'])
         self.assertEqual(reply['questions'], view['messages'][-1]['questions'])
         self.assertEqual(p.conversation_reply.transcript(reply), view['messages'][-1]['text'])
-        self.assertEqual(reply, json.loads(exported['calls'][0]['receipt']['answer']))
+        self.assertEqual(attach_claims(reply,self.requests[0]), json.loads(exported['calls'][0]['receipt']['answer']))
         self.assertEqual(view['messages'], exported['messages'])
-        self.assertEqual(p.conversation_reply.SCHEMA, self.requests[0]['response_schema'])
+        self.assertIn('intent_claims', self.requests[0]['response_schema']['required'])
+        self.assertTrue(exported['calls'][0]['intent_guard']['ok'])
         self.assertEqual('live_research', self.requests[0]['tool_policy'])
         self.assertNotIn('live_gate_version', saved)
         self.assertEqual({}, saved['fixtures'])

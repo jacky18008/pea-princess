@@ -126,6 +126,9 @@ class ReplayIntegrationTests(unittest.TestCase):
         release.set();self.join()
         self.assertEqual(2,len(seen));self.assertIn('LIVE INTERRUPTION',seen[1]['prompt']);self.assertNotIn('FOLLOWUP FUTURE',seen[1]['prompt'])
         s=self.lab.snapshot(r);self.assertTrue(s['replay']['modified']);self.assertEqual(1,s['replay']['remaining'])
+        self.assertEqual(0,s['replay']['completed']);self.assertEqual(1,s['replay']['superseded'])
+        self.assertEqual('superseded',self.lab._replay_comparison(self.lab._load(r))[0]['status'])
+        self.assertEqual(1,len([m for m in s['messages'] if m['role']=='assistant']))
     def test_legacy_grouping_is_one_call_and_never_imports_path_text(self):
         sid=self.source();s=self.lab._load(sid)
         s['output_mode']='checked';s['messages']=[{'role':'human','text':'/missing/legacy/no-selected-file.txt'}, {'role':'human','text':'Additional constraint','kind':'amendment'}, {'role':'assistant','text':'LEGACY original answer','call_id':'call-001-assistant'}, {'role':'human','text':'Unanswered message'}]

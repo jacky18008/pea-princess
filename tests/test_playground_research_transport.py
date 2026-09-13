@@ -1,6 +1,7 @@
 """Offline process transport and post-call research-observation failure checks."""
 import copy
 import json
+from agent_reply_fixture import attach_claims
 import os
 from pathlib import Path
 import subprocess
@@ -117,7 +118,7 @@ class ResearchObservationWriteTests(unittest.TestCase):
                     'input_tokens': 15, 'cached_input_tokens': 5, 'output_tokens': 5}}) + '\n'
                 record = playground.cli_record('answer', playground.launch.LaunchResult(
                     stdout=raw, exit_code=0, seconds=0.01), 'codex')
-                return dict(record, answer=answer)
+                return dict(record, answer=json.dumps(attach_claims(json.loads(answer),request)))
 
             original_write = playground._atomic_json
 
@@ -148,7 +149,7 @@ class ResearchObservationWriteTests(unittest.TestCase):
                     self.assertEqual('assistant', saved['messages'][-1]['role'])
                     self.assertEqual('The saved evidence supports this comparison.', saved['messages'][-1]['display_text'])
                     row = saved['calls'][0]
-                    self.assertEqual(answer, row['receipt']['answer'])
+                    self.assertEqual(attach_claims(json.loads(answer),invocations[0]), json.loads(row['receipt']['answer']))
                     self.assertEqual(20, row['receipt']['processed_tokens'])
                     self.assertEqual(20, lab._store(saved).show()['budgets']['tokens']['spent'])
                     self.assertEqual('unavailable', row['research_results']['observation_status'])
