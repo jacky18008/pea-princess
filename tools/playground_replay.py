@@ -4,16 +4,19 @@ Standard library only. No model calls, shell evaluation, original-path reads,
 network access or publication. extract_turns(session) is pure; the caller owns
 source-session integrity and idle-state checks. clone_input_files(source, target,
 turn["inputs"]) verifies immutable supplied-files snapshots for one chosen turn.
-Source assistant text is returned separately for comparison, never as an input.
+Source assistant prose is returned separately for comparison. Original form
+controls accompany historical answers only as verifiable, inert lineage.
 """
 import copy
 import hashlib
+import json
 import os
 from pathlib import Path
 import re
 import stat
 
 import playground_attachments as attachments
+import conversation_reply
 
 
 MAX_MESSAGES = 2000
@@ -22,11 +25,45 @@ MAX_FILES = 48
 CALL_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9_-]{0,79}\Z")
 FILE_FIELDS = {"id", "name", "bytes", "sha256", "path", "image", "source_kind"}
 OPTIONAL_FILE_FIELDS = {"original_path", "mime_type"}
-INPUT_FIELDS = {"text", "kind", "attachments", "attachment_only_default"}
+INPUT_FIELDS = {"text", "kind", "attachments", "attachment_only_default", "intent_text", "clarification_receipt", "clarification_source"}
 
 
 class ReplayError(ValueError):
     """The saved replay input or selected evidence cannot be used safely."""
+
+
+def _clarification_source(value):
+    """Validate inert controls captured by extraction, never supplied by a client."""
+    if (type(value) is not dict or set(value) != {"call_id", "questions"}
+            or type(value["call_id"]) is not str or not CALL_ID.fullmatch(value["call_id"])):
+        raise ReplayError("invalid original clarification controls")
+    try:
+        conversation_reply.decode(json.dumps({"message": "Recorded controls.", "questions": value["questions"]}))
+    except (ValueError, TypeError) as error:
+        raise ReplayError("invalid original clarification controls") from error
+    return copy.deepcopy(value)
+
+
+def _replayed_clarification_source(session, row, offset):
+    """Resolve a historical click against the host-frozen replay input.
+
+    The caller verifies saved-session integrity. Matching the exact original
+    input prevents a new answer from being attributed to these old controls.
+    New replay assistant wording is deliberately never used as a fallback.
+    """
+    replay = session.get("replay")
+    turn = row.get("replay_turn")
+    if type(replay) is not dict or type(turn) is not int or turn < 1 or type(replay.get("turns")) is not list:
+        raise ReplayError("saved clarification has no original replay turn")
+    matches = [item for item in replay["turns"] if type(item) is dict
+               and type(item.get("index")) is int and item["index"] == turn]
+    if len(matches) != 1 or type(matches[0].get("inputs")) is not list or offset >= len(matches[0]["inputs"]):
+        raise ReplayError("saved clarification has no original replay input")
+    original = matches[0]["inputs"][offset]
+    if type(original) is not dict or any(row.get(key, "question" if key == "kind" else None) != original.get(key, "question" if key == "kind" else None)
+                                       for key in ("text", "kind", "intent_text", "clarification_receipt")):
+        raise ReplayError("saved clarification differs from the frozen replay input")
+    return _clarification_source(original.get("clarification_source"))
 
 
 def _file(row):
@@ -71,6 +108,15 @@ def _input(row, strict=False):
     if not text.strip() and not files:
         raise ReplayError("a saved human input must contain text or attachments")
     result = {"text": text, "kind": kind, "attachments": files}
+    if 'intent_text' in row or 'clarification_receipt' in row:
+        if (type(row.get('intent_text')) is not str or not row['intent_text'].strip()
+                or len(row['intent_text'])>MAX_INPUT_CHARS or type(row.get('clarification_receipt')) is not dict):
+            raise ReplayError('invalid saved clarification authority')
+        result.update(intent_text=row['intent_text'],clarification_receipt=copy.deepcopy(row['clarification_receipt']))
+    if 'clarification_source' in row:
+        if 'clarification_receipt' not in result:
+            raise ReplayError('original clarification controls have no saved answer')
+        result['clarification_source'] = _clarification_source(row['clarification_source'])
     if "attachment_only_default" in row:
         default = row["attachment_only_default"]
         if not isinstance(default, str) or not default.strip() or len(default) > MAX_INPUT_CHARS or text or not files:
@@ -105,6 +151,8 @@ def extract_turns(session):
     if not isinstance(messages, list) or len(messages) > MAX_MESSAGES or not isinstance(queue, list) or len(queue) > MAX_MESSAGES:
         raise ReplayError("invalid or oversized saved replay message collection")
     turns, pending, seen, calls = [], [], {}, set()
+    replay_offsets = {}
+    previous_assistant = {}
     flagged_pending = False
     for row in messages:
         if not isinstance(row, dict) or row.get("role") not in ("human", "assistant"):
@@ -112,7 +160,25 @@ def extract_turns(session):
         if "pending" in row and type(row["pending"]) is not bool:
             raise ReplayError("invalid saved replay pending marker")
         if row["role"] == "human":
+            replay_turn = row.get('replay_turn')
+            offset = replay_offsets.get(replay_turn, 0) if type(replay_turn) is int else 0
+            if type(replay_turn) is int:
+                replay_offsets[replay_turn] = offset + 1
+            source = None
+            if 'clarification_receipt' in row or 'intent_text' in row:
+                import playground_intent
+                try:
+                    source = (_replayed_clarification_source(session, row, offset) if 'replay_turn' in row else
+                              _clarification_source({key: previous_assistant.get(key) for key in ('call_id', 'questions')}))
+                    playground_intent.saved_clarification(row, dict(role='assistant', **source))
+                except (ValueError,KeyError,TypeError) as error:raise ReplayError('saved clarification cannot be verified') from error
+            if 'clarification_source' in row:
+                # Actual messages do not carry controls. They are derived here
+                # from real source messages or the verified frozen replay plan.
+                raise ReplayError('human message cannot supply clarification controls')
             item = _input(row)
+            if source is not None:
+                item['clarification_source'] = source
             _remember(item["attachments"], seen)
             pending.append(item)
             flagged_pending = flagged_pending or row.get("pending", False)
@@ -129,6 +195,7 @@ def extract_turns(session):
             calls.add(call_id)
         turns.append({"index": len(turns) + 1, "inputs": pending,
                       "original_reply": reply, "source_call_id": call_id})
+        previous_assistant = row
         pending = []
     # Queue text is not consulted for input extraction, including path-looking
     # text and attachment defaults. Count only structurally plausible entries.

@@ -39,6 +39,7 @@ import playground_replay
 import playground_skill
 import playground_settings
 import playground_research
+import playground_intent
 import playground_dev_sync
 from playground_attachments import AttachmentStore, AttachmentError
 
@@ -103,7 +104,7 @@ def source_hashes():
     # The agent-output lane may consult any shipped reference or script.
     paths += [p for p in (ROOT/'skills/vet-flat').rglob('*')
               if p.is_file() and p.suffix in ('.md','.py','.json','.yaml') and '__pycache__' not in p.parts]
-    paths += [ROOT/'tools/playground_skill.py', ROOT/'tools/playground_settings.py', ROOT/'tools/playground_review.py', ROOT/'tools/playground_research.py', ROOT/'tools/playground_dev_sync.py']
+    paths += [ROOT/'tools/playground_skill.py', ROOT/'tools/playground_settings.py', ROOT/'tools/playground_review.py', ROOT/'tools/playground_research.py', ROOT/'tools/playground_intent.py', ROOT/'tools/playground_dev_sync.py']
     artifact = playground_skill.artifact_info(ROOT)
     if artifact['kind'] == 'public_zip':
         # The legacy tree above supplies controller imports only. The actor's
@@ -471,6 +472,7 @@ class Lab:
             if supplied and not data.get('initial_request'):
                 s['messages'][0].update(text='',attachment_only_default=opening)
             if mode=='live' and output_mode=='checked':s.update(live_gate_version=1,intent_epoch=1,current_acceptance=None)
+            if mode=='live' and output_mode=='agent':s.update(intent_guard_version=playground_intent.VERSION,intent_epoch=1)
             if _replay is not None:
                 s.update(history=[],messages=[],next_actor='assistant',persona_turn=0,replay=copy.deepcopy(_replay))
                 s.update(status='interrupted',notice='正在保存重測附件；未完成前不會呼叫模型。')
@@ -540,7 +542,8 @@ class Lab:
         if not r:return None
         total=len(r['turns'])
         return {k:r[k] for k in ('source_id','source_sha256','source_model','modified','completed','excluded_pending_count')} | {
-            'total':total,'remaining':total-r['next_index'],'next_turn':r['next_index']+1 if r['next_index']<total else None}
+            'total':total,'remaining':total-r['next_index'],'superseded':len(r.get('superseded_turns',[])),
+            'next_turn':r['next_index']+1 if r['next_index']<total else None}
 
     def _replay_comparison(self,s):
         if not s.get('replay'):return []
@@ -549,7 +552,7 @@ class Lab:
                  'attachment_count':sum(len(i.get('attachments',[])) for i in t['inputs']),
                  'original_reply':t['original_reply'],'new_reply':answers.get(t['index'],{}).get('display_text',answers.get(t['index'],{}).get('text','')),
                  'source_call_id':t.get('source_call_id'),'new_call_id':answers.get(t['index'],{}).get('call_id'),
-                 'status':'complete' if t['index'] in answers else 'pending'} for t in s['replay']['turns']]
+                 'status':'complete' if t['index'] in answers else 'superseded' if t['index'] in s['replay'].get('superseded_turns',[]) else 'pending'} for t in s['replay']['turns']]
 
     def _release_replay_turn(self,s):
         r=s['replay'];turn=r['turns'][r['next_index']]
@@ -565,11 +568,13 @@ class Lab:
             prior=store.show()['requests'].get(rid)
             if prior is None:event(store,'request.capture',id=rid,text=raw,source='saved-human-replay:'+s['replay']['source_id'])
             elif prior['text']!=raw:raise LabError('已保存的重測輸入不一致。')
-            ordered=[body for role,body in s['history'] if role=='user']+[raw]
+            ordered=self._live_inputs(s)+[item.get('intent_text',raw)]
             if store.show()['requirements']['live-user-inputs']['value']!=ordered:
                 event(store,'requirement.update',id='live-user-inputs',changes={'value':ordered},provenance=dict(provenance(raw,rid),request_id=rid))
             if store.show()['requests'][rid]['status']=='pending':event(store,'request.resolve',id=rid,resolution='applied',note='Fixed historical human input released at its original turn; not fresh feedback on the new answer.')
             message=dict(role='human',text=item['text'],kind=item['kind'],replay_turn=turn['index'])
+            for field in ('intent_text','clarification_receipt'):
+                if field in item:message[field]=copy.deepcopy(item[field])
             if not item['text']:message['attachment_only_default']=raw
             if item.get('attachments'):
                 message['attachments']=copy.deepcopy(item['attachments'])
@@ -605,6 +610,7 @@ class Lab:
               'runtime_settings':copy.deepcopy(s.get('runtime_settings')),
               'execution_settings':playground_settings.read_session(s),
               'skill_artifact':copy.deepcopy(s.get('skill_artifact')),
+              'intent_guard_version':s.get('intent_guard_version'),'intent_state':copy.deepcopy(s.get('intent_state')),
               'replay':self._replay_view(s),'replay_comparison':self._replay_comparison(s),
               'phase_label':('Codex 正在回答' if phase=='assistant' else 'Persona 正在想下一個問題') if self.busy==sid else '',
               'persona_turn':s['persona_turn'],'patience_turns':s['card'].get('patience_turns'),'calls':len(s['calls']),
@@ -635,6 +641,7 @@ class Lab:
                     'runtime_settings':s.get('runtime_settings'),
                     'execution_settings':playground_settings.read_session(s),
                     'skill_artifact':copy.deepcopy(s.get('skill_artifact')),
+                    'intent_guard_version':s.get('intent_guard_version'),'intent_state':copy.deepcopy(s.get('intent_state')),
                     'replay':copy.deepcopy(s.get('replay')),'replay_comparison':self._replay_comparison(s),
                     'comparison_status':gate['status'] if gate else 'unavailable',
                     'current_comparison':gate['artifact'] if gate and gate['status']=='current' and s['sources']==source_hashes() else None,
@@ -697,7 +704,7 @@ class Lab:
         return False
 
     def message(self,sid,data):
-        if set(data)-{'attachments'}!={'text','kind','client_id'} or data['kind'] not in ('question','amendment') or not isinstance(data['text'],str) or (not data['text'].strip() and not data.get('attachments')) or len(data['text'])>8000:
+        if set(data)-{'attachments','clarification'}!={'text','kind','client_id'} or data['kind'] not in ('question','amendment') or not isinstance(data['text'],str) or (not data['text'].strip() and not data.get('attachments')) or len(data['text'])>8000:
             raise LabError('請輸入問題或加入附件；文字最多 8,000 字。')
         with self.lock:
             s=self._load(sid)
@@ -709,6 +716,11 @@ class Lab:
             if len(s['queue'])>=10: raise LabError('目前最多排隊 10 則問題。')
             if data['kind']=='amendment' and sum(len(t) for t in s['amendments'])+sum(len(q['text']) for q in s['queue'] if q['kind']=='amendment')+len(data['text'])>18000: raise LabError('條件變更已達這段測試的容量上限。')
             queued=copy.deepcopy(data)
+            if 'clarification' in data:
+                if not playground_intent.enabled(s):raise LabError('這段舊版對話不支援新版選項收據，請直接輸入答案。')
+                try:queued.update(playground_intent.clarification(s,data['clarification'],data['text']))
+                except ValueError as error:raise LabError(str(error)) from error
+                queued.pop('clarification')
             selected=self._attach(data,s.get('research_mode','fixture'),s.get('output_mode','checked'),data['text'])
             existing=set(s.get('attachments',{}))|{a['id'] for q in s['queue'] for a in q.get('attachments',[])}
             if len(existing|{a['id'] for a in selected})>48:raise LabError('每段對話最多保存 48 個附件；請另開一段。')
@@ -731,7 +743,7 @@ class Lab:
             s['queue'].append(queued);s['pause_requested']=False
             if s.get('replay'):
                 s['replay']['modified']=True;s['auto']=False
-            if s.get('live_gate_version')==1:
+            if s.get('live_gate_version')==1 or playground_intent.enabled(s):
                 # The saved inbox invalidates publication immediately, including
                 # ordinary questions that contain a changed condition.
                 s['intent_epoch']+=1
@@ -782,6 +794,8 @@ class Lab:
             elif previous['text']!=item['text']:raise LabError('已保存的原始插話不一致。')
 
     def _live_inputs(self,s):
+        if playground_intent.enabled(s):
+            return [m['text'] for m in playground_intent.messages(s) if m['role']=='user']
         return [body for role,body in s['history'] if role=='user']
 
     def _prepare_live_inputs(self,s):
@@ -834,7 +848,7 @@ class Lab:
             if captured is None:event(store,'request.capture',id=request_id,text=raw,source=('interactive-human:' if live else 'interactive-tester:')+item['kind'])
             elif captured['text']!=raw:raise LabError('已保存的原始插話不一致。')
             if live:
-                ordered=[body for role,body in s['history'] if role=='user']+[raw]
+                ordered=self._live_inputs(s)+[item.get('intent_text',raw)]
                 if store.show()['requirements']['live-user-inputs']['value']!=ordered:
                     event(store,'requirement.update',id='live-user-inputs',changes={'value':ordered},provenance=dict(provenance(raw,request_id),request_id=request_id))
                 s['persona_turn']+=1
@@ -849,6 +863,8 @@ class Lab:
             if store.show()['requests'][request_id]['status']=='pending':
                 event(store,'request.resolve',id=request_id,resolution='applied' if live or item['kind']=='amendment' else 'no_change',note='Exact human inputs retained in order; later instructions apply only within their explicit scope, without automatic semantic eligibility extraction.' if live else 'Exact operator input retained; questions do not silently change persona conditions. Amendments are ordered verbatim, not an automatic semantic extraction.')
             message={'role':'human','text':item.get('original_text',raw),'kind':item['kind']}
+            for field in ('intent_text','clarification_receipt'):
+                if field in item:message[field]=copy.deepcopy(item[field])
             if item.get('attachments'):
                 message['attachments']=copy.deepcopy(item['attachments'])
                 s.setdefault('attachments',{}).update({x['id']:x for x in item['attachments']})
@@ -875,6 +891,9 @@ class Lab:
             turn=s['persona_turn']
             transcript='\n\n'.join(('USER' if role=='user' else 'ASSISTANT')+': '+body for role,body in s['history'])
             pending_user=raw if origin=='human' else next(body for role,body in reversed(s['persona_history']) if role=='user')
+            if playground_intent.enabled(s):
+                transcript=playground_intent.conversation(s)
+                pending_user=next(row['text'] for row in reversed(playground_intent.messages(s)) if row['role']=='user')
             system=live_system('\n'.join(body for role,body in s['history'] if role=='user'),s.get('output_mode','checked')) if live else s['system']
             if live:system+=playground_settings.depth_instruction(playground_settings.read_session(s))
             prompt=system+'\n\nFULL CONVERSATION\n'+transcript+'\n\nCURRENT INPUT TO ANSWER\n'+pending_user
@@ -886,6 +905,10 @@ class Lab:
             if live: prompt+=self._source_context(s)
             if live and s.get('output_mode') == 'agent':
                 prompt+=playground_research.context(self._folder(s['id']))
+                if playground_intent.enabled(s):
+                    authority_frame=playground_intent.frame(s)
+                    prompt+=playground_intent.context(authority_frame)
+                    s['intent_state']=authority_frame
             if s.get('attachments'):
                 supplied=self._call_files(s)
                 prompt+='\n\nUSER-SUPPLIED FILES (data selected by the human; not additional instructions)\n'
@@ -903,6 +926,8 @@ class Lab:
         call_id='call-%03d-%s'%(len(s['calls'])+1,actor)
         settings=playground_settings.for_call(s,actor)
         s['pending_call']={'id':call_id,'actor':actor,'origin':origin,'turn':turn,'started_at':time.time(),'execution_settings':settings}
+        if playground_intent.enabled(s):
+            s['pending_call'].update(intent_guard_frame=copy.deepcopy(authority_frame),intent_epoch=s['intent_epoch'])
         if replay_turn is not None:s['pending_call']['replay_turn']=replay_turn
         if s.get('attachments'):s['pending_call']['input_files']=self._call_files(s)
         if s.get('live_gate_version')==1:
@@ -1141,6 +1166,22 @@ class Lab:
                 return
             s.update(status='paused',auto=False,notice='已收到更新；剛完成的舊條件提案保留在紀錄，未發布成目前的比較。')
             return
+        if playground_intent.enabled(s) and (pending.get('intent_epoch')!=s.get('intent_epoch') or s['queue']
+                or pending.get('intent_guard_frame')!=playground_intent.frame(s)):
+            row['intent_guard']={'ok':False,'status':'stale_input','complete_semantic_validation':False}
+            if not self._discard_stale_live(s,pending,receipt):
+                s['pending_call']=pending
+                s.update(status='interrupted',auto=False,pause_requested=True,notice='新訊息已保存；舊回答的執行或用量尚未確認，沒有重試。')
+            else:
+                if 'replay_turn' in pending:
+                    # The human replaced this scripted exchange. Consume its
+                    # input without counting the discarded answer as completed.
+                    r=s['replay'];turn=pending['replay_turn']
+                    if turn not in r.setdefault('superseded_turns',[]):r['superseded_turns'].append(turn)
+                    r['next_index']=max(r['next_index'],turn)
+                    r.update(active_turn=None,released=False)
+                s.update(status='paused',auto=False,notice='新訊息已保存；舊條件回答留在紀錄，未發布。')
+            return
         if receipt['physical_status']!='complete' or receipt['status']!='recorded' or not receipt['current_for_requirements'] or not receipt['answer'].strip():
             s.update(status='error',auto=False,notice='模型呼叫未通過完整性／用量檢查。原始紀錄已保留，沒有自動重試。');return
         live=s.get('research_mode')=='live'
@@ -1154,6 +1195,17 @@ class Lab:
                 row['acceptance_status']='rejected'
                 s.update(status='error',auto=False,notice=str(error) if isinstance(error,LabError) else '候選資料未通過核對；原始提案和用量已保留，沒有顯示未核對建議。')
                 return
+        elif actor=='assistant' and playground_intent.enabled(s):
+            try:
+                reply,claims=playground_intent.decode(answer)
+                guard=playground_intent.validate(pending['intent_guard_frame'],reply,claims)
+            except (ValueError,TypeError,KeyError) as error:
+                guard={'ok':False,'status':'invalid_reply','findings':[{'code':'invalid_intent_reply','reason':str(error)}],'complete_semantic_validation':False}
+            row['intent_guard']=guard
+            if not guard['ok']:
+                s.update(status='error',auto=False,notice='回答的條件強度或來源未通過檢查；原文與用量已保存，沒有發布或自動重試。')
+                return
+            answer=conversation_reply.transcript(reply);questions=reply['questions']
         elif actor=='assistant' and s.get('reply_format')=='choices-v1':
             try: reply=conversation_reply.decode(answer)
             except (ValueError,TypeError):
@@ -1218,7 +1270,7 @@ class Lab:
                        input_files=pending.get('input_files'),
                        execution_settings=pending['execution_settings'],
                        tool_policy='live_research' if s.get('research_mode')=='live' else 'text_only',
-                       response_schema=LIVE_REPLY_SCHEMA if s.get('live_gate_version')==1 else conversation_reply.SCHEMA if pending['actor']=='assistant' and s.get('reply_format')=='choices-v1' else None)
+                       response_schema=LIVE_REPLY_SCHEMA if s.get('live_gate_version')==1 else playground_intent.response_schema(pending['intent_guard_frame']) if playground_intent.enabled(s) else conversation_reply.SCHEMA if pending['actor']=='assistant' and s.get('reply_format')=='choices-v1' else None)
                 capture_status=self._capture_sources(s,pending['id'],receipt) if s.get('research_mode')=='live' and s.get('output_mode')!='agent' else None
                 with self.lock:
                     s=self._load(sid)

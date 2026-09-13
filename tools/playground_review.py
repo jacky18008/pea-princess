@@ -460,7 +460,8 @@ def _inspect(folder, session, row, detail):
               'source': {'record_sha256': record_hash if binding else None,
                          'message_sha256': message_hash, 'record_path': record_path,
                          'displayed_sha256': displayed['sha256']},
-              'quality': 'not_evaluated', 'source_claims_verified': False}
+              'quality': 'not_evaluated', 'source_claims_verified': False,
+              'intent_guard': json.loads(_bytes(row['intent_guard'])) if isinstance(row.get('intent_guard'),dict) else None}
     if detail:
         prompt = request.get('prompt')
         current = None

@@ -1,6 +1,7 @@
 """Public artifact prompt routing and persisted provenance; no provider calls."""
 import copy
 import json
+from agent_reply_fixture import attach_claims
 from pathlib import Path
 import sys
 import tempfile
@@ -38,7 +39,7 @@ class PublicSkillIntegrationTests(unittest.TestCase):
             return {'id':'answer','status':'complete','exit_code':0,'errors':[],
                     'tool_events':[],'malformed_event_lines':0,'terminal_usage_events':1,
                     'direct_terminal_usage':{'input_tokens':15,'output_tokens':5,'cached_input_tokens':0},
-                    'answer':json.dumps({'message':'先比較兩間的空間與價格。','questions':[]})}
+                    'answer':json.dumps(attach_claims({'message':'先比較兩間的空間與價格。','questions':[]},request))}
         self.lab = p.Lab(self.root/'state', invoke=invoke)
         self.addCleanup(self.lab.close)
 

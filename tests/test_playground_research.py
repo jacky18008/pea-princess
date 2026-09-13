@@ -2,6 +2,7 @@
 from contextlib import contextmanager
 import copy
 import json
+from agent_reply_fixture import attach_claims
 from pathlib import Path
 import tempfile
 import unittest
@@ -16,11 +17,11 @@ import area_scan_store as scans
 
 
 def intent(**fields): return dict(client_id=str(uuid.uuid4()), **fields)
-def reply():
+def reply(request=None):
     return {'id':'answer','status':'complete','exit_code':0,'errors':[], 'tool_events':[],
             'malformed_event_lines':0,'terminal_usage_events':1,
             'direct_terminal_usage':{'input_tokens':15,'output_tokens':5,'cached_input_tokens':0},
-            'answer':json.dumps({'message':'A useful comparison.','questions':[]})}
+            'answer':json.dumps(attach_claims({'message':'A useful comparison.','questions':[]},request))}
 
 
 class ResearchHandoff(unittest.TestCase):
@@ -35,7 +36,7 @@ class ResearchHandoff(unittest.TestCase):
         if self.lab.worker:
             self.lab.worker.join(10);self.assertFalse(self.lab.worker.is_alive())
     def invoke(self,request,folder):
-        self.requests.append(copy.deepcopy(request));return reply()
+        self.requests.append(copy.deepcopy(request));return reply(request)
     def create(self):
         return self.lab.create(intent(research_mode='live',output_mode='agent',initial_request='Compare these streets.',model='gpt-5.6-terra',max_calls=4,max_tokens=10000,seed=1))['id']
     def step(self,sid):self.lab.control(sid,intent(action='step'));self.join()

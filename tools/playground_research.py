@@ -23,8 +23,12 @@ def from_call(folder):
 
 
 def index(session):
-    from area_scan_store import verified_index
-    return verified_index(directory(session), limit=20)
+    from area_scan_store import verified_index, reconcile_running
+    target = directory(session)
+    recovery = reconcile_running(target)
+    packet = verified_index(target, limit=20)
+    packet['gaps'].extend(recovery['gaps'])
+    return packet
 
 
 def context(session):

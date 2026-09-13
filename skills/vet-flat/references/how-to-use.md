@@ -23,7 +23,7 @@ If the person prefers speaking, suggest dictation into their existing chat box. 
 | "check everything thoroughly for these two flats" | `budget_mode: deep` for those candidates only | explain the extra checks in plain words; respect user limits |
 | "keep it cheap / I'm on a £20 plan" | `budget_mode: standard` with fewer axes (not `lite` with all axes) | see `budget-modes.md`: lite triples invented numbers |
 | "no more than 20 fetches per flat" | `limits.max_fetches_per_flat: 20` | hard cap, whatever the depth |
-| "I hate noise" / 「我怕吵」 | `quiet_over_light: true`, add "main windows facing a main road or a railway" to `avoid` | L4 |
+| "I hate noise" / 「我怕吵」 | Record a quietness preference with the exact user words | Do not infer a quiet-over-light ordering or a road/rail-facing exclusion; those need an explicit user decision. |
 | "I need to see sky" | `light.reject_no_sky: true` | L2 |
 | "ground floor is fine if it's dry" | conditional requirement in `.pea-state`; `floors.reject_ground_floor: false` only as a projection | preserve “dry” as a required condition with evidence; unknown dryness cannot become an unconditional pass |
 | "must have a washing machine" | add `washing_machine_in_flat` to `must_haves` | a must-have that fails is a hard fail |

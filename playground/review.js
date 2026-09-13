@@ -64,6 +64,10 @@
   if(d.displayed_questions?.status!=='present')head.append(node('p','選項未完整記錄，不能推定當時沒有提問。','fine'));
   for(const q of d.displayed_questions?.items||[]){const choices=node('div',undefined,'review-choices');choices.append(node('strong',q.question));const list=node('ul');for(const option of q.options||[])list.append(node('li',option));choices.append(list);head.append(choices);}
   head.append(node('p',`執行狀態：${d.status} · 品質尚未自動驗收。工具完成不代表來源說法已核實。`,'fine'));
+  if(d.intent_guard){
+   head.append(node('p',d.intent_guard.ok?'已通過本版支援的條件強度檢查；不代表整篇回答或所有條件已驗收。':'這份模型輸出未通過條件或版本檢查，沒有發布。','review-notice'));
+   const checks=node('details');checks.append(node('summary','條件檢查紀錄'),node('pre',JSON.stringify(d.intent_guard,null,2)));head.append(checks);
+  }
   if(d.integrity.gaps.length)head.append(node('pre',d.integrity.gaps.join('\n')));
   box.append(head);
   const usage=card('02 · 這次呼叫的用量');const grid=node('div',undefined,'review-totals');
