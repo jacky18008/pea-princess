@@ -456,6 +456,65 @@ class FullScanAcceptanceTests(unittest.TestCase):
         self.assertTrue(result['halted'])
         self.assertEqual(1, self.host.dispatches)
 
+    def test_completed_actor_with_rejected_guard_stops_and_keeps_cost(self):
+        self.prepare()
+        sid = self.create()
+        coordinator.step(self.out, 'A-r1')
+        rejected = {'ok': False, 'findings': [{'code': 'unsupported_hard_requirement'}]}
+        self.host.sessions[sid]['details']['call-1']['intent_guard'] = rejected
+        result = coordinator.record_observed(self.out, 'A-r1')
+        self.assertEqual(120, result['known_processed_tokens'])
+        self.assertIn('intent guard', result['halted'])
+        receipt = json.loads((self.out / 'receipts/A-r1-t1.json').read_text())
+        self.assertEqual(rejected, receipt['intent_guard'])
+        self.assertEqual('stopped', receipt['status'])
+        self.assert_blocked_without_post(lambda: coordinator.reserve_ui(self.out, 'A-r1'))
+
+    def test_missing_guard_in_guarded_session_cannot_count_as_pass(self):
+        self.prepare()
+        sid = self.create()
+        self.host.sessions[sid]['snapshot_override'] = {'intent_guard_version': 1}
+        coordinator.step(self.out, 'A-r1')
+        result = coordinator.record_observed(self.out, 'A-r1')
+        self.assertIn('unavailable', result['halted'])
+        self.assertEqual(120, result['known_processed_tokens'])
+
+    def test_successful_guard_is_a_recorded_check_not_semantic_approval(self):
+        self.prepare()
+        sid = self.create()
+        coordinator.step(self.out, 'A-r1')
+        self.host.sessions[sid]['details']['call-1']['intent_guard'] = {'ok': True, 'findings': []}
+        result = coordinator.record_observed(self.out, 'A-r1')
+        self.assertIsNone(result['halted'])
+        evidence = save_json(self.root / 'independent-review.json', {'gate': 'fail'})
+        old_receipt = (self.out / 'receipts/A-r1-t1.json').read_bytes()
+        result = coordinator.halt_review(self.out, 'Accepted prose contradicts current condition.', evidence)
+        self.assertIn('review gate failed', result['halted'])
+        self.assertEqual(old_receipt, (self.out / 'receipts/A-r1-t1.json').read_bytes())
+        self.assertEqual(120, result['known_processed_tokens'])
+        self.assert_blocked_without_post(lambda: coordinator.reserve_ui(self.out, 'A-r1'))
+
+    def test_reserved_guard_requirement_survives_missing_later_version(self):
+        self.prepare()
+        self.create()
+        coordinator.step(self.out, 'A-r1')
+        with coordinator._locked(self.out) as (out, _config, state):
+            state['pending']['intent_guard_version'] = 1
+            coordinator._save(out, state)
+        result = coordinator.record_observed(self.out, 'A-r1')
+        self.assertIn('intent guard', result['halted'])
+        self.assertEqual(120, result['known_processed_tokens'])
+
+    def test_disagreeing_export_and_inspector_guards_stop(self):
+        self.prepare()
+        sid = self.create()
+        coordinator.step(self.out, 'A-r1')
+        self.host.sessions[sid]['calls'][0]['intent_guard'] = {'ok': False, 'findings': []}
+        self.host.sessions[sid]['details']['call-1']['intent_guard'] = {'ok': True, 'findings': []}
+        result = coordinator.record_observed(self.out, 'A-r1')
+        self.assertIn('intent guard', result['halted'])
+        self.assertEqual(120, result['known_processed_tokens'])
+
     def test_guarded_choice_preserves_raw_question_but_validates_answer_only_authority(self):
         question = 'Which scope?'
         pending = {'questions': [{'question': question, 'options': ['Full scan', 'Advice only']}],

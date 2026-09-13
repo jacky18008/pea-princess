@@ -617,15 +617,26 @@ def record_observed(out, key, submission=None):
                  and all(detail.get("execution_settings", {}).get(k) == config["plan"][k]
                          for k in ("research_depth", "reasoning_effort")))
         complete = call.get("status") == "complete" and detail.get("status") == "complete"
+        guard = detail.get("intent_guard")
+        exported_guard = call.get("intent_guard")
+        guard_required = (exported.get("intent_guard_version") == 1
+                          or (pending or {}).get("intent_guard_version") == 1
+                          or exported_guard is not None or guard is not None)
+        publication_ok = (not guard_required or
+                          (isinstance(guard, dict) and guard.get("ok") is True
+                           and (exported_guard is None or exported_guard == guard)))
         row = {"session": key, "turn": before + 1, "remote_call_id": call_id,
-               "status": "complete" if valid and complete and usage is not None else "stopped",
+               "status": "complete" if valid and complete and usage is not None and publication_ok else "stopped",
                "usage": usage, "source": detail.get("source"), "recorded_at": time.time(),
+               "intent_guard": copy.deepcopy(guard),
                "submission": selected, "research_results": call.get("research_results"),
                "pending_intent": copy.deepcopy(pending)}
         state["calls"].append(row)
         state["pending"] = None
         if row["status"] != "complete":
-            state["halted"] = "physical/integrity failure or unknown direct usage; preserved without replacement"
+            state["halted"] = ("host intent guard rejected or unavailable; preserved without replacement"
+                               if not publication_ok else
+                               "physical/integrity failure or unknown direct usage; preserved without replacement")
         elif state["halted"] and state["halted"].startswith("unrecorded or active host call in " + key):
             state["halted"] = None
         if len(state["calls"]) == 1:
@@ -644,6 +655,24 @@ def acknowledge_cost(out, note):
         state["cost_reviews"].append({"note": note, "time": time.time(),
                                       "known_processed_tokens": _summary(config, state)["known_processed_tokens"]})
         state["cost_checkpoint"] = False
+        _save(out, state)
+        return _summary(config, state)
+
+
+def halt_review(out, note, evidence):
+    """Record a separate review stop without rewriting physical-call receipts."""
+    if not isinstance(note, str) or not note.strip():
+        raise CoordinatorError("review stop requires a reason")
+    path = Path(evidence).absolute()
+    raw = _read(path)
+    with _locked(out) as (out, config, state):
+        if state["pending"]:
+            raise CoordinatorError("record the existing pending receipt before a review stop")
+        if state["halted"]:
+            raise CoordinatorError("study is already stopped; preserve its original reason")
+        state["review_stop"] = {"note": note, "evidence_path": str(path),
+                                "evidence_sha256": _sha(raw), "recorded_at": time.time()}
+        state["halted"] = "review gate failed: " + note
         _save(out, state)
         return _summary(config, state)
 
@@ -681,7 +710,7 @@ def export(out):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
-    for name in ("prepare", "create", "step", "send", "reserve-ui", "record-observed", "inspect", "snapshot", "export", "report", "acknowledge-cost"):
+    for name in ("prepare", "create", "step", "send", "reserve-ui", "record-observed", "inspect", "snapshot", "export", "report", "acknowledge-cost", "halt-review"):
         command = sub.add_parser(name)
         command.add_argument("--out", required=True)
         if name in ("create", "step", "send", "reserve-ui", "record-observed"):
@@ -692,8 +721,10 @@ def main(argv=None):
             command.add_argument("--plan", required=True)
         if name == "record-observed":
             command.add_argument("--submission", help="JSON: exact question, option/free_text, text, selection_reason")
-        if name == "acknowledge-cost":
+        if name in ("acknowledge-cost", "halt-review"):
             command.add_argument("--note", required=True)
+        if name == "halt-review":
+            command.add_argument("--evidence", required=True)
     args = parser.parse_args(argv)
     try:
         if args.command == "prepare":
@@ -704,6 +735,8 @@ def main(argv=None):
             result = export(args.out)
         elif args.command == "acknowledge-cost":
             result = acknowledge_cost(args.out, args.note)
+        elif args.command == "halt-review":
+            result = halt_review(args.out, args.note, args.evidence)
         elif args.command in ("inspect", "snapshot"):
             result = {"inspect": inspect, "snapshot": snapshot}[args.command](args.out, args.session)
         elif args.command == "record-observed":
