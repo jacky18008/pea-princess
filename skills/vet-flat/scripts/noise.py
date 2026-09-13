@@ -71,7 +71,7 @@ SCALE = ("Lden (day-evening-night average, night weighted +10 dB): WHO guideline
          "Lnight (23:00-07:00): WHO guidelines road %d dB, rail %d dB. These compare modelled outdoor "
          "traffic exposure, not indoor levels, window direction or how often noise will be heard."
          % (WHO[("road", "lden")], WHO[("rail", "lden")], WHO[("road", "lnight")], WHO[("rail", "lnight")]))
-CAVEATS = ["A model of outdoor noise at 4 m height on a 10 m grid from 2021 traffic counts, not a measurement at the window; a closed window, a rear room or a new road layout changes it.",
+CAVEATS = ["A model of outdoor noise at 4 m height on a 10 m grid from 2021 traffic counts, not a measurement at any window; indoor levels depend on the flat itself.",
            "The value read is the map pixel under the point; on a road edge the neighbouring pixel can differ by several dB. Treat differences under 3 dB as noise.",
            "Only road and rail traffic are mapped: no pubs, building sites, bin lorries, neighbours or aircraft."]
 
@@ -269,7 +269,7 @@ def lookup(points, rail=False, night=False, with_band=True, verbose=False, fetch
     if out["band_2017"] and out["band_2017"].get("ok"):
         reading.append("The 2017 map drew no road-noise band here (below 55 dB then)." if "below" in str(out["band_2017"]["road_lden"])
                        else "The 2017 map put the point in the %s dB band for road noise." % out["band_2017"]["road_lden"])
-    reading.append("These are modelled outdoor levels from 2021 traffic, not a measurement at the window: treat differences under 3 dB as noise, and listen on the viewing day, at night if you can.")
+    reading.append("These are modelled outdoor levels from 2021 traffic, not a measurement at any window; differences under 3 dB are within the model's grain.")
     return out
 
 

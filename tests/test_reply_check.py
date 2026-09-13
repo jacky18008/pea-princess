@@ -151,6 +151,26 @@ class TestReviewAdditions(unittest.TestCase):
                 self.assertIn("claims", kinds(RC.scan(reply)))
 
 
+class TestAuthority(unittest.TestCase):
+    """2026-09-13: Terra turned "偏好安靜" into "只有…才值得"; the checker now flags a necessity or exclusion
+    that quotes neither the person nor a proposal marker, and no longer flags scan-derived figures."""
+
+    def test_a_condition_without_the_persons_words_or_a_proposal_marker_is_flagged(self):
+        found = RC.scan("Southerton 只有在臥室背向主幹道、晚間實聽仍可接受時，才值得用每月省下的錢交換。")
+        self.assertIn("authority", kinds(found)); self.assertIn("我建議先確認", [f for f in found if f["kind"] == "authority"][0]["say"])
+        self.assertIn("authority", kinds(RC.scan("臥室正對大馬路的房源一律排除。")))
+
+    def test_the_persons_own_rule_and_an_explicit_suggestion_pass(self):
+        self.assertEqual([], [f for f in RC.scan("你說臥室正對大馬路就排除，所以 B 要先確認窗向。") if f["kind"] == "authority"])
+        self.assertEqual([], [f for f in RC.scan("我建議先確認臥室朝向；如果背向主幹道，Southerton 才值得看。") if f["kind"] == "authority"])
+        self.assertEqual([], [f for f in RC.scan("Only if you want it: I would rule out B until the bedroom side is known.") if f["kind"] == "authority"])
+
+    def test_scan_and_saved_data_count_as_a_source_for_numbers(self):
+        self.assertEqual([], [f for f in RC.scan("保存資料在 300 米內未標出地面鐵路、酒吧、夜店或俱樂部。") if f["kind"] == "numbers"])
+        self.assertEqual([], [f for f in RC.scan("掃描資料顯示 300 公尺內沒有地面鐵路。") if f["kind"] == "numbers"])
+        self.assertEqual(["numbers"], kinds(RC.scan("押金最多 5 週房租。")), "a bare rule-of-thumb figure is still flagged")
+
+
 class TestCli(unittest.TestCase):
     def test_exit_code_and_json(self):
         proc = subprocess.run([sys.executable, os.path.join(SCRIPTS, "reply_check.py"), "-", "--json"],

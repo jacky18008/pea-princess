@@ -118,7 +118,7 @@ class TestLookup(unittest.TestCase):
         self.assertEqual((75.3, 40.6, 75.3, 3), (sm["at_point"], sm["min"], sm["max"], sm["n"]))
         self.assertIn("75.3 dB at the point (40.6-75.3 dB across 3 points", out["reading"][0])
         self.assertEqual("70.0-74.9", out["band_2017"]["road_lden"]); self.assertIn("70.0-74.9 dB band", out["reading"][1])
-        self.assertIn("not a measurement at the window", out["reading"][-1])
+        self.assertIn("not a measurement at any window", out["reading"][-1])
         self.assertIn("modelled outdoor exposure", out["reading"][0])
         self.assertIn("not indoor levels, window direction or how often noise will be heard", out["scale"])
         self.assertIn("road 53 dB, rail 54 dB", out["scale"])

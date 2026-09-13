@@ -591,9 +591,9 @@ def compose(where, crime, planning, roads, living, notes, noise=None, street=Non
     elif living is not None:
         out["not_found"].append("living environment: " + str(living.get("note") or "table unavailable"))
 
-    reading.append("Quiet and safety are different questions: the roads, rail, night-economy and noise lines answer quiet; the crime line answers safety and says nothing about noise. All of this is the area, not the flat: listen at the window on the viewing day, at night if you can, and read the flat's own EPC for fabric.")
+    reading.append("Quiet and safety are different questions: the roads, rail, night-economy and noise lines answer quiet; the crime line answers safety and says nothing about noise. All of this is the area around the point, not the flat: nothing here says which way any window faces or what is heard indoors.")
     if ((where or {}).get("how_located") or "").startswith("lat/lng given") and not (street and street.get("ok")):
-        reading.append("The point was given as coordinates: if it is an area centroid rather than a door, treat every distance as a rough guide and scan again with --street NAME.")
+        reading.append("The point was given as coordinates: if it is an area centroid rather than a door, every distance is a rough guide; a scan with --street NAME runs from the street itself.")
     out["sources"] = [s for s in out["sources"] if s]
     out["ok"] = any(x is not None for x in (out["quiet"], out["crime"], out["works"], out["living_environment"])) or bool(noise and noise.get("ok"))
     return out

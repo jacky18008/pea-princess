@@ -88,7 +88,7 @@ class TestCompose(unittest.TestCase):
     def test_living_environment_and_the_closing_caveat(self):
         self.assertEqual(1, self.out["living_environment"]["outdoors_decile"])
         self.assertIn("outdoors decile 1 of 10", self.out["reading"][3])
-        self.assertIn("the area, not the flat", self.out["reading"][-1])
+        self.assertIn("the area around the point, not the flat", self.out["reading"][-1])
         self.assertEqual(4, len(self.out["sources"]))
 
     def test_a_failed_register_is_reported_not_guessed(self):
