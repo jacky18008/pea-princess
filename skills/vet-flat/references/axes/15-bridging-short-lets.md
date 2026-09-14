@@ -31,6 +31,8 @@ A bridge is **not an extra cost**. During the bridge you are not paying the long
 
 Worked shape: a flat available now at an all-in of A costs 12A over the year. A cheaper flat available `w` weeks later, at all-in B, costs `(w/4.33) × weekly_bridge + (12 − w/4.33) × B`. Whenever B is enough below A, **waiting is cheaper, not dearer**.
 The wrong model — "amortise the bridge into the year as a surcharge, so every week of waiting lowers your rent ceiling" — double counts. It manufactures a false deadline and kills good October and November flats. If a report contains a "monthly cost after bridge amortisation" column, delete the column.
+**Never raise the cost of waiting without the plan that pays for it.** Waiting a month or two for a clearly better long let is usually right; say so, then price the bridge realistically: in London a short let in tiers B–F runs about £45–75 a night (author's 2026 bookings ●; check the current quotes), a hotel £100–200. Quote the short-let band, name two tiers to try, and give the 12-month total with and without the wait — a bare "a hotel at £150 a night" only adds worry.
+
 What waiting actually costs is three non-money things: moving twice; the risk that the bridge cannot be extended; and the value of having your own place, which is real but belongs in the comfort column, not the price column.
 
 ## Bookability tiers (pick the tier before you pick the listing)

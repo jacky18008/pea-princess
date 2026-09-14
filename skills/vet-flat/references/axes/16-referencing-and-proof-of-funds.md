@@ -50,6 +50,8 @@ The checking company executes; **the landlord sets the rules**. If a route is mi
 Paying a third-party guarantor company is lawful, and a landlord may lawfully require *a guarantor*. A landlord may **not** require you to buy one specific paid product as a condition of the tenancy — wording of the form "a UK guarantor **or** one of our approved guarantor companies" is the compliant shape. **Any fee payable to the landlord or agent themselves, rather than to the guarantor provider, is a prohibited payment: refuse it.**
 Approved-provider lists are usually set at group level; the local lettings person cannot add a provider. Ask which providers are approved and what each charges, then choose.
 
+**A guarantor product is a fallback, never a filter.** Many landlords and operators do not accept a given product (Housing Hand included), and some work only with their own partner; "do they accept Housing Hand?" must not decide which flats stay on the list. Ask every shortlisted landlord one question — *do you accept a guarantor company, and which ones do you work with?* — record the answer per flat, and treat the fee (from about £20 a month) as insurance you may not need rather than a plan.
+
 ### A route that no longer exists
 For an in-scope assured tenancy, **six or twelve months up front in place of a guarantor** is not a route around the pre-tenancy cap. Confirm the agreement and signing date first (axis 07); do not classify halls/PBSA or licences as unlawful from the payment schedule alone. Ask for the operator's current savings route.
 
