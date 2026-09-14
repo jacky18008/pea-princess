@@ -923,3 +923,59 @@ is the price of "short in, short out" read by a judge that rewards coverage; the
 (1.00). Adopted with that caveat written down; the next variant is measured against variant-c's skill.
 Main-3's own numbers-without-cue (5.3, the highest of any arm) is the injected date: the model now
 writes dates and durations it used to leave out, and the count does not exempt them all.
+
+## Context slimming (2026-09-12 → 14): three arms against a two-repeat baseline — none clears the 30% gate
+
+Design (`docs/handoffs/2026-09-11-evening.md`, "Context slimming"): the full-vet benchmark, five private flats,
+four cells (Codex gpt-5.6-terra lite / standard, Claude Sonnet 5 lite / standard), two repeats per cell,
+paired by cell × case × repeat; baseline = tag `baseline-context-2026-09-12`; arms on branches
+`exp/context-slim-a/b/c` (A = `--brief` tool outputs named everywhere; B = A + "the ledger file first";
+C = A + "read only the section, never `cat` a whole file"). Codex tokens include sub-agent threads
+(`bench/ab/account_codex.py`); Claude tokens are the run's total. Adopt gate, pre-registered: no quality
+metric worse than the baseline's own repeat noise and tokens at least 30% lower. `bench/ab/ctx_compare.py`.
+
+Paired differences (arm − baseline; tokens as the median ratio arm/baseline over the ten pairs):
+
+| Cell | Baseline facts / tokens | A: Δ facts / tokens ratio | B: Δ facts / ratio | C: Δ facts / ratio | Noise: Δ facts max, tokens rep2/rep1 |
+|---|---|---|---|---|---|
+| Sonnet 5 standard | 0.68 / 7.68M | 0.00 / **0.71** | 0.00 / 1.04 | 0.00 / 1.01 | ±0.20 / 0.66 |
+| Codex terra standard | 0.75 / 9.15M | −0.05 / 0.94 | −0.06 / 0.89 | −0.01 / 0.85 | ±0.10 / 1.18 |
+| Sonnet 5 lite | 0.48 / 1.53M | 0.00 / 1.11 | −0.01 / 1.15 | +0.03 / 1.10 | ±0.30 / 1.45 |
+| Codex terra lite | 0.15 / 0.76M | −0.02 / 1.06 | +0.05 / 0.86 | +0.09 / 1.10 | ±0.40 / 0.76 |
+
+Fabrications moved within ±0.3 per run everywhere (noise 0.25); schema validity and unknown-honesty did not
+move. Full per-cell tables: `bench/private/durable/ctx-compare-final.md`.
+
+Reading:
+- **Quality did not move** in any arm beyond the baseline's own repeat noise. The brief tool outputs lose
+  nothing the grader can see.
+- **Tokens did not move enough.** The one large number, Sonnet standard under arm A (0.71, and 0.62 on cell
+  means), did not reappear in arms B and C, which contain every change of A (1.04, 1.01); and the baseline's
+  own two repeats differed by a factor 0.66 on that cell. So A's Sonnet figure is within run-to-run spread,
+  not a treatment effect. On Codex standard the three arms are consistently a little cheaper (0.94, 0.89,
+  0.85: 6–15%), below the gate. The lite tiers make too few calls for output size to matter.
+- **Where the tokens actually are**, from the run summaries (Claude: turns and cache-read tokens per run):
+
+| Arm | Sonnet standard: turns / cache-read tokens / fresh+created / output | Sonnet lite: turns / cache-read |
+|---|---|---|
+| baseline | 85 / 7.42M / 200k / 65k (n=10) | 29 / 1.40M (n=10) |
+| A | 68 / 4.52M / 186k / 58k (n=10) | 30 / 1.49M (n=10) |
+| B | 82 / 7.38M / 210k / 71k (n=10) | 29 / 1.58M (n=10) |
+| C | 85 / 7.33M / 206k / 64k (n=10) | 29 / 1.47M (n=10) |
+
+  Cache-read tokens (the whole context re-sent per turn) are 97% of the bill; the number of turns, not the
+  size of any one tool result, sets it. Smaller tool outputs shave a few percent of each re-send; only fewer
+  turns would cut the bill by a third — and the turn count is set by the skill's method (15–25 calls per flat
+  at standard depth), which these arms did not change.
+
+Decision by the pre-registered gate: **none of the three arms is adopted as a context-slimming change.** Arm
+A's brief forms stay available behind flags on the branch; whether to merge them as a plain engineering
+improvement (no quality loss, strictly smaller outputs, one flag back to the full form) is the author's call,
+recorded below when made. Arms B and C are dropped. The next lever, if any, is the number of calls per flat
+(a scan-style "one call per axis" script for the identity/area/price/company groups), which is a different
+experiment.
+
+Harness notes: the durable controller resumes only in its own directory and stays paused after any failed
+call, so a network drop costs the in-flight call and the rest of that repeat had to be filled with one-call
+sweeps (`bench/private/ctx-lib.sh`); one relaunch restarted a repeat from scratch (the second baseline repeat
+is that restart); the runner's `--timeout` did not end a `codex exec` that hung through a drop (a watchdog did).
