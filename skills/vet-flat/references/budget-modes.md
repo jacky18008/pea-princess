@@ -10,11 +10,11 @@ When explaining depth, say “quick initial check”, “usual checks”, or “
 |---|---|---|---|
 | Who | £20 plans, chat-only users, a first quick screen | most users | £100+ plans, final shortlists, area sweeps |
 | Fetches per flat (shell mode, approx.) | ≤ 8 | ≈ 15–25 | 40+ |
-| Identity and area | `epc.py search --postcode "<postcode>"` to list the flats, then `epc.py cert <certificate id>` for the matching flat (never pass an address to `cert`) | + `epc.py search` for the building's flats | + whole-building profile (`epc.py building`) and certificate history |
+| Identity and area | `epc.py search --postcode "<postcode>" --brief --match "<flat or building>"` to find the flat, then `epc.py cert <certificate id>` for the matching flat (never pass an address to `cert`) | + `epc.py search` for the building's flats | + whole-building profile (`epc.py building`) and certificate history |
 | Crime | `geo.py lookup "<postcode>"` for coordinates, then `crime.py box --lat <lat> --lng <lng> --months 3 --no-sensitivity` (4 calls) | 6 months, no sensitivity (6 calls) | 6 months + ±20 m sensitivity (30 calls) + route corridor |
 | Commute | `commute.py journey --from "<postcode>" --to "<destination postcode>"` (postcodes work directly) | + rail and bus plans, `redundancy` | + `stations` detail and alternative arrival times |
 | Company and compliance | `company.py profile` of the named entity | + `search` for same-name shells, `redress.py cmp`, `heat-trust` | + `filings`, `address-search` (RMC/RTM), `rogue`, `landregistry.py price-paid` |
-| Planning | skip (state it) | `planning.py near --radius 250 --limit 20` | + `stages` on tall schemes, `roads.py near` |
+| Planning | skip (state it) | `planning.py near --radius 250 --brief` | + `stages` on tall schemes, `roads.py near --brief` |
 | Reviews | ask the user for the lowest reviews only | full paste, incentivised and burst filters | + Trustpilot/press, cross-building matrix |
 | Report | verdict card, hard filters, 2 questions, 12 axes with U where skipped | full | full + comparison |
 | The fixed form (`fixed-questions.yaml`) | the 8 gate questions, F1–F8 | + the 6 listing questions, F9–F14 | + the extended 4, F15–F18: council tax band, guarantor, referencing, furnishing and inventory |

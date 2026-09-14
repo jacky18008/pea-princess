@@ -431,6 +431,30 @@ def _category(elements, plat, plng, pred, limit_m, tag_keys=(), sort_key=None):
             "others": [r for _, r in found[1:6]]}
 
 
+BRIEF_DROP = ("attempts", "query_used", "overpass_instance", "http_status", "element_count")
+
+
+def brief(out):
+    """The same scan with every category reduced to count, the nearest element (name, distance, bearing) and
+    up to three names; the raw element lists, the query and the attempt log are dropped. About 2k characters
+    instead of 17k; the full form is one flag away when a specific element matters."""
+    small = {}
+    for k, v in out.items():
+        if k in BRIEF_DROP:
+            continue
+        if isinstance(v, dict) and "count" in v and ("nearest" in v or "elements" in v or "names" in v):
+            n = v.get("nearest")
+            small[k] = {"count": v.get("count"),
+                        "nearest": ({kk: n.get(kk) for kk in ("name", "distance_m", "bearing", "kind", "osm_url") if n.get(kk) is not None} if isinstance(n, dict) and n else None),
+                        "names": [str(x)[:50] for x in (v.get("names") or [])[:3]]}
+        elif isinstance(v, list) and k == "not_found":
+            small[k] = [str(x)[:120] for x in v][:12]
+        else:
+            small[k] = v
+    small["brief"] = True
+    return small
+
+
 def near(lat, lng, radius=300, verbose=False, elements=None, meta=None):
     query = build_query(lat, lng, radius)
     if elements is None:
@@ -599,12 +623,15 @@ def main():
         p = sub.add_parser(name, help=helptext)
         p.add_argument("--lat", type=float, required=True)
         p.add_argument("--lng", type=float, required=True)
+        p.add_argument("--brief", action="store_true", help="counts and the nearest element per category only (about 2k characters instead of 17k)")
         p.add_argument("--radius", type=int, default=300,
                        help="metres for roads, rail and tube (default 300); the other "
                             "categories keep their own fixed radii")
     a = ap.parse_args()
     if a.cmd == "near":
         out = near(a.lat, a.lng, a.radius, verbose=a.verbose)
+        if getattr(a, "brief", False):
+            out = brief(out)
     else:
         out = facade_note(a.lat, a.lng, a.radius, verbose=a.verbose)
     json.dump(out, sys.stdout, ensure_ascii=False, indent=1)

@@ -15,7 +15,7 @@ Two presumptions drive this axis: cheap has a reason, and you pay more only for 
 
 ## Method in shell mode
 1. `python3 scripts/epc.py building --postcode "<pc>"` — the area distribution, so the £ per square foot is computed on the right denominator.
-2. `python3 scripts/landregistry.py price-paid --postcode "<pc>"` — the sale sequence in the same building; the best available evidence of relative value between units and of the building's real vintage.
+2. `python3 scripts/landregistry.py price-paid --postcode "<pc>" --brief` — the price summary and the recent sales in the same building (drop `--brief` for the full sequence); the best available evidence of relative value between units and of the building's real vintage.
 3. Compute: rent ÷ certified square feet; the band median £ per square foot; the flat's percentile in the band.
 
 ## Method in fetch mode

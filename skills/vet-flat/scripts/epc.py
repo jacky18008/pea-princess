@@ -50,6 +50,32 @@ def _clean(s):
 
 
 # ---------------------------------------------------------------- search ----
+def search_match(out, text):
+    """Keep only the certificates whose address contains `text` (case-insensitive); say how many were dropped."""
+    want = re.sub(r"\s+", " ", (text or "").strip().lower())
+    rows = out.get("results") or []
+    # a word-boundary match, so "8 Buckstone" is not also 18, 28 and 58 Buckstone
+    pat = re.compile(r"(?<![0-9a-z])" + re.escape(want) + r"(?![0-9a-z])") if want else None
+    kept = [r for r in rows if pat and pat.search(re.sub(r"\s+", " ", (r.get("address") or "").lower()))]
+    out = dict(out)
+    out["match"] = {"text": text, "kept": len(kept), "of": len(rows)}
+    out["results"] = kept
+    if rows and not kept:
+        out["match"]["note"] = "no certificate address contains that text; try a shorter or different spelling, or read the unfiltered list"
+    return out
+
+
+def search_brief(out):
+    """The search with each certificate as one short row and the envelope trimmed: a few hundred characters
+    for a small building, under 5k for a 60-flat one (the full form is 280 characters a certificate)."""
+    keep = ("query", "ok", "note", "retrieved_at", "evidence_class", "count", "too_many_results", "no_results", "match", "not_found")
+    brief = {k: out[k] for k in keep if k in out}
+    brief["results"] = [{"id": r.get("certificate_id"), "address": r.get("address"), "rating": r.get("rating"), "valid_until": r.get("valid_until")}
+                        for r in (out.get("results") or [])]
+    brief["next"] = "epc.py cert <id> for the matching flat; certificate_url = https://find-energy-certificate.service.gov.uk/energy-certificate/<id>"
+    return brief
+
+
 def search(postcode=None, street=None, town=None):
     if postcode:
         pc = re.sub(r"\s+", " ", postcode.strip().upper())
@@ -267,6 +293,8 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
     p = sub.add_parser("search"); p.add_argument("--postcode"); p.add_argument("--street"); p.add_argument("--town")
+    p.add_argument("--match", help="keep only certificates whose address contains this text (case-insensitive): the building or flat")
+    p.add_argument("--brief", action="store_true", help="address, certificate id, rating and expiry only: what a model needs to pick the flat")
     p = sub.add_parser("cert"); p.add_argument("id"); p.add_argument("--history", action="store_true",
                                                                        help="also fetch earlier certificates")
     p = sub.add_parser("building"); p.add_argument("--postcode"); p.add_argument("--street"); p.add_argument("--town")
@@ -274,6 +302,10 @@ def main():
     a = ap.parse_args()
     if a.cmd == "search":
         out = search(a.postcode, a.street, a.town)
+        if getattr(a, "match", None):
+            out = search_match(out, a.match)
+        if getattr(a, "brief", False):
+            out = search_brief(out)
     elif a.cmd == "cert":
         out = cert(a.id, follow_history=a.history)
     else:
