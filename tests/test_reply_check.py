@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """scripts/reply_check.py: the pre-send check for numbers without a source, jargon, simplified
-characters and questions after a go-ahead.
+characters and excessive questions, without inferring consent from earlier words.
 
 Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen -
 https://github.com/jacky18008/pea-princess - CC BY 4.0
@@ -77,6 +77,34 @@ class TestJargon(unittest.TestCase):
     def test_plain_language_passes(self):
         self.assertEqual([], RC.scan("這一戶的面積來自官方能源證書，48 平方公尺；廣告寫的 52 是仲介自述。"))
 
+    def test_candidate_c_colon_survives_the_actual_comparison_context(self):
+        previous = "請幫我比較資料裡的 A、B、C，看看接下來先處理哪間。"
+        reply = "- A：先保留。\n- B：夜間噪音尚未檢查。\n- C：不處理；依你的排除條件，臥室牆面發霉。"
+        self.assertNotIn("jargon", kinds(RC.scan(reply, previous)))
+        self.assertNotIn("jargon", kinds(RC.scan("- 第三間 C：臥室牆面發霉。")))
+
+    def test_explicit_candidate_headings_in_both_languages_are_not_source_codes(self):
+        for reply, previous in [
+                ("候選 C：臥室牆面發霉。", None),
+                ("- 房源 G：先保留。", None),
+                ("Candidate C: The bedroom has mould.", None),
+                ("- C: The bedroom has mould.", "Compare A, B and C."),
+                ("- S: More evidence is needed.", "Please review candidate S.")]:
+            with self.subTest(reply=reply, previous=previous):
+                self.assertNotIn("jargon", kinds(RC.scan(reply, previous)))
+
+    def test_candidate_context_does_not_hide_parenthesized_or_inline_source_codes(self):
+        previous = "比較 A、B、C。"
+        for reply in ("C：房源資料（C）。", "- C：資料 C: 第三方來源。",
+                      "- C：面積資訊 (G)。", "- C：evidence class 尚待確認。"):
+            with self.subTest(reply=reply):
+                self.assertIn("jargon", kinds(RC.scan(reply, previous)))
+
+    def test_undeclared_evidence_legend_is_still_flagged(self):
+        for reply in ("C: Third-party source.", "- G：官方。", "資料（S）。"):
+            with self.subTest(reply=reply):
+                self.assertIn("jargon", kinds(RC.scan(reply)))
+
 
 class TestScriptAndAsking(unittest.TestCase):
     def test_simplified_characters_in_a_traditional_reply(self):
@@ -85,10 +113,30 @@ class TestScriptAndAsking(unittest.TestCase):
         self.assertIn("script", kinds(found))
         self.assertEqual([], [f for f in RC.scan("這一間的房租來自你給的頁面，每月 £1,800，我們先看它的問題。") if f["kind"] == "script"])
 
-    def test_more_than_three_questions_and_questions_after_a_go_ahead(self):
+    def test_more_than_three_questions_remain_a_style_finding(self):
         self.assertEqual(["asking"], kinds(RC.scan("要嗎？好嗎？行嗎？可以嗎？")))
-        self.assertEqual(["asking"], kinds(RC.scan("要不要我現在就查？", previous="都同意，Go")))
+        self.assertEqual(["asking"], kinds(RC.scan("要嗎？好嗎？行嗎？可以嗎？", previous="Go")))
         self.assertEqual([], RC.scan("查好了：這三間裡兩間過關。", previous="都同意，Go"))
+
+    def test_scoped_acceptance_does_not_prohibit_another_candidate_question(self):
+        for previous in ("A 可以，B 先不要。", "只同意 A 的通勤例外，其他條件不變。",
+                         "Only A is okay; continue comparing B."):
+            with self.subTest(previous=previous):
+                self.assertEqual([], RC.scan("B 的臥室較大，你願意考慮它的通勤差距嗎？", previous=previous))
+
+    def test_negation_quoted_history_and_side_questions_are_not_blanket_permission(self):
+        for previous in ("我不同意，也不可以安排看房。", "請不要繼續安排。",
+                         "之前說『都同意，Go』，現在先停下來。",
+                         "The old message said 'go ahead'; it does not apply to B.",
+                         "可以先解釋押金怎麼算嗎？", "I said yes to the explanation, not a viewing."):
+            with self.subTest(previous=previous):
+                self.assertEqual([], RC.scan("你指的是哪一間的押金？", previous=previous))
+
+    def test_short_assent_cannot_settle_the_scope_of_a_new_question(self):
+        for previous in ("Go", "gp", "yes", "continue", "proceed", "do it", "都同意，Go",
+                         "同意", "可以", "繼續", "照做", "沒問題"):
+            with self.subTest(previous=previous):
+                self.assertEqual([], RC.scan("要不要我現在就查？", previous=previous))
 
 
 class TestOpening(unittest.TestCase):
@@ -172,6 +220,21 @@ class TestAuthority(unittest.TestCase):
 
 
 class TestCli(unittest.TestCase):
+    def test_cli_does_not_turn_scoped_assent_into_a_question_block(self):
+        proc = subprocess.run([sys.executable, os.path.join(SCRIPTS, "reply_check.py"), "-", "--json",
+                               "--previous", "A 可以，B 還要先問我。"],
+                              input="B 的通勤差距你也能接受嗎？", capture_output=True, text=True)
+        self.assertEqual(0, proc.returncode, proc.stdout + proc.stderr)
+        self.assertTrue(json.loads(proc.stdout)["ok"])
+
+    def test_candidate_label_does_not_require_a_rewrite_to_pass_cli(self):
+        proc = subprocess.run([sys.executable, os.path.join(SCRIPTS, "reply_check.py"), "-", "--json",
+                               "--previous", "請比較資料裡的 A、B、C。"],
+                              input="- C：依你的排除條件，臥室牆面發霉，所以不處理。",
+                              capture_output=True, text=True)
+        self.assertEqual(0, proc.returncode, proc.stdout + proc.stderr)
+        self.assertTrue(json.loads(proc.stdout)["ok"])
+
     def test_exit_code_and_json(self):
         proc = subprocess.run([sys.executable, os.path.join(SCRIPTS, "reply_check.py"), "-", "--json"],
                               input="押金最多 5 週房租。", capture_output=True, text=True)

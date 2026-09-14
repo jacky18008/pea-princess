@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Check a draft reply before it is sent: numbers without a source, jargon, simplified characters,
-too many questions, and a question after the person already said "go".
+"""Check a draft reply before it is sent: numbers without a source, jargon,
+simplified characters and excessive questions. This linter does not infer consent.
 
 Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen -
 https://github.com/jacky18008/pea-princess - MIT
@@ -11,7 +11,7 @@ lists, and only then sends. Findings are plain sentences with the offending frag
 exit code is 1 when anything was found, so a host can gate on it.
 
     reply_check.py draft.md
-    reply_check.py draft.md --previous "都同意，Go"          # the person's last message, for the go-ahead rule
+    reply_check.py draft.md --previous "比較 A、B、C"          # actual message, for candidate-label context
     cat draft.md | reply_check.py - --json
 
 What it checks (2026-09-11, from the replay review of fifteen real cases):
@@ -23,8 +23,8 @@ What it checks (2026-09-11, from the replay review of fifteen real cases):
             words (evidence class, fixed form, budget mode, landmine, money-gate, lite/standard/deep
             as labels): say the plain thing instead.
   script    simplified Chinese characters inside a reply written in traditional Chinese.
-  asking    more than three question marks; or any question when the person's last message was a
-            go-ahead (Go / gp / 都同意 / 繼續 / 照做 / continue / go ahead): execute and report.
+  asking    more than three question marks. Prior words such as Go, 同意 or 可以 do not
+            establish permission, its scope or whether a new question is necessary.
   opening   the first sentence is praise or agreement (問得好, 你說得對, great question): open with
             the answer instead.
   paths     a machine path or file URL in the body (/var/folders, /private/var, /tmp, file://, ~/):
@@ -43,6 +43,10 @@ What it checks (2026-09-11, from the replay review of fifteen real cases):
             Explicitly negated claims are skipped; a URL alone is not a verification result.
 The 2026-09-11 checkpoint reviews of Opus and Codex terra on the same fifteen cases added the last
 four kinds (local paths, third person, unexplained codes, empty claims).
+Whether asking again repeats settled consent requires the actual saved state and
+semantic review. Scoped acceptance, negation, quoted history and side questions
+cannot be resolved by matching assent words in the previous message. Even a short
+Go is not a linter authorization to act or a blanket prohibition on questions.
 Standard library only, Python 3.9.
 """
 from __future__ import unicode_literals
@@ -68,6 +72,11 @@ NUMBER = re.compile(r"(£\s?\d[\d,]*(?:\.\d+)?|\d[\d,]*(?:\.\d+)?\s?(?:%|分鐘|
 DATE_LIKE = re.compile(r"\b(19|20)\d{2}[-/年.]\d{1,2}([-/月.]\d{1,2})?|\d{1,2}[/月]\d{1,2}[日號]?|\d{1,2}:\d{2}|\b(19|20)\d{2}\s?年")
 CIRCLED = re.compile(r"[①-⑳⓪-⓿㉑-㉟]")
 EVIDENCE_MARK = re.compile(r"(?<![A-Za-z])([GSCIU])(?![A-Za-z])\s*[:：）)]|[（(]\s*([GSCIU])\s*[)）]|\b(evidence class|evidence_class)\b", re.I)
+CANDIDATE_PREFIX = r"(?:候選(?:房源)?|房源|選項|第[一二三四五六七八九十\d]+間|(?:candidate|property|option|flat|listing)\b)"
+CANDIDATE_HEADING = re.compile(r"\s*(?:[-*+]\s*)?" + CANDIDATE_PREFIX + r"\s*$", re.I)
+CANDIDATE_LIST = re.compile(
+    r"(?:比較(?:資料裡的|這幾間|這些)?|房源|候選|選項|\b(?:compare|candidates|properties|options|flats|listings)\b)\s*"
+    r"([A-Z](?:\s*(?:[,、/]|\band\b|\bor\b|和|與|及)\s*[A-Z])+)(?![A-Za-z])", re.I)
 CODES = re.compile(r"(?<![A-Za-z])([LD]\d{1,2})(?![A-Za-z\d])|\bF\d{1,2}\b")
 BACKTICK = re.compile(r"`[^`\n]{1,60}`")
 FILENAME = re.compile(r"\b[\w\-]+\.(?:py|yaml|yml|md|json|html)\b")
@@ -90,7 +99,6 @@ CLAIM_NEGATION = re.compile(
     r"不能(?:視為|當作|說)|不(?:代表|等於)|"
     r"\b(?:not|never)(?:\s+(?:yet|been|independently|fully|necessarily))*|"
     r"\b(?:hasn|haven|isn|aren|wasn|weren)['’]t(?:\s+been)?)\s*$", re.I)
-GO_AHEAD = re.compile(r"(?i)\b(go|gp|continue|go ahead|do it|proceed|yes)\b|都同意|同意|繼續|照做|照這樣|去做|開始吧|可以|好，?做|沒問題")
 SIMPLIFIED = set("这说们时间对问题见车电东门长结应该认为与从发产权让还进过现经国单号计设层楼费钱价买卖办处务实际总条约签订视听讲话语书录读写点线区块图机关开风气热体验检证据确识质数议论选择优标备参决则规围绕码头脑岁维护积极响")
 
 
@@ -142,6 +150,28 @@ def _without_web_urls(text):
     return ''.join(chars)
 
 
+def _candidate_heading(text, match, previous):
+    """A named candidate's colon heading is not an evidence-class annotation.
+
+    Keep parenthesized and inline source codes visible. Only an explicit local
+    candidate name or a comparison list in the person's message disambiguates
+    a bare heading; do not whitelist a letter throughout the reply.
+    """
+    if not match.group(1) or not match.group(0).rstrip().endswith((':', '：')):
+        return False
+    prefix = text[text.rfind('\n', 0, match.start()) + 1:match.start()]
+    if CANDIDATE_HEADING.fullmatch(prefix):
+        return True
+    if not re.fullmatch(r"\s*(?:[-*+]\s*)?", prefix):
+        return False
+    letter = match.group(1).upper()
+    context = previous or ''
+    if re.search(CANDIDATE_PREFIX + r"\s*" + letter + r"(?![A-Za-z])", context, re.I):
+        return True
+    return any(letter in re.findall(r"(?<![A-Za-z])[A-Z](?![A-Za-z])", group.group(1).upper())
+               for group in CANDIDATE_LIST.finditer(context))
+
+
 def scan(text, previous=None):
     findings = []
     for sent in _sentences(text or ""):
@@ -153,6 +183,8 @@ def scan(text, previous=None):
     for m in CIRCLED.finditer(text or ""):
         findings.append({"kind": "jargon", "fragment": text[max(0, m.start() - 12):m.end() + 12].strip(), "say": "圈號代號，改成那件事的白話全名。"})
     for m in EVIDENCE_MARK.finditer(text or ""):
+        if _candidate_heading(text, m, previous):
+            continue
         findings.append({"kind": "jargon", "fragment": text[max(0, m.start() - 20):m.end() + 6].strip(), "say": "單字母證據標記或 evidence class，改成「官方登記」「刊登自述」「第三方」「推估」「未知」。"})
     for m in CODES.finditer(text or ""):
         findings.append({"kind": "jargon", "fragment": text[max(0, m.start() - 16):m.end() + 16].strip(), "say": "內部編號，改成它代表的那件事。"})
@@ -194,15 +226,13 @@ def scan(text, previous=None):
     q = len(QUESTION.findall(text or ""))
     if q > 3:
         findings.append({"kind": "asking", "fragment": "%d 個問號" % q, "say": "問題超過三個；留下會改變下一步的那幾個，其餘用預設。"})
-    if previous and GO_AHEAD.search(previous) and q:
-        findings.append({"kind": "asking", "fragment": previous.strip()[:80], "say": "使用者上一則已經放行，這一則不該再問；執行上一輪提議的事，回報結果。"})
     return findings
 
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("draft", help="file with the draft reply, or - for stdin")
-    ap.add_argument("--previous", default=None, help="the person's last message (for the go-ahead rule)")
+    ap.add_argument("--previous", default=None, help="the actual latest message (candidate-label context, not consent)")
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
     text = sys.stdin.read() if args.draft == "-" else io.open(args.draft, encoding="utf-8").read()
