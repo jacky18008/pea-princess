@@ -1,0 +1,62 @@
+{
+  "fixture_id": "grok-reconcile-20260914",
+  "synthetic": true,
+  "turns": [
+    "我十月一號到倫敦工作，想找一房，房租每月最多2300英鎊。通勤希望45分鐘左右，超過的先問我，再考慮看房。安靜是加分，發霉或漏水就不要。公司名稱我不想透露，通勤目的地用附件的圖書館正門。先比較附件A、B、C，不用找新房源。",
+    "只接受A這間預估46分鐘可以考慮看，其他房子的通勤條件不變。我知道只是估計，實際通勤還要核對。請更新比較和下一步。",
+    "我回來了。新資料把A的通勤改成75分鐘，B仍是46分鐘。之前同意A的46分鐘還算數嗎？另外，暖氣費包含在房租裡嗎？先不要改整體上限，也不用找新的。",
+    "A先留著，但不要約看，其他條件維持。B還值得繼續研究嗎？請把比較和待辦存好。",
+    "整體通勤上限放寬到80分鐘，其他條件先不動。白天有車聲可以，晚上臥室安靜只當加分。現在怎麼排？",
+    "A也可以考慮看了。請整理目前A、B的取捨和下一步，現在不用幫我聯絡或預約。"
+  ],
+  "journey": {
+    "destination_id": "library-main-entrance",
+    "time_window": "weekday-arrival-09:00"
+  },
+  "candidates": [
+    {
+      "id": "A",
+      "rent_pcm": 2250,
+      "bedrooms": 1,
+      "advertised_area_m2": 55,
+      "commute_minutes": 46,
+      "mould": false,
+      "leak": false,
+      "day_noise": "mild",
+      "night_quiet": null,
+      "heating_included": null
+    },
+    {
+      "id": "B",
+      "rent_pcm": 2150,
+      "bedrooms": 1,
+      "advertised_area_m2": 47,
+      "commute_minutes": 46,
+      "mould": false,
+      "leak": false,
+      "day_noise": "busy",
+      "night_quiet": null,
+      "heating_included": null
+    },
+    {
+      "id": "C",
+      "rent_pcm": 2200,
+      "bedrooms": 1,
+      "advertised_area_m2": 60,
+      "commute_minutes": 43,
+      "mould": true,
+      "leak": false,
+      "day_noise": "unknown",
+      "night_quiet": null,
+      "heating_included": null
+    }
+  ],
+  "t3_update": {
+    "A": {
+      "commute_minutes": 75
+    },
+    "B": {
+      "commute_minutes": 46
+    }
+  }
+}
