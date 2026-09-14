@@ -974,3 +974,41 @@ Harness notes: the durable controller resumes only in its own directory and stay
 call, so a network drop costs the in-flight call and the rest of that repeat had to be filled with one-call
 sweeps (`bench/private/ctx-lib.sh`); one relaunch restarted a repeat from scratch (the second baseline repeat
 is that restart); the runner's `--timeout` did not end a `codex exec` that hung through a drop (a watchdog did).
+
+## The gap to the original answers, itemised (2026-09-14)
+
+The author rated 20 replayed replies (`bench/private/calibration-2026-09-14`): mean satisfaction 1.50/2 against
+the judge's 1.00 on the same replies (exact agreement 10/20; where they differed the judge was harsher 9 times);
+on "better/same/worse than the original", the author said "same" for 15 of 20 (the gap is model class and
+context, the reply still covers the point) where the judge said "worse" for 13. The judge's "beats original"
+therefore measures resemblance to the stronger model's answer, not whether a general user is served.
+
+To see what the gap is made of, an Opus reader listed every difference between each replayed reply and the
+original answer and classified it (`bench/gap_analysis.py`; 20 rated replies + Sonnet 5 variant-c 15 + Codex
+terra 15, standard depth; "material" = would change what the person does next):
+
+| Model / arm | Replies | Work the skill could have done (material) | Knowledge (material) | Context the replay lacked (material) | Judgement, model-bound (material) | Reply better than original (material) |
+|---|---|---|---|---|---|---|
+| Sonnet 5, variant-c | 15 | 35 (28) | 8 (3) | 21 (10) | 25 (10) | 22 (2) |
+| Codex terra | 14 | 27 (20) | 7 (1) | 25 (14) | 18 (4) | 30 (10) |
+| Opus 5 | 3 | 4 (2) | 5 (1) | 4 (1) | 1 (0) | 9 (5) |
+| Codex sol | 3 | 8 (4) | 3 (0) | 4 (2) | 2 (0) | 6 (1) |
+
+Reading: of the material gaps, **about half are work the skill already tells the model to do** (Sonnet 28 of
+51, terra 20 of 39): act on a go-ahead and run the lines the person authorised; re-check the ledger when a
+rule changes (flats killed by the old rule); edit the manual and the ledger in the same turn as a correction;
+finish the deliverable (the viewing letter rewritten in full, the message draft, the merged page with its
+link); fetch what the scripts can fetch (the EPC heating field that reveals a heat network; floor areas;
+listing status; current guarantor fees) before asking the person; use evidence already in the conversation
+(a named building's crime figures; the lift as the only remaining gate). A fifth to a third is context the
+replay did not give the model (files, sub-agents, earlier research) and is not a fair comparison. Judgement
+proper — synthesis and explanation depth — is a fifth for Sonnet and a tenth for terra. Knowledge gaps are
+few and cheap (four went into the skill today: guarantor products as fallback, the short-let price band,
+explanation depth by experience, fallbacks on every named line).
+
+What follows: the checkpoint rules adopted this week cover most of the work gaps in words, and Sonnet still
+leaves 28 material ones in 15 replies — the words are read, not obeyed. The next harness step is to turn the
+checkable ones into `reply_check.py` rules (every listing or place the person named appears in the reply; a
+requested letter or message appears in full; a go-ahead is followed by results, not a promise; a correction
+names the manual and ledger lines it changed) and measure again with this reader (material work gaps per
+reply) beside judge v2.
