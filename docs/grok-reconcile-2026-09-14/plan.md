@@ -10,6 +10,16 @@ Integration commits:c6cb69e atomic batches,350e6a9 two narrow lint fixes,a388fc8
 
 ## Bounded native test
 
+### Local-transport amendment (before any rental response)
+
+After the user asked the operator to continue attaching the files, both the native picker and Finder clipboard routes failed to produce a verified attachment. The supported local-computer route now reads the same three byte-identical files and uses an isolated local test workspace instead of a cloud workspace. The actor package and six rental fixtures are unchanged; a short, exactly verified setup trigger supplies this transport override and forbids dumping ZIP/base64 into tool output.
+
+An unrelated reminder choice was first observed answered after the earlier pause. No recorded CUA action coincides with its displayed time; its origin is unknown. Keep that work-triggering interaction and the initial automatic greeting in the record, outside rental-quality samples. Do not erase them or infer zero usage.
+
+The original eight-interaction operator ceiling below assumed attachments needed no agent-mediated local reads. The revised bound is **eight intended text submissions** (setup, six rental turns, export), the **one already-observed uncertain choice**, and **at most sixteen individually inspected Allow once decisions** for these specific test inputs/workspace. This is a prospective operational amendment for the newly necessary file-access route, not a change to a user-specified token/spend budget or an automatic model retry. Preserve the former combined interaction count alongside these separate counters. Never select Always allow or expand general permissions. Actual provider calls/tokens remain unknown. Stop for unavailable setup, malformed/ambiguous sent text, unexpected access scope or rate limits. Every permission decision and action result must be retained. No rental result existed when this amendment was recorded.
+
+### Original attachment-path plan (retained for audit)
+
 Use the official installed Grok Bot app and existing subscription. At most8 deliberate submissions:1 setup,6 rental turns,1 evidence export. Native approval/choice responses that cause additional work count within this ceiling; do not hide them as free setup. No automatic retry, API conversion, new account, paid add-on, changes to broad permissions or Claude calls. Stop for corrupted/ambiguous sends, rate limit or required setup failure. Unknown tokens remain unknown; native prompts are not physical model calls. Existing conversation and draft remain intact. New named Bot and fresh workspace do not prove strong context isolation.
 
 Local name:Pea Princess2026-09-14; actual skill identifier:pea-princess. Inspect Marketplace→Yours and slash menu. If native skill registration is available, preserve exact packaged instructions/resources and verify its visible name/enabled status. Ask the Bot to use supported native skill creation when no import control exists. A pointer to files is not proof of an installed skill; a model-reported checksum is not an independently verified checksum. Do not claim old arbitrary paths/configurations have been changed if only the new Bot is configured.
