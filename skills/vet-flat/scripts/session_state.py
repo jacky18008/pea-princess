@@ -26,6 +26,8 @@ ZERO_HASH = "0" * 64
 MAX_LOG_BYTES = 32 * 1024 * 1024
 MAX_DOCUMENT_BYTES = 1024 * 1024
 MAX_EVENT_BYTES = 256 * 1024
+MAX_BATCH_EVENTS = 100
+MAX_BATCH_BYTES = 2 * 1024 * 1024
 DEFAULT_CONTEXT_CHARS = 16000
 ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$")
 HASH = re.compile(r"^[0-9a-f]{64}$")
@@ -785,62 +787,113 @@ class SessionStore:
             return self._append(directory, {"schema_version": VERSION, "events": []}, state,
                                 {"op": "project.init", "project_id": project_id})
 
-    def _append(self, directory, journal, state, event):
+    @staticmethod
+    def _entry(state, event):
         revision = state["revision"] + 1
         result = _reduce(state, event, revision)
         entry = {"revision": revision, "previous_hash": state["event_hash"],
                  "recorded_at": datetime.datetime.now(datetime.timezone.utc).isoformat(), "event": copy.deepcopy(event)}
         entry["event_hash"] = digest(entry)
         result["event_hash"] = entry["event_hash"]
+        return result, entry
+
+    def _append(self, directory, journal, state, event):
+        result, entry = self._entry(state, event)
         new = {"schema_version": VERSION, "events": journal["events"] + [entry],
-               "head": {"revision": revision, "event_hash": entry["event_hash"]}}
+               "head": {"revision": result["revision"], "event_hash": entry["event_hash"]}}
         self._write(directory, "events.json", new)
         return result
 
     def apply(self, event, expected_revision):
         if type(expected_revision) is not int or expected_revision < 1:
             raise RevisionConflict("expected_revision must name an existing revision")
+        return self.apply_many([event], expected_revision)
+
+    def apply_many(self, events, expected_revision, *, validate=None):
+        """Commit an ordered batch as one journal replacement, without rebasing.
+
+        Each non-noop event retains its ordinary revision and hash-chain entry.
+        A trusted validator may reject the final state before publication; it
+        receives a defensive copy, must not reacquire this store's lock, and its
+        return value is ignored. Failed batches may leave unused private source
+        objects, but do not publish any of their journal entries or state.
+        """
+        if type(expected_revision) is not int or expected_revision < 0:
+            raise RevisionConflict("expected_revision must be a nonnegative integer")
+        if not isinstance(events, list) or not 1 <= len(events) <= MAX_BATCH_EVENTS:
+            raise SessionStateError("events must be a nonempty array of at most 100 events")
+        if validate is not None and not callable(validate):
+            raise SessionStateError("validate must be callable")
+        events = [self._event_input(event) for event in events]
+        if len(canonical(events).encode("utf-8")) > MAX_BATCH_BYTES:
+            raise SessionStateError("event batch exceeds limit")
+        with self._locked(create=expected_revision == 0) as directory:
+            journal, state = self._load(directory, missing=expected_revision == 0)
+            initializing = journal is None
+            if initializing:
+                if self._read(directory, "identity.json", missing=True) is not None:
+                    raise IntegrityError("initialized project lost its event journal; do not reinitialize")
+                journal = {"schema_version": VERSION, "events": []}
+            if state["revision"] != expected_revision:
+                raise RevisionConflict("stale expected revision; reload before applying a change")
+            entries = []
+            for event in events:
+                event = self._prepare_event(directory, event, state)
+                if event is not None:
+                    state, entry = self._entry(state, event)
+                    entries.append(entry)
+            if validate is not None:
+                validate(copy.deepcopy(state))
+            if entries:
+                new = {"schema_version": VERSION, "events": journal["events"] + entries,
+                       "head": {"revision": state["revision"], "event_hash": state["event_hash"]}}
+                if initializing:
+                    self._write(directory, "identity.json", {"schema_version": VERSION, "project_id": state["project_id"]})
+                self._write(directory, "events.json", new)
+            return state
+
+    @staticmethod
+    def _event_input(event):
         if not isinstance(event, dict):
             raise SessionStateError("event must be a JSON object")
         event = copy.deepcopy(event)
         _value(event)
         if len(canonical(event).encode("utf-8")) > MAX_EVENT_BYTES:
             raise SessionStateError("event exceeds limit")
-        with self._locked() as directory:
-            journal, state = self._load(directory)
-            if state["revision"] != expected_revision:
-                raise RevisionConflict("stale expected revision; reload before applying a change")
-            op = event.get("op", event.get("type"))
-            if op == "budget.spend" and event.get("dispatch_id") is not None:
-                budget = state["budgets"].get(event.get("id"))
-                if budget is not None:
-                    previous_spends = [spend for spend in budget["spends"] if spend["dispatch_id"] == event["dispatch_id"]]
-                    if previous_spends:
-                        if type(event.get("amount")) is not type(previous_spends[0]["amount"]) or event.get("amount") != previous_spends[0]["amount"]:
-                            raise SessionStateError("conflicting spend for an already-accounted budget/dispatch")
-                        return state
-            if op == "fact.record":
-                if "source_verified" in event or "verification_kind" in event:
-                    raise SessionStateError("fact source verification is computed by the store")
-                provenance = _provenance(event.get("provenance"), state)
-                sources = _refs(state, event.get("source_ids", []))
-                matched = False
-                for source_id in sources:
-                    if source_id in state["documents"]:
-                        source = state["documents"][source_id]
-                        data = self._read(directory, "object-" + source["sha256"] + ".txt", MAX_DOCUMENT_BYTES).decode("utf-8")
-                        matched = matched or provenance["quote"] in data
-                    else:
-                        matched = matched or provenance["quote"] in state["facts"][source_id]["provenance"]["quote"]
-                if sources and not matched:
-                    raise SessionStateError("fact quote is not verbatim in its referenced saved evidence")
-                event["source_verified"] = matched or (provenance["actor"] == "user" and provenance.get("authorized") is True)
-                event["verification_kind"] = "saved_source_quote" if matched else ("user_assertion" if event["source_verified"] else "unverified_external_claim")
-            if op == "document.add":
-                if "document" in event:
-                    raise SessionStateError("document metadata must be created from an owned source snapshot")
-                event = self._document_event(directory, event, state)
-            return self._append(directory, journal, state, event)
+        return event
+
+    def _prepare_event(self, directory, event, state):
+        op = event.get("op", event.get("type"))
+        if op == "budget.spend" and event.get("dispatch_id") is not None:
+            budget = state["budgets"].get(event.get("id"))
+            if budget is not None:
+                previous_spends = [spend for spend in budget["spends"] if spend["dispatch_id"] == event["dispatch_id"]]
+                if previous_spends:
+                    if type(event.get("amount")) is not type(previous_spends[0]["amount"]) or event.get("amount") != previous_spends[0]["amount"]:
+                        raise SessionStateError("conflicting spend for an already-accounted budget/dispatch")
+                    return None
+        if op == "fact.record":
+            if "source_verified" in event or "verification_kind" in event:
+                raise SessionStateError("fact source verification is computed by the store")
+            provenance = _provenance(event.get("provenance"), state)
+            sources = _refs(state, event.get("source_ids", []))
+            matched = False
+            for source_id in sources:
+                if source_id in state["documents"]:
+                    source = state["documents"][source_id]
+                    data = self._read(directory, "object-" + source["sha256"] + ".txt", MAX_DOCUMENT_BYTES).decode("utf-8")
+                    matched = matched or provenance["quote"] in data
+                else:
+                    matched = matched or provenance["quote"] in state["facts"][source_id]["provenance"]["quote"]
+            if sources and not matched:
+                raise SessionStateError("fact quote is not verbatim in its referenced saved evidence")
+            event["source_verified"] = matched or (provenance["actor"] == "user" and provenance.get("authorized") is True)
+            event["verification_kind"] = "saved_source_quote" if matched else ("user_assertion" if event["source_verified"] else "unverified_external_claim")
+        if op == "document.add":
+            if "document" in event:
+                raise SessionStateError("document metadata must be created from an owned source snapshot")
+            event = self._document_event(directory, event, state)
+        return event
 
     def _document_event(self, directory, event, state):
         path = event.get("path")
@@ -980,6 +1033,9 @@ def main(argv=None):
     apply_parser = sub.add_parser("apply"); apply_parser.add_argument("--expected-revision", type=int, required=True)
     apply_parser.add_argument("--event-file", type=Path, help="otherwise read one JSON event from stdin")
     apply_parser.add_argument("--receipt-only", action="store_true", help="return verified revision/hash identity instead of full state; read context after the batch")
+    many_parser = sub.add_parser("apply-many"); many_parser.add_argument("--expected-revision", type=int, required=True)
+    many_parser.add_argument("--events-file", type=Path, required=True, help="private JSON array of 1 to 100 ordered events")
+    many_parser.add_argument("--receipt-only", action="store_true", help="return the committed final revision/hash identity instead of full state")
     sub.add_parser("show"); sub.add_parser("verify")
     for name in ("context", "checkpoint"):
         child = sub.add_parser(name); child.add_argument("--max-chars", type=int, default=DEFAULT_CONTEXT_CHARS)
@@ -992,17 +1048,21 @@ def main(argv=None):
         store = SessionStore(args.project)
         if args.command == "init":
             result = store.init(args.project_id)
-        elif args.command == "apply":
-            if args.event_file:
-                if args.event_file.is_symlink():
+        elif args.command in ("apply", "apply-many"):
+            batch = args.command == "apply-many"
+            input_file = args.events_file if batch else args.event_file
+            maximum = MAX_BATCH_BYTES if batch else MAX_EVENT_BYTES
+            if input_file:
+                if input_file.is_symlink():
                     raise SessionStateError("event input may not be a symlink")
-                with args.event_file.open("rb") as stream:
-                    raw = stream.read(MAX_EVENT_BYTES + 1)
+                with input_file.open("rb") as stream:
+                    raw = stream.read(maximum + 1)
             else:
-                raw = sys.stdin.buffer.read(MAX_EVENT_BYTES + 1)
-            if len(raw) > MAX_EVENT_BYTES:
-                raise SessionStateError("event exceeds limit")
-            result = store.apply(_parse(raw), args.expected_revision)
+                raw = sys.stdin.buffer.read(maximum + 1)
+            if len(raw) > maximum:
+                raise SessionStateError("event batch exceeds limit" if batch else "event exceeds limit")
+            operation = store.apply_many if batch else store.apply
+            result = operation(_parse(raw), args.expected_revision)
             if args.receipt_only:
                 result = dict({key: result[key] for key in ("schema_version", "project_id", "revision", "event_hash")}, ok=True)
         elif args.command in ("context", "checkpoint"):
