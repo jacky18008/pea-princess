@@ -21,6 +21,7 @@ metadata:
 |---|---|
 | asks how to start or what this does | `references/onboarding.md` |
 | compares specified advertised fields | `references/inputs.md`; use supplied pages, compare only requested fields |
+| discusses a candidate tradeoff or viewing hold | `references/boundary-turn.md` |
 | requests a full flat assessment | `references/axes/README.md`, then relevant linked axes |
 | wants candidates around an area or commute | `references/axes/00-area-sweep.md` (`scripts/sweep.py`) |
 | asks if a street is quiet, safe, or has works | `references/street-research.md`; run the scan in this thread, reuse saved results on follow-up |

@@ -309,6 +309,12 @@ def _reduce(previous, event, revision):
         state["project_id"] = _id(event.get("project_id"))
     elif state["project_id"] is None:
         raise SessionStateError("initialize the project first")
+    elif isinstance(op, str) and op.startswith("boundary."):
+        from boundary import reduce_event
+        try:
+            reduce_event(state, event, revision)
+        except (ValueError, KeyError, TypeError) as exc:
+            raise SessionStateError(str(exc)) from exc
     elif op in ("requirement.add", "requirement.update", "requirement.retire"):
         provenance = _provenance(event.get("provenance"), state, user=True)
         if op == "requirement.add":
@@ -963,6 +969,8 @@ class SessionStore:
             "facts": {i: r for i, r in state["facts"].items() if r["status"] == "active"},
             "documents": copy.deepcopy(state["documents"]), "dispatches": copy.deepcopy(state["dispatches"]),
             "decisions": copy.deepcopy(state["decisions"]), "outputs": copy.deepcopy(state["outputs"])}
+        if "proposed_checks" in state:
+            packet["proposed_checks"] = copy.deepcopy(state["proposed_checks"])
         encoded = canonical(packet)
         if len(encoded) > max_chars:
             raise ContextOverflow("complete context exceeds max_chars; no conditions or critical facts were truncated")

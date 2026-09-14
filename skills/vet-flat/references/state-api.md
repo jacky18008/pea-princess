@@ -157,3 +157,7 @@ Read the entire printed packet. `checkpoint()` returns a manifest containing `pa
 - Revision conflict: reload and reconcile, no automatic patch retry. Integrity/context overflow: stop affected work, never truncate. `max_chars` is a size limit, not a token budget. These methods neither launch models nor control provider billing.
 
 Source, decision and recovery obligations: [session-harness.md](session-harness.md). The repository manual is not required for these operations.
+
+## Candidate-specific boundary decisions
+
+For a quoted acceptance, refusal, retained viewing hold or explicit global change, use [boundary-turn.md](boundary-turn.md) or the individual [boundary-api.md](boundary-api.md) operations. They store `boundary.propose`, `boundary.decide` and `boundary.instruct` events in this same revision-checked journal. The boundary reducer creates `proposed_checks` lazily for boundary history only; it does not add generic `proposal.add` or `proposal.decide` operations. Existing journals without boundary events retain their earlier state shape. `context` includes the complete boundary history when present. Generated comparison/TODO files are derived artifacts, not independent condition state.

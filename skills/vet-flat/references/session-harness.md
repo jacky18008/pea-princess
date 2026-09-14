@@ -22,6 +22,8 @@ If no state exists, `init --project-id <project-id>` and capture the current use
 
 Before ranking candidates or saving a current recommendation/TODO, use [eligibility-api.md](eligibility-api.md) with the host's current normalized conditions, evidence and independently pinned hashes/revision. Recompute after changes; known mandatory failures stay blocked unless an explicit scoped user exception actually applies. The host separately checks authoritative state before and after the call and validates the returned recommendation/TODO. This checks already-normalized conditions, not automatic intent extraction, source truth or an overall PASS.
 
+For a concrete candidate tradeoff or viewing hold, use [boundary-turn.md](boundary-turn.md) and [boundary-api.md](boundary-api.md). They record scoped acceptance, refusal, retention or an explicit global change in this same state and derive comparison/viewing work together. Acceptance of an estimated journey does not verify its duration. Candidate-specific permission does not change the global requirement.
+
 ## Documents, facts and context
 
 Register source documents as immutable private snapshots. Record critical facts with source ID, exact quote/line range, value, unit and evidence status. Retain unknowns and disagreements. Retrieve original spans from the saved snapshot when judging; a hash proves byte identity, not truth. Register a new version when a source changes and retire or supersede the affected facts. Never overwrite an old snapshot with newer prose under the same identity.
