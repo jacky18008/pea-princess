@@ -949,29 +949,24 @@ move. Full per-cell tables: `bench/private/durable/ctx-compare-final.md`.
 Reading:
 - **Quality did not move** in any arm beyond the baseline's own repeat noise. The brief tool outputs lose
   nothing the grader can see.
-- **Tokens did not move enough.** The one large number, Sonnet standard under arm A (0.71, and 0.62 on cell
-  means), did not reappear in arms B and C, which contain every change of A (1.04, 1.01); and the baseline's
-  own two repeats differed by a factor 0.66 on that cell. So A's Sonnet figure is within run-to-run spread,
-  not a treatment effect. On Codex standard the three arms are consistently a little cheaper (0.94, 0.89,
-  0.85: 6–15%), below the gate. The lite tiers make too few calls for output size to matter.
+- **Tokens moved in one cell, and the mechanism is the number of turns.** Sonnet standard under arm A
+  ran 68 turns per flat against the baseline's 85 (range 51–87 vs 62–107) and cost less in 9 of the 10
+  pairs (per-flat input tokens, repeat 1 / repeat 2: baseline 6.4/4.2, 9.2/5.7, 13.7/7.2, 6.9/6.5, 7.4/9.0M;
+  A 5.3/5.2, 4.3/5.5, 3.1/5.2, 3.1/4.7, 4.4/6.4M): −39% on cell means, 0.71 as the median pair. The brief
+  outputs remove follow-up calls (one `--match` search instead of a 62-row list and a second look). Arms B
+  and C contain every change of A and gave the saving back by adding turns of their own: B writes the ledger
+  as it goes (82 turns), C's "find the heading, then read that range" is two calls per file (85 turns). On
+  Codex standard the three arms are consistently a little cheaper (0.94, 0.89, 0.85: 6–15%) — there the cost
+  sits in the spawned sub-agent threads, not in how big a tool result is. The lite tiers make too few calls
+  for output size to matter.
 - **Where the tokens actually are**, from the run summaries (Claude: turns and cache-read tokens per run):
 
-| Arm | Sonnet standard: turns / cache-read tokens / fresh+created / output | Sonnet lite: turns / cache-read |
-|---|---|---|
-| baseline | 85 / 7.42M / 200k / 65k (n=10) | 29 / 1.40M (n=10) |
-| A | 68 / 4.52M / 186k / 58k (n=10) | 30 / 1.49M (n=10) |
-| B | 82 / 7.38M / 210k / 71k (n=10) | 29 / 1.58M (n=10) |
-| C | 85 / 7.33M / 206k / 64k (n=10) | 29 / 1.47M (n=10) |
-
-  Cache-read tokens (the whole context re-sent per turn) are 97% of the bill; the number of turns, not the
-  size of any one tool result, sets it. Smaller tool outputs shave a few percent of each re-send; only fewer
-  turns would cut the bill by a third — and the turn count is set by the skill's method (15–25 calls per flat
-  at standard depth), which these arms did not change.
-
-Decision by the pre-registered gate: **none of the three arms is adopted as a context-slimming change.** Arm
-A's brief forms stay available behind flags on the branch; whether to merge them as a plain engineering
-improvement (no quality loss, strictly smaller outputs, one flag back to the full form) is the author's call,
-recorded below when made. Arms B and C are dropped. The next lever, if any, is the number of calls per flat
+Decision by the pre-registered gate: **arm A meets it on one cell** (Sonnet standard: quality within noise,
+tokens −39% on means, lower in 9 of 10 pairs) and is neutral on the other three (no quality loss; Codex
+standard −6%, lite unchanged). **Arms B and C are dropped**: each adds turns that cancel A's saving, and
+neither improves quality. Whether A merges is the author's call (recorded below when made); the
+recommendation is to merge it: nothing is lost anywhere, the cell that gains is the one a Claude user on a
+paid plan actually runs, and every full form is one flag away. The next lever, if any, is the number of calls per flat
 (a scan-style "one call per axis" script for the identity/area/price/company groups), which is a different
 experiment.
 
