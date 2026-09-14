@@ -21,14 +21,19 @@ Objects accept only the fields below; required arrays may be empty unless stated
 | Object | Required fields | Optional fields |
 |---|---|---|
 | Constraints | `schema_version: "vet-flat/eligibility-constraints/1"`, nonnegative integer `revision`, nonempty `requirements`, `user_requests` map of request ID to exact text, `exceptions` | none |
-| Requirement | `id`, `field`, `type`, `operator`, `value`, `unit`, boolean `mandatory`, nonempty `basis` | `scope` |
-| Exception | `id`, `requirement_id`, `candidate_id`, `request_id`, exact nonempty `quote`, `when` array of predicates | none |
+| Requirement | `id`, `field`, `type`, `operator`, `value`, `unit`, boolean `mandatory`, nonempty `basis` | `scope`, `provenance` |
+| Exception | `id`, `requirement_id`, `candidate_id`, `request_id`, exact nonempty `quote`, `when` array of predicates | paired `accepted_check` and `requirement_sha256` |
 | Exception predicate | `field`, `type`, `operator`, `value`, `unit`, nonempty `basis` | `scope` |
+| Accepted check | `field`, `type`, `operator`, `value`, `unit`, nonempty `basis` | `scope` |
 | Evidence | `schema_version: "vet-flat/eligibility-evidence/1"`, `sources` map of source ID to retained text, `candidates` | none |
 | Candidate | `id`, `fields` map of field ID to evidence item | none |
 | Evidence item | `value`, `unit`, `qualifier`, `source_id`, `quote` | `scope`; `reason` required only for unknown |
 | Inspection scope | ISO `date: "YYYY-MM-DD"`, nonempty `rooms` array of unique room IDs | none |
 | Journey scope | `kind: "journey"`, nonempty `destination_id`, nonempty `time_window` | none |
+
+Ordinary normalized requirements keep their supplied `mandatory` flag, including when no requirement provenance is supplied. This API does not infer a softer strength or silently downgrade a mandatory condition. The trusted caller remains responsible for faithful normalization of the actual user instruction.
+
+Optional `provenance` retains `{request_id, quote}` where the exact nonempty quote occurs in `user_requests[request_id]`. The durable state adapter also supplies `actor:"user"`, `authorized:true` and a nonempty `source_id`; all three authority fields must be supplied together. Malformed present provenance, missing requests, foreign quotes and unsupported fields are input errors. These fields preserve the captured source; they do not authenticate the caller or prove the words authorize the normalized value. For durable candidate decisions, use [boundary-turn.md](boundary-turn.md) and [boundary-api.md](boundary-api.md).
 
 Types are `number`, `boolean`, `string`. Operators are `lte`, `gte`, `eq`; ordering requires numeric values. A field has one consistent type/unit across conditions and predicates. Comparisons are inclusive and use decimal representations of finite JSON numbers. Evidence qualifiers and permitted `basis` values are `observed`, `estimate`, `reported`; evidence also permits `unknown`.
 
@@ -42,6 +47,14 @@ Once applicability is established, an allowed-basis value outside a condition is
 
 An exception waives only its named requirement for its named candidate after **every** predicate is `met`. An unobserved, missing, out-of-scope or false inspection cannot activate it. Empty `when` means a trusted, explicitly authorized unconditional waiver. Two exceptions for the same candidate/requirement are rejected. An applied waiver preserves the original check status and effective exception ID; it does not turn the original physical condition into an observed fact.
 
+For a bounded tradeoff, supply both `accepted_check` and `requirement_sha256` on the exception. The accepted check is a complete predicate describing the comparison this person actually accepted for this candidate. For example, after explicit acceptance of a named candidate at an estimated 46 minutes against a 45-minute target, it can specify `commute_minutes`, `number`, `lte`, `46`, `minutes`, the explicitly accepted evidence bases and the original journey scope. No minute tolerance or evidence basis is supplied automatically. Preserve the exact captured reply; the trusted host must determine whether its meaning accepts this bound, this candidate and this journey. A quote alone does not establish consent.
+
+Compute `requirement_sha256` with `canonical_hash()` on the exact targeted input requirement, including any retained provenance. Evaluation leaves the supplied `mandatory` flag and provenance unchanged. The pin must be lowercase SHA-256 hex. While the pin is current, the accepted check must have the same field, type, operator, unit and exact scope as that requirement; omitting scope differs from `scope: null`. A malformed pin or a mismatched current predicate is an input error. If the requirement changes, the old exception remains visible but inactive, with `requirement_current: false` and a reason to reconsider it. Current conditions still evaluate for every candidate. A host must never refresh an old exception's pin automatically to authorize a changed condition.
+
+With a current pin, the bounded exception additionally needs a true accepted comparison and a qualifier in its explicit `basis`. An accepted estimate or reported value may remove the original failure, but the effective check remains `unresolved`, with its original qualifier and an open requirement/TODO obligation. An observed satisfying value becomes `met`. Unknown, missing or mismatched journey evidence cannot satisfy the accepted comparison, and a later value beyond the accepted bound does not receive a waiver. Invalid evidence units remain input errors. Any extra `when` predicates still require every check to be observed and `met`; accepting a commute estimate cannot satisfy a dryness inspection. Empty `when` on a bounded exception removes those extra predicates only; the accepted comparison is still required.
+
+This effect waives an otherwise unmet original comparison; it is not an additional candidate restriction or a global amendment. Explicit changes to the global condition belong in that requirement, with current provenance and fresh input pins. Existing exceptions without these two optional fields keep their original unconditional/conditional semantics.
+
 ## Returned checks and current recommendation
 
 `evaluate(constraints, evidence, *, revision, constraints_sha256, evidence_sha256)` returns a `binding` and `candidates` map with checks and:
@@ -51,6 +64,11 @@ An exception waives only its named requirement for its named candidate after **e
 - `meets_recorded_checks`: no mandatory failures or unresolved conditions. Optional failures remain in `advisory_failed_requirement_ids`; this status is not an overall PASS.
 
 `exception_ids` lists only effective exceptions. Every output sets `payment_authorized: false`.
+
+Each computed check includes the requirement's unchanged boolean `mandatory` and a copy of its optional exact `provenance`. Existing result and recommendation fields retain their meaning; no requirement-source downgrade output is added.
+
+A bounded exception's result includes `acceptance: {kind: "candidate_bound", requirement_current, requirement_sha256, accepted_check, check, fact_verification: false}`. `accepted_check` retains the accepted predicate; `check` is its evidence comparison, or `null` when the requirement pin is stale. `satisfied` also accounts for all extra `when` predicates. An effective bounded check additionally retains this acceptance metadata, `original_status`, the original `comparison` and the actual evidence qualifier. Thus an original comparison may remain false while the nested accepted comparison is true. `fact_verification: false` marks the acceptance operation as consent rather than factual verification; it never upgrades an estimate to an observation.
+
 
 `validate_recommendation(constraints, evidence, recommendation, **pins)` recomputes checks from the current pinned inputs. It returns `{valid, errors, binding, payment_authorized: false}`. Accept only `valid is True`. Bad constraints, evidence or external pins raise `EligibilityError`; malformed or inconsistent recommendations return `valid: false`.
 

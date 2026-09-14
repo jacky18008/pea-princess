@@ -10,6 +10,7 @@ Usage: eligibility.py evaluate --constraints conditions.json --evidence facts.js
        eligibility.py validate <same options> --recommendation recommendation.json
 """
 import argparse
+from copy import deepcopy
 from datetime import date
 from decimal import Decimal
 import hashlib
@@ -95,7 +96,7 @@ def _predicate(row, at, fields, requirement=False):
     required = {"field", "type", "operator", "value", "unit", "basis"}
     if requirement:
         required |= {"id", "mandatory"}
-    _object(row, required, {"scope"}, at)
+    _object(row, required, {"scope", "provenance"} if requirement else {"scope"}, at)
     _text(row["field"], at + ".field")
     _require(type(row["type"]) is str and row["type"] in {"number", "boolean", "string"},
              at + ".type is unsupported")
@@ -119,6 +120,31 @@ def _predicate(row, at, fields, requirement=False):
     if requirement:
         _text(row["id"], at + ".id")
         _require(type(row["mandatory"]) is bool, at + ".mandatory must be boolean")
+
+
+def _validate_provenance(row, requests):
+    """Validate optional retained provenance without changing mandatory semantics.
+
+    Normalized ordinary requirements keep the caller's mandatory flag. Boundary
+    requirements additionally retain exact captured user words; neither matching
+    bytes nor caller-supplied authority fields establish semantic consent.
+    """
+    if "provenance" not in row:
+        return
+    provenance = row["provenance"]
+    _object(provenance, {"request_id", "quote"}, {"actor", "authorized", "source_id"},
+            at="requirement.provenance")
+    for key in ("request_id", "quote"):
+        _text(provenance[key], "requirement.provenance." + key)
+    _require(provenance["request_id"] in requests and
+             provenance["quote"] in requests[provenance["request_id"]],
+             "requirement provenance lacks a retained exact user quote")
+    if set(provenance) != {"request_id", "quote"}:
+        _require(set(provenance) == {"request_id", "quote", "actor", "authorized", "source_id"},
+                 "requirement provenance authority fields must be supplied together")
+        _require(provenance["actor"] == "user" and provenance["authorized"] is True,
+                 "requirement provenance must identify an authorized user request")
+        _text(provenance["source_id"], "requirement.provenance.source_id")
 
 
 def canonical_hash(value):
@@ -150,22 +176,24 @@ def _validate_inputs(constraints, evidence, binding):
              "constraints revision mismatch")
     rows = constraints["requirements"]
     _require(type(rows) is list and bool(rows), "requirements must be a nonempty array")
-    fields, requirements = {}, {}
-    for row in rows:
-        _predicate(row, "requirement", fields, requirement=True)
-        _require(row["id"] not in requirements, "duplicate requirement id")
-        requirements[row["id"]] = row
     requests = constraints["user_requests"]
     _require(type(requests) is dict, "user_requests must be an object")
     for key, value in requests.items():
         _text(key, "request id")
         _text(value, "request text")
+    fields, requirements, requirement_hashes = {}, {}, {}
+    for row in rows:
+        _predicate(row, "requirement", fields, requirement=True)
+        _require(row["id"] not in requirements, "duplicate requirement id")
+        _validate_provenance(row, requests)
+        requirements[row["id"]] = row
+        requirement_hashes[row["id"]] = canonical_hash(row)
     exceptions = constraints["exceptions"]
     _require(type(exceptions) is list, "exceptions must be an array")
     seen_ids, seen_scopes = set(), set()
     for row in exceptions:
         _object(row, {"id", "requirement_id", "candidate_id", "request_id", "quote", "when"},
-                at="exception")
+                {"accepted_check", "requirement_sha256"}, at="exception")
         for key in ("id", "requirement_id", "candidate_id", "request_id", "quote"):
             _text(row[key], "exception." + key)
         _require(row["id"] not in seen_ids, "duplicate exception id")
@@ -176,9 +204,28 @@ def _validate_inputs(constraints, evidence, binding):
         _require(row["requirement_id"] in requirements, "exception refers to unknown requirement")
         _require(row["request_id"] in requests and row["quote"] in requests[row["request_id"]],
                  "exception lacks a retained exact user quote")
+        _require(("accepted_check" in row) == ("requirement_sha256" in row),
+                 "a bounded exception needs both accepted_check and requirement_sha256")
+        current = True
+        if "accepted_check" in row:
+            _require(type(row["requirement_sha256"]) is str and
+                     re.fullmatch(r"[0-9a-f]{64}", row["requirement_sha256"]) is not None,
+                     "exception.requirement_sha256 must be lowercase SHA-256 hex")
+            current = row["requirement_sha256"] == requirement_hashes[row["requirement_id"]]
+            accepted = row["accepted_check"]
+            _predicate(accepted, "exception.accepted_check", fields if current else {})
+            if current:
+                target = requirements[row["requirement_id"]]
+                for key in ("field", "type", "operator", "unit"):
+                    _require(accepted[key] == target[key],
+                             "accepted_check must match its requirement's " + key)
+                _require(("scope" in accepted) == ("scope" in target) and
+                         accepted.get("scope") == target.get("scope"),
+                         "accepted_check must match its requirement's exact scope")
         _require(type(row["when"]) is list, "exception.when must be an array")
+        predicate_fields = fields if current else {}
         for predicate in row["when"]:
-            _predicate(predicate, "exception predicate", fields)
+            _predicate(predicate, "exception predicate", predicate_fields)
     _object(evidence, {"schema_version", "sources", "candidates"}, at="evidence")
     _require(evidence["schema_version"] == EVIDENCE_SCHEMA, "unsupported evidence schema")
     sources = evidence["sources"]
@@ -223,7 +270,7 @@ def _validate_inputs(constraints, evidence, binding):
                          "evidence quote not found in retained source")
     for row in exceptions:
         _require(row["candidate_id"] in candidates, "exception refers to unknown candidate")
-    return requirements, candidates
+    return requirements, candidates, requirement_hashes
 
 
 def _scope_matches(target, observed):
@@ -271,7 +318,7 @@ def _check(predicate, fields):
 def evaluate(constraints, evidence, *, revision, constraints_sha256, evidence_sha256):
     """Recompute checks from caller-pinned inputs; never issue an overall PASS."""
     binding = _binding(revision, constraints_sha256, evidence_sha256)
-    requirements, candidates = _validate_inputs(constraints, evidence, binding)
+    requirements, candidates, requirement_hashes = _validate_inputs(constraints, evidence, binding)
     exceptions = {(row["candidate_id"], row["requirement_id"]): row
                   for row in constraints["exceptions"]}
     results = {}
@@ -280,15 +327,48 @@ def evaluate(constraints, evidence, *, revision, constraints_sha256, evidence_sh
         for requirement_id, requirement in requirements.items():
             check = _check(requirement, candidate["fields"])
             exception = exceptions.get((candidate_id, requirement_id))
-            if exception:
+            if (exception and "accepted_check" in exception and
+                    exception["requirement_sha256"] != requirement_hashes[requirement_id]):
+                exception_checks[exception["id"]] = {
+                    "satisfied": False, "checks": [],
+                    "reason": "Requirement changed; reconsider the candidate-specific accepted bound",
+                    "acceptance": {"kind": "candidate_bound", "requirement_current": False,
+                                   "requirement_sha256": exception["requirement_sha256"],
+                                   "accepted_check": deepcopy(exception["accepted_check"]),
+                                   "check": None, "fact_verification": False}}
+            elif exception:
                 predicates = [_check(p, candidate["fields"]) for p in exception["when"]]
                 satisfied = all(p["status"] == "met" for p in predicates)
                 exception_checks[exception["id"]] = {"satisfied": satisfied, "checks": predicates}
+                acceptance = None
+                if "accepted_check" in exception:
+                    accepted = _check(exception["accepted_check"], candidate["fields"])
+                    # Consent can accept a planning comparison; it cannot make
+                    # that estimate an observation or bypass unrelated predicates.
+                    satisfied = (satisfied and accepted["comparison"] is True and
+                                 accepted["qualifier"] in exception["accepted_check"]["basis"])
+                    acceptance = {"kind": "candidate_bound", "requirement_current": True,
+                                  "requirement_sha256": exception["requirement_sha256"],
+                                  "accepted_check": deepcopy(exception["accepted_check"]),
+                                  "check": accepted, "fact_verification": False}
+                    exception_checks[exception["id"]].update(satisfied=satisfied, acceptance=acceptance)
                 if satisfied and check["status"] != "met":
-                    check = dict(check, status="met", original_status=check["status"],
-                                 reason="Explicit candidate-scoped exception applies",
-                                 exception_id=exception["id"])
+                    if acceptance is None:
+                        check = dict(check, status="met", original_status=check["status"],
+                                     reason="Explicit candidate-scoped exception applies",
+                                     exception_id=exception["id"])
+                    else:
+                        check = dict(check, status=acceptance["check"]["status"],
+                                     original_status=check["status"], exception_id=exception["id"],
+                                     acceptance=acceptance,
+                                     reason="User accepted this candidate-specific comparison; " +
+                                            ("the recorded value remains unconfirmed" if
+                                             acceptance["check"]["status"] == "unresolved" else
+                                             "the recorded observation meets the accepted bound"))
                     effective.append(exception["id"])
+            check["mandatory"] = requirement["mandatory"]
+            if "provenance" in requirement:
+                check["provenance"] = deepcopy(requirement["provenance"])
             checks[requirement_id] = check
         failed = sorted(key for key, check in checks.items()
                         if check["status"] == "failed" and requirements[key]["mandatory"])
