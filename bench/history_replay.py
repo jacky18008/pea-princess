@@ -42,7 +42,7 @@ import link_probe as LP  # noqa: E402
 
 DEFAULT_CORPUS = os.path.join(HERE, "..", ".pea-playground", "claude-rental-history-20260910")
 JUDGE_MODEL = "claude-opus-5"
-HEAD = re.compile(r"^### (user|assistant) · source line (\d+) · `([0-9a-f-]+)`\s*$")
+HEAD = re.compile(r"^### (user|assistant) · source line (\d+) · `?([0-9a-f-]+)`?\s*$")  # the corpus headings carry the id with or without backticks
 
 
 # ------------------------------------------------------------------ corpus --
