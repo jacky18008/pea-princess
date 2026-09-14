@@ -16,7 +16,7 @@
      "required": true
     },
     {
-     "cmd": "scripts/epc.py search --postcode \"XE1 9AA\"",
+     "cmd": "scripts/epc.py search --postcode \"XE1 9AA\" --brief --match \"<building>\"",
      "why": "the flats the register holds at this postcode, to pick the right one",
      "required": true
     },
@@ -77,7 +77,7 @@
    "required": true,
    "scripts": [
     {
-     "cmd": "scripts/planning.py near --lat <lat> --lng <lng> --radius 250 --limit 20",
+     "cmd": "scripts/planning.py near --lat <lat> --lng <lng> --radius 250 --brief",
      "why": "applications within 250 m; a discharged condition means work starts",
      "required": true
     },
