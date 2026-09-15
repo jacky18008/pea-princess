@@ -25,7 +25,7 @@ class StateApiDocumentationTests(unittest.TestCase):
         for relative in ('scripts/session_state.py', 'references/state-api.md', 'references/state-sources-api.md',
                          'references/session-harness.md', 'references/eligibility-api.md',
                          'references/boundary-api.md', 'references/boundary-turn.md',
-                         'references/comparison-fidelity.md'):
+                         'references/comparison-fidelity.md', 'references/comparison-research.md'):
             target = self.skill / relative
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(SKILL / relative, target)
