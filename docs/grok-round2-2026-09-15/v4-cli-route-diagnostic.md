@@ -33,3 +33,5 @@ TfL 初次用 `London Bridge Station` 收歧義，CLI 隨後以回應中的**鐵
 **P3：Grok Build CLI 1.0.30 的 session list/export 成功，resume/continue/fork 實測均回 `Session does not exist`。** 對長對話把要求原句、變更、比較、來源 snapshot、TODO 存在產品的 durable state，export 只當審閱附件；在 CLI session loader 修好前不把 host session 當唯一 checkpoint。
 
 下一個可採用的實驗是**兩階段 deterministic research＋小 evidence answer**，同 frozen actor、同 Grok 4.6、同 effort/depth、至少兩次；每輪都要看 final、source/authority lint、pre-send enforcement、follow-up 中 A「可考慮」與 B「尚未決定」以及 current TODO receipt。若 handoff 能在明顯少於 643,882 tokens 下完成而不損品質，才再比較它與其他模型；單純在 SKILL.md 多加論述，本場已無實驗證據支持。
+
+本輪寫文件時 main 已由 Claude 等工作前進到 `2cad479`；它比本實驗的共同祖先多四個 commits，`SKILL.md`、掃描／checker 等仍有位元組差異。**測過的安裝不會因 main 新 commit 自動更新**。保留這個 frozen 實驗分支；下一次先以 `grok inspect`、ZIP/內層 SHA 對照明確選出的版本，再開以最新 main 為底的整合分支處理衝突、重跑同 fixture，才有可比較的同步聲明。不要把本分支的 full-suite pass 或官方資料輸出稱為 `2cad479` 版也已通過模型驗收。
