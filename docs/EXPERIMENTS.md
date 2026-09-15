@@ -1066,6 +1066,23 @@ a preference written as an exclusion — and every one of those was revised befo
 | variant-e | 1.33 | 2.67 | 0.73 | 1/15 | 1.7 | $3.30 |
 | variant-e2 | 1.40 | 2.60 | 0.67 | 3/15 | 1.0 | $5.42 |
 
+The gates judge (re-run after the fact, `--rejudge`) sees the same picture with one difference worth naming:
+
+| arm (gates judge, 15 cases) | G1/G2/G3 pass | first sentence | T mean 0–3 | satisfy 0–2 | beats original | numbers w/o cue | questions / reply |
+|---|---|---|---|---|---|---|---|
+| main-3 | 3/14/10 | 8 | 1.43 | 0.80 | 1/15 | 5.3 | 1.2 |
+| main-4 | 2/12/10 | 12 | 1.62 | 0.80 | 3/15 | 3.3 | 1.1 |
+| main-hook | 4/13/10 | 11 | 1.53 | 0.87 | 0/15 | 5.4 | 0.4 |
+| main-hook2 | 2/12/11 | 9 | 1.65 | 1.20 | 3/15 | 3.7 | 0.5 |
+| variant-e | 4/12/11 | 8 | 1.50 | 0.73 | 0/15 | 5.1 | 1.3 |
+| variant-e2 | 6/14/8 | 6 | 1.41 | 0.67 | 4/15 | 2.5 | 1.9 |
+
+Questions per reply halve under main's hook (1.1 → 0.4–0.5: the go-ahead rule blocks a question after "Go"),
+and `main-hook2` has the best satisfy of any Sonnet arm on this judge (1.20 vs 0.80) — but `main-hook` did
+not (0.87), so one run of two; the inline judge put both at or below the baseline. The programmatic
+"numbers without a cue" count does not fall (3.7 vs 3.3): the model satisfies the checker by adding a cue word,
+which the stricter count does not accept.
+
 | arm (10 rated cases) | material work gaps / reply | all material gaps / reply |
 |---|---|---|
 | main-4 | 2.3 | 4.0 |
