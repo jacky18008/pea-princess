@@ -28,6 +28,8 @@
 
 [xAI 官方 SuperGrok FAQ](https://docs.x.ai/grok/faq) 說付費 Chat、Build 等產品會共享按週重置的使用池，長 coding task 耗計算較高，實際用量以 `Settings → Usage` 的**before/after 百分比與 Build 分項**為準；[定價頁](https://x.ai/pricing) 列 SuperGrok US$30/月。此場從 Grok Build `/usage` 讀池值回「Couldn't load usage… Internal error」，Codex IAB 的 grok.com 未登入；**沒有有效的前後百分比，也沒有官方的 token→池百分比換算**。此場命令從 task-only OAuth 授權，沒有觀察到 XAI_API_KEY；CLI 的 `$0.30335888` 是 telemetry 估價，**不是帳單出現的新費用或「只占 $30 的 1%」**。若用戶選 API／額外付費池，計費另需查實際 account/usage receipt。
 
+本使用者先前說使用 X Premium+ 附帶的 Super Grok，這和直接購買 US$30/月 SuperGrok 不是同一張收據；[X 官方現行 Premium+ 價格表](https://help.x.com/en/premium-plus-price-update) 列英國 £31/月、美國 US$40/月。此輪只驗到 Grok CLI 能用 OAuth 跑模型，**未讀到該 X 帳戶已連結的 Grok 週池／帳單**；不能拿對照價格推定實際權益或消耗比例。
+
 [OpenAI 官方 Codex 定價說明](https://learn.chatgpt.com/docs/pricing) 列 Plus US$20/月含 Codex；本地 Terra 約 25–200、Sol 10–100 **每五小時估計訊息數**，非固定額度，任務大小、模型、上下文、推理、工具與 cache 會變更使用。Grok 4.6 的 993,000 processed **不能換成 Plus 可做幾輪**，也不能把 17 個內部迴圈視作人發了 17 則訊息。等兩平台都有相同情境、官方用量前後讀數、品質盲評，才能對 $20 vs $30 的每週實際容量做數值結論。現階段可負責任的結論只有：本場 Grok 已送出初答，卻消耗大且有未修品質錯誤，**不宜讓低價個人方案每次都走這條深掃加長答路線**；不主張換方案或加購。
 
 後續對此 **同 frozen actor／同官方結果快照** 用修正後 pinned ZIP 做 2–3 次 fresh arm，記同帳戶週重置日期與前後 pool%，不夾其他 Build/Chat 使用；每條都驗 model calls、tool status、短答品質、3.7–10.4 dB、同口徑 TfL／追問、明確「存好」的 journal/comparison/TODO `save_gate`、重開接續。單次完成不能估失敗率或品質浮動。原始 1.68 MB NDJSON、actor、active SKILL、state scan/events、export、checker 和 SHA 收據在 [owner-only evidence manifest](/Users/chenhsienhao/Documents/UK-Study/pea-princess-evidence-20260915/grok-build-cli-elastic/sha256-manifest.json)，[run-summary.json](/Users/chenhsienhao/Documents/UK-Study/pea-princess-evidence-20260915/grok-build-cli-elastic/run-summary.json) 是可複查數字；不包含 OAuth／API 憑證。
