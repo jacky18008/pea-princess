@@ -1407,6 +1407,7 @@ lists the chain but never runs it; this runs it and returns states a model canno
 | `checks[].state` | `pass`, `flag`, `unknown`, `not_applicable` | unknown never becomes pass; absence-only registers (rogue landlords, redress schemes, Heat Trust) can say flag or unknown, never pass |
 | `checks[].scope` | `unit`, `building`, `street`, `area`, `journey`, `management` | what the evidence is about |
 | `next_steps[]` | code-generated | identity first, then the unknowns that block, then the flags; each says what would settle it |
+| `landmines[]` | report-shaped entries | every flag that maps onto one of the skill's sixteen codes (L1 area illusion, L4 road or rail, L5 works, L6 heat network, L7 enforcement entry, L10 ground or lower-ground floor, L11 top floor, L12 money gate) as `{code, label, detail, reversible, evidence_class, checks}`, one entry per problem — copy them into `candidates[].landmines` |
 | `verdict` | always `null` | the report contract turns the states into words; the script never gives an overall verdict |
 
 Seventeen checks: identity, floor area (advertised vs certificate, 5% tolerance), energy rating (F/G flagged),

@@ -6,6 +6,15 @@ Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen — https://github.com
 Fold what the user saw, heard and smelled at the property into the report without letting a single visit overturn evidence it cannot reach.
 A visit is a sample of one moment. It is extremely good at some things and worthless at others; this file separates the two.
 
+## Say these before a visit (the cheap-model checklist)
+When someone is about to view, or asks what to check on the day, the reply carries these, in the person's words:
+1. Smell first: the corridor, the bin store, the flat itself (damp, drains, smoke).
+2. Open the bedroom window, then shut it: the noise with it open is the summer noise; the meter cupboard or heat interface unit is where the bills come from.
+3. Stay courteous with whoever shows you round: ask before running taps or opening cupboards; they are the person who gets you the keys.
+4. Never sign or pay on the day: take the written evidence home and decide the next day.
+5. One visit is one sample: go back at another time of day if the flat is close.
+6. Before the visit, get the heat tariff and the deposit position in writing; the visit checks the building, the paper checks the money.
+
 ## The three-column adoption table
 Every observation is recorded as one row, and all three columns must be filled in.
 
@@ -61,6 +70,17 @@ Read the street from the pavement before you stand on it — see `18-street-view
 - Get in writing, before leaving home: the tariff or bills position, the deposit scheme and amount, the guarantor position, the appliance list, and the availability date.
 - At most three flats in one area in one day; more than that and the observations blur together.
 - Book any celebratory meal for after the viewings, not between them.
+
+## The first 30 minutes after arriving (a short let or the real tenancy)
+Before unpacking, in this order, and say so in the reply when someone has just arrived:
+1. Photograph or film every room, existing damage included, with a timestamp and something for scale; then copy the evidence off the phone (cloud, email to yourself), today.
+2. Smell the corridor, the bin store and the unit: musty or drain smells are the damp and the drainage the photos do not show.
+3. Run the hot tap and the shower for a minute: hot water and pressure.
+4. Check the internet is a fixed line (a router in the flat, not a dongle) and run one speed test.
+5. Find the meter cupboard, the stopcock and the washing machine; note the meter readings.
+6. That night, listen at the bedroom window with it open, then closed.
+7. Ask in writing, the same day, the latest date the stay can be extended to.
+Two strong signs of damp (smell plus visible mould, condensation inside the glass, a wet skirting) mean do not sleep in that room and message the host inside the platform before anything else.
 
 ## What goes into the report
 Fields are from `references/report-schema.json`. A visit writes into an existing report; it does not create a candidate.

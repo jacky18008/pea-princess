@@ -1153,3 +1153,29 @@ naming it in one line and carrying on (onboarding's one-doubt rule), and referen
 the reply (the 4× guarantor test, caps from her own rent, the PDF-password rejection, the two-question first
 message) — the latter now sits as a six-line checklist at the top of `references/axes/16-referencing-and-proof-of-funds.md`.
 
+j2, j4 and j6 re-cut the same way (second Opus triage: 51 stale, 42 real, 1 unclear); grader tolerances for
+typographic hyphens, plurals and "first" as a number word; drafted letters masked. Regraded 09-14 copies now:
+**Claude 0.817, Codex 0.860 (j5 0.95, j6 0.95 over the line), fabrications 1 / 0** — against 0.742 / 0.739
+this morning on the same replies, so about two-thirds of the "gap to the pass line" was the bench, not the
+skill. Real-miss themes fed back into the skill text: the one-doubt rule in onboarding's sorting block; a
+"first 30 minutes after arriving" list in axis 14; the standard answer about dates in axis 15; the referencing
+checklist in axis 16. Still to re-cut: j3, j7, j8 (0.76–0.83).
+
+j3, j7 and j8 re-cut (third triage: 35 stale / 27 real / 0 unclear) with an apostrophe normaliser in the
+grader and three more "say these" blocks in the skill (axis 15 for licences, axis 14 before a visit, axis 16
+never quoting a guarantor product's price without its page). **All ten 09-14 journeys regraded under the
+2026-09 contract: Claude 0.844 (1/10 over the line), Codex 0.897 (4/10), fabrications 0 / 0** — from 0.742 /
+0.739 and 3 / 4 "fabrications" this morning, on the same replies. The bench now measures the contract; the
+next run of `bench/journeys.py --all` on both hosts (skill at 55baade+) is the first clean baseline.
+
+**Arm F, repeat 1 (2026-09-15 21:38), paired against the baselines on the same five flats:** Sonnet 5 standard
+facts +0.08, stable +0.04, fabrications 0.00, unknown-honesty +0.15, tokens ×0.92, wall −64 s (inside the
+baseline's own repeat noise, max |Δ| 0.20); **Codex terra standard facts −0.32, stable −0.43**, unknown-honesty
++0.43, tokens ×0.35, wall −148 s. The "facts" metric is landmine-code recall: terra ran `vet_case.py`
+(with `--no-save`, identity `exact`), took its states at face value, filed most axes as unknown and raised
+four codes where the baseline raised seven — the failure mode named when the arm was launched (quoting the
+command's states instead of the facts). Fix on main (this commit): every flag that maps onto one of the
+sixteen codes is emitted as a report-shaped landmine entry (`landmines[]`), ground and lower-ground floors
+become an L10 caution, and `how_to_use` says to copy the entries into `candidates[].landmines`. Repeat 2 of
+arm F runs on the old script for the record; arm F2 (branch `exp/vet-case-route-2`) re-runs both cells after it.
+

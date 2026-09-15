@@ -64,6 +64,12 @@ What waiting actually costs is three non-money things: moving twice; the risk th
 ### The break-even question, in one line
 Convert every candidate to **all-in per week for your exact dates**, then ask what the cheaper option is missing: a front desk, a review history, a refund right, or a protected deposit. Decide what that is worth to you *before* you compare, and write the number down.
 
+## Say these in the first reply about a licence (the cheap-model checklist)
+1. A licence is not a tenancy: the deposit does not have to go into a government-approved protection scheme, so ask who holds it and how it comes back; the route if it goes wrong is the platform's complaint process, the operator's redress scheme where there is one, or the small claims court.
+2. The caps — deposit five weeks' rent (six at £50,000 a year or more), holding deposit one week, rent in advance one month — attach to an assured tenancy under the Renters' Rights Act, in force in England from 2026-05-01. If the paper says licence, the label decides whether they apply: ask which it is, in writing, before anything else.
+3. Do not sign tomorrow: get the answers in writing first, and cap the exposure — never pay more than a week's rent before the keys.
+4. A clause that lets the operator move you to another room at 24 hours' notice is a licence tell, and worth quoting back to them.
+
 ## Licence vs tenancy — the single most expensive distinction
 - A short serviced stay is normally a **licence to occupy**, not an assured shorthold tenancy.
 - A licence deposit is **not required to go into a government-approved deposit scheme**. If it goes wrong your route is the operator's redress scheme or the small claims track, not the scheme's adjudication.
@@ -137,4 +143,12 @@ If you arrive and the place is not habitable (damp, mould, water damage, pests, 
 
 ## Just arrived: ask before you book a private short let
 Ask the user, once: "For the first one or two weeks, would a hotel or an operator-run serviced stay work for you, with a private short let only after you have viewed it?" Present it as a trade, not a rule: the hotel or operator route buys protected money, an instant exit and a responsible party, at a known premium per night and usually without a kitchen (price the eating-out cost with `scripts/calc.py`); the private short let is cheaper and has a kitchen, but a licence is not a tenancy and problems surface only after check-in (see the damp check in `14-site-visit.md`). Record the answer in `profile.yaml` under `bridging.first_weeks` (`hotel_or_operator` | `private_short_let` | `undecided`).
+
+## What to tell the agent about your dates (the standard answer)
+When the person asks what to say about their dates, the answer has these parts, every time:
+1. Compare whole years, not monthly averages: the bridge plus the tenancy over twelve months against the alternative over the same twelve months; a cheaper flat that starts later can be cheaper overall once the bridge is priced.
+2. Never amortise the bridge into the tenancy's monthly figure; it is a one-off cost of waiting, shown on its own line.
+3. Offer a flexible start date and a willingness to extend; never offer to shorten the stay (a shorter stay is the one thing that costs more per night).
+4. Put the seam between two stays on a weekend, and never more than two blocks: one move is the aim.
+5. Keep the agent on side: say you can decide quickly and are flexible on the exact start, which is what makes a tenant easy to place.
 

@@ -96,6 +96,11 @@ class TestExactIdentity(NoNetwork):
         self.assertTrue(all(r["state"] == "ok" or (n == "rogue" and r["state"] == "not_found") for n, r in out["registers"].items()), out["registers"])
         self.assertTrue(any("deposit" in s.lower() for s in out["next_steps"]))
         self.assertEqual(out["summary"], {"pass": 11, "flag": 4, "unknown": 1, "not_applicable": 1})
+        codes = [e["code"] for e in out["landmines"]]
+        self.assertEqual(["L12", "L4"], sorted(codes))          # deposit over the cap; noise and the main road share one L4 entry
+        l4 = [e for e in out["landmines"] if e["code"] == "L4"][0]
+        self.assertEqual(["C10", "C11"], l4["checks"]); self.assertFalse(l4["reversible"])
+        self.assertTrue(all(k in e for e in out["landmines"] for k in ("code", "label", "detail", "reversible", "evidence_class")))
 
 
 class TestAmbiguousAndUnresolved(NoNetwork):
@@ -144,6 +149,25 @@ class TestAmbiguousAndUnresolved(NoNetwork):
         for cid in ("C1", "C2", "C3", "C4", "C5", "C6", "C13", "C15"):   # every absence or unreachable case stays unknown
             self.assertEqual("unknown", c[cid]["state"], cid)
         self.assertEqual("pass", c["C14"]["state"])   # a positive Companies House match is a real pass
+
+
+class TestFloorsAndLandmines(NoNetwork):
+    def test_a_lower_ground_flat_is_a_caution_L10_and_a_top_floor_L11(self):
+        fx = fixture(); fx["epc_cert"]["floor_position"] = "basement"
+        out = V.vet("XE4 2QP", flat="4", building="Corbel House", rent_pcm=1950, fixture=fx)
+        self.assertEqual("flag", by_id(out)["C5"]["state"])
+        self.assertIn("L10", [e["code"] for e in out["landmines"]])
+        fx = fixture(); fx["epc_cert"]["floor_position"] = "top"
+        out = V.vet("XE4 2QP", flat="4", building="Corbel House", rent_pcm=1950, fixture=fx)
+        self.assertIn("L11", [e["code"] for e in out["landmines"]])
+
+    def test_a_heat_network_is_L6_but_electric_heating_is_not_a_landmine(self):
+        fx = fixture(); fx["epc_cert"]["heating_class"] = "electric"
+        out = V.vet("XE4 2QP", flat="4", building="Corbel House", rent_pcm=1950, fixture=fx)
+        self.assertEqual("flag", by_id(out)["C4"]["state"]); self.assertNotIn("L6", [e["code"] for e in out["landmines"]])
+        fx = fixture(); fx["epc_cert"]["heating_class"] = "community_heat_network"; fx["heat_trust"] = {"ok": True, "match_count": 0, "not_found": {"query": "x"}}
+        out = V.vet("XE4 2QP", flat="4", building="Corbel House", rent_pcm=1950, fixture=fx)
+        self.assertIn("L6", [e["code"] for e in out["landmines"]]); self.assertEqual("unknown", by_id(out)["C17"]["state"])
 
 
 class TestPieces(unittest.TestCase):

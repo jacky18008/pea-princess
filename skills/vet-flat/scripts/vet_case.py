@@ -77,7 +77,10 @@ HOW_TO_USE = ("Each check carries a state. pass: checked, nothing to act on. fla
               "input for it. There is no overall verdict: unknown never becomes pass, and a register that lists only "
               "bad news (rogue landlords, redress schemes) can only say flag or unknown. scope says what the evidence "
               "is about: this unit, the whole building, the street, the area around the point, the journey, or the "
-              "people managing it. Quote value and source together; keep the state words out of the reply.")
+              "people managing it. Quote value and source together; keep the state words out of the reply. Every flag that "
+              "maps onto one of the skill's landmine codes is also listed under landmines[] in the report's own shape "
+              "(code, label, detail, reversible, evidence_class): copy those into candidates[].landmines, then add what "
+              "this command cannot see (reviews, light, the paperwork).")
 NOISE_FLAG_DB = 65.0          # Defra road Lden at or above this: a busy-road level at the facade
 NOISE_QUIET_DB = 55.0         # below this: quiet by the model (WHO night guidance sits lower still)
 MAIN_ROAD_M = 60              # a trunk or primary road within this distance of the point
@@ -218,6 +221,44 @@ def check(cid, name, scope, state, value=None, source=None, why="", next_step=No
             "value": value, "source": source, "why": why, "next_step": next_step}
 
 
+LANDMINE = {  # check id -> (code, plain label, reversible); the codes are the skill's own (references/glossary.yaml)
+    "C2": ("L1", "Area illusion", False), "C4": ("L6", "Heat network tariff", False), "C7": ("L12", "Landlord type and money gate", True),
+    "C9": ("L5", "Building works during your tenancy", False), "C10": ("L4", "Facing a main road or railway", False),
+    "C11": ("L4", "Facing a main road or railway", False), "C14": ("L12", "Landlord type and money gate", False),
+    "C15": ("L7", "Bad management you cannot replace", False),
+}
+
+
+def landmine_entries(checks):
+    """Report-shaped landmine entries for the flags that carry a code; one entry per problem, so C10 and C11 (noise and
+    the road that makes it) share the L4 entry, and a top floor is L11 while a ground or lower-ground floor is L10."""
+    out, by_code = [], {}
+    for c in checks:
+        if c["state"] != "flag":
+            continue
+        code = None
+        if c["id"] == "C5":
+            v = str(c.get("value") or "").lower()
+            code = ("L11", "Too hot, or smells from shared ventilation", True) if ("top" in v or "penthouse" in v) else ("L10", "Ground or lower-ground floor", True)
+        elif c["id"] == "C4" and c.get("value") != "community_heat_network":
+            continue
+        else:
+            code = LANDMINE.get(c["id"])
+        if not code:
+            continue
+        label = "%s: %s" % (code[1], (c.get("why") or "")[:100])
+        detail = " ".join(x for x in ((c.get("why") or ""), (c.get("next_step") or "")) if x)[:600]
+        if code[0] in by_code:
+            e = by_code[code[0]]
+            e["detail"] = (e["detail"] + " " + detail)[:600]
+            e["checks"].append(c["id"])
+            continue
+        e = {"code": code[0], "label": label[:120], "detail": detail, "reversible": code[2], "evidence_class": c.get("evidence_class") or "U", "checks": [c["id"]]}
+        by_code[code[0]] = e
+        out.append(e)
+    return out
+
+
 # ------------------------------------------------------------------------------ chain --
 def vet(postcode, flat=None, building=None, street=None, rent_pcm=None, area_m2=None, floor=None, deposit_gbp=None,
         agent=None, landlord=None, destination=None, commute_max=None, depth="standard", deadline_s=240,
@@ -339,9 +380,13 @@ def vet(postcode, flat=None, building=None, street=None, rent_pcm=None, area_m2=
     pos = ((cert or {}).get("floor_position") if cert_ok else None) or (str(floor).strip().lower() if floor not in (None, "") else None)
     if pos:
         top = pos in ("top", "penthouse") or "top" in pos
-        checks.append(check("C5", "floor position", "unit", "flag" if top else "pass", value=pos, source="energy certificate" if cert_ok and (cert or {}).get("floor_position") else "advert",
-                            why="top floor: summer heat under the roof and a lift question" if top else "not the top floor",
-                            next_step="Ask which way the bedroom faces and whether a portable air conditioner is allowed; view on a warm afternoon." if top else None))
+        low = pos in ("ground", "basement", "lower ground", "lower-ground", "0", "0.0", "-1", "-1.0") or "ground" in pos or "basement" in pos
+        state = "flag" if (top or low) else "pass"
+        why = ("top floor: summer heat under the roof and a lift question" if top else
+               "ground or lower-ground floor: extra checks for damp, mould, security and light (a caution, not a veto)" if low else "a middle floor")
+        nxt = ("Ask which way the bedroom faces and whether a portable air conditioner is allowed; view on a warm afternoon." if top else
+               "On the visit: smell for damp, look at the skirting and window frames, check the window locks and how much sky the room sees." if low else None)
+        checks.append(check("C5", "floor position", "unit", state, value=pos, source="energy certificate" if cert_ok and (cert or {}).get("floor_position") else "advert", why=why, next_step=nxt))
     else:
         checks.append(check("C5", "floor position", "unit", "unknown", why="neither the certificate nor the advert says which floor", next_step="Ask which floor and whether there is a lift."))
 
@@ -497,7 +542,10 @@ def vet(postcode, flat=None, building=None, street=None, rent_pcm=None, area_m2=
     else:
         checks.append(check("C17", "heat network operator in Heat Trust", "building", "not_applicable", why="not on a heat network, or heating unknown"))
 
-    # 4. next steps, code-generated: identity first, then blocking unknowns, then flags
+    # 4. landmines: every flag that maps onto one of the skill's codes, in the report's own shape
+    landmines = landmine_entries(checks)
+
+    # 5. next steps, code-generated: identity first, then blocking unknowns, then flags
     order = {"C1": 0, "unknown": 1, "flag": 2}
     steps = []
     for c in sorted(checks, key=lambda c: (0 if c["id"] == "C1" else order.get(c["state"], 3), c["id"])):
@@ -512,7 +560,7 @@ def vet(postcode, flat=None, building=None, street=None, rent_pcm=None, area_m2=
             not_found.append({"what": c["name"], "queries_used": [json.dumps(registers.get(k, {}).get("query") or {}, ensure_ascii=False) for k in registers][:1] or ["-"], "where_looked": c.get("source") or "-", "next_step": c["next_step"][:240]})
     out = {"how_to_use": HOW_TO_USE, "schema": SCHEMA, "ok": True, "retrieved_at": _now(), "inputs": inputs,
            "where": {"lat": lat, "lng": lng, "admin_district": (where or {}).get("admin_district") if isinstance(where, dict) else None, "state": geo_state},
-           "identity": identity, "checks": checks, "summary": counts, "next_steps": steps[:8], "registers": registers,
+           "identity": identity, "checks": checks, "summary": counts, "landmines": landmines, "next_steps": steps[:8], "registers": registers,
            "not_found": not_found, "sources": sources, "verdict": None,
            "verdict_note": "no overall verdict by design; the report contract turns the states into words",
            "area_scan_status": (area or {}).get("scan_status") if isinstance(area, dict) else None,

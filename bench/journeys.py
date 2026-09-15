@@ -216,7 +216,7 @@ QUOTED = [
 ]
 LETTER = QUOTED[-2:]
 
-WORD_NUMBERS = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6,
+WORD_NUMBERS = {"first": 1, "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6,
                 "seven": 7, "eight": 8, "nine": 9, "ten": 10, "eleven": 11, "twelve": 12,
                 "一": 1, "兩": 2, "二": 2, "三": 3, "四": 4,
                 "五": 5, "六": 6, "十二": 12}
@@ -374,11 +374,15 @@ def is_ascii(term):
         return False
 
 
+HYPHENS = re.compile("[\u2010\u2011\u2012\u2013\u2212]")
+
+
 def contains(text, term):
-    """Word-boundary match for ASCII terms, plain substring for CJK."""
+    """Word-boundary match for ASCII terms (a plural or a typographic hyphen still counts), plain substring for CJK."""
+    body = HYPHENS.sub("-", text or "").replace("\u2019", "'").replace("\u2018", "'")
     if is_ascii(term):
-        return re.search(r"\b" + re.escape(term) + r"\b", text or "", re.I) is not None
-    return term in (text or "")
+        return re.search(r"\b" + re.escape(term) + r"(?:e?s)?\b", body, re.I) is not None
+    return term in body or term in (text or "")
 
 
 # ------------------------------------------------------------- item checking --
