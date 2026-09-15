@@ -1179,3 +1179,24 @@ sixteen codes is emitted as a report-shaped landmine entry (`landmines[]`), grou
 become an L10 caution, and `how_to_use` says to copy the entries into `candidates[].landmines`. Repeat 2 of
 arm F runs on the old script for the record; arm F2 (branch `exp/vet-case-route-2`) re-runs both cells after it.
 
+**Arm F, both repeats (23:52):** Sonnet 5 standard Δ facts +0.04, Δ stable +0.02, Δ fabrications +0.10,
+unknown-honesty +0.08, tokens ×1.17 (repeat 2 was heavier than repeat 1's ×0.92), wall −47 s — nothing outside
+the baseline's own repeat noise. Codex terra standard Δ facts −0.22, Δ stable −0.29, unknown-honesty +0.31,
+tokens ×0.34, wall −128 s: cheaper and faster, and worse on the landmine codes, for the reason above. Verdict
+for arm F as run: not adopted. Arm F2 (the landmine-aware `vet_case.py`, branch `exp/vet-case-route-2`) is
+the test of the fix; if Codex's code recall comes back to the baseline at a third of the tokens, the routing
+goes in.
+
+## Journeys, first clean baseline on the current skill (2026-09-15 evening, Claude Code)
+
+`bench/journeys.py --all`, Claude Code Sonnet 5 resume mode, skill at 55baade (all of the day's checklist
+text), thirteen journeys (j1–j12 with j9 in two languages), graded with the round-2 grader (the simplified-
+script check and the j10 regex fixes, branch `fix/journeys-round2`): **mean 0.877, 6/13 over the line (j3
+0.92, j4 0.94, j5 0.93, j8 0.91, j10 0.91, j12 0.93), 0 fabrications.** The day before, the same bench read
+0.742 with 3 "fabrications" on the old skill and the old grader. The remaining misses are real and specific:
+j9 (settings by talking) 0.78–0.79 — Sonnet still waits for a yes before touching the profile and invents a
+field for the EPC minimum; j1 (from zero) 0.81 — the money-gate question and "never sign on the viewing day"
+missing; j6 — a first run answered a traditional-Chinese person in simplified characters (script check added;
+SKILL.md now says "language and script"). Codex terra's run of the same set is in progress (slow: four
+journeys in two hours with sub-agents on).
+
