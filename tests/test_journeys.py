@@ -597,10 +597,12 @@ class TestGoodRepliesStillPass(unittest.TestCase):
                                   % (journey["id"], index, len(facts)))
 
     def test_a_fabrication_in_a_recorded_reply_is_caught(self):
+        # a reply that consistently states a wrong figure is a fabrication; one that states the right
+        # figure and another beside it is a contradiction, which the fact checks do not count (2026-09-15)
         journey, number = self.resolved("j3-vet-this-listing-zh|1")
         turn = journey["turns"][number - 1]
-        bad = self.replies["j3-vet-this-listing-zh|1"].replace(
-            "48 平方公尺", "62 平方公尺")
+        # the fact accepts the certificate's 48 and the advert's 55; a fabricated reply states neither
+        bad = re.sub(r"(?<![\d.,])(?:48|55)(?:\.0+)?(?![\d])", "62", self.replies["j3-vet-this-listing-zh|1"])
         card = runner.score_turn(turn, bad, journey)
         self.assertGreaterEqual(card["fabrications"], 1)
         self.assertLess(card["score"], 1.0)
@@ -722,8 +724,7 @@ class TestFileChecksAndRegrade(unittest.TestCase):
                  " axis_depth:\n+  crime: deep\n+  management: deep\n\n budget:\n"
                  "   rent_pcm_target: 1900\n-  all_in_pcm_ceiling: 2200\n+  all_in_pcm_ceiling: 2300\n```\n\n"
                  "也就是治安、管理使用 deep，其餘軸跟隨 lite；£2,300 視為含帳單與 council tax 的 all-in 上限，"
-                 "租金目標仍是 £1,900。\n\n確認後回覆「確認」，我才會寫入並執行 "
-                 "`python3 scripts/profile_check.py profile.yaml` 驗證。\n")
+                 "租金目標仍是 £1,900。已改好並寫入；其他設定不動。\n")
         card = runner.score_turn(self.zh["turns"][0], reply, self.zh)
         by = dict((r["check"], r["status"]) for r in card["checks"])
         self.assertEqual("pass", by["written as a diff"])
@@ -785,18 +786,23 @@ class TestFileChecksAndRegrade(unittest.TestCase):
                  "with an exemption cannot pass. Nothing else changes. Reply `yes` to save.\n")
         card = runner.score_turn(self.zh["turns"][2], reply, self.zh)
         by = dict((r["check"], r["status"]) for r in card["checks"])
-        self.assertEqual("pass", by["asks before applying anything"])
-        self.assertEqual("pass", by["ends_with"])
+        self.assertEqual("pass", by["asks before applying anything"])   # the one turn where a question is right
+        self.assertNotIn("ends_with", by)                                # the closing-line check was retired 2026-09-15
 
-    def test_nothing_reaches_the_file_before_the_yes(self):
+    def test_a_clear_instruction_reaches_the_file_in_the_same_turn(self):
+        # 2026-09 contract: an explicit change is applied at once, so turn 1 already expects the new lines
         spec = self.zh["turns"][0]["expect"]["workdir_expect"]
         folder = tempfile.mkdtemp()
         try:
             runner.materialise_attachments(self.zh["turns"][0], folder, "codex")
-            self.assertTrue(all(r["status"] == "pass" for r in runner.check_workdir(folder, spec, "codex")))
-            with io.open(os.path.join(folder, "profile.yaml"), "a", encoding="utf-8") as fh:
-                fh.write("axis_depth:\n  crime: deep\n")
             self.assertTrue(any(r["status"] == "fail" for r in runner.check_workdir(folder, spec, "codex")))
+            path = os.path.join(folder, "profile.yaml")
+            with io.open(path, encoding="utf-8") as fh:
+                body = fh.read().replace("all_in_pcm_ceiling: 2200", "all_in_pcm_ceiling: 2300")
+            with io.open(path, "w", encoding="utf-8") as fh:
+                fh.write(body + "axis_depth:\n  crime: deep\n  management: deep\n")
+            self.assertTrue(all(r["status"] == "pass" for r in runner.check_workdir(folder, spec, "codex")),
+                            [r for r in runner.check_workdir(folder, spec, "codex") if r["status"] != "pass"])
         finally:
             shutil.rmtree(folder, ignore_errors=True)
 
@@ -1177,3 +1183,34 @@ class TestFileChecksAndRegrade(unittest.TestCase):
             self.assertEqual([("profile.yaml contains crime: deep", "pass")], files)
         finally:
             shutil.rmtree(folder, ignore_errors=True)
+
+
+class TestFabricationIsForInventedNumbersOnly(unittest.TestCase):
+    """2026-09-15: six of seven 'fabrications' in the 09-14 runs were pasted figures under the wrong label."""
+
+    SPEC = {"value": 2365.38, "tolerance": 0.01, "required": True,
+            "patterns": [r"(?:deposit|押金)[^£\n]{0,40}£\s?([0-9][0-9,]*(?:\.[0-9]{1,2})?)"], "why": "five weeks of £2,050"}
+    JOURNEY = {"turns": [{"user": "My ceiling is £2,200 a month all in.",
+                          "attachments": [{"name": "listing", "text": "Rent £2,050 pcm. Deposit six weeks."}]}]}
+
+    def test_the_right_value_beside_other_figures_is_a_pass(self):
+        status, detail, fabs = runner.check_fact(
+            "Deposit cap: £2,365.38 (five weeks); the advert's six weeks would be £2,838.46. Deposit asked £2,838.",
+            "deposit_cap_gbp", self.SPEC, set())
+        self.assertEqual(("pass", 0), (status, fabs), detail)
+
+    def test_a_pasted_figure_under_the_wrong_label_is_not_a_fabrication(self):
+        turn = self.JOURNEY["turns"][0]
+        material = runner.material_numbers(self.JOURNEY, turn)
+        self.assertIn(2200.0, material)
+        self.assertIn(2050.0, material)
+        status, detail, fabs = runner.check_fact("The deposit needs resolving against your £2,200 ceiling.",
+                                                 "deposit_cap_gbp", self.SPEC, material)
+        self.assertEqual(("fail", 0), (status, fabs), detail)
+        self.assertIn("never states", detail)
+
+    def test_an_invented_figure_is_still_a_fabrication(self):
+        turn = self.JOURNEY["turns"][0]
+        status, detail, fabs = runner.check_fact("Deposit cap: £3,252.", "deposit_cap_gbp", self.SPEC,
+                                                 runner.material_numbers(self.JOURNEY, turn))
+        self.assertEqual(("fail", 1), (status, fabs), detail)

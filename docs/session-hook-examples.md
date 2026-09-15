@@ -34,6 +34,28 @@ Merge into `.claude/settings.local.json` for personal setup, or shared project s
 
 The adapter uses exit 2 for Claude errors. SessionStart cannot block regardless of exit code. Timeout behavior differs across events and SDKs. `CLAUDE_PROJECT_DIR` can remain the original checkout after entering a worktree; configure the intended project explicitly for separate worktree state. The adapter never trusts input `cwd` to choose another project's state.
 
+### Optional: the pre-send checker as a Stop hook (Claude Code only)
+
+`bench/stop_check_hook.py` runs the skill's `scripts/reply_check.py` on the reply Claude is about to send and, when it
+finds something (a number without a source, a preference written as an exclusion, internal jargon, a decision
+stated as the person's), blocks the stop with the findings so the model revises — at most twice a turn
+(`PEA_STOP_MAX`), then the reply goes through. Measured 2026-09-15 on 15 replayed turns (`docs/EXPERIMENTS.md`,
+"Stop-hook enforcement"): 13 of 15 replies were revised at least once, judge quality unchanged, missing work
+unchanged within noise, cost +18%. It is **not on by default**; turn it on when bare figures in replies bother
+you more than the extra revision turns.
+
+```json
+{
+  "hooks": {
+    "Stop": [{"hooks": [{"type": "command", "command": "python3", "args": ["${CLAUDE_PROJECT_DIR}/bench/stop_check_hook.py"], "timeout": 30}]}]
+  }
+}
+```
+
+`PEA_REPLY_CHECK` points the hook at another copy of `reply_check.py` (default: the installed skill's,
+`~/.claude/skills/pea-princess/scripts/reply_check.py`). Codex has a `stop` hook event too (`[features] hooks = true`);
+untested here. Other hosts: run the checker by hand on the draft.
+
 ## Verify before relying on automation
 
 Test capture → resolve → checkpoint → resume in a throwaway initialized project, including an integrity failure. Check that the host runs the hook and respects its response. Unit tests cannot prove a host configuration is active.

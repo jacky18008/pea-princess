@@ -97,3 +97,12 @@ wording, and keep "no interim message at all" out of the rubric.
   results; your report already says Grok does not inherit them. Keep it that way.
 - The Stop hook is Claude Code only. Codex has hook events (`[features] hooks = true`) that nobody has
   tested; Grok Bot has none we know of.
+
+## Addendum, 21:30 the same day: j12 result on the two hosts (item 3 answered)
+
+Both hosts pass the six turns on the current skill: Claude Code Sonnet 5 0.93, Codex terra 0.98, 0 fabrications.
+Neither strengthened 可考慮看房 nor advised against researching B; terra quoted the person's words back. So the
+defects seen on Grok are a host trait or a trait of the older package tested there. The `decision` rule in
+`reply_check.py` still applies to Grok's replies offline (item 2). The journeys fabrication counter has been
+fixed on main (8f0287b): if you graded anything with it before, regrade.
+

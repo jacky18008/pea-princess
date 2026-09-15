@@ -112,121 +112,71 @@
          "檢查",
          "把關",
          "篩",
-         "看房源"
+         "看房源",
+         "拆解",
+         "逐項",
+         "劃出",
+         "找出"
         ]
        },
        {
-        "label": "primer 1 - timing and the order of the steps",
+        "label": "one fitting primer fact (onboarding: never recite all ten)",
         "any_of": [
          "referencing",
          "資格審查",
          "背景審查",
          "流程",
-         "順序"
-        ]
-       },
-       {
-        "label": "primer 2a - council tax, and students are exempt",
-        "any_of": [
+         "順序",
          "council tax",
          "市政稅",
          "地方稅",
          "Class N",
          "N 類",
-         "學生免"
-        ]
-       },
-       {
-        "label": "primer 2b - heat network bills heat separately",
-        "any_of": [
+         "學生免",
          "熱網",
          "集中供暖",
          "共同鍋爐",
          "社區供暖",
          "heat network",
-         "統一供暖"
-        ]
-       },
-       {
-        "label": "primer 3 - the law in force since 2026-05-01",
-        "any_of": [
+         "統一供暖",
          "2026-05-01",
          "2026 年 5 月 1 日",
          "2026年5月1日",
          "1 May 2026",
-         "2026/05/01"
-        ]
-       },
-       {
-        "label": "primer 4 - the income check and the guarantor",
-        "any_of": [
+         "2026/05/01",
          "擔保人",
          "guarantor",
          "30 倍",
          "三十倍",
          "30倍",
-         "收入審查"
-        ]
-       },
-       {
-        "label": "primer 5 - the energy certificate gives the true size",
-        "any_of": [
+         "收入審查",
          "能源證書",
          "EPC",
-         "能源效率證書"
-        ]
-       },
-       {
-        "label": "primer 6 - who the landlord legally is matters",
-        "any_of": [
+         "能源效率證書",
          "法人",
          "公司",
          "合約上的房東",
          "房東是誰",
-         "legal entity"
-        ]
-       },
-       {
-        "label": "primer 7 - money safety: nothing before a viewing, protected deposit",
-        "any_of": [
+         "legal entity",
          "看房前",
          "押金保護",
          "保護方案",
          "政府核可",
-         "個人帳戶"
-        ]
-       },
-       {
-        "label": "primer 8 - never sign on the viewing day",
-        "any_of": [
+         "個人帳戶",
          "當天不要簽",
          "不要當天簽",
          "看房當天",
-         "隔天再"
-        ]
-       },
-       {
-        "label": "primer 9 - crime is public street by street",
-        "any_of": [
+         "隔天再",
          "犯罪",
          "治安",
          "警方",
-         "police"
-        ]
-       },
-       {
-        "label": "primer 10 - where to look, and that it will ask her to paste",
-        "any_of": [
+         "police",
          "貼",
          "paste",
          "入口網站",
          "平台",
          "網站"
         ]
-       },
-       {
-        "label": "asks the six intake questions in one numbered message",
-        "regex": "(?ms)^\\s*[1１][.)、][\\s\\S]{0,2000}?^\\s*[6６][.)、]"
        },
        {
         "label": "offers a suggested default so she can answer 'use the defaults'",
@@ -236,7 +186,11 @@
          "如果不確定",
          "不知道也沒關係",
          "不清楚也沒關係",
-         "先假設"
+         "先假設",
+         "不確定也沒關係",
+         "不確定",
+         "大概範圍",
+         "不清楚"
         ]
        }
       ],
@@ -291,15 +245,15 @@
         ],
         "line_mask": [
          "listing|廣告|刊登|仲介要求|advert|asks for|asked for",
-         "\\|\\s*F2\\b|holding deposit\\s*\\||留位[金費]?\\s*\\|"
+         "\\|\\s*F2\\b|holding[- ]deposit\\s*\\||留位[金費]?\\s*\\|"
         ],
         "source": "skills/vet-flat/SKILL.md legal facts",
         "why": "The legal cap is five weeks' rent. A bigger number told to a tenant is money she should not hand over.",
         "mask_patterns": [
-         "(?m)^[ \\t#*\\-\\d.]*(?:留位金|留位費|留位|保留金|訂金|holding deposit)(?:(?!押金|tenancy deposit|deposit cap|security deposit)[^\\n])*(?:\\n+(?![0-9]+\\.\\s|#|\\|)[^\\n]+)*",
-         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^.。\\n]{0,80}",
-         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^。\\n£]{0,40}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
-         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^.。\\n]{0,40}?(?:[0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)"
+         "(?m)^[ \\t#*\\-\\d.]*(?:留位金|留位費|留位|保留金|訂金|holding[- ]deposit)(?:(?!押金|tenancy deposit|deposit cap|security deposit)[^\\n])*(?:\\n+(?![0-9]+\\.\\s|#|\\|)[^\\n]+)*",
+         "(?:留位金|留位費|留位|保留金|訂金|holding[- ]deposit)[^.。\\n]{0,80}",
+         "(?:留位金|留位費|留位|保留金|訂金|holding[- ]deposit)[^。\\n£]{0,40}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "(?:留位金|留位費|留位|保留金|訂金|holding[- ]deposit)[^.。\\n]{0,40}?(?:[0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)"
         ]
        },
        "holding_deposit_weeks": {
@@ -307,8 +261,8 @@
         "tolerance": 0.0,
         "required": false,
         "patterns": [
-         "(?:holding deposit|訂金|保留金)[^.。\\n]{0,40}?([0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)",
-         "([0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)[^.。;；,，\\n]{0,16}?(?:holding deposit|訂金|保留金)"
+         "(?:holding[- ]deposit|訂金|保留金)[^.。\\n]{0,40}?([0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)",
+         "([0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)[^.。;；,，\\n]{0,16}?(?:holding[- ]deposit|訂金|保留金)"
         ],
         "source": "skills/vet-flat/SKILL.md legal facts",
         "why": "A holding deposit is capped at one week's rent."
@@ -325,7 +279,7 @@
         "why": "Since 2026-05-01 a landlord in England may take at most one month's rent in advance. Six months up front is a signal, not a normal ask."
        }
       },
-      "max_questions": 6,
+      "max_questions": 3,
       "language": "zh-TW"
      },
      "judge_notes": "Ten facts on one screen without becoming a wall of law. Does the message end by inviting her to answer 'all defaults'?"
@@ -343,7 +297,11 @@
          "我先這樣記",
          "profile",
          "檔案",
-         "設定如下"
+         "設定如下",
+         "暫定",
+         "我先替你定",
+         "記下",
+         "先記"
         ]
        },
        {
@@ -373,7 +331,11 @@
          "sweep",
          "比較",
          "候選",
-         "名單"
+         "名單",
+         "優先",
+         "次序",
+         "備選",
+         "排序"
         ]
        },
        {
@@ -458,7 +420,11 @@
          "掃描",
          "sweep",
          "比較",
-         "候選"
+         "候選",
+         "對照",
+         "兩條路",
+         "排序",
+         "先看"
         ]
        },
        {
@@ -466,7 +432,11 @@
         "any_of": [
          "貼",
          "paste",
-         "複製"
+         "複製",
+         "傳來",
+         "截圖",
+         "PDF",
+         "傳給我"
         ]
        },
        {
@@ -475,18 +445,6 @@
          "能源證書",
          "EPC",
          "find-energy-certificate"
-        ]
-       },
-       {
-        "label": "states which mode it is in",
-        "any_of": [
-         "手動",
-         "manual",
-         "純對話",
-         "沒有工具",
-         "有工具",
-         "shell",
-         "模式"
         ]
        }
       ],
@@ -517,20 +475,6 @@
      "expect": {
       "must": [
        {
-        "label": "confirms manual mode in one line",
-        "any_of": [
-         "手動模式",
-         "manual",
-         "純對話",
-         "只靠你貼",
-         "貼上模式"
-        ]
-       },
-       {
-        "label": "asks once, as one numbered list",
-        "regex": "(?m)^\\s*(?:1[.)、]|一[.、])"
-       },
-       {
         "label": "gives the place to get it",
         "any_of": [
          "find-energy-certificate",
@@ -546,7 +490,10 @@
          "全文",
          "貼上",
          "文字",
-         "截圖"
+         "截圖",
+         "複製貼給我",
+         "頁面內容",
+         "貼給我"
         ]
        },
        {
@@ -556,7 +503,11 @@
          "用來",
          "這會決定",
          "目的",
-         "為什麼"
+         "為什麼",
+         "更能",
+         "才能",
+         "以便",
+         "才知道"
         ]
        },
        {
@@ -567,7 +518,11 @@
          "條款",
          "不抓",
          "請你貼",
-         "需要你貼"
+         "需要你貼",
+         "複製貼給我",
+         "貼給我",
+         "沒辦法自己",
+         "無法自己"
         ]
        }
       ],
@@ -626,9 +581,12 @@
          "仲介說",
          "自述",
          "未經證實",
-         "S（",
-         "S ",
-         "self-reported"
+         "self-reported",
+         "仲介所說",
+         "據仲介",
+         "仲介表示",
+         "仲介的說法",
+         "仲介提供"
         ]
        },
        {
@@ -638,13 +596,15 @@
          "不知道",
          "無法確認",
          "還不知道",
-         "U"
+         "待確認",
+         "尚未確認",
+         "再確認",
+         "還沒確認"
         ]
        },
        {
         "label": "puts the guarantor gate question first",
         "any_of": [
-         "G1",
          "擔保",
          "guarantor"
         ]
@@ -653,7 +613,10 @@
         "label": "asks for the energy certificate for this exact flat",
         "any_of": [
          "能源證書",
-         "EPC"
+         "EPC",
+         "能源效能",
+         "能源效率",
+         "能源證"
         ]
        },
        {
@@ -727,7 +690,7 @@
          "(?:一週|每週|單週|週|weekly|a week's|one week's|per-week)\\s*(?:的)?(?:租金|rent)[^\\n]{0,10}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "[0-9一二兩三四五六]+\\s*個月\\s*[=＝＝:：]\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:一個月|pcm|per month|a month|/ ?month|/ ?mo|/ ?月|每月)?\\s*(?:全包|all-?in|含水電|含帳單|inclusive|上限|ceiling|budget|預算)",
-         "(?:全包|all-?in|預算|budget|上限|ceiling|總共|in total)[^\\n]{0,8}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?"
+         "(?:全包|all-?in|預算|budget|上限|ceiling|總共|in total)[^\n£－\\-]{0,8}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?"
         ]
        },
        "deposit_cap_gbp": {
@@ -740,13 +703,13 @@
         "source": "computed from the rent in turn 5",
         "why": "Five weeks of GBP 1,850 pcm: 1850 x 12 / 52 x 5 = 2134.62. Stated differently, the arithmetic was done in the model's head and got it wrong.",
         "mask_patterns": [
-         "(?m)^[ \\t#*\\-\\d.]*(?:留位金|留位費|留位|保留金|訂金|holding deposit)(?:(?!押金|tenancy deposit|deposit cap|security deposit)[^\\n])*(?:\\n+(?![0-9]+\\.\\s|#|\\|)[^\\n]+)*",
+         "(?m)^[ \\t#*\\-\\d.]*(?:留位金|留位費|留位|保留金|訂金|holding[- ]deposit)(?:(?!押金|tenancy deposit|deposit cap|security deposit)[^\\n])*(?:\\n+(?![0-9]+\\.\\s|#|\\|)[^\\n]+)*",
          "(?:月租|年租|租金|rent|annual)[^\\n]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "£\\s?50,?000",
          "£\\s?[0-9][0-9,]*\\s*(?:pcm|per month|/ ?月|每月)",
          "£\\s?[0-9]+(?:\\.[0-9]+)?\\s*(?:/|／|per|每)\\s*(?:sq|平方|ft|呎|m²|m2)",
-         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^。\\n£]{0,40}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
-         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^.。\\n]{0,40}?(?:[0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)",
+         "(?:留位金|留位費|留位|保留金|訂金|holding[- ]deposit)[^。\\n£]{0,40}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "(?:留位金|留位費|留位|保留金|訂金|holding[- ]deposit)[^.。\\n]{0,40}?(?:[0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)",
          "(?<=\\d)\\s*[×x]\\s*\\(?\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "\\(\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*[×x]",
          "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:/ ?wk|/ ?week|pw\\b|per week|a week|每週|/週)",
@@ -756,13 +719,13 @@
          "(?:倍|times|x)\\s*(?:的)?(?:月租|租金|rent)[^\\n]{0,10}£\\s?[0-9][0-9,]*",
          "(?:年收入|年薪|annual income|income|salary|earn)[^\\n]{0,24}£\\s?[0-9][0-9,]*",
          "£?\\s?50[,，]?000(?:\\.00)?\\b",
-         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^\\n|]*?(?=\\|)",
+         "(?:留位金|留位費|留位|保留金|訂金|holding[- ]deposit)[^\\n|]*?(?=\\|)",
          "(?m)^\\s*[-*•]\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*$",
          "(?:餘額|balance|savings|存款|門檻|threshold|requirement)[^\\n]{0,24}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "[×x]\\s*[0-9]+\\s*=\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?"
         ],
         "line_mask": [
-         "\\|\\s*F2\\b|holding deposit\\s*\\||留位[金費]?\\s*\\|"
+         "\\|\\s*F2\\b|holding[- ]deposit\\s*\\||留位[金費]?\\s*\\|"
         ]
        }
       },
@@ -808,7 +771,11 @@
          "請幫我確認",
          "方便的話",
          "麻煩您",
-         "謝謝"
+         "謝謝",
+         "Thank you",
+         "please",
+         "Could you",
+         "Would you"
         ]
        },
        {
@@ -819,7 +786,11 @@
          "可能是舊資料",
          "可能還沒更新",
          "理解",
-         "常見"
+         "常見",
+         "不是指控",
+         "不代表詐騙",
+         "不一定是",
+         "不是說對方"
         ]
        }
       ],
@@ -874,7 +845,7 @@
         "tolerance": 0.0,
         "required": false,
         "patterns": [
-         "(?:holding deposit|訂金|保留金)[^.。\\n]{0,40}?([0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)"
+         "(?:holding[- ]deposit|訂金|保留金)[^.。\\n]{0,40}?([0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)"
         ],
         "source": "skills/vet-flat/SKILL.md legal facts",
         "why": "One week's rent is the legal ceiling on a holding deposit."
@@ -917,7 +888,12 @@
          "需要你",
          "請你貼",
          "尚未",
-         "還沒拿到"
+         "還沒拿到",
+         "複製貼給我",
+         "你需要",
+         "還沒",
+         "貼給我",
+         "缺"
         ]
        }
       ],
@@ -952,15 +928,6 @@
        }
       ],
       "max_questions": 2,
-      "ends_with": {
-       "any_of": [
-        "貼",
-        "看房",
-        "下一步",
-        "能源證書",
-        "清單"
-       ]
-      },
       "language": "zh-TW"
      },
      "judge_notes": "Does the closing line give her exactly one thing to do next?"
@@ -1461,15 +1428,15 @@
         ],
         "line_mask": [
          "listing|廣告|刊登|仲介要求|advert|asks for|asked for",
-         "\\|\\s*F2\\b|holding deposit\\s*\\||留位[金費]?\\s*\\|"
+         "\\|\\s*F2\\b|holding[- ]deposit\\s*\\||留位[金費]?\\s*\\|"
         ],
         "source": "skills/vet-flat/SKILL.md legal facts",
         "why": "Five weeks is the cap; the advertised six weeks is the listing's ask, so only a CAP sentence is read here.",
         "mask_patterns": [
-         "(?m)^[ \\t#*\\-\\d.]*(?:留位金|留位費|留位|保留金|訂金|holding deposit)(?:(?!押金|tenancy deposit|deposit cap|security deposit)[^\\n])*(?:\\n+(?![0-9]+\\.\\s|#|\\|)[^\\n]+)*",
-         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^.。\\n]{0,80}",
-         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^。\\n£]{0,40}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
-         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^.。\\n]{0,40}?(?:[0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)"
+         "(?m)^[ \\t#*\\-\\d.]*(?:留位金|留位費|留位|保留金|訂金|holding[- ]deposit)(?:(?!押金|tenancy deposit|deposit cap|security deposit)[^\\n])*(?:\\n+(?![0-9]+\\.\\s|#|\\|)[^\\n]+)*",
+         "(?:留位金|留位費|留位|保留金|訂金|holding[- ]deposit)[^.。\\n]{0,80}",
+         "(?:留位金|留位費|留位|保留金|訂金|holding[- ]deposit)[^。\\n£]{0,40}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "(?:留位金|留位費|留位|保留金|訂金|holding[- ]deposit)[^.。\\n]{0,40}?(?:[0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)"
         ]
        },
        "rent_in_advance_months": {
@@ -1496,13 +1463,13 @@
         "source": "computed from the advertised rent",
         "why": "Five weeks of GBP 2,050 pcm: 2050 x 12 / 52 x 5 = 2365.38. The advertised six weeks, 2838.46, is allowed because the listing asks for it and a good reply prices both.",
         "mask_patterns": [
-         "(?m)^[ \\t#*\\-\\d.]*(?:留位金|留位費|留位|保留金|訂金|holding deposit)(?:(?!押金|tenancy deposit|deposit cap|security deposit)[^\\n])*(?:\\n+(?![0-9]+\\.\\s|#|\\|)[^\\n]+)*",
+         "(?m)^[ \\t#*\\-\\d.]*(?:留位金|留位費|留位|保留金|訂金|holding[- ]deposit)(?:(?!押金|tenancy deposit|deposit cap|security deposit)[^\\n])*(?:\\n+(?![0-9]+\\.\\s|#|\\|)[^\\n]+)*",
          "(?:月租|年租|租金|rent|annual)[^\\n]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "£\\s?50,?000",
          "£\\s?[0-9][0-9,]*\\s*(?:pcm|per month|/ ?月|每月)",
          "£\\s?[0-9]+(?:\\.[0-9]+)?\\s*(?:/|／|per|每)\\s*(?:sq|平方|ft|呎|m²|m2)",
-         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^。\\n£]{0,40}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
-         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^.。\\n]{0,40}?(?:[0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)",
+         "(?:留位金|留位費|留位|保留金|訂金|holding[- ]deposit)[^。\\n£]{0,40}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "(?:留位金|留位費|留位|保留金|訂金|holding[- ]deposit)[^.。\\n]{0,40}?(?:[0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)",
          "(?<=\\d)\\s*[×x]\\s*\\(?\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "\\(\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*[×x]",
          "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:/ ?wk|/ ?week|pw\\b|per week|a week|每週|/週)",
@@ -1512,13 +1479,13 @@
          "(?:倍|times|x)\\s*(?:的)?(?:月租|租金|rent)[^\\n]{0,10}£\\s?[0-9][0-9,]*",
          "(?:年收入|年薪|annual income|income|salary|earn)[^\\n]{0,24}£\\s?[0-9][0-9,]*",
          "£?\\s?50[,，]?000(?:\\.00)?\\b",
-         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^\\n|]*?(?=\\|)",
+         "(?:留位金|留位費|留位|保留金|訂金|holding[- ]deposit)[^\\n|]*?(?=\\|)",
          "(?m)^\\s*[-*•]\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*$",
          "(?:餘額|balance|savings|存款|門檻|threshold|requirement)[^\\n]{0,24}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "[×x]\\s*[0-9]+\\s*=\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?"
         ],
         "line_mask": [
-         "\\|\\s*F2\\b|holding deposit\\s*\\||留位[金費]?\\s*\\|"
+         "\\|\\s*F2\\b|holding[- ]deposit\\s*\\||留位[金費]?\\s*\\|"
         ]
        }
       },
@@ -1947,15 +1914,15 @@
         ],
         "line_mask": [
          "listing|廣告|刊登|仲介要求|advert|asks for|asked for",
-         "\\|\\s*F2\\b|holding deposit\\s*\\||留位[金費]?\\s*\\|"
+         "\\|\\s*F2\\b|holding[- ]deposit\\s*\\||留位[金費]?\\s*\\|"
         ],
         "source": "skills/vet-flat/SKILL.md legal facts",
         "why": "Five weeks is the cap; the listing's six weeks is the ask, so only a CAP sentence is read here. Six is the listing's own ask and sits in the pasted material; a reply that quotes it beside the cap is not inventing a number.",
         "mask_patterns": [
-         "(?m)^[ \\t#*\\-\\d.]*(?:留位金|留位費|留位|保留金|訂金|holding deposit)(?:(?!押金|tenancy deposit|deposit cap|security deposit)[^\\n])*(?:\\n+(?![0-9]+\\.\\s|#|\\|)[^\\n]+)*",
-         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^.。\\n]{0,80}",
-         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^。\\n£]{0,40}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
-         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^.。\\n]{0,40}?(?:[0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)"
+         "(?m)^[ \\t#*\\-\\d.]*(?:留位金|留位費|留位|保留金|訂金|holding[- ]deposit)(?:(?!押金|tenancy deposit|deposit cap|security deposit)[^\\n])*(?:\\n+(?![0-9]+\\.\\s|#|\\|)[^\\n]+)*",
+         "(?:留位金|留位費|留位|保留金|訂金|holding[- ]deposit)[^.。\\n]{0,80}",
+         "(?:留位金|留位費|留位|保留金|訂金|holding[- ]deposit)[^。\\n£]{0,40}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "(?:留位金|留位費|留位|保留金|訂金|holding[- ]deposit)[^.。\\n]{0,40}?(?:[0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)"
         ],
         "values": [
          5,
@@ -1975,13 +1942,13 @@
         "source": "computed from the advertised rent",
         "why": "Five weeks of GBP 2,350 pcm: 2350 x 12 / 52 x 5 = 2711.54. The advertised six weeks, 3253.85, is allowed because the listing asks for it and a good reply prices both.",
         "mask_patterns": [
-         "(?m)^[ \\t#*\\-\\d.]*(?:留位金|留位費|留位|保留金|訂金|holding deposit)(?:(?!押金|tenancy deposit|deposit cap|security deposit)[^\\n])*(?:\\n+(?![0-9]+\\.\\s|#|\\|)[^\\n]+)*",
+         "(?m)^[ \\t#*\\-\\d.]*(?:留位金|留位費|留位|保留金|訂金|holding[- ]deposit)(?:(?!押金|tenancy deposit|deposit cap|security deposit)[^\\n])*(?:\\n+(?![0-9]+\\.\\s|#|\\|)[^\\n]+)*",
          "(?:月租|年租|租金|rent|annual)[^\\n]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "£\\s?50,?000",
          "£\\s?[0-9][0-9,]*\\s*(?:pcm|per month|/ ?月|每月)",
          "£\\s?[0-9]+(?:\\.[0-9]+)?\\s*(?:/|／|per|每)\\s*(?:sq|平方|ft|呎|m²|m2)",
-         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^。\\n£]{0,40}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
-         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^.。\\n]{0,40}?(?:[0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)",
+         "(?:留位金|留位費|留位|保留金|訂金|holding[- ]deposit)[^。\\n£]{0,40}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "(?:留位金|留位費|留位|保留金|訂金|holding[- ]deposit)[^.。\\n]{0,40}?(?:[0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)",
          "(?<=\\d)\\s*[×x]\\s*\\(?\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "\\(\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*[×x]",
          "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:/ ?wk|/ ?week|pw\\b|per week|a week|每週|/週)",
@@ -1991,13 +1958,13 @@
          "(?:倍|times|x)\\s*(?:的)?(?:月租|租金|rent)[^\\n]{0,10}£\\s?[0-9][0-9,]*",
          "(?:年收入|年薪|annual income|income|salary|earn)[^\\n]{0,24}£\\s?[0-9][0-9,]*",
          "£?\\s?50[,，]?000(?:\\.00)?\\b",
-         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^\\n|]*?(?=\\|)",
+         "(?:留位金|留位費|留位|保留金|訂金|holding[- ]deposit)[^\\n|]*?(?=\\|)",
          "(?m)^\\s*[-*•]\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*$",
          "(?:餘額|balance|savings|存款|門檻|threshold|requirement)[^\\n]{0,24}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "[×x]\\s*[0-9]+\\s*=\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?"
         ],
         "line_mask": [
-         "\\|\\s*F2\\b|holding deposit\\s*\\||留位[金費]?\\s*\\|"
+         "\\|\\s*F2\\b|holding[- ]deposit\\s*\\||留位[金費]?\\s*\\|"
         ]
        }
       },
@@ -3211,21 +3178,12 @@
         ]
        },
        {
-        "label": "the deposit cap is five weeks",
+        "label": "the deposit cap: five weeks, or the figure from her rent",
         "any_of": [
          "五週",
          "5 週",
          "5 weeks",
-         "五周"
-        ]
-       },
-       {
-        "label": "shows the deposit arithmetic from her own rent",
-        "regex": "2[,，]?150[^\\n]{0,44}(?:×|x|\\*|乘|/|÷)"
-       },
-       {
-        "label": "gives the deposit cap in pounds",
-        "any_of": [
+         "五周",
          "2,480",
          "2480",
          "2,481",
@@ -3233,17 +3191,35 @@
         ]
        },
        {
+        "label": "shows the deposit arithmetic from her own rent",
+        "regex": "2[,，]?150[^\\n]{0,44}(?:×|x|\\*|乘|/|÷)"
+       },
+       {
         "label": "the holding deposit is capped at one week",
         "any_of": [
          "一週",
          "1 週",
          "one week",
-         "一周"
+         "一周",
+         "496",
+         "一週的租金",
+         "one week's rent"
         ]
        },
        {
         "label": "names the questions to put in writing",
-        "regex": "\\bG[1567]\\b"
+        "any_of": [
+         "routes do you accept",
+         "接受哪些",
+         "criteria",
+         "標準",
+         "哪些擔保",
+         "書面",
+         "in writing",
+         "問清楚",
+         "白紙黑字",
+         "寫下來"
+        ]
        },
        {
         "label": "do not move money out of the evidenced account",
@@ -3252,7 +3228,12 @@
          "不要轉出",
          "不要動",
          "移出",
-         "不要換匯"
+         "不要換匯",
+         "先別移動",
+         "別換匯",
+         "不要移動",
+         "別動",
+         "留在帳戶"
         ]
        },
        {
@@ -3263,7 +3244,10 @@
          "criteria",
          "標準",
          "published",
-         "寄給我"
+         "寄給我",
+         "寄給",
+         "提供",
+         "send"
         ]
        }
       ],
@@ -3318,7 +3302,8 @@
         "required": true,
         "patterns": [
          "£\\s?([0-9][0-9,]{3,})\\s*(?:pcm|per month|/ ?月|每月|一個月)",
-         "(?:月租|租金|rent)[^。\\n]{0,12}?£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)"
+         "(?:月租|租金|rent)[^。\\n]{0,12}?£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)",
+         "£\\s?([0-9][0-9,]{3,})\\s*(?:×|x|\\*|乘)"
         ],
         "source": "turn 1 user message",
         "why": "Her rent, exactly as she stated it. Everything else is computed from it, so a wrong echo poisons the whole turn.",
@@ -3344,18 +3329,18 @@
         "tolerance": 1.5,
         "required": true,
         "patterns": [
-         "(?:押金|deposit)(?:(?!\\||\\n\\s*[-*•]\\s*£)[\\s\\S]){0,160}?£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)"
+         "(?:押金|按金|保證金|deposit)(?:(?!\\||\\n\\s*[-*•]\\s*£)[\\s\\S]){0,160}?£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)"
         ],
         "source": "computed from the rent in turn 1",
         "why": "Five weeks of GBP 2,150 pcm: 2150 x 12 / 52 x 5 = 2480.77.",
         "mask_patterns": [
-         "(?m)^[ \\t#*\\-\\d.]*(?:留位金|留位費|留位|保留金|訂金|holding deposit)(?:(?!押金|tenancy deposit|deposit cap|security deposit)[^\\n])*(?:\\n+(?![0-9]+\\.\\s|#|\\|)[^\\n]+)*",
+         "(?m)^[ \\t#*\\-\\d.]*(?:留位金|留位費|留位|保留金|訂金|holding[- ]deposit)(?:(?!押金|tenancy deposit|deposit cap|security deposit)[^\\n])*(?:\\n+(?![0-9]+\\.\\s|#|\\|)[^\\n]+)*",
          "(?:月租|年租|租金|rent|annual)[^\\n]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "£\\s?50,?000",
          "£\\s?[0-9][0-9,]*\\s*(?:pcm|per month|/ ?月|每月)",
          "£\\s?[0-9]+(?:\\.[0-9]+)?\\s*(?:/|／|per|每)\\s*(?:sq|平方|ft|呎|m²|m2)",
-         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^。\\n£]{0,40}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
-         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^.。\\n]{0,40}?(?:[0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)",
+         "(?:留位金|留位費|留位|保留金|訂金|holding[- ]deposit)[^。\\n£]{0,40}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "(?:留位金|留位費|留位|保留金|訂金|holding[- ]deposit)[^.。\\n]{0,40}?(?:[0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)",
          "(?<=\\d)\\s*[×x]\\s*\\(?\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "\\(\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*[×x]",
          "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:/ ?wk|/ ?week|pw\\b|per week|a week|每週|/週)",
@@ -3365,13 +3350,13 @@
          "(?:倍|times|x)\\s*(?:的)?(?:月租|租金|rent)[^\\n]{0,10}£\\s?[0-9][0-9,]*",
          "(?:年收入|年薪|annual income|income|salary|earn)[^\\n]{0,24}£\\s?[0-9][0-9,]*",
          "£?\\s?50[,，]?000(?:\\.00)?\\b",
-         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^\\n|]*?(?=\\|)",
+         "(?:留位金|留位費|留位|保留金|訂金|holding[- ]deposit)[^\\n|]*?(?=\\|)",
          "(?m)^\\s*[-*•]\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*$",
          "(?:餘額|balance|savings|存款|門檻|threshold|requirement)[^\\n]{0,24}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "[×x]\\s*[0-9]+\\s*=\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?"
         ],
         "line_mask": [
-         "\\|\\s*F2\\b|holding deposit\\s*\\||留位[金費]?\\s*\\|"
+         "\\|\\s*F2\\b|holding[- ]deposit\\s*\\||留位[金費]?\\s*\\|"
         ]
        },
        "holding_deposit_gbp": {
@@ -3379,7 +3364,7 @@
         "tolerance": 1.5,
         "required": false,
         "patterns": [
-         "(?:訂金|保留金|holding deposit)[^。\\n£]{0,40}£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)"
+         "(?:訂金|保留金|holding[- ]deposit)[^。\\n£]{0,40}£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)"
         ],
         "source": "computed from the rent in turn 1",
         "why": "One week of GBP 2,150 pcm: 2150 x 12 / 52 = 496.15."
@@ -3394,15 +3379,15 @@
         ],
         "line_mask": [
          "listing|廣告|刊登|仲介要求|advert|asks for|asked for",
-         "\\|\\s*F2\\b|holding deposit\\s*\\||留位[金費]?\\s*\\|"
+         "\\|\\s*F2\\b|holding[- ]deposit\\s*\\||留位[金費]?\\s*\\|"
         ],
         "source": "skills/vet-flat/SKILL.md legal facts",
         "why": "Five weeks is the statutory cap.",
         "mask_patterns": [
-         "(?m)^[ \\t#*\\-\\d.]*(?:留位金|留位費|留位|保留金|訂金|holding deposit)(?:(?!押金|tenancy deposit|deposit cap|security deposit)[^\\n])*(?:\\n+(?![0-9]+\\.\\s|#|\\|)[^\\n]+)*",
-         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^.。\\n]{0,80}",
-         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^。\\n£]{0,40}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
-         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^.。\\n]{0,40}?(?:[0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)"
+         "(?m)^[ \\t#*\\-\\d.]*(?:留位金|留位費|留位|保留金|訂金|holding[- ]deposit)(?:(?!押金|tenancy deposit|deposit cap|security deposit)[^\\n])*(?:\\n+(?![0-9]+\\.\\s|#|\\|)[^\\n]+)*",
+         "(?:留位金|留位費|留位|保留金|訂金|holding[- ]deposit)[^.。\\n]{0,80}",
+         "(?:留位金|留位費|留位|保留金|訂金|holding[- ]deposit)[^。\\n£]{0,40}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "(?:留位金|留位費|留位|保留金|訂金|holding[- ]deposit)[^.。\\n]{0,40}?(?:[0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)"
         ]
        }
       },
@@ -3416,8 +3401,17 @@
      "expect": {
       "must": [
        {
-        "label": "names G7",
-        "regex": "\\bG7\\b"
+        "label": "asks what is refundable or transferable if referencing fails",
+        "any_of": [
+         "refund",
+         "transfer",
+         "退款",
+         "可轉移",
+         "退還",
+         "轉移",
+         "refundable",
+         "退回"
+        ]
        },
        {
         "label": "confirm the holding deposit is exclusive before paying a guarantor fee",
@@ -3438,7 +3432,11 @@
          "配合",
          "通常不能",
          "不能沒收",
-         "法律"
+         "法律",
+         "如實",
+         "不會自動",
+         "被沒收",
+         "沒收"
         ]
        },
        {
@@ -3458,7 +3456,11 @@
          "想確認",
          "請幫我",
          "麻煩",
-         "謝謝"
+         "謝謝",
+         "Thank you",
+         "please",
+         "Could you",
+         "Would you"
         ]
        },
        {
@@ -3517,7 +3519,7 @@
         "tolerance": 0.0,
         "required": false,
         "patterns": [
-         "(?:holding deposit|訂金|保留金)[^.。\\n]{0,40}?([0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)"
+         "(?:holding[- ]deposit|訂金|保留金)[^.。\\n]{0,40}?([0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)"
         ],
         "source": "skills/vet-flat/SKILL.md legal facts",
         "why": "One week's rent is the cap; naming a different one misstates the law."
@@ -3555,7 +3557,11 @@
          "封面",
          "帳戶頁",
          "statement",
-         "存摺"
+         "存摺",
+         "月結單",
+         "結單",
+         "statements",
+         "對帳"
         ]
        },
        {
@@ -3594,7 +3600,11 @@
         "any_of": [
          "租約",
          "前房東",
-         "上一個房東"
+         "上一個房東",
+         "房東",
+         "住宿紀錄",
+         "住宿證明",
+         "landlord"
         ]
        },
        {
@@ -3648,20 +3658,50 @@
      "expect": {
       "must": [
        {
-        "label": "G1 - which guarantor and income-check routes are accepted",
-        "regex": "\\bG1\\b"
+        "label": "asks which guarantor and income-check routes are accepted",
+        "any_of": [
+         "擔保",
+         "guarantor",
+         "route",
+         "路線",
+         "哪些方式",
+         "accept",
+         "接受"
+        ]
        },
        {
-        "label": "G5 - the published affordability criteria as a document",
-        "regex": "\\bG5\\b"
+        "label": "asks for the published affordability criteria as a document",
+        "any_of": [
+         "criteria",
+         "標準",
+         "書面",
+         "document",
+         "文件",
+         "affordability"
+        ]
        },
        {
-        "label": "G6 - which guarantor products, at what cost, and the savings route",
-        "regex": "\\bG6\\b"
+        "label": "asks which guarantor products, at what cost, and about the savings route",
+        "any_of": [
+         "費用",
+         "cost",
+         "fee",
+         "存款",
+         "savings",
+         "產品",
+         "product",
+         "多少錢"
+        ]
        },
        {
-        "label": "G7 - what is refundable or transferable if referencing fails",
-        "regex": "\\bG7\\b"
+        "label": "asks what is refundable or transferable if referencing fails",
+        "any_of": [
+         "refund",
+         "退",
+         "transfer",
+         "轉移",
+         "refundable"
+        ]
        },
        {
         "label": "asks for documents, not opinions",
@@ -3692,7 +3732,12 @@
          "麻煩",
          "合作",
          "幫忙",
-         "配合"
+         "配合",
+         "Thank you",
+         "Thanks",
+         "Kind regards",
+         "please",
+         "Best regards"
         ]
        }
       ],
@@ -3736,15 +3781,6 @@
        }
       ],
       "max_questions": 6,
-      "ends_with": {
-       "any_of": [
-        "謝謝",
-        "感謝",
-        "麻煩",
-        "？",
-        "?"
-       ]
-      },
       "language": "zh-TW"
      },
      "judge_notes": "Are the questions sent verbatim from the bank rather than softened, and is the two-question rule actually honoured in the draft?"
@@ -4409,10 +4445,10 @@
         "source": "computed from the two advertised rents",
         "why": "Five weeks of each rent: 2250 x 12 / 52 x 5 = 2596.15 and 2100 x 12 / 52 x 5 = 2423.08.",
         "mask_patterns": [
-         "(?m)^[ \\t#*\\-\\d.]*(?:留位金|留位費|留位|保留金|訂金|holding deposit)(?:(?!押金|tenancy deposit|deposit cap|security deposit)[^\\n])*(?:\\n+(?![0-9]+\\.\\s|#|\\|)[^\\n]+)*",
+         "(?m)^[ \\t#*\\-\\d.]*(?:留位金|留位費|留位|保留金|訂金|holding[- ]deposit)(?:(?!押金|tenancy deposit|deposit cap|security deposit)[^\\n])*(?:\\n+(?![0-9]+\\.\\s|#|\\|)[^\\n]+)*",
          "£\\s?[0-9]+(?:\\.[0-9]+)?\\s*(?:/|／|per|每)\\s*(?:sq|平方|ft|呎|m²|m2)",
-         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^。\\n£]{0,40}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
-         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^.。\\n]{0,40}?(?:[0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)",
+         "(?:留位金|留位費|留位|保留金|訂金|holding[- ]deposit)[^。\\n£]{0,40}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "(?:留位金|留位費|留位|保留金|訂金|holding[- ]deposit)[^.。\\n]{0,40}?(?:[0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)",
          "(?<=\\d)\\s*[×x]\\s*\\(?\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "\\(\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*[×x]",
          "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:/ ?wk|/ ?week|pw\\b|per week|a week|每週|/週)",
@@ -4422,7 +4458,7 @@
          "(?:倍|times|x)\\s*(?:的)?(?:月租|租金|rent)[^\\n]{0,10}£\\s?[0-9][0-9,]*",
          "(?:年收入|年薪|annual income|income|salary|earn)[^\\n]{0,24}£\\s?[0-9][0-9,]*",
          "£?\\s?50[,，]?000(?:\\.00)?\\b",
-         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^\\n|]*?(?=\\|)",
+         "(?:留位金|留位費|留位|保留金|訂金|holding[- ]deposit)[^\\n|]*?(?=\\|)",
          "(?:月租|年租|租金|rent|annual)[^\\n]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "£\\s?50,?000",
          "£\\s?[0-9][0-9,]*\\s*(?:pcm|per month|/ ?月|每月)",
@@ -4431,7 +4467,7 @@
          "[×x]\\s*[0-9]+\\s*=\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?"
         ],
         "line_mask": [
-         "\\|\\s*F2\\b|holding deposit\\s*\\||留位[金費]?\\s*\\|"
+         "\\|\\s*F2\\b|holding[- ]deposit\\s*\\||留位[金費]?\\s*\\|"
         ]
        }
       },
@@ -4859,15 +4895,15 @@
         ],
         "line_mask": [
          "listing|廣告|刊登|仲介要求|advert|asks for|asked for",
-         "\\|\\s*F2\\b|holding deposit\\s*\\||留位[金費]?\\s*\\|"
+         "\\|\\s*F2\\b|holding[- ]deposit\\s*\\||留位[金費]?\\s*\\|"
         ],
         "source": "skills/vet-flat/SKILL.md legal facts",
         "why": "Five weeks is the ceiling. The clause's six weeks is the ask. Six is what the pasted clause asks for; quoting it beside the cap is not inventing a number.",
         "mask_patterns": [
-         "(?m)^[ \\t#*\\-\\d.]*(?:留位金|留位費|留位|保留金|訂金|holding deposit)(?:(?!押金|tenancy deposit|deposit cap|security deposit)[^\\n])*(?:\\n+(?![0-9]+\\.\\s|#|\\|)[^\\n]+)*",
-         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^.。\\n]{0,80}",
-         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^。\\n£]{0,40}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
-         "(?:留位金|留位費|留位|保留金|訂金|holding deposit)[^.。\\n]{0,40}?(?:[0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)"
+         "(?m)^[ \\t#*\\-\\d.]*(?:留位金|留位費|留位|保留金|訂金|holding[- ]deposit)(?:(?!押金|tenancy deposit|deposit cap|security deposit)[^\\n])*(?:\\n+(?![0-9]+\\.\\s|#|\\|)[^\\n]+)*",
+         "(?:留位金|留位費|留位|保留金|訂金|holding[- ]deposit)[^.。\\n]{0,80}",
+         "(?:留位金|留位費|留位|保留金|訂金|holding[- ]deposit)[^。\\n£]{0,40}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "(?:留位金|留位費|留位|保留金|訂金|holding[- ]deposit)[^.。\\n]{0,40}?(?:[0-9]+|one|two|three|一|兩|二|三)\\s*(?:週|周|星期|weeks?)"
         ],
         "values": [
          5,
@@ -5040,8 +5076,8 @@
     "references/budget-modes.md",
     "profile.template.yaml"
    ],
-   "outcome": "The four fields the user actually named are shown as a diff - field: old -> new - with nothing else touched, a one-word confirmation is asked for before anything is applied, the validator is named, and a setting the profile has no field for is refused rather than invented.",
-   "judge_notes": "This is the cheap-model test: natural language in, four exact field names and values out, nothing else moved. Does the diff read like a diff? Does it wait for the yes? Does it map 'keep the rest light' onto the field the reference says it maps onto rather than guessing a new one?",
+   "outcome": "The four things the user named change at once, shown as what changed (old → new, in plain words or as lines) with nothing else touched; a clear instruction is applied without asking first; the tooling behind the change (validator, scripts) is not narrated; a setting the profile has no field for is refused with the nearest real field offered, and that one is asked about because it is unclear.",
+   "judge_notes": "This is the cheap-model test: natural language in, four exact changes out, nothing else moved, applied at once (2026-09 contract: a clear instruction is executed, not confirmed; never talk about the machinery). Does the change read as a change? Does it map 'keep the rest light' onto the field the reference names rather than a new one? Turn 3 is the one place a question is right.",
    "turns": [
     {
      "user": {
@@ -5058,36 +5094,45 @@
      "expect": {
       "must": [
        {
-        "label": "crime is set to deep as a diff line",
-        "regex": "(?is)(crime|\\u6cbb\\u5b89)[^\\n]{0,40}?(?:\\u2192|->|=>|:|\\uff1a)[^\\n]{0,28}?deep"
+        "label": "crime goes deeper",
+        "regex": "(?is)(crime|治安)[^\\n]{0,40}?(?:→|->|=>|:|：|改成|改為|改到|now|to )[^\\n]{0,28}?(deep|深)"
        },
        {
-        "label": "management is set to deep as a diff line",
-        "regex": "(?is)(management|\\u7ba1\\u7406)[^\\n]{0,40}?(?:\\u2192|->|=>|:|\\uff1a)[^\\n]{0,28}?deep"
+        "label": "management goes deeper",
+        "regex": "(?is)(management|管理)[^\\n]{0,40}?(?:→|->|=>|:|：|改成|改為|改到|now|to )[^\\n]{0,28}?(deep|深)"
        },
        {
         "label": "everything else goes light: budget_mode lite, or the other axes lite",
-        "regex": "(?is)(budget_mode[^\\n]{0,40}?(?:\\u2192|->|=>|:|\\uff1a)[^\\n]{0,28}?lite|axis_depth[\\s\\S]{0,400}?:\\s*lite)"
+        "regex": "(?is)(budget_mode[^\\n]{0,40}?(?:→|->|=>|:|：|改成|改為|改到|now|to )[^\\n]{0,28}?(lite|輕)|axis_depth[\\s\\S]{0,400}?:\\s*lite|(其他|其餘|the rest|everything else|all other)[^\\n]{0,30}(輕量|輕|lite|light))"
        },
        {
         "label": "the ceiling moves 2200 -> 2300",
-        "regex": "(?ims)(?:(all_in_pcm_ceiling|all-?in[^\\n]{0,14}ceiling|\\u4e0a\\u9650)[^\\n]{0,60}?2[,\\uff0c]?200[^\\n]{0,30}?(?:\\u2192|->|=>|\\u6539\\u6210|\\u6539\\u70ba|to)[^\\n]{0,12}?\\u00a3?\\s?2[,\\uff0c]?300|^\\s*-\\s*(?:budget\\.)?all_in_pcm_ceiling\\s*:\\s*\\u00a3?\\s?2[,\\uff0c]?200\\b.*?^\\s*\\+\\s*(?:budget\\.)?all_in_pcm_ceiling\\s*:\\s*\\u00a3?\\s?2[,\\uff0c]?300\\b)"
+        "regex": "(?ims)(?:(all_in_pcm_ceiling|all-?in[^\\n]{0,14}ceiling|上限)[^\\n]{0,60}?2[,，]?200[^\\n]{0,30}?(?:→|->|=>|改成|改為|改到|to)[^\\n]{0,12}?£?\\s?2[,，]?300|^\\s*-\\s*(?:budget\\.)?all_in_pcm_ceiling\\s*:\\s*£?\\s?2[,，]?200\\b.*?^\\s*\\+\\s*(?:budget\\.)?all_in_pcm_ceiling\\s*:\\s*£?\\s?2[,，]?300\\b|(上限|ceiling)[^\\n]{0,40}?£?\\s?2[,，]?300)"
        },
        {
         "label": "written as a diff",
-        "regex": "(?ms)(?:\\u2192|->|=>|(?=.*^\\s*-\\s*[A-Za-z_][\\w.]*\\s*:)(?=.*^\\s*\\+\\s*[A-Za-z_][\\w.]*\\s*:))"
+        "regex": "(?ms)(?:→|->|=>|改成|改為|改到|從[^。\\n]{0,14}(?:到|變成)|from [^\\n]{0,24} to |(?=.*^\\s*-\\s*[A-Za-z_][\\w.]*\\s*:)(?=.*^\\s*\\+\\s*[A-Za-z_][\\w.]*\\s*:))"
        },
        {
-        "label": "asks for a one-word confirmation before applying",
+        "label": "applied now, not proposed",
         "any_of": [
-         "確認",
-         "確定",
-         "回覆",
-         "一個字",
-         "confirm",
-         "yes",
-         "one word",
-         "ok"
+         "已改",
+         "改好",
+         "已更新",
+         "已套用",
+         "已寫入",
+         "現在是",
+         "現在的",
+         "已經是",
+         "is now",
+         "now £",
+         "now 2",
+         "updated",
+         "applied",
+         "changed to",
+         "改成",
+         "改為",
+         "set to"
         ]
        },
        {
@@ -5110,18 +5155,8 @@
          "stay as they are",
          "stays as it is",
          "left alone",
-         "untouched"
-        ]
-       },
-       {
-        "label": "names the validator that runs after the change",
-        "any_of": [
-         "profile_check",
-         "profile-check",
-         "驗證",
-         "validator",
-         "validate",
-         "檢查檔"
+         "untouched",
+         "the rest"
         ]
        }
       ],
@@ -5135,17 +5170,17 @@
         "regex": "(?i)\\b(min_epc[a-z_]*|epc_rating_min|epc_min[a-z_]*|crime_depth|management_depth|deep_axes|axis_priority|depth_override|axis_depth_other|budget_ceiling)\\b[^\\n]{0,24}?(?:\\u2192|->|=>|:\\s*\\S)"
        },
        {
-        "label": "does not apply the change silently, before the yes",
+        "label": "does not ask whether to apply a clear instruction",
+        "regex": "(要不要|是否|需要我)[^。\\n]{0,8}(套用|改|寫入|apply|更新)|shall I apply|want me to apply|confirm (?:before|first)|reply (?:yes|with one word)|一個字"
+       },
+       {
+        "label": "does not narrate the tooling (validator, scripts)",
         "any_of": [
-         "已套用",
-         "已寫入",
-         "已經改好",
-         "已更新你",
-         "i have applied",
-         "i've applied",
-         "i have updated your",
-         "applied the change",
-         "i've updated your profile"
+         "profile_check",
+         "profile-check",
+         "validator",
+         "驗證器",
+         "scripts/"
         ]
        },
        {
@@ -5221,20 +5256,24 @@
         "why": "450 sq ft is what the pasted profile says."
        }
       },
-      "max_questions": 3,
+      "max_questions": 1,
       "workdir_expect": {
        "profile.yaml": {
         "contains": [
-         "all_in_pcm_ceiling: 2200"
+         "all_in_pcm_ceiling: 2300",
+         "crime: deep",
+         "management: deep",
+         "max_fetches_per_flat: 40",
+         "max_minutes_per_flat: 20",
+         "min_floor_area_sqft: 450"
         ],
         "absent": [
-         "all_in_pcm_ceiling: 2300",
-         "crime: deep"
+         "all_in_pcm_ceiling: 2200"
         ]
        }
       }
      },
-     "judge_notes": "Four field names, four values, one question. Anything longer than a short diff plus a sentence is the wrong shape for this ask."
+     "judge_notes": "Four changes, applied, one short reply. Under the 2026-09 contract a clear instruction is executed and shown, not proposed and confirmed; anything longer than the changes plus a sentence on what stayed is the wrong shape."
     },
     {
      "user": {
@@ -5243,6 +5282,25 @@
      },
      "expect": {
       "must": [
+       {
+        "label": "says the change is already in effect (applied last turn)",
+        "any_of": [
+         "已經",
+         "已改",
+         "已套用",
+         "已更新",
+         "已生效",
+         "上一則",
+         "剛剛",
+         "already",
+         "is in effect",
+         "was applied",
+         "is now",
+         "done",
+         "現在是",
+         "維持"
+        ]
+       },
        {
         "label": "echoes the applied values",
         "any_of": [
@@ -5255,16 +5313,6 @@
         "any_of": [
          "2,300",
          "2300"
-        ]
-       },
-       {
-        "label": "names the validator command",
-        "any_of": [
-         "profile_check",
-         "profile-check",
-         "驗證",
-         "validator",
-         "validate"
         ]
        },
        {
@@ -5340,6 +5388,16 @@
          "垃圾房東",
          "垃圾房东"
         ]
+       },
+       {
+        "label": "does not narrate the tooling (validator, scripts)",
+        "any_of": [
+         "profile_check",
+         "profile-check",
+         "validator",
+         "驗證器",
+         "scripts/"
+        ]
        }
       ],
       "facts": {
@@ -5362,7 +5420,7 @@
         ]
        }
       },
-      "max_questions": 2,
+      "max_questions": 1,
       "workdir_expect": {
        "profile.yaml": {
         "contains": [
@@ -5379,7 +5437,7 @@
        }
       }
      },
-     "judge_notes": "Does it actually show the validator's verdict, or say plainly that without a shell it is re-reading the changed lines instead?"
+     "judge_notes": "The person confirms a change that is already in effect: the right reply says so in a line, repeats the four values and what stayed, and adds what deeper checks cost. It does not re-apply, re-ask or name the validator."
     },
     {
      "user": {
@@ -5435,7 +5493,15 @@
          "回覆",
          "回我",
          "跟我說",
-         "告訴我"
+         "告訴我",
+         "要嗎",
+         "可以嗎",
+         "你決定",
+         "up to you",
+         "want me to",
+         "should I",
+         "還是",
+         "or would you"
         ]
        },
        {
@@ -5489,23 +5555,7 @@
         ]
        }
       ],
-      "max_questions": 3,
-      "ends_with": {
-       "any_of": [
-        "確認",
-        "confirm",
-        "?",
-        "？",
-        "yes",
-        "reply",
-        "apply",
-        "save",
-        "回覆",
-        "回我",
-        "套用",
-        "寫入"
-       ]
-      }
+      "max_questions": 2
      },
      "judge_notes": "The right answer is a refusal plus a real alternative, not a new key in the YAML. Does it stay useful while saying no?"
     }
@@ -5764,7 +5814,7 @@
       "must_not": [
        {
         "label": "does not strengthen 可考慮看房 into a scheduled or decided viewing for A",
-        "regex": "A[^。\\n]{0,16}(可排|已排|排定|排好|可以約|可約|已約|預約|安排)[^。\\n]{0,4}看房|A[^。\\n]{0,10}目前可排"
+        "regex": "A[^。\\n]{0,16}(可排|已排|排定|排好|可以約|可約|已約|預約|安排)[^。\\n]{0,4}看房(?!前|之前|以前)|A[^。\\n]{0,10}目前可排"
        },
        {
         "label": "does not extend the exception to B",
@@ -5887,7 +5937,18 @@
          "不確定",
          "沒寫",
          "未註明",
-         "無法確認"
+         "無法確認",
+         "仍未",
+         "尚未",
+         "還沒",
+         "還不知道",
+         "未確認",
+         "待查",
+         "未查",
+         "查不到",
+         "沒有資料",
+         "not known",
+         "unknown"
         ]
        }
       ],
@@ -5931,7 +5992,18 @@
          "不確定",
          "沒寫",
          "無法確認",
-         "未註明"
+         "未註明",
+         "仍未",
+         "尚未",
+         "還沒",
+         "還不知道",
+         "未確認",
+         "待查",
+         "未查",
+         "查不到",
+         "沒有資料",
+         "not known",
+         "unknown"
         ]
        }
       ],

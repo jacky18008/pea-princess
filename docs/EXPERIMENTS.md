@@ -1043,3 +1043,113 @@ do not ask when the change is clear), and the closing-line check (`ends_with`) f
 0.80 → 0.74 drop is at least partly the bench's expectations being older than the contract; the journeys need
 their expectations re-cut to the 2026-09 rules before they can tell a regression from a policy change. The
 fact checks that failed (rent, the deposit cap, rent in advance) are worth reading one by one.
+
+## Stop-hook enforcement (2026-09-15): the checker blocks wording, not missing work
+
+Two arms, each the pre-send checker run by a Claude Code **Stop hook** (`bench/stop_check_hook.py`; the model
+revises when the hook blocks, at most twice a turn), Sonnet 5 standard, the same 15 private turns, judge v2 and
+the Opus gap reader on the 10 rated cases. `main-hook` / `main-hook2` = main's checker (snapshot 6ada43d);
+`variant-e` / `variant-e2` = branch `exp/reply-check-d`'s checker (four extra checkable rules: coverage,
+deliverable, results, correction). Baselines `main-3` / `main-4` (same skill, no hook).
+
+The hook was live: in `main-hook2`, 13 of 15 replies were blocked at least once (55 blocks: 32 numbers
+without a source, 9 a condition stated as the person's, 8 internal jargon, 3 questions after a go-ahead, 2
+simplified characters, 1 empty claim). So what the checker catches is wording — a bare rule-of-thumb figure,
+a preference written as an exclusion — and every one of those was revised before sending.
+
+| arm (Sonnet std, 15 cases) | task 0–2 | quality 1–5 | satisfy 0–2 | beats original | invented numbers | cost/15 |
+|---|---|---|---|---|---|---|
+| main-3 | 1.53 | 2.73 | 0.93 | 2/15 | 1.9 | $3.10 |
+| main-4 | 1.53 | 3.00 | 1.00 | 4/15 | 0.8 | $3.70 |
+| main-hook | 1.47 | 2.93 | 0.80 | 2/15 | 1.5 | $3.04 |
+| main-hook2 | 1.53 | 3.07 | 1.00 | 2/15 | 0.9 | $4.35 |
+| variant-e | 1.33 | 2.67 | 0.73 | 1/15 | 1.7 | $3.30 |
+| variant-e2 | 1.40 | 2.60 | 0.67 | 3/15 | 1.0 | $5.42 |
+
+The gates judge (re-run after the fact, `--rejudge`) sees the same picture with one difference worth naming:
+
+| arm (gates judge, 15 cases) | G1/G2/G3 pass | first sentence | T mean 0–3 | satisfy 0–2 | beats original | numbers w/o cue | questions / reply |
+|---|---|---|---|---|---|---|---|
+| main-3 | 3/14/10 | 8 | 1.43 | 0.80 | 1/15 | 5.3 | 1.2 |
+| main-4 | 2/12/10 | 12 | 1.62 | 0.80 | 3/15 | 3.3 | 1.1 |
+| main-hook | 4/13/10 | 11 | 1.53 | 0.87 | 0/15 | 5.4 | 0.4 |
+| main-hook2 | 2/12/11 | 9 | 1.65 | 1.20 | 3/15 | 3.7 | 0.5 |
+| variant-e | 4/12/11 | 8 | 1.50 | 0.73 | 0/15 | 5.1 | 1.3 |
+| variant-e2 | 6/14/8 | 6 | 1.41 | 0.67 | 4/15 | 2.5 | 1.9 |
+
+Questions per reply halve under main's hook (1.1 → 0.4–0.5: the go-ahead rule blocks a question after "Go"),
+and `main-hook2` has the best satisfy of any Sonnet arm on this judge (1.20 vs 0.80) — but `main-hook` did
+not (0.87), so one run of two; the inline judge put both at or below the baseline. The programmatic
+"numbers without a cue" count does not fall (3.7 vs 3.3): the model satisfies the checker by adding a cue word,
+which the stricter count does not accept.
+
+| arm (10 rated cases) | material work gaps / reply | all material gaps / reply |
+|---|---|---|
+| main-4 | 2.3 | 4.0 |
+| main-hook | 2.4 | 3.7 |
+| main-hook2 | 2.0 | 3.7 |
+| variant-e | 1.7 | 3.3 |
+| variant-e2 | 1.6 | 4.0 |
+
+Reading. Main's checker plus the hook is neutral on the judge (quality 3.07 vs 3.00, within the 0.27 the two
+baselines differ by) and takes work gaps from 2.3 to 2.2 on average over two runs (−13%; the two hook runs
+differ from each other by 0.4, so this is inside run-to-run noise) at +18% cost from the revision turns. The
+branch-d checker plus the hook cuts work gaps more (1.65, −28%) but loses on the judge in both runs (quality
+2.60–2.67, satisfy 0.67–0.73, both below either baseline) and its all-material count does not move: the four
+extra rules push the model to add process content, and the reader files the result under judgement gaps.
+Neither arm meets the pre-set bar (work gaps down about a third with no loss).
+
+Decision. The Stop hook is **not the default**; it stays documented as an optional Claude Code setup
+(`docs/INSTALL.md`) because it does enforce the one rule text never achieved (no bare number, no
+preference-turned-exclusion) at a known cost. Branch `exp/reply-check-d` is not merged. The missing-work half
+of the gap needs the work to be done, not the wording checked — that is the fixed-chain experiment (arm F,
+`scripts/vet_case.py`, next section).
+
+## Arm F (started 2026-09-15 19:35): the fixed vetting chain as one command
+
+`scripts/vet_case.py` runs identity → certificates → Land Registry → area scan → management registers → TfL →
+arithmetic in one call and returns states the model cannot soften (identity exact/ambiguous/unresolved,
+checks pass/flag/unknown/not_applicable with scope, absence-only registers never pass, no overall verdict).
+Branch `exp/vet-case-route` (f811459, worktree `../pea-princess-f`) routes "requests a full flat assessment"
+through it first. Run: `bench/private/vetcase-run.sh` — the two standard cells (Sonnet 5, Codex terra) × the
+five private flats × two repeats into `bench/private/durable/vetcase-rep{1,2}`; compare with
+`bench/ab/ctx_compare.py --baseline ctx-baseline-4 ctx-baseline-5 --arm F vetcase-rep1 vetcase-rep2`
+(fact recall, fabrications, unknown honesty, tokens, turns). Expectation to beat: baseline fact recall on the
+same flats with fewer turns; the failure mode to watch: the model quoting the command's states instead of the
+facts.
+
+## Journeys, 2026-09-15: the fabrication counter was mostly wrong; j12 passes on both hosts
+
+Reading the seven 2026-09-14 "fabrications" one by one: six were pasted figures under the wrong label (the
+person's budget ceiling, the weekly rent as a holding-deposit cap, a sum on the right of an equals sign) and one
+was real — a six-week deposit cap done in the model's head, £3,252 for £3,253.85 (the "no model maths" rule not
+followed). `bench/journeys.py` now counts as a fabrication only a number with no source: a reply that states an
+accepted value passes even when the same pattern catches other figures; a wrong figure that the person or the
+pasted material stated is "never states this fact", not an invention; the holding-deposit masks get a second,
+unmasked look when they swallow the right figure (8f0287b, tests). Regrading copies of the 09-14 runs:
+Claude 3 → 1, Codex 4 → 0 fabrications; journey means unchanged (0.742/0.739 → 0.743/0.743), still 0/10 over
+the 0.9 line — the line is missed on keyword checks, not on invented numbers.
+
+`j12-scoped-consent-zh` (Codex's Grok six-turn fixture, ported verbatim) on the current skill: **Claude Code
+Sonnet 5 0.93 (0.98 with the refined expectations), Codex terra 0.98, 0 fabrications, both PASS** — the first
+journeys to clear the line on this skill. Neither host reproduced the two Grok defects: Sonnet kept 「可以考慮看
+房」 and continued researching B with the comparison saved; terra quoted the person's words back (「你說『只接
+受 A 這間預估 46 分鐘可以考慮看』，所以這個例外只給 A」) and refused to widen the 45-minute rule to B. Remaining
+misses: Sonnet did not restate C's exclusion when re-ranking in turn 5; terra's closing line did not say in so
+many words that nothing was contacted. So the consent-strengthening seen on Grok is a host trait, or a trait of
+the older package tested there — not the current skill text.
+
+Re-cutting j9 to the contract (1e17f8c: a clear instruction is applied at once and shown as old → new, no
+confirmation question, the validator not named, the one question kept for the setting that has no field) and
+regrading copies of the 2026-09-14 runs: Claude mean 0.742 → 0.758, Codex 0.739 → 0.760, fabrications 1 / 0,
+still 0/10 over the line. j9 itself: Claude 0.83/0.72 → 0.89/0.81 (en/zh), Codex 0.69/0.78 → 0.78/0.86. The
+lowest journeys are now j1 (0.63/0.67) and j5 (0.65/0.71); their failing checks are next to be read one by one.
+
+j1 and j5 re-cut (193418d) after an Opus triage of every failing check: two-thirds were stale (the ten-fact
+primer, six numbered questions, mode labels, route codes, zh-only phrase lists, three grader artefacts).
+Regraded 09-14 copies: Claude 0.793, Codex 0.804 (j5 0.95, the first pass), fabrications 1 / 0. The real
+misses cluster in two themes: Claude spending three turns on a doubt about a fictional postcode instead of
+naming it in one line and carrying on (onboarding's one-doubt rule), and referencing content never reaching
+the reply (the 4× guarantor test, caps from her own rent, the PDF-password rejection, the two-question first
+message) — the latter now sits as a six-line checklist at the top of `references/axes/16-referencing-and-proof-of-funds.md`.
+

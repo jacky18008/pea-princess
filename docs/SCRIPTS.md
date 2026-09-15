@@ -1380,3 +1380,41 @@ again (each check carries `needed_for`). Exit code 1 when anything fails, so a h
 written; the register calls are the same open, cached requests the skill makes in normal use (2026-09-15, London:
 about 25 s end to end, Overpass the slowest at ~17 s). This is the first thing to run on a new host, and the
 evidence behind the per-host table in `docs/INSTALL.md`.
+
+## `vet_case.py` — the fixed vetting chain for one flat, one command, explicit data states
+
+```
+python3 scripts/vet_case.py --postcode "SE1 9SG" --flat 4 --building "Corbel House" --rent-pcm 1950 --area-m2 48 \
+        --agent "Orrin & Vale" --destination "N1C 4TB" --commute-max 45        # ~3 s cached, ~2–4 min cold
+python3 scripts/vet_case.py --listing saved-page.html --rent-pcm 2100         # fields read from the page first
+python3 scripts/vet_case.py --postcode "SE1 9SG" --fixture canned.json         # no network (tests, replays)
+```
+
+Runs, in a fixed order and under one wall-clock budget (`--deadline-seconds`, default 240): postcodes.io →
+energy certificates (search at the postcode, word-bounded match on the flat number and building, the
+certificate, the building's range) → HM Land Registry → the area scan (crime, works, roads, noise; reused when
+already saved) → Companies House and the redress registers → TfL → arithmetic (deposit cap, rent per square
+metre). All imported as modules, never subprocesses, so the shared spacing and cache apply.
+
+Why (2026-09-15): the replayed conversations showed about half of a cheap model's material gaps are work the
+skill already asks for — a register not run, a certificate not matched, "no result" read as fine. `plan.py`
+lists the chain but never runs it; this runs it and returns states a model cannot soften:
+
+| Field | Values | Rule |
+|---|---|---|
+| `identity.state` | `exact`, `ambiguous`, `unresolved` | unit-scope facts need `exact`; with `ambiguous` the certificate figures are the building's range and the unit check stays unknown |
+| `registers.*.state` | `ok`, `not_found`, `unreachable` | a register still running at the deadline is `unreachable` ("timed out"), never clean |
+| `checks[].state` | `pass`, `flag`, `unknown`, `not_applicable` | unknown never becomes pass; absence-only registers (rogue landlords, redress schemes, Heat Trust) can say flag or unknown, never pass |
+| `checks[].scope` | `unit`, `building`, `street`, `area`, `journey`, `management` | what the evidence is about |
+| `next_steps[]` | code-generated | identity first, then the unknowns that block, then the flags; each says what would settle it |
+| `verdict` | always `null` | the report contract turns the states into words; the script never gives an overall verdict |
+
+Seventeen checks: identity, floor area (advertised vs certificate, 5% tolerance), energy rating (F/G flagged),
+heating type (heat network and electric flagged), floor position (top flagged), sales history and age, deposit
+cap (5 or 6 weeks by annual rent), rent per m², works nearby (notable applications flagged), road noise at the
+point (≥ 65 dB flagged, "not drawn" is quiet by the model), main road within 60 m or rail within 100 m,
+recorded crime (context, never a filter), client money protection, the company behind the name (only dissolved
+matches flagged), the rogue landlord checker (entries flagged; none is unknown), commute against the person's
+ceiling, Heat Trust membership when on a heat network. `not_found[]` uses the report contract's shape
+(`what`, `queries_used`, `where_looked`, `next_step`). A copy is saved under `.pea-state/vet-cases/` unless
+`--no-save`. Tests: `tests/test_vet_case.py` (canned register outputs, every network function trapped).
