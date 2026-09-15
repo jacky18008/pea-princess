@@ -164,6 +164,49 @@ class SyntheticStreamTests(unittest.TestCase):
             self.assertTrue(timed["deadline_reached"])
             self.assertFalse(timed["complete_answer"])
 
+    def test_resume_uses_existing_session_and_frozen_new_human_text_once(self):
+        with tempfile.TemporaryDirectory() as root_text:
+            root = Path(root_text)
+            project = root / "project"
+            skill = project / ".grok/skills/pea-princess/SKILL.md"
+            skill.parent.mkdir(parents=True)
+            skill.write_text("synthetic skill", encoding="utf-8")
+            prompt = root / "followup.txt"
+            prompt.write_text("change just this condition", encoding="utf-8")
+            session = "01a0a71e-ce4c-7340-b0a6-2a55255fd170"
+            inspected = {"skills": [{"name": "pea-princess", "source": {"path": str(skill)}}]}
+
+            def fake_run(cmd, **_kwargs):
+                if cmd[-2:] == ["inspect", "--json"]:
+                    return types.SimpleNamespace(returncode=0, stdout=json.dumps(inspected), stderr="")
+                return types.SimpleNamespace(returncode=0, stdout="grok 1.0.30\n", stderr="")
+
+            messages = [
+                {"type": "text", "data": "continued answer"},
+                {"type": "usage", "usage": {field: 1 for field in probe.FIELDS}},
+                {"type": "end", "stopReason": "end_turn", "sessionId": session},
+            ]
+            process = types.SimpleNamespace(pid=1234, stdout=io.StringIO(
+                "\n".join(json.dumps(m) for m in messages) + "\n"),
+                wait=lambda timeout=None: 0, poll=lambda: 0)
+            argv = ["run", "--project", str(project), "--grok-home", str(root / "home"),
+                    "--prompt-file", str(prompt), "--skill-file", str(skill),
+                    "--out", str(root / "receipt"), "--resume-id", session]
+            with mock.patch.object(probe.subprocess, "run", side_effect=fake_run), \
+                    mock.patch.object(probe.subprocess, "Popen", return_value=process) as launch, \
+                    redirect_stdout(io.StringIO()):
+                self.assertEqual(0, probe.main(argv))
+            cmd = launch.call_args.args[0]
+            self.assertEqual(session, cmd[cmd.index("--resume") + 1])
+            self.assertNotIn("--session-id", cmd)
+            self.assertEqual("change just this condition", (root / "receipt/prompt.txt").read_text())
+            self.assertEqual(session, json.loads((root / "receipt/summary.json").read_text())["session_id"])
+            self.assertEqual(session, json.loads((root / "receipt/manifest.json").read_text())["resume_id_requested"])
+            argv.extend(["--session-id", "b19b6904-2863-401b-82be-d9be776ab2b7"])
+            with redirect_stderr(io.StringIO()) as diagnostics:
+                self.assertEqual(1, probe.main(argv))
+            self.assertIn("use --resume-id alone", diagnostics.getvalue())
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -28,6 +28,7 @@ import subprocess
 import sys
 import threading
 import time
+import uuid
 
 
 FIELDS = ("input_tokens", "cache_read_input_tokens",
@@ -175,6 +176,13 @@ def inspect_skill(report, name, expected_file):
 def run(args):
     if args.hard_turns <= args.soft_turns:
         raise ValueError("hard turns must exceed soft turns")
+    if args.session_id and args.resume_id:
+        raise ValueError("--session-id creates a new conversation; use --resume-id alone to continue")
+    if args.resume_id:
+        try:
+            uuid.UUID(args.resume_id)
+        except ValueError as exc:
+            raise ValueError("--resume-id must be an existing session UUID") from exc
     project = args.project.resolve(strict=True)
     if not project.is_dir():
         raise ValueError("project must be a directory")
@@ -222,6 +230,8 @@ def run(args):
         cmd.append("--always-approve")
     if args.session_id:
         cmd.extend(["--session-id", args.session_id])
+    if args.resume_id:
+        cmd.extend(["--resume", args.resume_id])
     if args.reasoning_effort:
         cmd.extend(["--effort", args.reasoning_effort])
     if rules_text:
@@ -234,6 +244,7 @@ def run(args):
                 "model": args.model, "reasoning_effort": args.reasoning_effort,
                 "rules_sha256": rules_hash, "sandbox": args.sandbox,
                 "always_approve": args.always_approve, "session_id_requested": args.session_id,
+                "resume_id_requested": args.resume_id,
                 "soft_turns": args.soft_turns, "hard_turns": args.hard_turns,
                 "max_seconds": args.max_seconds,
                 "automatic_retry": False}
@@ -330,6 +341,7 @@ def main(argv=None):
     live.add_argument("--reasoning-effort")
     live.add_argument("--rules-file", type=Path)
     live.add_argument("--session-id")
+    live.add_argument("--resume-id", help="continue this project's existing Grok session; never creates a new ID")
     live.add_argument("--always-approve", action="store_true")
     live.add_argument("--expected-prompt-sha256")
     live.add_argument("--expected-skill-sha256")
