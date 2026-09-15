@@ -31,6 +31,25 @@ rent, availability, area or floor plan.
    person if the destination itself is unclear. Do not search the web for an
    unrelated postcode or substitute arbitrary coordinates. State origin and
    endpoint, date/time, route estimate, missing waits and any door buffer.
+   Save the JSON receipt for each candidate. Before ranking on the commute or
+   sending a draft, run the offline source audit with the person's **named**
+   endpoint (a stop ID alone does not prove where each returned route ends):
+   `python3 <skill>/scripts/commute_compare.py --candidate A=/path/to/a.json --candidate B=/path/to/b.json --target-endpoint "London Bridge Rail Station" --origin A="postcode point" --origin B="street midpoint" --draft /path/to/draft.txt`.
+   Compare every successful target-endpoint option, including returned
+   alternatives, on the same destination, date, arrival time and door buffer.
+   Read the audit's `plans` rows even when its status is `review_required`:
+   routes to another station remain visible, and a timed-out mode is unknown,
+   not evidence that no route exists. Correct `correction_required` findings;
+   inspect `review_required` findings and source receipts yourself. In
+   particular, a shorter all-mode journey to an Underground station must not
+   erase a rail journey to the requested Rail station or justify a blanket
+   “only A has buffer / B almost misses 9:00” claim. Preserve each origin's
+   precision in the final comparison. If there is no shell or the checker did
+   not run, compare the saved plan rows manually and say machine checking was
+   unavailable. A third-party host cannot guarantee that this helper executes
+   before its model sends a reply; a host-owned acceptance harness can run it
+   before accepting that reply. Literal draft cues are narrow, so a clean
+   checker result still needs human review of the actual claim and source.
 4. Explain the tradeoff in ordinary language. Keep reported advert facts,
    public-data estimates and unknown property-specific facts separate. Ask at
    most one question that would change which home to investigate next; continue

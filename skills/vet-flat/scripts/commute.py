@@ -203,6 +203,7 @@ def parse_journey(journey, door_buffer_min=0):
         "door_buffer_min": door_buffer_min,
         "start": journey.get("startDateTime"),
         "arrival": journey.get("arrivalDateTime"),
+        "actual_endpoint": legs[-1]["to"] if legs else None,
         "legs": legs,
         "changes": max(0, len(transit) - 1),
         "transit_legs": len(transit),
@@ -265,6 +266,9 @@ def parse_journey_response(obj, door_buffer_min=0):
     best = dict(parsed[0])
     best["ok"] = True
     best["alternatives_min"] = [p["duration_min"] for p in parsed]
+    # Keep each returned route's arrival, endpoint and modes. Minutes alone
+    # cannot establish that an alternative reaches the requested station.
+    best["alternatives"] = parsed
     best["journeys_returned"] = len(parsed)
     return best
 

@@ -164,6 +164,13 @@ class TestJourneyParser(unittest.TestCase):
         self.assertEqual(self.bus["duration_min"], min(self.bus["alternatives_min"]))
         self.assertEqual(self.bus["alternatives_min"], sorted(self.bus["alternatives_min"]))
 
+    def test_alternatives_retain_actual_endpoints_and_arrival_times(self):
+        self.assertEqual(len(self.bus["alternatives"]), self.bus["journeys_returned"])
+        self.assertEqual([p["duration_min"] for p in self.bus["alternatives"]],
+                         self.bus["alternatives_min"])
+        self.assertTrue(all(p["actual_endpoint"] for p in self.bus["alternatives"]))
+        self.assertTrue(all(p["arrival"] for p in self.bus["alternatives"]))
+
     def test_rail_plan_uses_rail_only(self):
         self.assertEqual(self.rail["modes"], ["tube"])
         self.assertEqual(self.rail["lines"], ["District"])
