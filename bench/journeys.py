@@ -743,6 +743,7 @@ def package_files(root):
     if root.is_symlink() or not root.is_dir():
         raise ValueError("public skill package must be a real directory: " + str(root))
     found = {}
+    total_bytes = 0
     for folder, dirs, files in os.walk(str(root), followlinks=False):
         for name in dirs + files:
             path = Path(folder) / name
@@ -751,6 +752,12 @@ def package_files(root):
             if name in files:
                 if not path.is_file():
                     raise ValueError("public skill package contains a non-file: " + str(path))
+                size = path.stat().st_size
+                total_bytes += size
+                if (len(found) >= playground_skill.MAX_ENTRIES or
+                        size > playground_skill.MAX_FILE_BYTES or
+                        total_bytes > playground_skill.MAX_TOTAL_BYTES):
+                    raise ValueError("public skill package exceeds the preflight size limit")
                 found[str(path.relative_to(root)).replace(os.sep, "/")] = hashlib.sha256(path.read_bytes()).hexdigest()
     return found
 
@@ -779,8 +786,12 @@ def pinned_bundle(args):
         # Codex read-only still permits reads of same-user installed skills.
         # A conflicting global copy would make the baseline ambiguous and must
         # stop *before* a model call, even if the local package is correct.
-        for location in (Path.home() / ".agents/skills/pea-princess",
-                         Path.home() / ".codex/skills/pea-princess"):
+        locations = [Path.home() / ".agents/skills/pea-princess",
+                     Path.home() / ".codex/skills/pea-princess"]
+        configured_codex_home = os.environ.get("CODEX_HOME")
+        if configured_codex_home:
+            locations.append(Path(configured_codex_home) / "skills/pea-princess")
+        for location in locations:
             if location.exists() or location.is_symlink():
                 verify_package(location, bundle)
     playground_skill.verify_source(bundle)
@@ -1092,7 +1103,8 @@ def play(journey, args, variant_id=None):
                 if bundle is not None:
                     playground_skill.verify_source(bundle)
                     verify_package(Path(workdir) / SKILL_HOME[agent] / "pea-princess", bundle)
-                    if len(system) + len(prompt) > args.max_prompt_chars:
+                    mounted_instruction = Path(workdir, "AGENTS.md").read_text(encoding="utf-8")
+                    if len(mounted_instruction) + len(prompt) > args.max_prompt_chars:
                         raise ValueError("pinned journey prompt exceeds --max-prompt-chars before dispatch")
                 cmd = codex_command(prompt, workdir, args.model, sandbox, pinned=bundle is not None)
             # One launcher for every runner: stdin closed, both streams captured, the
