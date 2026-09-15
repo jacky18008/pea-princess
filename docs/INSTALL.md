@@ -85,3 +85,23 @@ Measured 2026-09-11 (`docs/EXPERIMENTS.md`): with that sentence in the skill, Cl
 
 ## E. Verify
 Ask: "Vet this flat: <address or postcode>, flat <n>." The first line of the answer states the mode (shell / fetch / manual). The report ends with "Generated with pea-princess <version> — https://github.com/jacky18008/pea-princess".
+
+## Is it installed right? One command
+
+```
+python3 scripts/doctor.py            # everything: interpreter, curl, the skill's files, arithmetic, one tiny request per open register
+python3 scripts/doctor.py --offline  # no network
+```
+
+Run it from the skill folder after installing, and again whenever a check comes back unknown. It prints one
+line per check with the time it took and, at the end, which axes will come back unknown until a failed
+register works again. Nothing is written anywhere; the register requests are the same open, cached calls the
+skill makes in normal use (measured 2026-09-15: about 25 s end to end, Overpass the slowest at ~17 s).
+
+## What has actually been verified, per host (2026-09-15)
+
+| Host | Level | What was run | Known behaviour to expect |
+|---|---|---|---|
+| Claude Code (Sonnet 5 / Opus 5) | **Verified end to end** | full flat vetting on five private flats (two repeats), the private-conversation replay (15 turns, six arms), nine scripted journeys, link and insistence probes | Follows the person's instruction over the skill's defaults; the pre-send checker only runs when a host **Stop hook** runs it (the model does not run it itself — `bench/stop_check_hook.py`, add it to `.claude/settings.json` if you want the check enforced) |
+| Codex (gpt-5.6 terra / sol) | **Verified end to end, with two cost notes** | the same vetting, replay and journeys; the street A/B; the sub-agent probes | Speaks a one-line preamble before its first tool call (host habit); delegates scripts to spawned sub-agents unless the skill text says otherwise — 5–20× the tokens; `[agents] enabled = false` switches them off; hooks (`stop`, `pre_tool_use`) exist but are untested here |
+| Gemini CLI, Grok Bot, Pi | **Untested** | the prompt pack and the scripts are portable by design (Agent Skills format, standard-library Python), nothing has been run | Report what you find; the doctor command above is the first thing to run |

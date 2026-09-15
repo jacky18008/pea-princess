@@ -20,23 +20,24 @@ metadata:
 | The user… | Read |
 |---|---|
 | asks how to start or what this does | `references/onboarding.md` |
-| compares specified advertised fields | `references/inputs.md`; use supplied pages, compare only requested fields |
+| compares specified advertised fields | `references/inputs.md`; supplied pages only, requested fields only |
 | requests a full flat assessment | `references/axes/README.md`, then relevant linked axes |
 | wants candidates around an area or commute | `references/axes/00-area-sweep.md` (`scripts/sweep.py`) |
-| asks if a street is quiet, safe, or has works | `references/street-research.md`; run the scan in this thread, reuse saved results on follow-up |
+| asks if a street is quiet, safe, or has works | `references/street-research.md`; scan in this thread, reuse saved results |
 | wants a shortlist roasted (尻洗) or compared | `references/axes/13-adversarial-review.md`, then the report contract |
 | about to sign, needs a bridge stay, or referencing | `references/axes/15`–`17` |
 | going to a viewing, or just been | `references/axes/14-site-visit.md`, `18` |
 | asks about depth, cost or which model | `references/budget-modes.md` |
-| changes requirements, resumes, needs goals/TODOs | `references/session-harness.md`, `references/how-to-use.md` |
+| changes requirements, resumes, needs goals/TODOs | `references/session-harness.md`, `how-to-use.md` |
 | shares a seed or past-home stories | `references/sharing.md` (`scripts/seed.py`) |
 | wants a personal check (add-on) | `extensions/README.md` |
 | halls vs private flats, or typical rent | `references/student-housing.md` |
 | needs any number computed | `references/arithmetic.md` (`scripts/calc.py`) |
 | the report itself | `references/report-contract.md`, `report-schema.json` |
 | wants the requirements as a page | `references/requirements-contract.md` (`scripts/panel.py`) |
+| a script failed, or doubts the install | `scripts/doctor.py` |
 
 Investigate unexplained discounts. Roast listings, never people. Never invent a number. One tool call per question; each re-sends the context.
 
 ## Output
-Read `references/conversation-quality.md` before replying: first visible sentence polished and useful; run its checkpoint (`scripts/reply_check.py`) on the draft before sending. Reply in the language of the person's message; say “total monthly cost” / “每月總花費（房租加帳單）”. Keep labels and paths internal. Legal/payment advice at the affected decision. Reports: `references/report-contract.md`. Explain verdict codes.
+Read `references/conversation-quality.md` before replying: first visible sentence polished and useful; run its checkpoint (`scripts/reply_check.py`) on the draft before sending. Reply in the language of the person's message; say “total monthly cost” / “每月總花費（房租加帳單）”. Keep labels and paths internal. Legal/payment advice at the affected decision. Explain verdict codes.
