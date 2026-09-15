@@ -6,7 +6,9 @@ source-truth, consent, or external-action check. Run it just before saying that
 work has been saved. It does not initialize state or repair a failed save.
 """
 import argparse
+import hashlib
 import json
+import os
 from pathlib import Path
 import sys
 
@@ -18,6 +20,26 @@ import session_state
 def _require(condition, message):
     if not condition:
         raise session_state.SessionStateError(message)
+
+
+def _current_report_bytes(store, path):
+    """Read the currently visible report through project-relative no-follow fds."""
+    _require(isinstance(path, str) and path and not Path(path).is_absolute(),
+             "registered report path is not project-relative")
+    parts = Path(path).parts
+    _require(parts and all(part not in ("", ".", "..", ".pea-state") for part in parts),
+             "registered report path is unsafe")
+    descriptors = []
+    try:
+        parent = os.open(str(store.project_root), os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+        descriptors.append(parent)
+        for part in parts[:-1]:
+            parent = os.open(part, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=parent)
+            descriptors.append(parent)
+        return store._read(parent, parts[-1], session_state.MAX_DOCUMENT_BYTES)
+    finally:
+        for descriptor in reversed(descriptors):
+            os.close(descriptor)
 
 
 def check(project, scope, *, evidence=None, output_id=None):
@@ -63,6 +85,10 @@ def check(project, scope, *, evidence=None, output_id=None):
             _require(task and task["status"] == "completed" and task["valid"]
                      and output["document_id"] in task["evidence_ids"],
                      "report task has not validated its saved document")
+            current_bytes = _current_report_bytes(store, document["path"])
+            _require(len(current_bytes) == document["byte_length"]
+                     and hashlib.sha256(current_bytes).hexdigest() == document["sha256"],
+                     "current report file differs from its registered snapshot")
             receipt.update(output_id=output_id, document_id=output["document_id"],
                            document_sha256=document["sha256"], task_id=output["task_id"])
         else:

@@ -60,6 +60,28 @@ class SaveGateTests(unittest.TestCase):
     def reconcile(self):
         return boundary.reconcile(self.store, self.payload(), self.evidence, 0)
 
+    def register_report(self, *, complete=False):
+        self.reconcile()
+        current = self.store.show()
+        def apply(event):
+            nonlocal current
+            current = self.store.apply(event, expected_revision=current["revision"])
+
+        apply({"op": "task.add", "id": "compare-a-b", "title": "Check saved comparison report",
+               "acceptance": ["Saved report preserves its quoted source and uncertainties."]})
+        report = "A advertises GBP 2450/month; B advertises GBP 2100/month. Bedroom quiet is unknown."
+        path = self.project / "report.md"
+        path.write_text(report + "\n", encoding="utf-8")
+        apply({"op": "document.add", "id": "report-doc", "path": "report.md", "line_ranges": [[1, 1]],
+               "provenance": {"actor": "assistant", "source_id": "local-report", "quote": report}})
+        apply({"op": "output.record", "id": "report-a-b", "task_id": "compare-a-b",
+               "document_id": "report-doc", "decision_ids": [],
+               "based_on_revision": current["revision"]})
+        if complete:
+            apply({"op": "task.complete", "id": "compare-a-b", "evidence_ids": ["report-doc"],
+                   "based_on_revision": current["revision"]})
+        return current, path
+
     def cli(self, *extra):
         result = subprocess.run([sys.executable, str(SCRIPTS / "save_gate.py"),
                                  "--project", str(self.project), *extra, "--json"],
@@ -116,25 +138,13 @@ class SaveGateTests(unittest.TestCase):
                          "comparison")
 
     def test_registered_report_requires_validated_task_and_fails_after_change(self):
-        self.reconcile()
-        current = self.store.show()
-        def apply(event):
-            nonlocal current
-            current = self.store.apply(event, expected_revision=current["revision"])
-
-        apply({"op": "task.add", "id": "compare-a-b", "title": "Check saved comparison report",
-               "acceptance": ["Saved report preserves its quoted source and uncertainties."]})
-        report = "A advertises GBP 2450/month; B advertises GBP 2100/month. Bedroom quiet is unknown."
-        (self.project / "report.md").write_text(report + "\n", encoding="utf-8")
-        apply({"op": "document.add", "id": "report-doc", "path": "report.md", "line_ranges": [[1, 1]],
-               "provenance": {"actor": "assistant", "source_id": "local-report", "quote": report}})
-        apply({"op": "output.record", "id": "report-a-b", "task_id": "compare-a-b",
-               "document_id": "report-doc", "decision_ids": [],
-               "based_on_revision": current["revision"]})
+        current, _ = self.register_report()
         code, receipt = self.cli("--scope", "report", "--output-id", "report-a-b")
         self.assertEqual(code, 2, receipt)  # Registration alone leaves acceptance pending.
-        apply({"op": "task.complete", "id": "compare-a-b", "evidence_ids": ["report-doc"],
-               "based_on_revision": current["revision"]})
+        current = self.store.apply({"op": "task.complete", "id": "compare-a-b",
+                                    "evidence_ids": ["report-doc"],
+                                    "based_on_revision": current["revision"]},
+                                   expected_revision=current["revision"])
         code, receipt = self.cli("--scope", "report", "--output-id", "report-a-b")
         self.assertEqual(code, 0, receipt)
         self.assertEqual(receipt["document_sha256"], current["documents"]["report-doc"]["sha256"])
@@ -142,8 +152,36 @@ class SaveGateTests(unittest.TestCase):
         # export no longer matches the current revision; the scopes are separate.
         code, _ = self.cli("--scope", "comparison", "--evidence", str(self.evidence_path))
         self.assertEqual(code, 2)
-        apply({"op": "request.capture", "id": "u2", "source": "user-message",
-               "text": "New rent ceiling GBP 2200."})
+        self.store.apply({"op": "request.capture", "id": "u2", "source": "user-message",
+                          "text": "New rent ceiling GBP 2200."},
+                         expected_revision=current["revision"])
+        code, receipt = self.cli("--scope", "report", "--output-id", "report-a-b")
+        self.assertEqual(code, 2)
+        self.assertFalse(receipt["ok"])
+
+    def test_current_report_file_edit_and_symlink_fail_without_journal_change(self):
+        current, path = self.register_report(complete=True)
+        code, receipt = self.cli("--scope", "report", "--output-id", "report-a-b")
+        self.assertEqual(code, 0, receipt)
+        frozen_revision = current["revision"]
+        frozen_hash = current["event_hash"]
+        original_bytes = path.read_bytes()
+
+        path.write_text("A newer unsaved report with different facts.\n", encoding="utf-8")
+        code, receipt = self.cli("--scope", "report", "--output-id", "report-a-b")
+        self.assertEqual(code, 2)
+        self.assertFalse(receipt["ok"])
+        self.assertEqual(self.store.verify()["revision"], frozen_revision)
+        self.assertEqual(self.store.verify()["event_hash"], frozen_hash)
+
+        target = self.project / "replacement.md"
+        target.write_bytes(original_bytes)  # Following this link would incorrectly pass the hash.
+        path.unlink()
+        path.symlink_to(target)
+        code, receipt = self.cli("--scope", "report", "--output-id", "report-a-b")
+        self.assertEqual(code, 2)
+        self.assertFalse(receipt["ok"])
+        path.unlink()
         code, receipt = self.cli("--scope", "report", "--output-id", "report-a-b")
         self.assertEqual(code, 2)
         self.assertFalse(receipt["ok"])
