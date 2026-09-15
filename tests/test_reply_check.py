@@ -165,6 +165,19 @@ class TestAuthority(unittest.TestCase):
         self.assertEqual([], [f for f in RC.scan("我建議先確認臥室朝向；如果背向主幹道，Southerton 才值得看。") if f["kind"] == "authority"])
         self.assertEqual([], [f for f in RC.scan("Only if you want it: I would rule out B until the bedroom side is known.") if f["kind"] == "authority"])
 
+    def test_decision_flags_wording_stronger_than_the_persons(self):
+        # 2026-09-15 Grok Bot validation: 可考慮看房 became 可排看房; an unanswered offer became 已拒
+        self.assertIn("decision", kinds(RC.scan("好，A 目前可排看房，我把它列為下一步。")))
+        self.assertIn("decision", kinds(RC.scan("B 的例外已拒，先不深挖。")))
+        self.assertIn("decision", kinds(RC.scan("A viewing is booked for Thursday.")))
+        self.assertIn("你還沒回應", [f for f in RC.scan("B 的例外已拒。") if f["kind"] == "decision"][0]["say"])
+
+    def test_decision_keeps_the_persons_words_and_proposals(self):
+        for ok in ("你說 A 可以考慮看房，B 的條件不變。", "如果你同意，我再幫你排看房。", "A 你先留著，先不約看。",
+                   "你已預約週四看 A，我列出當天要確認的三件事。", "仲介回信說「已排週四」，你要不要去？",
+                   "You said A may be considered for a viewing; nothing is booked."):
+            self.assertEqual([], [f for f in RC.scan(ok) if f["kind"] == "decision"], ok)
+
     def test_scan_and_saved_data_count_as_a_source_for_numbers(self):
         self.assertEqual([], [f for f in RC.scan("保存資料在 300 米內未標出地面鐵路、酒吧、夜店或俱樂部。") if f["kind"] == "numbers"])
         self.assertEqual([], [f for f in RC.scan("掃描資料顯示 300 公尺內沒有地面鐵路。") if f["kind"] == "numbers"])
