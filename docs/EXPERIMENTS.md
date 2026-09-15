@@ -1145,3 +1145,11 @@ regrading copies of the 2026-09-14 runs: Claude mean 0.742 → 0.758, Codex 0.73
 still 0/10 over the line. j9 itself: Claude 0.83/0.72 → 0.89/0.81 (en/zh), Codex 0.69/0.78 → 0.78/0.86. The
 lowest journeys are now j1 (0.63/0.67) and j5 (0.65/0.71); their failing checks are next to be read one by one.
 
+j1 and j5 re-cut (193418d) after an Opus triage of every failing check: two-thirds were stale (the ten-fact
+primer, six numbered questions, mode labels, route codes, zh-only phrase lists, three grader artefacts).
+Regraded 09-14 copies: Claude 0.793, Codex 0.804 (j5 0.95, the first pass), fabrications 1 / 0. The real
+misses cluster in two themes: Claude spending three turns on a doubt about a fictional postcode instead of
+naming it in one line and carrying on (onboarding's one-doubt rule), and referencing content never reaching
+the reply (the 4× guarantor test, caps from her own rent, the PDF-password rejection, the two-question first
+message) — the latter now sits as a six-line checklist at the top of `references/axes/16-referencing-and-proof-of-funds.md`.
+

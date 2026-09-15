@@ -6,6 +6,15 @@ Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen — https://github.com
 Decide, before you spend a viewing on a flat, whether you can actually pass its money gate. Most wasted weeks in a search come from finding the right flat and then discovering the landlord's rule set does not have a route for you.
 The gate has three parts: **an affordability test**, **a referencing check**, and **a guarantor position**. Ask for all three in writing in the first message (question G1).
 
+## Say these in the first reply about referencing (the cheap-model checklist)
+The rest of this page is the reasoning; a reply that skips these six is the one the journeys keep failing (2026-09-15):
+1. **The three routes by name** — a personal UK guarantor, a commercial guarantor product (a fallback, never a filter), or savings — and that the landlord's own published criteria decide which are open.
+2. **The multiples that apply to this person**, from the table below: a student's guarantor at about **4×** the rent; the savings route at about **36×** the monthly rent held; say they are the published shapes and that the landlord's document is the evidence.
+3. **The caps computed from this rent**, with the arithmetic: deposit five weeks (six at £50,000 a year or more), holding deposit one week, rent in advance one month.
+4. **The holding deposit is exclusive**: confirm the flat is held for them before paying any guarantor-product fee, and a truthful applicant does not lose it if referencing fails on the landlord's rules.
+5. **The documents that pass**: official bank statements with the account cover page, three to six months with running balances, in English where the bank issues it, no screenshots, no PDF password; passport and immigration document; enrolment or offer letter with dates.
+6. **The first message to the agent carries two questions at most**, asks for documents not opinions, and is courteous: which routes they accept and the criteria as a document; what is refundable or transferable if referencing fails.
+
 ## The affordability test
 Landlords apply a multiple of the rent, and the multiple depends on which box you are in. Multiples below are the shapes seen in published operator criteria; the number for **this** landlord must come from their own document.
 
