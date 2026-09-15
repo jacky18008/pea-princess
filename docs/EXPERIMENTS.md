@@ -1139,3 +1139,9 @@ misses: Sonnet did not restate C's exclusion when re-ranking in turn 5; terra's 
 many words that nothing was contacted. So the consent-strengthening seen on Grok is a host trait, or a trait of
 the older package tested there — not the current skill text.
 
+Re-cutting j9 to the contract (1e17f8c: a clear instruction is applied at once and shown as old → new, no
+confirmation question, the validator not named, the one question kept for the setting that has no field) and
+regrading copies of the 2026-09-14 runs: Claude mean 0.742 → 0.758, Codex 0.739 → 0.760, fabrications 1 / 0,
+still 0/10 over the line. j9 itself: Claude 0.83/0.72 → 0.89/0.81 (en/zh), Codex 0.69/0.78 → 0.78/0.86. The
+lowest journeys are now j1 (0.63/0.67) and j5 (0.65/0.71); their failing checks are next to be read one by one.
+
