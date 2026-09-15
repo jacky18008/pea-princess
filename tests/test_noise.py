@@ -15,6 +15,7 @@ import os
 import subprocess
 import sys
 import unittest
+from unittest import mock
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SCRIPTS = os.path.join(HERE, "..", "skills", "vet-flat", "scripts")
@@ -77,9 +78,9 @@ class TestLevels(unittest.TestCase):
         self.assertFalse(r["ok"]); self.assertEqual("curl error 6", r["note"])
 
     def test_describe_is_anchored_to_the_who_guideline(self):
-        self.assertIn("well under the WHO guideline of 53", N.describe(41.0, "lden"))
-        self.assertIn("above the WHO guideline of 53", N.describe(56.0, "lden"))
-        self.assertIn("at least 17 dB above the WHO guideline of 53", N.describe(75.3, "lden"))
+        self.assertIn("12 dB below the WHO guideline of 53", N.describe(41.0, "lden"))
+        self.assertIn("3 dB above the WHO guideline of 53", N.describe(56.0, "lden"))
+        self.assertIn("22.3 dB above the WHO guideline of 53", N.describe(75.3, "lden"))
         self.assertIn("45 dB", N.describe(43.0, "lnight"))
         self.assertIn("54", N.describe(50.0, "lden", "rail"))
         self.assertIn("nothing drawn", N.describe(None, "lden"))
@@ -93,19 +94,19 @@ class TestLevels(unittest.TestCase):
                         text = N.describe(who + offset, metric, source)
                         self.assertIn("modelled outdoor exposure", text)
                         self.assertIn("%d dB" % who, text)
-                        self.assertIn("under" if offset < 0 else "above", text)
+                        self.assertIn("below" if offset < 0 else "at" if offset == 0 else "above", text)
                         for unsupported in ("audible", "window open", "constant presence", "quiet",
                                             "loud", "frontage", "trackside", "right by", "busy-road", "A-road"):
                             self.assertNotIn(unsupported, text)
 
-    def test_threshold_boundaries_keep_the_existing_comparison_bands(self):
-        self.assertIn("at or above", N.describe(53, "lden"))
-        self.assertIn("7–12 dB above", N.describe(60, "lden"))
-        self.assertIn("12–17 dB above", N.describe(65, "lden"))
-        self.assertIn("at least 17 dB above", N.describe(70, "lden"))
-        self.assertIn("at or above", N.describe(45, "lnight"))
-        self.assertIn("5–10 dB above", N.describe(50, "lnight"))
-        self.assertIn("at least 10 dB above", N.describe(55, "lnight"))
+    def test_threshold_boundaries_report_exact_gaps(self):
+        self.assertIn("at the WHO guideline of 53", N.describe(53, "lden"))
+        self.assertIn("7 dB above", N.describe(60, "lden"))
+        self.assertIn("12 dB above", N.describe(65, "lden"))
+        self.assertIn("17 dB above", N.describe(70, "lden"))
+        self.assertIn("at the WHO night guideline of 45", N.describe(45, "lnight"))
+        self.assertIn("5 dB above", N.describe(50, "lnight"))
+        self.assertIn("10 dB above", N.describe(55, "lnight"))
 
 
 class TestLookup(unittest.TestCase):
@@ -123,10 +124,23 @@ class TestLookup(unittest.TestCase):
         self.assertIn("not indoor levels, window direction or how often noise will be heard", out["scale"])
         self.assertIn("road 53 dB, rail 54 dB", out["scale"])
         self.assertIn("road 45 dB, rail 44 dB", out["scale"])
+        self.assertEqual(N.WHO_GUIDELINE_SOURCE, out["guideline_source_url"])
+        self.assertIn(N.WHO_GUIDELINE_SOURCE, out["sources"], "the area scan forwards these source URLs")
         for unsupported in ("quiet back streets", "main-road frontages", "just noticeable", "twice as loud"):
             self.assertNotIn(unsupported, out["scale"])
         self.assertIn("Crown Copyright", out["licence"])
         self.assertLess(len(json.dumps(out, ensure_ascii=False)), 3500)
+
+    def test_street_span_and_point_use_their_own_exact_who_gaps(self):
+        sample = lambda db: {"db": db, "ok": True, "note": ""}
+        with mock.patch.object(N, "level", side_effect=[sample(63.4), sample(56.7)]):
+            out = N.lookup([(51.5179, -0.0560), (51.5180, -0.0561)], with_band=False)
+        reading = out["reading"][0]
+        self.assertIn("63.4 dB at the point", reading)
+        self.assertIn("56.7-63.4 dB across 2 points", reading)
+        self.assertIn("WHO guideline of 53 dB, from 3.7 dB above to 10.4 dB above", reading)
+        self.assertIn("modelled outdoor exposure 10.4 dB above the WHO guideline of 53 dB", reading)
+        self.assertNotIn("7–12 dB", reading)
 
     def test_rail_nothing_drawn_reads_as_no_mapped_noise(self):
         f = fake([("Round_3", NO_BAND), ("Road_Noise_Lden", KING_ST), ("Rail_Noise_Lden", NOTHING)])

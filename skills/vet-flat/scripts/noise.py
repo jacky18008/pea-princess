@@ -20,6 +20,8 @@ Sources (verified 2026-09-11, docs/research/defra-noise-endpoints-2026-09-11.md)
         https://environment.data.gov.uk/spatialdata/noise-data/wms          (rail; the slug is not a typo)
     Round 3 WFS, the 2017 band polygon that contains the point:
         https://environment.data.gov.uk/spatialdata/road-noise-lden-england-round-3/wfs   (and lnight, rail)
+    WHO 2018 guideline values (published executive summary):
+        https://iris.who.int/bitstream/handle/10665/343936/WHO-EURO-2018-3287-43046-60243-eng.pdf
 
 Usage:
     noise.py --lat 51.4926 --lng -0.2284
@@ -65,6 +67,7 @@ WFS = {("road", "lden"): ("road-noise-lden-england-round-3",
 FLOOR = {"lden": 40.0, "lnight": 35.0}        # the 2022 raster is not drawn below these
 BAND_FLOOR = {"lden": 55.0, "lnight": 50.0}   # the 2017 polygons start here
 WHO = {("road", "lden"): 53.0, ("road", "lnight"): 45.0, ("rail", "lden"): 54.0, ("rail", "lnight"): 44.0}  # WHO 2018 guideline values
+WHO_GUIDELINE_SOURCE = "https://iris.who.int/bitstream/handle/10665/343936/WHO-EURO-2018-3287-43046-60243-eng.pdf"
 LICENCE = "Open Government Licence v3.0; attribution: © Crown Copyright (Defra strategic noise mapping)"
 HALF = 0.00008   # degrees: a 3x3-pixel box about 18 m tall and 11 m wide in London; the centre pixel is read
 SCALE = ("Lden (day-evening-night average, night weighted +10 dB): WHO guidelines road %d dB, rail %d dB. "
@@ -146,30 +149,15 @@ def describe(db, metric, source="road"):
         return "nothing drawn here (below the map's floor)"
     who = WHO[(source, metric)]
     guideline = "WHO night guideline" if metric == "lnight" else "WHO guideline"
-    if metric == "lnight":
-        if db < who - 5:
-            relation = "well under"
-        elif db < who:
-            relation = "under"
-        elif db < who + 5:
-            relation = "at or above"
-        elif db < who + 10:
-            relation = "5–10 dB above"
-        else:
-            relation = "at least 10 dB above"
-    elif db < who - 8:
-        relation = "well under"
-    elif db < who:
-        relation = "under"
-    elif db < who + 7:
-        relation = "at or above"
-    elif db < who + 12:
-        relation = "7–12 dB above"
-    elif db < who + 17:
-        relation = "12–17 dB above"
-    else:
-        relation = "at least 17 dB above"
-    return "modelled outdoor exposure %s the %s of %d dB" % (relation, guideline, who)
+    return "modelled outdoor exposure %s the %s of %d dB" % (_guideline_gap(db, who), guideline, who)
+
+
+def _guideline_gap(db, who):
+    """A measured map value and a fixed guideline are both shown to one decimal place."""
+    gap = round(db - who, 1)
+    if gap == 0:
+        return "at"
+    return "%s dB %s" % (_fmt(abs(gap)), "above" if gap > 0 else "below")
 
 
 def level(lat, lng, source="road", metric="lden", verbose=False, fetcher=None):
@@ -230,7 +218,8 @@ def lookup(points, rail=False, night=False, with_band=True, verbose=False, fetch
     layers = [("road", "lden")] + ([("road", "lnight")] if night else []) + ([("rail", "lden")] if rail else []) \
         + ([("rail", "lnight")] if rail and night else [])
     out = {"schema": SCHEMA, "ok": False, "retrieved_at": now_iso(), "points": [], "summary": {}, "band_2017": None,
-           "reading": [], "scale": SCALE, "sources": [], "licence": LICENCE, "caveats": CAVEATS, "not_found": []}
+           "reading": [], "scale": SCALE, "guideline_source_url": WHO_GUIDELINE_SOURCE,
+           "sources": [], "licence": LICENCE, "caveats": CAVEATS, "not_found": []}
     values = {k: [] for k in layers}
     for lat, lng in points:
         row = {"lat": round(lat, 6), "lng": round(lng, 6)}
@@ -252,7 +241,7 @@ def lookup(points, rail=False, night=False, with_band=True, verbose=False, fetch
         out["summary"]["%s_%s_db" % (src, met)] = {"at_point": first if isinstance(first, float) else None,
                                                     "min": min(vals) if vals else None, "max": max(vals) if vals else None,
                                                     "n": len(vals), "not_drawn": sum(1 for p in out["points"] if p.get("%s_%s_db" % (src, met)) == "not drawn")}
-    out["sources"] = sorted(set(WMS[s] for s, _ in layers))
+    out["sources"] = sorted(set(WMS[s] for s, _ in layers) | {WHO_GUIDELINE_SOURCE})
     if with_band and points:
         b = band(points[0][0], points[0][1], "road", "lden", verbose=verbose, fetcher=fetcher)
         out["band_2017"] = {"road_lden": b["band"], "ok": b["ok"], "note": b["note"]}
@@ -272,7 +261,13 @@ def lookup(points, rail=False, night=False, with_band=True, verbose=False, fetch
             return "%s: no value could be read for this point." % label
         v = sm["at_point"] if sm["at_point"] is not None else sm["max"]
         at = "at the point" if sm["at_point"] is not None else "at the loudest of the sampled points (nothing drawn at the point itself)"
-        span = "" if n == 1 or sm["min"] == sm["max"] else " (%s-%s dB across %d points along the street)" % (_fmt(sm["min"]), _fmt(sm["max"]), sm["n"])
+        span = ""
+        if n > 1 and sm["min"] != sm["max"]:
+            who = WHO[(src, met)]
+            guideline = "WHO night guideline" if met == "lnight" else "WHO guideline"
+            span = " (%s-%s dB across %d points along the street; compared with the %s of %d dB, from %s to %s)" % (
+                _fmt(sm["min"]), _fmt(sm["max"]), sm["n"], guideline, who,
+                _guideline_gap(sm["min"], who), _guideline_gap(sm["max"], who))
         return "%s: %s dB %s%s: %s." % (label, _fmt(v), at, span, describe(v, met, src))
     reading.append(_sentence("Road noise, day-evening-night average", "road", "lden"))
     if night:
