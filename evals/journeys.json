@@ -5679,6 +5679,7 @@
   },
   {
    "id": "j12-scoped-consent-zh",
+   "prompt_scope": "candidate-boundary",
    "title": "六回合：只放行一戶的看房，例外不擴散、不加重",
    "language": "zh-TW",
    "mode": "manual",

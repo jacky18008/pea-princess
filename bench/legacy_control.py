@@ -61,7 +61,7 @@ def _fingerprints(args):
                 raise ValueError('missing pinned skill input: ' + name)
     paths.update((ROOT / 'bench').glob('*.py'))
     paths.update((ROOT / 'bench/ab').glob('*.py'))
-    for key in ('cases', 'evals', 'journeys', 'personas', 'tasks', 'config', 'config_dir', 'regrade', 'retry_failed'):
+    for key in ('cases', 'evals', 'journeys', 'personas', 'tasks', 'config', 'config_dir', 'regrade', 'retry_failed', 'skill_archive'):
         value = getattr(args, key, None)
         if value:
             source = Path(value)

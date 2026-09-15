@@ -110,6 +110,7 @@ import argparse
 import collections
 import copy
 import datetime
+import hashlib
 import io
 import json
 import os
@@ -120,6 +121,7 @@ import sys
 import tempfile
 import time
 import uuid
+from pathlib import Path
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, ".."))
@@ -127,6 +129,10 @@ if HERE not in sys.path:
     sys.path.insert(0, HERE)
 import launch  # noqa: E402  the shared launcher: one attempt, captured tails, provider_error
 import legacy_control  # durable live-call boundary; offline modes remain local
+TOOLS = os.path.join(ROOT, "tools")
+if TOOLS not in sys.path:
+    sys.path.insert(0, TOOLS)
+import playground_skill  # noqa: E402  bounded public ZIP validation; no network
 
 SKILL_DIR = os.path.join(ROOT, "skills", "vet-flat")
 JOURNEYS_JSON = os.path.join(ROOT, "evals", "journeys.json")
@@ -633,9 +639,14 @@ def system_prompt(journey, refs="needed"):
     system prompt or the model is being marked on a file it was never given.
     """
     parts = []
-    for path, title in ((PROMPT_PACK, "SKILL INSTRUCTIONS"),
-                        (INPUTS_MD, "WHEN YOU CANNOT GET SOMETHING"),
-                        (ONBOARDING_MD, "ONBOARDING")):
+    # A scoped-consent comparison has supplied evidence and no intake request.
+    # Sending the 27k-character onboarding reference at every turn adds cost and
+    # competes with the explicit boundary instructions needed for this journey.
+    base = [(PROMPT_PACK, "SKILL INSTRUCTIONS"),
+            (INPUTS_MD, "WHEN YOU CANNOT GET SOMETHING")]
+    if journey.get("prompt_scope") != "candidate-boundary":
+        base.append((ONBOARDING_MD, "ONBOARDING"))
+    for path, title in base:
         if os.path.exists(path):
             parts.append("# %s\n\n%s" % (title, read_text(path)))
     for rel in reference_files(journey, refs):
@@ -726,7 +737,72 @@ def materialise_attachments(turn, workdir, agent):
     return written
 
 
-def prepare_workdir(journey, agent, workdir=None, system=None):
+def package_files(root):
+    """Bounded inventory of a selected installed public package; no links."""
+    root = Path(root)
+    if root.is_symlink() or not root.is_dir():
+        raise ValueError("public skill package must be a real directory: " + str(root))
+    found = {}
+    for folder, dirs, files in os.walk(str(root), followlinks=False):
+        for name in dirs + files:
+            path = Path(folder) / name
+            if path.is_symlink():
+                raise ValueError("public skill package contains a link: " + str(path))
+            if name in files:
+                if not path.is_file():
+                    raise ValueError("public skill package contains a non-file: " + str(path))
+                found[str(path.relative_to(root)).replace(os.sep, "/")] = hashlib.sha256(path.read_bytes()).hexdigest()
+    return found
+
+
+def verify_package(root, bundle):
+    expected = bundle["identity"]["files"]
+    actual = package_files(root)
+    if set(actual) != set(expected) or any(actual[name] != expected[name]["sha256"] for name in actual):
+        raise ValueError("public skill package differs from pinned ZIP: " + str(root))
+
+
+def pinned_bundle(args):
+    archive = getattr(args, "skill_archive", None)
+    if not archive:
+        return None
+    for value, label in ((getattr(args, "expected_archive_sha256", None), "archive"),
+                         (getattr(args, "expected_skill_sha256", None), "SKILL.md")):
+        if not isinstance(value, str) or not re.fullmatch(r"[0-9a-f]{64}", value):
+            raise ValueError("--expected-" + label.replace("SKILL.md", "skill") + "-sha256 is required with --skill-archive")
+    bundle = playground_skill.load_archive(archive)
+    identity = bundle["identity"]
+    if (identity["archive_sha256"] != args.expected_archive_sha256 or
+            identity["skill_sha256"] != args.expected_skill_sha256):
+        raise ValueError("selected public ZIP identity differs from expected archive or SKILL.md hash")
+    if args.agent == "codex" and not args.dry_run:
+        # Codex read-only still permits reads of same-user installed skills.
+        # A conflicting global copy would make the baseline ambiguous and must
+        # stop *before* a model call, even if the local package is correct.
+        for location in (Path.home() / ".agents/skills/pea-princess",
+                         Path.home() / ".codex/skills/pea-princess"):
+            if location.exists() or location.is_symlink():
+                verify_package(location, bundle)
+    playground_skill.verify_source(bundle)
+    return bundle
+
+
+def install_pinned_package(home, bundle):
+    destination = Path(home) / "pea-princess"
+    if destination.exists() or destination.is_symlink():
+        verify_package(destination, bundle)
+        return str(destination)
+    destination.mkdir(parents=True, mode=0o700)
+    for name, body in bundle["files"].items():
+        path = destination / name
+        path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+        path.write_bytes(body)
+        path.chmod(0o600)
+    verify_package(destination, bundle)
+    return str(destination)
+
+
+def prepare_workdir(journey, agent, workdir=None, system=None, bundle=None):
     """A clean folder with the skill where this agent looks for skills."""
     workdir = legacy_control.workdir(workdir)
     path = os.path.abspath(workdir) if workdir else tempfile.mkdtemp(
@@ -738,14 +814,25 @@ def prepare_workdir(journey, agent, workdir=None, system=None):
         home = os.path.join(path, SKILL_HOME[agent])
         if not os.path.isdir(home):
             os.makedirs(home)
-        dst = os.path.join(home, "vet-flat")
-        if os.path.lexists(dst):
-            (shutil.rmtree if os.path.isdir(dst) and not os.path.islink(dst)
-             else os.unlink)(dst)
-        shutil.copytree(SKILL_DIR, dst)
-        plan.append("copy skills/vet-flat -> %s/vet-flat" % SKILL_HOME[agent])
+        if bundle is not None:
+            dst = install_pinned_package(home, bundle)
+            plan.append("pin public ZIP -> %s/pea-princess (SKILL.md sha256 %s)" %
+                        (SKILL_HOME[agent], bundle["identity"]["skill_sha256"]))
+        else:
+            dst = os.path.join(home, "vet-flat")
+            if os.path.lexists(dst):
+                (shutil.rmtree if os.path.isdir(dst) and not os.path.islink(dst)
+                 else os.unlink)(dst)
+            shutil.copytree(SKILL_DIR, dst)
+            plan.append("copy skills/vet-flat -> %s/vet-flat" % SKILL_HOME[agent])
     if agent == "codex" and system is not None:
         with io.open(os.path.join(path, "AGENTS.md"), "w", encoding="utf-8") as fh:
+            if bundle is not None:
+                fh.write("# Pinned public skill for this test\n"
+                         "Use only %s (SKILL.md sha256 %s). Do not search globally installed skills. "
+                         "The required references are already in this instruction; reread a file only "
+                         "for a specific unresolved fact.\n\n" %
+                         (dst, bundle["identity"]["skill_sha256"]))
             fh.write(system)
         plan.append("write AGENTS.md (codex exec has no append-system-prompt flag)")
     return path, plan
@@ -781,9 +868,11 @@ def claude_command(prompt, workdir, model, system, session_id=None, resume=None,
     return cmd + ["--", prompt]
 
 
-def codex_command(prompt, workdir, model, sandbox="read-only"):
+def codex_command(prompt, workdir, model, sandbox="read-only", pinned=False):
     cmd = ["codex", "exec", "--cd", workdir, "--sandbox", sandbox,
            "--skip-git-repo-check", "--json"]
+    if pinned:
+        cmd += ["--ignore-user-config", "--ephemeral"]
     if model:
         cmd += ["--model", model]
     return cmd + ["--", prompt]
@@ -903,9 +992,15 @@ def play(journey, args, variant_id=None):
     tools, sandbox = claude_tools(journey), codex_sandbox(journey)
     label = journey["id"] + ("#" + variant_id if variant_id else "")
     legacy_control.job(label)
+    if (journey["id"] == "j12-scoped-consent-zh" and agent == "codex"
+            and not args.dry_run and not getattr(args, "skill_archive", None)):
+        raise ValueError("j12 Codex live run requires --skill-archive with exact public ZIP hashes")
+    bundle = pinned_bundle(args)
     system = system_prompt(journey, args.refs)
+    if bundle is not None and len(system) > getattr(args, "max_prompt_chars", 60000):
+        raise ValueError("pinned journey instruction exceeds --max-prompt-chars before dispatch")
     workdir, plan = prepare_workdir(journey, agent, args.workdir,
-                                    system if agent == "codex" else None)
+                                    system if agent == "codex" else None, bundle=bundle)
     session_id = legacy_control.session_id()
     carry, how = (False, "n/a")
     if agent == "claude":
@@ -920,8 +1015,9 @@ def play(journey, args, variant_id=None):
         print("workdir:  %s" % workdir)
         for line in plan or ["(nothing to copy: the skill travels in the system prompt)"]:
             print("          %s" % line)
-        print("system:   dist/prompt-pack/INSTRUCTIONS.md + references/inputs.md + "
-              "references/onboarding.md")
+        print("system:   dist/prompt-pack/INSTRUCTIONS.md + references/inputs.md" +
+              ("" if journey.get("prompt_scope") == "candidate-boundary" else
+               " + references/onboarding.md"))
         for rel in reference_files(journey, args.refs):
             print("          + %s" % rel)
         print("          + this run's note (%d characters in total)" % len(system))
@@ -969,7 +1065,7 @@ def play(journey, args, variant_id=None):
                 print("          cd %s && %s" % (workdir, shell_preview(cmd)))
             else:
                 cmd = codex_command(transcript(history, user) if history else user,
-                                    workdir, args.model, sandbox)
+                                    workdir, args.model, sandbox, pinned=bundle is not None)
                 print("          cd %s && %s" % (workdir, shell_preview(cmd)))
             history.append(("user", user))
             history.append(("assistant", "(dry run: the reply would be here)"))
@@ -992,8 +1088,13 @@ def play(journey, args, variant_id=None):
                                      session_id=session_id if carry else None,
                                      resume=session_id if (carry and index > 1) else None)
             else:
-                cmd = codex_command(transcript(history, user) if history else user,
-                                    workdir, args.model, sandbox)
+                prompt = transcript(history, user) if history else user
+                if bundle is not None:
+                    playground_skill.verify_source(bundle)
+                    verify_package(Path(workdir) / SKILL_HOME[agent] / "pea-princess", bundle)
+                    if len(system) + len(prompt) > args.max_prompt_chars:
+                        raise ValueError("pinned journey prompt exceeds --max-prompt-chars before dispatch")
+                cmd = codex_command(prompt, workdir, args.model, sandbox, pinned=bundle is not None)
             # One launcher for every runner: stdin closed, both streams captured, the
             # one physical attempt, and the tails kept when the
             # provider never let the turn through at all.
@@ -1245,6 +1346,11 @@ def build_parser():
                                                                       1200)),
                     help="seconds per turn, default 1200")
     ap.add_argument("--workdir", help="use this directory instead of a fresh temp one")
+    ap.add_argument("--skill-archive", help="exact public pea-princess ZIP to pin for this journey")
+    ap.add_argument("--expected-archive-sha256", help="required ZIP SHA-256 when --skill-archive is set")
+    ap.add_argument("--expected-skill-sha256", help="required SKILL.md SHA-256 when --skill-archive is set")
+    ap.add_argument("--max-prompt-chars", type=int, default=60000,
+                    help="pre-dispatch bound on the pinned instruction plus continuing prompt")
     ap.add_argument("--keep", action="store_true", help="do not delete the temp workdir")
     legacy_control.add_arguments(ap)
     return ap

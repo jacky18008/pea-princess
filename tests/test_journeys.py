@@ -22,6 +22,7 @@ Three things are checked here and nothing else.
 """
 import collections
 import contextlib
+import hashlib
 import io
 import json
 import os
@@ -43,6 +44,81 @@ SKILL_DIR = os.path.join(ROOT, "skills", "vet-flat")
 sys.path.insert(0, BENCH)
 import journeys as runner  # noqa: E402
 import launch  # noqa: E402  the shared launcher every runner goes through
+
+
+class TestPinnedPublicJourney(unittest.TestCase):
+    """Package selection must fail before a model call when source identity drifts."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.j12 = next(j for j in runner.load_journeys()["journeys"]
+                       if j["id"] == "j12-scoped-consent-zh")
+
+    def bundle(self):
+        files = {"SKILL.md": b"---\nname: pea-princess\n---\n",
+                 "references/rules.md": b"Rules for the bounded test.\n"}
+        return {"files": files, "identity": {
+            "archive_sha256": "a" * 64,
+            "skill_sha256": hashlib.sha256(files["SKILL.md"]).hexdigest(),
+            "files": {name: {"sha256": hashlib.sha256(body).hexdigest(),
+                             "bytes": len(body)} for name, body in files.items()}}}
+
+    def args(self, bundle):
+        return runner.build_parser().parse_args([
+            "--agent", "codex", "--journey", "j12-scoped-consent-zh",
+            "--skill-archive", "/synthetic/public.zip",
+            "--expected-archive-sha256", bundle["identity"]["archive_sha256"],
+            "--expected-skill-sha256", bundle["identity"]["skill_sha256"]])
+
+    def test_j12_live_refuses_an_unpinned_package_without_dispatch(self):
+        args = runner.build_parser().parse_args([
+            "--agent", "codex", "--journey", "j12-scoped-consent-zh"])
+        with mock.patch.object(runner.legacy_control, "run_cli") as dispatch:
+            with self.assertRaisesRegex(ValueError, "requires --skill-archive"):
+                runner.play(self.j12, args)
+        dispatch.assert_not_called()
+
+    def test_conflicting_global_installed_skill_refuses_before_dispatch(self):
+        bundle = self.bundle()
+        folder = tempfile.mkdtemp()
+        try:
+            global_home = runner.Path(folder) / ".agents/skills"
+            installed = runner.install_pinned_package(global_home, bundle)
+            self.assertTrue(installed.endswith("/pea-princess"))
+            (runner.Path(installed) / "references/rules.md").write_text("old rules")
+            with (mock.patch.object(runner.playground_skill, "load_archive", return_value=bundle),
+                  mock.patch.object(runner.playground_skill, "verify_source"),
+                  mock.patch.object(runner.Path, "home", return_value=runner.Path(folder))):
+                with self.assertRaisesRegex(ValueError, "differs from pinned ZIP"):
+                    runner.pinned_bundle(self.args(bundle))
+        finally:
+            shutil.rmtree(folder, ignore_errors=True)
+
+    def test_matching_global_and_local_package_passes_exact_file_check(self):
+        bundle = self.bundle()
+        folder = tempfile.mkdtemp()
+        try:
+            global_home = runner.Path(folder) / ".agents/skills"
+            local_home = runner.Path(folder) / "work/.agents/skills"
+            runner.install_pinned_package(global_home, bundle)
+            local = runner.install_pinned_package(local_home, bundle)
+            runner.verify_package(local, bundle)
+            with (mock.patch.object(runner.playground_skill, "load_archive", return_value=bundle),
+                  mock.patch.object(runner.playground_skill, "verify_source"),
+                  mock.patch.object(runner.Path, "home", return_value=runner.Path(folder))):
+                self.assertIs(bundle, runner.pinned_bundle(self.args(bundle)))
+        finally:
+            shutil.rmtree(folder, ignore_errors=True)
+
+    def test_candidate_boundary_prompt_omits_unneeded_onboarding_but_keeps_guards(self):
+        text = runner.system_prompt(self.j12)
+        self.assertLess(len(text), 60000)
+        self.assertNotIn("# ONBOARDING\n", text)
+        self.assertIn("# REFERENCES/BOUNDARY-TURN.MD", text)
+        self.assertIn("# REFERENCES/SESSION-HARNESS.MD", text)
+        cmd = runner.codex_command("hello", "/synthetic/work", "gpt-5.6-terra", pinned=True)
+        self.assertIn("--ignore-user-config", cmd)
+        self.assertIn("--ephemeral", cmd)
 
 
 class AuthenticatedApiTransport(unittest.TestCase):
