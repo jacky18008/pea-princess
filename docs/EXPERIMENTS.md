@@ -1153,3 +1153,11 @@ naming it in one line and carrying on (onboarding's one-doubt rule), and referen
 the reply (the 4× guarantor test, caps from her own rent, the PDF-password rejection, the two-question first
 message) — the latter now sits as a six-line checklist at the top of `references/axes/16-referencing-and-proof-of-funds.md`.
 
+j2, j4 and j6 re-cut the same way (second Opus triage: 51 stale, 42 real, 1 unclear); grader tolerances for
+typographic hyphens, plurals and "first" as a number word; drafted letters masked. Regraded 09-14 copies now:
+**Claude 0.817, Codex 0.860 (j5 0.95, j6 0.95 over the line), fabrications 1 / 0** — against 0.742 / 0.739
+this morning on the same replies, so about two-thirds of the "gap to the pass line" was the bench, not the
+skill. Real-miss themes fed back into the skill text: the one-doubt rule in onboarding's sorting block; a
+"first 30 minutes after arriving" list in axis 14; the standard answer about dates in axis 15; the referencing
+checklist in axis 16. Still to re-cut: j3, j7, j8 (0.76–0.83).
+

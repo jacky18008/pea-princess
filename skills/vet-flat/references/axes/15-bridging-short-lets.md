@@ -138,3 +138,11 @@ If you arrive and the place is not habitable (damp, mould, water damage, pests, 
 ## Just arrived: ask before you book a private short let
 Ask the user, once: "For the first one or two weeks, would a hotel or an operator-run serviced stay work for you, with a private short let only after you have viewed it?" Present it as a trade, not a rule: the hotel or operator route buys protected money, an instant exit and a responsible party, at a known premium per night and usually without a kitchen (price the eating-out cost with `scripts/calc.py`); the private short let is cheaper and has a kitchen, but a licence is not a tenancy and problems surface only after check-in (see the damp check in `14-site-visit.md`). Record the answer in `profile.yaml` under `bridging.first_weeks` (`hotel_or_operator` | `private_short_let` | `undecided`).
 
+## What to tell the agent about your dates (the standard answer)
+When the person asks what to say about their dates, the answer has these parts, every time:
+1. Compare whole years, not monthly averages: the bridge plus the tenancy over twelve months against the alternative over the same twelve months; a cheaper flat that starts later can be cheaper overall once the bridge is priced.
+2. Never amortise the bridge into the tenancy's monthly figure; it is a one-off cost of waiting, shown on its own line.
+3. Offer a flexible start date and a willingness to extend; never offer to shorten the stay (a shorter stay is the one thing that costs more per night).
+4. Put the seam between two stays on a weekend, and never more than two blocks: one move is the aim.
+5. Keep the agent on side: say you can decide quickly and are flexible on the exact start, which is what makes a tenant easy to place.
+

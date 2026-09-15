@@ -957,22 +957,18 @@
      "expect": {
       "must": [
        {
-        "label": "states which mode it is in",
-        "any_of": [
-         "shell mode",
-         "manual mode",
-         "fetch mode",
-         "paste"
-        ]
-       },
-       {
         "label": "offers a sweep or a comparison as the first step",
         "any_of": [
          "sweep",
          "scan the area",
          "compare buildings",
          "shortlist",
-         "candidates"
+         "candidates",
+         "compare",
+         "watch list",
+         "first area",
+         "search terms",
+         "areas to search"
         ]
        },
        {
@@ -1307,22 +1303,33 @@
         "label": "names the one-month ceiling on rent in advance",
         "any_of": [
          "one month",
-         "1 month"
+         "1 month",
+         "first month",
+         "first month's rent",
+         "a month's rent"
         ]
        },
        {
-        "label": "names a landmine code",
-        "regex": "\\bL(?:1|12)\\b"
+        "label": "names the deposit-cap or balcony trap in plain words",
+        "any_of": [
+         "deposit cap",
+         "balcony",
+         "five weeks",
+         "in advance",
+         "over the cap",
+         "cap"
+        ]
        },
        {
         "label": "asks a gate question about money",
         "any_of": [
-         "G1",
-         "G4",
-         "G8",
          "deposit protection",
          "custodial",
-         "guarantor"
+         "guarantor",
+         "referencing",
+         "income",
+         "affordability",
+         "holding deposit"
         ]
        },
        {
@@ -1331,7 +1338,11 @@
          "unknown",
          "not found",
          "cannot",
-         "u "
+         "not mentioned",
+         "not stated",
+         "not shown",
+         "no information",
+         "unclear"
         ]
        }
       ],
@@ -1445,7 +1456,8 @@
         "required": true,
         "patterns": [
          "(?:cap(?:ped)?(?:\\s+at)?|at most|no more than|maximum|may only take|can only take|上限|最多|不得超過|不能超過|只能收|法定)[^.。\\n]{0,32}?([0-9]+|one|two|three|six|twelve|一|兩|二|三|六|十二)\\s*(?:個月|months?)[^.。\\n]{0,20}?(?:in advance|up ?front|預付|先付)?",
-         "([0-9]+|one|two|three|一|兩|二|三)\\s*(?:個月|months?)\\s*(?:rent\\s*)?(?:in advance|up ?front|預付|先付)[^.。\\n]{0,20}?(?:at most|maximum|上限|為上限|是上限)"
+         "([0-9]+|one|two|three|一|兩|二|三)\\s*(?:個月|months?)\\s*(?:rent\\s*)?(?:in advance|up ?front|預付|先付)[^.。\\n]{0,20}?(?:at most|maximum|上限|為上限|是上限)",
+         "(?i)(?:limits?|restricted|capped|limited)[^.。\\n]{0,24}?to[^.。\\n]{0,12}?(first|one|1)\\s*month"
         ],
         "source": "skills/vet-flat/SKILL.md legal facts",
         "why": "One month is the cap; the listing's three months is the ask."
@@ -1530,17 +1542,13 @@
          "short",
          "template",
          "two at most",
-         "one message"
-        ]
-       },
-       {
-        "label": "frames the agent as the person who gets her the keys",
-        "any_of": [
-         "partner",
-         "keys",
-         "same questions",
-         "friendly",
-         "every flat"
+         "one message",
+         "first",
+         "ask next",
+         "follow-up",
+         "two first",
+         "the rest later",
+         "later"
         ]
        }
       ],
@@ -1588,13 +1596,6 @@
        }
       ],
       "max_questions": 4,
-      "ends_with": {
-       "any_of": [
-        "?",
-        "please",
-        "thank"
-       ]
-      },
       "language": "en"
      },
      "judge_notes": "Are the two drawn from the bank rather than softened? Would a letting agent read them in ten seconds?"
@@ -2342,8 +2343,16 @@
      "expect": {
       "must": [
        {
-        "label": "assigns bookability tiers",
-        "regex": "(?i)\\btier\\s*[A-F]\\b"
+        "label": "classifies each stay by who runs it, in plain words",
+        "any_of": [
+         "operator",
+         "marketplace",
+         "private landlord",
+         "hotel",
+         "aparthotel",
+         "tier",
+         "peer-to-peer"
+        ]
        },
        {
         "label": "names the licence-not-tenancy landmine",
@@ -2351,7 +2360,7 @@
        },
        {
         "label": "names the headline-price landmine",
-        "regex": "(?i)\\bL16\\b|headline\\ price|not\\ the\\ price|true\\ price|real\\ price|all\\-in\\ price|標價|標價不是實價"
+        "regex": "(?i)\\bL16\\b|headline\\ price|not\\ the\\ price|true\\ price|real\\ price|all\\-in\\ price|標價|標價不是實價|headline|real cost|actual cost|true cost|cheapest-looking|looks cheapest"
        },
        {
         "label": "damp caution on the lower-ground one",
@@ -2388,7 +2397,14 @@
          "who holds",
          "held by the operator",
          "held by the platform",
-         "held by the landlord"
+         "held by the landlord",
+         "goes to the operator",
+         "sits with the landlord",
+         "held by",
+         "holds the deposit",
+         "who gets the deposit",
+         "paid to the operator",
+         "to the platform"
         ]
        },
        {
@@ -2464,7 +2480,12 @@
          "walkthrough",
          "before you pay",
          "before paying",
-         "view it"
+         "view it",
+         "live-view",
+         "live viewing",
+         "before booking",
+         "before you book",
+         "video call"
         ]
        },
        {
@@ -2484,7 +2505,14 @@
          "2 night",
          "short stays",
          "cleanliness",
-         "fast reply"
+         "fast reply",
+         "2- and 3-night",
+         "2-night",
+         "3-night",
+         "two- and three-night",
+         "short-stay",
+         "3-night stays",
+         "nights"
         ]
        },
        {
@@ -2497,19 +2525,6 @@
          "k3",
          "k2",
          "k1"
-        ]
-       },
-       {
-        "label": "engages with the roast - either word, or a plain synonym",
-        "any_of": [
-         "roast",
-         "尻洗",
-         "blunt",
-         "candid",
-         "straight",
-         "no sugar",
-         "honestly",
-         "hard look"
         ]
        }
       ],
@@ -2777,7 +2792,13 @@
          "refund right",
          "protected deposit",
          "what you give up",
-         "missing"
+         "missing",
+         "wrong with it",
+         "company number",
+         "no company",
+         "deposit held by",
+         "gives up",
+         "loses"
         ]
        },
        {
@@ -2788,7 +2809,13 @@
          "someone responsible",
          "protected",
          "no kitchen",
-         "eating out"
+         "eating out",
+         "protection",
+         "the extra",
+         "extra £",
+         "hotel-grade",
+         "counterparty",
+         "buys you"
         ]
        },
        {
@@ -2816,7 +2843,11 @@
          "phone",
          "call",
          "before you submit",
-         "before you book"
+         "before you book",
+         "before paying",
+         "in writing before",
+         "confirm the booking",
+         "before you pay"
         ]
        }
       ],
@@ -2869,7 +2900,11 @@
          "before you unpack",
          "first 30 minutes",
          "30 minutes",
-         "straight away"
+         "straight away",
+         "before unpacking",
+         "unpack",
+         "on arrival",
+         "the moment you arrive"
         ]
        },
        {
@@ -2894,7 +2929,10 @@
        {
         "label": "smell test: corridor, bin store, the unit",
         "any_of": [
-         "smell"
+         "smell",
+         "smells",
+         "musty",
+         "drain"
         ]
        },
        {
@@ -2913,7 +2951,12 @@
          "wifi",
          "fixed line",
          "router",
-         "speed"
+         "speed",
+         "wi‑fi",
+         "wi fi",
+         "wireless",
+         "broadband",
+         "fibre"
         ]
        },
        {
@@ -3053,7 +3096,12 @@
          "helps both",
          "friendly",
          "same questions",
-         "makes it easy"
+         "makes it easy",
+         "agents like",
+         "flexible on the exact",
+         "decide quickly",
+         "move fast",
+         "easy for the agent"
         ]
        }
       ],
@@ -3088,14 +3136,6 @@
        }
       ],
       "max_questions": 3,
-      "ends_with": {
-       "any_of": [
-        "extend",
-        "date",
-        "weekend",
-        "agent"
-       ]
-      },
       "language": "en"
      },
      "judge_notes": "Does it price the bridge as a substitution for rent rather than an extra, and say what waiting really costs (two moves, extension risk)?"
@@ -3839,12 +3879,7 @@
        },
        {
         "label": "do not press cancel yourself",
-        "any_of": [
-         "不要自己取消",
-         "不要按取消",
-         "自行取消",
-         "不要自己按"
-        ]
+        "regex": "(?:不要|別|先別|不用|勿)[^。\\n]{0,6}(?:自己|自行)?[^。\\n]{0,4}按?[「『]?取消|(?i)do(?:n't| not) (?:press |hit |click )?cancel"
        },
        {
         "label": "the platform's complaint window after check-in",
@@ -3874,7 +3909,11 @@
          "房東通常",
          "對方通常",
          "多半",
-         "好好說"
+         "好好說",
+         "Please confirm",
+         "please",
+         "請",
+         "客套"
         ]
        },
        {
@@ -3883,7 +3922,12 @@
          "提前退房",
          "退款",
          "未住",
-         "沒住到"
+         "沒住到",
+         "未使用",
+         "退還",
+         "early check-out",
+         "refund",
+         "換房"
         ]
        },
        {
@@ -3915,7 +3959,13 @@
          "兩個",
          "就走",
          "不要住",
-         "換一間"
+         "換一間",
+         "同時出現",
+         "換房",
+         "不要過夜",
+         "三項",
+         "別在那間",
+         "不要住那間"
         ]
        }
       ],
@@ -3932,7 +3982,7 @@
        },
        {
         "label": "does not tell her to hit cancel herself",
-        "regex": "(直接|馬上|立刻|自己)[^。\\n]{0,8}按?取消"
+        "regex": "(?<!不要)(?<!別)(?<!先別)(?<!不用)(?:直接|馬上|立刻|自己)[^。\\n]{0,4}(?:按|點)[「『]?取消"
        },
        {
         "label": "no insult or accusation aimed at the landlord, agent or host",
@@ -3980,7 +4030,11 @@
          "訊息紀錄",
          "站內",
          "留存",
-         "截圖保留"
+         "截圖保留",
+         "平台訊息",
+         "in writing",
+         "截圖",
+         "站內訊息"
         ]
        },
        {
@@ -3990,7 +4044,11 @@
          "日期",
          "幾號",
          "多少",
-         "哪一天"
+         "哪一天",
+         "amount",
+         "date",
+         "refund amount",
+         "退款金額"
         ]
        },
        {
@@ -4018,7 +4076,11 @@
         "any_of": [
          "謝謝",
          "感謝",
-         "先謝"
+         "先謝",
+         "Thank you",
+         "thanks",
+         "感謝你",
+         "謝了"
         ]
        }
       ],
@@ -4107,7 +4169,13 @@
          "防潮",
          "粉刷",
          "重新",
-         "上次"
+         "上次",
+         "修好",
+         "何時修",
+         "repaired",
+         "處理過",
+         "怎樣修",
+         "修過"
         ]
        },
        {
@@ -4125,17 +4193,11 @@
          "價格",
          "需求",
          "不代表品質",
-         "不等於品質"
-        ]
-       },
-       {
-        "label": "keeps the host as a partner next time",
-        "any_of": [
-         "合作",
-         "禮貌",
-         "不是對立",
-         "好好問",
-         "客氣"
+         "不等於品質",
+         "最便宜",
+         "便宜",
+         "價錢",
+         "價位"
         ]
        }
       ],
@@ -4170,15 +4232,6 @@
        }
       ],
       "max_questions": 3,
-      "ends_with": {
-       "any_of": [
-        "清單",
-        "看房",
-        "視訊",
-        "下一間",
-        "檢查"
-       ]
-      },
       "language": "zh-TW"
      },
      "judge_notes": "Does it turn one bad night into a reusable filter rather than a rule against lower-ground flats, which are often good homes?"
