@@ -16,9 +16,9 @@
 
 TfL 初次用 `London Bridge Station` 收歧義，CLI 隨後以回應中的**鐵路站 `1000139`** 重查 A；B 用 scanner 回的 Cable Walk 中點座標同樣查 `1000139`，不再另搜尋終點座標。官方返回 A 17 分鐘、B 28 分鐘；B 最快方案的 08:58 到站只有 2 分鐘餘裕，但 rail-only 方案約 30 分鐘、08:36 到，故不能由前者直接說 B 平日難準時，應比較可選班次／穩健度並讓使用者權衡。不同出發點仍不是各戶門口，零等待接駁也不能保證實走。
 
-在 `max_turns_reached` 前，CLI 建出 `.pea-state/events.json` 並記錄這則 actor：房數與 £2,500 上限為 `must`，臥室安靜和「約 45 分鐘可談」為 `prefer`，9:00 前到站與這輪不找新房／不約看房各有使用者原句與 scope。**這一項比 v3 Bot「偏好升成硬條件」有改善**，但花了多通模型呼叫去讀狀態文件；沒有比較／TODO 的正式 output 註冊或 `save_gate` receipt，且本初問本來也沒要求「存好」。後續追問和保存未驗。
+在 `max_turns_reached` 前，CLI 建出 `.pea-state/events.json` 並記錄這則 actor：房數與 £2,500 上限為 `must`，臥室安靜和「約 45 分鐘可談」為 `prefer`，9:00 前到站與這輪不找新房／不約看房各有使用者原句與 scope。最後一組工具成功執行 `session_state apply-many`，journal 到 revision 10，隨後寫出 draft；上限觸發在**草稿 lint、正式比較／TODO／輸出及可見 reply 之前**。這項原話強度比 v3 Bot「偏好升成硬條件」有改善，但 9:00 要求仍是字串、沒有程式將它和 A/B commute evidence 或排序正式綁定；保存 events **不是候選硬條件已由程式核對的證明**。本初問也沒要求「存好」，所以不能以缺 comparison `save_gate` 單獨算這輪違反保存指令；後續追問和保存仍未驗。
 
-未送 draft 第一段已給 A 優先、B £350 價格差和 Sketch 最近租出；它把兩間廣告當「你提供的摘錄」，沒有預約。然而約 1,800 字的初答重新列出大量內部算式／小區統計，不符合此前設定的「先給引人往下用的有用資訊」長度和焦點；B rail-only 08:36 的備案又與「B 最快方案壓 9:00」的推論拉扯。後置 `reply_check.py` **exit 1、3 個 numbers findings**，其中表格房租／45 分鐘句有上下文來源但 regex 漏判，WHO 道路 53 dB 指引沒有當輪來源收據，需要人類確認或刪掉。CLI 沒有實際在送出前跑 checker，僅呼叫過 `--help`，而且沒有可見 final，故不能通過「講人話」或整輪品質 gate。
+未送 draft 第一段已給 A 優先、B £350 價格差和 Sketch 最近租出；它把兩間廣告當「你提供的摘錄」，沒有預約。然而約 1,800 字的初答重新列出大量內部算式／小區統計，不符合此前設定的「先給引人往下用的有用資訊」長度和焦點。它建議**只深挖 A**，過度把 B 最快路線的 08:58／兩分鐘餘裕當作整體準時風險，對 B rail-only 08:36／24 分鐘備案及兩戶均未核實的門口與臥室噪音權重不足。這是**證據與候選排序品質**問題，尚不是偏好→硬條件的帳本違規。外部事後 `reply_check.py` [私有收據](/Users/chenhsienhao/Documents/UK-Study/pea-princess-evidence-20260915/grok-build-cli-v4/posthoc-reply-check.json)為 **exit 1、3 個 numbers findings**；表格房租／45 分鐘句有上下文來源但 regex 漏判，WHO 道路 53 dB 數字在 scanner `noise.scale` 出現，仍沒有獨立 WHO 來源 URL／收據，需人類確認或刪掉。CLI 沒有實際在送出前跑 checker，僅呼叫過 `--help`，而且沒有可見 final，故不能通過「講人話」或整輪品質 gate。
 
 ## P1–P3 分級與架構處理
 
