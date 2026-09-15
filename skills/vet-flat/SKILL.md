@@ -12,14 +12,15 @@ metadata:
 # Pea Princess — London flat vetting
 
 ## Start
-1. **The person's instruction outranks skill defaults.** Record changes. Read four persistent rules in `references/rules.md` once a session.
-2. Use supplied listing files or text (`scripts/listing_fields.py`); never open listing links. Ask for missing evidence; research open registers with shipped scripts.
-3. Resume `.pea-state` (`references/session-harness.md`) or `profile.yaml`. Every reply advances the search. Ask at most **three essential questions** together; use native choices when available.
-4. **Route by intent** — read only the linked files needed now; never reread context, list folders, or open `sources.yaml`:
+1. **The person's instruction outranks every default in this skill.** Record changes; read `references/rules.md` once.
+2. Use supplied facts (`scripts/listing_fields.py`). Never open listing links or suggest fetching them. Use shipped open-register scripts.
+3. Resume `.pea-state` (`references/session-harness.md`) or `profile.yaml`. Advance replies. Ask at most **three essential questions** with native choices if available.
+4. **Route by intent** — choose one most specific row; do not stack rows, reread context, list folders or open `sources.yaml`:
 
 | The user… | Read |
 |---|---|
 | how to start or what this does | `references/onboarding.md` |
+| compares supplied listings and asks about their commute or surroundings | `references/comparison-research.md` |
 | compares advertised fields | `references/inputs.md`; use supplied pages, compare only requested fields |
 | ranks candidates, saves a comparison/TODO or records a viewing hold | `references/boundary-turn.md` |
 | full flat assessment | `references/axes/README.md`, then relevant linked axes |
@@ -38,7 +39,7 @@ metadata:
 | wants the requirements as a page | `references/requirements-contract.md` (`scripts/panel.py`) |
 | a script failed, or doubts the install | `scripts/doctor.py` |
 
-Investigate unexplained discounts. Roast listings, never people. Never invent a number. One tool call per question; each re-sends the context.
+Investigate discounts. Roast listings, never people. Never invent numbers. Each tool call re-sends context.
 
 ## Output
 Before replying, read `references/conversation-quality.md` and run `scripts/reply_check.py` on the draft. Claim a comparison or report was saved only with a passing `scripts/save_gate.py` receipt for that scope; otherwise state what remains. Open usefully in the person's language. Say “total monthly cost” / “每月總花費（房租加帳單）”; hide internal labels and paths. Give legal/payment advice when affected. Explain verdict codes.

@@ -87,6 +87,12 @@ class TestPlaces(unittest.TestCase):
     def test_free_text_falls_through(self):
         self.assertEqual(commute.parse_place("Victoria")[1], "text")
 
+    def test_disambiguated_tfl_station_id_can_be_requeried_without_guessing(self):
+        api, kind, label = commute.parse_place("1000139")
+        self.assertEqual((api, kind, label), ("1000139", "tfl_stop_id", "1000139"))
+        url = commute._journey_url("SE3%207RS", api, "20260916", "0900", "")
+        self.assertIn("/to/1000139?", url)
+
     def test_empty_is_a_usage_error(self):
         with self.assertRaises(ValueError):
             commute.parse_place("  ")
