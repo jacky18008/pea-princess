@@ -18,6 +18,7 @@ import hashlib
 import os
 import re
 import shutil
+import stat
 import sys
 import subprocess
 import tempfile
@@ -30,6 +31,7 @@ DIST = os.path.join(ROOT, "dist")
 LIMIT = 8000
 SKILL_NAME = "pea-princess"
 ARCHIVE_NAME = SKILL_NAME + "-skill.zip"
+ZIP_TIMESTAMP = (1980, 1, 1, 0, 0, 0)
 
 
 DIGEST_SOURCES = [  # in priority order; short, high-value sections first
@@ -179,6 +181,21 @@ def check_script_dependencies(members, root=None):
                     check_module(base, parts, rel)
 
 
+def write_reproducible_member(archive, source, name):
+    """Archive reviewed bytes with metadata independent of checkout timestamps/modes.
+
+    A shebang determines whether a script is executable; no permission or mtime
+    from the local filesystem enters the public artifact.
+    """
+    data = Path(source).read_bytes()
+    mode = 0o755 if data.startswith(b"#!") else 0o644
+    info = zipfile.ZipInfo(name, ZIP_TIMESTAMP)
+    info.create_system = 3
+    info.external_attr = (stat.S_IFREG | mode) << 16
+    info.compress_type = zipfile.ZIP_DEFLATED
+    archive.writestr(info, data)
+
+
 def main():
     # Validate every source before touching an existing release. Public builds do
     # not remove other dist/ files: it can also hold a private A/B handoff archive.
@@ -214,7 +231,7 @@ def main():
             for full, rel in members:
                 inside = (SKILL_NAME + "/" + rel[len("skills/vet-flat/"):]
                           if rel.startswith("skills/vet-flat/") else SKILL_NAME + "/" + rel)
-                z.write(full, inside)
+                write_reproducible_member(z, full, inside)
                 short = rel[len("skills/vet-flat/"):] if rel.startswith("skills/vet-flat/") else rel
                 if short.startswith(("references/", "profiles/")) or short == "profile.template.yaml":
                     target = os.path.join(pack, short)
