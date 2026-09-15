@@ -1118,3 +1118,24 @@ five private flats × two repeats into `bench/private/durable/vetcase-rep{1,2}`;
 same flats with fewer turns; the failure mode to watch: the model quoting the command's states instead of the
 facts.
 
+## Journeys, 2026-09-15: the fabrication counter was mostly wrong; j12 passes on both hosts
+
+Reading the seven 2026-09-14 "fabrications" one by one: six were pasted figures under the wrong label (the
+person's budget ceiling, the weekly rent as a holding-deposit cap, a sum on the right of an equals sign) and one
+was real — a six-week deposit cap done in the model's head, £3,252 for £3,253.85 (the "no model maths" rule not
+followed). `bench/journeys.py` now counts as a fabrication only a number with no source: a reply that states an
+accepted value passes even when the same pattern catches other figures; a wrong figure that the person or the
+pasted material stated is "never states this fact", not an invention; the holding-deposit masks get a second,
+unmasked look when they swallow the right figure (8f0287b, tests). Regrading copies of the 09-14 runs:
+Claude 3 → 1, Codex 4 → 0 fabrications; journey means unchanged (0.742/0.739 → 0.743/0.743), still 0/10 over
+the 0.9 line — the line is missed on keyword checks, not on invented numbers.
+
+`j12-scoped-consent-zh` (Codex's Grok six-turn fixture, ported verbatim) on the current skill: **Claude Code
+Sonnet 5 0.93 (0.98 with the refined expectations), Codex terra 0.98, 0 fabrications, both PASS** — the first
+journeys to clear the line on this skill. Neither host reproduced the two Grok defects: Sonnet kept 「可以考慮看
+房」 and continued researching B with the comparison saved; terra quoted the person's words back (「你說『只接
+受 A 這間預估 46 分鐘可以考慮看』，所以這個例外只給 A」) and refused to widen the 45-minute rule to B. Remaining
+misses: Sonnet did not restate C's exclusion when re-ranking in turn 5; terra's closing line did not say in so
+many words that nothing was contacted. So the consent-strengthening seen on Grok is a host trait, or a trait of
+the older package tested there — not the current skill text.
+
