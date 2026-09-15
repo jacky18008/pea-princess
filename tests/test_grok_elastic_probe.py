@@ -120,7 +120,7 @@ class SyntheticStreamTests(unittest.TestCase):
                                                  poll=lambda: 0)
             argv = ["run", "--project", str(project), "--grok-home", str(root / "home"),
                     "--prompt-file", str(prompt), "--skill-file", str(skill),
-                    "--out", str(out)]
+                    "--out", str(out), "--reasoning-effort", "high"]
             with mock.patch.object(probe.subprocess, "run", side_effect=fake_run), \
                     mock.patch.object(probe.subprocess, "Popen", return_value=fake_process) as launch, \
                     redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()) as diagnostics:
@@ -128,6 +128,8 @@ class SyntheticStreamTests(unittest.TestCase):
             self.assertEqual(1, launch.call_count)
             cmd = launch.call_args.args[0]
             self.assertEqual("32", cmd[cmd.index("--max-turns") + 1])
+            self.assertEqual("high", cmd[cmd.index("--effort") + 1])
+            self.assertNotIn("--reasoning-effort", cmd)
             self.assertNotIn("--no-auto-update", cmd)
             self.assertTrue(launch.call_args.kwargs["start_new_session"])
             self.assertEqual(1, diagnostics.getvalue().count("soft observation reached"))
@@ -147,8 +149,9 @@ class SyntheticStreamTests(unittest.TestCase):
             timed_process = types.SimpleNamespace(pid=5678, stdout=SlowStream(),
                                                   wait=lambda timeout=None: 143,
                                                   poll=lambda: 143)
-            timed_argv = argv[:-1] + [str(root / "timed-receipt"),
-                                       "--max-seconds", "0.005"]
+            timed_argv = list(argv)
+            timed_argv[timed_argv.index("--out") + 1] = str(root / "timed-receipt")
+            timed_argv.extend(["--max-seconds", "0.005"])
             with mock.patch.object(probe.subprocess, "run", side_effect=fake_run), \
                     mock.patch.object(probe.subprocess, "Popen", return_value=timed_process) as timed_launch, \
                     mock.patch.object(probe.os, "killpg") as kill_group, \

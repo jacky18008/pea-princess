@@ -223,7 +223,7 @@ def run(args):
     if args.session_id:
         cmd.extend(["--session-id", args.session_id])
     if args.reasoning_effort:
-        cmd.extend(["--reasoning-effort", args.reasoning_effort])
+        cmd.extend(["--effort", args.reasoning_effort])
     if rules_text:
         cmd.extend(["--rules", rules_text])
     manifest = {"cli_version": version_proc.stdout.strip(), "project": str(project),
