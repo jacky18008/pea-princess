@@ -203,7 +203,12 @@ QUOTED = [
     re.compile(r"‘[^’]*’"),          # ‘ ’
     re.compile(r'"[^"\n]*"'),
     re.compile(r"(?m)^\s*>.*$"),
+    # a letter drafted for the person to send (English to a UK agent, or Chinese) is quoted material:
+    # its question marks are not questions to the person and its language is not the reply's
+    re.compile(r"(?ms)^(?:Dear|Hi|Hello|Subject:)[^\n]*\n.*?^(?:Kind regards|Best regards|Best wishes|Regards|Thanks(?: in advance)?|Many thanks|Yours (?:sincerely|faithfully))[^\n]*(?:\n[^\n]*){0,2}"),
+    re.compile(r"(?ms)^---\s*\n(?:Dear|Hi|Hello|Subject|Re:)[\s\S]*?^---\s*$"),
 ]
+LETTER = QUOTED[-2:]
 
 WORD_NUMBERS = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6,
                 "seven": 7, "eight": 8, "nine": 9, "ten": 10, "eleven": 11, "twelve": 12,
@@ -329,6 +334,8 @@ def cjk_share(text):
     and file paths are left out: a settings diff or a path to the file that was written
     is not the reply's language."""
     body = re.sub(r"```.*?```", " ", text or "", flags=re.S)
+    for pattern in LETTER:
+        body = pattern.sub(" ", body)
     body = re.sub(r"`[^`\n]*`", " ", body)
     body = re.sub(r"\]\([^)]*\)", "]", body)                 # markdown link targets
     body = re.sub(r"(?:https?://|/)[^\s)]+", " ", body)        # URLs and absolute paths

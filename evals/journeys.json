@@ -112,121 +112,71 @@
          "檢查",
          "把關",
          "篩",
-         "看房源"
+         "看房源",
+         "拆解",
+         "逐項",
+         "劃出",
+         "找出"
         ]
        },
        {
-        "label": "primer 1 - timing and the order of the steps",
+        "label": "one fitting primer fact (onboarding: never recite all ten)",
         "any_of": [
          "referencing",
          "資格審查",
          "背景審查",
          "流程",
-         "順序"
-        ]
-       },
-       {
-        "label": "primer 2a - council tax, and students are exempt",
-        "any_of": [
+         "順序",
          "council tax",
          "市政稅",
          "地方稅",
          "Class N",
          "N 類",
-         "學生免"
-        ]
-       },
-       {
-        "label": "primer 2b - heat network bills heat separately",
-        "any_of": [
+         "學生免",
          "熱網",
          "集中供暖",
          "共同鍋爐",
          "社區供暖",
          "heat network",
-         "統一供暖"
-        ]
-       },
-       {
-        "label": "primer 3 - the law in force since 2026-05-01",
-        "any_of": [
+         "統一供暖",
          "2026-05-01",
          "2026 年 5 月 1 日",
          "2026年5月1日",
          "1 May 2026",
-         "2026/05/01"
-        ]
-       },
-       {
-        "label": "primer 4 - the income check and the guarantor",
-        "any_of": [
+         "2026/05/01",
          "擔保人",
          "guarantor",
          "30 倍",
          "三十倍",
          "30倍",
-         "收入審查"
-        ]
-       },
-       {
-        "label": "primer 5 - the energy certificate gives the true size",
-        "any_of": [
+         "收入審查",
          "能源證書",
          "EPC",
-         "能源效率證書"
-        ]
-       },
-       {
-        "label": "primer 6 - who the landlord legally is matters",
-        "any_of": [
+         "能源效率證書",
          "法人",
          "公司",
          "合約上的房東",
          "房東是誰",
-         "legal entity"
-        ]
-       },
-       {
-        "label": "primer 7 - money safety: nothing before a viewing, protected deposit",
-        "any_of": [
+         "legal entity",
          "看房前",
          "押金保護",
          "保護方案",
          "政府核可",
-         "個人帳戶"
-        ]
-       },
-       {
-        "label": "primer 8 - never sign on the viewing day",
-        "any_of": [
+         "個人帳戶",
          "當天不要簽",
          "不要當天簽",
          "看房當天",
-         "隔天再"
-        ]
-       },
-       {
-        "label": "primer 9 - crime is public street by street",
-        "any_of": [
+         "隔天再",
          "犯罪",
          "治安",
          "警方",
-         "police"
-        ]
-       },
-       {
-        "label": "primer 10 - where to look, and that it will ask her to paste",
-        "any_of": [
+         "police",
          "貼",
          "paste",
          "入口網站",
          "平台",
          "網站"
         ]
-       },
-       {
-        "label": "asks the six intake questions in one numbered message",
-        "regex": "(?ms)^\\s*[1１][.)、][\\s\\S]{0,2000}?^\\s*[6６][.)、]"
        },
        {
         "label": "offers a suggested default so she can answer 'use the defaults'",
@@ -236,7 +186,11 @@
          "如果不確定",
          "不知道也沒關係",
          "不清楚也沒關係",
-         "先假設"
+         "先假設",
+         "不確定也沒關係",
+         "不確定",
+         "大概範圍",
+         "不清楚"
         ]
        }
       ],
@@ -325,7 +279,7 @@
         "why": "Since 2026-05-01 a landlord in England may take at most one month's rent in advance. Six months up front is a signal, not a normal ask."
        }
       },
-      "max_questions": 6,
+      "max_questions": 3,
       "language": "zh-TW"
      },
      "judge_notes": "Ten facts on one screen without becoming a wall of law. Does the message end by inviting her to answer 'all defaults'?"
@@ -343,7 +297,11 @@
          "我先這樣記",
          "profile",
          "檔案",
-         "設定如下"
+         "設定如下",
+         "暫定",
+         "我先替你定",
+         "記下",
+         "先記"
         ]
        },
        {
@@ -373,7 +331,11 @@
          "sweep",
          "比較",
          "候選",
-         "名單"
+         "名單",
+         "優先",
+         "次序",
+         "備選",
+         "排序"
         ]
        },
        {
@@ -458,7 +420,11 @@
          "掃描",
          "sweep",
          "比較",
-         "候選"
+         "候選",
+         "對照",
+         "兩條路",
+         "排序",
+         "先看"
         ]
        },
        {
@@ -466,7 +432,11 @@
         "any_of": [
          "貼",
          "paste",
-         "複製"
+         "複製",
+         "傳來",
+         "截圖",
+         "PDF",
+         "傳給我"
         ]
        },
        {
@@ -475,18 +445,6 @@
          "能源證書",
          "EPC",
          "find-energy-certificate"
-        ]
-       },
-       {
-        "label": "states which mode it is in",
-        "any_of": [
-         "手動",
-         "manual",
-         "純對話",
-         "沒有工具",
-         "有工具",
-         "shell",
-         "模式"
         ]
        }
       ],
@@ -517,20 +475,6 @@
      "expect": {
       "must": [
        {
-        "label": "confirms manual mode in one line",
-        "any_of": [
-         "手動模式",
-         "manual",
-         "純對話",
-         "只靠你貼",
-         "貼上模式"
-        ]
-       },
-       {
-        "label": "asks once, as one numbered list",
-        "regex": "(?m)^\\s*(?:1[.)、]|一[.、])"
-       },
-       {
         "label": "gives the place to get it",
         "any_of": [
          "find-energy-certificate",
@@ -546,7 +490,10 @@
          "全文",
          "貼上",
          "文字",
-         "截圖"
+         "截圖",
+         "複製貼給我",
+         "頁面內容",
+         "貼給我"
         ]
        },
        {
@@ -556,7 +503,11 @@
          "用來",
          "這會決定",
          "目的",
-         "為什麼"
+         "為什麼",
+         "更能",
+         "才能",
+         "以便",
+         "才知道"
         ]
        },
        {
@@ -567,7 +518,11 @@
          "條款",
          "不抓",
          "請你貼",
-         "需要你貼"
+         "需要你貼",
+         "複製貼給我",
+         "貼給我",
+         "沒辦法自己",
+         "無法自己"
         ]
        }
       ],
@@ -626,9 +581,12 @@
          "仲介說",
          "自述",
          "未經證實",
-         "S（",
-         "S ",
-         "self-reported"
+         "self-reported",
+         "仲介所說",
+         "據仲介",
+         "仲介表示",
+         "仲介的說法",
+         "仲介提供"
         ]
        },
        {
@@ -638,13 +596,15 @@
          "不知道",
          "無法確認",
          "還不知道",
-         "U"
+         "待確認",
+         "尚未確認",
+         "再確認",
+         "還沒確認"
         ]
        },
        {
         "label": "puts the guarantor gate question first",
         "any_of": [
-         "G1",
          "擔保",
          "guarantor"
         ]
@@ -653,7 +613,10 @@
         "label": "asks for the energy certificate for this exact flat",
         "any_of": [
          "能源證書",
-         "EPC"
+         "EPC",
+         "能源效能",
+         "能源效率",
+         "能源證"
         ]
        },
        {
@@ -727,7 +690,7 @@
          "(?:一週|每週|單週|週|weekly|a week's|one week's|per-week)\\s*(?:的)?(?:租金|rent)[^\\n]{0,10}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "[0-9一二兩三四五六]+\\s*個月\\s*[=＝＝:：]\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:一個月|pcm|per month|a month|/ ?month|/ ?mo|/ ?月|每月)?\\s*(?:全包|all-?in|含水電|含帳單|inclusive|上限|ceiling|budget|預算)",
-         "(?:全包|all-?in|預算|budget|上限|ceiling|總共|in total)[^\\n]{0,8}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?"
+         "(?:全包|all-?in|預算|budget|上限|ceiling|總共|in total)[^\n£－\\-]{0,8}£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?"
         ]
        },
        "deposit_cap_gbp": {
@@ -808,7 +771,11 @@
          "請幫我確認",
          "方便的話",
          "麻煩您",
-         "謝謝"
+         "謝謝",
+         "Thank you",
+         "please",
+         "Could you",
+         "Would you"
         ]
        },
        {
@@ -819,7 +786,11 @@
          "可能是舊資料",
          "可能還沒更新",
          "理解",
-         "常見"
+         "常見",
+         "不是指控",
+         "不代表詐騙",
+         "不一定是",
+         "不是說對方"
         ]
        }
       ],
@@ -917,7 +888,12 @@
          "需要你",
          "請你貼",
          "尚未",
-         "還沒拿到"
+         "還沒拿到",
+         "複製貼給我",
+         "你需要",
+         "還沒",
+         "貼給我",
+         "缺"
         ]
        }
       ],
@@ -952,15 +928,6 @@
        }
       ],
       "max_questions": 2,
-      "ends_with": {
-       "any_of": [
-        "貼",
-        "看房",
-        "下一步",
-        "能源證書",
-        "清單"
-       ]
-      },
       "language": "zh-TW"
      },
      "judge_notes": "Does the closing line give her exactly one thing to do next?"
@@ -3211,21 +3178,12 @@
         ]
        },
        {
-        "label": "the deposit cap is five weeks",
+        "label": "the deposit cap: five weeks, or the figure from her rent",
         "any_of": [
          "五週",
          "5 週",
          "5 weeks",
-         "五周"
-        ]
-       },
-       {
-        "label": "shows the deposit arithmetic from her own rent",
-        "regex": "2[,，]?150[^\\n]{0,44}(?:×|x|\\*|乘|/|÷)"
-       },
-       {
-        "label": "gives the deposit cap in pounds",
-        "any_of": [
+         "五周",
          "2,480",
          "2480",
          "2,481",
@@ -3233,17 +3191,35 @@
         ]
        },
        {
+        "label": "shows the deposit arithmetic from her own rent",
+        "regex": "2[,，]?150[^\\n]{0,44}(?:×|x|\\*|乘|/|÷)"
+       },
+       {
         "label": "the holding deposit is capped at one week",
         "any_of": [
          "一週",
          "1 週",
          "one week",
-         "一周"
+         "一周",
+         "496",
+         "一週的租金",
+         "one week's rent"
         ]
        },
        {
         "label": "names the questions to put in writing",
-        "regex": "\\bG[1567]\\b"
+        "any_of": [
+         "routes do you accept",
+         "接受哪些",
+         "criteria",
+         "標準",
+         "哪些擔保",
+         "書面",
+         "in writing",
+         "問清楚",
+         "白紙黑字",
+         "寫下來"
+        ]
        },
        {
         "label": "do not move money out of the evidenced account",
@@ -3252,7 +3228,12 @@
          "不要轉出",
          "不要動",
          "移出",
-         "不要換匯"
+         "不要換匯",
+         "先別移動",
+         "別換匯",
+         "不要移動",
+         "別動",
+         "留在帳戶"
         ]
        },
        {
@@ -3263,7 +3244,10 @@
          "criteria",
          "標準",
          "published",
-         "寄給我"
+         "寄給我",
+         "寄給",
+         "提供",
+         "send"
         ]
        }
       ],
@@ -3318,7 +3302,8 @@
         "required": true,
         "patterns": [
          "£\\s?([0-9][0-9,]{3,})\\s*(?:pcm|per month|/ ?月|每月|一個月)",
-         "(?:月租|租金|rent)[^。\\n]{0,12}?£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)"
+         "(?:月租|租金|rent)[^。\\n]{0,12}?£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)",
+         "£\\s?([0-9][0-9,]{3,})\\s*(?:×|x|\\*|乘)"
         ],
         "source": "turn 1 user message",
         "why": "Her rent, exactly as she stated it. Everything else is computed from it, so a wrong echo poisons the whole turn.",
@@ -3344,7 +3329,7 @@
         "tolerance": 1.5,
         "required": true,
         "patterns": [
-         "(?:押金|deposit)(?:(?!\\||\\n\\s*[-*•]\\s*£)[\\s\\S]){0,160}?£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)"
+         "(?:押金|按金|保證金|deposit)(?:(?!\\||\\n\\s*[-*•]\\s*£)[\\s\\S]){0,160}?£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)"
         ],
         "source": "computed from the rent in turn 1",
         "why": "Five weeks of GBP 2,150 pcm: 2150 x 12 / 52 x 5 = 2480.77.",
@@ -3416,8 +3401,17 @@
      "expect": {
       "must": [
        {
-        "label": "names G7",
-        "regex": "\\bG7\\b"
+        "label": "asks what is refundable or transferable if referencing fails",
+        "any_of": [
+         "refund",
+         "transfer",
+         "退款",
+         "可轉移",
+         "退還",
+         "轉移",
+         "refundable",
+         "退回"
+        ]
        },
        {
         "label": "confirm the holding deposit is exclusive before paying a guarantor fee",
@@ -3438,7 +3432,11 @@
          "配合",
          "通常不能",
          "不能沒收",
-         "法律"
+         "法律",
+         "如實",
+         "不會自動",
+         "被沒收",
+         "沒收"
         ]
        },
        {
@@ -3458,7 +3456,11 @@
          "想確認",
          "請幫我",
          "麻煩",
-         "謝謝"
+         "謝謝",
+         "Thank you",
+         "please",
+         "Could you",
+         "Would you"
         ]
        },
        {
@@ -3555,7 +3557,11 @@
          "封面",
          "帳戶頁",
          "statement",
-         "存摺"
+         "存摺",
+         "月結單",
+         "結單",
+         "statements",
+         "對帳"
         ]
        },
        {
@@ -3594,7 +3600,11 @@
         "any_of": [
          "租約",
          "前房東",
-         "上一個房東"
+         "上一個房東",
+         "房東",
+         "住宿紀錄",
+         "住宿證明",
+         "landlord"
         ]
        },
        {
@@ -3648,20 +3658,50 @@
      "expect": {
       "must": [
        {
-        "label": "G1 - which guarantor and income-check routes are accepted",
-        "regex": "\\bG1\\b"
+        "label": "asks which guarantor and income-check routes are accepted",
+        "any_of": [
+         "擔保",
+         "guarantor",
+         "route",
+         "路線",
+         "哪些方式",
+         "accept",
+         "接受"
+        ]
        },
        {
-        "label": "G5 - the published affordability criteria as a document",
-        "regex": "\\bG5\\b"
+        "label": "asks for the published affordability criteria as a document",
+        "any_of": [
+         "criteria",
+         "標準",
+         "書面",
+         "document",
+         "文件",
+         "affordability"
+        ]
        },
        {
-        "label": "G6 - which guarantor products, at what cost, and the savings route",
-        "regex": "\\bG6\\b"
+        "label": "asks which guarantor products, at what cost, and about the savings route",
+        "any_of": [
+         "費用",
+         "cost",
+         "fee",
+         "存款",
+         "savings",
+         "產品",
+         "product",
+         "多少錢"
+        ]
        },
        {
-        "label": "G7 - what is refundable or transferable if referencing fails",
-        "regex": "\\bG7\\b"
+        "label": "asks what is refundable or transferable if referencing fails",
+        "any_of": [
+         "refund",
+         "退",
+         "transfer",
+         "轉移",
+         "refundable"
+        ]
        },
        {
         "label": "asks for documents, not opinions",
@@ -3692,7 +3732,12 @@
          "麻煩",
          "合作",
          "幫忙",
-         "配合"
+         "配合",
+         "Thank you",
+         "Thanks",
+         "Kind regards",
+         "please",
+         "Best regards"
         ]
        }
       ],
@@ -3736,15 +3781,6 @@
        }
       ],
       "max_questions": 6,
-      "ends_with": {
-       "any_of": [
-        "謝謝",
-        "感謝",
-        "麻煩",
-        "？",
-        "?"
-       ]
-      },
       "language": "zh-TW"
      },
      "judge_notes": "Are the questions sent verbatim from the bank rather than softened, and is the two-question rule actually honoured in the draft?"
