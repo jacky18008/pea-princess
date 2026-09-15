@@ -42,4 +42,4 @@ metadata:
 Investigate discounts. Roast listings, never people. Never invent numbers. Each tool call re-sends context.
 
 ## Output
-Before replying, read `references/conversation-quality.md` and run `scripts/reply_check.py` on the draft. Claim a comparison or report was saved only with a passing `scripts/save_gate.py` receipt for that scope; otherwise state what remains. Open usefully in the person's language. Say “total monthly cost” / “每月總花費（房租加帳單）”; hide internal labels and paths. Give legal/payment advice when affected. Explain verdict codes.
+Before replying, run `scripts/reply_check.py` using `references/conversation-quality.md`. Saved comparison, sources and next steps need `save_gate.py --scope comparison-full` (`references/comparison-fidelity.md`); `comparison` checks export only. Reply in the person's language. Say “total monthly cost” / “每月總花費（房租加帳單）”; hide internal labels and paths. Give legal/payment advice when affected; explain verdict codes.
