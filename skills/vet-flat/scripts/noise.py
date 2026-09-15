@@ -98,9 +98,13 @@ def parse_feature_info(body):
         d = json.loads(body or "")
     except ValueError:
         return None, "response was not JSON"
-    feats = d.get("features") or []
+    if not isinstance(d, dict) or not isinstance(d.get("features"), list):
+        return None, "response was not a GeoJSON feature collection"
+    feats = d["features"]
     if not feats:
-        return None, "no value at this point (outside the mapped area)"
+        return None, "no map value at this point (possibly outside the mapped area)"
+    if not isinstance(feats[0], dict):
+        return None, "feature was not an object"
     v = (feats[0].get("properties") or {}).get("GRAY_INDEX")
     if v is None:
         return None, "no value in the response"
@@ -172,15 +176,26 @@ def level(lat, lng, source="road", metric="lden", verbose=False, fetcher=None):
     url = feature_info_url(source, metric, lat, lng)
     res = (fetcher or get)(url, ua=TOOL_UA, timeout=25, min_gap=0.5, verbose=verbose)
     out = {"source": source, "metric": metric, "db": None, "ok": False, "note": "",
+           "http_status": res.get("status"), "outcome": "unknown",
            "retrieved_at": res.get("retrieved_at"), "from_cache": bool(res.get("from_cache"))}
     if not res.get("ok"):
         out["note"] = res.get("note") or "fetch failed"
+        if (res.get("status") or 0) >= 400:
+            out["outcome"] = "http_error"
+        elif re.search(r"curl error 28\b|curl timeout\b", out["note"], re.I):
+            out["outcome"] = "timeout"
+        else:
+            out["outcome"] = "fetch_error"
         return out
     v, note = parse_feature_info(res.get("body") or "")
     out["db"], out["ok"], out["note"] = v, v is not None, note
+    out["outcome"] = ("numeric_value" if v is not None else
+                      "no_map_value" if note.startswith("no map value") or note.startswith("no-data value") else
+                      "invalid_response")
     if v is not None and v < FLOOR[metric] - 1:
         # the raster holds 0 where nothing is drawn: that is "no mapped noise", never "0 dB"
         out["db"], out["ok"], out["drawn"] = None, True, False
+        out["outcome"] = "below_map_floor"
         out["note"] = "nothing drawn here: below the map's floor of %d dB" % int(FLOOR[metric])
     elif v is not None:
         out["drawn"] = True
