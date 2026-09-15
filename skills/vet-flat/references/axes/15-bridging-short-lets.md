@@ -64,6 +64,12 @@ What waiting actually costs is three non-money things: moving twice; the risk th
 ### The break-even question, in one line
 Convert every candidate to **all-in per week for your exact dates**, then ask what the cheaper option is missing: a front desk, a review history, a refund right, or a protected deposit. Decide what that is worth to you *before* you compare, and write the number down.
 
+## Say these in the first reply about a licence (the cheap-model checklist)
+1. A licence is not a tenancy: the deposit does not have to go into a government-approved protection scheme, so ask who holds it and how it comes back; the route if it goes wrong is the platform's complaint process, the operator's redress scheme where there is one, or the small claims court.
+2. The caps — deposit five weeks' rent (six at £50,000 a year or more), holding deposit one week, rent in advance one month — attach to an assured tenancy under the Renters' Rights Act, in force in England from 2026-05-01. If the paper says licence, the label decides whether they apply: ask which it is, in writing, before anything else.
+3. Do not sign tomorrow: get the answers in writing first, and cap the exposure — never pay more than a week's rent before the keys.
+4. A clause that lets the operator move you to another room at 24 hours' notice is a licence tell, and worth quoting back to them.
+
 ## Licence vs tenancy — the single most expensive distinction
 - A short serviced stay is normally a **licence to occupy**, not an assured shorthold tenancy.
 - A licence deposit is **not required to go into a government-approved deposit scheme**. If it goes wrong your route is the operator's redress scheme or the small claims track, not the scheme's adjudication.

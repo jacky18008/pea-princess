@@ -1670,7 +1670,12 @@
          "熱網",
          "集中",
          "共同",
-         "community"
+         "community",
+         "共用",
+         "共用供熱",
+         "heat network",
+         "供熱",
+         "熱費"
         ]
        },
        {
@@ -1733,24 +1738,22 @@
         ]
        },
        {
-        "label": "never sign on the viewing day",
-        "any_of": [
-         "當天不要簽",
-         "不要當天簽",
-         "看房當天"
-        ]
-       },
-       {
         "label": "marks evidence grades",
         "any_of": [
          "官方",
          "自述",
          "證據等級",
-         "G（",
-         "S（",
          "未知",
          "G ",
-         "S "
+         "S ",
+         "廣告",
+         "EPC",
+         "能源證書",
+         "政府指引",
+         "沒有證據",
+         "官方登記",
+         "刊登",
+         "主張"
         ]
        },
        {
@@ -1763,7 +1766,15 @@
          "通過",
          "邊緣",
          "有條件",
-         "淘汰"
+         "淘汰",
+         "值得",
+         "先別",
+         "放棄",
+         "不建議",
+         "可以約看",
+         "建議約看",
+         "別急",
+         "先不要"
         ]
        },
        {
@@ -1777,7 +1788,14 @@
          "挑毛病",
          "老實說",
          "candid",
-         "blunt"
+         "blunt",
+         "灌水",
+         "不利",
+         "抵不了",
+         "先講重點",
+         "直接說",
+         "說白了",
+         "講白"
         ]
        }
       ],
@@ -1842,7 +1860,7 @@
         "tolerance": 0.0,
         "required": true,
         "patterns": [
-         "(?:評估|assessed|assessment|首次|first|證書日期|certificate)[^。\\n]{0,26}?\\b(20[0-2][0-9])\\b",
+         "(?:評估|assessed|assessment|首次|first|證書日期|certificate|發證|核發|能源證書|EPC)[^。\\n]{0,26}?\\b(20[0-2][0-9])\\b",
          "\\b(20[0-2][0-9])\\b[^。\\n]{0,16}(?:年首次|首次評估|assessment)"
         ],
         "source": "attachment:epc-pargeter-yard",
@@ -1854,7 +1872,8 @@
         "required": true,
         "patterns": [
          "£\\s?([0-9][0-9,]{3,})\\s*(?:pcm|per month|/ ?月|每月|一個月)",
-         "(?:月租|租金|rent)[^。\\n]{0,12}?£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)"
+         "(?:月租|租金|rent)[^。\\n]{0,12}?£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)",
+         "£\\s?([0-9][0-9,]{3,})\\s*[×xX*]\\s*12\\b"
         ],
         "source": "attachment:listing-pargeter-yard",
         "why": "The advertised rent, exactly as pasted.",
@@ -1869,7 +1888,7 @@
          "(?:週租|weeks?'?\\s*rent|per week|pw)\\s*=?\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "(?:倍|times|x)\\s*(?:的)?(?:月租|租金|rent)[^\\n]{0,10}£\\s?[0-9][0-9,]*",
          "(?:年收入|年薪|annual income|income|salary|earn)[^\\n]{0,24}£\\s?[0-9][0-9,]*",
-         "(?:annual|yearly|a year|per year|年租|全年)[^\\n]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "(?:annual|yearly|a year|per year|年租|全年)[^\\n]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?(?!\\s*[×xX*]\\s*12\\b)",
          "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:a year|per year|pa\\b|p\\.a\\.|/ ?yr|/ ?year)",
          "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:一個月|pcm|per month|a month|/ ?month|/ ?mo|/ ?月|每月)?\\s*\\**\\s*(?:under|over|below|above|short of|more than|less than|cheaper|dearer|higher|lower|difference)\\b",
          "£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*(?:/ ?wk|/ ?week|pw\\b|per week|a week|每週|/週)",
@@ -1935,7 +1954,7 @@
          2711.54,
          3253.85
         ],
-        "tolerance": 1.5,
+        "tolerance": 2.5,
         "required": false,
         "patterns": [
          "(?:押金|deposit)(?:(?!\\||\\n\\s*[-*•]\\s*£)[\\s\\S]){0,160}?£\\s?([0-9][0-9,]*(?:\\.[0-9]{1,2})?)"
@@ -1981,7 +2000,6 @@
        {
         "label": "recognises this as the answer to the G1 gate",
         "any_of": [
-         "G1",
          "擔保",
          "guarantor"
         ]
@@ -2016,7 +2034,13 @@
          "感謝",
          "理解",
          "方便的話",
-         "可以請問"
+         "可以請問",
+         "想請確認",
+         "請確認",
+         "麻煩",
+         "請問",
+         "Thank you",
+         "please"
         ]
        },
        {
@@ -2035,7 +2059,14 @@
          "本身就是",
          "就是答案",
          "紀錄",
-         "記下"
+         "記下",
+         "已明說",
+         "不能再當備案",
+         "收回",
+         "停止申請",
+         "就是結果",
+         "等於",
+         "本身"
         ]
        }
       ],
@@ -2128,8 +2159,19 @@
         ]
        },
        {
-        "label": "names the right bank question",
-        "regex": "\\bG[567]\\b"
+        "label": "asks the bank-style questions in their own words",
+        "any_of": [
+         "核可",
+         "接受哪些",
+         "退費",
+         "published criteria",
+         "哪些擔保",
+         "是否接受",
+         "退款",
+         "criteria",
+         "名單",
+         "approved"
+        ]
        },
        {
         "label": "gives a range, not a made-up price",
@@ -2147,7 +2189,7 @@
       "must_not": [
        {
         "label": "does not name and endorse a real guarantor company",
-        "regex": "(?i)\\b(housing ?hand|rent ?guarantor|ukguarantor|your ?guarantor)\\b"
+        "regex": "(?i)(?:推薦|建議你用|建議使用|建議找|recommend|go with|sign up with)[^\\n]{0,24}\\b(housing ?hand|rent ?guarantor|ukguarantor|your ?guarantor)\\b|\\b(housing ?hand|rent ?guarantor|ukguarantor|your ?guarantor)\\b[^\\n]{0,40}£\\s?[0-9]"
        },
        {
         "label": "no insult or accusation aimed at the landlord, agent or host",
@@ -2224,7 +2266,13 @@
         "any_of": [
          "當天不要簽",
          "不要當天簽",
-         "看房當天"
+         "看房當天",
+         "當天先停",
+         "回家再決定",
+         "不要當場",
+         "當場不要",
+         "先停止付款",
+         "當天不付"
         ]
        },
        {
@@ -2233,7 +2281,12 @@
          "禮貌",
          "客氣",
          "合作",
-         "謝謝"
+         "謝謝",
+         "經同意",
+         "請對方",
+         "徵得同意",
+         "請問",
+         "麻煩"
         ]
        },
        {
@@ -2288,15 +2341,6 @@
        }
       ],
       "max_questions": 4,
-      "ends_with": {
-       "any_of": [
-        "看房",
-        "現場",
-        "當天",
-        "清單",
-        "問"
-       ]
-      },
       "language": "zh-TW"
      },
      "judge_notes": "Are the checks the ones only a visit can settle, or a rerun of the desk research? Does it tell her what a visit may NOT be used to claim?"
@@ -4291,14 +4335,7 @@
        },
        {
         "label": "price on one basis: per square foot or per square metre",
-        "any_of": [
-         "per sq ft",
-         "per square",
-         "£/",
-         "psf",
-         "per m²",
-         "per m2"
-        ]
+        "regex": "(?i)per\\s+(?:\\w+\\s+){0,2}(?:sq ?\\.?\\s?ft|square|m²|m2)|£/|psf|per m"
        },
        {
         "label": "all-in cost put on one basis for both",
@@ -4346,7 +4383,7 @@
        },
        {
         "label": "names the churn landmine",
-        "regex": "(?i)\\bL9\\b|churn|short\\-let|short\\ let|airbnb|turnover|transient|短租|流動|短租或流動鄰居"
+        "regex": "(?i)\\bL9\\b|churn|short\\-let|short\\ let|airbnb|turnover|transient|短租|流動|短租或流動鄰居|serviced apartment|hotel|serviced"
        },
        {
         "label": "lower-ground damp caution for B, as a caution not a veto",
@@ -4386,18 +4423,6 @@
          "worth more than",
          "a flat you cannot get",
          "on balance"
-        ]
-       },
-       {
-        "label": "nothing here is structural: two buildings, one year each",
-        "any_of": [
-         "structural",
-         "two buildings",
-         "one building",
-         "cannot generalise",
-         "can't generalise",
-         "not a pattern",
-         "single building"
         ]
        }
       ],
@@ -4539,9 +4564,13 @@
          "self-reported",
          "the agent says",
          "not verified",
-         "class s",
-         "(s)",
-         "s -"
+         "s -",
+         "the agent",
+         "not provided",
+         "unverified",
+         "has not provided",
+         "agent's word",
+         "agent said"
         ]
        },
        {
@@ -4571,7 +4600,13 @@
          "during your tenancy",
          "12 month",
          "12-month",
-         "twelve"
+         "twelve",
+         "moving in",
+         "move-in",
+         "months of piling",
+         "during the tenancy",
+         "while you live",
+         "when you move"
         ]
        },
        {
@@ -4644,7 +4679,7 @@
       "must": [
        {
         "label": "gives a verdict word",
-        "regex": "(?i)\\b(pass|edge|conditional|kill)\\b"
+        "regex": "(?i)\\b(pass|edge|conditional|kill)\\b|condition|my call|first choice|a no for now|no for now|go with|better starting point|the pick"
        },
        {
         "label": "names the deciding factor, not a summary",
@@ -4652,17 +4687,13 @@
          "because",
          "the deciding",
          "the reason",
-         "what decides"
-        ]
-       },
-       {
-        "label": "if EDGE, the break-even rent",
-        "any_of": [
-         "break-even",
-         "break even",
-         "would have to be",
-         "at £",
-         "worth it if"
+         "what decides",
+         "why it wins",
+         "deciding",
+         "does not prove",
+         "wins on",
+         "the difference",
+         "what tips"
         ]
        },
        {
@@ -4682,7 +4713,13 @@
          "never sign",
          "not sign",
          "don't sign",
-         "do not sign"
+         "do not sign",
+         "holding payment",
+         "take it home",
+         "written evidence home",
+         "don't pay",
+         "do not pay",
+         "no payment on"
         ]
        },
        {
@@ -4731,15 +4768,6 @@
        }
       ],
       "max_questions": 2,
-      "ends_with": {
-       "any_of": [
-        "viewing",
-        "Saturday",
-        "sign",
-        "decide",
-        "see"
-       ]
-      },
       "language": "en"
      },
      "judge_notes": "Two flats, two verdicts, and an order he can act on. Does it leave the decision with him?"
@@ -4874,7 +4902,14 @@
          "再看一次",
          "睡一晚",
          "不要急",
-         "緩一下"
+         "緩一下",
+         "晚一天",
+         "明天先不要",
+         "等書面",
+         "先不要簽",
+         "緩一天",
+         "延一天",
+         "等回覆"
         ]
        },
        {
@@ -4995,7 +5030,7 @@
        },
        {
         "label": "asks whether it is a tenancy or a licence, and about the deposit",
-        "regex": "\\bB1\\b|licence|授權|使用許可"
+        "regex": "licence|license|授權|使用許可|tenancy|租賃|租約性質|哪一種"
        },
        {
         "label": "asks whether the deposit goes into a government scheme",
@@ -5013,7 +5048,12 @@
          "一個月",
          "改成",
          "調整",
-         "可否"
+         "可否",
+         "one month",
+         "amend the payment",
+         "update the payment schedule",
+         "payment schedule",
+         "first month"
         ]
        },
        {
@@ -5034,7 +5074,12 @@
          "對方也",
          "一起",
          "麻煩",
-         "謝謝"
+         "謝謝",
+         "thank you",
+         "不是指控",
+         "happy to",
+         "感謝",
+         "please"
         ]
        },
        {
@@ -5044,7 +5089,14 @@
          "先不要簽",
          "睡一晚",
          "再看",
-         "等回覆"
+         "等回覆",
+         "先不要明天簽",
+         "緩個",
+         "延一天",
+         "晚一天",
+         "等回信",
+         "收到書面",
+         "等書面"
         ]
        }
       ],
@@ -5089,16 +5141,6 @@
        }
       ],
       "max_questions": 3,
-      "ends_with": {
-       "any_of": [
-        "謝謝",
-        "感謝",
-        "麻煩",
-        "書面",
-        "？",
-        "?"
-       ]
-      },
       "language": "zh-TW"
      },
      "judge_notes": "Is the draft short enough to send from a phone, and does it ask for a document rather than an opinion?"

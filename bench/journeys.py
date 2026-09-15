@@ -373,7 +373,7 @@ HYPHENS = re.compile("[\u2010\u2011\u2012\u2013\u2212]")
 
 def contains(text, term):
     """Word-boundary match for ASCII terms (a plural or a typographic hyphen still counts), plain substring for CJK."""
-    body = HYPHENS.sub("-", text or "")
+    body = HYPHENS.sub("-", text or "").replace("\u2019", "'").replace("\u2018", "'")
     if is_ascii(term):
         return re.search(r"\b" + re.escape(term) + r"(?:e?s)?\b", body, re.I) is not None
     return term in body or term in (text or "")

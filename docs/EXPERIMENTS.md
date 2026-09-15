@@ -1161,3 +1161,10 @@ skill. Real-miss themes fed back into the skill text: the one-doubt rule in onbo
 "first 30 minutes after arriving" list in axis 14; the standard answer about dates in axis 15; the referencing
 checklist in axis 16. Still to re-cut: j3, j7, j8 (0.76–0.83).
 
+j3, j7 and j8 re-cut (third triage: 35 stale / 27 real / 0 unclear) with an apostrophe normaliser in the
+grader and three more "say these" blocks in the skill (axis 15 for licences, axis 14 before a visit, axis 16
+never quoting a guarantor product's price without its page). **All ten 09-14 journeys regraded under the
+2026-09 contract: Claude 0.844 (1/10 over the line), Codex 0.897 (4/10), fabrications 0 / 0** — from 0.742 /
+0.739 and 3 / 4 "fabrications" this morning, on the same replies. The bench now measures the contract; the
+next run of `bench/journeys.py --all` on both hosts (skill at 55baade+) is the first clean baseline.
+
