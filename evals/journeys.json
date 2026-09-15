@@ -4026,7 +4026,7 @@
        },
        {
         "label": "does not tell her to hit cancel herself",
-        "regex": "(?<!不要)(?<!別)(?<!先別)(?<!不用)(?:直接|馬上|立刻|自己)[^。\\n]{0,4}(?:按|點)[「『]?取消"
+        "regex": "(?<!不要)(?<!別)(?<!先別)(?<!不用)(?<!别)(?<!先别)(?<!勿)(?:直接|馬上|立刻|自己)[^。\\n]{0,4}(?:按|點)[「『]?取消"
        },
        {
         "label": "no insult or accusation aimed at the landlord, agent or host",
@@ -5695,12 +5695,19 @@
          "無法確定是哪",
          "還不知道是哪",
          "which flat",
-         "unit"
+         "unit",
+         "門牌",
+         "戶號",
+         "鎖定",
+         "無法確定",
+         "不能確定",
+         "还不知道",
+         "无法"
         ]
        },
        {
         "label": "gives the building's certificate range as context, not as this flat's figure",
-        "regex": "41[^。\\n]{0,40}55|55[^。\\n]{0,40}41|範圍|between"
+        "regex": "41[^。\\n]{0,40}55|55[^。\\n]{0,40}41|範圍|between|最接近|兩戶|closest|每戶|六戶|6 戶"
        },
        {
         "label": "marks unit-level area as unknown or unconfirmed",
@@ -5710,7 +5717,13 @@
          "未確認",
          "無法確認",
          "unknown",
-         "unconfirmed"
+         "unconfirmed",
+         "不能定案",
+         "無法確定",
+         "不能確定",
+         "還不能",
+         "推測",
+         "无法"
         ]
        },
        {
@@ -5720,7 +5733,12 @@
          "哪一戶",
          "房號",
          "flat number",
-         "which flat"
+         "which flat",
+         "門牌號",
+         "戶號",
+         "門牌",
+         "幾樓幾號",
+         "哪一間"
         ]
        },
        {
@@ -5746,7 +5764,7 @@
        },
        {
         "label": "does not state 48 sq m as the certificate figure",
-        "regex": "(證書|EPC)[^。\\n]{0,15}48\\s*(?:平方公尺|平方米|m²|m2|sq ?m)"
+        "regex": "(證書|EPC)(?:上|寫|說|顯示|為|是|：|:|載明|登記)\\s*(?:的)?\\s*48\\s*(?:平方公尺|平方米|m²|m2|sq ?m)"
        }
       ],
       "max_questions": 3
