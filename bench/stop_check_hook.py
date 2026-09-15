@@ -56,6 +56,8 @@ def last_texts(transcript_path):
         if not text.strip():
             continue
         if role == "user":
+            if text.lstrip().startswith("Stop hook feedback"):
+                continue   # our own block reason, not the person
             user = text
             assistant = ""   # a new user turn resets the reply we are checking
         elif role == "assistant":
@@ -86,6 +88,14 @@ def main():
     if checker is None:
         return 0
     user, assistant = last_texts(payload.get("transcript_path") or "")
+    if payload.get("last_assistant_message"):
+        assistant = payload["last_assistant_message"]   # the host hands over the reply about to be sent
+    debug = os.environ.get("PEA_STOP_DEBUG")
+    if debug:
+        try:
+            io.open(debug, "a", encoding="utf-8").write(json.dumps({"n": n, "user": user[:200], "assistant": assistant[:200]}, ensure_ascii=False) + "\n")
+        except OSError:
+            pass
     if not assistant.strip():
         return 0
     findings = checker.scan(assistant, previous=user or None)
@@ -103,7 +113,13 @@ def main():
     lines = ["Before this reply goes out, the pre-send check found %d thing(s). Fix them in the reply itself and send again (do not mention this check to the person):" % len(findings)]
     for f in findings[:8]:
         lines.append("- [%s] %s → %s" % (f["kind"], f["fragment"][:100], f["say"]))
-    print(json.dumps({"decision": "block", "reason": "\n".join(lines)}, ensure_ascii=False))
+    out = json.dumps({"decision": "block", "reason": "\n".join(lines)}, ensure_ascii=False)
+    if debug:
+        try:
+            io.open(debug, "a", encoding="utf-8").write(out + "\n")
+        except OSError:
+            pass
+    print(out)
     return 0
 
 
