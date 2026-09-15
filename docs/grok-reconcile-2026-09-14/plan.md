@@ -26,6 +26,10 @@ Local name:Pea Princess2026-09-14; actual skill identifier:pea-princess. Inspect
 
 The actor receives only the public ZIP, setup instructions, and the current turn's text/source fixtures. Future turns, rubrics and expected outcomes are withheld. Input may use a short exact verified trigger plus a current-turn UTF-8 attachment, to avoid native long-paste corruption. Verify composer then click Send; never press Return as submission. Save exact intended/sent triggers, attachment hashes, visible progress/finals/questions, tool/approval details, timestamps and downloaded artifacts where exposed. Do not silently replace a malformed attempt.
 
+### Native-choice execution addendum (user steering, 2026-09-15)
+
+After the original plan was frozen, the user directed the operator to click Grok's option-mode choices. When a native clarification offers the semantically matching answer, inspect the exact question/scope and click that option once; **do not also type the scripted answer**. Use free text for a source update or interrupt that no offered option expresses. Record the option verbatim, timing as observed, and any semantic difference from the fixed turn text. This changes the input method and interaction ledger, not the predeclared quality gates or the actor package. A native option may cause its own model work; keep it separate from intended text submissions and one-time permissions. The turn-4 option answered A's retention question; a separate text submission covered the scripted B research/save request and explicitly paused booking generally. The abandoned original episode and its unattributed choices remain separate evidence.
+
 ## Six-turn scenario
 
 1. New worker supplies a vague45-minute commute target, explicit ask-before-viewing boundary, rent cap, quiet preference and mould/leak exclusion; compare3 supplied candidates without live research.
