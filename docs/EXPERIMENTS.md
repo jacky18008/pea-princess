@@ -1043,3 +1043,61 @@ do not ask when the change is clear), and the closing-line check (`ends_with`) f
 0.80 → 0.74 drop is at least partly the bench's expectations being older than the contract; the journeys need
 their expectations re-cut to the 2026-09 rules before they can tell a regression from a policy change. The
 fact checks that failed (rent, the deposit cap, rent in advance) are worth reading one by one.
+
+## Stop-hook enforcement (2026-09-15): the checker blocks wording, not missing work
+
+Two arms, each the pre-send checker run by a Claude Code **Stop hook** (`bench/stop_check_hook.py`; the model
+revises when the hook blocks, at most twice a turn), Sonnet 5 standard, the same 15 private turns, judge v2 and
+the Opus gap reader on the 10 rated cases. `main-hook` / `main-hook2` = main's checker (snapshot 6ada43d);
+`variant-e` / `variant-e2` = branch `exp/reply-check-d`'s checker (four extra checkable rules: coverage,
+deliverable, results, correction). Baselines `main-3` / `main-4` (same skill, no hook).
+
+The hook was live: in `main-hook2`, 13 of 15 replies were blocked at least once (55 blocks: 32 numbers
+without a source, 9 a condition stated as the person's, 8 internal jargon, 3 questions after a go-ahead, 2
+simplified characters, 1 empty claim). So what the checker catches is wording — a bare rule-of-thumb figure,
+a preference written as an exclusion — and every one of those was revised before sending.
+
+| arm (Sonnet std, 15 cases) | task 0–2 | quality 1–5 | satisfy 0–2 | beats original | invented numbers | cost/15 |
+|---|---|---|---|---|---|---|
+| main-3 | 1.53 | 2.73 | 0.93 | 2/15 | 1.9 | $3.10 |
+| main-4 | 1.53 | 3.00 | 1.00 | 4/15 | 0.8 | $3.70 |
+| main-hook | 1.47 | 2.93 | 0.80 | 2/15 | 1.5 | $3.04 |
+| main-hook2 | 1.53 | 3.07 | 1.00 | 2/15 | 0.9 | $4.35 |
+| variant-e | 1.33 | 2.67 | 0.73 | 1/15 | 1.7 | $3.30 |
+| variant-e2 | 1.40 | 2.60 | 0.67 | 3/15 | 1.0 | $5.42 |
+
+| arm (10 rated cases) | material work gaps / reply | all material gaps / reply |
+|---|---|---|
+| main-4 | 2.3 | 4.0 |
+| main-hook | 2.4 | 3.7 |
+| main-hook2 | 2.0 | 3.7 |
+| variant-e | 1.7 | 3.3 |
+| variant-e2 | 1.6 | 4.0 |
+
+Reading. Main's checker plus the hook is neutral on the judge (quality 3.07 vs 3.00, within the 0.27 the two
+baselines differ by) and takes work gaps from 2.3 to 2.2 on average over two runs (−13%; the two hook runs
+differ from each other by 0.4, so this is inside run-to-run noise) at +18% cost from the revision turns. The
+branch-d checker plus the hook cuts work gaps more (1.65, −28%) but loses on the judge in both runs (quality
+2.60–2.67, satisfy 0.67–0.73, both below either baseline) and its all-material count does not move: the four
+extra rules push the model to add process content, and the reader files the result under judgement gaps.
+Neither arm meets the pre-set bar (work gaps down about a third with no loss).
+
+Decision. The Stop hook is **not the default**; it stays documented as an optional Claude Code setup
+(`docs/INSTALL.md`) because it does enforce the one rule text never achieved (no bare number, no
+preference-turned-exclusion) at a known cost. Branch `exp/reply-check-d` is not merged. The missing-work half
+of the gap needs the work to be done, not the wording checked — that is the fixed-chain experiment (arm F,
+`scripts/vet_case.py`, next section).
+
+## Arm F (started 2026-09-15 19:35): the fixed vetting chain as one command
+
+`scripts/vet_case.py` runs identity → certificates → Land Registry → area scan → management registers → TfL →
+arithmetic in one call and returns states the model cannot soften (identity exact/ambiguous/unresolved,
+checks pass/flag/unknown/not_applicable with scope, absence-only registers never pass, no overall verdict).
+Branch `exp/vet-case-route` (f811459, worktree `../pea-princess-f`) routes "requests a full flat assessment"
+through it first. Run: `bench/private/vetcase-run.sh` — the two standard cells (Sonnet 5, Codex terra) × the
+five private flats × two repeats into `bench/private/durable/vetcase-rep{1,2}`; compare with
+`bench/ab/ctx_compare.py --baseline ctx-baseline-4 ctx-baseline-5 --arm F vetcase-rep1 vetcase-rep2`
+(fact recall, fabrications, unknown honesty, tokens, turns). Expectation to beat: baseline fact recall on the
+same flats with fewer turns; the failure mode to watch: the model quoting the command's states instead of the
+facts.
+
