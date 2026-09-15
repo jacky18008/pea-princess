@@ -31,6 +31,11 @@ These are outdoor area estimates, not measurements inside a particular bedroom.
 Window direction affects exposure; facing away does not establish absence of noise.
 Planning approval does not establish that work has started. Distances are relative
 to the reported scan point until the exact home location is established.
+An OSM zero means no matching element was mapped by that successful query and
+its actual radius (pubs, bars and clubs: 100 m; roads: usually 300 m), not that
+none exists. Police-box totals count records, not personal safety; different
+Defra outdoor layers and points cannot prove which bedroom is quieter. Preserve
+source failures and missing coverage.
 
 Explain the useful comparison, then ask only about a preference or missing fact
 that changes the next decision. A user approving the proposed research means run
