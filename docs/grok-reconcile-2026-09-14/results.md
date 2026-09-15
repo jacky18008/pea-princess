@@ -1,6 +1,6 @@
 # Grok Bot current-skill integration: status and evidence
 
-Status: the reconciled package is ready, but **one native setup attempt stopped before the skill loaded; zero rental-quality turns have run**. After the user asked the operator to handle attachment, the picker and Finder clipboard routes still produced no verified attachment. A supported local-file setup request reached Grok and received a response, but Grok reported insufficient subsequent local access. The controller also failed coordinate operations in Finder and could not save the generated receipt. An explicit request to use AppleScript as an alternative UI method is pending. No current-package Grok quality result or installed-skill claim is justified.
+Current status (2026-09-15): Grok shows a private native `pea-princess` loader, and the reconciled ZIP and full `SKILL.md` hashes were independently recomputed in the isolated Bot's remote computer. A synthetic conversation ran through turn 4 with native option selections; turns 5–6, state-file agreement and export remain pending after the Mac locked. See [the dated native validation checkpoint](native-observations-2026-09-15.md) for exact outcomes and limits. The setup failure and UI-controller observations below are retained as the earlier 2026-09-14 history, not the current installation status.
 
 ## Which version to use
 
