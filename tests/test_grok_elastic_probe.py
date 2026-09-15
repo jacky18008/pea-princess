@@ -5,6 +5,7 @@ import io
 from pathlib import Path
 import sys
 import tempfile
+import time
 import types
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
@@ -114,7 +115,7 @@ class SyntheticStreamTests(unittest.TestCase):
                 self.assertEqual("--version", cmd[-1])
                 return types.SimpleNamespace(returncode=0, stdout="grok 1.0.30\n", stderr="")
 
-            fake_process = types.SimpleNamespace(stdout=io.StringIO(stream),
+            fake_process = types.SimpleNamespace(pid=1234, stdout=io.StringIO(stream),
                                                  wait=lambda timeout=None: 0,
                                                  poll=lambda: 0)
             argv = ["run", "--project", str(project), "--grok-home", str(root / "home"),
@@ -127,6 +128,8 @@ class SyntheticStreamTests(unittest.TestCase):
             self.assertEqual(1, launch.call_count)
             cmd = launch.call_args.args[0]
             self.assertEqual("32", cmd[cmd.index("--max-turns") + 1])
+            self.assertNotIn("--no-auto-update", cmd)
+            self.assertTrue(launch.call_args.kwargs["start_new_session"])
             self.assertEqual(1, diagnostics.getvalue().count("soft observation reached"))
             receipt = json.loads((out / "summary.json").read_text(encoding="utf-8"))
             self.assertTrue(receipt["complete_answer"])
@@ -135,6 +138,28 @@ class SyntheticStreamTests(unittest.TestCase):
             self.assertEqual(14, receipt["soft_snapshot"]["usage_events"])
             self.assertEqual("A terminal answer\n", (out / "terminal-answer.txt").read_text())
             self.assertEqual(0o700, out.stat().st_mode & 0o777)
+
+            class SlowStream:
+                def __iter__(self):
+                    time.sleep(0.04)
+                    return iter(())
+
+            timed_process = types.SimpleNamespace(pid=5678, stdout=SlowStream(),
+                                                  wait=lambda timeout=None: 143,
+                                                  poll=lambda: 143)
+            timed_argv = argv[:-1] + [str(root / "timed-receipt"),
+                                       "--max-seconds", "0.005"]
+            with mock.patch.object(probe.subprocess, "run", side_effect=fake_run), \
+                    mock.patch.object(probe.subprocess, "Popen", return_value=timed_process) as timed_launch, \
+                    mock.patch.object(probe.os, "killpg") as kill_group, \
+                    redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
+                self.assertEqual(1, probe.main(timed_argv))
+            self.assertEqual(1, timed_launch.call_count)
+            kill_group.assert_any_call(5678, probe.signal.SIGTERM)
+            kill_group.assert_any_call(5678, probe.signal.SIGKILL)
+            timed = json.loads((root / "timed-receipt/summary.json").read_text())
+            self.assertTrue(timed["deadline_reached"])
+            self.assertFalse(timed["complete_answer"])
 
 
 if __name__ == "__main__":

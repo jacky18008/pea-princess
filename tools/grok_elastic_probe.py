@@ -19,16 +19,20 @@ import argparse
 import collections
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import shutil
 import signal
 import subprocess
 import sys
+import threading
+import time
 
 
 FIELDS = ("input_tokens", "cache_read_input_tokens",
           "cache_creation_input_tokens", "output_tokens", "reasoning_tokens")
+STOP_GRACE_SECONDS = 20
 
 
 def sha256(path):
@@ -211,7 +215,7 @@ def run(args):
                                   capture_output=True, text=True, timeout=10, check=False)
     if version_proc.returncode != 0:
         raise ValueError("grok --version failed before dispatch")
-    cmd = [cli, "--no-auto-update", "-m", args.model, "--sandbox", args.sandbox,
+    cmd = [cli, "-m", args.model, "--sandbox", args.sandbox,
            "--no-subagents", "--max-turns", str(args.hard_turns),
            "--output-format", "streaming-json", "--prompt-file", str(frozen_prompt)]
     if args.always_approve:
@@ -231,14 +235,38 @@ def run(args):
                 "rules_sha256": rules_hash, "sandbox": args.sandbox,
                 "always_approve": args.always_approve, "session_id_requested": args.session_id,
                 "soft_turns": args.soft_turns, "hard_turns": args.hard_turns,
+                "max_seconds": args.max_seconds,
                 "automatic_retry": False}
     write_json(out / "manifest.json", manifest)
     ledger = StreamLedger(args.soft_turns)
     interrupted = False
+    deadline_reached = threading.Event()
+    started = time.monotonic()
     with (out / "stderr.txt").open("x", encoding="utf-8") as error_file, \
             (out / "stream.ndjson").open("x", encoding="utf-8") as stream_file:
         proc = subprocess.Popen(cmd, cwd=project, env=env, stdout=subprocess.PIPE,
-                                stderr=error_file, text=True, bufsize=1)
+                                stderr=error_file, text=True, bufsize=1,
+                                start_new_session=True)
+
+        def signal_group(signum):
+            try:
+                os.killpg(proc.pid, signum)
+            except ProcessLookupError:
+                pass
+
+        force_timer = threading.Timer(STOP_GRACE_SECONDS, signal_group,
+                                      args=(signal.SIGKILL,))
+        force_timer.daemon = True
+
+        def stop_on_deadline():
+            deadline_reached.set()
+            print("wallclock deadline reached; stopping Grok process group", file=sys.stderr)
+            signal_group(signal.SIGTERM)
+            force_timer.start()
+
+        deadline_timer = threading.Timer(args.max_seconds, stop_on_deadline)
+        deadline_timer.daemon = True
+        deadline_timer.start()
         try:
             for line in proc.stdout:
                 stream_file.write(line)
@@ -250,17 +278,22 @@ def run(args):
             exit_code = proc.wait()
         except KeyboardInterrupt:
             interrupted = True
-            proc.send_signal(signal.SIGINT)
+            signal_group(signal.SIGINT)
             try:
-                exit_code = proc.wait(timeout=20)
+                exit_code = proc.wait(timeout=STOP_GRACE_SECONDS)
             except subprocess.TimeoutExpired:
-                proc.kill()
+                signal_group(signal.SIGKILL)
                 exit_code = proc.wait()
         finally:
+            deadline_timer.cancel()
+            force_timer.cancel()
+            if deadline_reached.is_set() or interrupted or proc.poll() is None:
+                signal_group(signal.SIGKILL)
             if proc.poll() is None:
-                proc.kill()
                 proc.wait()
     receipt = ledger.report(exit_code=exit_code, interrupted=interrupted)
+    receipt["deadline_reached"] = deadline_reached.is_set()
+    receipt["elapsed_seconds"] = round(time.monotonic() - started, 3)
     receipt["frozen_identity_ok_after"] = (sha256(prompt) == prompt_hash and
                                            sha256(skill) == skill_hash and
                                            sha256(frozen_prompt) == prompt_hash)
@@ -302,9 +335,12 @@ def main(argv=None):
     live.add_argument("--expected-skill-sha256")
     live.add_argument("--soft-turns", type=int, default=14)
     live.add_argument("--hard-turns", type=int, default=32)
+    live.add_argument("--max-seconds", type=float, default=3600)
     args = parser.parse_args(argv)
     if args.soft_turns < 1:
         parser.error("soft turns must be positive")
+    if args.command == "run" and (not math.isfinite(args.max_seconds) or args.max_seconds <= 0):
+        parser.error("max seconds must be positive and finite")
     try:
         if args.command == "audit":
             print(json.dumps(audit(args.stream, args.soft_turns), ensure_ascii=False))
