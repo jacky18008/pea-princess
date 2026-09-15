@@ -167,10 +167,12 @@ def prepare_workdir(agent, depth, skill_dir=None):
     return path
 
 
-def claude_command(prompt, workdir, model, hook_path, extra_allowed=None):
+def claude_command(prompt, workdir, model, hook_path, extra_allowed=None, stop_hook=None):
     settings = {"disableAllHooks": False,
                 "hooks": {"PreToolUse": [{"matcher": "WebFetch|WebSearch|Bash|mcp__.*",
                                           "hooks": [{"type": "command", "command": "python3 %s" % hook_path}]}]}}
+    if stop_hook:  # the pre-send checker as a host Stop hook: blocks the stop with the findings, at most twice a turn
+        settings["hooks"]["Stop"] = [{"hooks": [{"type": "command", "command": stop_hook}]}]
     allowed = "Read,Glob,Grep,Skill,Write,Edit,Bash(python3 .claude/skills/pea-princess/scripts/*),Bash(python3 scripts/*)"
     if extra_allowed:  # e.g. "Bash(python3 *),Bash(cd *)": the deny hook still refuses curl, wget and URLs
         allowed += "," + extra_allowed
@@ -186,7 +188,7 @@ def codex_command(prompt, workdir, model):
         (["--model", model] if model else []) + ["--", prompt]
 
 
-def run_answer(agent, model, depth, prompt, timeout, skill_dir=None, extra_allowed=None):
+def run_answer(agent, model, depth, prompt, timeout, skill_dir=None, extra_allowed=None, stop_hook=False):
     workdir = prepare_workdir(agent, depth, skill_dir)
     side = tempfile.mkdtemp(prefix="vetflat-replay-side-")
     hook_log = os.path.join(side, "hook.log")
@@ -194,7 +196,11 @@ def run_answer(agent, model, depth, prompt, timeout, skill_dir=None, extra_allow
         hook_path = os.path.join(side, "probe_hook.py")
         with io.open(hook_path, "w", encoding="utf-8") as fh:
             fh.write(LP.HOOK % {"net": repr(LP.HOOK_DENY.pattern)})
-        cmd = claude_command(prompt, workdir, model, hook_path, extra_allowed)
+        stop_cmd = None
+        if stop_hook:
+            checker = os.path.join(workdir, ".claude", "skills", "pea-princess", "scripts", "reply_check.py")
+            stop_cmd = "PEA_REPLY_CHECK=%s PEA_STOP_MAX=2 python3 %s" % (checker, os.path.join(HERE, "stop_check_hook.py"))
+        cmd = claude_command(prompt, workdir, model, hook_path, extra_allowed, stop_cmd)
     else:
         cmd = codex_command(prompt, workdir, model)
     env = dict(os.environ, LINK_PROBE_LOG=hook_log)
@@ -520,7 +526,7 @@ def run_case(args, case_id, out_dir):
     focus = case_focus(corpus, case_id)
     today = case_date(os.path.abspath(args.corpus or DEFAULT_CORPUS), case_id, args.turn) if getattr(args, "inject_date", False) else None
     prompt = answer_prompt(history, message, today)
-    ans = run_answer(args.agent, args.model, args.depth, prompt, args.timeout, args.skill_dir, extra_allowed=getattr(args, "claude_allow", None))
+    ans = run_answer(args.agent, args.model, args.depth, prompt, args.timeout, args.skill_dir, extra_allowed=getattr(args, "claude_allow", None), stop_hook=getattr(args, "stop_hook", False))
     raw = os.path.join(out_dir, "raw", "%s-%s-%s-%s-%s.jsonl" % (case_id, args.turn, args.agent, (args.model or "default").replace("/", "_"), args.depth))
     os.makedirs(os.path.dirname(raw), exist_ok=True)
     with io.open(raw, "w", encoding="utf-8") as fh:
@@ -606,6 +612,7 @@ def main():
     ap.add_argument("--retry-failed", default=None, help="results folder: re-run every configuration row that failed (API error, empty, non-zero exit); new rows are appended")
     ap.add_argument("--rejudge-limit", type=int, default=None)
     ap.add_argument("--calibrate", default=None, help="results folder: judge the ORIGINAL answers blind and compare with the real reactions")
+    ap.add_argument("--stop-hook", action="store_true", help="Claude only: run the skill's reply_check as a Stop hook that blocks the reply until it passes (at most twice)")
     ap.add_argument("--claude-allow", default=None,
                     help='extra Claude permission rules, e.g. "Bash(python3 *),Bash(cd *)"; the replay allow-list matches only one spelling of the script call')
     ap.add_argument("--inject-date", action="store_true",
