@@ -1012,3 +1012,34 @@ checkable ones into `reply_check.py` rules (every listing or place the person na
 requested letter or message appears in full; a go-ahead is followed by results, not a promise; a correction
 names the manual and ledger lines it changed) and measure again with this reader (material work gaps per
 reply) beside judge v2.
+
+## Variant d: the checkpoint as checks — and the model never ran them (2026-09-15)
+
+`exp/reply-check-d` (de89865) turned four checkpoint rules into `reply_check.py` checks (every name the person
+used appears; a requested letter appears in full; a go-ahead gets results; an admitted error names what changed)
+and told the model to run the checker with `--previous`. Replay, Sonnet 5 standard, 15 cases, date injected:
+`variant-d` twice against `main-3` / `main-4`. Judge v2 and the gap reader moved within noise (material work
+gaps per reply: main-4 4.0, variant-d 4.0, variant-d-2 3.7, variant-c 3.4). The reason is in the streams:
+**in 90 Sonnet runs across six arms the model never invoked `reply_check.py` once** (terra: once in 44). A
+checker the skill only *asks* the model to run is text, and text was already the thing not being obeyed.
+
+Consequence: enforcement has to live in the host. `bench/stop_check_hook.py` runs the checker as a Claude Code
+**Stop hook** — when the reply about to be sent trips a check, the hook blocks the stop with the findings and
+the model revises (at most twice a turn). `history_replay.py --stop-hook` installs it in the replay. Running:
+`variant-e` (d's checker + the hook) and `main-hook` (main's checker + the hook), Sonnet 5, same 15 cases.
+Codex 0.153 has hook events too (`stop`, `pre_tool_use`, …; `[features] hooks = true`) — untested here.
+
+## Journeys, re-run on the current skill (2026-09-14 night): both hosts 0.74
+
+`bench/journeys.py --all`, nine scripted conversations (ten runs with the bilingual one), Claude Code
+(Sonnet 5, `--resume` per turn) and Codex (terra, default settings, sub-agents on). Mean journey score
+Sonnet 0.742, terra 0.739; 0/10 over the 0.9 pass line on either (the line was never met on 2026-09-05
+either: Sonnet 0.80, terra 0.80 then). Every journey completed; fabrications 3 (Sonnet) and 4 (terra) across
+38 turns; no tone or protected-characteristic failures. Of the 296 keyword "must" checks, 136 failed on
+each host, spread thin — no single check fails more than five times. Several of the failing expectations are
+ones the skill now deliberately breaks (j9: "names the validator command", "states which mode it is in",
+"asks for a one-word confirmation before applying" — the checkpoint says never talk about the machinery and
+do not ask when the change is clear), and the closing-line check (`ends_with`) fails on half the runs. So the
+0.80 → 0.74 drop is at least partly the bench's expectations being older than the contract; the journeys need
+their expectations re-cut to the 2026-09 rules before they can tell a regression from a policy change. The
+fact checks that failed (rent, the deposit cap, rent in advance) are worth reading one by one.
