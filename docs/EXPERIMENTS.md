@@ -1168,3 +1168,14 @@ never quoting a guarantor product's price without its page). **All ten 09-14 jou
 0.739 and 3 / 4 "fabrications" this morning, on the same replies. The bench now measures the contract; the
 next run of `bench/journeys.py --all` on both hosts (skill at 55baade+) is the first clean baseline.
 
+**Arm F, repeat 1 (2026-09-15 21:38), paired against the baselines on the same five flats:** Sonnet 5 standard
+facts +0.08, stable +0.04, fabrications 0.00, unknown-honesty +0.15, tokens ×0.92, wall −64 s (inside the
+baseline's own repeat noise, max |Δ| 0.20); **Codex terra standard facts −0.32, stable −0.43**, unknown-honesty
++0.43, tokens ×0.35, wall −148 s. The "facts" metric is landmine-code recall: terra ran `vet_case.py`
+(with `--no-save`, identity `exact`), took its states at face value, filed most axes as unknown and raised
+four codes where the baseline raised seven — the failure mode named when the arm was launched (quoting the
+command's states instead of the facts). Fix on main (this commit): every flag that maps onto one of the
+sixteen codes is emitted as a report-shaped landmine entry (`landmines[]`), ground and lower-ground floors
+become an L10 caution, and `how_to_use` says to copy the entries into `candidates[].landmines`. Repeat 2 of
+arm F runs on the old script for the record; arm F2 (branch `exp/vet-case-route-2`) re-runs both cells after it.
+
