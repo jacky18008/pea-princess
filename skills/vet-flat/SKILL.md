@@ -29,15 +29,15 @@ metadata:
 | going to a viewing, or just been | `references/axes/14-site-visit.md`, `18` |
 | asks about depth, cost or which model | `references/budget-modes.md` |
 | changes requirements, resumes, needs goals/TODOs | `references/session-harness.md`, `how-to-use.md` |
-| shares a seed or past-home stories | `references/sharing.md` (`scripts/seed.py`) |
-| wants a personal check (add-on) | `extensions/README.md` |
+| shares a seed or past homes | `references/sharing.md` (`scripts/seed.py`) |
+| wants a personal check | `extensions/README.md` |
 | halls vs private flats, or typical rent | `references/student-housing.md` |
 | needs any number computed | `references/arithmetic.md` (`scripts/calc.py`) |
 | the report itself | `references/report-contract.md`, `report-schema.json` |
 | wants the requirements as a page | `references/requirements-contract.md` (`scripts/panel.py`) |
 | a script failed, or doubts the install | `scripts/doctor.py` |
 
-Investigate unexplained discounts. Roast listings, never people. Never invent a number. One tool call per question; each re-sends the context.
+Investigate unexplained discounts. Roast listings, never people. Never invent a number. One tool call per question.
 
 ## Output
-Read `references/conversation-quality.md` before replying: first visible sentence polished and useful; run its checkpoint (`scripts/reply_check.py`) on the draft before sending. Reply in the language of the person's message; say “total monthly cost” / “每月總花費（房租加帳單）”. Keep labels and paths internal. Legal/payment advice at the affected decision. Explain verdict codes.
+Read `references/conversation-quality.md` before replying: first visible sentence polished and useful; run its checkpoint (`scripts/reply_check.py`) on the draft before sending. Reply in the language and script of the person's message (traditional stays traditional); say “total monthly cost” / “每月總花費（房租加帳單）”. Keep labels and paths internal. Legal/payment advice at the affected decision. Explain verdict codes.
