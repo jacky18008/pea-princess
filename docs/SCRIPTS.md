@@ -1366,3 +1366,17 @@ host 815,000 tokens in a single turn; this call is about 2,500–3,000 tokens to
 the listing, the EPC or the person) or a point; give `--street` whenever the name is known. The first line on
 stderr says what is being scanned and where a copy of the JSON is saved (`--out`, `--no-save`), so a host whose
 tool call times out before the scan returns can still read the result from the file.
+
+## `doctor.py` — is it installed right? (one request per open register)
+
+```
+python3 scripts/doctor.py            # interpreter, curl, the skill's files, arithmetic, one tiny request per register
+python3 scripts/doctor.py --offline  # no network
+python3 scripts/doctor.py --json     # machine-readable: {"ok", "failed", "results": [{"check", "ok", "seconds", "note", "needed_for"}], "reading"}
+```
+
+One line per check with the time it took; at the end, which axes come back unknown until a failed register works
+again (each check carries `needed_for`). Exit code 1 when anything fails, so a host can gate on it. Nothing is
+written; the register calls are the same open, cached requests the skill makes in normal use (2026-09-15, London:
+about 25 s end to end, Overpass the slowest at ~17 s). This is the first thing to run on a new host, and the
+evidence behind the per-host table in `docs/INSTALL.md`.

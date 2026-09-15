@@ -974,3 +974,72 @@ Harness notes: the durable controller resumes only in its own directory and stay
 call, so a network drop costs the in-flight call and the rest of that repeat had to be filled with one-call
 sweeps (`bench/private/ctx-lib.sh`); one relaunch restarted a repeat from scratch (the second baseline repeat
 is that restart); the runner's `--timeout` did not end a `codex exec` that hung through a drop (a watchdog did).
+
+## The gap to the original answers, itemised (2026-09-14)
+
+The author rated 20 replayed replies (`bench/private/calibration-2026-09-14`): mean satisfaction 1.50/2 against
+the judge's 1.00 on the same replies (exact agreement 10/20; where they differed the judge was harsher 9 times);
+on "better/same/worse than the original", the author said "same" for 15 of 20 (the gap is model class and
+context, the reply still covers the point) where the judge said "worse" for 13. The judge's "beats original"
+therefore measures resemblance to the stronger model's answer, not whether a general user is served.
+
+To see what the gap is made of, an Opus reader listed every difference between each replayed reply and the
+original answer and classified it (`bench/gap_analysis.py`; 20 rated replies + Sonnet 5 variant-c 15 + Codex
+terra 15, standard depth; "material" = would change what the person does next):
+
+| Model / arm | Replies | Work the skill could have done (material) | Knowledge (material) | Context the replay lacked (material) | Judgement, model-bound (material) | Reply better than original (material) |
+|---|---|---|---|---|---|---|
+| Sonnet 5, variant-c | 15 | 35 (28) | 8 (3) | 21 (10) | 25 (10) | 22 (2) |
+| Codex terra | 14 | 27 (20) | 7 (1) | 25 (14) | 18 (4) | 30 (10) |
+| Opus 5 | 3 | 4 (2) | 5 (1) | 4 (1) | 1 (0) | 9 (5) |
+| Codex sol | 3 | 8 (4) | 3 (0) | 4 (2) | 2 (0) | 6 (1) |
+
+Reading: of the material gaps, **about half are work the skill already tells the model to do** (Sonnet 28 of
+51, terra 20 of 39): act on a go-ahead and run the lines the person authorised; re-check the ledger when a
+rule changes (flats killed by the old rule); edit the manual and the ledger in the same turn as a correction;
+finish the deliverable (the viewing letter rewritten in full, the message draft, the merged page with its
+link); fetch what the scripts can fetch (the EPC heating field that reveals a heat network; floor areas;
+listing status; current guarantor fees) before asking the person; use evidence already in the conversation
+(a named building's crime figures; the lift as the only remaining gate). A fifth to a third is context the
+replay did not give the model (files, sub-agents, earlier research) and is not a fair comparison. Judgement
+proper — synthesis and explanation depth — is a fifth for Sonnet and a tenth for terra. Knowledge gaps are
+few and cheap (four went into the skill today: guarantor products as fallback, the short-let price band,
+explanation depth by experience, fallbacks on every named line).
+
+What follows: the checkpoint rules adopted this week cover most of the work gaps in words, and Sonnet still
+leaves 28 material ones in 15 replies — the words are read, not obeyed. The next harness step is to turn the
+checkable ones into `reply_check.py` rules (every listing or place the person named appears in the reply; a
+requested letter or message appears in full; a go-ahead is followed by results, not a promise; a correction
+names the manual and ledger lines it changed) and measure again with this reader (material work gaps per
+reply) beside judge v2.
+
+## Variant d: the checkpoint as checks — and the model never ran them (2026-09-15)
+
+`exp/reply-check-d` (de89865) turned four checkpoint rules into `reply_check.py` checks (every name the person
+used appears; a requested letter appears in full; a go-ahead gets results; an admitted error names what changed)
+and told the model to run the checker with `--previous`. Replay, Sonnet 5 standard, 15 cases, date injected:
+`variant-d` twice against `main-3` / `main-4`. Judge v2 and the gap reader moved within noise (material work
+gaps per reply: main-4 4.0, variant-d 4.0, variant-d-2 3.7, variant-c 3.4). The reason is in the streams:
+**in 90 Sonnet runs across six arms the model never invoked `reply_check.py` once** (terra: once in 44). A
+checker the skill only *asks* the model to run is text, and text was already the thing not being obeyed.
+
+Consequence: enforcement has to live in the host. `bench/stop_check_hook.py` runs the checker as a Claude Code
+**Stop hook** — when the reply about to be sent trips a check, the hook blocks the stop with the findings and
+the model revises (at most twice a turn). `history_replay.py --stop-hook` installs it in the replay. Running:
+`variant-e` (d's checker + the hook) and `main-hook` (main's checker + the hook), Sonnet 5, same 15 cases.
+Codex 0.153 has hook events too (`stop`, `pre_tool_use`, …; `[features] hooks = true`) — untested here.
+
+## Journeys, re-run on the current skill (2026-09-14 night): both hosts 0.74
+
+`bench/journeys.py --all`, nine scripted conversations (ten runs with the bilingual one), Claude Code
+(Sonnet 5, `--resume` per turn) and Codex (terra, default settings, sub-agents on). Mean journey score
+Sonnet 0.742, terra 0.739; 0/10 over the 0.9 pass line on either (the line was never met on 2026-09-05
+either: Sonnet 0.80, terra 0.80 then). Every journey completed; fabrications 3 (Sonnet) and 4 (terra) across
+38 turns; no tone or protected-characteristic failures. Of the 296 keyword "must" checks, 136 failed on
+each host, spread thin — no single check fails more than five times. Several of the failing expectations are
+ones the skill now deliberately breaks (j9: "names the validator command", "states which mode it is in",
+"asks for a one-word confirmation before applying" — the checkpoint says never talk about the machinery and
+do not ask when the change is clear), and the closing-line check (`ends_with`) fails on half the runs. So the
+0.80 → 0.74 drop is at least partly the bench's expectations being older than the contract; the journeys need
+their expectations re-cut to the 2026-09 rules before they can tell a regression from a policy change. The
+fact checks that failed (rent, the deposit cap, rent in advance) are worth reading one by one.

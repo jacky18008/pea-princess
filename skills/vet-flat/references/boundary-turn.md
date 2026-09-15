@@ -6,6 +6,8 @@ For a comparison involving a candidate just outside a stated limit or a viewing 
 
 Start with the saved state and provided facts. Explain a useful difference; when a worthwhile candidate exceeds a limit and the person has not already decided, ask whether they accept that actual tradeoff. Distinguish accepting this candidate, keeping it without viewing, and declining. Use native choices plus free text when available. The proposal's wording must ask about the offered value, not merely “keep it for comparison” when the proposed effect would permit viewing. Exact user quotes still need interpretation; neither this script nor a copied quote proves semantic consent.
 
+A viewing hold on one candidate does not stop research on another. Sort gaps as in [onboarding.md](onboarding.md): fetch what a script can find, ask only for facts or preferences the person holds, and keep comparing facts that do not depend on a pending viewing decision. A ranking-only gap never holds back the current comparison or report.
+
 Run from the user's private project. Set `PEA_SKILL` to the installed skill directory and `PEA_PROJECT` to that project, not the skill folder. Python 3.9+, no dependencies or network calls.
 
 ```bash

@@ -41,6 +41,11 @@ What it checks (2026-09-11, from the replay review of fifteen real cases):
             quote them; everything else is your suggestion and is written as one. Added 2026-09-13
             after Codex's Terra runs turned "偏好安靜" into "只有…才值得".
             Explicitly negated claims are skipped; a URL alone is not a verification result.
+  decision  a sentence that records a decision as the person's (可排看房, 已約, 已同意, 已拒, booked,
+            agreed, declined) without their words beside it (你說, 你選了) and without a proposal
+            marker: the reply may never be stronger than what the person said. 可考慮 stays 可考慮,
+            an unanswered offer is not 已拒. Added 2026-09-15 after the Grok Bot six-turn validation
+            turned 「可考慮看房」 into 「A 目前可排看房」 and wrote 「已拒」 for an offer nobody answered.
 The 2026-09-11 checkpoint reviews of Opus and Codex terra on the same fifteen cases added the last
 four kinds (local paths, third person, unexplained codes, empty claims).
 Whether asking again repeats settled consent requires the actual saved state and
@@ -68,6 +73,13 @@ USER_CUE = re.compile(r"(你說|你的條件|你要求|你提過|你之前|你�
                       r"\byou said\b|\byou asked\b|\byour (?:rule|condition|requirement|limit|ceiling|budget|deal-?breaker)|\bas you\b|\bper your\b)", re.I)
 PROPOSAL_CUE = re.compile(r"(我建議|我會建議|我的建議|建議你|建議先|我認為|我覺得|我的看法|我擔心|我會先|我會把|可以考慮|如果你|要不要|看你|由你|你決定|你可以|"
                           r"\bI suggest|\bI would|\bI'd\b|\bmy (?:advice|view|suggestion)|\bconsider\b|\bif you\b|\bup to you\b|\byou (?:could|might|may)\b)", re.I)
+DECISION_CUE = re.compile(r"(可排|已排|排定|排好|已約|約好|已預約|已同意|已接受|已拒|被拒|拒絕了|已決定|定案|已放行|已授權|"
+                          r"\bbooked\b|\bscheduled\b|\bagreed\b|\baccepted\b|\bdeclined\b|\brejected\b|\bauthori[sz]ed\b|"
+                          r"\byou(?:'ve| have) (?:agreed|accepted|decided|declined))", re.I)
+DECISION_NEGATION = re.compile(r"(?:不該|不能|不應|不可|不是|不算|尚未|還未|還沒|未曾|沒有|未|不|"
+                               r"\bnot\b|\bnever\b|\bno\b|\bhasn['’]t\b|\bhaven['’]t\b|\bisn['’]t\b|\baren['’]t\b)"
+                               r"\s*(?:被)?(?:當成|視為|當作|算作|等於|代表)?\s*$", re.I)
+QUOTED = re.compile(r"[「“\"][^」”\"]{2,80}[」”\"]")
 NUMBER = re.compile(r"(£\s?\d[\d,]*(?:\.\d+)?|\d[\d,]*(?:\.\d+)?\s?(?:%|分鐘|分|週|周|個月|月|年|m²|平方公尺|sq ?ft|平方呎|平方英尺|坪|英鎊|鎊|件|戶|棟|間|公尺|米|km|公里|k\b|萬))")
 DATE_LIKE = re.compile(r"\b(19|20)\d{2}[-/年.]\d{1,2}([-/月.]\d{1,2})?|\d{1,2}[/月]\d{1,2}[日號]?|\d{1,2}:\d{2}|\b(19|20)\d{2}\s?年")
 CIRCLED = re.compile(r"[①-⑳⓪-⓿㉑-㉟]")
@@ -223,6 +235,16 @@ def scan(text, previous=None):
         if NECESSITY.search(sent) and not USER_CUE.search(sent) and not PROPOSAL_CUE.search(sent):
             findings.append({"kind": "authority", "fragment": sent.strip()[:140],
                              "say": "這句把一個條件寫成定案（必須／只有…才／排除）。能引使用者原話就加「你說…」；不能就是你的建議，改寫成「我建議先確認…」，並放進提議欄，不改使用者的條件。"})
+    for sent in re.split(r"(?<=[。.!?！？\n])", text or ""):
+        quoted_spans = [quote.span() for quote in QUOTED.finditer(sent)]
+        unsupported = any(
+            not DECISION_NEGATION.search(sent[:cue.start()])
+            and not any(start <= cue.start() and cue.end() <= end for start, end in quoted_spans)
+            for cue in DECISION_CUE.finditer(sent)
+        )
+        if unsupported and not USER_CUE.search(sent) and not PROPOSAL_CUE.search(sent):
+            findings.append({"kind": "decision", "fragment": sent.strip()[:140],
+                             "say": "這句替使用者下了決定（可排／已約／已同意／已拒）。只用使用者自己的字（可考慮、先留著），或加「你說…」引原話；沒人回應的提議寫「你還沒回應」，不是「已拒」。"})
     q = len(QUESTION.findall(text or ""))
     if q > 3:
         findings.append({"kind": "asking", "fragment": "%d 個問號" % q, "say": "問題超過三個；留下會改變下一步的那幾個，其餘用預設。"})
