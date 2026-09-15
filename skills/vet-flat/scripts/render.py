@@ -1008,6 +1008,12 @@ def recompute_candidate(cand, profile):
             label_id="ui.arith_holding_deposit_cap"))
 
     council_tax = _num(costs.get("council_tax"))
+    unpriced = costs.get("unknown_components") or []
+    if not isinstance(unpriced, list):
+        unpriced = []
+    unpriced = tuple({"heat_network_tariff": "heat-network tariff",
+                      "other_unpriced_bill": "another unpriced bill"}[name]
+                     for name in unpriced if name in ("heat_network_tariff", "other_unpriced_bill"))
     broadband_entry = _pick(numbers, [["broadband", "internet"]], money=True)
     broadband = broadband_entry["value"] if broadband_entry else 0.0
     all_in = {}
@@ -1035,7 +1041,7 @@ def recompute_candidate(cand, profile):
         label = {"low": "All-in cost, mild month", "planning": "All-in cost, the planning number",
                  "stress": "All-in cost, cold month"}[name]
         missing = tuple(name for name, amount in (("rent", rent), ("modelled bills", bills),
-                                                  ("council tax", council_tax)) if amount is None)
+                                                  ("council tax", council_tax)) if amount is None) + unpriced
         if missing:
             for source in sources:
                 if source:
@@ -1066,7 +1072,7 @@ def recompute_candidate(cand, profile):
 
     ceiling = _ceiling(cand, profile)
     bills_planning = _num(costs.get("bills_planning"))
-    if ceiling is not None and bills_planning is not None and council_tax is not None:
+    if ceiling is not None and bills_planning is not None and council_tax is not None and not unpriced:
         break_even = ceiling - bills_planning - council_tax
         entry = _pick(numbers, [["break even", "breakeven"]], money=True)
         checks.append(_check("break_even_rent", "Break-even rent against your ceiling",
@@ -1077,7 +1083,7 @@ def recompute_candidate(cand, profile):
         entry = _pick(numbers, [["break even", "breakeven"]], money=True)
         if entry:
             missing = tuple(name for name, amount in (("modelled bills", bills_planning),
-                                                      ("council tax", council_tax)) if amount is None)
+                                                      ("council tax", council_tax)) if amount is None) + unpriced
             checks.append(_unknown_cost_check("break_even_rent", "Break-even rent against your ceiling",
                                               _source(entry["value"], entry["where"], entry["loc"]), missing))
 

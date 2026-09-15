@@ -1226,12 +1226,22 @@
           ],
           "description": "Council tax for the band, spread over twelve months. If the user qualifies for a full student exemption, write 0 and say why in basis_note - do not silently drop it."
         },
+        "unknown_components": {
+          "type": "array",
+          "description": "Required monthly charges omitted from the bills model. Mark an unpriced communal-heat standing charge or tariff here even when council tax is an evidenced 0. Keep the attempted source or missing tariff in axis 10 unknowns and basis_note; this flag is not a tariff quote.",
+          "items": {
+            "type": "string",
+            "enum": ["heat_network_tariff", "other_unpriced_bill"]
+          },
+          "uniqueItems": true,
+          "maxItems": 2
+        },
         "all_in_planning": {
           "type": [
             "number",
             "null"
           ],
-          "description": "Rent plus bills_planning plus council tax, in pounds per month. Null until the tax amount or an evidenced exemption and the applicable bills basis are known; never substitute 0 for an unknown component. Compare to the person's total-spending ceiling only once complete."
+          "description": "Rent plus complete bills_planning plus council tax, in pounds per month. Null until the tax amount or an evidenced exemption and the applicable bills basis are known, including any communal-heat tariff; never substitute 0 for an unknown component. Compare to the person's total-spending ceiling only once complete."
         },
         "basis_note": {
           "type": "string",

@@ -536,6 +536,28 @@ class TestArithmeticCheck(unittest.TestCase):
         self.assertIn("council tax is unknown", "\n".join(render.arithmetic_warnings(data)))
         self.assertIn(("costs", "all_in_planning"), render.bad_locations(data)[data["candidates"][0]["id"]])
 
+    def test_unknown_heat_tariff_rejects_numeric_total_and_break_even_with_zero_tax(self):
+        data = load_sample()
+        costs = data["candidates"][0]["costs"]
+        costs["council_tax"] = 0
+        costs["unknown_components"] = ["heat_network_tariff"]
+        errors, _ = render.validate(data, load_schema())
+        self.assertEqual([], errors)
+        result = render.recompute(data)[0]
+        full = next(c for c in result["checks"] if c["where"] == "costs.all_in_planning")
+        self.assertFalse(result["arithmetic_ok"])
+        self.assertIsNone(full["recomputed"])
+        self.assertIn("heat-network tariff", full["formula"])
+        self.assertIn(("costs", "all_in_planning"), render.bad_locations(data)[data["candidates"][0]["id"]])
+        with tempfile.TemporaryDirectory() as folder:
+            path = os.path.join(folder, "unpriced-heat.json")
+            with io.open(path, "w", encoding="utf-8") as fh:
+                json.dump(data, fh)
+            proc = subprocess.run([sys.executable, os.path.join(SCRIPTS, "render.py"), path,
+                                   "--validate-only"], capture_output=True, text=True)
+        self.assertEqual(1, proc.returncode, proc.stderr)
+        self.assertIn("numeric full cost despite unknown required inputs", proc.stderr)
+
     def test_numeric_total_with_missing_bills_is_invalid_without_strict(self):
         data = load_sample()
         costs = data["candidates"][0]["costs"]
@@ -574,6 +596,13 @@ costs.bills_planning=null;
 result=context.recompute(report)[0];
 claim=result.checks.find(x=>x.where==='costs.all_in_planning');
 if(result.arithmetic_ok || !claim || claim.recomputed!==null || claim.ok) process.exit(3);
+costs.council_tax=0;
+costs.bills_planning=175;
+costs.unknown_components=['heat_network_tariff'];
+result=context.recompute(report)[0];
+claim=result.checks.find(x=>x.where==='costs.all_in_planning');
+if(result.arithmetic_ok || !claim || claim.recomputed!==null || claim.ok ||
+   !claim.formula.includes('heat-network tariff')) process.exit(4);
 """
         proc = subprocess.run([node, "-e", script, VIEWER, SAMPLE],
                               capture_output=True, text=True)

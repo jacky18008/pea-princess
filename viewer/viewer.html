@@ -430,6 +430,9 @@ function recomputeCandidate(c,profile){
       weekly,apick(numbers,[["holding"],["deposit","fee"]],[],true),"cap",null,"GBP","ui.arith_holding_deposit_cap"));
   }
   var councilTax=anum(costs.council_tax), bb=apick(numbers,[["broadband","internet"]],[],true);
+  var unpriced=(Array.isArray(costs.unknown_components)?costs.unknown_components:[]).map(function(name){
+    return {heat_network_tariff:"heat-network tariff",other_unpriced_bill:"another unpriced bill"}[name]||null;
+  }).filter(function(name){return name;});
   var broadband=bb?bb.value:0.0, allIn={};
   [["low","bills_low",["low","best","mild","careful"],["stress","worst"],"All-in cost, mild month"],
    ["planning","bills_planning",null,["stress","worst","low","best","mild"],"All-in cost, the planning number"],
@@ -452,6 +455,7 @@ function recomputeCandidate(c,profile){
     if(rent===null) missing.push("rent");
     if(bills===null) missing.push("modelled bills");
     if(councilTax===null) missing.push("council tax");
+    missing=missing.concat(unpriced);
     if(missing.length){
       sources.forEach(function(s){checks.push(aUnknownCost("all_in_"+name,band[4],s,missing));});
       return;
@@ -478,10 +482,11 @@ function recomputeCandidate(c,profile){
   var ceiling=aceiling(c,profile), billsPlanning=anum(costs.bills_planning);
   if(ceiling!==null){
     var be=apick(numbers,[["break even","breakeven"]],[],true);
-    if(councilTax===null||billsPlanning===null){
+    if(councilTax===null||billsPlanning===null||unpriced.length){
       var missingBE=[];
       if(billsPlanning===null) missingBE.push("modelled bills");
       if(councilTax===null) missingBE.push("council tax");
+      missingBE=missingBE.concat(unpriced);
       if(be) checks.push(aUnknownCost("break_even_rent","Break-even rent against your ceiling",
                                    asource(be.value,be.where,be.loc),missingBE));
     }else{

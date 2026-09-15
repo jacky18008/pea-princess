@@ -24,6 +24,8 @@ Each prints `inputs`, `formula`, `steps`, `result`; quote the formula in the rep
 
 Council tax is not zero by default. Without a verified council-tax amount, `all-in` returns a known subtotal for each bill scenario and `null` for the total; `break-even` returns an upper bound before council tax and `null` for the affordable rent. Do not quote either subtotal or upper bound as a complete monthly cost or rent limit. Pass `--council-tax 0` only when a documented exemption or inclusion makes the tenant's council-tax payment zero; otherwise verify the amount first.
 
+If a communal-heat standing charge or tariff is still absent from the bills model, pass `--unknown-component heat_network_tariff` to `all-in` and `break-even`, even when council tax is an evidenced £0. The calculator keeps the known subtotal and returns `null` for the complete cost and rent limit. Set `costs.unknown_components` to `["heat_network_tariff"]` in the report, name the missing rate card in axis 10's `unknowns`, and explain the bills basis in `basis_note`. Use `other_unpriced_bill` for another required charge with no price. Remove the marker only after the charge is included in the bills model on a stated source or estimate basis.
+
 ## Without a shell
 1. Write the formula in words (for example: weekly rent = monthly rent × 12 ÷ 52; deposit cap = 5 × weekly rent when the annual rent is under £50,000, else 6 ×).
 2. Write every intermediate step with its number.

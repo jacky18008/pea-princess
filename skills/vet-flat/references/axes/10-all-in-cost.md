@@ -17,7 +17,7 @@ A comparison where one flat carries the operator's estimate and another carries 
 1. Council tax band: the national band lookup is a fetch or a manual step; record the band and the borough's current rate for it.
 2. `python3 scripts/redress.py heat-trust --site "<building>"` and `python3 scripts/company.py profile <supplier>` — whether the heat supplier is inside the consumer-protection scheme and whether its accounts point at a tariff rise (axis 3).
 3. Compute three totals from the same model for every candidate: low, planning and stress.
-   If the council tax amount or an applicable exemption has not been confirmed, the calculator returns a known subtotal and a null total. Do not treat an omitted `--council-tax` flag as £0 or compare that subtotal with a person's total-spending ceiling.
+   If the council tax amount or an applicable exemption has not been confirmed, the calculator returns a known subtotal and a null total. Do not treat an omitted `--council-tax` flag as £0 or compare that subtotal with a person's total-spending ceiling. If the heat-network tariff remains unpriced in the bills model, pass `--unknown-component heat_network_tariff`; an evidenced `--council-tax 0` does not complete that total.
 
 ## Method in fetch mode
 The band lookup and the regulator's pages are fetchable. Tariffs usually are not.
@@ -62,7 +62,7 @@ Fields are from `references/report-schema.json`, which is the contract.
 This axis writes one entry in `candidates[].axes[]` with `id: 10`, `name`, `finding` (600 characters, plain sentences), `evidence_class`, `unknowns[]` and `sources[]`. Every figure quoted in the finding is repeated in `numbers[]` as a labelled number (`label`, `value`, `unit`, `meaning`, `compared_to`, `evidence_class`, `sources`).
 
 Also fills:
-- `candidates[].costs` — `rent_pcm`, `bills_low`, `bills_planning`, `bills_stress`, `council_tax`, `all_in_planning`, `basis_note` and `sources`. The `basis_note` must say that the bills figures are a shared assumption applied identically to every candidate and are not a supplier quote.
+- `candidates[].costs` — `rent_pcm`, `bills_low`, `bills_planning`, `bills_stress`, `council_tax`, `unknown_components` when a required monthly charge is unpriced, `all_in_planning`, `basis_note` and `sources`. The `basis_note` must say that the bills figures are a shared assumption applied identically to every candidate and are not a supplier quote. Keep the missing tariff and attempted source in axis 10 `unknowns`; do not label a known subtotal as the complete cost.
 - `candidates[].hard_filters[]` — one row for the profile's all-in ceiling.
 - `candidates[].verdict.break_even_rent_pcm` — the rent at which an over-ceiling candidate comes back under; this is the negotiating target.
 Numbers to record: each one-off cost, the twelve-month total on each scenario, and, where bridging applies, the bridging weeks and weekly cost with the twelve-month comparison spelled out.

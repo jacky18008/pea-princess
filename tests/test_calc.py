@@ -46,6 +46,23 @@ class TestCalc(unittest.TestCase):
         self.assertEqual(target["upper_bound_before_tax"], 2425.0)
         self.assertEqual(target["unknown_components"], ["council_tax"])
 
+    def test_unpriced_heat_tariff_keeps_known_subtotal_even_with_evidenced_zero_tax(self):
+        args = ("all-in", "--rent-pcm", "2450", "--bills-planning", "175",
+                "--council-tax", "0", "--unknown-component", "heat_network_tariff")
+        raw = subprocess.run([sys.executable, CALC] + list(args), capture_output=True, text=True, check=True)
+        output = json.loads(raw.stdout)
+        self.assertEqual(output["inputs"]["unknown_component"], ["heat_network_tariff"])
+        self.assertEqual(output["result"]["known_subtotal_planning"], 2625.0)
+        self.assertIsNone(output["result"]["all_in_planning"])
+        self.assertEqual(output["result"]["unknown_components"], ["heat_network_tariff"])
+        self.assertEqual(run("all-in", "--rent-pcm", "2450", "--bills-planning", "175",
+                             "--council-tax", "0")["all_in_planning"], 2625.0)
+        target = run("break-even", "--ceiling", "2800", "--bills-planning", "175",
+                     "--council-tax", "0", "--unknown-component", "heat_network_tariff")
+        self.assertIsNone(target["max_rent_pcm"])
+        self.assertEqual(target["upper_bound_before_unknowns"], 2625.0)
+        self.assertEqual(target["unknown_components"], ["heat_network_tariff"])
+
     def test_price_per_sqft(self):
         r = run("price-per-sqft", "--rent-pcm", "2400", "--area-m2", "52")
         self.assertAlmostEqual(r["area_sqft"], 559.72, places=2)
