@@ -412,6 +412,29 @@ def in_any_span(pos, spans):
     return any(lo <= pos <= hi for lo, hi in spans)
 
 
+def material_numbers(journey, turn):
+    """Every number the person or the pasted material stated up to and including this turn.
+
+    A reply that repeats one of them beside the wrong label has mislabelled a pasted figure, not
+    invented one; the fabrication counter is for numbers with no source. Added 2026-09-15 after six
+    of the seven "fabrications" in the 2026-09-14 runs turned out to be the person's budget ceiling,
+    the weekly rent or a sum being read as a deposit cap or a platform fee."""
+    nums, texts = set(), []
+    for t in journey.get("turns") or []:
+        texts.append(t.get("user") or "")
+        for a in t.get("attachments") or []:
+            texts.append(a.get("text") or "")
+        if t is turn:
+            break
+    for tx in texts:
+        for m in re.finditer(r"\d[\d,]*(?:\.\d+)?", tx):
+            try:
+                nums.add(round(float(m.group(0).replace(",", "")), 2))
+            except ValueError:
+                pass
+    return nums
+
+
 def extract_numbers(text, spec):
     """Every number of this fact's kind that the reply states, with where it was found.
 
@@ -444,8 +467,13 @@ def extract_numbers(text, spec):
     return found
 
 
-def check_fact(text, name, spec):
-    """(status, detail, fabrications). Wrong number of the right kind = fabrication."""
+def check_fact(text, name, spec, material=None):
+    """(status, detail, fabrications). Wrong number of the right kind = fabrication.
+
+    Two exceptions, both from reading the 2026-09-14 "fabrications" one by one: when the reply states
+    the right value, other figures caught by the same pattern are other quantities, not a second claim
+    (pass); and a wrong figure that the person or the pasted material stated (`material`) is a
+    mislabelled quote, not an invention (fail, never-states, no fabrication)."""
     wanted = spec.get("values")
     if wanted is None:
         wanted = [spec.get("value")]
@@ -456,11 +484,31 @@ def check_fact(text, name, spec):
         if spec.get("required"):
             return "fail", "the reply never states %s (required)" % name, 0
         return "skipped", "the reply does not state %s, which is allowed" % name, 0
-    wrong = []
+    wrong, right = [], []
     for value, snippet in found:
         if not any(abs(value - w) <= tolerance + 1e-9 for w in wanted):
             wrong.append((value, snippet))
+        else:
+            right.append((value, snippet))
+    if wrong and not right and (spec.get("mask_patterns") or spec.get("line_mask")):
+        # the masks exist to keep the holding-deposit line out; when a reply writes "deposit/holding-deposit
+        # ceilings: £2,596.15/£519.23" the mask can swallow the right figure and leave the other one, so
+        # look once more without the masks before calling the remainder wrong
+        unmasked = {k: v for k, v in spec.items() if k not in ("mask_patterns", "line_mask")}
+        right = [(v, sn) for v, sn in extract_numbers(text, unmasked) if any(abs(v - w) <= tolerance + 1e-9 for w in wanted)]
     want_text = ", ".join(("%g" % w) for w in wanted)
+    if right and wrong:
+        return "pass", "states %s, which matches the pasted material (other figures nearby: %s)" % (
+            want_text, ", ".join("%g" % v for v, _ in wrong[:3])), 0
+    if wrong and material:
+        quoted = [w for w in wrong if round(w[0], 2) in material]
+        wrong = [w for w in wrong if round(w[0], 2) not in material]
+        if quoted and not wrong:
+            if spec.get("required"):
+                return "fail", "the reply never states %s; the figure near it (%s) is one the person or the pasted material stated, not this fact" % (
+                    name, ", ".join("%g" % v for v, _ in quoted[:3])), 0
+            return "skipped", "the reply does not state %s (the figure near it, %s, is a pasted one), which is allowed" % (
+                name, ", ".join("%g" % v for v, _ in quoted[:3])), 0
     if wrong:
         seen = collections.OrderedDict((w[0], w[1]) for w in wrong)
         return ("fail",
@@ -545,7 +593,7 @@ def score_turn(turn, reply, journey, workdir=None, agent=None, file_rows=None):
 
     fabrications = 0
     for name, spec in (exp.get("facts") or {}).items():
-        status, detail, fabs = check_fact(text, name, spec)
+        status, detail, fabs = check_fact(text, name, spec, material_numbers(journey, turn))
         fabrications += fabs
         rows.append(row(name, "fact", status, detail, why=spec.get("why")))
 
