@@ -1089,11 +1089,21 @@ class SessionStore:
         with self._locked() as directory:
             state = self._load(directory)[1]
             packet = self._context(state, max_chars, task_ids, max_tokens)
-            manifest = {"schema_version": VERSION, "project_id": state["project_id"],
-                "revision": state["revision"], "event_hash": state["event_hash"],
-                "context_sha256": digest(packet), "packet": packet}
-            self._write(directory, "checkpoint.json", manifest)
-            return manifest
+            return self._save_checkpoint(directory, state, packet)
+
+    def navigation_checkpoint(self, max_chars=DEFAULT_CONTEXT_CHARS, max_tokens=None):
+        """Save the same verifiable checkpoint envelope with a navigation packet."""
+        with self._locked() as directory:
+            state = self._load(directory)[1]
+            packet = self._navigation(state, max_chars, max_tokens)
+            return self._save_checkpoint(directory, state, packet)
+
+    def _save_checkpoint(self, directory, state, packet):
+        manifest = {"schema_version": VERSION, "project_id": state["project_id"],
+            "revision": state["revision"], "event_hash": state["event_hash"],
+            "context_sha256": digest(packet), "packet": packet}
+        self._write(directory, "checkpoint.json", manifest)
+        return manifest
 
     def retrieve(self, document_id, start=1, end=None, max_chars=6000,
                  expected_revision=None, expected_event_hash=None, expected_sha256=None):

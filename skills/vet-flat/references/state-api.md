@@ -44,7 +44,7 @@ python3 "$PEA_SKILL/scripts/session_state.py" --project "$PEA_PROJECT" retrieve 
   --expected-event-hash "$PEA_EVENT_HASH" --expected-sha256 "$PEA_SOURCE_SHA256"
 ~~~
 
-`inspect` also supports `requests`, `documents`, `facts`, `budgets`, `outputs`, `decisions` and `dispatches`; raise `--max-chars` explicitly if an original row is large. `context` and `show` retain the full expanded views. Navigation indexes do not replace source inspection, semantic review, decision coverage or the full context that `session_runner.py` injects into a model call.
+`inspect` also supports `requests`, `documents`, `facts`, `budgets`, `outputs`, `decisions` and `dispatches`; raise `--max-chars` explicitly if an original row is large. `context` and `show` retain the full expanded views. Navigation indexes do not replace source inspection, semantic review or decision coverage. `session_runner.py` injects the complete active authority plus only explicitly selected original source spans.
 
 ## Atomic event batches
 

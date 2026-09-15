@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT / "tools"), str(ROOT / "skills/vet-flat/scripts")]
 import session_runner as runner
 import session_hook as hook
-from session_state import SessionStore, SessionStateError
+from session_state import SessionStore, SessionStateError, ContextOverflow
 
 
 def provenance(quote="Allow up to 1000 API tokens"):
@@ -113,6 +113,73 @@ class SessionRunnerTests(unittest.TestCase):
         invoke = mock.Mock(return_value=terminal())
         with self.assertRaises(SessionStateError):
             self.run_step(invoke, max_chars=10)
+        invoke.assert_not_called()
+        self.assertFalse(self.store.show()["dispatches"])
+
+    def test_large_sources_use_complete_navigation_and_only_explicit_original_spans(self):
+        for i in range(9):
+            path=self.root/("source-%02d.txt" % i)
+            path.write_text('\n'.join("LINE %02d %02d ORIGINAL_%02d %s" %
+                                      (i, line, i, 'x'*100)
+                                      for line in range(1,41))+'\n')
+            self.apply({"op":"document.add","id":"source-%02d" % i,"path":path.name,
+                        "line_ranges":[[1,40]],
+                        "provenance":{"actor":"source","source_id":path.name,
+                                      "quote":"Synthetic saved source"}})
+        with self.assertRaises(ContextOverflow):
+            self.store.context(max_chars=24000)
+        before=self.store.show()
+        active={i:r for i,r in before["requirements"].items() if r["status"]=="active"}
+        def invoke(request, folder):
+            self.assertEqual("navigation",request["packet_kind"])
+            self.assertIn("LINE 00 01 ORIGINAL_00",request["prompt"])
+            self.assertNotIn("LINE 01 01 ORIGINAL_01",request["prompt"])
+            manifest=runner._envelope(folder,"manifest.json")
+            self.assertEqual(active,manifest["packet"]["requirements"])
+            self.assertEqual(9,len(manifest["packet"]["document_index"]))
+            self.assertEqual("navigation",manifest["packet"]["packet_kind"])
+            self.assertEqual(runner._digest(manifest["packet"]),request["packet_sha256"])
+            self.assertEqual(1,len(request["source_span_refs"]))
+            return terminal()
+        receipt=self.run_step(invoke,source_spans=[{"document_id":"source-00","start":1,"end":2}])
+        self.assertEqual("recorded",receipt["status"])
+        self.assertEqual(receipt,runner.recover(self.root,"step-1"))
+
+    def test_source_selection_and_packet_tampering_fail_without_reinterpreting_history(self):
+        invoke=mock.Mock(return_value=terminal())
+        with self.assertRaises(ValueError):
+            self.run_step(invoke,source_spans=[{"document_id":"missing","start":1,"end":1}])
+        invoke.assert_not_called()
+        self.assertFalse(self.store.show()["dispatches"])
+        self.run_step(invoke)
+        path=self.root/".pea-state/runs/step-1/manifest.json"
+        original=path.read_bytes()
+        saved=json.loads(original)
+        saved["value"]["packet"]["requirements"]["dry-ground-floor"]["value"]="Tampered value"
+        saved["value"]["packet_sha256"]=runner._digest(saved["value"]["packet"])
+        saved["value"]["request"]["packet_sha256"]=saved["value"]["packet_sha256"]
+        saved["value"]["request_hash"]=runner._digest(saved["value"]["request"])
+        saved["sha256"]=runner._digest(saved["value"])
+        path.write_text(json.dumps(saved))
+        try:
+            with self.assertRaises(ValueError):
+                runner.recover(self.root,"step-1")
+        finally:
+            path.write_bytes(original)
+        self.assertEqual("recorded",runner.recover(self.root,"step-1")["status"])
+
+    def test_superseded_source_is_retrievable_as_history_but_not_injected_as_current(self):
+        old=self.root/"old.txt";old.write_text("Old quote\n")
+        new=self.root/"new.txt";new.write_text("New quote\n")
+        self.apply({"op":"document.add","id":"old","path":"old.txt","line_ranges":[[1,1]],
+                    "provenance":{"actor":"source","source_id":"old","quote":"Old quote"}})
+        self.apply({"op":"document.add","id":"new","path":"new.txt","line_ranges":[[1,1]],
+                    "supersedes":"old",
+                    "provenance":{"actor":"source","source_id":"new","quote":"New quote"}})
+        self.assertEqual("Old quote",self.store.retrieve("old",1,1)["text"])
+        invoke=mock.Mock(return_value=terminal())
+        with self.assertRaises(ValueError):
+            self.run_step(invoke,source_spans=[{"document_id":"old","start":1,"end":1}])
         invoke.assert_not_called()
         self.assertFalse(self.store.show()["dispatches"])
 
@@ -531,7 +598,38 @@ class SessionHookTests(unittest.TestCase):
         output = hook.handle({"hook_event_name": "SessionStart", "source": "compact"}, self.root,
                              max_chars=24000, inline=True)
         self.assertIn("Keep all conditions", output["hookSpecificOutput"]["additionalContext"])
-        self.assertIn("context --max-chars 24000.", output["hookSpecificOutput"]["additionalContext"])
+        self.assertIn("navigation --max-chars 24000.", output["hookSpecificOutput"]["additionalContext"])
+        saved=json.loads((self.store.state_root/"checkpoint.json").read_text())
+        self.assertEqual("navigation",saved["packet"]["packet_kind"])
+
+    def test_large_project_hook_uses_short_navigation_pointer_and_bounded_checkpoint(self):
+        for i in range(9):
+            path=self.root/("hook-source-%02d.txt" % i)
+            path.write_text('\n'.join("HOOK_EXCERPT_%02d %s" % (i,'z'*130)
+                                      for _ in range(40))+'\n')
+            state=self.store.show()
+            self.store.apply({"op":"document.add","id":"hook-source-%02d" % i,
+                              "path":path.name,"line_ranges":[[1,40]],
+                              "provenance":{"actor":"source","source_id":path.name,
+                                            "quote":"Synthetic source"}},
+                             expected_revision=state["revision"])
+        with self.assertRaises(ContextOverflow):
+            self.store.context(max_chars=24000)
+        pointer=hook.handle({"hook_event_name":"SessionStart"},self.root)
+        text=pointer["hookSpecificOutput"]["additionalContext"]
+        self.assertIn("navigation --max-chars 96000.",text)
+        self.assertNotIn("HOOK_EXCERPT_",text)
+        self.assertLess(len(text),2500)
+        self.assertEqual({},hook.handle({"hook_event_name":"PreCompact"},self.root))
+        saved=json.loads((self.store.state_root/"checkpoint.json").read_text())
+        self.assertEqual("navigation",saved["packet"]["packet_kind"])
+        self.assertEqual(9,len(saved["packet"]["document_index"]))
+        self.assertTrue(self.store.verify()["checkpoint"]["current"])
+        captured=hook.handle({"hook_event_name":"UserPromptSubmit",
+                              "prompt":"PRIVATE_RAW_NEW_REQUEST"},self.root)
+        self.assertNotIn("PRIVATE_RAW_NEW_REQUEST",
+                         captured["hookSpecificOutput"]["additionalContext"])
+        self.assertEqual(1,len(self.store.navigation(96000)["pending_requests"]))
 
     def test_hook_cwd_cannot_redirect_capture_to_other_project(self):
         hook.handle({"hook_event_name": "UserPromptSubmit", "prompt": "Safe capture", "cwd": "/tmp/attacker"}, self.root)

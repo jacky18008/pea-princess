@@ -38,7 +38,7 @@ Represent goals, workflows and tasks with stable IDs, dependencies, requirement 
 
 Checkpoint at natural task boundaries and before compaction or handoff. On resume, read state before reusing outputs. Unresolved physical calls are inspected, never automatically retried. Rate limits and unknown usage remain paused. The repository's `tools/session_runner.py` connects this state to the existing durable physical-call controller; other hosts must implement the same preflight and result checks explicitly.
 
-The engine is local persistence and validation, not a scheduler, account system or sandbox. Hooks help capture and reload state, but hosts can time out or truncate hook outputs. Default hook output is a short pointer; read the complete packet from disk. Without a shell, keep the equivalent requirements/change log/TODO/source files manually and label machine checks unavailable. Request files from the user if they cannot be accessed; do not claim to have restored unseen state.
+The engine is local persistence and validation, not a scheduler, account system or sandbox. Hooks help capture and reload state, but hosts can time out or truncate hook outputs. Default hook output is a short pointer to the complete-authority navigation packet; read it from disk and inspect the relevant indexed originals. Managed `session_runner.py` calls inject that authority and only caller-selected, revision-pinned source spans. Without a shell, keep the equivalent requirements/change log/TODO/source files manually and label machine checks unavailable. Request files from the user if they cannot be accessed; do not claim to have restored unseen state.
 
 ## Public feedback, stage 1
 

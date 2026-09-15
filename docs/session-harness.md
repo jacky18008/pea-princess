@@ -17,7 +17,7 @@
 
 `.pea-state/` 不進 Git 或公開 skill 發布。它不是加密資料庫；有本機讀取權限的工具仍可能存取。不要直接發布整個工作目錄或自動把這些資料加入報告／seed。
 
-**只給路徑不能確保模型會讀，低階與高階模型皆然。** 一般 Codex／Claude 對話靠入口／hooks 提醒 Agent 讀取；`tools/session_runner.py` 則由程式自己讀完整 packet，放進每次實體呼叫，不必等模型主動開檔。Runner 檢查輸入與回覆的版本，返回尚未驗收的答案；可信 orchestrator 另送 `decision.record` 時，引擎才檢查條件 coverage 與 evidence。Runner 不會自動替答案評分或完成任務；若原生 Agent 跳過後續驗收，這個檢查也不會憑空發生。這兩種整合的保證不能混用，結構檢查通過也仍可能誤解資訊。
+**只給路徑不能確保模型會讀，低階與高階模型皆然。** 一般 Codex／Claude 對話靠入口／hooks 提醒 Agent 讀取；`tools/session_runner.py` 則由程式自己讀取完整當前權威的 navigation packet，放進每次實體呼叫；只有可信呼叫端明確指定的來源行段才另外取回原文並釘住版本／SHA，不會把全部文件摘錄無條件送給模型。Runner 檢查輸入與回覆的版本，返回尚未驗收的答案；可信 orchestrator 另送 `decision.record` 時，引擎才檢查條件 coverage 與 evidence。Runner 不會自動替答案評分或完成任務；若原生 Agent 跳過後續驗收，這個檢查也不會憑空發生。這兩種整合的保證不能混用，結構檢查通過也仍可能誤解資訊。
 
 所有有效 requirements（含 prefer、prohibit、conditional）、predicate、scope、critical facts 進 packet。詳細來源以檔案快照保存。超過設定上限直接失敗，沒有「最後幾條被裁掉」的 fallback。字元／UTF-8 bytes 是工程上限，不是計費 tokens。
 
@@ -37,7 +37,7 @@ python3 skills/vet-flat/scripts/session_state.py --project . verify
 
 `show` 還原完整狀態；`context` 輸出當前 packet；`checkpoint` 寫下可驗證的 snapshot。`--max-chars` 明確調整上限；`--max-tokens` 是保守 UTF-8-byte 上界，不是 tokenizer。若已有 profile，逐欄匯入並附來源，不能把 example profile 或舊摘要當成使用者現在的條件。
 
-2026-09-15 新增 `navigation --max-chars 96000` 作為本 repo 的啟動封包。它完整載入所有有效條件、未解決的原文請求／問題、預算與正在執行的任務／goal；其他任務、來源快照、請求與輸出列成索引，不展開文件摘錄或歷史輸出。讀索引項目用 `inspect <collection> <id> --expected-revision <rev> --expected-event-hash <hash>`；讀來源原文用 `retrieve <doc-id> --start <line> --end <line> --expected-revision <rev> --expected-event-hash <hash> --expected-sha256 <source-sha>`。索引不是證據，判斷前仍需取回相關原列／快照。`context` 和 `show` 保留完整視圖；任一必要封包超限時仍明確失敗，不會截斷有效條件。此啟動封包沒有改變 `session_runner.py` 的完整 context 注入或模型呼叫界線。
+2026-09-15 新增 `navigation --max-chars 96000` 作為本 repo 的啟動封包。它完整載入所有有效條件、未解決的原文請求／問題、預算與正在執行的任務／goal；其他任務、來源快照、請求與輸出列成索引，不展開文件摘錄或歷史輸出。讀索引項目用 `inspect <collection> <id> --expected-revision <rev> --expected-event-hash <hash>`；讀來源原文用 `retrieve <doc-id> --start <line> --end <line> --expected-revision <rev> --expected-event-hash <hash> --expected-sha256 <source-sha>`。索引不是證據，判斷前仍需取回相關原列／快照。`context` 和 `show` 保留完整視圖；任一必要封包超限時仍明確失敗，不會截斷有效條件。Runner 現在直接注入同等權威的導覽封包，另可指定最多八段 `--source-span <doc-id>:<start>:<end>` 原文；未指定的文件只在索引中。舊完整 context 與 checkpoint 原型仍可按明確較大容量使用。
 
 Journal 是原子替換的、邏輯上只追加事件的 JSON 與 hash chain，使用 POSIX lock、revision check、fsync、私有權限及 symlink／hardlink 檢查。Checkpoint 是衍生資料；較新的 journal 永遠優先。Hash 能發現損毀，不能防止持有整個目錄寫入權限的人重寫一整條歷史；獨立備份／Git 交付紀錄另有價值。
 
@@ -118,7 +118,8 @@ python3 skills/vet-flat/scripts/session_state.py --project . retrieve quote-v2 -
 
 ```bash
 python3 tools/session_runner.py --project . run --id step-001 --task review-a \
-  --model YOUR_CODEX_MODEL --token-budget model-tokens --prompt-file step.txt --timeout 180
+  --model YOUR_CODEX_MODEL --token-budget model-tokens --prompt-file step.txt --timeout 180 \
+  --source-span quote-v2:3:8
 python3 tools/session_runner.py --project . recover --id step-001
 ```
 
@@ -132,7 +133,7 @@ python3 tools/session_runner.py --project . recover --id step-001
 
 ## 原生 hooks
 
-`tools/session_hook.py` 支援 UserPromptSubmit（保存原文）、SessionStart（最新狀態入口）、PreCompact／PostCompact（checkpoint）。預設返回短路徑與 revision，避免 host 截斷長 context。完整 packet 由 Agent 讀檔，或由 runner 直接注入。`--inline` 只用於已核對 host 長度限制的環境。
+`tools/session_hook.py` 支援 UserPromptSubmit（保存原文）、SessionStart（最新狀態入口）、PreCompact／PostCompact（可驗證的 navigation checkpoint）。預設返回短路徑、revision 與 event hash，避免 host 截斷長 context。完整當前權威的 navigation packet 由 Agent 讀取，或由 runner 直接注入；相關來源原文仍需按索引檢索或明確指定 `--source-span`。`--inline` 只用於已核對 host 長度限制的環境。
 
 初始化後參照 [設定範例](session-hook-examples.md) 啟用。這次不修改全域設定、不繞過 Codex project／hook trust，也不宣稱正在執行的對話已被自動接管。Host 重送 UserPromptSubmit 可能產生重複 pending requests，需明確 reconcile，不自動消除可能不同的使用者意圖。
 

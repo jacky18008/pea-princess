@@ -1,6 +1,6 @@
 # Optional project hooks
 
-Read [the harness guide](session-harness.md) first. Initialize state before enabling hooks. The examples use a 24,000-character local packet ceiling, independently of the host’s short hook-output limit. These are templates, not active settings; this work did not change global configuration or grant host trust. Official host behavior and sources are in [source notes](harness-source-notes-2026-09-09.md).
+Read [the harness guide](session-harness.md) first. Initialize state before enabling hooks. The examples use a 96,000-character local packet ceiling, independently of the host’s short hook-output limit. These are templates, not active settings; this work did not change global configuration or grant host trust. Official host behavior and sources are in [source notes](harness-source-notes-2026-09-09.md).
 
 ## Codex
 
@@ -9,14 +9,14 @@ Merge into the project's `.codex/hooks.json`. Replace `/ABSOLUTE/PROJECT` with t
 ```json
 {
   "hooks": {
-    "SessionStart": [{"matcher": "startup|resume|clear|compact", "hooks": [{"type": "command", "command": "python3 \"/ABSOLUTE/PROJECT/tools/session_hook.py\" --project \"/ABSOLUTE/PROJECT\" --host codex --max-chars 24000", "timeout": 10, "additionalContextLimit": 2500}]}],
-    "UserPromptSubmit": [{"hooks": [{"type": "command", "command": "python3 \"/ABSOLUTE/PROJECT/tools/session_hook.py\" --project \"/ABSOLUTE/PROJECT\" --host codex --max-chars 24000", "timeout": 10, "additionalContextLimit": 2500}]}],
-    "PreCompact": [{"matcher": "manual|auto", "hooks": [{"type": "command", "command": "python3 \"/ABSOLUTE/PROJECT/tools/session_hook.py\" --project \"/ABSOLUTE/PROJECT\" --host codex --max-chars 24000", "timeout": 10}]}]
+    "SessionStart": [{"matcher": "startup|resume|clear|compact", "hooks": [{"type": "command", "command": "python3 \"/ABSOLUTE/PROJECT/tools/session_hook.py\" --project \"/ABSOLUTE/PROJECT\" --host codex --max-chars 96000", "timeout": 10, "additionalContextLimit": 2500}]}],
+    "UserPromptSubmit": [{"hooks": [{"type": "command", "command": "python3 \"/ABSOLUTE/PROJECT/tools/session_hook.py\" --project \"/ABSOLUTE/PROJECT\" --host codex --max-chars 96000", "timeout": 10, "additionalContextLimit": 2500}]}],
+    "PreCompact": [{"matcher": "manual|auto", "hooks": [{"type": "command", "command": "python3 \"/ABSOLUTE/PROJECT/tools/session_hook.py\" --project \"/ABSOLUTE/PROJECT\" --host codex --max-chars 96000", "timeout": 10}]}]
   }
 }
 ```
 
-The adapter returns successful JSON with `continue:false` on Codex errors. Session context output is a short pointer; the complete packet must still be read or inserted by `session_runner.py`.
+The adapter returns successful JSON with `continue:false` on Codex errors. Session context output is a short revision/hash pointer to the complete-authority navigation packet; the agent must read that packet and fetch relevant indexed originals, or use a managed `session_runner.py` call.
 
 ## Claude Code
 
@@ -25,9 +25,9 @@ Merge into `.claude/settings.local.json` for personal setup, or shared project s
 ```json
 {
   "hooks": {
-    "SessionStart": [{"matcher": "startup|resume|clear|compact", "hooks": [{"type": "command", "command": "python3", "args": ["${CLAUDE_PROJECT_DIR}/tools/session_hook.py", "--project", "${CLAUDE_PROJECT_DIR}", "--host", "claude", "--max-chars", "24000"], "timeout": 10}]}],
-    "UserPromptSubmit": [{"hooks": [{"type": "command", "command": "python3", "args": ["${CLAUDE_PROJECT_DIR}/tools/session_hook.py", "--project", "${CLAUDE_PROJECT_DIR}", "--host", "claude", "--max-chars", "24000"], "timeout": 10}]}],
-    "PreCompact": [{"matcher": "manual|auto", "hooks": [{"type": "command", "command": "python3", "args": ["${CLAUDE_PROJECT_DIR}/tools/session_hook.py", "--project", "${CLAUDE_PROJECT_DIR}", "--host", "claude", "--max-chars", "24000"], "timeout": 10}]}]
+    "SessionStart": [{"matcher": "startup|resume|clear|compact", "hooks": [{"type": "command", "command": "python3", "args": ["${CLAUDE_PROJECT_DIR}/tools/session_hook.py", "--project", "${CLAUDE_PROJECT_DIR}", "--host", "claude", "--max-chars", "96000"], "timeout": 10}]}],
+    "UserPromptSubmit": [{"hooks": [{"type": "command", "command": "python3", "args": ["${CLAUDE_PROJECT_DIR}/tools/session_hook.py", "--project", "${CLAUDE_PROJECT_DIR}", "--host", "claude", "--max-chars", "96000"], "timeout": 10}]}],
+    "PreCompact": [{"matcher": "manual|auto", "hooks": [{"type": "command", "command": "python3", "args": ["${CLAUDE_PROJECT_DIR}/tools/session_hook.py", "--project", "${CLAUDE_PROJECT_DIR}", "--host", "claude", "--max-chars", "96000"], "timeout": 10}]}]
   }
 }
 ```
@@ -60,4 +60,4 @@ untested here. Other hosts: run the checker by hand on the draft.
 
 Test capture → resolve → checkpoint → resume in a throwaway initialized project, including an integrity failure. Check that the host runs the hook and respects its response. Unit tests cannot prove a host configuration is active.
 
-Do not enable `--inline` without checking all host context limits; a host can truncate long hook output. The default pointer stays short. `session_runner.py` deterministically inserts the complete packet into each managed request and stops on overflow or stale state. These hooks do not create schedules or restart paused Claude experiments.
+Do not enable `--inline` without checking all host context limits; a host can truncate long hook output. The default pointer stays short. Compact hooks save a verifiable navigation checkpoint; the original `checkpoint` API still saves the full packet when explicitly called with enough capacity. `session_runner.py` inserts complete current authority and only explicitly selected `--source-span document-id:start:end` originals into each managed request. It stops on overflow or stale state, and its recorder checks before and after the physical call are unchanged. These hooks do not create schedules or restart paused Claude experiments.
