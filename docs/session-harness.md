@@ -33,9 +33,11 @@ python3 skills/vet-flat/scripts/session_state.py --project . checkpoint
 python3 skills/vet-flat/scripts/session_state.py --project . verify
 ```
 
-本 repo 的實際狀態另保存了前次品質報告、兩份來源複核及完整合成實驗來源；不是使用者的租屋偏好。入口使用 `context --max-chars 96000`，以容納持續新增的需求、驗收與來源 metadata，與 `AGENTS.md` 的恢復指令一致；此上限不是模型 token 預算。2026-09-10 在新增對話驗收要求前，舊 packet 已達約 62,600 字元，因此將本 repo 的容量由 64,000 提高到 96,000，保留全部條件與既有紀錄；不改其他使用者或實驗案例的預設上限。若 packet 超過上限，先明確調整容量並重新讀取完整內容，不可截斷需求後繼續。
+本 repo 的實際狀態另保存了前次品質報告、兩份來源複核及完整合成實驗來源；不是使用者的租屋偏好。2026-09-10 至 2026-09-14 的入口使用 `context --max-chars 96000`，以容納持續新增的需求、驗收與來源 metadata；此上限不是模型 token 預算。2026-09-10 在新增對話驗收要求前，舊 packet 已達約 62,600 字元，因此當時將本 repo 的容量由 64,000 提高到 96,000，保留全部條件與既有紀錄；不改其他使用者或實驗案例的預設上限。若必要封包超過上限，先明確調整容量並重新讀取完整內容，不可截斷需求後繼續。
 
 `show` 還原完整狀態；`context` 輸出當前 packet；`checkpoint` 寫下可驗證的 snapshot。`--max-chars` 明確調整上限；`--max-tokens` 是保守 UTF-8-byte 上界，不是 tokenizer。若已有 profile，逐欄匯入並附來源，不能把 example profile 或舊摘要當成使用者現在的條件。
+
+2026-09-15 新增 `navigation --max-chars 96000` 作為本 repo 的啟動封包。它完整載入所有有效條件、未解決的原文請求／問題、預算與正在執行的任務／goal；其他任務、來源快照、請求與輸出列成索引，不展開文件摘錄或歷史輸出。讀索引項目用 `inspect <collection> <id> --expected-revision <rev> --expected-event-hash <hash>`；讀來源原文用 `retrieve <doc-id> --start <line> --end <line> --expected-revision <rev> --expected-event-hash <hash> --expected-sha256 <source-sha>`。索引不是證據，判斷前仍需取回相關原列／快照。`context` 和 `show` 保留完整視圖；任一必要封包超限時仍明確失敗，不會截斷有效條件。此啟動封包沒有改變 `session_runner.py` 的完整 context 注入或模型呼叫界線。
 
 Journal 是原子替換的、邏輯上只追加事件的 JSON 與 hash chain，使用 POSIX lock、revision check、fsync、私有權限及 symlink／hardlink 檢查。Checkpoint 是衍生資料；較新的 journal 永遠優先。Hash 能發現損毀，不能防止持有整個目錄寫入權限的人重寫一整條歷史；獨立備份／Git 交付紀錄另有價值。
 

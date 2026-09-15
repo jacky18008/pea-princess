@@ -6,7 +6,7 @@ Use `scripts/session_state.py --project <working-project> ...`. When invoking th
 
 ## Resume protocol
 
-At startup, after compaction and before each consequential step, run `context`. Read the entire returned packet and its revision. It includes all active requirements, conditional predicates, budgets, goals, tasks, questions, facts and source references. Run `verify` if restoring from a backup. Integrity or context-size failures stop dependent work; never truncate requirements to continue. A summary is a navigation aid, not the source of truth.
+At startup, after compaction and before each consequential step, run `navigation` and read its entire returned packet and revision/event hash. It contains complete active requirements (including conditional predicates), pending raw requests/questions, budgets and current running/goal/workflow rows. Every task, source document, request and output also has an index entry. Fetch the relevant original rows with `inspect` and saved source spans with `retrieve`, pinned to that revision/event hash and document SHA. The older `context` command still returns the full expanded packet when given a large enough explicit limit, and `show` returns the full state. Run `verify` if restoring from a backup. Integrity or size failures stop dependent work; never truncate requirements to continue. An index is navigation, not evidence or approval.
 
 If no state exists, `init --project-id <project-id>` and capture the current user request. Import the user's existing profile and source documents deliberately, with their exact values and provenance. Do not treat example profiles as the user's preferences. Do not infer personal budgets from old benchmark fixtures.
 

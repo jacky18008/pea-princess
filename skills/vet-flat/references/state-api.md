@@ -31,7 +31,20 @@ python3 "$PEA_SKILL/scripts/session_state.py" --project "$PEA_PROJECT" context -
 
 The receipt contains only `ok: true`, `schema_version`, `project_id`, `revision` and `event_hash` from that successful apply. Validation, locking, revision checks and invalidation are unchanged. Use the returned revision for the next already reconciled event; a conflict still requires reloading and reconciling, never automatic retry. An idempotent duplicate spend returns the existing revision/hash without appending an event. The receipt identifies that apply's resulting journal head, even if another writer advances the journal before stdout is printed; it does not guarantee that revision remains current.
 
-Read the complete `context` packet after the batch and before dependent work. A receipt is neither a context packet nor a decision receipt, and is not evidence that requirements or task completion were semantically validated. This option reduces stdout only; it does not reduce or truncate stored state, required context or model input.
+Read the complete `navigation` packet after the batch and before dependent work. It includes complete active authority and bounded indexes; read the relevant original indexed rows and saved document spans before a decision. A receipt is neither a context packet nor a decision receipt, and is not evidence that requirements or task completion were semantically validated. This option reduces stdout only; it does not reduce or truncate stored state, required context or model input.
+
+For a source or task named by the navigation packet, pin the read to its `revision` and `event_hash`. `document_index[id]` contains `[status, source_sha256, line_count, source_basename, excerpt_ranges]`; choose the needed original lines from the immutable snapshot. `task_index[id]` gives title, kind, status, dependencies, requirement/budget IDs and an acceptance hash; use `inspect tasks <id>` for complete criteria. The CLI returns one complete JSON object or refuses a stale/oversized read:
+
+~~~bash
+python3 "$PEA_SKILL/scripts/session_state.py" --project "$PEA_PROJECT" navigation --max-chars 32000
+python3 "$PEA_SKILL/scripts/session_state.py" --project "$PEA_PROJECT" inspect tasks check-demo \
+  --expected-revision "$PEA_REVISION" --expected-event-hash "$PEA_EVENT_HASH"
+python3 "$PEA_SKILL/scripts/session_state.py" --project "$PEA_PROJECT" retrieve quote-v2 \
+  --start 3 --end 8 --expected-revision "$PEA_REVISION" \
+  --expected-event-hash "$PEA_EVENT_HASH" --expected-sha256 "$PEA_SOURCE_SHA256"
+~~~
+
+`inspect` also supports `requests`, `documents`, `facts`, `budgets`, `outputs`, `decisions` and `dispatches`; raise `--max-chars` explicitly if an original row is large. `context` and `show` retain the full expanded views. Navigation indexes do not replace source inspection, semantic review, decision coverage or the full context that `session_runner.py` injects into a model call.
 
 ## Atomic event batches
 

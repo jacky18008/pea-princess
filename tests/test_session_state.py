@@ -213,6 +213,103 @@ class SessionStateTests(unittest.TestCase):
         with self.assertRaises(s.ContextOverflow): self.store.context(max_chars=50)
         with self.assertRaises(s.ContextOverflow): self.store.context(max_tokens=50)
 
+    def test_navigation_preserves_authority_and_fetches_indexed_originals_at_head(self):
+        self.requirement('must1', value='Keep this complete condition')
+        self.requirement('conditional1', value='Only here', strength='conditional',
+                         predicate='A separate inspection confirms the predicate')
+        self.task('goal1', kind='goal', acceptance=['Complete every child'])
+        self.task('work1', acceptance=['Check exact saved source lines'])
+        long_source = '\n'.join('Source line %03d: %s' % (i, 'x'*120) for i in range(1, 61)) + '\n'
+        self.document('large1', text=long_source, line_ranges=[[1,40]])
+        self.fact('critical1', value='Check this quote', critical=True)
+        self.apply('request.capture', id='u-latest', text='Keep the pending raw instruction.',
+                   source='user-message')
+        self.apply('question.add', id='q-latest', text='Confirm a relevant ambiguity.',
+                   blocking=True, task_ids=['work1'])
+        state = self.store.show()
+        with self.assertRaises(s.ContextOverflow):
+            self.store.context(max_chars=8000)
+        packet = self.store.navigation(max_chars=16000)
+        self.assertEqual(state['revision'], packet['revision'])
+        self.assertEqual(state['event_hash'], packet['event_hash'])
+        self.assertEqual({i:r for i,r in state['requirements'].items() if r['status']=='active'},
+                         packet['requirements'])
+        self.assertEqual(state['requests']['u-latest'], packet['pending_requests']['u-latest'])
+        self.assertEqual(state['questions']['q-latest'], packet['pending_questions']['q-latest'])
+        self.assertEqual(state['tasks']['goal1'], packet['focus_tasks']['goal1'])
+        self.assertEqual(set(state['tasks']), set(packet['task_index']))
+        self.assertEqual(set(state['documents']), set(packet['document_index']))
+        self.assertNotIn('Source line 001', s.canonical(packet))
+        original = self.store.inspect('tasks', 'work1', packet['revision'], packet['event_hash'])
+        self.assertEqual(state['tasks']['work1'], original['row'])
+        self.assertEqual(s.digest(original['row']), original['row_sha256'])
+        index = packet['document_index']['large1']
+        saved = self.store.retrieve('large1', 1, 2, expected_revision=packet['revision'],
+                                    expected_event_hash=packet['event_hash'],
+                                    expected_sha256=index[1])
+        self.assertEqual('\n'.join(long_source.splitlines()[:2]), saved['text'])
+        self.assertEqual(index[1], saved['sha256'])
+        self.apply('question.resolve', id='q-latest', answer='A user answer.', provenance=user())
+        with self.assertRaises(s.RevisionConflict):
+            self.store.inspect('tasks', 'work1', packet['revision'], packet['event_hash'])
+        with self.assertRaises(s.RevisionConflict):
+            self.store.retrieve('large1', 1, 2, expected_revision=packet['revision'],
+                                expected_event_hash=packet['event_hash'],
+                                expected_sha256=index[1])
+        with self.assertRaises(s.RevisionConflict):
+            self.store.retrieve('large1', 1, 2, expected_sha256='0'*64)
+
+    def test_navigation_overflow_is_explicit_and_cli_stdout_obeys_bound(self):
+        self.requirement('complete', value='X'*2500, strength='conditional',
+                         predicate='Evidence is required for this exact exception')
+        packet = self.store.navigation(max_chars=12000)
+        required = packet['requirements']['complete']
+        self.assertEqual('X'*2500, required['value'])
+        with self.assertRaises(s.ContextOverflow):
+            self.store.navigation(max_chars=len(s.canonical(packet))-1)
+        stdout=io.StringIO();stderr=io.StringIO()
+        limit=len(s.canonical(packet))+1
+        with redirect_stdout(stdout),redirect_stderr(stderr):
+            code=s.main(['--project',str(self.root),'navigation','--max-chars',str(limit)])
+        self.assertEqual((0,''),(code,stderr.getvalue()))
+        self.assertLessEqual(len(stdout.getvalue()),limit)
+        self.assertEqual(packet,json.loads(stdout.getvalue()))
+        with redirect_stdout(io.StringIO()),redirect_stderr(io.StringIO()):
+            code=s.main(['--project',str(self.root),'navigation','--max-chars',str(limit-1)])
+        self.assertEqual(2,code)
+
+    def test_dense_navigation_indexes_all_rows_without_echoing_source_excerpts(self):
+        state=s._empty()
+        state.update(project_id='synthetic',revision=600,event_hash='a'*64)
+        for i in range(37):
+            identifier='condition-%02d' % i
+            state['requirements'][identifier]={'id':identifier,'status':'active',
+                'strength':'conditional','scope':'all candidates','predicate':'Documented proof %02d' % i,
+                'value':'Exact synthetic condition %02d' % i}
+        for i in range(173):
+            identifier='source-%03d' % i
+            state['documents'][identifier]={'id':identifier,'status':'active','sha256':'b'*64,
+                'path':'synthetic/%s.txt' % identifier,
+                'line_count':60,'excerpts':[{'start':1,'end':40,'text':'EXCERPT ONLY '+('x'*1800)}]}
+        for i in range(45):
+            identifier='task-%02d' % i
+            state['tasks'][identifier]={'id':identifier,'title':'Check synthetic item %02d' % i,
+                'kind':'goal' if i==0 else 'task','status':'running' if i==1 else 'needs_review',
+                'valid':False,'needs_review':True,'depends_on':[],'requirement_ids':[],
+                'budget_ids':[],'acceptance':['Evidence for item %02d' % i],
+                'updated_revision':600,'stale_reason':'Requires review'}
+        for i in range(83):
+            identifier='request-%02d' % i
+            state['requests'][identifier]={'id':identifier,'status':'resolved',
+                'captured_revision':i+1,'resolved_revision':i+2,'text':'OLD RAW REQUEST '+('y'*1000)}
+        packet=self.store._navigation(state,96000)
+        self.assertEqual(37,len(packet['requirements']))
+        self.assertEqual(173,len(packet['document_index']))
+        self.assertEqual(45,len(packet['task_index']))
+        self.assertEqual(83,len(packet['request_index']))
+        self.assertNotIn('EXCERPT ONLY',s.canonical(packet))
+        self.assertNotIn('OLD RAW REQUEST',s.canonical(packet))
+
     def test_stale_writes_rejected_under_real_process_lock(self):
         context=multiprocessing.get_context('fork');queue=context.Queue();rev=self.state['revision']
         processes=[context.Process(target=race_apply,args=(str(self.root),rev,'question'+str(i),queue)) for i in range(2)]
