@@ -34,7 +34,17 @@ class TestCalc(unittest.TestCase):
     def test_all_in_and_break_even(self):
         r = run("all-in", "--rent-pcm", "2400", "--bills-low", "125", "--bills-planning", "175", "--bills-stress", "250", "--council-tax", "0", "--broadband", "30")
         self.assertEqual((r["all_in_low"], r["all_in_planning"], r["all_in_stress"]), (2555.0, 2605.0, 2680.0))
-        self.assertEqual(run("break-even", "--ceiling", "2600", "--bills-planning", "175")["max_rent_pcm"], 2425.0)
+        self.assertEqual(run("break-even", "--ceiling", "2600", "--bills-planning", "175", "--council-tax", "0")["max_rent_pcm"], 2425.0)
+
+    def test_unknown_council_tax_stays_out_of_total_and_rent_target(self):
+        monthly = run("all-in", "--rent-pcm", "2100", "--bills-planning", "175")
+        self.assertIsNone(monthly["all_in_planning"])
+        self.assertEqual(monthly["known_subtotal_planning"], 2275.0)
+        self.assertEqual(monthly["unknown_components"], ["council_tax"])
+        target = run("break-even", "--ceiling", "2600", "--bills-planning", "175")
+        self.assertIsNone(target["max_rent_pcm"])
+        self.assertEqual(target["upper_bound_before_tax"], 2425.0)
+        self.assertEqual(target["unknown_components"], ["council_tax"])
 
     def test_price_per_sqft(self):
         r = run("price-per-sqft", "--rent-pcm", "2400", "--area-m2", "52")

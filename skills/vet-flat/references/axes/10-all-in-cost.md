@@ -17,6 +17,7 @@ A comparison where one flat carries the operator's estimate and another carries 
 1. Council tax band: the national band lookup is a fetch or a manual step; record the band and the borough's current rate for it.
 2. `python3 scripts/redress.py heat-trust --site "<building>"` and `python3 scripts/company.py profile <supplier>` — whether the heat supplier is inside the consumer-protection scheme and whether its accounts point at a tariff rise (axis 3).
 3. Compute three totals from the same model for every candidate: low, planning and stress.
+   If the council tax amount or an applicable exemption has not been confirmed, the calculator returns a known subtotal and a null total. Do not treat an omitted `--council-tax` flag as £0 or compare that subtotal with a person's total-spending ceiling.
 
 ## Method in fetch mode
 The band lookup and the regulator's pages are fetchable. Tariffs usually are not.
@@ -30,6 +31,7 @@ Ask the user for:
 
 ## How to read the numbers
 - `bills_low_pcm`, `bills_planning_pcm`, `bills_stress_pcm` — profile placeholders. Use the same three numbers for every candidate in one run and print them next to the total. They are a sensitivity assumption, not a supplier's quote for any heating system, and the report must say so.
+- When council tax is unknown, write “rent plus the stated bills model = £X, **plus council tax still to check**”. This is a subtotal, not the whole monthly cost. A heat-network standing charge or tariff missing from the bills model is also an unresolved extra; don't bury it inside a £0 assumption. `--council-tax 0` applies only when an actual exemption has been established and named in the basis note.
 - `all_in_ceiling_pcm` — profile. On or under it is a pass on this axis.
 - `edge_band_over_ceiling_pcm` — over the ceiling by up to this much is EDGE, and the report must carry the break-even rent; more than that is a different price bracket, not an edge case.
 - `bridging_weekly_cost` and `move_in_window` — profile, and only relevant if the user would bridge to reach a later start date.
@@ -38,6 +40,7 @@ Ask the user for:
 1. **One basis, printed with the number.** Six sub-reports quoting bills between £148 and £315 cannot be compared with each other. Recompute all of them.
 2. **Bundled bills go in at the bundle price**, flagged as bundled, with what the bundle excludes.
 3. **Council tax depends on the household.** Some households are exempt or discounted (for example where every occupier is a full-time student). State which rule you applied and that it is a rule, not an assumption about the user.
+   Null is unknown; zero requires a verified exemption. Without the amount, do not mark the total-cost axis as passed or supply a break-even rent target. The rent-only limit can still be checked separately.
 4. **One-off costs count**: inventory, moving, referencing, guarantor product fees, verification products, and any cash damage deposit — the last is also an exit-friction item, not just a cost.
 5. **Break-even.** When a candidate is over the ceiling, compute the rent at which it comes back under. That number is the negotiating target and belongs in the report.
 

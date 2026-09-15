@@ -82,16 +82,22 @@ def affordability(a):
 
 
 def all_in(a):
-    fixed = (a.council_tax or 0) + (a.broadband or 0)
-    res = {}
+    tax_known = a.council_tax is not None
+    fixed = (a.council_tax if tax_known else 0) + (a.broadband or 0)
+    res = {"unknown_components": [] if tax_known else ["council_tax"]}
     steps = []
     for name, bills in (("low", a.bills_low), ("planning", a.bills_planning), ("stress", a.bills_stress)):
         if bills is None:
             continue
         tot = a.rent_pcm + bills + fixed
-        steps.append(f"{name}: {a.rent_pcm} + {bills} + {fixed} = {r2(tot)}")
-        res[f"all_in_{name}"] = r2(tot)
-    out("all-in", vars(a), "all-in = rent_pcm + bills + council_tax + broadband", steps, res)
+        if tax_known:
+            steps.append(f"{name}: {a.rent_pcm} + {bills} + {fixed} = {r2(tot)}")
+            res[f"all_in_{name}"] = r2(tot)
+        else:
+            steps.append(f"{name} known subtotal: {a.rent_pcm} + {bills} + {a.broadband or 0} = {r2(tot)}; council tax unknown")
+            res[f"known_subtotal_{name}"] = r2(tot)
+            res[f"all_in_{name}"] = None
+    out("all-in", vars(a), "total = rent_pcm + bills + council_tax + broadband; unknown council_tax makes total unknown", steps, res)
 
 
 def price_per_sqft(a):
@@ -117,9 +123,15 @@ def bridge(a):
 
 
 def break_even(a):
-    rent = a.ceiling - a.bills_planning - (a.council_tax or 0)
+    if a.council_tax is None:
+        before_tax = r2(a.ceiling - a.bills_planning)
+        out("break-even", vars(a), "max rent = ceiling − bills_planning − council_tax; unknown tax leaves the maximum unknown",
+            [f"ceiling minus modelled bills = {a.ceiling} − {a.bills_planning} = {before_tax}; subtract the unknown council tax before quoting a rent target"],
+            {"max_rent_pcm": None, "upper_bound_before_tax": before_tax, "unknown_components": ["council_tax"]})
+        return
+    rent = a.ceiling - a.bills_planning - a.council_tax
     out("break-even", vars(a), "max rent = ceiling − bills_planning − council_tax",
-        [f"{a.ceiling} − {a.bills_planning} − {a.council_tax or 0} = {r2(rent)}"], {"max_rent_pcm": r2(rent)})
+        [f"{a.ceiling} − {a.bills_planning} − {a.council_tax} = {r2(rent)}"], {"max_rent_pcm": r2(rent), "unknown_components": []})
 
 
 def guarantor_product(a):
