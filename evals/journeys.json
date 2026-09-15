@@ -5040,8 +5040,8 @@
     "references/budget-modes.md",
     "profile.template.yaml"
    ],
-   "outcome": "The four fields the user actually named are shown as a diff - field: old -> new - with nothing else touched, a one-word confirmation is asked for before anything is applied, the validator is named, and a setting the profile has no field for is refused rather than invented.",
-   "judge_notes": "This is the cheap-model test: natural language in, four exact field names and values out, nothing else moved. Does the diff read like a diff? Does it wait for the yes? Does it map 'keep the rest light' onto the field the reference says it maps onto rather than guessing a new one?",
+   "outcome": "The four things the user named change at once, shown as what changed (old → new, in plain words or as lines) with nothing else touched; a clear instruction is applied without asking first; the tooling behind the change (validator, scripts) is not narrated; a setting the profile has no field for is refused with the nearest real field offered, and that one is asked about because it is unclear.",
+   "judge_notes": "This is the cheap-model test: natural language in, four exact changes out, nothing else moved, applied at once (2026-09 contract: a clear instruction is executed, not confirmed; never talk about the machinery). Does the change read as a change? Does it map 'keep the rest light' onto the field the reference names rather than a new one? Turn 3 is the one place a question is right.",
    "turns": [
     {
      "user": {
@@ -5058,36 +5058,45 @@
      "expect": {
       "must": [
        {
-        "label": "crime is set to deep as a diff line",
-        "regex": "(?is)(crime|\\u6cbb\\u5b89)[^\\n]{0,40}?(?:\\u2192|->|=>|:|\\uff1a)[^\\n]{0,28}?deep"
+        "label": "crime goes deeper",
+        "regex": "(?is)(crime|治安)[^\\n]{0,40}?(?:→|->|=>|:|：|改成|改為|改到|now|to )[^\\n]{0,28}?(deep|深)"
        },
        {
-        "label": "management is set to deep as a diff line",
-        "regex": "(?is)(management|\\u7ba1\\u7406)[^\\n]{0,40}?(?:\\u2192|->|=>|:|\\uff1a)[^\\n]{0,28}?deep"
+        "label": "management goes deeper",
+        "regex": "(?is)(management|管理)[^\\n]{0,40}?(?:→|->|=>|:|：|改成|改為|改到|now|to )[^\\n]{0,28}?(deep|深)"
        },
        {
         "label": "everything else goes light: budget_mode lite, or the other axes lite",
-        "regex": "(?is)(budget_mode[^\\n]{0,40}?(?:\\u2192|->|=>|:|\\uff1a)[^\\n]{0,28}?lite|axis_depth[\\s\\S]{0,400}?:\\s*lite)"
+        "regex": "(?is)(budget_mode[^\\n]{0,40}?(?:→|->|=>|:|：|改成|改為|改到|now|to )[^\\n]{0,28}?(lite|輕)|axis_depth[\\s\\S]{0,400}?:\\s*lite|(其他|其餘|the rest|everything else|all other)[^\\n]{0,30}(輕量|輕|lite|light))"
        },
        {
         "label": "the ceiling moves 2200 -> 2300",
-        "regex": "(?ims)(?:(all_in_pcm_ceiling|all-?in[^\\n]{0,14}ceiling|\\u4e0a\\u9650)[^\\n]{0,60}?2[,\\uff0c]?200[^\\n]{0,30}?(?:\\u2192|->|=>|\\u6539\\u6210|\\u6539\\u70ba|to)[^\\n]{0,12}?\\u00a3?\\s?2[,\\uff0c]?300|^\\s*-\\s*(?:budget\\.)?all_in_pcm_ceiling\\s*:\\s*\\u00a3?\\s?2[,\\uff0c]?200\\b.*?^\\s*\\+\\s*(?:budget\\.)?all_in_pcm_ceiling\\s*:\\s*\\u00a3?\\s?2[,\\uff0c]?300\\b)"
+        "regex": "(?ims)(?:(all_in_pcm_ceiling|all-?in[^\\n]{0,14}ceiling|上限)[^\\n]{0,60}?2[,，]?200[^\\n]{0,30}?(?:→|->|=>|改成|改為|改到|to)[^\\n]{0,12}?£?\\s?2[,，]?300|^\\s*-\\s*(?:budget\\.)?all_in_pcm_ceiling\\s*:\\s*£?\\s?2[,，]?200\\b.*?^\\s*\\+\\s*(?:budget\\.)?all_in_pcm_ceiling\\s*:\\s*£?\\s?2[,，]?300\\b|(上限|ceiling)[^\\n]{0,40}?£?\\s?2[,，]?300)"
        },
        {
         "label": "written as a diff",
-        "regex": "(?ms)(?:\\u2192|->|=>|(?=.*^\\s*-\\s*[A-Za-z_][\\w.]*\\s*:)(?=.*^\\s*\\+\\s*[A-Za-z_][\\w.]*\\s*:))"
+        "regex": "(?ms)(?:→|->|=>|改成|改為|改到|從[^。\\n]{0,14}(?:到|變成)|from [^\\n]{0,24} to |(?=.*^\\s*-\\s*[A-Za-z_][\\w.]*\\s*:)(?=.*^\\s*\\+\\s*[A-Za-z_][\\w.]*\\s*:))"
        },
        {
-        "label": "asks for a one-word confirmation before applying",
+        "label": "applied now, not proposed",
         "any_of": [
-         "確認",
-         "確定",
-         "回覆",
-         "一個字",
-         "confirm",
-         "yes",
-         "one word",
-         "ok"
+         "已改",
+         "改好",
+         "已更新",
+         "已套用",
+         "已寫入",
+         "現在是",
+         "現在的",
+         "已經是",
+         "is now",
+         "now £",
+         "now 2",
+         "updated",
+         "applied",
+         "changed to",
+         "改成",
+         "改為",
+         "set to"
         ]
        },
        {
@@ -5110,18 +5119,8 @@
          "stay as they are",
          "stays as it is",
          "left alone",
-         "untouched"
-        ]
-       },
-       {
-        "label": "names the validator that runs after the change",
-        "any_of": [
-         "profile_check",
-         "profile-check",
-         "驗證",
-         "validator",
-         "validate",
-         "檢查檔"
+         "untouched",
+         "the rest"
         ]
        }
       ],
@@ -5135,17 +5134,17 @@
         "regex": "(?i)\\b(min_epc[a-z_]*|epc_rating_min|epc_min[a-z_]*|crime_depth|management_depth|deep_axes|axis_priority|depth_override|axis_depth_other|budget_ceiling)\\b[^\\n]{0,24}?(?:\\u2192|->|=>|:\\s*\\S)"
        },
        {
-        "label": "does not apply the change silently, before the yes",
+        "label": "does not ask whether to apply a clear instruction",
+        "regex": "(要不要|是否|需要我)[^。\\n]{0,8}(套用|改|寫入|apply|更新)|shall I apply|want me to apply|confirm (?:before|first)|reply (?:yes|with one word)|一個字"
+       },
+       {
+        "label": "does not narrate the tooling (validator, scripts)",
         "any_of": [
-         "已套用",
-         "已寫入",
-         "已經改好",
-         "已更新你",
-         "i have applied",
-         "i've applied",
-         "i have updated your",
-         "applied the change",
-         "i've updated your profile"
+         "profile_check",
+         "profile-check",
+         "validator",
+         "驗證器",
+         "scripts/"
         ]
        },
        {
@@ -5221,20 +5220,24 @@
         "why": "450 sq ft is what the pasted profile says."
        }
       },
-      "max_questions": 3,
+      "max_questions": 1,
       "workdir_expect": {
        "profile.yaml": {
         "contains": [
-         "all_in_pcm_ceiling: 2200"
+         "all_in_pcm_ceiling: 2300",
+         "crime: deep",
+         "management: deep",
+         "max_fetches_per_flat: 40",
+         "max_minutes_per_flat: 20",
+         "min_floor_area_sqft: 450"
         ],
         "absent": [
-         "all_in_pcm_ceiling: 2300",
-         "crime: deep"
+         "all_in_pcm_ceiling: 2200"
         ]
        }
       }
      },
-     "judge_notes": "Four field names, four values, one question. Anything longer than a short diff plus a sentence is the wrong shape for this ask."
+     "judge_notes": "Four changes, applied, one short reply. Under the 2026-09 contract a clear instruction is executed and shown, not proposed and confirmed; anything longer than the changes plus a sentence on what stayed is the wrong shape."
     },
     {
      "user": {
@@ -5243,6 +5246,25 @@
      },
      "expect": {
       "must": [
+       {
+        "label": "says the change is already in effect (applied last turn)",
+        "any_of": [
+         "已經",
+         "已改",
+         "已套用",
+         "已更新",
+         "已生效",
+         "上一則",
+         "剛剛",
+         "already",
+         "is in effect",
+         "was applied",
+         "is now",
+         "done",
+         "現在是",
+         "維持"
+        ]
+       },
        {
         "label": "echoes the applied values",
         "any_of": [
@@ -5255,16 +5277,6 @@
         "any_of": [
          "2,300",
          "2300"
-        ]
-       },
-       {
-        "label": "names the validator command",
-        "any_of": [
-         "profile_check",
-         "profile-check",
-         "驗證",
-         "validator",
-         "validate"
         ]
        },
        {
@@ -5340,6 +5352,16 @@
          "垃圾房東",
          "垃圾房东"
         ]
+       },
+       {
+        "label": "does not narrate the tooling (validator, scripts)",
+        "any_of": [
+         "profile_check",
+         "profile-check",
+         "validator",
+         "驗證器",
+         "scripts/"
+        ]
        }
       ],
       "facts": {
@@ -5362,7 +5384,7 @@
         ]
        }
       },
-      "max_questions": 2,
+      "max_questions": 1,
       "workdir_expect": {
        "profile.yaml": {
         "contains": [
@@ -5379,7 +5401,7 @@
        }
       }
      },
-     "judge_notes": "Does it actually show the validator's verdict, or say plainly that without a shell it is re-reading the changed lines instead?"
+     "judge_notes": "The person confirms a change that is already in effect: the right reply says so in a line, repeats the four values and what stayed, and adds what deeper checks cost. It does not re-apply, re-ask or name the validator."
     },
     {
      "user": {
@@ -5435,7 +5457,15 @@
          "回覆",
          "回我",
          "跟我說",
-         "告訴我"
+         "告訴我",
+         "要嗎",
+         "可以嗎",
+         "你決定",
+         "up to you",
+         "want me to",
+         "should I",
+         "還是",
+         "or would you"
         ]
        },
        {
@@ -5489,23 +5519,7 @@
         ]
        }
       ],
-      "max_questions": 3,
-      "ends_with": {
-       "any_of": [
-        "確認",
-        "confirm",
-        "?",
-        "？",
-        "yes",
-        "reply",
-        "apply",
-        "save",
-        "回覆",
-        "回我",
-        "套用",
-        "寫入"
-       ]
-      }
+      "max_questions": 2
      },
      "judge_notes": "The right answer is a refusal plus a real alternative, not a new key in the YAML. Does it stay useful while saying no?"
     }
