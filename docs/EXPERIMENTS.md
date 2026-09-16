@@ -1228,3 +1228,12 @@ profile has no field for. `how-to-use.md` now carries the no-field row (must_hav
 new key) beside the phrases → fields table; the false "saved" claim is the empty-claim pattern the pre-send
 checker flags and the model does not run.
 
+j9, fourth run (02:32, after the no-field row in how-to-use and the runner naming the file in the prompt):
+**zh 0.94, PASS** — the profile written in turn 1, the diff shown, turn 3 refuses the invented key and offers
+`must_haves`; en 0.80 — the file written, but turn 1's reply was two sentences ("Saved to profile.yaml … no
+shell available") with none of the four changes stated and the validator named. Two bench findings behind
+the earlier j9 runs: the runner said "pasted" for a profile that was also a file in the folder, so Sonnet
+kept answering "no file access" (fixed, 017e392); and the setting with no field kept becoming a new key
+until how-to-use said where it goes (0aca0dc). Both are the same lesson as the day's: text the model reads on
+demand works when it names the exact case; general rules do not carry.
+
