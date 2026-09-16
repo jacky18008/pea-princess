@@ -1422,4 +1422,6 @@ fabrications) against the post-adoption baseline; Claude Code 0.879 → 0.868 (�
 the private replay equal on task and satisfy, quality +0.13, bare numbers 1.9 → 1.1. Both hosts inside the ±0.03
 line the author set. Shipped text now 785,730 chars (from 855,672 this morning); the pack 7,986. The two single-run
 swings on Claude (j10 0.91 → 0.82, j9-zh 0.93 → 0.84) are re-run on the merged main as a check.
+Re-check on the merged main (Claude Code): j9 zh 0.94 / en 0.90 (both over the line, 0 fabrications), j10 0.91
+(over the line) — the two dips were single-run swings, not the cuts.
 
