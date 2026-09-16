@@ -157,8 +157,13 @@ class TestStoryIntake(unittest.TestCase):
     """The five-minute story session in onboarding.md section 2b."""
 
     def setUp(self):
+        # since exp/slim-text the listening, distilling and write-back rules live in sharing.md ("Hearing the
+        # stories"); onboarding.md keeps the invitation and points there, so the tests read both
         self.s = read("references", "onboarding.md")
-        self.section = self.s[self.s.index("## 2b."):self.s.index("## 3. Primer")]
+        sharing = read("references", "sharing.md")
+        head = self.s[self.s.index("## 2b."):self.s.index("## 3. Primer")]
+        body = sharing[sharing.index("# Hearing the stories"):] if "# Hearing the stories" in sharing else ""
+        self.section = head + "\n" + body
 
     def test_the_section_is_there_and_says_it_is_optional(self):
         self.assertIn("## 2b. Tell me about the places you have lived (optional, 5 minutes)", self.s)
