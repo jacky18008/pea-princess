@@ -7,7 +7,7 @@ found for this repository's experiment runners. Other Claude tasks were left alo
 
 ## Recoverable local snapshot
 
-Backup: `/Users/chenhsienhao/Documents/pea-princess-handoff-20260908T113914Z`.
+Backup: `<repo>-handoff-20260908T113914Z`.
 
 - `history.bundle`: all Git refs and reachable history; `git bundle verify` passed.
 - `source-8126037.tar.gz`: exact tracked source at handoff.

@@ -102,3 +102,11 @@ possible secrets or identifying prose are absent. No live attack or provider mod
 
 For a suspected vulnerability, give the maintainer a minimal synthetic reproduction and the
 source commit. Do not put credentials, private reports or third-party documents in a public issue.
+
+## The energy-certificate register and robots.txt
+
+`scripts/epc.py` reads find-energy-certificate.service.gov.uk, a public government register whose robots.txt
+disallows automated crawling. The skill does not crawl it: it fetches one certificate or one postcode search at
+a time, on the person's behalf, at the register's own page rate (1.2 s between requests, a day's cache), which is
+what a person clicking through the site does. Chat products that honour robots.txt cannot fetch it at all and
+fall back to asking the person to paste the certificate page; the skill says so instead of pretending.

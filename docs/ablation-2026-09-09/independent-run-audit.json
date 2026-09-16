@@ -1,7 +1,7 @@
 {
   "status": "PASS_WITH_DIAGNOSTICS",
   "finished_run": true,
-  "run": "/Users/chenhsienhao/Documents/pea-princess/bench/results/ablation-2026-09-09/live-v1",
+  "run": "<repo>/bench/results/ablation-2026-09-09/live-v1",
   "new_model_calls": 0,
   "problems": [],
   "warnings": [

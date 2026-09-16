@@ -20,8 +20,8 @@ completion year, and it is independent of the marketing brochure.
 
 The SPARQL used by `price-paid`:
 
-    PREFIX lrppi:    <http://landregistry.data.gov.uk/def/ppi/>
-    PREFIX lrcommon: <http://landregistry.data.gov.uk/def/common/>
+    PREFIX lrppi:    <https://landregistry.data.gov.uk/def/ppi/>
+    PREFIX lrcommon: <https://landregistry.data.gov.uk/def/common/>
     PREFIX xsd:      <http://www.w3.org/2001/XMLSchema#>
     SELECT ?date ?amount ?paon ?saon ?street ?town ?ptype ?newbuild ?estate ?category
     WHERE {
@@ -78,8 +78,8 @@ def build_query(postcode, since=None, limit=500):
     if since:
         flt = '  FILTER (?date >= "%d-01-01"^^xsd:date)\n' % int(since)
     return (
-        'PREFIX lrppi: <http://landregistry.data.gov.uk/def/ppi/>\n'
-        'PREFIX lrcommon: <http://landregistry.data.gov.uk/def/common/>\n'
+        'PREFIX lrppi: <https://landregistry.data.gov.uk/def/ppi/>\n'
+        'PREFIX lrcommon: <https://landregistry.data.gov.uk/def/common/>\n'
         'PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n'
         'SELECT ?date ?amount ?paon ?saon ?street ?town ?ptype ?newbuild ?estate ?category\n'
         'WHERE {\n'

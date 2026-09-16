@@ -12,7 +12,7 @@ check or a guarantee that connectivity and capacity will be available then.
 The second skill fix was merged at `8126037`; the earlier A/B write-up is `b1728ae`.
 Original results, including failed and superseded attempts, remain in `bench/results/`.
 The root handoff also archived all 2,060 original artifact files before testing, under
-`/Users/chenhsienhao/Documents/pea-princess-handoff-20260908T113914Z`. The original shell
+`<repo>-handoff-20260908T113914Z`. The original shell
 plans and relevant logs were preserved by the root handoff as supplemental evidence.
 
 The independent regrade lives locally at
@@ -26,7 +26,7 @@ JSON cards are authoritative for the regrade. The committed, transcript-free out
 Reproduce from a fresh output path (existing output is rejected):
 
 ```bash
-cd /Users/chenhsienhao/Documents/pea-princess
+cd <repo>
 python3 bench/handoff_personas.py --output bench/results/handoff-personas-reproduce
 ```
 
@@ -127,7 +127,7 @@ Prepare a fresh continuation directory, then inspect a one-session plan. These c
 are offline; `copytree` refuses to overwrite an existing continuation:
 
 ```bash
-cd /Users/chenhsienhao/Documents/pea-princess
+cd <repo>
 git diff --exit-code 8126037 -- skills/vet-flat evals/personas.json
 python3 tools/build_dist.py
 python3 - <<'PY'

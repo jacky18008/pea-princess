@@ -24,3 +24,12 @@ bench/ab/skill-variants/skill-*/
 .pea-state/
 .community-state/
 .pea-playground/
+# Credential files never belong here.
+*.env
+id_rsa*
+.netrc
+credentials.json
+*credentials*.json
+*.p12
+*.pfx
+*.jks

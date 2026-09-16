@@ -123,7 +123,7 @@
     "bench/results/handoff-2026-09-08-verified/personas-2026-09-07-fixed/scorecard.json": "3c7c936483923d4b6a24e0871c5d1bf18ed54f72739dc8e7ab6577cdd07efd9d",
     "bench/results/handoff-2026-09-08-verified/personas-2026-09-07-fix2/scorecard.json": "5fd56f0960b67bb55b6392d2da7491286bb01a365bcbcb9106dce53d8d07c39a"
   },
-  "raw_results_directory": "/Users/chenhsienhao/Documents/pea-princess/bench/results/codex-cost-probe-2026-09-08/trial-v1",
+  "raw_results_directory": "<repo>/bench/results/codex-cost-probe-2026-09-08/trial-v1",
   "calls": [
     {
       "id": "personas-2026-09-07-compact-32",

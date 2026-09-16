@@ -1962,7 +1962,7 @@ class HtmlRenderer(object):
         rows = []
         for src in self.d.get("sources") or []:
             url = src.get("url") or ""
-            link = ('<a href="%s">%s</a>' % (esc(url), esc(url))) if url.startswith("http") else esc(url)
+            link = ('<a href="%s">%s</a>' % (esc(url), esc(url))) if url.startswith(("http://", "https://")) else esc(url)
             note = " ".join(x for x in (src.get("provenance"), src.get("note")) if x)
             rows.append([
                 '<td class="num"><code>%s</code></td>' % esc(src.get("id", "")),

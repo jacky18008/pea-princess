@@ -28,7 +28,7 @@ it, and `README-CODEX.md` at the top of the tarball repeats this section.
 
 | path | what it is |
 |---|---|
-| `/Users/chenhsienhao/Documents/pea-princess` | the repository root. **`REPO` below means this.** |
+| `<repo>` | the repository root. **`REPO` below means this.** |
 | `REPO/skills/vet-flat/` | the skill itself: `SKILL.md`, `references/`, `scripts/` |
 | `REPO/skills/vet-flat/SKILL.md` | the instructions the agent follows |
 | `REPO/skills/vet-flat/references/report-schema.json` | the report contract. The single source of truth for the output shape, the four verdict statuses and the L1–L12 landmine codes |

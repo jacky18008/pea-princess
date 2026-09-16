@@ -330,7 +330,7 @@ DNS 是最後七場失敗的原因，沒有證據足以把整週用量暴增都�
 Git 中保存 protocol、runner、測試、結果 JSON 與本文件；大型原始紀錄留在本機：
 
 ```text
-/Users/chenhsienhao/Documents/pea-princess/
+<repo>/
   bench/results/codex-cost-probe-2026-09-08/
     canary/                   # 先行計量確認，單列成本
     trial/                    # 未執行的早期 preparation
@@ -350,7 +350,7 @@ Git 中保存 protocol、runner、測試、結果 JSON 與本文件；大型原�
 ```
 
 完整試驗備份位於
-`/Users/chenhsienhao/Documents/pea-princess-cost-probe-20260908T122647Z`，
+`<repo>-cost-probe-20260908T122647Z`，
 包含 Git bundle、原始碼、113 個原始試驗檔、來源 scorecards、測試 log 與 SHA-256 清單。
 該備份固定在 `c6f1aa0`，早於本次追加的詳細分析文件。
 交接前的另一份備份保留 2,060 個原始 artifacts；試驗完成時已全部確認 SHA-256 未變。
@@ -358,7 +358,7 @@ Git 中保存 protocol、runner、測試、結果 JSON 與本文件；大型原�
 以下只讀原始回答，比較三組配對，**不呼叫模型、不修改結果**：
 
 ```sh
-cd /Users/chenhsienhao/Documents/pea-princess
+cd <repo>
 python3 - <<'PY'
 import hashlib, json
 from pathlib import Path

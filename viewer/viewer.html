@@ -923,7 +923,7 @@ function s10(d,L){
     [L.label("ui.retrieved_at"),L.plain("ui.retrieved_at")],L.label("ui.evidence"),L.label("ui.provenance")],
     ss.map(function(s){
       var url=s.url||"";
-      var link = url.indexOf("http")===0 ? '<a href="'+esc(url)+'">'+esc(url)+"</a>" : esc(url);
+      var link = (url.indexOf("http://")===0||url.indexOf("https://")===0) ? '<a href="'+esc(url)+'">'+esc(url)+"</a>" : esc(url);
       var note=[s.provenance,s.note].filter(Boolean).join(" ");
       return ['<td class="num"><code>'+esc(s.id||"")+"</code></td>","<td>"+esc(s.name||"")+"</td>",
         "<td><small>"+link+"</small></td>",'<td class="num"><small>'+esc(s.retrieved_at||"")+"</small></td>",

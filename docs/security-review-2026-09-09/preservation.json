@@ -1,22 +1,22 @@
 {
   "artifacts": [
     {
-      "inventory": "/Users/chenhsienhao/Documents/pea-princess-handoff-20260908T113914Z/artifact-inventory.json",
+      "inventory": "<repo>-handoff-20260908T113914Z/artifact-inventory.json",
       "files": 2060,
       "changed_or_missing": []
     },
     {
-      "inventory": "/Users/chenhsienhao/Documents/pea-princess-cost-probe-20260908T122647Z/raw-file-inventory.json",
+      "inventory": "<repo>-cost-probe-20260908T122647Z/raw-file-inventory.json",
       "files": 113,
       "changed_or_missing": []
     },
     {
-      "inventory": "/Users/chenhsienhao/Documents/pea-princess-context-quality-20260908T173123Z/raw-file-inventory.json",
+      "inventory": "<repo>-context-quality-20260908T173123Z/raw-file-inventory.json",
       "files": 365,
       "changed_or_missing": []
     },
     {
-      "inventory": "/Users/chenhsienhao/Documents/pea-princess-ablation-20260909T165258Z/raw-file-inventory.json",
+      "inventory": "<repo>-ablation-20260909T165258Z/raw-file-inventory.json",
       "files": 1290,
       "changed_or_missing": []
     }

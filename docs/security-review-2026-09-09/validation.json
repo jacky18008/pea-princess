@@ -90,9 +90,9 @@
     "tools/build_dist.py": "b3d2f300c03ed12f700cde57c7fe27e3ecb89062b7010181b93a5609037de8f7",
     "tools/copy_deck.py": "7800fcaecb176c9425b8b56543c9fe612a00126516494e22492d45366c15f0fa"
   },
-  "backup_directory": "/Users/chenhsienhao/Documents/pea-princess-security-20260909T171829Z",
+  "backup_directory": "<repo>-security-20260909T171829Z",
   "result_commit_location": "source_commit in backup COMPLETED.json",
-  "backup_manifest": "/Users/chenhsienhao/Documents/pea-princess-security-20260909T171829Z/COMPLETED.json",
+  "backup_manifest": "<repo>-security-20260909T171829Z/COMPLETED.json",
   "published": false,
   "local_review_links_checked": 5,
   "public_zip_matches_final_working_sources": true,

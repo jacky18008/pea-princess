@@ -43,8 +43,8 @@
   "raw_inventory_sha256": "661e4dbc5b5efae1a2c8408e288e922ceb1e9a31a3979d83a290b457ced497b0",
   "raw_archive_sha256": "1983a5c7f7f2bb7a039503a1fd0ff5be63b6f2cce5b788a015986bc2dabe413b",
   "backup": {
-    "path": "/Users/chenhsienhao/Documents/pea-princess-context-quality-20260908T173123Z",
-    "completion_record": "/Users/chenhsienhao/Documents/pea-princess-context-quality-20260908T173123Z/COMPLETED.json",
+    "path": "<repo>-context-quality-20260908T173123Z",
+    "completion_record": "<repo>-context-quality-20260908T173123Z/COMPLETED.json",
     "git_bundle_note": "The exact results commit and verified Git bundle are recorded in the external completion record after committing this validation file."
   },
   "result_artifact_sha256": {

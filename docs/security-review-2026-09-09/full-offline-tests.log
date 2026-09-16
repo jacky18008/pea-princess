@@ -1,10 +1,10 @@
 ..............usage error: only the claude agent takes --append-system-prompt, so this config's appendix would be silently dropped. For a codex config use bench/ab/run_codex.py, which delivers the appendix as AGENTS.md.
 ..................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................usage error: give --journey <id> or --all
-usage error: no journey 'nope' in /Users/chenhsienhao/Documents/pea-princess/evals/journeys.json
+usage error: no journey 'nope' in <repo>/evals/journeys.json
 ...........................................................................................................................................................................................................................usage error: give --persona <id> or --matrix pilot|first|full
-usage error: no persona 'nope' in /Users/chenhsienhao/Documents/pea-princess/evals/personas.json
-usage error: no transcripts/ folder under /Users/chenhsienhao/Documents/pea-princess/tests/nowhere
-.............................................................................usage error: no cards/ folder under /var/folders/fj/rp6vbc_x79j6xvb13hdgnc7h0000gn/T/tmpg6i_njsk
+usage error: no persona 'nope' in <repo>/evals/personas.json
+usage error: no transcripts/ folder under <repo>/tests/nowhere
+.............................................................................usage error: no cards/ folder under <tmp>
 ....usage error: P2-claude carries a `pipeline:` block, so it is a role-pipeline arm and running it here would quietly run it as one agent instead. Use bench/pipeline.py --config P2-claude.
 ...................................................................................................................................................................................................................................................................................................................................viewer.html is up to date (184 terms, 2 candidates, 157.3 KB).
 .............viewer.html is up to date (184 terms, 2 candidates, 157.3 KB).
