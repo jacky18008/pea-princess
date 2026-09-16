@@ -1200,3 +1200,10 @@ missing; j6 — a first run answered a traditional-Chinese person in simplified 
 SKILL.md now says "language and script"). Codex terra's run of the same set is in progress (slow: four
 journeys in two hours with sub-agents on).
 
+**Arm F2, repeat 1 (2026-09-16 01:56; the landmine-aware `vet_case.py`, branch `exp/vet-case-route-2` at a29468f),
+paired against the baselines:** Codex terra standard Δ facts −0.02, Δ stable +0.04, Δ fabrications 0.00,
+unknown-honesty +0.16, **tokens ×0.36, wall −145 s**; Sonnet 5 standard Δ facts −0.00, Δ stable +0.04,
+fabrications 0.00, tokens ×0.81, wall −85 s. So the landmine entries closed the gap that arm F opened: the same
+landmine recall as the baseline at about a third of the tokens on Codex and a fifth fewer on Sonnet (one
+repeat; repeat 2 running). If repeat 2 holds, the routing (SKILL.md row + the axes/README paragraph) is merged.
+
