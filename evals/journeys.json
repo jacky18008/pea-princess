@@ -5613,7 +5613,13 @@
          "no dedicated field",
          "no specific field",
          "no EPC field",
-         "not a field of its own"
+         "not a field of its own",
+         "沒有對應的設定欄位",
+         "欄位並不存在",
+         "並不存在",
+         "form recognizes",
+         "沒有這種欄位",
+         "不是現有欄位"
         ]
        },
        {

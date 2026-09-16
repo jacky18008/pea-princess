@@ -736,12 +736,15 @@ def reference_files(journey, refs):
     return [r for r in wanted if os.path.exists(os.path.join(SKILL_DIR, r))]
 
 
-def user_message(turn):
-    """The turn's own words, plus anything the user pasted with it."""
+def user_message(turn, files=True):
+    """The turn's own words, plus anything the user pasted with it. An attachment that
+    was also written into the run's folder says so (a person with a shell who pastes
+    their profile has the file right there; the agent should edit it, not talk about it)."""
     parts = [turn["user"]]
     for att in turn.get("attachments") or []:
-        parts.append("--- pasted: %s ---\n%s--- end of %s ---"
-                     % (att["name"], att["text"]
+        where = " (also in your working folder as %s)" % att["file"] if files and att.get("file") else ""
+        parts.append("--- pasted: %s%s ---\n%s--- end of %s ---"
+                     % (att["name"], where, att["text"]
                         if att["text"].endswith("\n") else att["text"] + "\n", att["name"]))
     return "\n\n".join(parts)
 
@@ -1016,7 +1019,7 @@ def play(journey, args, variant_id=None):
 
     history, turns, errors = [], [], []
     for index, turn in enumerate(journey["turns"], 1):
-        user = user_message(turn)
+        user = user_message(turn, files=(agent != "api"))
         written = materialise_attachments(turn, workdir, agent)
         exp = turn.get("expect") or {}
         if args.dry_run and written:
