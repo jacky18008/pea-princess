@@ -1237,3 +1237,13 @@ kept answering "no file access" (fixed, 017e392); and the setting with no field 
 until how-to-use said where it goes (0aca0dc). Both are the same lesson as the day's: text the model reads on
 demand works when it names the exact case; general rules do not carry.
 
+**Arm F2, both repeats (04:01) — adopted (fc9e72c).** Paired against the two baselines on the same five
+flats: Sonnet 5 standard Δ landmine recall +0.01, Δ stable +0.05, **Δ fabrications −0.20**, unknown-honesty
++0.02, tokens ×0.85, wall −62 s; Codex terra standard Δ recall −0.07 (the two baselines differ from each other
+by up to 0.10 on the same cells), Δ stable −0.02, fabrications 0.00, unknown-honesty +0.25, **tokens ×0.35,
+wall −176 s**. So the fixed chain with report-shaped landmine entries gives the same landmine recall as the
+model orchestrating the scripts itself, at a third of the tokens on Codex and a sixth fewer on Sonnet, with
+fewer fabrications on Sonnet. The full flat assessment now routes through `scripts/vet_case.py` first
+(SKILL.md row, axes/README paragraph). What it does not do: reviews, light, the bills basis and anything the
+person asked beyond the list still come from the axes by hand.
+
