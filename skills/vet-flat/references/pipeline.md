@@ -2,32 +2,17 @@ Part of Pea Princess (vet-flat) by Hsien Hao (Jacky) Chen — https://github.com
 
 # The role pipeline: planner → executors → verifier → integrator
 
-One agent doing all four jobs is fast and usually fine. It also fails in one particular way: it fetches something, forms an opinion, and then reads everything afterwards as support for the opinion. The number that was about the building becomes the number about the flat. The rating on the replaced certificate becomes the rating. Nobody lied; the same head did the getting and the deciding.
-
-This page splits the work into four roles that cannot do each other's job, and puts a deterministic check between the getting and the deciding. It is written so any agent can follow it — with subagents or without, on any vendor.
 
 ## When to use it
 
-**Measured on 2026-09-07 and not recommended.** On five private flats, the check on its
-own (single agent, then verify and integrate) lost one or two facts in seven of eight exact
-pairs and gained none, caught no fabrication and introduced one; the whole pipeline scored
-below the single agent on all three flats it ran on, at two to four times the tokens. The
-numbers are in `docs/EXPERIMENTS.md`. This file stays as the documented shape of the mode
-for anyone who wants to re-test it; the default remains one agent with the whole skill.
-
-
-The original design proposed the following triggers. They are retained as research hypotheses,
-not automatic escalation rules; use this mode only when the user explicitly requests it or a
-new experiment is planned:
+**Measured on 2026-09-07 and not recommended** as a default: on five private flats the split pipeline scored below one agent with the whole skill at two to four times the tokens (`docs/EXPERIMENTS.md`); those results supersede the original expectations. The original triggers are research hypotheses, not automatic escalation rules — use this mode only when the person asks for it or an experiment is planned:
 
 - the model doing the judging is not the strongest one you have;
 - the flat is on the final shortlist of two or three;
 - the budget mode is `deep`;
 - the report will be shown to somebody who is going to sign something.
 
-The single pass in `SKILL.md` remains the default. The pilot did not establish a quality benefit
-from the extra roles. Role names and separate files also do not themselves provide security
-isolation: the host must enforce filesystem, tool and network boundaries.
+Role names and separate files do not provide security isolation; the host must enforce tool and network boundaries.
 
 ## The four roles in one line each
 
@@ -189,14 +174,6 @@ Then write a `replan` list: what is worth one more round of executor work, concr
 The integrator does not go back for anything. If it finds itself wanting a fact, that is a note for `not_found`, not a fetch.
 
 ---
-
-## What this is expected to buy, and what it is not
-
-The design originated in a different domain; those findings do not transfer automatically.
-The local flat-vetting pilot is now recorded in `docs/EXPERIMENTS.md`, and its results at the top
-of this page supersede the original expectations. The harness is `bench/pipeline.py`.
-
-Two things are worth knowing while the numbers are being collected:
 
 - **The split and the check are different factors.** A pipeline that fetches in four roles and never checks anything may buy nothing at all. That is why there is an arm with the verifier and no split (`P3`) and an arm with the split and no verifier (`P1`).
 - **Information sufficiency is the diagnostic.** When a fact is missing from the report, `verify.py --gold` says whether it was in the evidence at all. Missing from the evidence is a planner or executor failure; present in the evidence and missing from the report is an integrator failure. They look identical in a score and they need opposite fixes.

@@ -39,7 +39,7 @@ Ask the user for:
 - **Mezzanines and galleries** may or may not be counted. If the plan shows a second level, ask which areas the certificate measured.
 - **The whole-building distribution is worth more than one certificate.** It tells you whether this flat is a mainstream type or an edge type, whether an apparent £ per square foot gap is just the size curve, and whether the building contains ground-floor flats at all. In one sweep it cancelled a false "dark side discount" alarm outright.
 - **A self-described "studio suite" is not evidence.** Use the building's area bands plus the living-area share to decide whether it is a real one-bedroom.
-- **Borrowed areas are not this flat's area.** If the only certificate is for a neighbouring unit, set `epc_exact_match: false` and grade the axis S at best.
+- **Borrowed areas are not this flat's area.** If the only certificate is for a neighbouring unit, say in the axis text that the certificate is a neighbouring unit's and grade the axis S at best.
 - **Sources disagreeing is itself a finding.** A plan saying 459 sq ft against a certificate saying 549 sq ft is a document-quality problem; record it separately from any management or landlord judgement, and use it as a question, not an accusation.
 - **A listing that contradicts itself** (an accessibility field saying ground floor while the text says 16th) tells you how carefully the listing was assembled. Note it here and again in axis 7.
 

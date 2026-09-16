@@ -17,7 +17,7 @@ trust, a rule that is yours — goes here, in your copy, and stays out of the sh
 ## The rules an add-on keeps
 
 - **It never changes a verdict code.** An add-on can add a line, a number and a question
-  for the viewing day; the verdict (PASS / CONDITIONAL / EDGE / FAIL) comes from the
+  for the viewing day; the verdict (PASS / CONDITIONAL / EDGE / KILL) comes from the
   shared axes only, unless you write `verdict: mine` in the add-on and accept that the
   report says so.
 - **It is labelled.** Every finding from an add-on carries `(personal add-on: <file>)`.

@@ -95,7 +95,7 @@ class TestOnboarding(unittest.TestCase):
         for lang in ["**English**", "**繁體中文**", "**简体中文**"]:
             self.assertIn(lang, s)
         self.assertIn("2026-05-01", s)
-        self.assertIn("five weeks", s)
+        self.assertIn("axes/16-referencing-and-proof-of-funds.md", s)   # the caps live in the axis-16 checklist since 2026-09-16, not restated here
         self.assertNotIn("Rightmove scraping", s)
 
     def test_deal_breaker_menu_maps_to_landmines(self):
@@ -198,17 +198,6 @@ class TestStoryIntake(unittest.TestCase):
         self.assertIn("story_summary", self.section)
         self.assertIn("story_taken_on", self.section)
         self.assertIn("Shall I save these?", self.section)
-
-    def test_the_worked_example_is_six_lines_in_and_eight_lines_out(self):
-        example = self.section[self.section.index("### Worked example"):]
-        transcript = [line for line in example.split("```diff")[0].splitlines()
-                      if line.startswith("> The") or line.startswith("> I ") or
-                      line.startswith("> One")]
-        self.assertEqual(len(transcript), 6, "the story is meant to be six lines")
-        diff = example.split("```diff")[1].split("```")[0]
-        self.assertEqual(len([line for line in diff.splitlines() if line.startswith("+")]), 8,
-                         "the worked example is meant to change eight lines")
-        self.assertIn("(fictional)", self.section)
 
     def test_recurring_personal_questions_are_offered_and_classified(self):
         recurring = self.section[self.section.index("### Recurring personal questions"):]

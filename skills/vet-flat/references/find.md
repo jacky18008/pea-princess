@@ -24,7 +24,6 @@ Exit codes: 0 hits, 1 nothing found, 2 wrong arguments. The footer on stderr say
 ## What a thick view is, and why it is here
 Each hit prints the **whole paragraph**, plus its neighbours, up to about 1,000 characters — not a snippet of the matching line. That is deliberate, and it is a **hypothesis under test in this repo, not a proven gain**: the pattern was seen elsewhere, on another project, where a model given the best paragraph with a little context chose well, while the same model given thin snippets did worse than not searching at all. The same work suggested that an interface with many rules hurts weak models and leaves strong ones unchanged, which is why this tool has one command shape and no modes.
 
-Treat the size of the view as a setting under measurement. If a run shows a model quoting confidently from a paragraph that did not contain the answer, say so in the experiment notes rather than quietly shrinking the view.
 
 ## grep still works
 Nothing in this skill is findable only through `find.py`. `grep -n "deposit" pasted/*.txt` finds the same lines, and if the script is missing, broken, or the shell has no Python, grep is the fallback and it is a complete one. What `find.py` adds is ranking and the surrounding paragraph. Say that plainly to the user when you use it: "I searched the pasted document; here are the five paragraphs that best match, in the order the ranker put them."

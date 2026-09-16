@@ -52,9 +52,8 @@ Practical rules:
 - Verification texts: some travel eSIMs cannot receive automated verification messages. If codes do not arrive, that is the first thing to test.
 
 ## Deposits and their protection
-- For an assured shorthold tenancy the deposit is capped at **five weeks' rent** where the annual rent is under the statutory threshold, and the holding deposit at one week.
 - The deposit must be placed in a **government-approved scheme** within 30 days, and you must be given the prescribed information. **Ask for the scheme name and the certificate; keep the email.**
-- Recompute the cap yourself against the rent on the agreement. A deposit above five weeks is either an error or evidence the rent was recently reduced — either way it is a question worth asking.
+- Deposit and holding-deposit caps: see axis 07 (owner) and the axis 16 checklist; do not restate them here.
 - Deposit-replacement or "no deposit" products are a **non-refundable fee**, not a deposit, and you still pay for damage. They are always optional. One sentence is enough: *"I'd prefer the traditional deposit in a custodial scheme, please."*
 - A short-stay **licence** deposit is not required to be protected at all. Cap your exposure instead (axis 15).
 

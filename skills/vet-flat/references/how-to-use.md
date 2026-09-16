@@ -21,7 +21,7 @@ If the person prefers speaking, suggest dictation into their existing chat box. 
 | "rent around 1,700" | `budget.rent_pcm_target: 1700` | warn if the gap to the ceiling cannot hold bills |
 | "dig deeper on crime and management, keep the rest light" / 「治安跟管理挖深，其他輕量」 | `axis_depth.crime: deep`, `axis_depth.management: deep`, `budget_mode: lite` | unset axes follow `budget_mode` |
 | "check everything thoroughly for these two flats" | `budget_mode: deep` for those candidates only | explain the extra checks in plain words; respect user limits |
-| "keep it cheap / I'm on a £20 plan" | `budget_mode: standard` with fewer axes (not `lite` with all axes) | see `budget-modes.md`: lite triples invented numbers |
+| "keep it cheap / I'm on a £20 plan" | `budget_mode: standard` with fewer axes (not `lite` with all axes) | see `budget-modes.md`: lite multiplies invented numbers several-fold on weak models |
 | "no more than 20 fetches per flat" | `limits.max_fetches_per_flat: 20` | hard cap, whatever the depth |
 | "I hate noise" / 「我怕吵」 | Record a quietness preference with the exact user words | Do not infer a quiet-over-light ordering or a road/rail-facing exclusion; those need an explicit user decision. |
 | "I need to see sky" | `light.reject_no_sky: true` | L2 |

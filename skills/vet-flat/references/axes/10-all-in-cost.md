@@ -15,7 +15,7 @@ A comparison where one flat carries the operator's estimate and another carries 
 
 ## Method in shell mode
 1. Council tax band: the national band lookup is a fetch or a manual step; record the band and the borough's current rate for it.
-2. `python3 scripts/redress.py heat-trust --site "<building>"` and `python3 scripts/company.py profile <supplier>` — whether the heat supplier is inside the consumer-protection scheme and whether its accounts point at a tariff rise (axis 3).
+2. `python3 scripts/redress.py heat-trust --site "<building>"` and `python3 scripts/company.py search --name "<supplier>"` then `profile <company number>` — whether the heat supplier is inside the consumer-protection scheme and whether its accounts point at a tariff rise (axis 3).
 3. Compute three totals from the same model for every candidate: low, planning and stress.
    If the council tax amount or an applicable exemption has not been confirmed, the calculator returns a known subtotal and a null total. Do not treat an omitted `--council-tax` flag as £0 or compare that subtotal with a person's total-spending ceiling. If the heat-network tariff remains unpriced in the bills model, pass `--unknown-component heat_network_tariff`; an evidenced `--council-tax 0` does not complete that total.
 
@@ -54,7 +54,7 @@ Ask the user for:
 ## Traps and lessons
 - **A billing platform's FAQ figure and residents' actual bills can differ by a factor of two.** Prefer a resident's reported bill to a marketing figure, and label which you used.
 - **Electric-only and heat-network flats have different bases**; do not carry one model across both without saying so.
-- **Never let a cost model quietly become a quote.** Set `not_a_supplier_quote: true` on the model in the report.
+- **Never let a cost model quietly become a quote.** Write the model into `costs.basis_note` as an estimate and list every unpriced part in `costs.unknown_components`; there is no separate flag.
 - **If a launderette replaces a washing machine**, that is money plus 60 to 90 minutes a week — cost it here and grade it on axis 12.
 
 ## What goes into the report

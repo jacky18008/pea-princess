@@ -163,54 +163,11 @@ Three parts, one message:
 2. **The proposed profile** — only the lines that would change, each with a five-word reason. Never the whole file.
 3. **One question**: "Shall I save these?" Then apply, or amend, and move on to the flats. If they change their mind later, `story_summary` is a normal field they can edit or delete.
 
-### Worked example (fictional)
-
-Six lines of transcript:
-
-> The flat I loved was a second-floor one over a courtyard, morning sun right on the kitchen table, and I never once heard the road.
-> The one I hated was a ground-floor conversion behind a bus stop and by November the whole place smelled of damp.
-> The landlord took three weeks to come out for a leak and then somehow it was my fault.
-> One January the heating bill was two hundred and eighty pounds and nobody would tell me the rate beforehand.
-> I do not mind a small kitchen but I want to cook properly, and I never want to carry laundry down to a basement again.
-> I paid a hundred and twenty more a month for the last place just to stop looking, and I regret it.
-
-What I heard (the three sentences that become `story_summary`):
-
-> You are happiest a few floors up with morning light on the table and a courtyard between you and the traffic. What ruins a flat for you is damp, a landlord who does not turn up, and a bill nobody will quote before you sign. You will pay a little more for quiet and a real floor, but not to end a search early.
-
-Eight changed lines in the preference block of `profile.yaml` (the summary block follows underneath):
-
-```diff
- avoid:
-   - ground floor
-+  - main road, bus stop or railway outside the bedroom window   # "behind a bus stop" → L4
-+  - damp, or a history of mould in the flat or the one below    # "smelled of damp" → L10 checks
-+  - heating with no written tariff                              # "nobody would tell me the rate" → L6
-+  - management with no resident route to replace it             # "three weeks for a leak" → L7
- priorities:
-   - quiet
--  - commute
-+  - light                                                       # morning sun, named first, twice
-   - price
- light:
-   aspect_scores:
--    E: 4
-+    E: 5                                                        # "morning sun on the kitchen table"
- floors:
--  prefer_floor_band:
-+  prefer_floor_band: "2-8"                                      # loved a second floor, hated the ground
- budget:
--  stretch_ceiling_and_conditions:
-+  stretch_ceiling_and_conditions: "Up to 100 more per month only for a quiet-side flat on the second floor or above; never to end a search."
-```
-
-`must_haves` gains `washing_machine_in_flat` only if it is not already there ("never again" is a hard filter), `story_summary` gets the three sentences above and `story_taken_on` today's date. The last line of the transcript is also a question waiting to be written down — offer it back as one: *"If it is pricier, am I buying visible value I actually care about, or just paying more?"*, `when: compare`, `kind: answer`. Nothing else moves: the transcript is not saved, the landlord is not named, and no number came out of the stories that the user did not say out loud.
-
-## 3. Primer for someone with no idea (ten facts, one screen; cite `references/sources.yaml` ids where numbers appear)
+## 3. Primer for someone with no idea (ten facts, one screen; name the register a number comes from)
 
 1. **Timing.** Listings appear about four to eight weeks before the move-in date; good flats go within days. The order is: enquiry → viewing → "referencing" (income and identity checks) → holding deposit → contract → deposit → keys.
 2. **What you pay.** Rent, plus council tax (full-time students are exempt: Class N), energy, water, broadband. Buildings on a **heat network** (one boiler for the whole building) bill heat separately through a billing company: ask for the tariff in writing before you sign.
-3. **The law since 2026-05-01**: in-scope private assured tenancies are periodic. No rent before signing; normally **one month's rent in advance** between signing and commencement for monthly rent. Deposit cap **five weeks' rent** (six at £50,000 annual rent), holding deposit **one week**. Identify halls, licences and lodgers separately; axis 07 gives scope, timing and exceptions.
+3. **The law since 2026-05-01** (caps, advance rent, deposit protection): the checklist at the top of `references/axes/16-referencing-and-proof-of-funds.md` carries the figures; quote them from there, never from memory.
 4. **The income check.** Landlords usually want yearly income of roughly thirty times the monthly rent, or a guarantor. If you have neither, there are rent-guarantee or "commercial guarantor" services many landlords accept. Ask every landlord first: "which guarantor routes do you accept?"
 5. **The energy certificate (EPC) is your friend.** It is public, free, and gives the true indoor size, the building's first assessment year (≈ its age) and the heating type. Advertised sizes often include the balcony.
 6. **Who the landlord is matters more than the brand.** Purpose-built rental buildings are run by companies with on-site management; private landlords vary from excellent to absent. The legal entity on the contract is what counts; the skill looks it up.

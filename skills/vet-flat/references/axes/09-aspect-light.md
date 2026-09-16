@@ -14,7 +14,7 @@ In a London winter, indoor brightness comes from sky openness, floor level and w
 - **U** — no plan, no compass, no photograph.
 
 ## Method in shell mode
-1. `python3 scripts/geo.py lookup "<postcode>"` and `python3 scripts/geo.py nearby "<postcode>" --radius 100` — what stands around the building.
+1. `python3 scripts/geo.py lookup "<postcode>"` and `python3 scripts/geo.py nearby --lat <lat> --lng <lng> --radius 100` (the lookup prints lat and lng) — what stands around the building.
 2. `python3 scripts/roads.py near --lat <lat> --lng <lng> --radius 150 --brief` — the buildings, roads and railways the windows face.
 3. `python3 scripts/planning.py near --lat <lat> --lng <lng> --radius 250 --brief` — any consented scheme that will take the sky away, and any daylight assessment naming this building.
 4. Compute the obstruction angle: the height of the facing obstruction over the distance to it, as an angle from the window.

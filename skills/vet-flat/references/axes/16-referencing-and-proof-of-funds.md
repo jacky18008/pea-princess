@@ -7,7 +7,7 @@ Decide, before you spend a viewing on a flat, whether you can actually pass its 
 The gate has three parts: **an affordability test**, **a referencing check**, and **a guarantor position**. Ask for all three in writing in the first message (question G1).
 
 ## Say these in the first reply about referencing (the cheap-model checklist)
-The rest of this page is the reasoning; a reply that skips these six is the one the journeys keep failing (2026-09-15):
+The rest of this page is the reasoning; a reply that skips any of these seven is the one the journeys keep failing:
 1. **The three routes by name** — a personal UK guarantor, a commercial guarantor product (a fallback, never a filter), or savings — and that the landlord's own published criteria decide which are open.
 2. **The multiples that apply to this person**, from the table below: a student's guarantor at about **4×** the rent; the savings route at about **36×** the monthly rent held; say they are the published shapes and that the landlord's document is the evidence.
 3. **The caps computed from this rent**, with the arithmetic: deposit five weeks (six at £50,000 a year or more), holding deposit one week, rent in advance one month — the Renters' Rights Act rules in force in England from 2026-05-01; say the date.

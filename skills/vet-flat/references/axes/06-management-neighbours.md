@@ -15,8 +15,8 @@ Most of the raw material is on resident-review sites whose terms forbid automate
 
 ## Method in shell mode
 Nothing here fetches a review site. `scripts/reviews.py` reads the pages the user pastes - see the review surgery below, which is where this axis's real work happens - and these scripts do the work around them:
-1. `python3 scripts/company.py search "<managing agent or landlord>"` → `profile <company number>` → `filings <company number>` — activity codes, charges, accounts, officers.
-2. `python3 scripts/company.py address-search "<building postcode>"` — companies registered at the building. A building with no resident-owned management or right-to-manage company means residents structurally cannot change the managing agent; that absence is an official-register finding.
+1. `python3 scripts/company.py search --name "<managing agent or landlord>"` → `profile <company number>` → `filings <company number>` — activity codes, charges, accounts, officers.
+2. `python3 scripts/company.py address-search --query "<building postcode>"` — companies registered at the building. A building with no resident-owned management or right-to-manage company means residents structurally cannot change the managing agent; that absence is an official-register finding.
 3. `python3 scripts/redress.py rogue --name "<landlord or agent>"` — the London enforcement checker (absence only means no borough reported one).
 4. `python3 scripts/planning.py search --text "<building>"` — objections and consultation records name residents and their complaints.
 

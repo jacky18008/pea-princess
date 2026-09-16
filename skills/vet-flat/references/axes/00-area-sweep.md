@@ -94,6 +94,6 @@ Fields are from `references/report-schema.json`, which is the contract. A sweep 
 - `comparison.single_building_findings[]` — `building`, `theme`, `detail`, `generalisable: false`, `sources`.
 - `not_found[]` — `what`, `queries_used` (the exact strings), `where_looked`, `next_step`. This is the coverage table; a sweep without it cannot be audited.
 - `blocked_sources[]` — `source`, `http_status`, `reason`, `workaround`, for everything that refused, challenged or returned the wrong page.
-- `sources[]` — every source used, with `id` matching `sources.yaml`, `retrieved_at`, `evidence_class` and `provenance`.
+- `sources[]` — every source used: `id` (the register's name, or `pasted:<name>`), the `source_url` the script printed, `retrieved_at`, `evidence_class` and `provenance`. You never open `sources.yaml`; the verifier does.
 - `profile_snapshot` — the ruler used, so a reader can see which filters produced this shortlist.
 Keep the excluded buildings and the reason for each in the run's working notes, and summarise the counts in the sweep's opening section.

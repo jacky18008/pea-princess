@@ -14,9 +14,9 @@ Nothing on this axis is optional: it is the gate that money passes through.
 - **U** — the entity cannot be resolved.
 
 ## Method in shell mode
-1. `python3 scripts/company.py search "<name>"` → `profile <company number>` → `filings <company number>`.
-2. `python3 scripts/company.py address-search "<postcode>"` — related entities at the same address.
-3. `python3 scripts/redress.py cmp --name "<agent>"` — client-money protection; `redress.py prs --name`, `redress.py tpo --name` — redress schemes; `redress.py rogue --name` — the London enforcement checker.
+1. `python3 scripts/company.py search --name "<name>"` → `profile <company number>` → `filings <company number>`.
+2. `python3 scripts/company.py address-search --query "<postcode>"` — related entities at the same address.
+3. `python3 scripts/redress.py cmp --agent "<agent>"` — client-money protection; `redress.py prs`, `redress.py tpo` (manual-check instructions, no arguments) — redress schemes; `redress.py rogue --name` — the London enforcement checker.
 4. `python3 scripts/landregistry.py title` — the route to the title register (a paid, signed-in human step; the script tells the user what to buy).
 
 ## Method in fetch mode

@@ -619,7 +619,7 @@ def main(argv=None):
     ap.add_argument("--landlord", help="landlord's or management company's name")
     ap.add_argument("--destination", help="commute destination (postcode, station or place name)")
     ap.add_argument("--commute-max", type=float, help="the person's commute ceiling in minutes")
-    ap.add_argument("--depth", choices=("lite", "standard"), default="standard")
+    ap.add_argument("--depth", choices=("lite", "standard", "deep"), default="standard", help="deep runs the area scan at its deep tier; the register chain is the same")
     ap.add_argument("--listing", help="saved page or pasted text: fields are read from it first (flags override)")
     ap.add_argument("--fixture", help="JSON of canned register outputs keyed by register name (tests; no network for those)")
     ap.add_argument("--deadline-seconds", type=int, default=240)

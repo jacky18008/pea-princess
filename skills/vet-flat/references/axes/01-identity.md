@@ -22,7 +22,7 @@ Every other axis keys off this. If identity is unresolved, no axis above it can 
 6. `python3 scripts/epc.py cert <certificate id>` — the certificate for the exact flat.
 
 ## Method in fetch mode
-Fetch the EPC postcode-search page and then the certificate page (see `sources.yaml`, `epc_find_by_postcode`, `epc_certificate_page`).
+Search the register by postcode, then open the certificate page (`scripts/epc.py search`, then `cert`; each prints its `source_url` for the report's `sources[]`).
 The register's robots.txt disallows these paths for crawlers, so a robots-honouring fetcher will not get them. That is expected: fall through to manual mode.
 
 ## Method in manual mode
@@ -35,7 +35,7 @@ Ask the user for, in one message:
 ## How to read the numbers
 - `epc_validity_years` — a certificate older than this is expired; the flat may have been re-assessed under another certificate.
 - `fetch_host_spacing_seconds` — the minimum gap between requests to one host; do not bulk-harvest a register for an address you are not vetting.
-- No pass/fail number lives on this axis. The output is a boolean: `identity.epc_exact_match`.
+- No pass/fail number lives on this axis. The output is whether the certificate is this flat's: put the certificate's registered address in `identity.address`/`flat` and cite the certificate in `sources[]`; there is no separate boolean field.
 
 ## Traps and lessons
 - **One building, several postcodes.** Large blocks are commonly split across postcodes by floor band, so a high-floor flat is simply absent from the postcode you searched. Search by street, and check every covering postcode before concluding the flat has no certificate.
