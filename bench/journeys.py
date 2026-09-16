@@ -329,6 +329,22 @@ def count_questions(text):
     return total
 
 
+try:  # the skill's own list of simplified-only characters (scripts/reply_check.py), so the two agree
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "skills", "vet-flat", "scripts"))
+    from reply_check import SIMPLIFIED as SIMPLIFIED_ONLY  # noqa: E402
+except Exception:  # noqa: BLE001
+    SIMPLIFIED_ONLY = set("这们为说时会对开关么没样发过还从间问题动进经现实报门业务给让办买卖钱两种类应该虽记录电话网络设备参认识观讨论准选择继续总结简单复杂适马汉语韩国键东钟头产权账预约签录异议担护许证据际气质构")
+
+
+def script_mismatch(text, language):
+    """For a traditional-Chinese journey, the simplified characters the reply used (the skill's own rule:
+    reply in the person's script). Returns the distinct offending characters, empty when fine."""
+    if (language or "").lower() not in ("zh-tw", "zh-hant"):
+        return ""
+    body = mask_quoted(text)
+    return "".join(sorted(set(c for c in body if c in SIMPLIFIED_ONLY)))
+
+
 def cjk_share(text):
     """Share of CJK characters in the prose. Fenced and inline code, link targets, URLs
     and file paths are left out: a settings diff or a path to the file that was written
@@ -647,6 +663,9 @@ def score_turn(turn, reply, journey, workdir=None, agent=None, file_rows=None):
     language = exp.get("language") or journey.get("language")
     if language:
         share = cjk_share(text)
+        bad = script_mismatch(text, journey.get("language") if isinstance(journey, dict) else None)
+        if bad:
+            rows.append(row("script", "language", "fail", "%d simplified characters in a traditional-Chinese journey: %s" % (len(bad), bad[:20])))
         if language.lower().startswith(("zh", "ja")):
             ok, want = share >= 0.20, "at least 20%"
         else:
