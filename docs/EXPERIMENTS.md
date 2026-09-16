@@ -257,7 +257,7 @@ the earlier count-as-score label: cards have either three or four criteria. A se
 for the seven sessions still capped (the compare-and-vet path and the short-let path)
 was merged at `8126037`; all seven confirmation attempts then hit provider DNS errors,
 leaving **zero graded confirmations**. Claude runs are paused for quota recovery.
-The [handoff record](handoff/2026-09-08-experiment-status.md) contains the preserved
+The [handoff record](handoffs/2026-09-08/2026-09-08-experiment-status.md) contains the preserved
 artifacts, exact pending sessions and resume commands. Sixteen invented people can find a broken flow;
 they cannot say a real person would have signed.
 

@@ -14,4 +14,4 @@
 
 完整實驗仍用每次實際終端收據記帳。一次 CLI invocation 可能含多輪 provider 請求；input 包含 cached input，processed 為 input 加 output。主代理及協作子代理的對話用量沒有相同收據，另列未知，不宣稱這是整個帳戶完整帳單。
 
-相關文件：[原凍結方案](conversation-ablation-protocol.md)、[三次成本診斷](native-pilot-cost-diagnosis.md)、[評估流程複核](conversation-evaluation-process-review.md)。
+相關文件：[原凍結方案](conversation-ablation-protocol.md)、[三次成本診斷](../native-pilot-cost-diagnosis.md)、[評估流程複核](../conversation-evaluation-process-review.md)。

@@ -46,7 +46,7 @@ evaluator 已另存獨立重讀附註：I03 的 S4 從 1 修訂為 2；I01 的 T
 
 ## 執行政策與進度訊息的觀察缺口
 
-收集中途把尚未開始的原定呼叫從 240 秒改為 1,200 秒，詳見[操作修正](conversation-ablation-runtime-amendment.md)。evaluator 另存 `runtime-policy-review.md`：每輪保存實際設定，同一段對話可能橫跨兩種 deadline；完成、缺失及混合條件配對分開，不把延長等待後的結果歸因於提示修改。報表 v2 從有 hash 的 request／invocation receipt 讀 deadline，缺失保持 null；同時保存逐輪向量、原定與已啟動分母、失敗、未知用量。原 rubric 分數不改，原有摘要仍明示為混合設定下的彙整。
+收集中途把尚未開始的原定呼叫從 240 秒改為 1,200 秒，詳見[操作修正](conversation-ablation-2026-09-10/conversation-ablation-runtime-amendment.md)。evaluator 另存 `runtime-policy-review.md`：每輪保存實際設定，同一段對話可能橫跨兩種 deadline；完成、缺失及混合條件配對分開，不把延長等待後的結果歸因於提示修改。報表 v2 從有 hash 的 request／invocation receipt 讀 deadline，缺失保持 null；同時保存逐輪向量、原定與已啟動分母、失敗、未知用量。原 rubric 分數不改，原有摘要仍明示為混合設定下的彙整。
 
 root 查到另一個缺口：原生終端保存的 `agent_message` 事件含執行中進度訊息，但正式配對封包的 dialogue 只採最後回答，工具事件列表也排除了這些訊息。已檢查的七筆 native 原始紀錄共 23 個此類事件，只有五筆成功呼叫各有一個與最後回答完全相符；另外 18 個事件沒有進入正式 dialogue。這七筆是五筆成功、兩筆超時，並非七段完整對話。兩次超時也有進度訊息，不能寫成「完全沒有回應」。
 

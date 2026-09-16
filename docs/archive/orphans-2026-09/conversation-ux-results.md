@@ -12,7 +12,7 @@
 
 ## 有界實測
 
-兩份計畫都在呼叫前保存：[六次計畫](conversation-ux-smoke-plan.json)、[一次開場複驗](conversation-ux-refinement-plan.json)。全部使用 gpt-6-astra / low；沒有 Claude 或自動重試。
+兩份計畫都在呼叫前保存：[六次計畫](../../conversation-ux-smoke-plan.json)、[一次開場複驗](../../conversation-ux-refinement-plan.json)。全部使用 gpt-6-astra / low；沒有 Claude 或自動重試。
 
 | 凍結版本／案例 | 呼叫 | processed tokens | 實際觀察 |
 |---|---:|---:|---|
@@ -40,13 +40,13 @@
 
 本輪前六次150,666 tokens，單則追加26,433；不是對照相同輸入的成本A/B，不能宣稱省多少。cached input 已包括在 input，不能再加一次。這些是終端提供的 processed counters，不等於訂閱額度百分比或 API 帳單；編碼、協作代理和外部 Grok 用量不在此表。
 
-[文章審查](article-harness-review.md)發現固定載入38,977字元的指引，再追加政策與歷史；因此下一步比較指示與資料載入方式，而不是單純限制輸出長度。
+[文章審查](../../article-harness-review.md)發現固定載入38,977字元的指引，再追加政策與歷史；因此下一步比較指示與資料載入方式，而不是單純限制輸出長度。
 
 ## 後續驗收
 
-完整方法與分數面向：[對話評估設計](conversation-evaluation-design.md)。接續的 native-agent study 另凍結48組 model × effort ×研究深度×入口×資料載入組合，包含四段較長對話、資料更正、條件例外與檔案恢復。這份報告的七次紀錄不能代替尚未產出的新矩陣結果。
+完整方法與分數面向：[對話評估設計](../../conversation-evaluation-design.md)。接續的 native-agent study 另凍結48組 model × effort ×研究深度×入口×資料載入組合，包含四段較長對話、資料更正、條件例外與檔案恢復。這份報告的七次紀錄不能代替尚未產出的新矩陣結果。
 
-私人的 `ux-smoke-20260909/` 和 `ux-refinement-20260909/` 保存計畫、intent IDs、source commit、snapshots、完整匯出及逐筆用量；每個session底下保留durable manifest和物理終端原文。原始使用者內容不自動公開。操作方式見[本機介面指南](persona-playground.md)，Grok模型選擇的官方說明見[來源說明](grok-model-selection.md)。
+私人的 `ux-smoke-20260909/` 和 `ux-refinement-20260909/` 保存計畫、intent IDs、source commit、snapshots、完整匯出及逐筆用量；每個session底下保留durable manifest和物理終端原文。原始使用者內容不自動公開。操作方式見[本機介面指南](../../persona-playground.md)，Grok模型選擇的官方說明見[來源說明](../grok-round1/grok-model-selection.md)。
 
 ## 介面上限顯示修正
 

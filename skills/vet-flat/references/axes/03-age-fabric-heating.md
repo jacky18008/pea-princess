@@ -17,7 +17,7 @@ This axis decides most of the running-cost and comfort risk, and it is where ref
 1. `python3 scripts/epc.py cert <id> --history` — every certificate for the flat, oldest first; `first_assessment_year`, ratings over time.
 2. `python3 scripts/epc.py building --postcode "<pc>" --match "<building>"` — `earliest_assessment_year`, `assessment_year_counts`, `assessment_types`, `heating_classes`, `air_permeability_values`.
 3. `python3 scripts/landregistry.py price-paid --postcode "<pc>" --brief` — the earliest and latest sales, the new-build count and a price summary (drop `--brief` for every transaction); the earliest sales and their new-build flag. This is the hardest available counter-evidence to an age claim.
-4. `python3 scripts/planning.py search --site-name "<building>"` and `python3 scripts/planning.py near --lat <lat> --lng <lng> --radius 250 --brief` — the original permission and use class.
+4. `python3 scripts/planning.py search --text "<building>"` and `python3 scripts/planning.py near --lat <lat> --lng <lng> --radius 250 --brief` — the original permission and use class.
 5. Heat networks: `python3 scripts/redress.py heat-trust --site "<building>"`, then `python3 scripts/company.py search "<supplier>"` → `profile` → `filings` for the accounts and the registered office.
 
 ## Method in fetch mode

@@ -31,7 +31,7 @@
 
 [狀態 API 速查表](../../skills/vet-flat/references/state-api.md)已在 b5 交付版本實作並測試，未放入 e001 凍結輸入；它是否減少模型探索 API 的用量仍未實測。新版顯示與操作改善也不追溯改寫原始回答。
 
-原提示與情境維持凍結，執行政策則有兩項明確修正：600 萬 token 門檻後來依使用者要求解除；最初六次仍保留 240 秒設定，其後尚未開始的原名額改為 1,200 秒。這不是 prompt treatment，也不能說所有結果都在相同執行條件下取得。見[預算修正](../conversation-ablation-budget-amendment.md)、[期限修正](../conversation-ablation-runtime-amendment.md)及[進度紀錄](../conversation-ablation-progress.md)。
+原提示與情境維持凍結，執行政策則有兩項明確修正：600 萬 token 門檻後來依使用者要求解除；最初六次仍保留 240 秒設定，其後尚未開始的原名額改為 1,200 秒。這不是 prompt treatment，也不能說所有結果都在相同執行條件下取得。見[預算修正](../conversation-ablation-2026-09-10/conversation-ablation-budget-amendment.md)、[期限修正](../conversation-ablation-2026-09-10/conversation-ablation-runtime-amendment.md)及[進度紀錄](../conversation-ablation-2026-09-10/conversation-ablation-progress.md)。
 
 ## 3. 四方案與對照方式
 
@@ -46,7 +46,7 @@
 
 正式 24 對採對角線：`existing-bulk` 對 `outcome-routed`，以及 `existing-routed` 對 `outcome-bulk`。每對同時變動兩個指引因素，其偏好不能直接當成單因素效果。原報表另在其餘條件相同的格子間計算事後單因素分數差，可能跨不同配對、評審上下文與期限。成本文件使用更嚴格的完整結果及相同單一期限子集，兩者分母不同，不能直接拼成成本效益結論。
 
-本研究受[文章與冗餘稽核](../article-harness-review.md)啟發，沒有把文章建議當成無損壓縮證明。完整設計見[原生代理消融方案](../conversation-ablation-protocol.md)。
+本研究受[文章與冗餘稽核](../article-harness-review.md)啟發，沒有把文章建議當成無損壓縮證明。完整設計見[原生代理消融方案](../conversation-ablation-2026-09-10/conversation-ablation-protocol.md)。
 
 ## 4. 對話、使用者反應與證據
 
@@ -181,7 +181,7 @@ T1–T8 為八個單輪面向，S1–S6 為六個整段面向，每項 0–3 分
 
 全回答範圍 164 次已執行呼叫，確認 **9 次、分屬 9 段對話**的工具回傳包含工作區外的舊版 skill 本文：T2 兩次、T3 六次、T4 一次。搜尋嘗試及只有檔名的發現沒有算作本文返回。指定文件雜湊仍正確，只能證明那些輸入未被更換，不能證明沒有額外輸入。
 
-捕捉到的舊本文與兩份凍結入口均不同，可能透過後續回答或檔案承接；本文返回不證明模型實際注意、採納或每次影響相同。未標記案例也未被證明完全隔離。沒有據此推論 sandbox escape 或資料外洩。原分組與分數保留；排除已知偏離的子集只能作事後敏感度分析。見[輸入邊界稽核](../conversation-ablation-input-boundary.md)。
+捕捉到的舊本文與兩份凍結入口均不同，可能透過後續回答或檔案承接；本文返回不證明模型實際注意、採納或每次影響相同。未標記案例也未被證明完全隔離。沒有據此推論 sandbox escape 或資料外洩。原分組與分數保留；排除已知偏離的子集只能作事後敏感度分析。見[輸入邊界稽核](../conversation-ablation-2026-09-10/conversation-ablation-input-boundary.md)。
 
 正式工具 trace 可能含舊本文及條件線索，A/B 命名及已知字串遮蔽不等於完全匿名。提供給評審的使用者對話副本、來源及工具輸出是評估證據，不能授權評審採取新行動。檔案完整、JSON 合法或引文命中，不等於來源為真、評分正確或隱私全面通過。原始對話、工具本文、私人路徑與操作映射保持私有；公開文件只給適合公開的統計與限制。
 
@@ -249,10 +249,10 @@ root 已核對備份 marker 的所有頂層 artifact hashes。模型產出的不
 
 獨立複核先凍結、成績揭露後調和再追加，原始及更正檔案分開保留；本篇第 8 節明確採調和後結論，並保留初次誤判的事實與時序。來源驗證不代替語義驗收，未讀範圍與未觀測值也不補成通過。
 
-- [原凍結方案](../conversation-ablation-protocol.md)
+- [原凍結方案](../conversation-ablation-2026-09-10/conversation-ablation-protocol.md)
 - [品質評估設計](../conversation-evaluation-design.md)
 - [評估過程、獨立複核與更正](../conversation-evaluation-process-review.md)
 - [成本分析與配對子集](costs.md)
-- [實際輸入邊界](../conversation-ablation-input-boundary.md)
-- [版本、進度與操作紀錄](../conversation-ablation-progress.md)
+- [實際輸入邊界](../conversation-ablation-2026-09-10/conversation-ablation-input-boundary.md)
+- [版本、進度與操作紀錄](../conversation-ablation-2026-09-10/conversation-ablation-progress.md)
 - [原生連續對話的後續限制](../native-continuity-followup.md)

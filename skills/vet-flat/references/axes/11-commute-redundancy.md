@@ -24,7 +24,7 @@ arrival time; do not promote them to guaranteed real-world travel times.
 ## Method in shell mode
 1. `python3 scripts/commute.py journey --from "<postcode or lat,lng>" --to "<destination address>" --arrive 09:00` — the destination is always an argument. Never build a destination into a script.
 2. `python3 scripts/commute.py stations --lat <lat> --lng <lng> --radius 800` — every rail, underground and light-rail station within the redundancy walk.
-3. `python3 scripts/commute.py redundancy --lat <lat> --lng <lng> --walk-min 10` — which strike families are reachable on foot and what grade that gives.
+3. `python3 scripts/commute.py redundancy --lat <lat> --lng <lng> --radius 800` — which strike families are reachable on foot and what grade that gives.
 4. Run the journey three ways and keep them separate: average walking speed (the headline), fast walking speed (a sensitivity run only), and an entrance buffer added at the destination.
 
 ## Method in fetch mode

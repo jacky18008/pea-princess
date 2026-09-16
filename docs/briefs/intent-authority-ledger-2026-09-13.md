@@ -84,7 +84,7 @@ programmatic metric, plus judge v2's G3 gate and the reviewers' "condition owner
 - Tests: extend `tests/test_profile_check.py`, `tests/test_eligibility.py`, `tests/test_panel.py`; the full
   suite (`python3 -m unittest discover -s tests -p 'test_*.py'`) must pass; the pack ≤ 8,000.
 
-### 5. Report back (one file, `docs/condition-ledger-2026-09-13/results.md`)
+### 5. Report back (one file, `docs/intent-authority-ablation-2026-09-12/ (the ledger experiment's records; no separate results file was written)`)
 
 The two arms' tables (replay and fixtures), the noise reference, the adopt decision with the gate numbers,
 what was left out and why, and the exact commands to re-run. Plain language; every number with what it is

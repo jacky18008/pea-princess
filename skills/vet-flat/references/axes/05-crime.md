@@ -16,8 +16,8 @@ The output is a tier and a texture, not a precise ranking of streets.
 ## Method in shell mode
 0. If the question is the street rather than one flat, `python3 scripts/area_scan.py --postcode "<pc>" --street "<name>"` answers crime, roads, noise in dB, works and the living environment in one compact JSON; come here only for the finer window or route analysis.
 1. `python3 scripts/crime.py latest` — the newest month the dataset actually holds. Choose months from this, never from today's date.
-2. `python3 scripts/geo.py box --lat <lat> --lng <lng> --half-width 150` — the polygon. Same spec for every candidate.
-3. `python3 scripts/crime.py box --lat <lat> --lng <lng> --half-width 150 --months 6 --sensitivity 20` — counts by month and category, the top street anchors, and the four shifted boxes.
+2. `python3 scripts/geo.py box --lat <lat> --lng <lng> --half-m 150` — the polygon. Same spec for every candidate.
+3. `python3 scripts/crime.py box --lat <lat> --lng <lng> --half-m 150 --months 6 ` — counts by month and category, the top street anchors, and the four shifted boxes.
 4. Classify each top anchor as on or off the station-to-door route, using the walking leg from `commute.py journey`.
 
 ## Method in fetch mode

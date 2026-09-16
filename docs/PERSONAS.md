@@ -27,7 +27,7 @@ Designed by Claude (Fable 5.1) and GPT-6 Astra (Codex) for Hsien Hao (Jacky) Che
 
 **Status, 2026-09-08:** the two 32-session matrices are complete. The seven-session
 second-fix confirmation batch ended with seven provider errors and no graded result;
-Claude-dependent runs are paused. See the [handoff record](handoff/2026-09-08-experiment-status.md)
+Claude-dependent runs are paused. See the [handoff record](handoffs/2026-09-08/2026-09-08-experiment-status.md)
 for current results, corrected metric definitions and the bounded resume plan.
 
 ---

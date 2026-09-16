@@ -31,7 +31,7 @@ Generated 2026-09-05 from the public repository (private data excluded). Each se
 - Axis 17 — `skills/vet-flat/references/axes/17-uk-admin-pitfalls.md`
 - Thresholds — `skills/vet-flat/references/thresholds.yaml`
 - Sources catalogue (tested 2026-09-03) — `skills/vet-flat/references/sources.yaml`
-- Borough catalogue summary — `skills/vet-flat/references/boroughs-summary.md`
+- Borough catalogue summary — `docs/boroughs-summary.md`
 - Scripts usage — `docs/SCRIPTS.md`
 - Experiments: A/B and ablation results — `docs/EXPERIMENTS.md`
 - Benchmark README — `bench/README.md`
@@ -3459,7 +3459,7 @@ sources:
 
 ---
 
-## Borough catalogue summary — `skills/vet-flat/references/boroughs-summary.md`
+## Borough catalogue summary — `docs/boroughs-summary.md`
 
 ````markdown
 # London flat vetting: verified source catalogue
