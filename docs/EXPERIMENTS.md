@@ -1221,3 +1221,10 @@ were mostly the bench. Codex's j8 miss survived the axis-15 checklist added the 
 is read on demand and terra did not open it for a "read this clause" ask; that is the next skill-text item
 (route "a clause in a short-let agreement" to axis 15).
 
+j9 on Claude Code, three runs the same night (0.79/0.78, then 0.74/0.72 after the file nudge): the words are
+the contract's (applied at once, old → new, the rest untouched) but the file work is not — run 2 said "the
+file is saved" one turn before it wrote anything, and both runs added `min_epc_rating: B` for a setting the
+profile has no field for. `how-to-use.md` now carries the no-field row (must_haves or my_questions, never a
+new key) beside the phrases → fields table; the false "saved" claim is the empty-claim pattern the pre-send
+checker flags and the model does not run.
+

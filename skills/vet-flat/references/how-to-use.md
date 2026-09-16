@@ -28,6 +28,7 @@ If the person prefers speaking, suggest dictation into their existing chat box. 
 | "ground floor is fine if it's dry" | conditional requirement in `.pea-state`; `floors.reject_ground_floor: false` only as a projection | preserve “dry” as a required condition with evidence; unknown dryness cannot become an unconditional pass |
 | "must have a washing machine" | add `washing_machine_in_flat` to `must_haves` | a must-have that fails is a hard fail |
 | "I always ask X" | append to `my_questions` with `when`/`kind` (classify: compare / filter / viewing / sign) | see `onboarding.md` |
+| "EPC rating B or better" / 「能源等級 B 以上」, or any setting with no field | **no field of its own**: a `must_haves` line ("energy rating B or better") or a `my_questions` filter question — say which and why | never add a key the template does not have (`min_epc_rating`, `crime_depth`, …): `profile_check.py` rejects unknown keys and the next tool to read the file ignores them |
 | "stop asking me about Y" | change the follow-up question policy | this does not itself waive the requirement; ask once if the user also wants Y retired |
 | "start over" | begin with useful examples and learn preferences gradually | do not silently delete the saved history |
 | 「只問把關的八題」 / "just the eight that matter" | `advanced.fixed_form.questions: gate` | the fixed form drops to the money-and-paperwork eight |
