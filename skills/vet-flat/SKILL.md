@@ -21,10 +21,10 @@ metadata:
 |---|---|
 | how to start or what this does | `references/onboarding.md` |
 | compares specified advertised fields | `references/inputs.md`; supplied pages only, requested fields only |
-| requests a full flat assessment | `references/axes/README.md`, then relevant linked axes |
+| requests a full flat assessment | `scripts/vet_case.py` once, then `references/axes/README.md` for the rest |
 | candidates around an area or commute | `references/axes/00-area-sweep.md` (`scripts/sweep.py`) |
 | asks if a street is quiet, safe, or has works | `references/street-research.md`; scan in this thread, reuse saved results |
-| wants a shortlist roasted (尻洗) or compared | `references/axes/13-adversarial-review.md`, then the report contract |
+| wants a shortlist roasted (尻洗) | `references/axes/13-adversarial-review.md`, then the report contract |
 | about to sign, a bridge stay, a short-let or licence clause, or referencing | `references/axes/15`–`17` |
 | going to a viewing, or just been | `references/axes/14-site-visit.md`, `18` |
 | depth, cost or which model | `references/budget-modes.md` |
