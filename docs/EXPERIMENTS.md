@@ -1417,3 +1417,9 @@ Interim results, Sonnet 5:
 
 Codex terra's slim journeys run is in progress; the branch is adopted only if it too stays within the line.
 
+**Verdict (2026-09-16 evening): slim adopted.** Codex terra journeys 0.871 → 0.866 (−0.005; 3 → 4 over the line; 0 → 0
+fabrications) against the post-adoption baseline; Claude Code 0.879 → 0.868 (−0.011; 4 → 4; fabrications 3 → 1);
+the private replay equal on task and satisfy, quality +0.13, bare numbers 1.9 → 1.1. Both hosts inside the ±0.03
+line the author set. Shipped text now 785,730 chars (from 855,672 this morning); the pack 7,986. The two single-run
+swings on Claude (j10 0.91 → 0.82, j9-zh 0.93 → 0.84) are re-run on the merged main as a check.
+
