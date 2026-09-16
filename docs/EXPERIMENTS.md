@@ -1398,3 +1398,22 @@ Read the open registers directly; listing pages are saved or pasted by the perso
 
 Treat the size of the view as a setting under measurement. If a run shows a model quoting confidently from a paragraph that did not contain the answer, say so in the experiment notes rather than quietly shrinking the view.
 
+## Slimming the skill text (2026-09-16): safe cuts on main, behaviour-changing cuts under test
+
+Three read-only audits (security, orphans, text) preceded this. Shipped text went 855,672 → 786,000 chars on
+main through corrections and zero-risk cuts (b8a082a: measurement narrative, model comparisons, a fictional
+worked example, third copies of the legal caps; every removed passage is in the appendix below). Branch
+`exp/slim-text` (958184d) carries the cuts that change what a turn reads: the axes/15–17 route split into
+three rows (a referencing question loads one axis, not 46,539 chars of three), conversation-quality.md cut
+to its numbered rules (10,881 → 6,995 chars, read before every reply), the story-listening sections moved
+from onboarding.md to sharing.md (the from-zero route 27.9k → 19k), two small reference merges.
+
+Interim results, Sonnet 5:
+
+| bench | main-now (b8a082a) | slim (958184d) | read |
+|---|---|---|---|
+| private replay, 15 turns (task / quality / satisfy / invented numbers) | 1.60 / 2.80 / 0.87 / 1.9 | 1.60 / 2.93 / 0.87 / 1.1 | equal or better; fewer bare numbers |
+| journeys, 13 (mean / pass / fabrications) | 0.879 / 4 / 3 | 0.868 / 4 / 1 | −0.011, inside the ±0.03 line; j10 0.91 → 0.82 and j9-zh 0.93 → 0.84 are single-run swings to re-check |
+
+Codex terra's slim journeys run is in progress; the branch is adopted only if it too stays within the line.
+
