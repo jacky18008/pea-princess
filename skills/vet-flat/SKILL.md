@@ -19,19 +19,19 @@ metadata:
 
 | The user… | Read |
 |---|---|
-| asks how to start or what this does | `references/onboarding.md` |
+| how to start or what this does | `references/onboarding.md` |
 | compares specified advertised fields | `references/inputs.md`; supplied pages only, requested fields only |
 | requests a full flat assessment | `references/axes/README.md`, then relevant linked axes |
-| wants candidates around an area or commute | `references/axes/00-area-sweep.md` (`scripts/sweep.py`) |
+| candidates around an area or commute | `references/axes/00-area-sweep.md` (`scripts/sweep.py`) |
 | asks if a street is quiet, safe, or has works | `references/street-research.md`; scan in this thread, reuse saved results |
 | wants a shortlist roasted (尻洗) or compared | `references/axes/13-adversarial-review.md`, then the report contract |
-| about to sign, needs a bridge stay, or referencing | `references/axes/15`–`17` |
+| about to sign, a bridge stay, a short-let or licence clause, or referencing | `references/axes/15`–`17` |
 | going to a viewing, or just been | `references/axes/14-site-visit.md`, `18` |
-| asks about depth, cost or which model | `references/budget-modes.md` |
+| depth, cost or which model | `references/budget-modes.md` |
 | changes requirements, resumes, needs goals/TODOs | `references/session-harness.md`, `how-to-use.md` |
 | shares a seed or past homes | `references/sharing.md` (`scripts/seed.py`) |
 | wants a personal check | `extensions/README.md` |
-| halls vs private flats, or typical rent | `references/student-housing.md` |
+| halls vs private flats, typical rent | `references/student-housing.md` |
 | needs any number computed | `references/arithmetic.md` (`scripts/calc.py`) |
 | the report itself | `references/report-contract.md`, `report-schema.json` |
 | wants the requirements as a page | `references/requirements-contract.md` (`scripts/panel.py`) |
