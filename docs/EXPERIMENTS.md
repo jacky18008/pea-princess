@@ -1247,3 +1247,15 @@ fewer fabrications on Sonnet. The full flat assessment now routes through `scrip
 (SKILL.md row, axes/README paragraph). What it does not do: reviews, light, the bills basis and anything the
 person asked beyond the list still come from the axes by hand.
 
+## Journeys on the merged routing (2026-09-16 04:15–08:30, skill fc9e72c)
+
+| host | mean | over the line | fabrications | vs the previous clean run |
+|---|---|---|---|---|
+| Claude Code, Sonnet 5 | 0.877 | 3/13 (j3 0.93, j10 1.00, j12 1.00) | 3 (one a negated "不是三個月" the grader read as 3 — masked now; one a mislabelled annual rent; one real) | flat (0.877); j9 0.78/0.79 → 0.88/0.88, j10 0.91 → 1.00; j8 0.91 → 0.66 because the reply was in simplified Chinese again |
+| Codex, gpt-5.6 terra | 0.871 | 3/13 (j10 0.91, j11 1.00, j12 0.96) | 0 | up from 0.851; j10 0.82 → 0.91 (the identity journey is where the fixed chain helps), j9 0.82/0.88 → 0.85/0.90, the assessment journeys j3/j7 flat |
+
+The routing did not move the conversational journeys and lifted the one that is about identity. The recurring
+Claude Code defect is the script drift: twice in the night (j6, then j8) Sonnet answered a traditional-Chinese
+person in simplified characters, which the skill's own checker flags and the model never runs — the one
+concrete argument for the optional Stop hook on Claude Code.
+

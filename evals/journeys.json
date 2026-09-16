@@ -279,7 +279,10 @@
          "(?:in advance|up ?front|預付|先付|預繳)[^.。,，\\n]{0,30}?([0-9]+|one|two|three|六|一|兩|二|三)\\s*(?:個月|months?)"
         ],
         "source": "skills/vet-flat/SKILL.md legal facts",
-        "why": "Since 2026-05-01 a landlord in England may take at most one month's rent in advance. Six months up front is a signal, not a normal ask."
+        "why": "Since 2026-05-01 a landlord in England may take at most one month's rent in advance. Six months up front is a signal, not a normal ask.",
+        "mask_patterns": [
+         "(?:不是|並非|而非|而不是|不會是|不該是|不能是|not|rather than|instead of|no longer)\\s*(?:[0-9一二三四五六]+|one|two|three)\\s*(?:個月|months?)"
+        ]
        }
       },
       "max_questions": 3,
@@ -844,7 +847,10 @@
          "([0-9]+|one|two|three|一|兩|二|三)\\s*(?:個月|months?)\\s*(?:rent\\s*)?(?:in advance|up ?front|預付|先付)[^.。\\n]{0,20}?(?:at most|maximum|上限|為上限|是上限)"
         ],
         "source": "skills/vet-flat/SKILL.md legal facts",
-        "why": "The cap is one month. The three months in the user's message is the ask, not the law, so only a CAP sentence is read here."
+        "why": "The cap is one month. The three months in the user's message is the ask, not the law, so only a CAP sentence is read here.",
+        "mask_patterns": [
+         "(?:不是|並非|而非|而不是|不會是|不該是|不能是|not|rather than|instead of|no longer)\\s*(?:[0-9一二三四五六]+|one|two|three)\\s*(?:個月|months?)"
+        ]
        },
        "holding_deposit_weeks": {
         "value": 1,
@@ -1469,7 +1475,10 @@
          "(?i)(?:limits?|restricted|capped|limited)[^.。\\n]{0,24}?to[^.。\\n]{0,12}?(first|one|1)\\s*month"
         ],
         "source": "skills/vet-flat/SKILL.md legal facts",
-        "why": "One month is the cap; the listing's three months is the ask."
+        "why": "One month is the cap; the listing's three months is the ask.",
+        "mask_patterns": [
+         "(?:不是|並非|而非|而不是|不會是|不該是|不能是|not|rather than|instead of|no longer)\\s*(?:[0-9一二三四五六]+|one|two|three)\\s*(?:個月|months?)"
+        ]
        },
        "deposit_cap_gbp": {
         "values": [
@@ -5009,7 +5018,10 @@
          "([0-9]+|one|two|three|一|兩|二|三)\\s*(?:個月|months?)\\s*(?:rent\\s*)?(?:in advance|up ?front|預付|先付)[^.。\\n]{0,20}?(?:at most|maximum|上限|為上限|是上限)"
         ],
         "source": "skills/vet-flat/SKILL.md legal facts",
-        "why": "One month is the ceiling for an assured tenancy in England. The three months in the clause is what he is being asked for, so only a CAP sentence is read here."
+        "why": "One month is the ceiling for an assured tenancy in England. The three months in the clause is what he is being asked for, so only a CAP sentence is read here.",
+        "mask_patterns": [
+         "(?:不是|並非|而非|而不是|不會是|不該是|不能是|not|rather than|instead of|no longer)\\s*(?:[0-9一二三四五六]+|one|two|three)\\s*(?:個月|months?)"
+        ]
        },
        "deposit_cap_weeks": {
         "tolerance": 0.0,
