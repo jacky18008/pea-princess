@@ -12,10 +12,10 @@ Usage:
   calc.py "2300 - 2250" "484 - 342"
   calc.py deposit --rent-pcm 2400
   calc.py affordability --rent-pcm 2400 --multiple 2.5 [--income 65000] [--guarantor-multiple 4]
-  calc.py all-in --rent-pcm 2400 --bills-low 125 --bills-planning 175 --bills-stress 250 [--council-tax 0] [--broadband 30]
+  calc.py all-in --rent-pcm 2400 --bills-low 125 --bills-planning 175 --bills-stress 250 [--council-tax 0] [--broadband 30] [--unknown-component heat_network_tariff]
   calc.py price-per-sqft --rent-pcm 2400 --area-m2 52
   calc.py bridge --weeks 7.7 --weekly 500 --months 10.2 --all-in 2170 [--alt-all-in 2175 --alt-months 12]
-  calc.py break-even --ceiling 2600 --bills-planning 175 [--council-tax 0]
+  calc.py break-even --ceiling 2600 --bills-planning 175 [--council-tax 0] [--unknown-component heat_network_tariff]
   calc.py guarantor-product --rent-pcm 2400 --model oneoff --fee-months 1
   calc.py guarantor-product --rent-pcm 2400 --model annual --weeks 3 --setup 59.99 --years 1
   calc.py pro-rata --rent-pcm 2400 --move-in 2026-09-18
@@ -82,16 +82,24 @@ def affordability(a):
 
 
 def all_in(a):
-    fixed = (a.council_tax or 0) + (a.broadband or 0)
-    res = {}
+    tax_known = a.council_tax is not None
+    fixed = (a.council_tax if tax_known else 0) + (a.broadband or 0)
+    unknown = list(dict.fromkeys(([] if tax_known else ["council_tax"]) + a.unknown_component))
+    res = {"unknown_components": unknown}
     steps = []
     for name, bills in (("low", a.bills_low), ("planning", a.bills_planning), ("stress", a.bills_stress)):
         if bills is None:
             continue
         tot = a.rent_pcm + bills + fixed
-        steps.append(f"{name}: {a.rent_pcm} + {bills} + {fixed} = {r2(tot)}")
-        res[f"all_in_{name}"] = r2(tot)
-    out("all-in", vars(a), "all-in = rent_pcm + bills + council_tax + broadband", steps, res)
+        if not unknown:
+            steps.append(f"{name}: {a.rent_pcm} + {bills} + {fixed} = {r2(tot)}")
+            res[f"all_in_{name}"] = r2(tot)
+        else:
+            steps.append(f"{name} known subtotal: {a.rent_pcm} + {bills} + {fixed} = {r2(tot)}; "
+                         f"unknown: {', '.join(unknown)}")
+            res[f"known_subtotal_{name}"] = r2(tot)
+            res[f"all_in_{name}"] = None
+    out("all-in", vars(a), "total = rent_pcm + complete bills + council_tax + broadband; any unknown component makes total unknown", steps, res)
 
 
 def price_per_sqft(a):
@@ -117,9 +125,19 @@ def bridge(a):
 
 
 def break_even(a):
-    rent = a.ceiling - a.bills_planning - (a.council_tax or 0)
+    unknown = list(dict.fromkeys(([] if a.council_tax is not None else ["council_tax"]) + a.unknown_component))
+    if unknown:
+        before_unknown = r2(a.ceiling - a.bills_planning - (a.council_tax or 0))
+        result = {"max_rent_pcm": None, "upper_bound_before_unknowns": before_unknown,
+                  "unknown_components": unknown}
+        if a.council_tax is None:
+            result["upper_bound_before_tax"] = before_unknown
+        out("break-even", vars(a), "max rent = ceiling − complete bills − council_tax; any unknown component leaves the maximum unknown",
+            [f"ceiling less known costs = {before_unknown}; subtract {', '.join(unknown)} before quoting a rent target"], result)
+        return
+    rent = a.ceiling - a.bills_planning - a.council_tax
     out("break-even", vars(a), "max rent = ceiling − bills_planning − council_tax",
-        [f"{a.ceiling} − {a.bills_planning} − {a.council_tax or 0} = {r2(rent)}"], {"max_rent_pcm": r2(rent)})
+        [f"{a.ceiling} − {a.bills_planning} − {a.council_tax} = {r2(rent)}"], {"max_rent_pcm": r2(rent), "unknown_components": []})
 
 
 def guarantor_product(a):
@@ -254,6 +272,8 @@ def main(argv=None):
     p = sub.add_parser("all-in"); p.add_argument("--rent-pcm", type=float, required=True, dest="rent_pcm")
     for k in ("bills-low", "bills-planning", "bills-stress", "council-tax", "broadband"):
         p.add_argument("--" + k, type=float, dest=k.replace("-", "_"))
+    p.add_argument("--unknown-component", action="append", default=[], choices=("heat_network_tariff", "other_unpriced_bill"),
+                   help="required monthly charge omitted from the bills model; repeat for separate charges")
     p.set_defaults(f=all_in)
     p = sub.add_parser("price-per-sqft"); p.add_argument("--rent-pcm", type=float, required=True, dest="rent_pcm")
     p.add_argument("--area-m2", type=float, required=True, dest="area_m2"); p.set_defaults(f=price_per_sqft)
@@ -261,7 +281,9 @@ def main(argv=None):
     p.add_argument("--months", type=float, required=True); p.add_argument("--all-in", type=float, required=True, dest="all_in")
     p.add_argument("--alt-all-in", type=float, dest="alt_all_in"); p.add_argument("--alt-months", type=float, default=12.0, dest="alt_months"); p.set_defaults(f=bridge)
     p = sub.add_parser("break-even"); p.add_argument("--ceiling", type=float, required=True)
-    p.add_argument("--bills-planning", type=float, required=True, dest="bills_planning"); p.add_argument("--council-tax", type=float, dest="council_tax"); p.set_defaults(f=break_even)
+    p.add_argument("--bills-planning", type=float, required=True, dest="bills_planning"); p.add_argument("--council-tax", type=float, dest="council_tax")
+    p.add_argument("--unknown-component", action="append", default=[], choices=("heat_network_tariff", "other_unpriced_bill"))
+    p.set_defaults(f=break_even)
     p = sub.add_parser("guarantor-product"); p.add_argument("--rent-pcm", type=float, required=True, dest="rent_pcm")
     p.add_argument("--model", choices=("oneoff", "annual"), required=True); p.add_argument("--fee-months", type=float, default=1.0, dest="fee_months")
     p.add_argument("--weeks", type=float, default=3.0); p.add_argument("--setup", type=float, default=0.0); p.add_argument("--years", type=int, default=1); p.set_defaults(f=guarantor_product)

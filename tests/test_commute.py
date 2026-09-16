@@ -87,6 +87,12 @@ class TestPlaces(unittest.TestCase):
     def test_free_text_falls_through(self):
         self.assertEqual(commute.parse_place("Victoria")[1], "text")
 
+    def test_disambiguated_tfl_station_id_can_be_requeried_without_guessing(self):
+        api, kind, label = commute.parse_place("1000139")
+        self.assertEqual((api, kind, label), ("1000139", "tfl_stop_id", "1000139"))
+        url = commute._journey_url("SE3%207RS", api, "20260916", "0900", "")
+        self.assertIn("/to/1000139?", url)
+
     def test_empty_is_a_usage_error(self):
         with self.assertRaises(ValueError):
             commute.parse_place("  ")
@@ -157,6 +163,13 @@ class TestJourneyParser(unittest.TestCase):
     def test_fastest_journey_is_chosen_not_the_first(self):
         self.assertEqual(self.bus["duration_min"], min(self.bus["alternatives_min"]))
         self.assertEqual(self.bus["alternatives_min"], sorted(self.bus["alternatives_min"]))
+
+    def test_alternatives_retain_actual_endpoints_and_arrival_times(self):
+        self.assertEqual(len(self.bus["alternatives"]), self.bus["journeys_returned"])
+        self.assertEqual([p["duration_min"] for p in self.bus["alternatives"]],
+                         self.bus["alternatives_min"])
+        self.assertTrue(all(p["actual_endpoint"] for p in self.bus["alternatives"]))
+        self.assertTrue(all(p["arrival"] for p in self.bus["alternatives"]))
 
     def test_rail_plan_uses_rail_only(self):
         self.assertEqual(self.rail["modes"], ["tube"])

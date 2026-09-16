@@ -124,7 +124,7 @@ def rows(profile):
     out.append(("通勤 · commute", "；".join(bits) if bits else UNKNOWN, not bits))
     b = profile.get("budget") if isinstance(profile.get("budget"), dict) else {}
     if b.get("all_in_pcm_ceiling"):
-        out.append(("每月上限 · ceiling", _money(b["all_in_pcm_ceiling"]) + "／月，房租＋帳單 · rent + bills", False))
+        out.append(("每月上限 · ceiling", _money(b["all_in_pcm_ceiling"]) + "／月，房租＋帳單＋council tax · rent + bills + council tax", False))
     elif b.get("rent_pcm_target"):
         out.append(("每月上限 · ceiling", _money(b["rent_pcm_target"]) + "／月，只含房租 · rent only; bills not yet counted", False))
     else:

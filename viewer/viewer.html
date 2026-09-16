@@ -370,6 +370,13 @@ function acheck(field,label,formula,recomputed,source,kind,floor,unit,labelId,we
     recomputed:Math.round(recomputed*100)/100,delta:delta,ok:ok,tolerance:Math.round(tol*10000)/10000,
     where:source?source.where:null,loc:source?source.loc:null};
 }
+function aUnknownCost(field,label,source,missing){
+  missing=missing||["council tax"];
+  return {field:field,label:label,label_id:null,weeks:null,
+    formula:missing.join(", ")+" is unknown; the full cost cannot be calculated",
+    unit:"GBP per month",kind:"equal",model_value:source.value,
+    recomputed:null,delta:null,ok:false,tolerance:null,where:source.where,loc:source.loc};
+}
 function aepcArea(c,numbers){
   function sqft(value,unit){
     var raw=String(unit||"").toLowerCase();
@@ -422,16 +429,17 @@ function recomputeCandidate(c,profile){
     checks.push(acheck("holding_deposit_cap","Holding deposit, legal maximum (1 week)",FORMULAS.holding_deposit_cap,
       weekly,apick(numbers,[["holding"],["deposit","fee"]],[],true),"cap",null,"GBP","ui.arith_holding_deposit_cap"));
   }
-  var councilTax=anum(costs.council_tax)||0.0, bb=apick(numbers,[["broadband","internet"]],[],true);
+  var councilTax=anum(costs.council_tax), bb=apick(numbers,[["broadband","internet"]],[],true);
+  var unpriced=(Array.isArray(costs.unknown_components)?costs.unknown_components:[]).map(function(name){
+    return {heat_network_tariff:"heat-network tariff",other_unpriced_bill:"another unpriced bill"}[name]||null;
+  }).filter(function(name){return name;});
   var broadband=bb?bb.value:0.0, allIn={};
   [["low","bills_low",["low","best","mild","careful"],["stress","worst"],"All-in cost, mild month"],
    ["planning","bills_planning",null,["stress","worst","low","best","mild"],"All-in cost, the planning number"],
    ["stress","bills_stress",["stress","worst","cold","bad winter"],["low","best","mild"],"All-in cost, cold month"]
   ].forEach(function(band){
     var name=band[0], bills=anum(costs[band[1]]);
-    if(rent===null||bills===null) return;
-    var total=rent+bills+councilTax+broadband, sources=[];
-    allIn[name]=total;
+    var sources=[];
     if(name==="planning"){
       sources.push(asource(anum(costs.all_in_planning),"costs.all_in_planning",{kind:"costs",key:"all_in_planning"}));
       (c.hard_filters||[]).forEach(function(f,index){
@@ -443,6 +451,17 @@ function recomputeCandidate(c,profile){
     apickAll(numbers,band[2]===null?[TOTAL_WORDS]:[TOTAL_WORDS,band[2]],BRIDGE_WORDS.concat(band[3]),true)
       .forEach(function(e){ sources.push(asource(e.value,e.where,e.loc)); });
     sources=sources.filter(function(s){ return s; });
+    var missing=[];
+    if(rent===null) missing.push("rent");
+    if(bills===null) missing.push("modelled bills");
+    if(councilTax===null) missing.push("council tax");
+    missing=missing.concat(unpriced);
+    if(missing.length){
+      sources.forEach(function(s){checks.push(aUnknownCost("all_in_"+name,band[4],s,missing));});
+      return;
+    }
+    var total=rent+bills+councilTax+broadband;
+    allIn[name]=total;
     (sources.length?sources:[null]).forEach(function(s){
       checks.push(acheck("all_in_"+name,band[4],FORMULAS.all_in,total,s,"equal",null,null,"ui.arith_all_in_"+name)); });
   });
@@ -461,10 +480,19 @@ function recomputeCandidate(c,profile){
   }
   /* verdict.break_even_rent_pcm is a judgement, not this formula, so it is not compared */
   var ceiling=aceiling(c,profile), billsPlanning=anum(costs.bills_planning);
-  if(ceiling!==null&&billsPlanning!==null){
+  if(ceiling!==null){
     var be=apick(numbers,[["break even","breakeven"]],[],true);
-    checks.push(acheck("break_even_rent","Break-even rent against your ceiling",FORMULAS.break_even_rent,
-      ceiling-billsPlanning-councilTax,be?asource(be.value,be.where,be.loc):null,"equal",null,null,"ui.arith_break_even"));
+    if(councilTax===null||billsPlanning===null||unpriced.length){
+      var missingBE=[];
+      if(billsPlanning===null) missingBE.push("modelled bills");
+      if(councilTax===null) missingBE.push("council tax");
+      missingBE=missingBE.concat(unpriced);
+      if(be) checks.push(aUnknownCost("break_even_rent","Break-even rent against your ceiling",
+                                   asource(be.value,be.where,be.loc),missingBE));
+    }else{
+      checks.push(acheck("break_even_rent","Break-even rent against your ceiling",FORMULAS.break_even_rent,
+        ceiling-billsPlanning-councilTax,be?asource(be.value,be.where,be.loc):null,"equal",null,null,"ui.arith_break_even"));
+    }
   }
   var weeks=apick(numbers,[BRIDGE_WORDS,["week"]],["rate","cost"],false);
   var weeklyRate=apick(numbers,[BRIDGE_WORDS,["week"]],[],true);
@@ -515,6 +543,8 @@ function checkLabel(ch,L){
   return (ch.weeks&&ch.label_id) ? text+" ("+ch.weeks+" "+L.label("ui.arith_weeks")+")" : text;
 }
 function checkStatus(ch,L){
+  if(ch.recomputed===null||ch.recomputed===undefined)
+    return L.label("ui.arith_mismatch")+": "+L.label("ui.arith_model_said")+" "+moneyExact(ch.model_value)+"; "+ch.formula;
   var gives=L.label("ui.arith_formula_gives")+" "+moneyExact(ch.recomputed);
   if(ch.model_value===null||ch.model_value===undefined) return L.label("ui.arith_not_stated")+"; "+gives;
   if(ch.ok) return L.label("ui.arith_matches")+" ("+L.label("ui.arith_model_said")+" "+moneyExact(ch.model_value)+")";

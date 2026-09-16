@@ -24,7 +24,7 @@ ROADS = {"ok": True, "source_url": "https://overpass.example/q", "radius_m": 300
          "secondary_road": {"count": 0, "names": [], "nearest": None},
          "railway_surface": {"count": 1, "names": ["London Bridge approach"], "nearest": {"distance_m": 210}},
          "tube_surface": {"count": 0, "nearest": None},
-         "night_economy": {"count": 4, "names": ["The Example Arms"], "nearest": {"distance_m": 90}},
+         "night_economy": {"count": 4, "search_radius_m": 100, "names": ["The Example Arms"], "nearest": {"distance_m": 90}},
          "park_or_green": {"count": 1, "nearest": {"distance_m": 250}}, "facade_note": None}
 CRIME = {"ok": True, "source_url": "https://data.police.uk/api/x", "query": {"half_m": 150}, "total": 583, "months_counted": 6,
          "per_month": {"2026-02": 75, "2026-03": 119, "2026-04": 100, "2026-05": 86, "2026-06": 111, "2026-07": 92},
@@ -97,6 +97,50 @@ class TestCompose(unittest.TestCase):
         self.assertIn("crime: curl error 6", out["not_found"]); self.assertIn("planning: timeout", out["not_found"])
         self.assertTrue(out["ok"], "roads alone still makes a scan")
         self.assertTrue(all("Crime:" not in s for s in out["reading"]))
+
+
+class TestMappedSourceScope(unittest.TestCase):
+    def zero_mapped_roads(self):
+        roads = copy.deepcopy(ROADS)
+        for key in ("trunk_or_primary_road", "railway_surface", "tube_surface", "night_economy"):
+            roads[key].update(count=0, names=[], nearest=None)
+        roads["trunk_or_primary_road"]["search_radius_m"] = 300
+        roads["railway_surface"]["search_radius_m"] = 300
+        return roads
+
+    def test_successful_zero_is_a_mapped_query_result_with_its_actual_radius(self):
+        out = AS.compose(WHERE, None, None, self.zero_mapped_roads(), None, [])
+        text = out["reading"][0]
+        self.assertEqual(0, out["quiet"]["night_economy_count"])
+        self.assertEqual(100, out["quiet"]["night_economy_radius_m"])
+        self.assertIn("OSM query returned", text)
+        self.assertIn("Roads (OSM query returned): none listed in this map/query within 300 m", text)
+        self.assertIn("Rail at surface: none listed in this map/query within 300 m", text)
+        self.assertIn("Bars, pubs and clubs in the OSM query within 100 m: 0 mapped", text)
+        self.assertIn("does not prove no venues exist", text)
+        self.assertNotIn("clubs in the OSM query within 300 m", text)
+
+    def test_source_failure_and_partial_scan_do_not_turn_zero_into_absence(self):
+        failed = AS.compose(WHERE, None, None, {"ok": False, "note": "Overpass timed out"}, None, [])
+        self.assertIsNone(failed["quiet"])
+        self.assertIn("roads: Overpass timed out", failed["not_found"])
+        self.assertFalse(any("Bars, pubs and clubs" in s for s in failed["reading"]))
+
+        partial = AS.compose(WHERE, {"ok": False, "note": "police API timed out"}, None,
+                             self.zero_mapped_roads(), None, ["planning: deadline reached"])
+        self.assertTrue(partial["ok"])
+        self.assertIn("crime: police API timed out", partial["not_found"])
+        self.assertIn("planning: deadline reached", partial["not_found"])
+        self.assertIn("0 mapped", partial["reading"][0])
+        self.assertIn("does not prove no venues exist", partial["reading"][0])
+        self.assertFalse(any(s.startswith("Crime:") for s in partial["reading"]))
+
+    def test_positive_map_count_keeps_the_reported_venue_and_radius(self):
+        out = AS.compose(WHERE, None, None, ROADS, None, [])
+        self.assertEqual(4, out["quiet"]["night_economy_count"])
+        self.assertEqual(100, out["quiet"]["night_economy_radius_m"])
+        self.assertIn("within 100 m: 4 mapped (nearest The Example Arms at 90 m)", out["reading"][0])
+        self.assertNotIn("zero mapped here", out["reading"][0])
 
 
 class TestPartialPlanning(unittest.TestCase):

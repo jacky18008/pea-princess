@@ -108,7 +108,7 @@ def _redact(url):
 
 # --------------------------------------------------------------- places -----
 def parse_place(text):
-    """'lat,lng' or a postcode or free text -> (api_value, kind, label)."""
+    """'lat,lng', postcode, TfL 7-digit stop ID or free text -> API place."""
     if text is None or not str(text).strip():
         raise ValueError("empty place")
     s = str(text).strip()
@@ -122,6 +122,8 @@ def parse_place(text):
     if POSTCODE_RE.match(squashed) or POSTCODE_RE.match(squashed[:-3] + " " + squashed[-3:]):
         pc = squashed[:-3] + " " + squashed[-3:]
         return pc.replace(" ", "%20"), "postcode", pc
+    if re.fullmatch(r"\d{7}", s):
+        return s, "tfl_stop_id", s
     return s.replace(" ", "%20"), "text", s
 
 
@@ -201,6 +203,7 @@ def parse_journey(journey, door_buffer_min=0):
         "door_buffer_min": door_buffer_min,
         "start": journey.get("startDateTime"),
         "arrival": journey.get("arrivalDateTime"),
+        "actual_endpoint": legs[-1]["to"] if legs else None,
         "legs": legs,
         "changes": max(0, len(transit) - 1),
         "transit_legs": len(transit),
@@ -252,8 +255,8 @@ def parse_journey_response(obj, door_buffer_min=0):
         return {"ok": False, "note": "expected a JSON object"}
     if "Disambiguation" in (obj.get("$type") or ""):
         return {"ok": False,
-                "note": ("TfL could not pin down one of the endpoints; pass a postcode or "
-                         "lat,lng instead of a place name"),
+                "note": ("TfL could not pin down one endpoint; choose the correct stop ID "
+                         "from disambiguation, or use a known postcode or lat,lng"),
                 "disambiguation": _disambiguation(obj)}
     journeys = obj.get("journeys") or []
     if not journeys:
@@ -263,6 +266,9 @@ def parse_journey_response(obj, door_buffer_min=0):
     best = dict(parsed[0])
     best["ok"] = True
     best["alternatives_min"] = [p["duration_min"] for p in parsed]
+    # Keep each returned route's arrival, endpoint and modes. Minutes alone
+    # cannot establish that an alternative reaches the requested station.
+    best["alternatives"] = parsed
     best["journeys_returned"] = len(parsed)
     return best
 
@@ -576,7 +582,7 @@ def main():
 
     p = sub.add_parser("journey", help="door-to-door plans, three mode sets")
     p.add_argument("--from", dest="frm", required=True, help='postcode or "lat,lng"')
-    p.add_argument("--to", required=True, help='postcode or "lat,lng" — required, never assumed')
+    p.add_argument("--to", required=True, help='postcode, "lat,lng" or TfL 7-digit stop ID — required, never assumed')
     p.add_argument("--arrive", default="09:00", help="arrive-by time HH:MM (default 09:00)")
     p.add_argument("--date", default="next-weekday", help="next-weekday or YYYYMMDD")
     p.add_argument("--door-buffer-min", type=int, default=0, dest="door_buffer_min",

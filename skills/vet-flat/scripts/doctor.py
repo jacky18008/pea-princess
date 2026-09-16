@@ -13,7 +13,7 @@ https://github.com/jacky18008/pea-princess - MIT
 
 The network checks read only open registers already used by the skill (postcodes.io, data.police.uk, the
 EPC register, the GLA Planning Datahub, Overpass, Defra's noise map, TfL, Companies House, the Land Registry)
-with a fixed London postcode, cached for a day like every other call; nothing is written anywhere.
+with a fixed London postcode. Fetched responses may be cached locally for a day by _fetch.
 Standard library only, Python 3.9.
 """
 from __future__ import unicode_literals
@@ -36,11 +36,41 @@ LAT, LNG = 51.5045, -0.0865
 
 def check(name, fn, need=None):
     t0 = time.time()
+    details = None
     try:
-        ok, note = fn()
+        answer = fn()
+        ok, note = answer[:2]
+        if len(answer) > 2:
+            details = answer[2]
     except Exception as exc:  # noqa: BLE001 - a failed check is a finding, not a crash
         ok, note = False, "%s: %s" % (type(exc).__name__, str(exc)[:120])
-    return {"check": name, "ok": bool(ok), "note": note or "", "seconds": round(time.time() - t0, 1), "needed_for": need or "everything"}
+    result = {"check": name, "ok": bool(ok), "note": note or "", "seconds": round(time.time() - t0, 1), "needed_for": need or "everything"}
+    if details is not None:
+        result["diagnostic"] = details
+    return result
+
+
+def noise_check(verbose=False, level_fn=None):
+    """Check that the fixed point yields a number, while exposing why a map value is missing."""
+    if level_fn is None:
+        import noise
+        level_fn = noise.level
+    r = level_fn(LAT, LNG, "road", "lden", verbose=verbose)
+    diagnostic = {"outcome": r.get("outcome") or "unknown", "http_status": r.get("http_status"),
+                  "from_cache": bool(r.get("from_cache")), "retrieved_at": r.get("retrieved_at"),
+                  "source_ok": bool(r.get("ok")), "source_note": r.get("note") or "",
+                  "drawn": r.get("drawn"), "db": r.get("db")}
+    # An undrawn zero pixel is a valid source answer, but not a numeric reading
+    # at this deliberately fixed test point. Do not report "None dB" as a pass.
+    numeric = (bool(r.get("ok")) and isinstance(r.get("db"), (int, float))
+               and not isinstance(r.get("db"), bool))
+    note = ["road Lden at the fixed point: %s" % ("%s dB" % r["db"] if numeric else "no numeric value"),
+            "outcome %s" % diagnostic["outcome"],
+            "HTTP %s" % (diagnostic["http_status"] if diagnostic["http_status"] is not None else "unknown"),
+            "%s response retrieved %s" % ("cached" if diagnostic["from_cache"] else "live", diagnostic["retrieved_at"] or "at an unknown time")]
+    if diagnostic["source_note"]:
+        note.append("source note: " + diagnostic["source_note"])
+    return numeric, "; ".join(note), diagnostic
 
 
 def offline_checks():
@@ -90,11 +120,7 @@ def network_checks(verbose=False):
         r = roads.near(LAT, LNG, 150, verbose=verbose)
         return (bool(r.get("ok")), "%s map elements within 150 m" % r.get("element_count"))
     out.append(check("OpenStreetMap via Overpass", roads_, "axes 04, 09, 12, the street scan"))
-    def noise_():
-        import noise
-        r = noise.level(LAT, LNG, "road", "lden", verbose=verbose)
-        return (bool(r.get("ok")), "road Lden at the point: %s dB" % r.get("db"))
-    out.append(check("Defra strategic noise map", noise_, "the street scan (noise)"))
+    out.append(check("Defra strategic noise map", lambda: noise_check(verbose), "the street scan (noise)"))
     def living_():
         import living_env
         r = living_env.lookup(postcode=POSTCODE, verbose=verbose)

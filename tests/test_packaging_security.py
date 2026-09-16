@@ -85,6 +85,34 @@ class PackageBoundary(unittest.TestCase):
             [sys.executable, str(skill / 'scripts/calc.py')], cwd=installed, text=True)
         self.assertEqual('1', output.strip())
 
+    def test_public_zip_is_identical_after_source_mtime_and_permission_changes(self):
+        script = self.write('skills/vet-flat/scripts/calc.py',
+                            '#!/usr/bin/env python3\nprint(1)\n')
+        self.public_build()
+        archive_path = self.root / 'dist/pea-princess-skill.zip'
+        first_zip = archive_path.read_bytes()
+        first_checksums = (self.root / 'dist/CHECKSUMS.txt').read_bytes()
+
+        for full, _ in DIST.public_members(str(self.root)):
+            os.chmod(full, 0o600)
+            os.utime(full, (946684800, 946684800))
+        self.public_build()
+        self.assertEqual(first_zip, archive_path.read_bytes())
+        self.assertEqual(first_checksums, (self.root / 'dist/CHECKSUMS.txt').read_bytes())
+
+        with zipfile.ZipFile(archive_path) as archive:
+            script_info = archive.getinfo('pea-princess/scripts/calc.py')
+            text_info = archive.getinfo('pea-princess/SKILL.md')
+            self.assertEqual(DIST.ZIP_TIMESTAMP, script_info.date_time)
+            self.assertEqual(DIST.ZIP_TIMESTAMP, text_info.date_time)
+            self.assertEqual(0o755, stat.S_IMODE(script_info.external_attr >> 16))
+            self.assertEqual(0o644, stat.S_IMODE(text_info.external_attr >> 16))
+            self.assertEqual(b'#!/usr/bin/env python3\nprint(1)\n', archive.read(script_info))
+
+        script.write_text('#!/usr/bin/env python3\nprint(2)\n', encoding='utf-8')
+        self.public_build()
+        self.assertNotEqual(first_zip, archive_path.read_bytes())
+
     def test_identity_mismatch_refused_without_replacing_release(self):
         self.public_build()
         output = self.root / 'dist/pea-princess-skill.zip'

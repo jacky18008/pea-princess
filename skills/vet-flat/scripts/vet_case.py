@@ -459,7 +459,7 @@ def vet(postcode, flat=None, building=None, street=None, rent_pcm=None, area_m2=
         main = quiet.get("main_road_nearest_m"); rail = [d for d in (quiet.get("railway_surface_nearest_m"), quiet.get("tube_surface_nearest_m")) if d is not None]
         near_main = main is not None and main <= MAIN_ROAD_M; near_rail = bool(rail) and min(rail) <= RAIL_M
         checks.append(check("C11", "main road and rail nearby", "street", "flag" if (near_main or near_rail) else "pass",
-                            value={"main_road_m": main, "main_road_names": (quiet.get("main_road_names") or [])[:2], "rail_or_tube_m": min(rail) if rail else None, "night_economy_count": quiet.get("night_economy_count")},
+                            value={"main_road_m": main, "main_road_names": (quiet.get("main_road_names") or [])[:2], "rail_or_tube_m": min(rail) if rail else None, "night_economy_count": quiet.get("night_economy_count"), "night_economy_radius_m": quiet.get("night_economy_radius_m"), "night_economy_note": "an OSM zero within the query radius does not prove no venues exist"},
                             source="OpenStreetMap", evidence_class="C", why=("main road at %d m" % main if main is not None else "no main road within the radius") + ("; rail or tube at %d m" % min(rail) if rail else ""),
                             next_step="Check which facade the bedroom is on relative to that road or line." if (near_main or near_rail) else None))
     else:

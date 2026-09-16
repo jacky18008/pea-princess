@@ -453,6 +453,7 @@ def compose(where, crime, planning, roads, living, notes, noise=None, street=Non
              "railway_surface_nearest_m": nearest_m(roads.get("railway_surface")),
              "tube_surface_nearest_m": nearest_m(roads.get("tube_surface")),
              "night_economy_count": (roads.get("night_economy") or {}).get("count"),
+             "night_economy_radius_m": (roads.get("night_economy") or {}).get("search_radius_m"),
              "night_economy_nearest_m": nearest_m(roads.get("night_economy")),
              "night_economy_names": names(roads.get("night_economy")),
              "park_nearest_m": nearest_m(roads.get("park_or_green")),
@@ -461,13 +462,20 @@ def compose(where, crime, planning, roads, living, notes, noise=None, street=Non
         out["sources"].append(roads.get("source_url"))
         main = q["main_road_nearest_m"]
         rail = [d for d in (q["railway_surface_nearest_m"], q["tube_surface_nearest_m"]) if d is not None]
-        reading.append("Roads: %s%s. Rail at surface: %s. Bars, pubs and clubs within %s m: %s%s." % (
+        def extent(radius):
+            return "%s m" % radius if radius is not None else "the queried area (radius not reported)"
+        road_radius = (roads.get("trunk_or_primary_road") or {}).get("search_radius_m") or q["radius_m"]
+        rail_radius = (roads.get("railway_surface") or {}).get("search_radius_m") or q["radius_m"]
+        night_radius = q["night_economy_radius_m"]
+        night_count = q["night_economy_count"]
+        reading.append("Roads (OSM query returned): %s%s. Rail at surface: %s. Bars, pubs and clubs in the OSM query within %s: %s mapped%s%s." % (
             ("nearest main road %s at %d m" % (q["main_road_names"][0], main)) if main is not None and q["main_road_names"] else
-            ("nearest main road at %d m" % main) if main is not None else "no main road within the search radius",
+            ("nearest main road at %d m" % main) if main is not None else "none listed in this map/query within %s" % extent(road_radius),
             ("; a secondary road at %d m" % q["secondary_road_nearest_m"]) if q["secondary_road_nearest_m"] is not None else "",
-            ("nearest at %d m" % min(rail)) if rail else "none within the radius",
-            q["radius_m"], q["night_economy_count"] if q["night_economy_count"] is not None else "unknown",
-            (" (nearest %s at %d m)" % (q["night_economy_names"][0], q["night_economy_nearest_m"])) if q["night_economy_names"] and q["night_economy_nearest_m"] is not None else ""))
+            ("nearest at %d m" % min(rail)) if rail else "none listed in this map/query within %s" % extent(rail_radius),
+            extent(night_radius), night_count if night_count is not None else "unknown",
+            (" (nearest %s at %d m)" % (q["night_economy_names"][0], q["night_economy_nearest_m"])) if q["night_economy_names"] and q["night_economy_nearest_m"] is not None else "",
+            " (zero mapped here does not prove no venues exist)" if night_count == 0 else ""))
         if q["facade_note"]:
             reading[-1] += (" Road proximity is a prompt to check window direction and sound insulation; "
                             "it does not establish the flat's facade orientation or a quiet side.")
@@ -545,10 +553,10 @@ def compose(where, crime, planning, roads, living, notes, noise=None, street=Non
         reading.append("Works: %s planning applications within %s m since %s%s, %s with a tall-building hint; the nearest: %s. Investigation leads (%s): %s. These application records do not establish current or imminent works." % (
             w["count"], w["applications_within_m"], w["since_year"],
             (" (the nearest %d read, out to %d m)" % (seen, far)) if w["seen_out_to_m"] is not None else "", w["tall_building_hints"],
-            ("%s, %s (%s)" % (label(top[0]), top[0].get("status") or "status unknown", distance(top[0]))) if top else "none",
+            ("%s, %s (%s)" % (label(top[0]), top[0].get("status") or "status unknown", distance(top[0]))) if top else "none returned by this query",
             "since %d, selected by application scale or subject" % NOTABLE_SINCE,
             "; ".join("%s at %s (%s, %s; %s%s)" % (label(n), distance(n), n.get("status") or "status unknown", n.get("decision_date") or "no decision date", n["why"],
-                                                     (", +%d related submissions for the same site" % n["related_submissions"]) if n["related_submissions"] else "") for n in notable[:3]) or "none found"))
+                                                     (", +%d related submissions for the same site" % n["related_submissions"]) if n["related_submissions"] else "") for n in notable[:3]) or "none selected from returned records"))
     elif planning is not None:
         out["not_found"].append("planning: " + str(planning.get("note") or "register unavailable"))
 

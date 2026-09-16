@@ -903,6 +903,16 @@ def _check(field, label, formula, recomputed, source, kind="equal", floor=TOL_FL
             "loc": source["loc"] if source else None}
 
 
+def _unknown_cost_check(field, label, source, missing=("council tax",)):
+    """A claimed full cost cannot be verified when a required component is unknown."""
+    missing_text = ", ".join(missing)
+    return {"field": field, "label": label, "label_id": None, "weeks": None,
+            "formula": missing_text + " is unknown; the full cost cannot be calculated",
+            "unit": "GBP per month", "kind": "equal", "model_value": source["value"],
+            "recomputed": None, "delta": None, "ok": False, "tolerance": None,
+            "where": source["where"], "loc": source["loc"]}
+
+
 def _epc_area(cand, numbers):
     """The indoor floor area, in square feet, and where it came from.
 
@@ -997,7 +1007,13 @@ def recompute_candidate(cand, profile):
             weekly, _pick(numbers, [["holding"], ["deposit", "fee"]], money=True), kind="cap", unit="GBP",
             label_id="ui.arith_holding_deposit_cap"))
 
-    council_tax = _num(costs.get("council_tax")) or 0.0
+    council_tax = _num(costs.get("council_tax"))
+    unpriced = costs.get("unknown_components") or []
+    if not isinstance(unpriced, list):
+        unpriced = []
+    unpriced = tuple({"heat_network_tariff": "heat-network tariff",
+                      "other_unpriced_bill": "another unpriced bill"}[name]
+                     for name in unpriced if name in ("heat_network_tariff", "other_unpriced_bill"))
     broadband_entry = _pick(numbers, [["broadband", "internet"]], money=True)
     broadband = broadband_entry["value"] if broadband_entry else 0.0
     all_in = {}
@@ -1007,10 +1023,6 @@ def recompute_candidate(cand, profile):
             ("planning", "bills_planning", None, ["stress", "worst", "low", "best", "mild"]),
             ("stress", "bills_stress", ["stress", "worst", "cold", "bad winter"], ["low", "best", "mild"])):
         bills = _num(costs.get(key))
-        if rent is None or bills is None:
-            continue
-        total = rent + bills + council_tax + broadband
-        all_in[name] = total
         want = [total_words] if extra is None else [total_words, extra]
         sources = []
         if name == "planning":
@@ -1028,6 +1040,15 @@ def recompute_candidate(cand, profile):
         sources = [s for s in sources if s] or [None]
         label = {"low": "All-in cost, mild month", "planning": "All-in cost, the planning number",
                  "stress": "All-in cost, cold month"}[name]
+        missing = tuple(name for name, amount in (("rent", rent), ("modelled bills", bills),
+                                                  ("council tax", council_tax)) if amount is None) + unpriced
+        if missing:
+            for source in sources:
+                if source:
+                    checks.append(_unknown_cost_check("all_in_" + name, label, source, missing))
+            continue
+        total = rent + bills + council_tax + broadband
+        all_in[name] = total
         for source in sources:
             checks.append(_check("all_in_" + name, label, FORMULAS["all_in"], total, source,
                                  label_id="ui.arith_all_in_" + name))
@@ -1051,13 +1072,20 @@ def recompute_candidate(cand, profile):
 
     ceiling = _ceiling(cand, profile)
     bills_planning = _num(costs.get("bills_planning"))
-    if ceiling is not None and bills_planning is not None:
+    if ceiling is not None and bills_planning is not None and council_tax is not None and not unpriced:
         break_even = ceiling - bills_planning - council_tax
         entry = _pick(numbers, [["break even", "breakeven"]], money=True)
         checks.append(_check("break_even_rent", "Break-even rent against your ceiling",
                              FORMULAS["break_even_rent"], break_even,
                              _source(entry["value"], entry["where"], entry["loc"]) if entry else None,
                              label_id="ui.arith_break_even"))
+    elif ceiling is not None:
+        entry = _pick(numbers, [["break even", "breakeven"]], money=True)
+        if entry:
+            missing = tuple(name for name, amount in (("modelled bills", bills_planning),
+                                                      ("council tax", council_tax)) if amount is None) + unpriced
+            checks.append(_unknown_cost_check("break_even_rent", "Break-even rent against your ceiling",
+                                              _source(entry["value"], entry["where"], entry["loc"]), missing))
 
     weeks = _pick(numbers, [BRIDGE_WORDS, ["week"]], avoid=["rate", "cost"], money=False)
     weekly_rate = _pick(numbers, [BRIDGE_WORDS, ["week"]], money=True)
@@ -1146,6 +1174,11 @@ def arithmetic_warnings(report):
         for check in entry["checks"]:
             if check["ok"]:
                 continue
+            if check["recomputed"] is None:
+                lines.append("candidates[%d] %s: %s: model said %s, but the full cost is unknown (%s)"
+                             % (i, entry["candidate_id"], check["where"] or check["field"],
+                                fmt_value(check["model_value"]), check["formula"]))
+                continue
             lines.append(
                 "candidates[%d] %s: %s %s: model said %s, formula gives %s (%s)"
                 % (i, entry["candidate_id"], check["where"] or check["field"],
@@ -1194,6 +1227,9 @@ def check_label(check, L):
 
 def check_status(check, L):
     """'matches', or 'does not match: model said X, formula gives Y', in the reader's language."""
+    if check["recomputed"] is None:
+        return "%s: %s %s; %s" % (L.label("ui.arith_mismatch"), L.label("ui.arith_model_said"),
+                                  money_exact(check["model_value"]), check["formula"])
     gives = "%s %s" % (L.label("ui.arith_formula_gives"), money_exact(check["recomputed"]))
     if check["model_value"] is None:
         return "%s; %s" % (L.label("ui.arith_not_stated"), gives)
@@ -2421,6 +2457,15 @@ def main(argv=None):
     sums = arithmetic_warnings(data)
     for line in sums:
         sys.stderr.write("WARNING  arithmetic: %s\n" % line)
+    # An asserted complete monthly cost with missing inputs (council tax, a heat tariff)
+    # is not an estimate but a claim nobody can check: an error even without --strict
+    # (2026-09-16; the schema now expects null there and known_subtotal_* beside it).
+    unknown_cost_claims = [check for entry in recompute(data) for check in entry["checks"]
+                           if not check["ok"] and check["recomputed"] is None]
+    if unknown_cost_claims:
+        errors.extend("%s: numeric full cost despite unknown required inputs (%s)" %
+                      (claim["where"] or claim["field"], claim["formula"])
+                      for claim in unknown_cost_claims)
     gaps = unsourced_numbers(data, schema)
     for gap in gaps:
         sys.stderr.write("WARNING  no source: %s\n" % gap["message"])

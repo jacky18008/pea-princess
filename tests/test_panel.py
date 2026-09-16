@@ -108,6 +108,9 @@ class TestPage(unittest.TestCase):
         self.assertIn("帳單還沒算進去", html)
         self.assertIn("通勤只能估", html)
 
+    def test_total_ceiling_explicitly_includes_council_tax(self):
+        self.assertIn("£2,200／月，房租＋帳單＋council tax · rent + bills + council tax", self.html)
+
 
 class TestCli(unittest.TestCase):
     def test_the_repository_template_profile_renders_to_a_file(self):

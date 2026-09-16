@@ -9,8 +9,10 @@ import copy
 import io
 import json
 import os
+import shutil
 import subprocess
 import sys
+import tempfile
 import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -521,6 +523,90 @@ class TestArithmeticCheck(unittest.TestCase):
         data = load_sample()
         data["candidates"][0]["costs"]["all_in_planning"] = 2528.4
         self.assertTrue(render.recompute(data)[0]["arithmetic_ok"])
+
+    def test_unknown_council_tax_cannot_be_recomputed_as_zero(self):
+        data = load_sample()
+        data["candidates"][0]["costs"]["council_tax"] = None
+        result = render.recompute(data)[0]
+        self.assertFalse(result["arithmetic_ok"])
+        total = next(c for c in result["checks"] if c["field"] == "all_in_planning" and
+                     c["where"] == "costs.all_in_planning")
+        self.assertIsNone(total["recomputed"])
+        self.assertFalse(total["ok"])
+        self.assertIn("council tax is unknown", "\n".join(render.arithmetic_warnings(data)))
+        self.assertIn(("costs", "all_in_planning"), render.bad_locations(data)[data["candidates"][0]["id"]])
+
+    def test_unknown_heat_tariff_rejects_numeric_total_and_break_even_with_zero_tax(self):
+        data = load_sample()
+        costs = data["candidates"][0]["costs"]
+        costs["council_tax"] = 0
+        costs["unknown_components"] = ["heat_network_tariff"]
+        errors, _ = render.validate(data, load_schema())
+        self.assertEqual([], errors)
+        result = render.recompute(data)[0]
+        full = next(c for c in result["checks"] if c["where"] == "costs.all_in_planning")
+        self.assertFalse(result["arithmetic_ok"])
+        self.assertIsNone(full["recomputed"])
+        self.assertIn("heat-network tariff", full["formula"])
+        self.assertIn(("costs", "all_in_planning"), render.bad_locations(data)[data["candidates"][0]["id"]])
+        with tempfile.TemporaryDirectory() as folder:
+            path = os.path.join(folder, "unpriced-heat.json")
+            with io.open(path, "w", encoding="utf-8") as fh:
+                json.dump(data, fh)
+            proc = subprocess.run([sys.executable, os.path.join(SCRIPTS, "render.py"), path,
+                                   "--validate-only"], capture_output=True, text=True)
+        self.assertEqual(1, proc.returncode, proc.stderr)
+        self.assertIn("numeric full cost despite unknown required inputs", proc.stderr)
+
+    def test_numeric_total_with_missing_bills_is_invalid_without_strict(self):
+        data = load_sample()
+        costs = data["candidates"][0]["costs"]
+        costs["council_tax"] = None
+        costs["bills_planning"] = None
+        costs["all_in_planning"] = 2275
+        entry = render.recompute(data)[0]
+        claim = next(c for c in entry["checks"] if c["where"] == "costs.all_in_planning")
+        self.assertFalse(entry["arithmetic_ok"])
+        self.assertIsNone(claim["recomputed"])
+        with tempfile.TemporaryDirectory() as folder:
+            path = os.path.join(folder, "bad-total.json")
+            with io.open(path, "w", encoding="utf-8") as fh:
+                json.dump(data, fh)
+            proc = subprocess.run([sys.executable, os.path.join(SCRIPTS, "render.py"), path,
+                                   "--validate-only"], capture_output=True, text=True)
+        self.assertEqual(1, proc.returncode, proc.stderr)
+        self.assertIn("numeric full cost despite unknown required inputs", proc.stderr)
+
+    def test_browser_and_python_reject_the_same_unknown_total(self):
+        node = shutil.which("node")
+        if node is None:
+            self.skipTest("node is needed to execute the browser's embedded arithmetic")
+        script = """
+const fs=require('fs'), vm=require('vm');
+const html=fs.readFileSync(process.argv[1],'utf8');
+const source=html.slice(html.indexOf('<script>')+8,html.indexOf('/* ---- page wiring'));
+const context={}; vm.createContext(context); vm.runInContext(source,context);
+const report=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
+const costs=report.candidates[0].costs;
+costs.council_tax=null;
+let result=context.recompute(report)[0];
+let claim=result.checks.find(x=>x.where==='costs.all_in_planning');
+if(result.arithmetic_ok || !claim || claim.recomputed!==null || claim.ok) process.exit(2);
+costs.bills_planning=null;
+result=context.recompute(report)[0];
+claim=result.checks.find(x=>x.where==='costs.all_in_planning');
+if(result.arithmetic_ok || !claim || claim.recomputed!==null || claim.ok) process.exit(3);
+costs.council_tax=0;
+costs.bills_planning=175;
+costs.unknown_components=['heat_network_tariff'];
+result=context.recompute(report)[0];
+claim=result.checks.find(x=>x.where==='costs.all_in_planning');
+if(result.arithmetic_ok || !claim || claim.recomputed!==null || claim.ok ||
+   !claim.formula.includes('heat-network tariff')) process.exit(4);
+"""
+        proc = subprocess.run([node, "-e", script, VIEWER, SAMPLE],
+                              capture_output=True, text=True)
+        self.assertEqual(0, proc.returncode, proc.stderr)
 
     def test_warnings_name_the_number_and_the_formula(self):
         lines = render.arithmetic_warnings(broken_sample())

@@ -16,7 +16,7 @@ The article argues that instructions accumulated to compensate for older models 
 
 OpenAI's [current model guidance](https://developers.openai.com/api/docs/guides/latest-model) independently describes sensitivity to conflicting skill instructions, unnecessary clarification stops, verbosity and excessive testing. Its recommendations support auditing instruction scope and making completion explicit; they do not establish a universally optimal prompt length.
 
-The locally installed [skill-creator](</Users/chenhsienhao/.codex/skills/.system/skill-creator/SKILL.md>) was also read as an upstream reference. It recommends precise discovery, progressive disclosure, retaining non-obvious operational invariants, and deterministic scripts when they improve reliability. This local path identifies the inspected copy, not a portable repository dependency. See also the [conversation-design source review](conversation-design-sources.md) for actual Codex/Claude clarification capabilities.
+The locally installed [skill-creator](<(private evidence folder)) was also read as an upstream reference. It recommends precise discovery, progressive disclosure, retaining non-obvious operational invariants, and deterministic scripts when they improve reliability. This local path identifies the inspected copy, not a portable repository dependency. See also the [conversation-design source review](conversation-design-sources.md) for actual Codex/Claude clarification capabilities.
 
 ## What is currently loaded
 
