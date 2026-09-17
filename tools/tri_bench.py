@@ -19,9 +19,14 @@ Each host keeps its own session - Claude and Grok carry the conversation in the 
 own session, Codex has no resume so its transcript is replayed each turn - and every
 turn is written to ``.pea-playground/tri/<session>/<host>/transcript.jsonl``.
 
-The commands, the prompts, the attachment handling and the grader all come from
+The commands, the prompts, the pasted-text attachments and the grader all come from
 ``bench/journeys.py`` and ``bench/launch.py``. Nothing about how a host is called lives
 here twice.
+
+A message can also carry files - the photo from the viewing, the agent's PDF, a page
+saved as text. They are kept once in the session folder and copied into every enabled
+host's working folder under ``attachments/<turn>/``, so each CLI opens them with its own
+Read tools. The bench reads none of them: no OCR, no conversion, no text extraction.
 
 WHAT IT DOES NOT DO
 ===================
@@ -69,6 +74,16 @@ GROK_SYNC_MARKER = ".tri-bench-synced"
 MAX_BODY = 400000          # one pasted page is large; a listing is not a megabyte
 MAX_MESSAGE = 40000
 
+# What the page may attach to a message. The list is short on purpose: the photo you took
+# on the viewing, the PDF the agent sent, a page saved as text. Anything else can be
+# pasted into the attachment box as words.
+MAX_UPLOAD = 20 * 1024 * 1024      # all the files of one message together
+MAX_FILES = 8
+UPLOAD_SLACK = 64 * 1024           # the boundaries and headers around those bytes
+MAX_PARTS = 40                     # a sanity bound on the parser, not the file limit
+TEXT_KINDS = ("txt", "md", "html", "json", "csv")
+ACCEPTED = ("pdf", "png", "jpg", "jpeg", "webp", "heic") + TEXT_KINDS
+
 # What a bench turn may do, per host: read the folder it was given, nothing else. Claude
 # gets Read, Codex a read-only sandbox, Grok its read-only three with web search off, so
 # a difference between the three columns is the host and not the permissions.
@@ -103,6 +118,105 @@ def safe_name(name, fallback="pasted.txt"):
     if not base or base in (".", "..") or len(base) > 80:
         return fallback
     return base
+
+
+def human_size(size):
+    """412 KB, 1.8 MB: what the page shows and what the hosts are told."""
+    if size < 1024:
+        return "%d B" % size
+    if size < 1024 * 1024:
+        return "%d KB" % int(round(size / 1024.0))
+    return "%.1f MB" % (size / 1048576.0)
+
+
+def upload_name(raw, taken=(), index=1):
+    """A chosen file's name as a plain file name, unique inside this turn.
+
+    Basename only, no separator, nothing but ASCII letters, digits, dot, dash and
+    underscore. A browser that sends ``C:\\Users\\me\\..\\photo (1).JPG`` lands as
+    ``photo-1.jpg`` inside the turn's own folder and nowhere else. Returns
+    ``(name, extension)``; the extension is what the type gate is decided on."""
+    base = os.path.basename((raw or "").replace("\\", "/").strip().rstrip("/"))
+    stem, dot, ext = base.rpartition(".")
+    if not dot:
+        stem, ext = base, ""
+    ext = re.sub(r"[^a-z0-9]+", "", ext.lower())[:8]
+    stem = re.sub(r"[^A-Za-z0-9._-]+", "-", stem).strip("-._")[:60] or "file-%d" % index
+    tail = "." + ext if ext else ""
+    name, count = stem + tail, 1
+    while name in taken:
+        count += 1
+        name = "%s-%d%s" % (stem, count, tail)
+    return name, ext
+
+
+def sniff(kind, raw):
+    """Do the first bytes agree with the name? The magic number, not the extension.
+
+    This is not a virus scan and not a decoder. It stops an archive renamed ``.pdf`` and
+    a name that promises a photo over something else; it says nothing about whether the
+    file is safe to open, which is why the hosts get a read-only copy and nothing more."""
+    if kind == "pdf":
+        return b"%PDF-" in raw[:1024]
+    if kind == "png":
+        return raw[:8] == b"\x89PNG\r\n\x1a\n"
+    if kind in ("jpg", "jpeg"):
+        return raw[:3] == b"\xff\xd8\xff"
+    if kind == "webp":
+        return raw[:4] == b"RIFF" and raw[8:12] == b"WEBP"
+    if kind == "heic":
+        brands = (b"heic", b"heix", b"hevc", b"hevx", b"heim", b"heis", b"mif1", b"msf1")
+        return raw[4:8] == b"ftyp" and raw[8:12] in brands
+    if kind in TEXT_KINDS:
+        if b"\x00" in raw:
+            return False
+        try:
+            raw.decode("utf-8")
+        except UnicodeDecodeError:
+            return False
+        return True
+    return False
+
+
+def accept_uploads(files):
+    """[(safe name, kind, bytes)] for what the page attached, or the sentence it failed on.
+
+    Everything is decided here: how many, how big together, the extension, and whether the
+    bytes agree with it. One bad file stops the whole message, because half a message
+    reaching three hosts is worse than none - and the page says which file and why."""
+    files = list(files or [])
+    if len(files) > MAX_FILES:
+        raise BenchError("that is %d files; the bench takes %d with one message."
+                         % (len(files), MAX_FILES))
+    total = sum(len(data) for _name, data in files)
+    if total > MAX_UPLOAD:
+        raise BenchError("those files come to %s together; the bench takes %s with one "
+                         "message." % (human_size(total), human_size(MAX_UPLOAD)))
+    out, taken = [], set()
+    for index, (raw, data) in enumerate(files, 1):
+        name, kind = upload_name(raw, taken, index)
+        if kind not in ACCEPTED:
+            raise BenchError("%s: the bench takes %s files only. Anything else you can paste "
+                             "into the attachment box as text." % (name, ", ".join(ACCEPTED)))
+        if not data:
+            raise BenchError("%s is empty, so nothing was sent." % name)
+        if not sniff(kind, data):
+            raise BenchError("%s is not a %s file inside, whatever its name says, so nothing "
+                             "was sent." % (name, kind))
+        taken.add(name)
+        out.append((name, kind, data))
+    return out
+
+
+def attachment_line(uploaded):
+    """The one line the hosts are told: what arrived, where it is, how big it is."""
+    if not uploaded:
+        return ""
+    line = "附件（在你的工作資料夾）：" + "、".join(
+        "%s (%s)" % (item["rel"], human_size(item["size"])) for item in uploaded)
+    if any(item["kind"] == "pdf" for item in uploaded):
+        line += "\n（PDF 可以用你自己的讀檔工具直接打開，不用先轉檔。）"
+    return "\n\n" + line
 
 
 def thousands(value):
@@ -344,6 +458,43 @@ class Bench(object):
             fh.write(json.dumps(entry, ensure_ascii=False) + "\n")
         return path
 
+    def keep_uploads(self, turn, turn_no):
+        """The turn's attached files into the session folder, once, before anyone runs.
+
+        This is the copy that stays. Each host then gets its own copy of these same bytes
+        at the same relative path, so the three columns are reading one file and not three
+        uploads that might differ."""
+        staged = turn.pop("uploads", None)
+        if not staged:
+            return []
+        folder = self.owned(os.path.join(self.dir, "attachments", str(turn_no)))
+        os.makedirs(folder, mode=0o700, exist_ok=True)
+        kept = []
+        for name, kind, data in staged:
+            with io.open(self.owned(os.path.join(folder, name)), "wb") as fh:
+                fh.write(data)
+            kept.append(collections.OrderedDict([
+                ("name", name), ("rel", "attachments/%d/%s" % (turn_no, name)),
+                ("size", len(data)), ("kind", kind)]))
+        turn["uploaded"] = kept
+        return kept
+
+    def copy_uploads(self, turn, work):
+        """One copy per host, in that host's own folder, at the same relative path.
+
+        The host opens it with its own Read tool: Claude Code shows a photo and a PDF,
+        Codex and Grok read the text kinds. Nothing here converts anything."""
+        written = []
+        for item in turn.get("uploaded") or []:
+            source = os.path.join(self.dir, *item["rel"].split("/"))
+            target = self.owned(os.path.join(work, *item["rel"].split("/")))
+            folder = os.path.dirname(target)
+            if not os.path.isdir(folder):
+                os.makedirs(folder, mode=0o700, exist_ok=True)
+            shutil.copyfile(source, target)
+            written.append(item["rel"])
+        return written
+
     # -- one turn --------------------------------------------------------------
     def command(self, host, turn_no, user, state, system):
         """The command for this host's next turn, straight out of bench/journeys.py."""
@@ -401,7 +552,9 @@ class Bench(object):
         started = time.time()
         try:
             card["files"] = journeys.materialise_attachments(turn, work, host)
-            user = journeys.user_message(turn, files=True)
+            card["files"] += self.copy_uploads(turn, work)
+            user = journeys.user_message(turn, files=True) + attachment_line(
+                turn.get("uploaded"))
             cmd = self.command(host, turn_no, user, state, system)
             result = self.runner(cmd, work, self.timeout, host, attempts=1,
                                  label="%s turn %d" % (host, turn_no))
@@ -449,6 +602,17 @@ class Bench(object):
             self.busy = len(targets)
             for host in targets:
                 self.hosts[host]["status"] = "running"
+        try:
+            self.keep_uploads(turn, turn_no)
+        except Exception:
+            # The files never reached disk, so this turn never happened: give the number
+            # back and let the page say what went wrong rather than sit on "running".
+            with self.lock:
+                self.turn = turn_no - 1
+                self.busy = 0
+                for host in targets:
+                    self.hosts[host]["status"] = "idle"
+            raise
         threads = []
         for host in targets:
             thread = threading.Thread(target=self.play_turn, name="tri-" + host,
@@ -459,8 +623,12 @@ class Bench(object):
         return threads
 
     # -- what the page asks for ------------------------------------------------
-    def send(self, text, attachment=None, hosts=None):
-        """One typed message to every enabled host, as the next turn of each session."""
+    def send(self, text, attachment=None, hosts=None, uploads=None):
+        """One typed message to every enabled host, as the next turn of each session.
+
+        ``uploads`` is what ``accept_uploads`` let through: the files go into the session
+        folder and into every enabled host's folder, and the message gains one line
+        saying what they are called and how big they are."""
         text = (text or "").strip()
         if not text:
             raise BenchError("type a message first")
@@ -470,10 +638,14 @@ class Bench(object):
             raise BenchError("a journey is playing; stop it first")
         turn = collections.OrderedDict([("user", text)])
         if attachment and (attachment.get("text") or "").strip():
+            if len(attachment["text"]) > MAX_BODY:
+                raise BenchError("that pasted page is longer than the bench accepts")
             name = (attachment.get("name") or "pasted.txt").strip()[:80] or "pasted.txt"
             turn["attachments"] = [collections.OrderedDict([
                 ("name", name), ("file", safe_name(name)),
                 ("text", attachment["text"])])]
+        if uploads:
+            turn["uploads"] = list(uploads)
         self.start_turn(turn, hosts)
         return self.turn
 
@@ -591,6 +763,8 @@ textarea, input[type=text] { width:100%; font:13px/1.5 ui-monospace,SFMono-Regul
   padding:8px; resize:vertical }
 .row { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:10px }
 .row label { font-size:13px; display:inline-flex; gap:5px; align-items:center }
+input[type=file] { font:12px/1.4 inherit; color:var(--dim); max-width:100% }
+#chosen { overflow-wrap:anywhere }
 .spacer { flex:1 1 auto }
 button, select { font:13px/1.4 inherit; color:var(--ink); background:var(--card);
   border:1px solid var(--line); border-radius:6px; padding:7px 12px; cursor:pointer }
@@ -611,6 +785,7 @@ p.err { color:var(--bad); font-size:13px; margin:10px 0 0; white-space:pre-wrap 
 .card .head { display:flex; flex-wrap:wrap; gap:8px; font-size:11px; color:var(--dim) }
 .card .you { font-size:12px; color:var(--dim); white-space:pre-wrap; margin:5px 0;
   padding-left:8px; border-left:2px solid var(--line) }
+.card .files { font-size:11px; color:var(--dim); overflow-wrap:anywhere; margin:5px 0 0 }
 .card .reply { white-space:pre-wrap; overflow-wrap:anywhere; font-size:13px; margin:6px 0 0 }
 .card .bad { color:var(--bad); white-space:pre-wrap; font-size:12px; margin-top:6px }
 .score { font-weight:600 } .score.low { color:var(--bad) } .score.high { color:var(--good) }
@@ -631,6 +806,14 @@ p.err { color:var(--bad); font-size:13px; margin:10px 0 0; white-space:pre-wrap 
       <div class="row"><input type="text" id="attname" placeholder="what it is, e.g. listing.txt"></div>
       <textarea id="atttext" rows="6" placeholder="Paste the page here. It is written into every host's folder under that name."></textarea>
     </details>
+    <div class="row">
+      <label for="files">Files</label>
+      <input type="file" id="files" multiple
+             accept=".pdf,.png,.jpg,.jpeg,.webp,.heic,.txt,.md,.html,.json,.csv">
+      <span class="hint" id="chosen"></span>
+      <span class="hint">up to 8 files, 20 MB a message; each host gets its own copy under
+        attachments/&lt;turn&gt;/ in its working folder</span>
+    </div>
     <div class="row" id="hostrow"></div>
     <div class="row">
       <button class="go" id="send">Send</button>
@@ -656,7 +839,8 @@ p.err { color:var(--bad); font-size:13px; margin:10px 0 0; white-space:pre-wrap 
   }
   function api(path, body) {
     var init = { method: body ? "POST" : "GET", headers: { "X-Pea-Client": "tri-bench" } };
-    if (body) { init.headers["Content-Type"] = "application/json"; init.body = JSON.stringify(body); }
+    if (body instanceof FormData) { init.body = body; }          // the browser sets the boundary
+    else if (body) { init.headers["Content-Type"] = "application/json"; init.body = JSON.stringify(body); }
     return fetch(path, init).then(function (r) {
       return r.json().then(function (data) {
         if (!r.ok) { throw new Error(data && data.message ? data.message : "HTTP " + r.status); }
@@ -725,6 +909,9 @@ p.err { color:var(--bad); font-size:13px; margin:10px 0 0; white-space:pre-wrap 
     }
     box.appendChild(head);
     box.appendChild(el("div", "you", entry.user));
+    if (entry.files && entry.files.length) {
+      box.appendChild(el("div", "files", "files: " + entry.files.join(" · ")));
+    }
     if (entry.error) { box.appendChild(el("div", "bad", entry.error)); }
     if (entry.reply) { box.appendChild(el("div", "reply", entry.reply)); }
     if (entry.failed && entry.failed.length) {
@@ -778,12 +965,35 @@ p.err { color:var(--bad); font-size:13px; margin:10px 0 0; white-space:pre-wrap 
     }, function () { /* the server is restarting; the next tick tries again */ });
   }
 
+  function chosen() {
+    var picker = document.getElementById("files"), names = [], i;
+    for (i = 0; i < (picker.files ? picker.files.length : 0); i++) { names.push(picker.files[i].name); }
+    document.getElementById("chosen").textContent = names.length ? names.join(" · ") : "";
+  }
+  document.getElementById("files").addEventListener("change", chosen);
   document.getElementById("send").addEventListener("click", function () {
-    var text = document.getElementById("msg").value;
-    var body = { text: text, attachment: { name: document.getElementById("attname").value,
-                                           text: document.getElementById("atttext").value } };
+    var picker = document.getElementById("files");
+    var name = document.getElementById("attname").value;
+    var pasted = document.getElementById("atttext").value;
+    var text = document.getElementById("msg").value, call, i;
     fail(null);
-    api("/api/send", body).then(function () { document.getElementById("msg").value = ""; poll(); }, fail);
+    if (picker.files && picker.files.length) {
+      // With files the message goes as a form, so the bytes travel as bytes.
+      var form = new FormData();
+      form.append("text", text);
+      form.append("attname", name);
+      form.append("atttext", pasted);
+      for (i = 0; i < picker.files.length; i++) { form.append("files", picker.files[i]); }
+      call = api("/api/upload", form);
+    } else {
+      call = api("/api/send", { text: text, attachment: { name: name, text: pasted } });
+    }
+    call.then(function () {
+      document.getElementById("msg").value = "";
+      picker.value = "";
+      chosen();
+      poll();
+    }, fail);
   });
   document.getElementById("runj").addEventListener("click", function () {
     var label = document.getElementById("journey").value;
@@ -809,6 +1019,80 @@ p.err { color:var(--bad); font-size:13px; margin:10px 0 0; white-space:pre-wrap 
 
 def page(nonce):
     return PAGE.replace("__NONCE__", nonce)
+
+
+# ------------------------------------------------- one upload off the wire --
+# A hand parser and not ``cgi.FieldStorage``: cgi is deprecated since 3.11 and gone in
+# 3.13, and a photo has to come back out of here byte for byte. Only the shape a browser
+# sends for a form is understood - a boundary, a Content-Disposition per part, the bytes
+# between - and a body that is not that shape is refused rather than guessed at.
+def form_boundary(content_type):
+    """The boundary string out of ``multipart/form-data; boundary=...``, or a refusal."""
+    kind, _sep, rest = (content_type or "").partition(";")
+    if kind.strip().lower() != "multipart/form-data":
+        raise BenchError("that upload did not arrive as a form")
+    for param in rest.split(";"):
+        key, _eq, value = param.partition("=")
+        if key.strip().lower() == "boundary":
+            value = value.strip().strip('"')
+            if value and len(value) <= 200:
+                return value.encode("ascii", "ignore")
+    raise BenchError("that upload has no boundary, so the bench cannot read it")
+
+
+def part_disposition(head):
+    """(field name, file name) out of one part's headers; the file name is None for a field."""
+    name = filename = None
+    for line in head.decode("utf-8", "replace").split("\r\n"):
+        key, _sep, value = line.partition(":")
+        if key.strip().lower() != "content-disposition":
+            continue
+        for param in value.split(";")[1:]:
+            k, _eq, v = param.partition("=")
+            k, v = k.strip().lower(), v.strip().strip('"')
+            if k == "name":
+                name = v
+            elif k == "filename":
+                filename = v
+    return name, filename
+
+
+def parse_multipart(body, content_type):
+    """[(field name, file name or None, bytes)] for one multipart/form-data body."""
+    marker = b"--" + form_boundary(content_type)
+    chunks = (b"\r\n" + body).split(b"\r\n" + marker)
+    if len(chunks) < 2:
+        raise BenchError("that upload is not shaped like a form the bench can read")
+    parts = []
+    for chunk in chunks[1:]:
+        if chunk[:2] == b"--":                 # the closing boundary; the rest is epilogue
+            break
+        if not chunk.startswith(b"\r\n"):
+            raise BenchError("that upload is not shaped like a form the bench can read")
+        head, sep, data = chunk[2:].partition(b"\r\n\r\n")
+        if not sep or len(head) > 4096:
+            raise BenchError("that upload is not shaped like a form the bench can read")
+        name, filename = part_disposition(head)
+        if not name:
+            raise BenchError("that upload has a part with no name")
+        parts.append((name, filename, data))
+        if len(parts) > MAX_PARTS:
+            raise BenchError("that upload has more pieces than the bench reads")
+    return parts
+
+
+def read_form(body, content_type):
+    """(fields, files) from one upload: the typed message, and what was attached to it.
+
+    Fields come back as text, files as ``(name the browser gave, bytes)`` in the order the
+    page added them. A file part with an empty name is an empty picker and is dropped."""
+    fields, files = {}, []
+    for name, filename, data in parse_multipart(body, content_type):
+        if filename is None:
+            fields[name] = data.decode("utf-8", "replace")
+        elif filename.strip():
+            files.append((filename, data))
+    return fields, files
 
 
 # ------------------------------------------------------------------ the server --
@@ -849,6 +1133,19 @@ class Handler(BaseHTTPRequestHandler):
             if self.headers.get("X-Pea-Client") != "tri-bench":
                 raise BenchError("this is the bench API, not a link to follow")
 
+    def _body(self, cap):
+        """The request body, whole, or a refusal - never a partial read taken as one."""
+        if self.headers.get("Transfer-Encoding"):
+            raise BenchError("chunked requests are not accepted")
+        length = int(self.headers.get("Content-Length") or 0)
+        if not 0 < length <= cap:
+            self.close_connection = True      # nothing drains a body this size
+            raise BenchError("that request is the wrong size")
+        body = self.rfile.read(length)
+        if len(body) != length:
+            raise BenchError("that request arrived incomplete")
+        return body
+
     def do_GET(self):
         try:
             self._guard(self.path.startswith("/api/"))
@@ -867,15 +1164,24 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         try:
             self._guard(True)
-            if self.headers.get("Transfer-Encoding"):
-                raise BenchError("chunked requests are not accepted")
-            length = int(self.headers.get("Content-Length") or 0)
-            if not 0 < length <= MAX_BODY:
-                raise BenchError("that request is the wrong size")
-            body = json.loads(self.rfile.read(length).decode("utf-8"))
+            bench = self.server.bench
+            kind = (self.headers.get("Content-Type") or "").partition(";")[0].strip().lower()
+            if kind == "multipart/form-data":
+                if self.path != "/api/upload":
+                    raise BenchError("files go to /api/upload")
+                if int(self.headers.get("Content-Length") or 0) > MAX_UPLOAD + UPLOAD_SLACK:
+                    self.close_connection = True      # nothing drains a body this size
+                    raise BenchError("that message carries more than the %s of files the "
+                                     "bench takes at once." % human_size(MAX_UPLOAD))
+                fields, files = read_form(self._body(MAX_UPLOAD + UPLOAD_SLACK),
+                                          self.headers.get("Content-Type"))
+                return self._send(200, {"turn": bench.send(
+                    fields.get("text"),
+                    {"name": fields.get("attname"), "text": fields.get("atttext")},
+                    None, accept_uploads(files))})
+            body = json.loads(self._body(MAX_BODY).decode("utf-8"))
             if not isinstance(body, dict):
                 raise BenchError("the request must be a JSON object")
-            bench = self.server.bench
             if self.path == "/api/send":
                 return self._send(200, {"turn": bench.send(body.get("text"),
                                                            body.get("attachment"),
@@ -892,12 +1198,18 @@ class Handler(BaseHTTPRequestHandler):
                                                                 body.get("enabled"))})
             self._send(404, {"message": "no such action"})
         except BenchError as exc:
-            self._send(400, {"message": str(exc)})
+            self.refuse(400, str(exc))
         except (ValueError, TypeError, KeyError) as exc:
-            self._send(400, {"message": "the bench refused that request: %s" % exc})
+            self.refuse(400, "the bench refused that request: %s" % exc)
         except Exception:
-            self._send(500, {"message": "the bench could not run that; the transcript is "
-                                        "on disk and nothing is retried automatically"})
+            self.refuse(500, "the bench could not run that; the transcript is on disk and "
+                             "nothing is retried automatically")
+
+    def refuse(self, code, message):
+        """Say no and hang up: a refused POST may have a body nobody read, and a line with
+        an unread upload still on it cannot be used for the next request."""
+        self.close_connection = True
+        self._send(code, {"message": message})
 
 
 def serve(bench, port=DEFAULT_PORT):

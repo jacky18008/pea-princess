@@ -40,6 +40,41 @@ one JSON object per line: the session line first, then one card per turn with th
 prompt, the reply, the wall time, the usage and the error if there was one. The folder
 link at the top of the page opens that directory.
 
+## Attaching files
+
+Beside the message box there is a file picker. Pick one file or several, type the
+question, press Send: the files go with that message to every host that is switched on.
+
+**What it takes.** `pdf`, `png`, `jpg`/`jpeg`, `webp`, `heic`, `txt`, `md`, `html`,
+`json`, `csv` — up to **8 files and 20 MB** in one message. The name is checked and so
+are the first bytes: a `.zip` renamed `listing.pdf` is refused, and so is a `photo.png`
+that is not a PNG inside. A refused file stops the whole message and the page says which
+file and why, because half a message reaching three hosts is worse than none. Anything
+else you want the hosts to see can still be pasted as text in the attachment box, which
+works as it always did.
+
+**Where they land.** The copy that stays is
+`.pea-playground/tri/<session>/attachments/<turn>/<name>`, and each enabled host gets its
+own copy at the same relative path inside its working folder. The name is reduced to a
+plain file name first — basename only, no separators, ASCII, unique within the turn — so
+`../photo (1).JPG` is written as `photo-1.jpg` and nowhere else. The turn card in each
+column lists the files that host received.
+
+**What the hosts do with them.** Each one opens its own copy with its own Read tool;
+the bench reads nothing. The message gains one trailing line naming the files with their
+relative paths and sizes, plus a note that a PDF can be opened directly:
+
+```
+附件（在你的工作資料夾）：attachments/1/listing.pdf (412 KB)、attachments/1/photo-1.jpg (1.8 MB)
+```
+
+Claude Code shows PNG, JPG and WEBP images and reads a PDF page by page. **Codex and
+Grok read text**: `txt`, `md`, `html`, `json`, `csv` arrive as readable files, while a
+photo or a PDF is bytes they cannot render, and they will say so. **HEIC is accepted and
+no host renders it** — not Codex, not Grok, and not Claude Code, whose Read tool does not
+list it — so an iPhone photo is worth converting to JPG before you attach it. Nothing
+here does OCR or converts anything, and attached files count towards no score.
+
 ## Pinning a skill
 
 By default the bench stages the working tree's `skills/vet-flat` into each host's own
@@ -109,9 +144,12 @@ would not paste into all three.
 Writes stay inside `.pea-playground/tri/<session>/` (gitignored), with the one named
 exception above, and every write goes through a check that refuses a path outside it.
 An attachment name is reduced to a plain file name, so a pasted "`../../etc/passwd`" is
-written as `passwd` inside the host's own folder and nowhere else. Attachment text is
-written with `materialise_attachments` from the runner, which drops a leading title line
-that is not part of the file.
+written as `passwd` inside the host's own folder and nowhere else; the same is true of
+the name a browser gives an uploaded file. Attachment text is written with
+`materialise_attachments` from the runner, which drops a leading title line that is not
+part of the file. An uploaded file is written byte for byte, unread, into the session
+folder and the host folders — a photo of a room or a tenancy PDF is exactly the kind of
+private thing this page then sends to three providers.
 
 The bench opens no network connection of its own: it binds 127.0.0.1, checks the `Host`
 and `Origin` headers and a client header on every API call, serves one page held inline
@@ -127,3 +165,4 @@ metadata — treat them the way `SECURITY.md` treats raw experiment logs.
   every turn. That is visible in its token count and is not a bug in the bench.
 * One turn at a time: while three hosts are running, Send and Play are disabled.
 * `Stop` ends a journey after the turn that is already running; it does not kill a CLI.
+* It does not read, convert or OCR an attached file. It copies it and says it is there.

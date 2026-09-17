@@ -13,7 +13,10 @@ prints, so what is checked is exactly the part this tool owns:
    one the CLI said it used, not the one the bench guessed.
 3. **A pasted attachment lands in every host's folder** under a safe name, and the
    prompt says where it is.
-4. **The server binds loopback and nothing else**, serves the page, and refuses a
+4. **An attached file** is read out of the multipart body byte for byte, passes a type
+   and size gate or is refused in a sentence, lands under a sanitised name in the
+   session folder and in each host's own folder, and is named in the message.
+5. **The server binds loopback and nothing else**, serves the page, and refuses a
    request that did not come from that page.
 """
 import io
@@ -46,6 +49,35 @@ CODEX_STDOUT = "\n".join([
     json.dumps({"type": "turn.completed",
                 "usage": {"input_tokens": 200, "output_tokens": 60}}),
 ])
+# Enough of each file for the sniffer: the signature, then bytes that include a CRLF, so
+# a parser that treats the payload as text instead of bytes fails these tests.
+PNG = b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR" + b"\r\n\x00\xff" * 64
+JPG = b"\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01" + b"\r\n\x00\xfe" * 64
+PDF = b"%PDF-1.7\n1 0 obj\r\n" + b"\x00\r\n" * 1000 + b"\n%%EOF\n"
+ZIP = b"PK\x03\x04\x14\x00\x00\x00" + b"\x00" * 64
+BOUNDARY = "----peaBench7MA4YWxkTrZu0gW"
+
+
+def multipart(fields=(), files=(), boundary=BOUNDARY):
+    """A browser-shaped multipart/form-data body, built by hand out of bytes.
+
+    Nothing here goes through the parser under test, so what the parser reads is a body
+    and not another parser's idea of one."""
+    line = ("--" + boundary).encode("ascii")
+    out = []
+    for name, value in fields:
+        out.append(line + b"\r\n" +
+                   ('Content-Disposition: form-data; name="%s"\r\n\r\n' % name).encode("utf-8") +
+                   value.encode("utf-8") + b"\r\n")
+    for name, data in files:
+        out.append(line + b"\r\n" +
+                   ('Content-Disposition: form-data; name="files"; filename="%s"\r\n'
+                    % name).encode("utf-8") +
+                   b"Content-Type: application/octet-stream\r\n\r\n" + data + b"\r\n")
+    out.append(line + b"--\r\n")
+    return b"".join(out), "multipart/form-data; boundary=" + boundary
+
+
 GROK_SESSION = "11111111-2222-3333-4444-555555555555"
 GROK_STDOUT = json.dumps({"text": "grok says hello", "stopReason": "EndTurn",
                           "sessionId": GROK_SESSION, "requestId": "req-1"})
@@ -111,8 +143,8 @@ class BenchCase(unittest.TestCase):
         kwargs.setdefault("runner", self.runner)
         return tri_bench.Bench(**kwargs).start()
 
-    def send(self, bench, text, attachment=None):
-        bench.send(text, attachment)
+    def send(self, bench, text, attachment=None, uploads=None):
+        bench.send(text, attachment, None, uploads)
         wait_idle(bench)
 
 
@@ -290,6 +322,105 @@ class Attachments(BenchCase):
         self.assertFalse(os.path.exists(os.path.join(os.path.dirname(bench.dir), "escaped.txt")))
 
 
+class Uploads(BenchCase):
+    """Photos, PDFs and pages that arrive as files rather than as pasted text."""
+
+    def test_two_files_come_back_out_of_the_body_byte_for_byte(self):
+        body, ctype = multipart([("text", "幫我看這兩個"), ("attname", "")],
+                                [("listing.pdf", PDF), ("photo (1).JPG", JPG)])
+        fields, files = tri_bench.read_form(body, ctype)
+        self.assertEqual(fields["text"], "幫我看這兩個")
+        self.assertEqual(fields["attname"], "")
+        self.assertEqual([name for name, _data in files], ["listing.pdf", "photo (1).JPG"])
+        self.assertEqual(files[0][1], PDF)      # the CRLFs inside a binary file survive
+        self.assertEqual(files[1][1], JPG)
+        self.assertEqual(len(files[0][1]), len(PDF))
+
+    def test_a_body_that_is_not_a_form_is_refused_rather_than_guessed_at(self):
+        body, ctype = multipart([("text", "hi")], [("a.png", PNG)])
+        self.assertRaises(tri_bench.BenchError, tri_bench.read_form, body,
+                          "application/json")
+        self.assertRaises(tri_bench.BenchError, tri_bench.read_form, body,
+                          "multipart/form-data")            # no boundary
+        self.assertRaises(tri_bench.BenchError, tri_bench.read_form, b"nothing like it", ctype)
+
+    def test_the_gate_takes_a_photo_and_says_why_it_refuses_the_rest(self):
+        taken = tri_bench.accept_uploads([("photo.png", PNG), ("notes.md", b"# hello\n")])
+        self.assertEqual([(name, kind) for name, kind, _d in taken],
+                         [("photo.png", "png"), ("notes.md", "md")])
+        self.assertEqual(taken[0][2], PNG)
+
+        def why(files):
+            with self.assertRaises(tri_bench.BenchError) as caught:
+                tri_bench.accept_uploads(files)
+            return str(caught.exception)
+
+        self.assertIn("pdf, png", why([("photo.png", PNG), ("holiday.zip", ZIP)]))
+        self.assertIn("is not a png file inside", why([("photo.png", ZIP)]))
+        self.assertIn("is empty", why([("photo.png", b"")]))
+        self.assertIn("takes 8", why([("photo.png", PNG)] * 9))
+        with mock.patch.object(tri_bench, "MAX_UPLOAD", 2048):
+            self.assertIn("together", why([("a.pdf", PDF), ("b.png", PNG)]))
+
+    def test_an_upload_name_becomes_a_plain_file_name_and_stays_unique(self):
+        self.assertEqual(tri_bench.upload_name("photo (1).JPG"), ("photo-1.jpg", "jpg"))
+        self.assertEqual(tri_bench.upload_name("../../etc/passwd.txt"), ("passwd.txt", "txt"))
+        self.assertEqual(tri_bench.upload_name("C:\\Users\\me\\..\\x.PNG"), ("x.png", "png"))
+        self.assertEqual(tri_bench.upload_name("房子.pdf"), ("file-1.pdf", "pdf"))
+        self.assertEqual(tri_bench.upload_name("a.png", taken={"a.png", "a-2.png"}),
+                         ("a-3.png", "png"))
+        self.assertEqual(tri_bench.upload_name("..")[1], "")          # no kind, so no pass
+        taken = tri_bench.accept_uploads([("a.png", PNG), ("a.png", PNG)])
+        self.assertEqual([name for name, _k, _d in taken], ["a.png", "a-2.png"])
+
+    def test_a_file_lands_in_the_session_folder_and_in_every_host_s_own_folder(self):
+        bench = self.bench()
+        self.send(bench, "看一下這兩份", uploads=tri_bench.accept_uploads(
+            [("listing.pdf", PDF), ("../photo (1).JPG", JPG)]))
+        kept = os.path.join(bench.dir, "attachments", "1", "listing.pdf")
+        self.assertTrue(os.path.isfile(kept), kept)
+        with io.open(kept, "rb") as handle:
+            self.assertEqual(handle.read(), PDF)
+        for host in tri_bench.HOSTS:
+            for name, blob in (("listing.pdf", PDF), ("photo-1.jpg", JPG)):
+                path = os.path.join(bench.work(host), "attachments", "1", name)
+                self.assertTrue(os.path.isfile(path), path)
+                with io.open(path, "rb") as handle:
+                    self.assertEqual(handle.read(), blob)
+            self.assertEqual(bench.hosts[host]["cards"][0]["files"],
+                             ["attachments/1/listing.pdf", "attachments/1/photo-1.jpg"])
+        self.send(bench, "還有這張", uploads=tri_bench.accept_uploads(
+            [("photo (1).JPG", JPG)]))                       # turn 2 has its own folder
+        self.assertTrue(os.path.isfile(os.path.join(bench.work("codex"), "attachments",
+                                                    "2", "photo-1.jpg")))
+
+    def test_the_message_says_what_arrived_where_it_is_and_how_big(self):
+        bench = self.bench()
+        self.send(bench, "看一下", uploads=tri_bench.accept_uploads(
+            [("listing.pdf", PDF), ("photo (1).JPG", JPG)]))
+        body = self.runner.cmd("claude")[-1]
+        self.assertIn("附件（在你的工作資料夾）：", body)
+        self.assertIn("attachments/1/listing.pdf (%s)" % tri_bench.human_size(len(PDF)), body)
+        self.assertIn("、attachments/1/photo-1.jpg (%s)" % tri_bench.human_size(len(JPG)), body)
+        self.assertIn("PDF", body.rsplit("\n", 1)[-1])      # and that it can just be opened
+        self.assertEqual(tri_bench.human_size(412 * 1024), "412 KB")
+        self.assertEqual(tri_bench.human_size(1887437), "1.8 MB")
+        # No files, no line: an ordinary message is exactly what it was before.
+        self.send(bench, "那下一個呢")
+        self.assertNotIn("附件（", self.runner.cmd("claude", 1)[-1])
+
+    def test_nothing_is_written_when_the_files_cannot_be_written(self):
+        bench = self.bench()
+        with mock.patch.object(tri_bench.Bench, "keep_uploads",
+                               side_effect=OSError("the disk said no")):
+            self.assertRaises(OSError, bench.send, "看一下", None, None,
+                              tri_bench.accept_uploads([("a.png", PNG)]))
+        self.assertEqual(bench.turn, 0)                      # the turn number came back
+        self.assertFalse(bench.busy)
+        self.send(bench, "那直接問")          # and the bench still answers
+        self.assertEqual(bench.hosts["claude"]["cards"][0]["reply"], "claude says hello")
+
+
 class GrokSkillHome(BenchCase):
     def test_the_pinned_skill_is_synced_into_the_only_place_grok_reads(self):
         bench = self.bench(sync_grok_home=True)
@@ -415,6 +546,18 @@ class Server(unittest.TestCase):
         conn.close()
         return response.status, body
 
+    def post(self, path, body, ctype, headers=None):
+        import http.client
+        conn = http.client.HTTPConnection("127.0.0.1", self.port, timeout=10)
+        head = {"Host": "127.0.0.1:%d" % self.port, "Content-Type": ctype,
+                "Content-Length": str(len(body))}
+        head.update(headers or {})
+        conn.request("POST", path, body=body, headers=head)
+        response = conn.getresponse()
+        text = response.read().decode("utf-8")
+        conn.close()
+        return response.status, text
+
     def test_it_binds_loopback_and_nothing_else(self):
         self.assertEqual(self.server.server_address[0], "127.0.0.1")
         with mock.patch.object(tri_bench, "ThreadingHTTPServer") as made:
@@ -426,7 +569,7 @@ class Server(unittest.TestCase):
         self.assertEqual(status, 200)
         self.assertIn("Three-host test bench", body)
         for control in ('id="msg"', 'id="cols"', 'id="journey"', 'id="hostrow"',
-                        "run journey"):
+                        'id="files"', "multiple", "run journey"):
             self.assertIn(control, body)
         # The three columns are built from /api/state, so the host names are there.
         state = json.loads(self.get("/api/state", {"X-Pea-Client": "tri-bench"})[1])
@@ -447,6 +590,26 @@ class Server(unittest.TestCase):
         self.assertEqual(self.get("/api/state", {"X-Pea-Client": "tri-bench",
                                                  "Origin": "http://evil.example"})[0], 403)
         self.assertEqual(self.get("/nope", {"X-Pea-Client": "tri-bench"})[0], 404)
+
+    def test_the_upload_endpoint_answers_the_page_and_nobody_else(self):
+        page = {"X-Pea-Client": "tri-bench"}
+        body, ctype = multipart([("text", "看一下這份")],
+                                [("listing.pdf", PDF)])
+        status, text = self.post("/api/upload", body, ctype)              # not from the page
+        self.assertEqual(status, 400)
+        self.assertIn("not a link to follow", json.loads(text)["message"])
+        refused, refused_type = multipart([("text", "看一下")],
+                                          [("holiday.zip", ZIP)])
+        status, text = self.post("/api/upload", refused, refused_type, page)
+        self.assertEqual(status, 400)
+        self.assertIn("pdf, png", json.loads(text)["message"])
+        status, text = self.post("/api/upload", body, ctype, page)
+        self.assertEqual(status, 200)
+        turn = json.loads(text)["turn"]
+        wait_idle(self.bench)
+        kept = os.path.join(self.bench.dir, "attachments", str(turn), "listing.pdf")
+        self.assertTrue(os.path.isfile(kept), kept)
+        self.assertEqual(self.post("/api/send", body, ctype, page)[0], 400)  # files go to /upload
 
 
 if __name__ == "__main__":
