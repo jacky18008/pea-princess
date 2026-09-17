@@ -15,7 +15,7 @@
   <img alt="格式：Agent Skills" src="https://img.shields.io/badge/format-Agent%20Skills-1F1D26">
   <img alt="房源網站：從不抓取" src="https://img.shields.io/badge/listing%20sites-never%20fetched-6B6679">
 </p>
-<p align="center"><sub>作者：Hsien Hao (Jacky) Chen · <a href="https://www.linkedin.com/in/jacky-chen-a49177137/">LinkedIn</a></sub></p>
+<p align="center"><sub>作者：陳先灝 Hsien Hao (Jacky) Chen · <a href="https://www.linkedin.com/in/jacky-chen-a49177137/">LinkedIn</a></sub></p>
 
 這是一個在倫敦檢視跟搜尋房源用的 agent skill，用官方與公開的英國資料，像謹慎的驗屋師一樣尻洗一間倫敦出租公寓：身份、面積、屋齡、供暖、周邊工地、治安、管理評價、仲介合規、價格、採光、全部月成本、通勤，最後給出判決。任何支援 [Agent Skills](https://agentskills.io) 格式的 agent 都能用（Ex: GPT, Claude, Grok, Gemini, pi-agent, DeepSeek, etc）；一般的 chat mode, 也可以，只是建議使用 agent mode, 複雜的任務會比較穩定。跟 AI 講白話文就好。
 
@@ -149,4 +149,4 @@ Rightmove、Zoopla、OnTheMarket、OpenRent、HomeViews、Trustpilot、Airbnb、
 
 ## 作者的聯絡方式
 
-Hsien Hao (Jacky) Chen — [LinkedIn](https://www.linkedin.com/in/jacky-chen-a49177137/)。有問題、想法，或你自己找房的故事，歡迎在這裡開 issue 或到 LinkedIn 私訊。
+陳先灝 Hsien Hao (Jacky) Chen — [LinkedIn](https://www.linkedin.com/in/jacky-chen-a49177137/)。有問題、想法，或你自己找房的故事，歡迎在這裡開 issue 或到 LinkedIn 私訊。
