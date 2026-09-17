@@ -5,7 +5,7 @@
 
 <h1 align="center">Pea Princess · 豌豆公主</h1>
 
-<p align="center"><b>English</b> · <a href="README.zh-TW.md">繁體中文</a> · <a href="README.zh-CN.md">简体中文</a></p>
+<p align="center"><b>English</b> · <a href="README.zh-TW.md">繁體中文</a></p>
 
 <p align="center">An agent skill that vets a London rental flat from official and open UK data —<br>and says plainly what it does not know.</p>
 

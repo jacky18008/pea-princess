@@ -5,7 +5,7 @@
 
 <h1 align="center">Pea Princess · 豌豆公主</h1>
 
-<p align="center"><a href="README.md">English</a> · <b>繁體中文</b> · <a href="README.zh-CN.md">简体中文</a></p>
+<p align="center"><a href="README.md">English</a> · <b>繁體中文</b></p>
 
 <p align="center">用英國官方與公開資料，替你尻洗一間倫敦出租公寓，<br>並老實說出它不知道的事。</p>
 
