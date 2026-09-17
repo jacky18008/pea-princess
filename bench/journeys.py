@@ -77,6 +77,15 @@ codex   ``codex exec`` per turn with the transcript replayed, in a read-only
         sandbox (journeys are pasted material; nothing needs the network). The
         system prompt is delivered as ``AGENTS.md`` in the working directory,
         because ``codex exec`` has no append-system-prompt flag.
+grok    ``grok --prompt-file`` per turn. Grok Build carries the session itself:
+        turn 1 names a ``--session-id`` and every later turn passes ``--resume``,
+        so nothing is replayed. The system prompt is delivered as ``--rules``
+        (Grok has no append-system-prompt flag either), the toolset is the
+        read-only three and web search is off, which is what the other two hosts
+        get. Its calls go straight through ``bench/launch.py``: the durable call
+        boundary in ``bench/legacy_control.py`` reads telemetry for the two CLIs
+        it was written for and refuses any other family, so a Grok journey run
+        has no durable call accounting.
 
 Every launch goes through ``bench/launch.py``, the one launcher this directory
 shares: stdin closed, both streams captured, and a busy provider retried with a
@@ -135,9 +144,16 @@ PROMPT_PACK = os.path.join(ROOT, "dist", "prompt-pack", "INSTRUCTIONS.md")
 INPUTS_MD = os.path.join(SKILL_DIR, "references", "inputs.md")
 ONBOARDING_MD = os.path.join(SKILL_DIR, "references", "onboarding.md")
 
-AGENTS = ("api", "claude", "codex")
+AGENTS = ("api", "claude", "codex", "grok")
 SKILL_HOME = {"claude": os.path.join(".claude", "skills"),
-              "codex": os.path.join(".agents", "skills")}
+              "codex": os.path.join(".agents", "skills"),
+              # Grok Build 1.0.30 does not read a project-level skill folder at all
+              # (probed 2026-09-17: .grok/skills, .agents/skills and .claude/skills inside
+              # the working folder are absent from `grok inspect --json`), so this copy is
+              # a file the model can read, not a skill the CLI discovers. The text the
+              # model is graded on travels in --rules, exactly as it travels in
+              # --append-system-prompt for Claude and in AGENTS.md for Codex.
+              "grok": os.path.join(".grok", "skills")}
 
 PASS_LINE = {"journey_score": 0.90, "fabrications": 0, "critical_failures": 0}
 # A provider saying "at capacity" or "rate limited" is not the model failing the turn.
@@ -870,6 +886,131 @@ def codex_command(prompt, workdir, model, sandbox="read-only"):
     return cmd + ["--", prompt]
 
 
+# ------------------------------------------------------------------- grok --
+# What a journey turn may do on Grok Build: read the folder, nothing else. This is the
+# same reach Claude gets from CLAUDE_TOOLS_READ and Codex from its read-only sandbox, so
+# a difference between the three columns is the host, not the permissions. Tool ids are
+# Grok's own (`grok --help`: --tools is an allowlist and headless-only).
+GROK_TOOLS_READ = "read_file,grep,list_dir"
+GROK_MODEL = "grok-4.6"
+GROK_MAX_TURNS = 24
+
+
+def grok_command(prompt_file, workdir, model, session_id=None, resume=None, rules=None,
+                 tools=GROK_TOOLS_READ, sandbox="read-only", max_turns=GROK_MAX_TURNS):
+    """One headless Grok Build turn, reading its prompt from a file.
+
+    The prompt goes in a file rather than in argv because a journey turn carries a
+    pasted page and a turn that begins with a dash is an unknown option to most CLIs.
+    ``--session-id`` names a NEW session (Grok refuses an id that already exists) and
+    ``--resume`` continues it, so the model sees its own history instead of a replay.
+    ``rules`` is the system prompt; on a resume it is not sent again, because the
+    session already carries it - the same shape as ``claude_command``.
+    """
+    cmd = ["grok", "--cwd", workdir, "--prompt-file", prompt_file,
+           "--output-format", "json", "--sandbox", sandbox, "--no-subagents",
+           "--disable-web-search", "--always-approve", "--max-turns", str(max_turns)]
+    if tools:
+        cmd += ["--tools", tools]
+    if model:
+        cmd += ["-m", model]
+    if resume:
+        cmd += ["--resume", resume]
+    else:
+        if rules:
+            cmd += ["--rules", rules]
+        if session_id:
+            cmd += ["--session-id", session_id]
+    return cmd
+
+
+def grok_envelope(stdout):
+    """The `--output-format json` object as a dict, or None.
+
+    Grok prints one object after the run: {"text", "stopReason", "sessionId", "requestId"}.
+    The balanced-object reader in bench/launch.py is not Claude-specific; it is the one
+    copy of "find the first complete JSON object in this stdout" every runner uses.
+    """
+    return launch.claude_envelope(stdout or "")
+
+
+def grok_answer(stdout):
+    """(final message, usage) out of `grok --prompt-file --output-format json` stdout.
+
+    The envelope carries no token counts, so usage is None here and the caller asks
+    ``grok usage <session id>`` for them once the session exists. An error envelope is
+    not an answer: it comes back empty, and ``grok_error`` says what the CLI said."""
+    obj = grok_envelope(stdout)
+    if isinstance(obj, dict) and obj.get("type") == "error":
+        return "", None
+    if isinstance(obj, dict) and isinstance(obj.get("text"), str):
+        return obj["text"], None
+    return stdout or "", None
+
+
+def grok_error(stdout):
+    """The message Grok put in an error envelope, or None.
+
+    Grok Build exits 0 and writes {"type": "error", "message": ...} on stdout for a
+    refusal the caller has to act on - "Not signed in" arrived exactly that way on
+    2026-09-17 - so the envelope is the only place the failure is stated. Without this
+    the error text would be graded as if it were the model's answer."""
+    obj = grok_envelope(stdout)
+    if isinstance(obj, dict) and obj.get("type") == "error":
+        return str(obj.get("message") or "an error the CLI did not name")[:300]
+    return None
+
+
+def grok_session_id(stdout):
+    """The session id Grok says it used, or None."""
+    obj = grok_envelope(stdout)
+    value = obj.get("sessionId") if isinstance(obj, dict) else None
+    return value if isinstance(value, str) and value else None
+
+
+def grok_prompt_file(workdir, index, text):
+    """Write one turn's prompt beside the run and return its path."""
+    path = os.path.join(workdir, "_prompt-%02d.txt" % index)
+    with io.open(path, "w", encoding="utf-8") as fh:
+        fh.write(text if text.endswith("\n") else text + "\n")
+    return path
+
+
+def grok_usage(session_id, timeout=30, runner=None):
+    """Tokens and cost for one Grok session from `grok usage <id>`, or None.
+
+    Grok's headless envelope has no usage in it; the CLI persists the numbers and hands
+    them back on request. Anything unparseable is unknown, never zero.
+    """
+    if not session_id:
+        return None
+    try:
+        proc = (runner or subprocess.Popen)(["grok", "usage", session_id],
+                                            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                            stdin=subprocess.DEVNULL)
+        out, _err = proc.communicate(timeout=timeout)
+    except (OSError, ValueError, subprocess.SubprocessError):
+        return None
+    text = (out or b"").decode("utf-8", "replace") if isinstance(out, bytes) else (out or "")
+    obj = launch.claude_envelope(text)
+    if isinstance(obj, dict):
+        usage = collections.OrderedDict()
+        for key, value in sorted(obj.items()):
+            if isinstance(value, (int, float)) and not isinstance(value, bool):
+                usage[key] = value
+        if usage:
+            return usage
+    numbers = collections.OrderedDict()
+    for key, value in re.findall(r"([A-Za-z][A-Za-z _-]{1,40}?)\s*[:=]\s*\$?([0-9][0-9,]*(?:\.[0-9]+)?)",
+                                 text):
+        name = re.sub(r"[ -]+", "_", key.strip().lower())
+        try:
+            numbers[name] = float(value.replace(",", "")) if "." in value else int(value.replace(",", ""))
+        except ValueError:
+            continue
+    return numbers or None
+
+
 def claude_supports_resume(mode="auto"):
     """(bool, how). `claude --help` is the only authority; --session-mode overrides it."""
     if mode == "resume":
@@ -991,6 +1132,10 @@ def play(journey, args, variant_id=None):
     carry, how = (False, "n/a")
     if agent == "claude":
         carry, how = claude_supports_resume(args.session_mode)
+    elif agent == "grok":
+        # Grok Build 1.0.30 documents --session-id and --resume for headless runs;
+        # there is nothing to probe and nothing to replay.
+        carry, how = True, "`grok --help` documents --session-id and --resume"
 
     if args.dry_run:
         print("journey:  %s  (%s)" % (label, journey["title"]))
@@ -1006,7 +1151,7 @@ def play(journey, args, variant_id=None):
         for rel in reference_files(journey, args.refs):
             print("          + %s" % rel)
         print("          + this run's note (%d characters in total)" % len(system))
-        if agent == "claude":
+        if agent in ("claude", "grok"):
             print("session:  %s   (%s)" % ("--resume carries the history" if carry
                                            else "transcript replayed each turn", how))
         print("results:  %s" % os.path.join(
@@ -1016,6 +1161,8 @@ def play(journey, args, variant_id=None):
             print("tools:    %s" % tools)
         elif agent == "codex":
             print("sandbox:  %s" % sandbox)
+        elif agent == "grok":
+            print("tools:    %s   sandbox: read-only, web search off" % GROK_TOOLS_READ)
 
     history, turns, errors = [], [], []
     for index, turn in enumerate(journey["turns"], 1):
@@ -1048,6 +1195,14 @@ def play(journey, args, variant_id=None):
                                      session_id=session_id if carry else None,
                                      resume=session_id if (carry and index > 1) else None)
                 print("          cd %s && %s" % (workdir, shell_preview(cmd)))
+            elif agent == "grok":
+                cmd = grok_command(os.path.join(workdir, "_prompt-%02d.txt" % index),
+                                   workdir, args.model, rules=system,
+                                   session_id=session_id if index == 1 else None,
+                                   resume=session_id if index > 1 else None)
+                print("          writes the turn into %s"
+                      % os.path.join(workdir, "_prompt-%02d.txt" % index))
+                print("          cd %s && %s" % (workdir, shell_preview(cmd)))
             else:
                 cmd = codex_command(transcript(history, user) if history else user,
                                     workdir, args.model, sandbox)
@@ -1072,24 +1227,46 @@ def play(journey, args, variant_id=None):
                 cmd = claude_command(prompt, workdir, args.model, system, tools=tools,
                                      session_id=session_id if carry else None,
                                      resume=session_id if (carry and index > 1) else None)
+            elif agent == "grok":
+                cmd = grok_command(grok_prompt_file(workdir, index, user), workdir,
+                                   args.model, rules=system,
+                                   session_id=session_id if index == 1 else None,
+                                   resume=session_id if index > 1 else None)
             else:
                 cmd = codex_command(transcript(history, user) if history else user,
                                     workdir, args.model, sandbox)
             # One launcher for every runner: stdin closed, both streams captured, the
             # one physical attempt, and the tails kept when the
             # provider never let the turn through at all.
-            res = legacy_control.run_cli(cmd, workdir, args.timeout, agent,
-                             attempts=MAX_ATTEMPTS, waits=RETRY_WAITS,
-                             label="turn %d" % index)
-            reply, usage = legacy_control.reply_text(res, agent), res.usage
-            if getattr(res, "session_id", None):
-                session_id = res.session_id          # the persisted CLI session identity
+            cli_said = None
+            if agent == "grok":
+                # The durable boundary reads telemetry for the two CLIs it was written
+                # for and refuses every other family, so this lane is the shared
+                # launcher on its own: one attempt, both streams kept, no retry.
+                res = launch.run(cmd, workdir, args.timeout, agent,
+                                 attempts=MAX_ATTEMPTS, waits=RETRY_WAITS,
+                                 label="turn %d" % index)
+                raw = res.stdout or res.text
+                reply, usage = grok_answer(raw)
+                cli_said = grok_error(raw)
+                session_id = grok_session_id(raw) or session_id
+                usage = usage or grok_usage(session_id)
+            else:
+                res = legacy_control.run_cli(cmd, workdir, args.timeout, agent,
+                                 attempts=MAX_ATTEMPTS, waits=RETRY_WAITS,
+                                 label="turn %d" % index)
+                reply, usage = legacy_control.reply_text(res, agent), res.usage
+                if getattr(res, "session_id", None):
+                    session_id = res.session_id      # the persisted CLI session identity
             attempts = res.attempts
             attempt_records = res.attempt_records
             provider_error = res.provider_error
             # The note the card always carried, plus the tails: a row that reads
             # "the agent exited 1: " with nothing behind it cannot be diagnosed later.
             note = res.tail_note("the agent " if (res.note or "").startswith("exited") else "")
+            if cli_said:
+                # Grok exits 0 on a refusal, so without this the row would read "no reply".
+                note = "the CLI reported: %s%s" % (cli_said, ("; " + note) if note else "")
         wall = round(time.time() - started, 2)
 
         if not (reply or "").strip():
@@ -1144,8 +1321,8 @@ def play(journey, args, variant_id=None):
         ("run_at", now()),
         ("mode", journey["mode"]),
         ("language", journey.get("language")),
-        ("tools", tools if agent == "claude" else None),
-        ("sandbox", sandbox if agent == "codex" else None),
+        ("tools", tools if agent == "claude" else GROK_TOOLS_READ if agent == "grok" else None),
+        ("sandbox", sandbox if agent == "codex" else "read-only" if agent == "grok" else None),
         ("turns_expected", len(journey["turns"])),
         ("turns_played", len(scored)),
         ("journey_score", journey_score),
@@ -1337,7 +1514,7 @@ def main(argv=None):
     if args.regrade:
         return regrade(args.regrade, args.journeys)
     if not args.agent:
-        print("usage error: --agent is required (api, claude or codex)", file=sys.stderr)
+        print("usage error: --agent is required (api, claude, codex or grok)", file=sys.stderr)
         return 2
     if not args.journey and not args.all:
         print("usage error: give --journey <id> or --all", file=sys.stderr)
