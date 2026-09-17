@@ -573,10 +573,11 @@ def listing_inputs(path):
     """Fields from a saved page or pasted text, through listing_fields.py (no network)."""
     if listing_fields is None:
         return {}
-    raw = io.open(path, "rb").read()
-    kind = "saved_page" if path.lower().endswith((".html", ".htm", ".mhtml")) else "pasted_text"
     try:
-        out = listing_fields.extract(raw, kind)
+        raw = io.open(path, "rb").read()
+        text = listing_fields.decode_saved_text(raw, path)
+        kind = "html" if path.lower().endswith((".html", ".htm")) or "<" in text[:2000] else "text"
+        out = listing_fields.extract(text, kind)
     except Exception:  # noqa: BLE001
         return {}
     f = (out or {}).get("fields") or {}
@@ -591,7 +592,7 @@ def listing_inputs(path):
             got["area_m2"] = round(v * 0.092903, 1) if f["floor_area"].get("unit") == "sq_ft" else v
     if f.get("floor"):
         got["floor"] = f["floor"].get("value")
-    if f.get("deposit"):
+    if f.get("deposit") and f["deposit"].get("unit") == "GBP":    # "6 weeks' rent" is not pounds
         got["deposit_gbp"] = _num(f["deposit"].get("value"))
     return got
 

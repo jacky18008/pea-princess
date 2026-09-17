@@ -212,5 +212,31 @@ class TestCli(unittest.TestCase):
         self.assertEqual(2, proc.returncode); self.assertIn("no postcode", json.loads(proc.stdout)["error"])
 
 
+class TestListingInputs(unittest.TestCase):
+    """--listing: the page's fields feed the chain; a saved page is parsed as HTML, not as text."""
+
+    def write(self, name, body):
+        folder = tempfile.mkdtemp(prefix="vetflat-listing-")
+        path = os.path.join(folder, name)
+        with io.open(path, "w", encoding="utf-8") as fh:
+            fh.write(body)
+        return path
+
+    def test_a_saved_page_gives_the_property_postcode_rent_and_deposit(self):
+        page = ('<html><head><title>Flat to rent, Example Road, London, XE4</title><script>window.model = '
+                '{"propertyData":{"prices":{"primaryPrice":"£1,950 pcm"},"address":{"displayAddress":"Example Road, London, XE4",'
+                '"outcode":"XE4","incode":"2QP"},"lettings":{"deposit":"2250"},'
+                '"customer":{"displayAddress":"1 Office Row, London, XW9 7AA"}}};</script></head>'
+                '<body><p>Example Road, London, XE4</p><p>£1,950 pcm</p>'
+                '<p>MARKETED BY Orrin &amp; Vale, 1 Office Row, London, XW9 7AA</p></body></html>')
+        got = V.listing_inputs(self.write("page.html", page))
+        self.assertEqual({"postcode": "XE4 2QP", "rent_pcm": 1950.0, "deposit_gbp": 2250.0}, got)
+
+    def test_a_deposit_in_weeks_is_not_pounds(self):
+        got = V.listing_inputs(self.write("listing.txt", "Flat 5, 12 Pargeter Yard, London XE2 7HD\n£2,350 pcm\nDeposit: 6 weeks' rent.\n"))
+        self.assertEqual("XE2 7HD", got["postcode"])
+        self.assertNotIn("deposit_gbp", got)
+
+
 if __name__ == "__main__":
     unittest.main()

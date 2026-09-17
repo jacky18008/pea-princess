@@ -280,7 +280,7 @@ class TestItNeverFetches(unittest.TestCase):
                               capture_output=True, text=True)
         self.assertEqual(0, proc.returncode, proc.stdout + proc.stderr)
         rec = json.loads(proc.stdout)
-        self.assertEqual("vet-flat/listing-fields/1", rec["schema"])
+        self.assertEqual("vet-flat/listing-fields/2", rec["schema"])
         self.assertEqual(1850.0, rec["fields"]["rent"]["value"])
 
     def test_no_site_is_named_in_the_module(self):
@@ -288,6 +288,158 @@ class TestItNeverFetches(unittest.TestCase):
             source = fh.read().lower()
         for name in ("rightmove", "zoopla", "onthemarket", "openrent", "spareroom", "airbnb", "booking.com"):
             self.assertNotIn(name, source, name)
+
+
+def indexed(obj):
+    """The index-referenced form some page frameworks write: every object value is a
+    position in one flat list, and the root sits at position 0."""
+    values = []
+
+    def add(value):
+        i = len(values)
+        values.append(None)
+        if isinstance(value, dict):
+            values[i] = {k: add(v) for k, v in value.items()}
+        elif isinstance(value, list):
+            values[i] = [add(v) for v in value]
+        else:
+            values[i] = value
+        return i
+
+    add(obj)
+    return values
+
+
+MODEL = {"propertyData": {
+    "id": "1", "bedrooms": 2, "bathrooms": 1, "propertySubType": "Flat",
+    "prices": {"primaryPrice": "£1,750 pcm", "secondaryPrice": "£404 pw"},
+    "address": {"displayAddress": "Pargeter Yard, London, XE2", "outcode": "XE2", "incode": "7HD", "countryCode": "GB"},
+    "lettings": {"letAvailableDate": "Now", "deposit": "2019", "minimumTermInMonths": 12, "letType": "Long term",
+                 "furnishType": "Furnished"},
+    "location": {"latitude": 51.4723, "longitude": -0.0215, "pinType": "APPROXIMATE_POINT"},
+    "sizings": [],
+    "floorplans": [{"url": "https://example.invalid/plan/1.png", "caption": "Floorplan 1"}],
+    "images": [{"url": "https://example.invalid/photo/%d.jpeg" % i, "caption": None} for i in range(3)],
+    "epcGraphs": [{"url": "https://example.invalid/epc/1.jpg", "caption": "EPC"}],
+    "nearestStations": [{"name": "Example Bridge Station", "types": ["LIGHT_RAILWAY"], "distance": 0.1595, "unit": "miles"}],
+    "keyFeatures": ["Bills included", "Second-floor apartment"],
+    "text": {"description": "A fictional second-floor apartment written for this test, long enough to count as a "
+                            "description of the home and nothing else.",
+             "pageTitle": "2 bedroom flat for rent in Pargeter Yard, London, XE2"},
+    "listingHistory": {"listingUpdateReason": "Added on 16/01/2026"},
+    "customer": {"companyName": "Fenn & Aldridge Ltd", "branchDisplayName": "Fenn & Aldridge, Hendon",
+                 "displayAddress": "170 Example Broadway,\r\nLondon,\r\nXW9 7AA",
+                 "customerDescription": {"descriptionHTML": "<p>Fenn &amp; Aldridge brings together a fictional team of "
+                                                            "seasoned property professionals for this fixture only.</p>"}},
+    "contactInfo": {"telephoneNumbers": {"localNumber": "020 0000 0000"}},
+    "livingCosts": {"councilTaxBand": None, "councilTaxIncluded": False},
+}, "metadata": {"deviceType": "desktop"}}
+
+INDEXED_PAGE = """<!doctype html><html><head><title>2 bedroom flat for rent in Pargeter Yard, London, XE2</title>
+<script>window.__PAGE_DATA = %s;</script></head>
+<body><svg><title>open-menu</title></svg><svg><title>log_in</title></svg>
+<h1>Pargeter Yard, London, XE2</h1><div>£1,750 pcm</div><div>£404 pw</div>
+<div>Let available date: </div><div>Now</div><div>Deposit: </div><div>£2,019</div>
+<div>Furnish type: Furnished</div><div>Council Tax: </div><div>Ask agent</div>
+<div>PROPERTY TYPE</div><div>Flat</div><div>BEDROOMS</div><div>2</div><div>BATHROOMS</div><div>1</div>
+<div>SIZE</div><div>Ask agent</div>
+<p>A fictional second-floor apartment written for this test.</p>
+<div>COUNCIL TAX</div><div>A payment made to your local authority in order to pay for local services.</div>
+<div>MARKETED BY</div><div>Fenn &amp; Aldridge, Hendon</div><div>170 Example Broadway, London, XW9 7AA</div>
+</body></html>""" % json.dumps({"data": json.dumps(indexed(MODEL)), "encoding": "on"})
+
+
+class TestSavedPageDataBlock(unittest.TestCase):
+    """A page saved from the browser carries the page's own data block: one JSON document
+    inside another as a string, in the index-referenced form. Fictional listing."""
+
+    def setUp(self):
+        self.rec = LF.extract(INDEXED_PAGE, "html")
+        self.f = self.rec["fields"]
+
+    def test_the_page_title_is_the_document_title_only(self):
+        self.assertEqual("2 bedroom flat for rent in Pargeter Yard, London, XE2", self.rec["source"]["title"])
+
+    def test_an_index_referenced_data_block_is_rebuilt_and_read(self):
+        f = self.f
+        self.assertEqual("embedded_json", f["rent"]["how"])
+        self.assertEqual(1750.0, f["rent"]["value"]); self.assertEqual("GBP/month", f["rent"]["unit"])
+        self.assertEqual(2.0, f["bedrooms"]["value"]); self.assertEqual(1.0, f["bathrooms"]["value"])
+        self.assertEqual("now", f["available_from"]["value"])
+        self.assertEqual(2019.0, f["deposit"]["value"]); self.assertEqual("GBP", f["deposit"]["unit"])
+        self.assertEqual("furnished", f["furnished"]["value"]); self.assertEqual("long term", f["let_type"]["value"])
+        self.assertEqual(12.0, f["minimum_term_months"]["value"]); self.assertEqual("flat", f["property_type"]["value"])
+        self.assertEqual(2.0, f["floor"]["value"])          # "second-floor" in the visible text
+        for name in ("epc", "council_tax_band", "floor_area"):
+            self.assertIn(name, self.rec["unknown"])
+
+    def test_the_full_postcode_comes_from_the_split_halves_not_the_agent_footer(self):
+        self.assertEqual("XE2 7HD", self.f["postcode"]["value"])
+        self.assertEqual("embedded_json", self.f["postcode"]["how"])
+        self.assertEqual("XE2", self.f["outcode"]["value"])
+        roles = {c["value"]: c["role"] for c in self.rec["postcode_candidates"]}
+        self.assertIn(roles["XW9 7AA"], ("office", "other_district"))
+
+    def test_page_extras_list_what_the_block_says_and_never_fetch(self):
+        page = self.rec["page"]
+        self.assertEqual(3, page["photos"]["count"]); self.assertEqual(1, page["floorplans"]["count"])
+        self.assertEqual(1, page["epc_images"]["count"])
+        station = page["nearest_stations"]["items"][0]
+        self.assertEqual(("Example Bridge Station", 0.16, "miles", ["light railway"]),
+                         (station["name"], station["distance"], station["unit"], station["modes"]))
+        self.assertEqual({"lat": 51.4723, "lng": -0.0215, "precision": "approximate, as the page places it"},
+                         dict(page["coordinates"]["value"]))
+        self.assertIn("Bills included", page["key_features"]["items"])
+        self.assertTrue(page["description"]["value"].startswith("A fictional second-floor apartment"))
+        self.assertEqual("Added on 16/01/2026", page["listed_on"]["value"])
+        self.assertEqual("Fenn & Aldridge Ltd", page["agent"]["name"]); self.assertEqual("020 0000 0000", page["agent"]["phone"])
+        self.assertIn("never fetch", self.rec["page_note"])
+        self.assertNotIn("seasoned property professionals", json.dumps(page))   # the agent's blurb is not the home's description
+
+    def test_a_glossary_sentence_after_council_tax_is_not_a_band(self):
+        self.assertNotIn("council_tax_band", self.f)
+
+
+class TestVisibleTextLayouts(unittest.TestCase):
+    def test_label_then_value_grid_reads_each_count(self):
+        f = LF.extract("PROPERTY TYPE\nFlat\nBEDROOMS\n3\nBATHROOMS\n2\nSIZE\nAsk agent\n", "text")["fields"]
+        self.assertEqual((3.0, 2.0), (f["bedrooms"]["value"], f["bathrooms"]["value"]))
+        self.assertEqual("flat", f["property_type"]["value"])
+
+    def test_value_then_label_forms_still_read(self):
+        f = LF.extract("3 bed 2 bath house, £2,100 pcm", "text")["fields"]
+        self.assertEqual((3.0, 2.0), (f["bedrooms"]["value"], f["bathrooms"]["value"]))
+        f = LF.extract("2 bedrooms, 1 bathroom. Second floor.", "text")["fields"]
+        self.assertEqual((2.0, 1.0, 2.0), (f["bedrooms"]["value"], f["bathrooms"]["value"], f["floor"]["value"]))
+
+    def test_a_room_list_is_not_a_bedroom_count(self):
+        rec = LF.extract("Bedroom 1: 4.0m x 3.0m\nBedroom 2: 3.2m x 2.8m\n", "text")
+        self.assertIn("bedrooms", rec["unknown"])
+
+    def test_deposit_forms(self):
+        self.assertEqual((2019.0, "GBP"), tuple(LF.extract("Deposit: \n£ 2,019", "text")["fields"]["deposit"][k] for k in ("value", "unit")))
+        f = LF.extract("Holding deposit: £400. Deposit: £2,000.", "text")["fields"]
+        self.assertEqual(2000.0, f["deposit"]["value"])
+        f = LF.extract("Deposit: 6 weeks' rent. Holding deposit: 2 weeks' rent.", "text")["fields"]
+        self.assertEqual((6.0, "weeks_rent"), (f["deposit"]["value"], f["deposit"]["unit"]))
+
+    def test_available_date_label_forms(self):
+        self.assertEqual("now", LF.extract("Let available date: \nNow", "text")["fields"]["available_from"]["value"])
+        self.assertEqual("1st October 2026", LF.extract("Available from 1st October 2026", "text")["fields"]["available_from"]["value"])
+        self.assertEqual("15/11/2026", LF.extract("Available: 15/11/2026", "text")["fields"]["available_from"]["value"])
+
+    def test_let_type_minimum_term_and_bands(self):
+        f = LF.extract("Let type: Long term\nMinimum term: 12 months\nEPC rating: C\nCouncil Tax: Band D\n", "text")["fields"]
+        self.assertEqual("long term", f["let_type"]["value"]); self.assertEqual(12.0, f["minimum_term_months"]["value"])
+        self.assertEqual("C", f["epc"]["value"]); self.assertEqual("D", f["council_tax_band"]["value"])
+
+    def test_an_unlabelled_office_postcode_from_another_district_is_not_the_property(self):
+        rec = LF.extract("Flat to rent, Pargeter Yard, London, XE2\n£1,750 pcm\n"
+                         "About Fenn & Aldridge, Hendon 170 Example Broadway, London, XW9 7AA\n", "text")
+        self.assertNotIn("postcode", rec["fields"])
+        self.assertEqual("XE2", rec["fields"]["outcode"]["value"])
+        self.assertEqual(["other_district"], [c["role"] for c in rec["postcode_candidates"]])
+        self.assertTrue(rec["postcode_note"])
 
 
 if __name__ == "__main__":

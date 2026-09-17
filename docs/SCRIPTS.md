@@ -1383,6 +1383,38 @@ written; the register calls are the same open, cached requests the skill makes i
 about 25 s end to end, Overpass the slowest at ~17 s). This is the first thing to run on a new host, and the
 evidence behind the per-host table in `docs/INSTALL.md`.
 
+## `listing_fields.py` — fields from a page the person saved or pasted (no network, no key)
+
+```
+python3 scripts/listing_fields.py saved-page.html
+python3 scripts/listing_fields.py --text pasted.txt
+pbpaste | python3 scripts/listing_fields.py -
+```
+
+What it reads, in order of trust: JSON-LD; microdata and meta tags; the page's own embedded data block —
+one JSON document carried inside another as a string, and the index-referenced array form some page
+frameworks write (every object value a position in one flat list) — both opened in place with no
+site-specific code; then the visible text with plain-language patterns ("£1,800 pcm", "Bedrooms: 2",
+"3 bed 2 bath", "second-floor", "Deposit: £500", "Deposit: 6 weeks' rent", "Let available date: Now").
+
+Output (`vet-flat/listing-fields/2`): `fields` — rent, bedrooms, bathrooms, floor, floor_area, postcode,
+outcode, address, available_from, furnished, deposit, let_type, minimum_term_months, property_type, epc,
+council_tax_band, each `{value, unit, how, quote}`; `unknown`; `postcode_candidates` with roles (property,
+office, other_district, unassigned) and a `postcode_note`; `page` — photos, floorplans, epc_images,
+virtual_tours, coordinates, nearest_stations, key_features, description, listed_on, agent — with a
+`page_note`: links are listed for the person to open in their own browser, never fetched.
+
+Postcode rule: an office or contact postcode is never the property's; a candidate from another district
+than the address or title states is `other_district` and excluded; conflicting candidates leave the
+postcode unknown. Checked on one real saved portal page on 2026-09-17 (the page is not stored): 12 of 16
+fields read, the full postcode came from the data block although the screen showed only the district,
+and the agent's office postcode — which the previous version returned as the property's — was excluded.
+
+Refuses: any URL (prints the save instruction); PDFs and other binaries (convert with
+`pdftotext -layout` first). `vet_case.py --listing` feeds its postcode, monthly rent, floor area, floor
+and pound deposit into the chain. Tests: `tests/test_listing_fields.py` (no network module imported, no
+site named in the module).
+
 ## `vet_case.py` — the fixed vetting chain for one flat, one command, explicit data states
 
 ```
