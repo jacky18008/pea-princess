@@ -31,7 +31,7 @@ On a phone
 
 | Surface | Blocks | Source |
 |---|---|---|
-| README — the front page | 20 | `README.md` |
+| README — the front page | 21 | `README.md` |
 | docs/USING.md — the plain-words walkthrough | 41 | `docs/USING.md` |
 | docs/INSTALL.md — install page | 14 | `docs/INSTALL.md` |
 | docs/EXPERIMENTS.md — which configuration to run | 7 | `docs/EXPERIMENTS.md` |
@@ -40,7 +40,7 @@ On a phone
 | inputs.md — the one message that asks the user for what is missing | 1 | `skills/vet-flat/references/inputs.md` |
 | profiles/ — the sentences a profile carries | 14 | `skills/vet-flat/profiles/*.yaml` |
 | seed.py — the seed card sentences (read-only here) | 25 | `skills/vet-flat/scripts/seed.py` |
-| **Total** | **158** | |
+| **Total** | **159** | |
 
 ---
 
@@ -149,7 +149,18 @@ In the fairy tale only the real princess feels the pea through twenty mattresses
 
 ### deck:readme:10
 
-- source: `README.md` · L52
+- source: `README.md` · L51
+- under: ## Why "Pea Princess"
+- lang: zh-TW
+- write-back: yes
+
+```text
+作者的話（繁中，發在社群的原文）：[到了倫敦才發現自己有病，是公主病](docs/posts/2026-09-launch.zh-TW.md)。
+```
+
+### deck:readme:11
+
+- source: `README.md` · L54
 - under: ## No code required · 不用會寫程式
 - lang: en
 - write-back: yes
@@ -158,9 +169,9 @@ In the fairy tale only the real princess feels the pea through twenty mattresses
 Everything is done by typing or dictating sentences: install (one pasted line, or a zip upload in a chat app), then ask, paste what it asks for, read the report, and change any setting by saying it. [The walkthrough](docs/USING.md) explains it in English and Chinese.
 ```
 
-### deck:readme:11
+### deck:readme:12
 
-- source: `README.md` · L54
+- source: `README.md` · L56
 - under: ## No code required · 不用會寫程式
 - lang: zh-TW
 - write-back: yes
@@ -169,26 +180,15 @@ Everything is done by typing or dictating sentences: install (one pasted line, o
 **Prefer speaking? · 不想打字？** Use your device's built-in dictation, or an optional app such as Typeless or Wispr Flow, to put your words into the assistant's text box. 可以直接口述需求、住屋經驗或中途補充，不用先整理成表單。See [voice input and free-plan limits](docs/USING.md#speak-instead-of-typing).
 ```
 
-### deck:readme:12
+### deck:readme:13
 
-- source: `README.md` · L57
+- source: `README.md` · L59
 - under: ## Start here, on any platform
 - lang: en
 - write-back: yes
 
 ```text
 Ask **"What can this do?"** (or 這能幹嘛？). The answer comes from `skills/vet-flat/references/onboarding.md`: a short pitch, three starting points (a listing → vet it; an area or destination → sweep; no idea → a ten-fact primer and six questions with suggested defaults). Your rules live in `profile.yaml` (budget, size, flat type, deal-breakers, priorities, `budget_mode` lite/standard/deep for £20 plans and chat-only use). The hard follow-up questions the agent must ask are in `references/questions.md`.
-```
-
-### deck:readme:13
-
-- source: `README.md` · L60
-- under: ## Benchmark (facts must be right on every model; verdicts may differ)
-- lang: en
-- write-back: yes
-
-```text
-`evals/evals.json` has 8 real flats across 7 boroughs plus 2 conversation cases ("what can this do", "I have no idea"), with truth produced by the repo's own fetchers on 2026-09-03. `bench/grade.py` scores fact recall, fabrications, citations, unknown-honesty and hard-filter consistency; `bench/run.py --dry-run` prints the exact command for Claude Code, Codex, Gemini CLI or an OpenAI-compatible API. See `bench/README.md`.
 ```
 
 ### deck:readme:14
@@ -199,7 +199,7 @@ Ask **"What can this do?"** (or 這能幹嘛？). The answer comes from `skills/
 - write-back: yes
 
 ```text
-**Which configuration to run:** `docs/EXPERIMENTS.md` records the original flat-vetting comparisons. The [later context ablation](docs/ablation-2026-09-09/results.md) includes generation costs and source reviews: extra summarization, structured memory and multiple retrieval calls did not save tokens at the tested sizes. Keep one agent with full context as the starting point; the four-role pipeline remains experimental. These studies measure different tasks, not a universal model ranking.
+`evals/evals.json` has 8 real flats across 7 boroughs plus 2 conversation cases ("what can this do", "I have no idea"), with truth produced by the repo's own fetchers on 2026-09-03. `bench/grade.py` scores fact recall, fabrications, citations, unknown-honesty and hard-filter consistency; `bench/run.py --dry-run` prints the exact command for Claude Code, Codex, Gemini CLI or an OpenAI-compatible API. See `bench/README.md`.
 ```
 
 ### deck:readme:15
@@ -210,7 +210,7 @@ Ask **"What can this do?"** (or 這能幹嘛？). The answer comes from `skills/
 - write-back: yes
 
 ```text
-**Long-running projects and changing requirements:** the [session harness](docs/session-harness.md) saves exact user requests, revisioned requirements and conditional exceptions, source snapshots, goals, TODOs and execution state. The managed runner inserts the current packet itself and rejects stale results. Short `AGENTS.md` / `CLAUDE.md` files link to detailed rules; pointers alone cannot ensure reading. [Lifecycle validation](docs/session-harness-validation.md) tests recovery without new model calls, not quality equivalence or token savings.
+**Which configuration to run:** `docs/EXPERIMENTS.md` records the original flat-vetting comparisons. The [later context ablation](docs/ablation-2026-09-09/results.md) includes generation costs and source reviews: extra summarization, structured memory and multiple retrieval calls did not save tokens at the tested sizes. Keep one agent with full context as the starting point; the four-role pipeline remains experimental. These studies measure different tasks, not a universal model ranking.
 ```
 
 ### deck:readme:16
@@ -221,7 +221,7 @@ Ask **"What can this do?"** (or 這能幹嘛？). The answer comes from `skills/
 - write-back: yes
 
 ```text
-**Try a whole persona conversation:** run `python3 tools/persona_playground.py` and open the printed local URL. The [interactive lab](docs/persona-playground.md) uses your local Codex login for dynamic persona replies and assistant answers, with step/run/pause, queued human questions, scenario amendments, private history and shared usage ceilings. All 16 cards are available in a clearly labelled chat adaptation; this is a local alpha, with no public deployment or hidden model judge.
+**Long-running projects and changing requirements:** the [session harness](docs/session-harness.md) saves exact user requests, revisioned requirements and conditional exceptions, source snapshots, goals, TODOs and execution state. The managed runner inserts the current packet itself and rejects stale results. Short `AGENTS.md` / `CLAUDE.md` files link to detailed rules; pointers alone cannot ensure reading. [Lifecycle validation](docs/session-harness-validation.md) tests recovery without new model calls, not quality equivalence or token savings.
 ```
 
 ### deck:readme:17
@@ -232,7 +232,7 @@ Ask **"What can this do?"** (or 這能幹嘛？). The answer comes from `skills/
 - write-back: yes
 
 ```text
-**Community feedback, stage 1:** open the [local options form](community/index.html) and follow the [guide](docs/community-feedback-stage1.md). Public JSON contains controlled choices; optional text stays on the author's device. Local validation, import and search use a fictional demo catalog. There is no online submission service or real review dataset yet.
+**Try a whole persona conversation:** run `python3 tools/persona_playground.py` and open the printed local URL. The [interactive lab](docs/persona-playground.md) uses your local Codex login for dynamic persona replies and assistant answers, with step/run/pause, queued human questions, scenario amendments, private history and shared usage ceilings. All 16 cards are available in a clearly labelled chat adaptation; this is a local alpha, with no public deployment or hidden model judge.
 ```
 
 ### deck:readme:18
@@ -243,12 +243,23 @@ Ask **"What can this do?"** (or 這能幹嘛？). The answer comes from `skills/
 - write-back: yes
 
 ```text
-**Whole conversations, not one answer:** `docs/JOURNEYS.md` scores nine scripted multi-turn journeys, and `docs/PERSONAS.md` goes one step further — sixteen fictional people played by a model, with a deterministic controller holding their documents so nothing can be invented, a judge that has to quote its evidence, and a paired probe per person that moves exactly one setting. `python3 bench/personas.py --matrix pilot --dry-run` prints the whole plan without calling a model.
+**Community feedback, stage 1:** open the [local options form](community/index.html) and follow the [guide](docs/community-feedback-stage1.md). Public JSON contains controlled choices; optional text stays on the author's device. Local validation, import and search use a fictional demo catalog. There is no online submission service or real review dataset yet.
 ```
 
 ### deck:readme:19
 
-- source: `README.md` · L78
+- source: `README.md` · L72
+- under: ## Benchmark (facts must be right on every model; verdicts may differ)
+- lang: en
+- write-back: yes
+
+```text
+**Whole conversations, not one answer:** `docs/JOURNEYS.md` scores nine scripted multi-turn journeys, and `docs/PERSONAS.md` goes one step further — sixteen fictional people played by a model, with a deterministic controller holding their documents so nothing can be invented, a judge that has to quote its evidence, and a paired probe per person that moves exactly one setting. `python3 bench/personas.py --matrix pilot --dry-run` prints the whole plan without calling a model.
+```
+
+### deck:readme:20
+
+- source: `README.md` · L80
 - under: ## Sources you will not find here
 - lang: en
 - write-back: yes
@@ -257,9 +268,9 @@ Ask **"What can this do?"** (or 這能幹嘛？). The answer comes from `skills/
 Rightmove, Zoopla, OnTheMarket, OpenRent, HomeViews, Trustpilot, Airbnb, Booking.com are listed by name only. Their terms forbid automated access, so this project gives no method for them; the skill asks you for the page (a PDF, screenshots or the text) and does not open listing links itself. How you and your assistant use those sites is your responsibility under their terms; nothing here does it or asks for it.
 ```
 
-### deck:readme:20
+### deck:readme:21
 
-- source: `README.md` · L81
+- source: `README.md` · L83
 - under: ## Licence and attribution (proposed)
 - lang: en
 - write-back: yes

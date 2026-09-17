@@ -48,6 +48,8 @@ Report layout for people without a shell: open `viewer/viewer.html` in a browser
 ## Why "Pea Princess"
 In the fairy tale only the real princess feels the pea through twenty mattresses. Here **you** are the princess. This tool lifts the mattresses one by one: it reads the registers, counts the crimes, checks the planning applications and the company filings, and tells you where the pea might be. Only you can feel it: go and see the flat, walk the street, talk to the agent and the landlord. The report is a filter, and when you are in a hurry it is only a filter. Its first duty is to say what it does not know and ask you for it.
 
+作者的話（繁中，發在社群的原文）：[到了倫敦才發現自己有病，是公主病](docs/posts/2026-09-launch.zh-TW.md)。
+
 ## No code required · 不用會寫程式
 Everything is done by typing or dictating sentences: install (one pasted line, or a zip upload in a chat app), then ask, paste what it asks for, read the report, and change any setting by saying it. [The walkthrough](docs/USING.md) explains it in English and Chinese.
 
