@@ -31,9 +31,9 @@ On a phone
 
 | Surface | Blocks | Source |
 |---|---|---|
-| README — the front page | 30 | `README.md` |
-| README.zh-TW.md — the front page, Traditional Chinese | 30 | `README.zh-TW.md` |
-| README.zh-CN.md — the front page, Simplified Chinese | 30 | `README.zh-CN.md` |
+| README — the front page | 31 | `README.md` |
+| README.zh-TW.md — the front page, Traditional Chinese | 31 | `README.zh-TW.md` |
+| README.zh-CN.md — the front page, Simplified Chinese | 31 | `README.zh-CN.md` |
 | docs/USING.md — the plain-words walkthrough (English) | 21 | `docs/USING.md` |
 | docs/USING.zh-TW.md — the walkthrough, Traditional Chinese | 18 | `docs/USING.zh-TW.md` |
 | docs/USING.zh-CN.md — the walkthrough, Simplified Chinese | 8 | `docs/USING.zh-CN.md` |
@@ -44,7 +44,7 @@ On a phone
 | inputs.md — the one message that asks the user for what is missing | 1 | `skills/vet-flat/references/inputs.md` |
 | profiles/ — the sentences a profile carries | 14 | `skills/vet-flat/profiles/*.yaml` |
 | seed.py — the seed card sentences (read-only here) | 25 | `skills/vet-flat/scripts/seed.py` |
-| **Total** | **234** | |
+| **Total** | **237** | |
 
 ---
 
@@ -54,7 +54,7 @@ All prose paragraphs. Tables, headings and code blocks are not in the deck.
 
 ### deck:readme:1
 
-- source: `README.md` · L19
+- source: `README.md` · L20
 - under: (top of file)
 - lang: en
 - write-back: yes
@@ -65,7 +65,7 @@ An agent skill for checking and searching rental listings in London. It vets a f
 
 ### deck:readme:2
 
-- source: `README.md` · L23
+- source: `README.md` · L24
 - under: ## Start here — no terminal needed
 - lang: en
 - write-back: yes
@@ -76,7 +76,7 @@ Three ways in, from easiest to most manual. Pick the one that matches what you a
 
 ### deck:readme:3
 
-- source: `README.md` · L25
+- source: `README.md` · L26
 - under: ## Start here — no terminal needed
 - lang: en
 - write-back: yes
@@ -87,7 +87,7 @@ Three ways in, from easiest to most manual. Pick the one that matches what you a
 
 ### deck:readme:4
 
-- source: `README.md` · L27
+- source: `README.md` · L28
 - under: ## Start here — no terminal needed
 - lang: en
 - write-back: yes
@@ -98,7 +98,7 @@ Three ways in, from easiest to most manual. Pick the one that matches what you a
 
 ### deck:readme:5
 
-- source: `README.md` · L29
+- source: `README.md` · L30
 - under: ## Start here — no terminal needed
 - lang: en
 - write-back: yes
@@ -109,7 +109,7 @@ Three ways in, from easiest to most manual. Pick the one that matches what you a
 
 ### deck:readme:6
 
-- source: `README.md` · L31
+- source: `README.md` · L32
 - under: ## Start here — no terminal needed
 - lang: en
 - write-back: yes
@@ -120,7 +120,7 @@ Three ways in, from easiest to most manual. Pick the one that matches what you a
 
 ### deck:readme:7
 
-- source: `README.md` · L33
+- source: `README.md` · L34
 - under: ## Start here — no terminal needed
 - lang: en
 - write-back: yes
@@ -131,7 +131,7 @@ Three ways in, from easiest to most manual. Pick the one that matches what you a
 
 ### deck:readme:8
 
-- source: `README.md` · L35
+- source: `README.md` · L36
 - under: ## Start here — no terminal needed
 - lang: en
 - write-back: yes
@@ -142,7 +142,7 @@ No code, no settings files: everything after that is sentences, typed or dictate
 
 ### deck:readme:9
 
-- source: `README.md` · L50
+- source: `README.md` · L51
 - under: ## What it checks, and where the answers come from
 - lang: en
 - write-back: yes
@@ -153,7 +153,7 @@ Every finding carries its evidence grade. What it cannot reach, it asks you for,
 
 ### deck:readme:10
 
-- source: `README.md` · L53
+- source: `README.md` · L54
 - under: ## Why "Pea Princess"
 - lang: en
 - write-back: yes
@@ -164,7 +164,7 @@ In the fairy tale only the real princess feels the pea through twenty mattresses
 
 ### deck:readme:11
 
-- source: `README.md` · L55
+- source: `README.md` · L56
 - under: ## Why "Pea Princess"
 - lang: zh-TW
 - write-back: yes
@@ -175,7 +175,7 @@ The author's own account, in Traditional Chinese, as posted to the community: [�
 
 ### deck:readme:12
 
-- source: `README.md` · L64
+- source: `README.md` · L65
 - under: ## Three modes
 - lang: en
 - write-back: yes
@@ -186,7 +186,7 @@ The author's own account, in Traditional Chinese, as posted to the community: [�
 
 ### deck:readme:13
 
-- source: `README.md` · L66
+- source: `README.md` · L67
 - under: ## Three modes
 - lang: en
 - write-back: yes
@@ -197,7 +197,7 @@ The author's own account, in Traditional Chinese, as posted to the community: [�
 
 ### deck:readme:14
 
-- source: `README.md` · L81
+- source: `README.md` · L82
 - under: # then, on any host with a shell: is it installed right? (one request per open register)
 - lang: en
 - write-back: yes
@@ -208,7 +208,7 @@ The skill is installed and invoked as **`pea-princess`**; the upload artifact is
 
 ### deck:readme:15
 
-- source: `README.md` · L83
+- source: `README.md` · L84
 - under: # then, on any host with a shell: is it installed right? (one request per open register)
 - lang: en
 - write-back: yes
@@ -219,7 +219,7 @@ Codex: enable sandbox network (`sandbox_workspace_write.network_access = true`) 
 
 ### deck:readme:16
 
-- source: `README.md` · L86
+- source: `README.md` · L87
 - under: ### Scripts (Python 3.9 standard library only; network via curl)
 - lang: en
 - write-back: yes
@@ -230,7 +230,7 @@ All in `skills/vet-flat/scripts/`; each prints one JSON object with `source_url`
 
 ### deck:readme:17
 
-- source: `README.md` · L101
+- source: `README.md` · L102
 - under: ### Scripts (Python 3.9 standard library only; network via curl)
 - lang: en
 - write-back: yes
@@ -241,7 +241,7 @@ Report layout for people without a shell: open `viewer/viewer.html` in a browser
 
 ### deck:readme:18
 
-- source: `README.md` · L104
+- source: `README.md` · L105
 - under: ### Ask it what it can do
 - lang: en
 - write-back: yes
@@ -252,7 +252,7 @@ Ask **"What can this do?"** (or 這能幹嘛？). The answer comes from `skills/
 
 ### deck:readme:19
 
-- source: `README.md` · L107
+- source: `README.md` · L108
 - under: ### Benchmark (facts must be right on every model; verdicts may differ)
 - lang: en
 - write-back: yes
@@ -263,7 +263,7 @@ Ask **"What can this do?"** (or 這能幹嘛？). The answer comes from `skills/
 
 ### deck:readme:20
 
-- source: `README.md` · L109
+- source: `README.md` · L110
 - under: ### Benchmark (facts must be right on every model; verdicts may differ)
 - lang: en
 - write-back: yes
@@ -274,7 +274,7 @@ Ask **"What can this do?"** (or 這能幹嘛？). The answer comes from `skills/
 
 ### deck:readme:21
 
-- source: `README.md` · L111
+- source: `README.md` · L112
 - under: ### Benchmark (facts must be right on every model; verdicts may differ)
 - lang: en
 - write-back: yes
@@ -285,7 +285,7 @@ Ask **"What can this do?"** (or 這能幹嘛？). The answer comes from `skills/
 
 ### deck:readme:22
 
-- source: `README.md` · L113
+- source: `README.md` · L114
 - under: ### Benchmark (facts must be right on every model; verdicts may differ)
 - lang: en
 - write-back: yes
@@ -296,7 +296,7 @@ Ask **"What can this do?"** (or 這能幹嘛？). The answer comes from `skills/
 
 ### deck:readme:23
 
-- source: `README.md` · L115
+- source: `README.md` · L116
 - under: ### Benchmark (facts must be right on every model; verdicts may differ)
 - lang: en
 - write-back: yes
@@ -307,7 +307,7 @@ Ask **"What can this do?"** (or 這能幹嘛？). The answer comes from `skills/
 
 ### deck:readme:24
 
-- source: `README.md` · L117
+- source: `README.md` · L118
 - under: ### Benchmark (facts must be right on every model; verdicts may differ)
 - lang: en
 - write-back: yes
@@ -318,7 +318,7 @@ Ask **"What can this do?"** (or 這能幹嘛？). The answer comes from `skills/
 
 ### deck:readme:25
 
-- source: `README.md` · L127
+- source: `README.md` · L128
 - under: ## Sources you will not find here
 - lang: en
 - write-back: yes
@@ -329,7 +329,7 @@ Rightmove, Zoopla, OnTheMarket, OpenRent, HomeViews, Trustpilot, Airbnb, Booking
 
 ### deck:readme:26
 
-- source: `README.md` · L131
+- source: `README.md` · L132
 - under: ## Make it yours
 - lang: en
 - write-back: yes
@@ -340,7 +340,7 @@ A skill is a folder of Markdown and a few scripts, and this one is written to be
 
 ### deck:readme:27
 
-- source: `README.md` · L140
+- source: `README.md` · L141
 - under: ## Make it yours
 - lang: en
 - write-back: yes
@@ -351,7 +351,7 @@ One sentence to try first, on any host:
 
 ### deck:readme:28
 
-- source: `README.md` · L142
+- source: `README.md` · L143
 - under: ## Make it yours
 - lang: en
 - write-back: yes
@@ -362,7 +362,7 @@ One sentence to try first, on any host:
 
 ### deck:readme:29
 
-- source: `README.md` · L145
+- source: `README.md` · L146
 - under: ## Licence and attribution (proposed)
 - lang: en
 - write-back: yes
@@ -373,13 +373,24 @@ Documentation and skill text: CC BY 4.0. Code: MIT. Every report carries "Genera
 
 ### deck:readme:30
 
-- source: `README.md` · L147
+- source: `README.md` · L148
 - under: ## Licence and attribution (proposed)
 - lang: en
 - write-back: yes
 
 ```text
 The illustration is Edmund Dulac's 1911 plate for *Stories from Hans Andersen* (Hodder & Stoughton, London), public domain. The mark in `docs/assets/mark.svg` (a pea under seven mattresses) is original and released with the documentation under CC BY 4.0; `docs/assets/social-preview.png` is the same mark as a 1280×640 preview card.
+```
+
+### deck:readme:31
+
+- source: `README.md` · L152
+- under: ## Contact the author
+- lang: en
+- write-back: yes
+
+```text
+Hsien Hao (Jacky) Chen — [LinkedIn](https://www.linkedin.com/in/jacky-chen-a49177137/). Questions, ideas and stories from your own search are welcome: open an issue here or write on LinkedIn.
 ```
 
 ---
@@ -390,7 +401,7 @@ All prose paragraphs. Tables, headings and code blocks are not in the deck.
 
 ### deck:readme-zh-tw:1
 
-- source: `README.zh-TW.md` · L19
+- source: `README.zh-TW.md` · L20
 - under: (top of file)
 - lang: zh-TW
 - write-back: yes
@@ -401,7 +412,7 @@ All prose paragraphs. Tables, headings and code blocks are not in the deck.
 
 ### deck:readme-zh-tw:2
 
-- source: `README.zh-TW.md` · L23
+- source: `README.zh-TW.md` · L24
 - under: ## 從這裡開始，不需要終端機
 - lang: zh-TW
 - write-back: yes
@@ -412,7 +423,7 @@ All prose paragraphs. Tables, headings and code blocks are not in the deck.
 
 ### deck:readme-zh-tw:3
 
-- source: `README.zh-TW.md` · L25
+- source: `README.zh-TW.md` · L26
 - under: ## 從這裡開始，不需要終端機
 - lang: zh-TW
 - write-back: yes
@@ -423,7 +434,7 @@ All prose paragraphs. Tables, headings and code blocks are not in the deck.
 
 ### deck:readme-zh-tw:4
 
-- source: `README.zh-TW.md` · L27
+- source: `README.zh-TW.md` · L28
 - under: ## 從這裡開始，不需要終端機
 - lang: zh-TW
 - write-back: yes
@@ -434,7 +445,7 @@ All prose paragraphs. Tables, headings and code blocks are not in the deck.
 
 ### deck:readme-zh-tw:5
 
-- source: `README.zh-TW.md` · L29
+- source: `README.zh-TW.md` · L30
 - under: ## 從這裡開始，不需要終端機
 - lang: zh-TW
 - write-back: yes
@@ -445,7 +456,7 @@ All prose paragraphs. Tables, headings and code blocks are not in the deck.
 
 ### deck:readme-zh-tw:6
 
-- source: `README.zh-TW.md` · L31
+- source: `README.zh-TW.md` · L32
 - under: ## 從這裡開始，不需要終端機
 - lang: zh-TW
 - write-back: yes
@@ -456,7 +467,7 @@ All prose paragraphs. Tables, headings and code blocks are not in the deck.
 
 ### deck:readme-zh-tw:7
 
-- source: `README.zh-TW.md` · L33
+- source: `README.zh-TW.md` · L34
 - under: ## 從這裡開始，不需要終端機
 - lang: zh-TW
 - write-back: yes
@@ -467,7 +478,7 @@ All prose paragraphs. Tables, headings and code blocks are not in the deck.
 
 ### deck:readme-zh-tw:8
 
-- source: `README.zh-TW.md` · L35
+- source: `README.zh-TW.md` · L36
 - under: ## 從這裡開始，不需要終端機
 - lang: zh-TW
 - write-back: yes
@@ -478,7 +489,7 @@ All prose paragraphs. Tables, headings and code blocks are not in the deck.
 
 ### deck:readme-zh-tw:9
 
-- source: `README.zh-TW.md` · L50
+- source: `README.zh-TW.md` · L51
 - under: ## 它查什麼，答案從哪裡來
 - lang: zh-TW
 - write-back: yes
@@ -489,7 +500,7 @@ All prose paragraphs. Tables, headings and code blocks are not in the deck.
 
 ### deck:readme-zh-tw:10
 
-- source: `README.zh-TW.md` · L53
+- source: `README.zh-TW.md` · L54
 - under: ## 為什麼叫「豌豆公主」
 - lang: zh-TW
 - write-back: yes
@@ -500,7 +511,7 @@ All prose paragraphs. Tables, headings and code blocks are not in the deck.
 
 ### deck:readme-zh-tw:11
 
-- source: `README.zh-TW.md` · L55
+- source: `README.zh-TW.md` · L56
 - under: ## 為什麼叫「豌豆公主」
 - lang: zh-TW
 - write-back: yes
@@ -511,7 +522,7 @@ All prose paragraphs. Tables, headings and code blocks are not in the deck.
 
 ### deck:readme-zh-tw:12
 
-- source: `README.zh-TW.md` · L64
+- source: `README.zh-TW.md` · L65
 - under: ## 三種模式
 - lang: zh-TW
 - write-back: yes
@@ -522,7 +533,7 @@ All prose paragraphs. Tables, headings and code blocks are not in the deck.
 
 ### deck:readme-zh-tw:13
 
-- source: `README.zh-TW.md` · L66
+- source: `README.zh-TW.md` · L67
 - under: ## 三種模式
 - lang: zh-TW
 - write-back: yes
@@ -533,7 +544,7 @@ All prose paragraphs. Tables, headings and code blocks are not in the deck.
 
 ### deck:readme-zh-tw:14
 
-- source: `README.zh-TW.md` · L81
+- source: `README.zh-TW.md` · L82
 - under: # then, on any host with a shell: is it installed right? (one request per open register)
 - lang: zh-TW
 - write-back: yes
@@ -544,7 +555,7 @@ All prose paragraphs. Tables, headings and code blocks are not in the deck.
 
 ### deck:readme-zh-tw:15
 
-- source: `README.zh-TW.md` · L83
+- source: `README.zh-TW.md` · L84
 - under: # then, on any host with a shell: is it installed right? (one request per open register)
 - lang: zh-TW
 - write-back: yes
@@ -555,7 +566,7 @@ Codex：把沙箱網路打開（`sandbox_workspace_write.network_access = true`�
 
 ### deck:readme-zh-tw:16
 
-- source: `README.zh-TW.md` · L86
+- source: `README.zh-TW.md` · L87
 - under: ### 腳本（只用 Python 3.9 標準函式庫；網路走 curl）
 - lang: zh-TW
 - write-back: yes
@@ -566,7 +577,7 @@ Codex：把沙箱網路打開（`sandbox_workspace_write.network_access = true`�
 
 ### deck:readme-zh-tw:17
 
-- source: `README.zh-TW.md` · L101
+- source: `README.zh-TW.md` · L102
 - under: ### 腳本（只用 Python 3.9 標準函式庫；網路走 curl）
 - lang: zh-TW
 - write-back: yes
@@ -577,7 +588,7 @@ Codex：把沙箱網路打開（`sandbox_workspace_write.network_access = true`�
 
 ### deck:readme-zh-tw:18
 
-- source: `README.zh-TW.md` · L104
+- source: `README.zh-TW.md` · L105
 - under: ### 問它能做什麼
 - lang: zh-TW
 - write-back: yes
@@ -588,7 +599,7 @@ Codex：把沙箱網路打開（`sandbox_workspace_write.network_access = true`�
 
 ### deck:readme-zh-tw:19
 
-- source: `README.zh-TW.md` · L107
+- source: `README.zh-TW.md` · L108
 - under: ### 基準測試（事實在每個模型上都要對；判決可以不一樣）
 - lang: zh-TW
 - write-back: yes
@@ -599,7 +610,7 @@ Codex：把沙箱網路打開（`sandbox_workspace_write.network_access = true`�
 
 ### deck:readme-zh-tw:20
 
-- source: `README.zh-TW.md` · L109
+- source: `README.zh-TW.md` · L110
 - under: ### 基準測試（事實在每個模型上都要對；判決可以不一樣）
 - lang: zh-TW
 - write-back: yes
@@ -610,7 +621,7 @@ Codex：把沙箱網路打開（`sandbox_workspace_write.network_access = true`�
 
 ### deck:readme-zh-tw:21
 
-- source: `README.zh-TW.md` · L111
+- source: `README.zh-TW.md` · L112
 - under: ### 基準測試（事實在每個模型上都要對；判決可以不一樣）
 - lang: zh-TW
 - write-back: yes
@@ -621,7 +632,7 @@ Codex：把沙箱網路打開（`sandbox_workspace_write.network_access = true`�
 
 ### deck:readme-zh-tw:22
 
-- source: `README.zh-TW.md` · L113
+- source: `README.zh-TW.md` · L114
 - under: ### 基準測試（事實在每個模型上都要對；判決可以不一樣）
 - lang: zh-TW
 - write-back: yes
@@ -632,7 +643,7 @@ Codex：把沙箱網路打開（`sandbox_workspace_write.network_access = true`�
 
 ### deck:readme-zh-tw:23
 
-- source: `README.zh-TW.md` · L115
+- source: `README.zh-TW.md` · L116
 - under: ### 基準測試（事實在每個模型上都要對；判決可以不一樣）
 - lang: zh-TW
 - write-back: yes
@@ -643,7 +654,7 @@ Codex：把沙箱網路打開（`sandbox_workspace_write.network_access = true`�
 
 ### deck:readme-zh-tw:24
 
-- source: `README.zh-TW.md` · L117
+- source: `README.zh-TW.md` · L118
 - under: ### 基準測試（事實在每個模型上都要對；判決可以不一樣）
 - lang: zh-TW
 - write-back: yes
@@ -654,7 +665,7 @@ Codex：把沙箱網路打開（`sandbox_workspace_write.network_access = true`�
 
 ### deck:readme-zh-tw:25
 
-- source: `README.zh-TW.md` · L127
+- source: `README.zh-TW.md` · L128
 - under: ## 這裡不會有的來源
 - lang: zh-TW
 - write-back: yes
@@ -665,7 +676,7 @@ Rightmove、Zoopla、OnTheMarket、OpenRent、HomeViews、Trustpilot、Airbnb、
 
 ### deck:readme-zh-tw:26
 
-- source: `README.zh-TW.md` · L131
+- source: `README.zh-TW.md` · L132
 - under: ## 改成你的樣子
 - lang: zh-TW
 - write-back: yes
@@ -676,7 +687,7 @@ Rightmove、Zoopla、OnTheMarket、OpenRent、HomeViews、Trustpilot、Airbnb、
 
 ### deck:readme-zh-tw:27
 
-- source: `README.zh-TW.md` · L140
+- source: `README.zh-TW.md` · L141
 - under: ## 改成你的樣子
 - lang: zh-TW
 - write-back: yes
@@ -687,7 +698,7 @@ Rightmove、Zoopla、OnTheMarket、OpenRent、HomeViews、Trustpilot、Airbnb、
 
 ### deck:readme-zh-tw:28
 
-- source: `README.zh-TW.md` · L142
+- source: `README.zh-TW.md` · L143
 - under: ## 改成你的樣子
 - lang: zh-TW
 - write-back: yes
@@ -698,7 +709,7 @@ Rightmove、Zoopla、OnTheMarket、OpenRent、HomeViews、Trustpilot、Airbnb、
 
 ### deck:readme-zh-tw:29
 
-- source: `README.zh-TW.md` · L145
+- source: `README.zh-TW.md` · L146
 - under: ## 授權與姓名標示（提案中）
 - lang: zh-TW
 - write-back: yes
@@ -709,13 +720,24 @@ Rightmove、Zoopla、OnTheMarket、OpenRent、HomeViews、Trustpilot、Airbnb、
 
 ### deck:readme-zh-tw:30
 
-- source: `README.zh-TW.md` · L147
+- source: `README.zh-TW.md` · L148
 - under: ## 授權與姓名標示（提案中）
 - lang: zh-TW
 - write-back: yes
 
 ```text
 插圖出自 Edmund Dulac 1911 年為 *Stories from Hans Andersen*（Hodder & Stoughton，倫敦）畫的彩頁，屬於公有領域。`docs/assets/mark.svg` 裡的標誌（七層床墊下的一顆豌豆）是原創的，跟文件一起以 CC BY 4.0 釋出；`docs/assets/social-preview.png` 是同一個標誌做成的 1280×640 預覽卡。
+```
+
+### deck:readme-zh-tw:31
+
+- source: `README.zh-TW.md` · L152
+- under: ## 作者的聯絡方式
+- lang: zh-TW
+- write-back: yes
+
+```text
+陳先豪 Hsien Hao (Jacky) Chen — [LinkedIn](https://www.linkedin.com/in/jacky-chen-a49177137/)。有問題、想法，或你自己找房的故事，歡迎在這裡開 issue 或到 LinkedIn 私訊。
 ```
 
 ---
@@ -726,7 +748,7 @@ All prose paragraphs. Tables, headings and code blocks are not in the deck.
 
 ### deck:readme-zh-cn:1
 
-- source: `README.zh-CN.md` · L19
+- source: `README.zh-CN.md` · L20
 - under: (top of file)
 - lang: zh-CN
 - write-back: yes
@@ -737,7 +759,7 @@ All prose paragraphs. Tables, headings and code blocks are not in the deck.
 
 ### deck:readme-zh-cn:2
 
-- source: `README.zh-CN.md` · L23
+- source: `README.zh-CN.md` · L24
 - under: ## 从这里开始，不需要终端
 - lang: zh-CN
 - write-back: yes
@@ -748,7 +770,7 @@ All prose paragraphs. Tables, headings and code blocks are not in the deck.
 
 ### deck:readme-zh-cn:3
 
-- source: `README.zh-CN.md` · L25
+- source: `README.zh-CN.md` · L26
 - under: ## 从这里开始，不需要终端
 - lang: zh-CN
 - write-back: yes
@@ -759,7 +781,7 @@ All prose paragraphs. Tables, headings and code blocks are not in the deck.
 
 ### deck:readme-zh-cn:4
 
-- source: `README.zh-CN.md` · L27
+- source: `README.zh-CN.md` · L28
 - under: ## 从这里开始，不需要终端
 - lang: zh-CN
 - write-back: yes
@@ -770,7 +792,7 @@ All prose paragraphs. Tables, headings and code blocks are not in the deck.
 
 ### deck:readme-zh-cn:5
 
-- source: `README.zh-CN.md` · L29
+- source: `README.zh-CN.md` · L30
 - under: ## 从这里开始，不需要终端
 - lang: zh-CN
 - write-back: yes
@@ -781,7 +803,7 @@ All prose paragraphs. Tables, headings and code blocks are not in the deck.
 
 ### deck:readme-zh-cn:6
 
-- source: `README.zh-CN.md` · L31
+- source: `README.zh-CN.md` · L32
 - under: ## 从这里开始，不需要终端
 - lang: zh-CN
 - write-back: yes
@@ -792,7 +814,7 @@ All prose paragraphs. Tables, headings and code blocks are not in the deck.
 
 ### deck:readme-zh-cn:7
 
-- source: `README.zh-CN.md` · L33
+- source: `README.zh-CN.md` · L34
 - under: ## 从这里开始，不需要终端
 - lang: zh-CN
 - write-back: yes
@@ -803,7 +825,7 @@ All prose paragraphs. Tables, headings and code blocks are not in the deck.
 
 ### deck:readme-zh-cn:8
 
-- source: `README.zh-CN.md` · L35
+- source: `README.zh-CN.md` · L36
 - under: ## 从这里开始，不需要终端
 - lang: zh-CN
 - write-back: yes
@@ -814,7 +836,7 @@ All prose paragraphs. Tables, headings and code blocks are not in the deck.
 
 ### deck:readme-zh-cn:9
 
-- source: `README.zh-CN.md` · L50
+- source: `README.zh-CN.md` · L51
 - under: ## 它查什么，答案从哪里来
 - lang: zh-CN
 - write-back: yes
@@ -825,7 +847,7 @@ All prose paragraphs. Tables, headings and code blocks are not in the deck.
 
 ### deck:readme-zh-cn:10
 
-- source: `README.zh-CN.md` · L53
+- source: `README.zh-CN.md` · L54
 - under: ## 为什么叫「豌豆公主」
 - lang: zh-CN
 - write-back: yes
@@ -836,7 +858,7 @@ All prose paragraphs. Tables, headings and code blocks are not in the deck.
 
 ### deck:readme-zh-cn:11
 
-- source: `README.zh-CN.md` · L55
+- source: `README.zh-CN.md` · L56
 - under: ## 为什么叫「豌豆公主」
 - lang: zh-TW
 - write-back: yes
@@ -847,7 +869,7 @@ All prose paragraphs. Tables, headings and code blocks are not in the deck.
 
 ### deck:readme-zh-cn:12
 
-- source: `README.zh-CN.md` · L64
+- source: `README.zh-CN.md` · L65
 - under: ## 三种模式
 - lang: zh-CN
 - write-back: yes
@@ -858,7 +880,7 @@ All prose paragraphs. Tables, headings and code blocks are not in the deck.
 
 ### deck:readme-zh-cn:13
 
-- source: `README.zh-CN.md` · L66
+- source: `README.zh-CN.md` · L67
 - under: ## 三种模式
 - lang: zh-CN
 - write-back: yes
@@ -869,7 +891,7 @@ All prose paragraphs. Tables, headings and code blocks are not in the deck.
 
 ### deck:readme-zh-cn:14
 
-- source: `README.zh-CN.md` · L81
+- source: `README.zh-CN.md` · L82
 - under: # then, on any host with a shell: is it installed right? (one request per open register)
 - lang: zh-CN
 - write-back: yes
@@ -880,7 +902,7 @@ All prose paragraphs. Tables, headings and code blocks are not in the deck.
 
 ### deck:readme-zh-cn:15
 
-- source: `README.zh-CN.md` · L83
+- source: `README.zh-CN.md` · L84
 - under: # then, on any host with a shell: is it installed right? (one request per open register)
 - lang: zh-CN
 - write-back: yes
@@ -891,7 +913,7 @@ Codex：把沙箱网络打开（`sandbox_workspace_write.network_access = true`�
 
 ### deck:readme-zh-cn:16
 
-- source: `README.zh-CN.md` · L86
+- source: `README.zh-CN.md` · L87
 - under: ### 脚本（只用 Python 3.9 标准库；网络走 curl）
 - lang: zh-CN
 - write-back: yes
@@ -902,7 +924,7 @@ Codex：把沙箱网络打开（`sandbox_workspace_write.network_access = true`�
 
 ### deck:readme-zh-cn:17
 
-- source: `README.zh-CN.md` · L101
+- source: `README.zh-CN.md` · L102
 - under: ### 脚本（只用 Python 3.9 标准库；网络走 curl）
 - lang: zh-CN
 - write-back: yes
@@ -913,7 +935,7 @@ Codex：把沙箱网络打开（`sandbox_workspace_write.network_access = true`�
 
 ### deck:readme-zh-cn:18
 
-- source: `README.zh-CN.md` · L104
+- source: `README.zh-CN.md` · L105
 - under: ### 问它能做什么
 - lang: zh-CN
 - write-back: yes
@@ -924,7 +946,7 @@ Codex：把沙箱网络打开（`sandbox_workspace_write.network_access = true`�
 
 ### deck:readme-zh-cn:19
 
-- source: `README.zh-CN.md` · L107
+- source: `README.zh-CN.md` · L108
 - under: ### 基准测试（事实在每个模型上都要对；判决可以不一样）
 - lang: zh-CN
 - write-back: yes
@@ -935,7 +957,7 @@ Codex：把沙箱网络打开（`sandbox_workspace_write.network_access = true`�
 
 ### deck:readme-zh-cn:20
 
-- source: `README.zh-CN.md` · L109
+- source: `README.zh-CN.md` · L110
 - under: ### 基准测试（事实在每个模型上都要对；判决可以不一样）
 - lang: zh-CN
 - write-back: yes
@@ -946,7 +968,7 @@ Codex：把沙箱网络打开（`sandbox_workspace_write.network_access = true`�
 
 ### deck:readme-zh-cn:21
 
-- source: `README.zh-CN.md` · L111
+- source: `README.zh-CN.md` · L112
 - under: ### 基准测试（事实在每个模型上都要对；判决可以不一样）
 - lang: zh-CN
 - write-back: yes
@@ -957,7 +979,7 @@ Codex：把沙箱网络打开（`sandbox_workspace_write.network_access = true`�
 
 ### deck:readme-zh-cn:22
 
-- source: `README.zh-CN.md` · L113
+- source: `README.zh-CN.md` · L114
 - under: ### 基准测试（事实在每个模型上都要对；判决可以不一样）
 - lang: zh-CN
 - write-back: yes
@@ -968,7 +990,7 @@ Codex：把沙箱网络打开（`sandbox_workspace_write.network_access = true`�
 
 ### deck:readme-zh-cn:23
 
-- source: `README.zh-CN.md` · L115
+- source: `README.zh-CN.md` · L116
 - under: ### 基准测试（事实在每个模型上都要对；判决可以不一样）
 - lang: zh-CN
 - write-back: yes
@@ -979,7 +1001,7 @@ Codex：把沙箱网络打开（`sandbox_workspace_write.network_access = true`�
 
 ### deck:readme-zh-cn:24
 
-- source: `README.zh-CN.md` · L117
+- source: `README.zh-CN.md` · L118
 - under: ### 基准测试（事实在每个模型上都要对；判决可以不一样）
 - lang: zh-CN
 - write-back: yes
@@ -990,7 +1012,7 @@ Codex：把沙箱网络打开（`sandbox_workspace_write.network_access = true`�
 
 ### deck:readme-zh-cn:25
 
-- source: `README.zh-CN.md` · L127
+- source: `README.zh-CN.md` · L128
 - under: ## 这里不会有的来源
 - lang: zh-CN
 - write-back: yes
@@ -1001,7 +1023,7 @@ Rightmove、Zoopla、OnTheMarket、OpenRent、HomeViews、Trustpilot、Airbnb、
 
 ### deck:readme-zh-cn:26
 
-- source: `README.zh-CN.md` · L131
+- source: `README.zh-CN.md` · L132
 - under: ## 改成你的样子
 - lang: zh-CN
 - write-back: yes
@@ -1012,7 +1034,7 @@ Rightmove、Zoopla、OnTheMarket、OpenRent、HomeViews、Trustpilot、Airbnb、
 
 ### deck:readme-zh-cn:27
 
-- source: `README.zh-CN.md` · L140
+- source: `README.zh-CN.md` · L141
 - under: ## 改成你的样子
 - lang: zh-CN
 - write-back: yes
@@ -1023,7 +1045,7 @@ Rightmove、Zoopla、OnTheMarket、OpenRent、HomeViews、Trustpilot、Airbnb、
 
 ### deck:readme-zh-cn:28
 
-- source: `README.zh-CN.md` · L142
+- source: `README.zh-CN.md` · L143
 - under: ## 改成你的样子
 - lang: zh-CN
 - write-back: yes
@@ -1034,7 +1056,7 @@ Rightmove、Zoopla、OnTheMarket、OpenRent、HomeViews、Trustpilot、Airbnb、
 
 ### deck:readme-zh-cn:29
 
-- source: `README.zh-CN.md` · L145
+- source: `README.zh-CN.md` · L146
 - under: ## 许可与署名（提案中）
 - lang: zh-CN
 - write-back: yes
@@ -1045,13 +1067,24 @@ Rightmove、Zoopla、OnTheMarket、OpenRent、HomeViews、Trustpilot、Airbnb、
 
 ### deck:readme-zh-cn:30
 
-- source: `README.zh-CN.md` · L147
+- source: `README.zh-CN.md` · L148
 - under: ## 许可与署名（提案中）
 - lang: zh-CN
 - write-back: yes
 
 ```text
 插图出自 Edmund Dulac 1911 年为 *Stories from Hans Andersen*（Hodder & Stoughton，伦敦）画的彩页，属于公有领域。`docs/assets/mark.svg` 里的标志（七层床垫下的一颗豌豆）是原创的，跟文档一起以 CC BY 4.0 发布；`docs/assets/social-preview.png` 是同一个标志做成的 1280×640 预览卡。
+```
+
+### deck:readme-zh-cn:31
+
+- source: `README.zh-CN.md` · L152
+- under: ## 作者的联系方式
+- lang: zh-CN
+- write-back: yes
+
+```text
+陈先豪 Hsien Hao (Jacky) Chen — [LinkedIn](https://www.linkedin.com/in/jacky-chen-a49177137/)。有问题、想法，或你自己找房的故事，欢迎在这里开 issue 或到 LinkedIn 私信。
 ```
 
 ---

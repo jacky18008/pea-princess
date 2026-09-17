@@ -15,6 +15,7 @@
   <img alt="format: Agent Skills" src="https://img.shields.io/badge/format-Agent%20Skills-1F1D26">
   <img alt="listing sites: never fetched" src="https://img.shields.io/badge/listing%20sites-never%20fetched-6B6679">
 </p>
+<p align="center"><sub>Author: Hsien Hao (Jacky) Chen · <a href="https://www.linkedin.com/in/jacky-chen-a49177137/">LinkedIn</a></sub></p>
 
 An agent skill for checking and searching rental listings in London. It vets a flat the way a careful surveyor would: identity, floor area, age, heating, construction nearby, crime, management reviews, agent compliance, price, light, total monthly cost and commute, from official and open UK data, ending in a verdict. Works with any agent that reads the [Agent Skills](https://agentskills.io) format (e.g. GPT, Claude, Grok, Gemini, pi-agent, DeepSeek, etc.). Plain chat mode works too, but agent mode is recommended: it is steadier on complex tasks. Just talk to the AI in plain words.
 
@@ -145,3 +146,7 @@ One sentence to try first, on any host:
 Documentation and skill text: CC BY 4.0. Code: MIT. Every report carries "Generated with pea-princess <version> — <source URL>". Please keep it.
 
 The illustration is Edmund Dulac's 1911 plate for *Stories from Hans Andersen* (Hodder & Stoughton, London), public domain. The mark in `docs/assets/mark.svg` (a pea under seven mattresses) is original and released with the documentation under CC BY 4.0; `docs/assets/social-preview.png` is the same mark as a 1280×640 preview card.
+
+## Contact the author
+
+Hsien Hao (Jacky) Chen — [LinkedIn](https://www.linkedin.com/in/jacky-chen-a49177137/). Questions, ideas and stories from your own search are welcome: open an issue here or write on LinkedIn.
