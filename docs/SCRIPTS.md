@@ -1383,6 +1383,28 @@ written; the register calls are the same open, cached requests the skill makes i
 about 25 s end to end, Overpass the slowest at ~17 s). This is the first thing to run on a new host, and the
 evidence behind the per-host table in `docs/INSTALL.md`.
 
+## `reply_check.py` — lint a draft reply before it is sent (no network, no key)
+
+```
+python3 scripts/reply_check.py draft.md
+python3 scripts/reply_check.py draft.md --previous "the person's last message"
+cat draft.md | python3 scripts/reply_check.py - --json
+```
+
+The assistant writes its draft to a file, runs this, fixes what it lists, then sends; exit code 1 when
+anything was found, so a host hook can gate on it. Findings are plain sentences quoting the fragment.
+Kinds: `numbers` (an amount, percentage, duration, count, distance or area with no source, formula or
+"you said" in its sentence), `jargon` (codes, evidence letters, file and skill names, internal words),
+`terms` and `address` (house wording and the person's own words kept), `script` (simplified characters
+in a traditional-script conversation), `opening` (the first sentence narrates process instead of
+answering), `paths`, `asking` (too many questions; and, with `--previous`, a question after the person's
+bare go-ahead — "go", "都同意", "繼續" with no question, negation, quote or scoping word in it), `authority`
+(the reply grants itself a permission the person did not give), `decision` (wording stronger than the
+person's own: "you have decided" after "I'm leaning towards"), `claims` (a save or a check reported as
+done that the host cannot show). It does not infer consent: a short "go" is not a licence to act on
+anything but the last proposal. Optional Stop-hook setup for Claude Code: `docs/session-hook-examples.md`.
+Tests: `tests/test_reply_check.py`.
+
 ## `listing_fields.py` — fields from a page the person saved or pasted (no network, no key)
 
 ```

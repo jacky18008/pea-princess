@@ -120,6 +120,20 @@ the two non-Claude paths behave identically.)
 **No flag anywhere skips a permission prompt or disables a sandbox.**
 `tests/test_journeys.py` asserts it for every agent and every journey.
 
+### Grok
+
+```
+python3 bench/journeys.py --journey j12-grok-consent-fixture-zh --agent grok --dry-run
+python3 bench/journeys.py --all --agent grok
+```
+
+`--agent grok` drives the Grok Build CLI headless (`grok -p … --output-format streaming-json -m grok-4.6
+--no-subagents --max-turns N`), carrying the conversation with `--session-id` / `--resume`. Grok Build
+reads skills only from `~/.grok/skills/<name>`, so the runner syncs the pinned skill there for the run
+and restores what was there afterwards. Web search is off, and the answer, token counts and errors are
+read from the streaming JSON events. First seen on the three-host bench (2026-09-17): Grok tends to open
+with a sentence narrating its process, the habit rule 6 of the contract is written against.
+
 ### Both languages
 
 `j9-adjust-settings-by-talking` is scripted in Chinese and English. Each variant is one

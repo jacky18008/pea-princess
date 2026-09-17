@@ -32,7 +32,7 @@ On a phone
 | Surface | Blocks | Source |
 |---|---|---|
 | README — the front page | 21 | `README.md` |
-| docs/USING.md — the plain-words walkthrough | 41 | `docs/USING.md` |
+| docs/USING.md — the plain-words walkthrough | 44 | `docs/USING.md` |
 | docs/INSTALL.md — install page | 14 | `docs/INSTALL.md` |
 | docs/EXPERIMENTS.md — which configuration to run | 7 | `docs/EXPERIMENTS.md` |
 | onboarding.md — what the skill says to a new user | 30 | `skills/vet-flat/references/onboarding.md` |
@@ -40,7 +40,7 @@ On a phone
 | inputs.md — the one message that asks the user for what is missing | 1 | `skills/vet-flat/references/inputs.md` |
 | profiles/ — the sentences a profile carries | 14 | `skills/vet-flat/profiles/*.yaml` |
 | seed.py — the seed card sentences (read-only here) | 25 | `skills/vet-flat/scripts/seed.py` |
-| **Total** | **159** | |
+| **Total** | **162** | |
 
 ---
 
@@ -94,8 +94,8 @@ All prose paragraphs. Tables, headings and code blocks are not in the deck.
 
 ### deck:readme:5
 
-- source: `README.md` · L26
-- under: # claude.ai / Claude Cowork / ChatGPT Skills: upload the zip from Releases
+- source: `README.md` · L28
+- under: # then, on any host with a shell: is it installed right? (one request per open register)
 - lang: en
 - write-back: yes
 
@@ -105,8 +105,8 @@ The skill is installed and invoked as **`pea-princess`**; the upload artifact is
 
 ### deck:readme:6
 
-- source: `README.md` · L28
-- under: # claude.ai / Claude Cowork / ChatGPT Skills: upload the zip from Releases
+- source: `README.md` · L30
+- under: # then, on any host with a shell: is it installed right? (one request per open register)
 - lang: en
 - write-back: yes
 
@@ -116,7 +116,7 @@ Codex: enable sandbox network (`sandbox_workspace_write.network_access = true`) 
 
 ### deck:readme:7
 
-- source: `README.md` · L31
+- source: `README.md` · L33
 - under: ## Scripts (Python 3.9 standard library only; network via curl)
 - lang: en
 - write-back: yes
@@ -127,7 +127,7 @@ All in `skills/vet-flat/scripts/`; each prints one JSON object with `source_url`
 
 ### deck:readme:8
 
-- source: `README.md` · L46
+- source: `README.md` · L48
 - under: ## Scripts (Python 3.9 standard library only; network via curl)
 - lang: en
 - write-back: yes
@@ -138,7 +138,7 @@ Report layout for people without a shell: open `viewer/viewer.html` in a browser
 
 ### deck:readme:9
 
-- source: `README.md` · L49
+- source: `README.md` · L51
 - under: ## Why "Pea Princess"
 - lang: en
 - write-back: yes
@@ -149,7 +149,7 @@ In the fairy tale only the real princess feels the pea through twenty mattresses
 
 ### deck:readme:10
 
-- source: `README.md` · L51
+- source: `README.md` · L53
 - under: ## Why "Pea Princess"
 - lang: zh-TW
 - write-back: yes
@@ -160,7 +160,7 @@ In the fairy tale only the real princess feels the pea through twenty mattresses
 
 ### deck:readme:11
 
-- source: `README.md` · L54
+- source: `README.md` · L56
 - under: ## No code required · 不用會寫程式
 - lang: en
 - write-back: yes
@@ -171,7 +171,7 @@ Everything is done by typing or dictating sentences: install (one pasted line, o
 
 ### deck:readme:12
 
-- source: `README.md` · L56
+- source: `README.md` · L58
 - under: ## No code required · 不用會寫程式
 - lang: zh-TW
 - write-back: yes
@@ -182,7 +182,7 @@ Everything is done by typing or dictating sentences: install (one pasted line, o
 
 ### deck:readme:13
 
-- source: `README.md` · L59
+- source: `README.md` · L61
 - under: ## Start here, on any platform
 - lang: en
 - write-back: yes
@@ -193,7 +193,7 @@ Ask **"What can this do?"** (or 這能幹嘛？). The answer comes from `skills/
 
 ### deck:readme:14
 
-- source: `README.md` · L62
+- source: `README.md` · L64
 - under: ## Benchmark (facts must be right on every model; verdicts may differ)
 - lang: en
 - write-back: yes
@@ -204,7 +204,7 @@ Ask **"What can this do?"** (or 這能幹嘛？). The answer comes from `skills/
 
 ### deck:readme:15
 
-- source: `README.md` · L64
+- source: `README.md` · L66
 - under: ## Benchmark (facts must be right on every model; verdicts may differ)
 - lang: en
 - write-back: yes
@@ -215,7 +215,7 @@ Ask **"What can this do?"** (or 這能幹嘛？). The answer comes from `skills/
 
 ### deck:readme:16
 
-- source: `README.md` · L66
+- source: `README.md` · L68
 - under: ## Benchmark (facts must be right on every model; verdicts may differ)
 - lang: en
 - write-back: yes
@@ -226,7 +226,7 @@ Ask **"What can this do?"** (or 這能幹嘛？). The answer comes from `skills/
 
 ### deck:readme:17
 
-- source: `README.md` · L68
+- source: `README.md` · L70
 - under: ## Benchmark (facts must be right on every model; verdicts may differ)
 - lang: en
 - write-back: yes
@@ -237,7 +237,7 @@ Ask **"What can this do?"** (or 這能幹嘛？). The answer comes from `skills/
 
 ### deck:readme:18
 
-- source: `README.md` · L70
+- source: `README.md` · L72
 - under: ## Benchmark (facts must be right on every model; verdicts may differ)
 - lang: en
 - write-back: yes
@@ -248,7 +248,7 @@ Ask **"What can this do?"** (or 這能幹嘛？). The answer comes from `skills/
 
 ### deck:readme:19
 
-- source: `README.md` · L72
+- source: `README.md` · L74
 - under: ## Benchmark (facts must be right on every model; verdicts may differ)
 - lang: en
 - write-back: yes
@@ -259,7 +259,7 @@ Ask **"What can this do?"** (or 這能幹嘛？). The answer comes from `skills/
 
 ### deck:readme:20
 
-- source: `README.md` · L80
+- source: `README.md` · L82
 - under: ## Sources you will not find here
 - lang: en
 - write-back: yes
@@ -270,7 +270,7 @@ Rightmove, Zoopla, OnTheMarket, OpenRent, HomeViews, Trustpilot, Airbnb, Booking
 
 ### deck:readme:21
 
-- source: `README.md` · L83
+- source: `README.md` · L85
 - under: ## Licence and attribution (proposed)
 - lang: en
 - write-back: yes
@@ -375,13 +375,13 @@ The assistant uses real rental examples with source links and dates. A public ad
 
 ### deck:using:9
 
-- source: `docs/USING.md` · L22
-- under: ### Speak instead of typing
+- source: `docs/USING.md` · L20
+- under: ## English
 - lang: en
 - write-back: yes
 
 ```text
-If speaking is easier, use your device's built-in dictation or an app you already like to enter text in the assistant's chat box. [Typeless](https://www.typeless.com/pricing) and [Wispr Flow](https://wisprflow.ai/pricing) are optional examples; both list free plans with usage limits, which vary by plan or platform (checked 11 September 2026). Check the linked pages for current allowances; installing or paying for another app is not required.
+**Handing over a listing page.** The skill never opens listing links (the sites' terms do not allow programs to read for you), so give it the page itself. On a computer: File → Save Page As → "Webpage, Complete", then attach the `.html` — it carries more than the screen shows, including the full postcode. On an iPhone: Safari's share sheet, either with the one-tap shortcut described at the top of `skills/vet-flat/scripts/capture_page.js` or with Options → Web Archive. A PDF or the copied text also works, with less in it. Photos and the floor plan are pictures: save them, or print the page to PDF.
 ```
 
 ### deck:using:10
@@ -392,29 +392,29 @@ If speaking is easier, use your device's built-in dictation or an app you alread
 - write-back: yes
 
 ```text
-Describe in your own words what you want, the rentals or stays that were especially good or especially bad, even a shopping experience you still remember — it all helps the assistant understand you. You can change your mind midway. Before sending, just glance at the text to check it was transcribed correctly.
+If speaking is easier, use your device's built-in dictation or an app you already like to enter text in the assistant's chat box. [Typeless](https://www.typeless.com/pricing) and [Wispr Flow](https://wisprflow.ai/pricing) are optional examples; both list free plans with usage limits, which vary by plan or platform (checked 11 September 2026). Check the linked pages for current allowances; installing or paying for another app is not required.
 ```
 
 ### deck:using:11
 
-- source: `docs/USING.md` · L28
+- source: `docs/USING.md` · L26
+- under: ### Speak instead of typing
+- lang: en
+- write-back: yes
+
+```text
+Describe in your own words what you want, the rentals or stays that were especially good or especially bad, even a shopping experience you still remember — it all helps the assistant understand you. You can change your mind midway. Before sending, just glance at the text to check it was transcribed correctly.
+```
+
+### deck:using:12
+
+- source: `docs/USING.md` · L30
 - under: ### Learn by comparing
 - lang: en
 - write-back: yes
 
 ```text
 Start with differences you can react to: a shorter commute versus more space, a quiet bedroom versus a busy road, lower rent versus uncertain bills. The assistant explains the likely consequences, then helps you inspect the evidence or prepare a viewing check. You can ask about London areas, rental budgets, paperwork or common problems whenever they become relevant. For claims about the current market or the law, you can ask the assistant to attach the sources it checked.
-```
-
-### deck:using:12
-
-- source: `docs/USING.md` · L32
-- under: ### Read the recommendation
-- lang: en
-- write-back: yes
-
-```text
-The answer begins with what to do next and why. Numbers keep their source and uncertainty: “landlord estimate: 20 minutes, not checked” is different from a journey planner prediction for your destination and arrival time. A quote matching the landlord's message does not prove the claim is true. Unknown information remains unknown; a low estimate alone does not confirm that a home meets your limit.
 ```
 
 ### deck:using:13
@@ -425,18 +425,18 @@ The answer begins with what to do next and why. Numbers keep their source and un
 - write-back: yes
 
 ```text
-A fuller report covers the money, paperwork, size, bills, move-in timing and other checks relevant to the home. These are things the assistant works through, not a form you must fill out before it helps. It asks for the few missing items that matter next and keeps other gaps visible.
+The answer begins with what to do next and why. Numbers keep their source and uncertainty: “landlord estimate: 20 minutes, not checked” is different from a journey planner prediction for your destination and arrival time. A quote matching the landlord's message does not prove the claim is true. Unknown information remains unknown; a low estimate alone does not confirm that a home meets your limit.
 ```
 
 ### deck:using:14
 
-- source: `docs/USING.md` · L38
-- under: ### Change your mind or interrupt
+- source: `docs/USING.md` · L36
+- under: ### Read the recommendation
 - lang: en
 - write-back: yes
 
 ```text
-Say “Raise my total monthly limit to £2,300”, “Quiet matters more than light”, or “A longer commute is okay, but never over 45 minutes”. The assistant applies clear instructions, explains the effect in plain words and preserves conditions and previous requirements. It asks only when your meaning is materially ambiguous or it proposes a change itself.
+A fuller report covers the money, paperwork, size, bills, move-in timing and other checks relevant to the home. These are things the assistant works through, not a form you must fill out before it helps. It asks for the few missing items that matter next and keeps other gaps visible.
 ```
 
 ### deck:using:15
@@ -447,18 +447,18 @@ Say “Raise my total monthly limit to £2,300”, “Quiet matters more than li
 - write-back: yes
 
 ```text
-Ask a side question at any point. It should answer it, keep the original work available, and resume without making you repeat your preferences. Saving across conversations depends on the host's file and memory support; the assistant must say when it cannot save something.
+Say “Raise my total monthly limit to £2,300”, “Quiet matters more than light”, or “A longer commute is okay, but never over 45 minutes”. The assistant applies clear instructions, explains the effect in plain words and preserves conditions and previous requirements. It asks only when your meaning is materially ambiguous or it proposes a change itself.
 ```
 
 ### deck:using:16
 
-- source: `docs/USING.md` · L44
-- under: ### Before arriving or committing
+- source: `docs/USING.md` · L42
+- under: ### Change your mind or interrupt
 - lang: en
 - write-back: yes
 
 ```text
-Compare temporary accommodation if it would give you time to view longer-term homes. Check actual cancellation, payment and departure terms; no accommodation type guarantees a refund or same-day exit. Build an arrival plan from your dates and verified costs, leaving gaps explicit.
+Ask a side question at any point. It should answer it, keep the original work available, and resume without making you repeat your preferences. Saving across conversations depends on the host's file and memory support; the assistant must say when it cannot save something.
 ```
 
 ### deck:using:17
@@ -469,7 +469,7 @@ Compare temporary accommodation if it would give you time to view longer-term ho
 - write-back: yes
 
 ```text
-Use the report to decide what to investigate, then see the flat and speak with the agent or landlord. Take the agreement away to read; do not sign at the viewing. The assistant gives legal and payment guidance at the decision it affects, with the applicable date and agreement type.
+Compare temporary accommodation if it would give you time to view longer-term homes. Check actual cancellation, payment and departure terms; no accommodation type guarantees a refund or same-day exit. Build an arrival plan from your dates and verified costs, leaving gaps explicit.
 ```
 
 ### deck:using:18
@@ -480,7 +480,7 @@ Use the report to decide what to investigate, then see the flat and speak with t
 - write-back: yes
 
 ```text
-**Your own little secretary.** Anything personal or local that the shared skill does not check — the walk to your gym, a school's catchment, a noise source you know about, a data set you trust — goes into `extensions/` in your copy as a one-page add-on (or just tell the assistant the whole list and let it put it in). These extras are labelled in the report, never change the verdict by themselves, read no listing or review sites, and never describe an area by who lives there.
+Use the report to decide what to investigate, then see the flat and speak with the agent or landlord. Take the agreement away to read; do not sign at the viewing. The assistant gives legal and payment guidance at the decision it affects, with the applicable date and agreement type.
 ```
 
 ### deck:using:19
@@ -491,18 +491,18 @@ Use the report to decide what to investigate, then see the flat and speak with t
 - write-back: yes
 
 ```text
-**Share what you learned, not where you live.** Ask the assistant for your seed and post it: it carries your taste, deal-breakers and the questions you make every flat answer, never where you go each day or when you move. Around it, say what helped you; leave out your employer, school, station and moving date. There is no version that includes them: a friend who needs everything gets your profile file, not a seed.
+**Your own little secretary.** Anything personal or local that the shared skill does not check — the walk to your gym, a school's catchment, a noise source you know about, a data set you trust — goes into `extensions/` in your copy as a one-page add-on (or just tell the assistant the whole list and let it put it in). These extras are labelled in the report, never change the verdict by themselves, read no listing or review sites, and never describe an area by who lives there.
 ```
 
 ### deck:using:20
 
-- source: `docs/USING.md` · L54
-- under: ## 繁體中文
-- lang: zh-TW
+- source: `docs/USING.md` · L52
+- under: ### Before arriving or committing
+- lang: en
 - write-back: yes
 
 ```text
-不用寫程式，也不用先填完整問卷或挑技術設定。按照[安裝說明](INSTALL.md)加入技能後，可以直接說：
+**Share what you learned, not where you live.** Ask the assistant for your seed and post it: it carries your taste, deal-breakers and the questions you make every flat answer, never where you go each day or when you move. Around it, say what helped you; leave out your employer, school, station and moving date. There is no version that includes them: a friend who needs everything gets your profile file, not a seed.
 ```
 
 ### deck:using:21
@@ -513,12 +513,23 @@ Use the report to decide what to investigate, then see the flat and speak with t
 - write-back: yes
 
 ```text
-- 「我十月要去倫敦，先給我例子，教我怎麼挑。」
+不用寫程式，也不用先填完整問卷或挑技術設定。按照[安裝說明](INSTALL.md)加入技能後，可以直接說：
 ```
 
 ### deck:using:22
 
-- source: `docs/USING.md` · L57
+- source: `docs/USING.md` · L58
+- under: ## 繁體中文
+- lang: zh-TW
+- write-back: yes
+
+```text
+- 「我十月要去倫敦，先給我例子，教我怎麼挑。」
+```
+
+### deck:using:23
+
+- source: `docs/USING.md` · L59
 - under: ## 繁體中文
 - lang: zh-TW
 - write-back: yes
@@ -527,26 +538,15 @@ Use the report to decide what to investigate, then see the flat and speak with t
 - 「我想找安靜的一房，每月總花費（房租加帳單）不要超過 £2,200。」
 ```
 
-### deck:using:23
+### deck:using:24
 
-- source: `docs/USING.md` · L58
+- source: `docs/USING.md` · L60
 - under: ## 繁體中文
 - lang: zh-TW
 - write-back: yes
 
 ```text
 - 「比較這兩間，告訴我看房時要查什麼。」
-```
-
-### deck:using:24
-
-- source: `docs/USING.md` · L59
-- under: ## 繁體中文
-- lang: zh-TW
-- write-back: yes
-
-```text
-- 「先插問一下：擔保人是做什麼的？」
 ```
 
 ### deck:using:25
@@ -557,7 +557,7 @@ Use the report to decide what to investigate, then see the flat and speak with t
 - write-back: yes
 
 ```text
-Agent 會先用例子或你提供的房源做出有用的比較，再從你的反應了解偏好。通常一次問零到兩題，必要確認最多三題；「還不知道」也可以，不必先把所有條件想清楚。
+- 「先插問一下：擔保人是做什麼的？」
 ```
 
 ### deck:using:26
@@ -568,7 +568,7 @@ Agent 會先用例子或你提供的房源做出有用的比較，再從你的�
 - write-back: yes
 
 ```text
-能搜尋時，真實房源會附來源與日期；不能搜尋時，教學例子會明確標示為虛構，不會把假設價格說成倫敦現在的行情。需要你貼房源、戶型圖或其他文件時，會說明用途，並繼續做不受影響的部分。聊天軟體有選項介面就用選項，沒有就直接打字。
+Agent 會先用例子或你提供的房源做出有用的比較，再從你的反應了解偏好。通常一次問零到兩題，必要確認最多三題；「還不知道」也可以，不必先把所有條件想清楚。
 ```
 
 ### deck:using:27
@@ -579,7 +579,7 @@ Agent 會先用例子或你提供的房源做出有用的比較，再從你的�
 - write-back: yes
 
 ```text
-**不想打字，可以用語音輸入。** 用手機或電腦內建的聽寫，或你習慣的語音轉文字工具，把內容輸入助理的對話框即可；[Typeless](https://www.typeless.com/pricing) 和 [Wispr Flow](https://wisprflow.ai/pricing) 都是可選例子。兩者目前都有免費方案，但有用量限制，依平台與方案而異（2026-09-11 查核，最新額度看官方頁面）；不需要為了使用這個 skill 另外安裝或付費。
+能搜尋時，真實房源會附來源與日期；不能搜尋時，教學例子會明確標示為虛構，不會把假設價格說成倫敦現在的行情。需要你貼房源、戶型圖或其他文件時，會說明用途，並繼續做不受影響的部分。聊天軟體有選項介面就用選項，沒有就直接打字。
 ```
 
 ### deck:using:28
@@ -590,7 +590,7 @@ Agent 會先用例子或你提供的房源做出有用的比較，再從你的�
 - write-back: yes
 
 ```text
-可以直接說你的需求、過去特別好或特別糟的租房/住宿經驗，甚至是過去印象深刻的購物經驗也可以，會讓 AI 更理解你。中途改主意也行。送出前看一下文字有沒有辨識正確就好。
+**把房源頁面交給它。** 技能不會自己開房源連結（網站條款不允許程式代替你讀），所以把頁面本身給它。電腦上：「檔案 → 另存網頁 → 網頁，完整」，然後附上 `.html`，裡面的資訊比畫面多，連完整郵遞區號都在。iPhone 上：用 Safari 的分享面板，裝一次 `skills/vet-flat/scripts/capture_page.js` 開頭寫的捷徑就能一鍵送出，或用「選項 → 網頁封存」。PDF 或複製文字也可以，只是資訊少一些。照片和平面圖是圖片，另外存下來，或把頁面列印成 PDF。
 ```
 
 ### deck:using:29
@@ -601,7 +601,7 @@ Agent 會先用例子或你提供的房源做出有用的比較，再從你的�
 - write-back: yes
 
 ```text
-可以先比較「通勤近一點，還是空間大一點」、「臥室安靜，還是生活機能方便」、「租金低一點，還是帳單比較確定」。邊看邊問倫敦的區域、預算、租屋流程或常見問題，也可以請助理教你如何在看房時查證。涉及目前行情或法律的說法，可以要求 Agent 應附上查過的來源。
+**不想打字，可以用語音輸入。** 用手機或電腦內建的聽寫，或你習慣的語音轉文字工具，把內容輸入助理的對話框即可；[Typeless](https://www.typeless.com/pricing) 和 [Wispr Flow](https://wisprflow.ai/pricing) 都是可選例子。兩者目前都有免費方案，但有用量限制，依平台與方案而異（2026-09-11 查核，最新額度看官方頁面）；不需要為了使用這個 skill 另外安裝或付費。
 ```
 
 ### deck:using:30
@@ -612,7 +612,7 @@ Agent 會先用例子或你提供的房源做出有用的比較，再從你的�
 - write-back: yes
 
 ```text
-答案先說下一步和理由。數字會保留來源與限制：「房東估計通勤 20 分鐘，還沒查證」不等於實際通勤已確認；逐字核對房東訊息，也不代表內容一定正確。每月總花費會說明房租、能源、水、網路與適用的市政稅哪些已知、哪些只是估計。
+可以直接說你的需求、過去特別好或特別糟的租房/住宿經驗，甚至是過去印象深刻的購物經驗也可以，會讓 AI 更理解你。中途改主意也行。送出前看一下文字有沒有辨識正確就好。
 ```
 
 ### deck:using:31
@@ -623,7 +623,7 @@ Agent 會先用例子或你提供的房源做出有用的比較，再從你的�
 - write-back: yes
 
 ```text
-中途改條件直接說：「總預算提高到 £2,300」、「安靜比採光重要」、「通勤可以久一點，但超過 45 分鐘就不要」。助理會套用明確指示，用白話說明影響，保留例外和其他條件；不需要再確認同一個要求。只有意思不明確，或助理自己提議修改時，才需要釐清。
+可以先比較「通勤近一點，還是空間大一點」、「臥室安靜，還是生活機能方便」、「租金低一點，還是帳單比較確定」。邊看邊問倫敦的區域、預算、租屋流程或常見問題，也可以請助理教你如何在看房時查證。涉及目前行情或法律的說法，可以要求 Agent 應附上查過的來源。
 ```
 
 ### deck:using:32
@@ -634,7 +634,7 @@ Agent 會先用例子或你提供的房源做出有用的比較，再從你的�
 - write-back: yes
 
 ```text
-隨時可以插問其他問題，再回到原本的找房工作，不必重新交代偏好。跨對話保存取決於你使用的軟體；助理不能假裝已經存好。
+答案先說下一步和理由。數字會保留來源與限制：「房東估計通勤 20 分鐘，還沒查證」不等於實際通勤已確認；逐字核對房東訊息，也不代表內容一定正確。每月總花費會說明房租、能源、水、網路與適用的市政稅哪些已知、哪些只是估計。
 ```
 
 ### deck:using:33
@@ -645,7 +645,7 @@ Agent 會先用例子或你提供的房源做出有用的比較，再從你的�
 - write-back: yes
 
 ```text
-還沒抵達時，可以比較暫住方案，替實地看房留時間。取消、退款和退房條件都要看實際條款，不能只因為是旅館或服務式公寓就當成有保障。看房時親自確認環境、和仲介或房東談清楚；合約帶回去讀，看房當天不簽約。法律與付款提醒會放在相關決定旁，不會每次開場都貼一整段。
+中途改條件直接說：「總預算提高到 £2,300」、「安靜比採光重要」、「通勤可以久一點，但超過 45 分鐘就不要」。助理會套用明確指示，用白話說明影響，保留例外和其他條件；不需要再確認同一個要求。只有意思不明確，或助理自己提議修改時，才需要釐清。
 ```
 
 ### deck:using:34
@@ -656,7 +656,7 @@ Agent 會先用例子或你提供的房源做出有用的比較，再從你的�
 - write-back: yes
 
 ```text
-**自己的小秘書。** 共用技能沒查、但你在意的東西，例如到健身房的步行時間、學區、你知道的噪音來源、你信任的資料集，寫成一頁放進你自己那份的 `extensions/` 資料夾（或是直接跟 Agent 講一整串讓它放進去）。這些額外項目在報告裡會標示出來、不會自己改變判決、不讀房源和評價網站、也不用「住的是誰」來描述一個地區。
+隨時可以插問其他問題，再回到原本的找房工作，不必重新交代偏好。跨對話保存取決於你使用的軟體；助理不能假裝已經存好。
 ```
 
 ### deck:using:35
@@ -667,29 +667,29 @@ Agent 會先用例子或你提供的房源做出有用的比較，再從你的�
 - write-back: yes
 
 ```text
-**分享你學到的，不分享你住哪。** 跟助理要一組「種子」貼出去：它帶的是你的口味、地雷和你要求每間房回答的問題，從來不含你每天去哪、什麼時候搬。貼文裡寫對你有幫助的事就好，別補上公司、學校、車站和搬家日。沒有任何一種版本會帶這些；真的要給朋友全部，就直接給設定檔，不用種子。
+還沒抵達時，可以比較暫住方案，替實地看房留時間。取消、退款和退房條件都要看實際條款，不能只因為是旅館或服務式公寓就當成有保障。看房時親自確認環境、和仲介或房東談清楚；合約帶回去讀，看房當天不簽約。法律與付款提醒會放在相關決定旁，不會每次開場都貼一整段。
 ```
 
 ### deck:using:36
 
-- source: `docs/USING.md` · L85
-- under: ## 简体中文
-- lang: zh-CN
+- source: `docs/USING.md` · L83
+- under: ## 繁體中文
+- lang: zh-TW
 - write-back: yes
 
 ```text
-直接聊天就能开始，不用先填问卷。可以说「先给我例子，教我怎么挑」，或贴两套房源请助理比较。它会先做有用的分析，再从你的反应了解偏好；通常一次问零到两题，必要确认最多三题。支持选项界面时使用真实选项，没有就直接打字。
+**自己的小秘書。** 共用技能沒查、但你在意的東西，例如到健身房的步行時間、學區、你知道的噪音來源、你信任的資料集，寫成一頁放進你自己那份的 `extensions/` 資料夾（或是直接跟 Agent 講一整串讓它放進去）。這些額外項目在報告裡會標示出來、不會自己改變判決、不讀房源和評價網站、也不用「住的是誰」來描述一個地區。
 ```
 
 ### deck:using:37
 
-- source: `docs/USING.md` · L87
-- under: ## 简体中文
-- lang: zh-CN
+- source: `docs/USING.md` · L85
+- under: ## 繁體中文
+- lang: zh-TW
 - write-back: yes
 
 ```text
-**不想打字，可以用语音输入。** 使用设备内置的听写或你习惯的语音转文字工具，将内容输入助理的聊天框；[Typeless](https://www.typeless.com/pricing) 和 [Wispr Flow](https://wisprflow.ai/pricing) 是可选例子。两者目前都有免费方案，但有用量限制，依平台和方案而异（2026-09-11 查核，最新额度看官方页面），不必另行安装或付费。直接说你的需求、过去特别好或特别糟的租房/住宿经历，甚至印象深刻的购物经历也可以，能让助理更了解你；中途改主意也行。发送前看一下文字有没有识别正确就好。
+**分享你學到的，不分享你住哪。** 跟助理要一組「種子」貼出去：它帶的是你的口味、地雷和你要求每間房回答的問題，從來不含你每天去哪、什麼時候搬。貼文裡寫對你有幫助的事就好，別補上公司、學校、車站和搬家日。沒有任何一種版本會帶這些；真的要給朋友全部，就直接給設定檔，不用種子。
 ```
 
 ### deck:using:38
@@ -700,7 +700,7 @@ Agent 會先用例子或你提供的房源做出有用的比較，再從你的�
 - write-back: yes
 
 ```text
-每月总花费包括房租和账单；数字会说明来源、哪些只是估计。真实房源需要来源与日期，不能搜索时的教学例子会标成虚构。你可以随时插问、改变预算或增加条件，助理应保留原本的工作，不让你重新填写全部资料。跨对话保存取决于软件能力，不能假装已经保存。
+直接聊天就能开始，不用先填问卷。可以说「先给我例子，教我怎么挑」，或贴两套房源请助理比较。它会先做有用的分析，再从你的反应了解偏好；通常一次问零到两题，必要确认最多三题。支持选项界面时使用真实选项，没有就直接打字。
 ```
 
 ### deck:using:39
@@ -711,7 +711,7 @@ Agent 會先用例子或你提供的房源做出有用的比較，再從你的�
 - write-back: yes
 
 ```text
-先用比较学会取舍，再安排查证和看房。退款、付款、签约规则要看实际条款与适用法律；合约带回去读，看房当天不签约。
+**把房源页面交给它。** 技能不会自己打开房源链接（网站条款不允许程序代替你读），所以把页面本身给它：电脑上「文件 → 网页另存为 → 网页，全部」再附上 `.html`，里面的信息比屏幕多，连完整邮编都在；iPhone 上用 Safari 的分享面板，装一次 `skills/vet-flat/scripts/capture_page.js` 开头写的快捷指令即可一键发送，或用「选项 → 网页归档」。PDF 或复制文字也可以，只是信息少一些。照片和户型图另外保存，或把页面打印成 PDF。
 ```
 
 ### deck:using:40
@@ -722,12 +722,45 @@ Agent 會先用例子或你提供的房源做出有用的比較，再從你的�
 - write-back: yes
 
 ```text
-**自己的小秘书。** 共用技能没查、但你在意的东西，例如到健身房的步行时间、学区、你知道的噪音来源、你信任的数据集，写成一页放进你自己那份的 `extensions/` 文件夹（或者直接跟助理讲一整串让它放进去）。这些额外项目在报告里会标示出来、不会自己改变判决、不读房源和评价网站、也不用「住的是谁」来描述一个地区。
+**不想打字，可以用语音输入。** 使用设备内置的听写或你习惯的语音转文字工具，将内容输入助理的聊天框；[Typeless](https://www.typeless.com/pricing) 和 [Wispr Flow](https://wisprflow.ai/pricing) 是可选例子。两者目前都有免费方案，但有用量限制，依平台和方案而异（2026-09-11 查核，最新额度看官方页面），不必另行安装或付费。直接说你的需求、过去特别好或特别糟的租房/住宿经历，甚至印象深刻的购物经历也可以，能让助理更了解你；中途改主意也行。发送前看一下文字有没有识别正确就好。
 ```
 
 ### deck:using:41
 
 - source: `docs/USING.md` · L95
+- under: ## 简体中文
+- lang: zh-CN
+- write-back: yes
+
+```text
+每月总花费包括房租和账单；数字会说明来源、哪些只是估计。真实房源需要来源与日期，不能搜索时的教学例子会标成虚构。你可以随时插问、改变预算或增加条件，助理应保留原本的工作，不让你重新填写全部资料。跨对话保存取决于软件能力，不能假装已经保存。
+```
+
+### deck:using:42
+
+- source: `docs/USING.md` · L97
+- under: ## 简体中文
+- lang: zh-CN
+- write-back: yes
+
+```text
+先用比较学会取舍，再安排查证和看房。退款、付款、签约规则要看实际条款与适用法律；合约带回去读，看房当天不签约。
+```
+
+### deck:using:43
+
+- source: `docs/USING.md` · L99
+- under: ## 简体中文
+- lang: zh-CN
+- write-back: yes
+
+```text
+**自己的小秘书。** 共用技能没查、但你在意的东西，例如到健身房的步行时间、学区、你知道的噪音来源、你信任的数据集，写成一页放进你自己那份的 `extensions/` 文件夹（或者直接跟助理讲一整串让它放进去）。这些额外项目在报告里会标示出来、不会自己改变判决、不读房源和评价网站、也不用「住的是谁」来描述一个地区。
+```
+
+### deck:using:44
+
+- source: `docs/USING.md` · L101
 - under: ## 简体中文
 - lang: zh-CN
 - write-back: yes

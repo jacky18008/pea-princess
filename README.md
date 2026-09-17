@@ -22,6 +22,8 @@ npx skills add jacky18008/pea-princess
 # Claude Code
 /plugin marketplace add jacky18008/pea-princess && /plugin install pea-princess@pea-princess
 # claude.ai / Claude Cowork / ChatGPT Skills: upload the zip from Releases
+# then, on any host with a shell: is it installed right? (one request per open register)
+python3 ~/.claude/skills/pea-princess/scripts/doctor.py   # or the folder your agent installed it to
 ```
 The skill is installed and invoked as **`pea-princess`**; the upload artifact is `dist/pea-princess-skill.zip`. The repository still stores its source in `skills/vet-flat/` so existing script paths and experiment records remain valid. This is one skill, with one installed name.
 

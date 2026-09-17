@@ -17,6 +17,8 @@ It starts with useful examples or the evidence you provide, explains a trade-off
 
 The assistant uses real rental examples with source links and dates. A public advert is not a guarantee of availability. If a source cannot be reached, it continues with supported information and asks for the missing extract; it does not switch to fictional homes. Invented teaching examples are used only if you request them. Your assistant may need you to paste a listing or attach a floor plan. It explains what is needed and why, while continuing other checks. If your app supports a choice panel, it can use that; otherwise you answer in ordinary text.
 
+**Handing over a listing page.** The skill never opens listing links (the sites' terms do not allow programs to read for you), so give it the page itself. On a computer: File → Save Page As → "Webpage, Complete", then attach the `.html` — it carries more than the screen shows, including the full postcode. On an iPhone: Safari's share sheet, either with the one-tap shortcut described at the top of `skills/vet-flat/scripts/capture_page.js` or with Options → Web Archive. A PDF or the copied text also works, with less in it. Photos and the floor plan are pictures: save them, or print the page to PDF.
+
 ### Speak instead of typing
 
 If speaking is easier, use your device's built-in dictation or an app you already like to enter text in the assistant's chat box. [Typeless](https://www.typeless.com/pricing) and [Wispr Flow](https://wisprflow.ai/pricing) are optional examples; both list free plans with usage limits, which vary by plan or platform (checked 11 September 2026). Check the linked pages for current allowances; installing or paying for another app is not required.
@@ -62,6 +64,8 @@ Agent 會先用例子或你提供的房源做出有用的比較，再從你的�
 
 能搜尋時，真實房源會附來源與日期；不能搜尋時，教學例子會明確標示為虛構，不會把假設價格說成倫敦現在的行情。需要你貼房源、戶型圖或其他文件時，會說明用途，並繼續做不受影響的部分。聊天軟體有選項介面就用選項，沒有就直接打字。
 
+**把房源頁面交給它。** 技能不會自己開房源連結（網站條款不允許程式代替你讀），所以把頁面本身給它。電腦上：「檔案 → 另存網頁 → 網頁，完整」，然後附上 `.html`，裡面的資訊比畫面多，連完整郵遞區號都在。iPhone 上：用 Safari 的分享面板，裝一次 `skills/vet-flat/scripts/capture_page.js` 開頭寫的捷徑就能一鍵送出，或用「選項 → 網頁封存」。PDF 或複製文字也可以，只是資訊少一些。照片和平面圖是圖片，另外存下來，或把頁面列印成 PDF。
+
 **不想打字，可以用語音輸入。** 用手機或電腦內建的聽寫，或你習慣的語音轉文字工具，把內容輸入助理的對話框即可；[Typeless](https://www.typeless.com/pricing) 和 [Wispr Flow](https://wisprflow.ai/pricing) 都是可選例子。兩者目前都有免費方案，但有用量限制，依平台與方案而異（2026-09-11 查核，最新額度看官方頁面）；不需要為了使用這個 skill 另外安裝或付費。
 
 可以直接說你的需求、過去特別好或特別糟的租房/住宿經驗，甚至是過去印象深刻的購物經驗也可以，會讓 AI 更理解你。中途改主意也行。送出前看一下文字有沒有辨識正確就好。
@@ -83,6 +87,8 @@ Agent 會先用例子或你提供的房源做出有用的比較，再從你的�
 ## 简体中文
 
 直接聊天就能开始，不用先填问卷。可以说「先给我例子，教我怎么挑」，或贴两套房源请助理比较。它会先做有用的分析，再从你的反应了解偏好；通常一次问零到两题，必要确认最多三题。支持选项界面时使用真实选项，没有就直接打字。
+
+**把房源页面交给它。** 技能不会自己打开房源链接（网站条款不允许程序代替你读），所以把页面本身给它：电脑上「文件 → 网页另存为 → 网页，全部」再附上 `.html`，里面的信息比屏幕多，连完整邮编都在；iPhone 上用 Safari 的分享面板，装一次 `skills/vet-flat/scripts/capture_page.js` 开头写的快捷指令即可一键发送，或用「选项 → 网页归档」。PDF 或复制文字也可以，只是信息少一些。照片和户型图另外保存，或把页面打印成 PDF。
 
 **不想打字，可以用语音输入。** 使用设备内置的听写或你习惯的语音转文字工具，将内容输入助理的聊天框；[Typeless](https://www.typeless.com/pricing) 和 [Wispr Flow](https://wisprflow.ai/pricing) 是可选例子。两者目前都有免费方案，但有用量限制，依平台和方案而异（2026-09-11 查核，最新额度看官方页面），不必另行安装或付费。直接说你的需求、过去特别好或特别糟的租房/住宿经历，甚至印象深刻的购物经历也可以，能让助理更了解你；中途改主意也行。发送前看一下文字有没有识别正确就好。
 
