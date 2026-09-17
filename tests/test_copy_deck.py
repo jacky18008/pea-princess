@@ -260,6 +260,14 @@ class DeckCase(unittest.TestCase):
 
 
 class TestExtract(DeckCase):
+    def test_html_layout_blocks_are_not_copy(self):
+        lines = ['<p align="center">', '  <img src="x.png" width="300" alt="hero">', '</p>', '',
+                 '<h1 align="center">Pea Princess</h1>', '', 'A real paragraph.', '',
+                 '<details>', '<summary><b>For engineers</b></summary>', '', 'Inside the fold.', '', '</details>']
+        kinds = [(kind, lines[first]) for kind, first, _last, _a, _b in copy_deck.md_chunks(lines, 0, len(lines))]
+        self.assertEqual([k for k, _ in kinds], ["html", "html", "para", "html", "para", "html"])
+        self.assertEqual([line for k, line in kinds if k == "para"], ["A real paragraph.", "Inside the fold."])
+
     def test_deterministic(self):
         first, first_lock = self.extract(), read(self.root, copy_deck.LOCK_REL)
         second, second_lock = self.extract(), read(self.root, copy_deck.LOCK_REL)
@@ -565,7 +573,8 @@ class TestWritebackSecurity(DeckCase):
             self.apply()
 
     def test_board_json_escapes_html_parser_state_delimiters(self):
-        payload = "<!--<script> untrusted </ScRiPt><img src=x onerror=alert(1)>"
+        # A paragraph that carries markup (a line that *starts* with a tag is layout, not copy).
+        payload = "Untrusted: <!--<script> untrusted </ScRiPt><img src=x onerror=alert(1)>"
         write(self.root, "README.md", "# Example\n\n" + payload + "\n")
         write(self.root, copy_deck.BOARD_REL,
               copy_deck.ISLAND_OPEN + "{}" + copy_deck.ISLAND_CLOSE)

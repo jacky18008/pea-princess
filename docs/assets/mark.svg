@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-labelledby="t">
+  <title id="t">Pea Princess: a pea under a stack of mattresses</title>
+  <!-- bed frame -->
+  <rect x="88" y="392" width="336" height="26" rx="8" fill="#6B4A3A"/>
+  <rect x="104" y="416" width="26" height="56" rx="6" fill="#6B4A3A"/>
+  <rect x="382" y="416" width="26" height="56" rx="6" fill="#6B4A3A"/>
+  <!-- the pea -->
+  <circle cx="256" cy="378" r="14" fill="#2F6F55"/>
+  <circle cx="251" cy="373" r="5" fill="#9FDCBF" opacity=".85"/>
+  <!-- seven mattresses -->
+  <rect x="112" y="328" width="300" height="34" rx="15" fill="#F7E9EE" stroke="#8A2846" stroke-width="4"/>
+  <rect x="100" y="290" width="300" height="34" rx="15" fill="#F0D3DC" stroke="#8A2846" stroke-width="4"/>
+  <rect x="112" y="252" width="300" height="34" rx="15" fill="#F7E9EE" stroke="#8A2846" stroke-width="4"/>
+  <rect x="100" y="214" width="300" height="34" rx="15" fill="#F0D3DC" stroke="#8A2846" stroke-width="4"/>
+  <rect x="112" y="176" width="300" height="34" rx="15" fill="#F7E9EE" stroke="#8A2846" stroke-width="4"/>
+  <rect x="100" y="138" width="300" height="34" rx="15" fill="#F0D3DC" stroke="#8A2846" stroke-width="4"/>
+  <rect x="112" y="100" width="300" height="34" rx="15" fill="#F7E9EE" stroke="#8A2846" stroke-width="4"/>
+  <!-- a small crown resting on top -->
+  <polygon points="214,96 232,62 256,84 280,62 298,96" fill="#D9A441" stroke="#8A2846" stroke-width="4" stroke-linejoin="round"/>
+  <rect x="214" y="92" width="84" height="10" rx="4" fill="#D9A441" stroke="#8A2846" stroke-width="4"/>
+</svg>

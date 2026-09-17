@@ -71,7 +71,7 @@ On a phone
 """
 
 # --------------------------------------------------------------- what is a surface --
-# kinds: para | blockquote | ol | ul | fence   (markdown)
+# kinds: para | blockquote | ol | ul | fence   (markdown; html blocks are layout and never extracted)
 #        yaml (a key's value)                  (yaml)
 #        pystr (a string literal)              (python)
 SURFACES = [
@@ -80,13 +80,44 @@ SURFACES = [
         "title": "README — the front page",
         "note": "All prose paragraphs. Tables, headings and code blocks are not in the deck.",
         "extractor": "markdown",
-        "sections": [{"match": "*", "title": None, "kinds": ["para", "blockquote"]}],
+        "sections": [{"match": "*", "title": None, "kinds": ["para", "blockquote", "ol"]}],
+    },
+    {
+        "path": "README.zh-TW.md",
+        "title": "README.zh-TW.md — the front page, Traditional Chinese",
+        "note": "All prose paragraphs. Tables, headings and code blocks are not in the deck.",
+        "optional": True,
+        "extractor": "markdown",
+        "sections": [{"match": "*", "title": None, "kinds": ["para", "blockquote", "ol"]}],
+    },
+    {
+        "path": "README.zh-CN.md",
+        "title": "README.zh-CN.md — the front page, Simplified Chinese",
+        "note": "All prose paragraphs. Tables, headings and code blocks are not in the deck.",
+        "optional": True,
+        "extractor": "markdown",
+        "sections": [{"match": "*", "title": None, "kinds": ["para", "blockquote", "ol"]}],
     },
     {
         "path": "docs/USING.md",
-        "title": "docs/USING.md — the plain-words walkthrough",
-        "note": "Every paragraph, step and bullet, in all three languages. Headings are not in "
-                "the deck.",
+        "title": "docs/USING.md — the plain-words walkthrough (English)",
+        "note": "Every paragraph, step and bullet. Headings are not in the deck.",
+        "optional": True,
+        "extractor": "markdown",
+        "sections": [{"match": "*", "title": None, "kinds": ["para", "ol", "ul", "blockquote"]}],
+    },
+    {
+        "path": "docs/USING.zh-TW.md",
+        "title": "docs/USING.zh-TW.md — the walkthrough, Traditional Chinese",
+        "note": "Every paragraph, step and bullet. Headings are not in the deck.",
+        "optional": True,
+        "extractor": "markdown",
+        "sections": [{"match": "*", "title": None, "kinds": ["para", "ol", "ul", "blockquote"]}],
+    },
+    {
+        "path": "docs/USING.zh-CN.md",
+        "title": "docs/USING.zh-CN.md — the walkthrough, Simplified Chinese",
+        "note": "Every paragraph, step and bullet. Headings are not in the deck.",
         "optional": True,
         "extractor": "markdown",
         "sections": [{"match": "*", "title": None, "kinds": ["para", "ol", "ul", "blockquote"]}],
@@ -318,6 +349,14 @@ def md_chunks(lines, start, stop):
         if _ATTRIB.match(line):
             out.append(("attribution", i, i, i, i))
             i += 1
+            continue
+        if line.lstrip().startswith("<"):
+            # An HTML block (a centred header, a <details> fold, an <img>): layout, not copy.
+            j = i + 1
+            while j < stop and lines[j].strip() and not _starts_block(lines[j]):
+                j += 1
+            out.append(("html", i, j - 1, i, j - 1))
+            i = j
             continue
         j = i + 1
         while j < stop and not _starts_block(lines[j]):
