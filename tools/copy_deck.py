@@ -77,22 +77,14 @@ On a phone
 SURFACES = [
     {
         "path": "README.md",
-        "title": "README — the front page",
+        "title": "README — the front page (Traditional Chinese, the page GitHub shows)",
         "note": "All prose paragraphs. Tables, headings and code blocks are not in the deck.",
         "extractor": "markdown",
         "sections": [{"match": "*", "title": None, "kinds": ["para", "blockquote", "ol"]}],
     },
     {
-        "path": "README.zh-TW.md",
-        "title": "README.zh-TW.md — the front page, Traditional Chinese",
-        "note": "All prose paragraphs. Tables, headings and code blocks are not in the deck.",
-        "optional": True,
-        "extractor": "markdown",
-        "sections": [{"match": "*", "title": None, "kinds": ["para", "blockquote", "ol"]}],
-    },
-    {
-        "path": "README.zh-CN.md",
-        "title": "README.zh-CN.md — the front page, Simplified Chinese",
+        "path": "README.en.md",
+        "title": "README.en.md — the front page, English",
         "note": "All prose paragraphs. Tables, headings and code blocks are not in the deck.",
         "optional": True,
         "extractor": "markdown",

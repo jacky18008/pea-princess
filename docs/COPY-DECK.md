@@ -31,8 +31,8 @@ On a phone
 
 | Surface | Blocks | Source |
 |---|---|---|
-| README — the front page | 31 | `README.md` |
-| README.zh-TW.md — the front page, Traditional Chinese | 31 | `README.zh-TW.md` |
+| README — the front page (Traditional Chinese, the page GitHub shows) | 36 | `README.md` |
+| README.en.md — the front page, English | 36 | `README.en.md` |
 | docs/USING.md — the plain-words walkthrough (English) | 21 | `docs/USING.md` |
 | docs/USING.zh-TW.md — the walkthrough, Traditional Chinese | 18 | `docs/USING.zh-TW.md` |
 | docs/USING.zh-CN.md — the walkthrough, Simplified Chinese | 8 | `docs/USING.zh-CN.md` |
@@ -43,366 +43,17 @@ On a phone
 | inputs.md — the one message that asks the user for what is missing | 1 | `skills/vet-flat/references/inputs.md` |
 | profiles/ — the sentences a profile carries | 14 | `skills/vet-flat/profiles/*.yaml` |
 | seed.py — the seed card sentences (read-only here) | 25 | `skills/vet-flat/scripts/seed.py` |
-| **Total** | **206** | |
-
-> Not yet present: `README.zh-CN.md` is not in the repo yet — skipped. Re-run `extract` once it exists.
+| **Total** | **216** | |
 
 ---
 
-## README — the front page
+## README — the front page (Traditional Chinese, the page GitHub shows)
 
 All prose paragraphs. Tables, headings and code blocks are not in the deck.
 
 ### deck:readme:1
 
 - source: `README.md` · L20
-- under: (top of file)
-- lang: en
-- write-back: yes
-
-```text
-An agent skill for checking and searching rental listings in London. It vets a flat the way a careful surveyor would: identity, floor area, age, heating, construction nearby, crime, management reviews, agent compliance, price, light, total monthly cost and commute, from official and open UK data, ending in a verdict. Works with any agent that reads the [Agent Skills](https://agentskills.io) format (e.g. GPT, Claude, Grok, Gemini, pi-agent, DeepSeek, etc.). Plain chat mode works too, but agent mode is recommended: it is steadier on complex tasks. Just talk to the AI in plain words.
-```
-
-### deck:readme:2
-
-- source: `README.md` · L24
-- under: ## Start here — no terminal needed
-- lang: en
-- write-back: yes
-
-```text
-Three ways in, from easiest to most manual. Pick the one that matches what you already use.
-```
-
-### deck:readme:3
-
-- source: `README.md` · L26
-- under: ## Start here — no terminal needed
-- lang: en
-- write-back: yes
-
-```text
-1. **You use an agent app** (Claude Code, Codex, Cursor, Gemini CLI, Grok Build, …). Paste this sentence to it and wait:
-```
-
-### deck:readme:4
-
-- source: `README.md` · L28
-- under: ## Start here — no terminal needed
-- lang: en
-- write-back: yes
-
-```text
-   > Install the skill from https://github.com/jacky18008/pea-princess and then tell me what it can do.
-```
-
-### deck:readme:5
-
-- source: `README.md` · L30
-- under: ## Start here — no terminal needed
-- lang: en
-- write-back: yes
-
-```text
-   The agent fetches this repository, installs the skill under the name `pea-princess`, and answers. From then on, just talk: "Roast this flat:" and paste the listing.
-```
-
-### deck:readme:6
-
-- source: `README.md` · L32
-- under: ## Start here — no terminal needed
-- lang: en
-- write-back: yes
-
-```text
-2. **You use a chat app with a Skills feature** (claude.ai, Claude Cowork, ChatGPT Business). Download `pea-princess-skill.zip` from [Releases](https://github.com/jacky18008/pea-princess/releases), open Settings → Skills → Upload, choose the zip. Then ask "What can this do?".
-```
-
-### deck:readme:7
-
-- source: `README.md` · L34
-- under: ## Start here — no terminal needed
-- lang: en
-- write-back: yes
-
-```text
-3. **You use a chat app without Skills** (ChatGPT Plus Projects, Grok Projects, Gemini Gems, Perplexity Spaces). Download the prompt pack from [Releases](https://github.com/jacky18008/pea-princess/releases), paste `INSTRUCTIONS.md` into the project's instructions and attach the `references/` files. The skill then tells you, once, what to paste.
-```
-
-### deck:readme:8
-
-- source: `README.md` · L36
-- under: ## Start here — no terminal needed
-- lang: en
-- write-back: yes
-
-```text
-No code, no settings files: everything after that is sentences, typed or dictated. The five-minute walkthrough is [USING.md](docs/USING.md); every install route with its caveats is [INSTALL.md](docs/INSTALL.md).
-```
-
-### deck:readme:9
-
-- source: `README.md` · L51
-- under: ## What it checks, and where the answers come from
-- lang: en
-- write-back: yes
-
-```text
-Every finding carries its evidence grade. What it cannot reach, it asks you for, once, in one message. It never opens listing sites: you hand it the page, and [the walkthrough](docs/USING.md) shows the three ways to do that.
-```
-
-### deck:readme:10
-
-- source: `README.md` · L54
-- under: ## Why "Pea Princess"
-- lang: en
-- write-back: yes
-
-```text
-In the fairy tale only the real princess feels the pea through twenty mattresses. Here **you** are the princess. This tool lifts the mattresses one by one: it reads the registers, counts the crimes, checks the planning applications and the company filings, and tells you where the pea might be. Only you can feel it: go and see the flat, walk the street, talk to the agent and the landlord. The report is a filter, and when you are in a hurry it is only a filter. Its first duty is to say what it does not know and ask you for it.
-```
-
-### deck:readme:11
-
-- source: `README.md` · L56
-- under: ## Why "Pea Princess"
-- lang: zh-TW
-- write-back: yes
-
-```text
-The author's own account, in Traditional Chinese, as posted to the community: [到了倫敦才發現自己有病，是公主病](docs/posts/2026-09-launch.zh-TW.md).
-```
-
-### deck:readme:12
-
-- source: `README.md` · L65
-- under: ## Three modes
-- lang: en
-- write-back: yes
-
-```text
-> Status: **draft**. Local collection, area sweep, report rendering and experiment harnesses are implemented. Read [security and privacy boundaries](SECURITY.md) before handling personal data or building a release. Usage: `docs/INSTALL.md`, `docs/SCRIPTS.md`, `docs/CONVENTIONS.md`.
-```
-
-### deck:readme:13
-
-- source: `README.md` · L67
-- under: ## Three modes
-- lang: en
-- write-back: yes
-
-```text
-**Distribution:** download the skill/tool and run it with your own agent. Pea Princess does not host model workers or handle subscription credentials. The local persona lab is a testing companion. See [desktop/mobile boundaries, provider subscription policies, and release gates](docs/local-product-and-provider-policy.md).
-```
-
-### deck:readme:14
-
-- source: `README.md` · L82
-- under: # then, on any host with a shell: is it installed right? (one request per open register)
-- lang: en
-- write-back: yes
-
-```text
-The skill is installed and invoked as **`pea-princess`**; the upload artifact is `dist/pea-princess-skill.zip`. The repository still stores its source in `skills/vet-flat/` so existing script paths and experiment records remain valid. This is one skill, with one installed name.
-```
-
-### deck:readme:15
-
-- source: `README.md` · L84
-- under: # then, on any host with a shell: is it installed right? (one request per open register)
-- lang: en
-- write-back: yes
-
-```text
-Codex: enable sandbox network (`sandbox_workspace_write.network_access = true`) or use manual mode.
-```
-
-### deck:readme:16
-
-- source: `README.md` · L87
-- under: ### Scripts (Python 3.9 standard library only; network via curl)
-- lang: en
-- write-back: yes
-
-```text
-All in `skills/vet-flat/scripts/`; each prints one JSON object with `source_url`, `retrieved_at`, `http_status`, `ok` and an evidence class. Usage details: `docs/SCRIPTS.md`.
-```
-
-### deck:readme:17
-
-- source: `README.md` · L102
-- under: ### Scripts (Python 3.9 standard library only; network via curl)
-- lang: en
-- write-back: yes
-
-```text
-Report layout for people without a shell: open `viewer/viewer.html` in a browser and paste the JSON. The requirements page is the same idea for the other file: `scripts/panel.py --profile profile.yaml --out requirements.html` writes a read-only page of where things stand, for the person to open whenever they like. No assistant writes HTML; the model writes YAML and JSON, the scripts render them.
-```
-
-### deck:readme:18
-
-- source: `README.md` · L105
-- under: ### Ask it what it can do
-- lang: en
-- write-back: yes
-
-```text
-Ask **"What can this do?"** (or 這能幹嘛？). The answer comes from `skills/vet-flat/references/onboarding.md`: a short pitch, three starting points (a listing → vet it; an area or destination → sweep; no idea → a ten-fact primer and six questions with suggested defaults). Your rules live in `profile.yaml` (budget, size, flat type, deal-breakers, priorities, `budget_mode` lite/standard/deep for £20 plans and chat-only use). The hard follow-up questions the agent must ask are in `references/questions.md`.
-```
-
-### deck:readme:19
-
-- source: `README.md` · L108
-- under: ### Benchmark (facts must be right on every model; verdicts may differ)
-- lang: en
-- write-back: yes
-
-```text
-`evals/evals.json` has 8 real flats across 7 boroughs plus 2 conversation cases ("what can this do", "I have no idea"), with truth produced by the repo's own fetchers on 2026-09-03. `bench/grade.py` scores fact recall, fabrications, citations, unknown-honesty and hard-filter consistency; `bench/run.py --dry-run` prints the exact command for Claude Code, Codex, Gemini CLI or an OpenAI-compatible API. See `bench/README.md`.
-```
-
-### deck:readme:20
-
-- source: `README.md` · L110
-- under: ### Benchmark (facts must be right on every model; verdicts may differ)
-- lang: en
-- write-back: yes
-
-```text
-**Which configuration to run:** `docs/EXPERIMENTS.md` records the original flat-vetting comparisons. The [later context ablation](docs/ablation-2026-09-09/results.md) includes generation costs and source reviews: extra summarization, structured memory and multiple retrieval calls did not save tokens at the tested sizes. Keep one agent with full context as the starting point; the four-role pipeline remains experimental. These studies measure different tasks, not a universal model ranking.
-```
-
-### deck:readme:21
-
-- source: `README.md` · L112
-- under: ### Benchmark (facts must be right on every model; verdicts may differ)
-- lang: en
-- write-back: yes
-
-```text
-**Long-running projects and changing requirements:** the [session harness](docs/session-harness.md) saves exact user requests, revisioned requirements and conditional exceptions, source snapshots, goals, TODOs and execution state. The managed runner inserts the current packet itself and rejects stale results. Short `AGENTS.md` / `CLAUDE.md` files link to detailed rules; pointers alone cannot ensure reading. [Lifecycle validation](docs/session-harness-validation.md) tests recovery without new model calls, not quality equivalence or token savings.
-```
-
-### deck:readme:22
-
-- source: `README.md` · L114
-- under: ### Benchmark (facts must be right on every model; verdicts may differ)
-- lang: en
-- write-back: yes
-
-```text
-**Try a whole persona conversation:** run `python3 tools/persona_playground.py` and open the printed local URL. The [interactive lab](docs/persona-playground.md) uses your local Codex login for dynamic persona replies and assistant answers, with step/run/pause, queued human questions, scenario amendments, private history and shared usage ceilings. All 16 cards are available in a clearly labelled chat adaptation; this is a local alpha, with no public deployment or hidden model judge.
-```
-
-### deck:readme:23
-
-- source: `README.md` · L116
-- under: ### Benchmark (facts must be right on every model; verdicts may differ)
-- lang: en
-- write-back: yes
-
-```text
-**Community feedback, stage 1:** open the [local options form](community/index.html) and follow the [guide](docs/community-feedback-stage1.md). Public JSON contains controlled choices; optional text stays on the author's device. Local validation, import and search use a fictional demo catalog. There is no online submission service or real review dataset yet.
-```
-
-### deck:readme:24
-
-- source: `README.md` · L118
-- under: ### Benchmark (facts must be right on every model; verdicts may differ)
-- lang: en
-- write-back: yes
-
-```text
-**Whole conversations, not one answer:** `docs/JOURNEYS.md` scores nine scripted multi-turn journeys, and `docs/PERSONAS.md` goes one step further — sixteen fictional people played by a model, with a deterministic controller holding their documents so nothing can be invented, a judge that has to quote its evidence, and a paired probe per person that moves exactly one setting. `python3 bench/personas.py --matrix pilot --dry-run` prints the whole plan without calling a model.
-```
-
-### deck:readme:25
-
-- source: `README.md` · L128
-- under: ## Sources you will not find here
-- lang: en
-- write-back: yes
-
-```text
-Rightmove, Zoopla, OnTheMarket, OpenRent, HomeViews, Trustpilot, Airbnb, Booking.com appear here by name only. Their terms do not want programs reading them automatically, so this project provides no method for that; the skill asks you for the page (a PDF, screenshots or the plain text) and never opens listing links itself. There is no scraper for these sites in this package, and it cannot encourage you to have your agent scrape them either.
-```
-
-### deck:readme:26
-
-- source: `README.md` · L132
-- under: ## Make it yours
-- lang: en
-- write-back: yes
-
-```text
-A skill is a folder of Markdown and a few scripts, and this one is written to be bent. You do not need to read the code: say what you want to your agent.
-```
-
-### deck:readme:27
-
-- source: `README.md` · L141
-- under: ## Make it yours
-- lang: en
-- write-back: yes
-
-```text
-One sentence to try first, on any host:
-```
-
-### deck:readme:28
-
-- source: `README.md` · L143
-- under: ## Make it yours
-- lang: en
-- write-back: yes
-
-```text
-> Change this skill so that every report starts with the all-in monthly cost, run the tests, and tell me what you changed.
-```
-
-### deck:readme:29
-
-- source: `README.md` · L146
-- under: ## Licence and attribution (proposed)
-- lang: en
-- write-back: yes
-
-```text
-Documentation and skill text: CC BY 4.0. Code: MIT. Every report carries "Generated with pea-princess <version> — <source URL>". Please keep it.
-```
-
-### deck:readme:30
-
-- source: `README.md` · L148
-- under: ## Licence and attribution (proposed)
-- lang: en
-- write-back: yes
-
-```text
-The illustration is Edmund Dulac's 1911 plate for *Stories from Hans Andersen* (Hodder & Stoughton, London), public domain. The mark in `docs/assets/mark.svg` (a pea under seven mattresses) is original and released with the documentation under CC BY 4.0; `docs/assets/social-preview.png` is the same mark as a 1280×640 preview card.
-```
-
-### deck:readme:31
-
-- source: `README.md` · L152
-- under: ## Contact the author
-- lang: en
-- write-back: yes
-
-```text
-Hsien Hao (Jacky) Chen 陳先灝 — [LinkedIn](https://www.linkedin.com/in/jacky-chen-a49177137/). Questions, ideas and stories from your own search are welcome: open an issue here or write on LinkedIn.
-```
-
----
-
-## README.zh-TW.md — the front page, Traditional Chinese
-
-All prose paragraphs. Tables, headings and code blocks are not in the deck.
-
-### deck:readme-zh-tw:1
-
-- source: `README.zh-TW.md` · L20
 - under: (top of file)
 - lang: zh-TW
 - write-back: yes
@@ -411,97 +62,9 @@ All prose paragraphs. Tables, headings and code blocks are not in the deck.
 這是一個在倫敦檢視跟搜尋房源用的 agent skill，用官方與公開的英國資料，像謹慎的驗屋師一樣尻洗一間倫敦出租公寓：身份、面積、屋齡、供暖、周邊工地、治安、管理評價、仲介合規、價格、採光、全部月成本、通勤，最後給出判決。任何支援 [Agent Skills](https://agentskills.io) 格式的 agent 都能用（Ex: GPT, Claude, Grok, Gemini, pi-agent, DeepSeek, etc）；一般的 chat mode, 也可以，只是建議使用 agent mode, 複雜的任務會比較穩定。跟 AI 講白話文就好。
 ```
 
-### deck:readme-zh-tw:2
+### deck:readme:2
 
-- source: `README.zh-TW.md` · L24
-- under: ## 從這裡開始，不需要終端機
-- lang: zh-TW
-- write-back: yes
-
-```text
-三條路，從最省事到最手動。挑一條跟你現在在用的工具對得上的。
-```
-
-### deck:readme-zh-tw:3
-
-- source: `README.zh-TW.md` · L26
-- under: ## 從這裡開始，不需要終端機
-- lang: zh-TW
-- write-back: yes
-
-```text
-1. **你在用 agent 應用程式**（Claude Code、Codex、Cursor、Gemini CLI、Grok Build……）。把這句話貼給它，然後等：
-```
-
-### deck:readme-zh-tw:4
-
-- source: `README.zh-TW.md` · L28
-- under: ## 從這裡開始，不需要終端機
-- lang: zh-TW
-- write-back: yes
-
-```text
-   > 請安裝 https://github.com/jacky18008/pea-princess 這個技能，裝好後告訴我它能做什麼
-```
-
-### deck:readme-zh-tw:5
-
-- source: `README.zh-TW.md` · L30
-- under: ## 從這裡開始，不需要終端機
-- lang: zh-TW
-- write-back: yes
-
-```text
-   Agent 會把這個專案抓下來，用 `pea-princess` 這個名字把技能裝好，然後回答你。從此就只要講話：「尻洗這間房：」再把房源貼上去。
-```
-
-### deck:readme-zh-tw:6
-
-- source: `README.zh-TW.md` · L32
-- under: ## 從這裡開始，不需要終端機
-- lang: zh-TW
-- write-back: yes
-
-```text
-2. **你在用有 Skills 功能的聊天軟體**（claude.ai、Claude Cowork、ChatGPT Business）。到 [Releases](https://github.com/jacky18008/pea-princess/releases) 下載 `pea-princess-skill.zip`，打開 Settings → Skills → Upload，選這個 zip。然後問它「這能幹嘛？」。
-```
-
-### deck:readme-zh-tw:7
-
-- source: `README.zh-TW.md` · L34
-- under: ## 從這裡開始，不需要終端機
-- lang: zh-TW
-- write-back: yes
-
-```text
-3. **你在用沒有 Skills 的聊天軟體**（ChatGPT Plus Projects、Grok Projects、Gemini Gems、Perplexity Spaces）。到 [Releases](https://github.com/jacky18008/pea-princess/releases) 下載提示詞包，把 `INSTRUCTIONS.md` 貼進專案的指示欄，再附上 `references/` 裡的檔案。之後技能會一次告訴你要貼什麼。
-```
-
-### deck:readme-zh-tw:8
-
-- source: `README.zh-TW.md` · L36
-- under: ## 從這裡開始，不需要終端機
-- lang: zh-TW
-- write-back: yes
-
-```text
-不用寫程式，不用改設定檔：接下來全部都是一句一句的話，打字或用語音都行。五分鐘上手看 [USING.zh-TW.md](docs/USING.zh-TW.md)；每一種安裝方式和它的注意事項在 [INSTALL.md](docs/INSTALL.md)。
-```
-
-### deck:readme-zh-tw:9
-
-- source: `README.zh-TW.md` · L51
-- under: ## 它查什麼，答案從哪裡來
-- lang: zh-TW
-- write-back: yes
-
-```text
-每一項結論都帶著它的證據等級。查不到的東西，它會一次、用一則訊息問你。它不會自己去開房源網站：頁面由你交給它，[上手指南](docs/USING.zh-TW.md)裡有三種做法。
-```
-
-### deck:readme-zh-tw:10
-
-- source: `README.zh-TW.md` · L54
+- source: `README.md` · L23
 - under: ## 為什麼叫「豌豆公主」
 - lang: zh-TW
 - write-back: yes
@@ -510,9 +73,9 @@ All prose paragraphs. Tables, headings and code blocks are not in the deck.
 童話裡，只有真正的公主能隔著二十層床墊感覺到那顆豌豆。在這裡，**你**就是那位公主。這個工具幫你一層一層把床墊掀開：翻登記資料、數犯罪案件、查規劃申請和公司申報文件，告訴你豌豆可能藏在哪裡。但只有你感覺得到：親自去看房、走一走那條街、跟仲介和房東聊一聊。這份報告是一道濾網，趕時間的時候，它也只是一道濾網。它的第一個責任，是說出自己不知道什麼，然後開口問你。
 ```
 
-### deck:readme-zh-tw:11
+### deck:readme:3
 
-- source: `README.zh-TW.md` · L56
+- source: `README.md` · L25
 - under: ## 為什麼叫「豌豆公主」
 - lang: zh-TW
 - write-back: yes
@@ -521,9 +84,152 @@ All prose paragraphs. Tables, headings and code blocks are not in the deck.
 作者自己的經歷，發在社群的繁體中文原文：[到了倫敦才發現自己有病，是公主病](docs/posts/2026-09-launch.zh-TW.md)。
 ```
 
-### deck:readme-zh-tw:12
+### deck:readme:4
 
-- source: `README.zh-TW.md` · L65
+- source: `README.md` · L29
+- under: ## 從這裡開始，不需要終端機
+- lang: zh-TW
+- write-back: yes
+
+```text
+三條路，從最省事到最手動。挑一條跟你現在在用的工具對得上的。
+```
+
+### deck:readme:5
+
+- source: `README.md` · L31
+- under: ## 從這裡開始，不需要終端機
+- lang: zh-TW
+- write-back: yes
+
+```text
+1. **你在用 agent 應用程式**（Claude Code、Codex、Cursor、Gemini CLI、Grok Build……）。把這句話貼給它，然後等：
+```
+
+### deck:readme:6
+
+- source: `README.md` · L33
+- under: ## 從這裡開始，不需要終端機
+- lang: zh-TW
+- write-back: yes
+
+```text
+   > 請安裝 https://github.com/jacky18008/pea-princess 這個技能，裝好後告訴我它能做什麼
+```
+
+### deck:readme:7
+
+- source: `README.md` · L35
+- under: ## 從這裡開始，不需要終端機
+- lang: zh-TW
+- write-back: yes
+
+```text
+   Agent 會把這個專案抓下來，用 `pea-princess` 這個名字把技能裝好，然後回答你。從此就只要講話：「尻洗這間房：」再把房源貼上去。
+```
+
+### deck:readme:8
+
+- source: `README.md` · L37
+- under: ## 從這裡開始，不需要終端機
+- lang: zh-TW
+- write-back: yes
+
+```text
+2. **你在用有 Skills 功能的聊天軟體**（claude.ai、Claude Cowork、ChatGPT Business）。到 [Releases](https://github.com/jacky18008/pea-princess/releases) 下載 `pea-princess-skill.zip`，打開 Settings → Skills → Upload，選這個 zip。然後問它「這能幹嘛？」。
+```
+
+### deck:readme:9
+
+- source: `README.md` · L39
+- under: ## 從這裡開始，不需要終端機
+- lang: zh-TW
+- write-back: yes
+
+```text
+3. **你在用沒有 Skills 的聊天軟體**（ChatGPT Plus Projects、Grok Projects、Gemini Gems、Perplexity Spaces）。到 [Releases](https://github.com/jacky18008/pea-princess/releases) 下載提示詞包，把 `INSTRUCTIONS.md` 貼進專案的指示欄，再附上 `references/` 裡的檔案。之後技能會一次告訴你要貼什麼。
+```
+
+### deck:readme:10
+
+- source: `README.md` · L41
+- under: ## 從這裡開始，不需要終端機
+- lang: zh-TW
+- write-back: yes
+
+```text
+不用寫程式，不用改設定檔：接下來全部都是一句一句的話，打字或用語音都行。五分鐘上手看 [USING.zh-TW.md](docs/USING.zh-TW.md)；每一種安裝方式和它的注意事項在 [INSTALL.md](docs/INSTALL.md)。
+```
+
+### deck:readme:11
+
+- source: `README.md` · L45
+- under: ### 跟它說說你自己
+- lang: zh-TW
+- write-back: yes
+
+```text
+你不用填表格。把你的需求和你的雷點講給它聽就好——含帳單的預算、通勤、「再也不要住地下室」——還有你住過的地方，最好的和最差的；連你還記得的購物習慣，都能讓它知道你是怎麼做決定的。它會把這些記在你的 `profile.yaml` 裡，每次要改都先讓你看過，你中途改變主意也沒關係。懶得打字就用講的：手機或電腦內建的語音輸入，或是 Typeless、Wispr Flow 這類工具，中英文混著講也沒問題。語音輸入真的超讚。
+```
+
+### deck:readme:12
+
+- source: `README.md` · L60
+- under: ## 它查什麼，答案從哪裡來
+- lang: zh-TW
+- write-back: yes
+
+```text
+每一項結論都帶著它的證據等級。查不到的東西，它會一次、用一則訊息問你。它不會自己去開房源網站：頁面由你交給它，[上手指南](docs/USING.zh-TW.md)裡有三種做法。
+```
+
+### deck:readme:13
+
+- source: `README.md` · L64
+- under: ## 它只是篩子，房子要親自去看
+- lang: zh-TW
+- write-back: yes
+
+```text
+這裡的每一句話，不是從登記簿讀來的，就是從你貼給它的東西讀來的。它聞不到霉味，聽不到半夜兩點的車聲，也看不到你問「房東到底是誰」的時候，仲介臉上的表情。所以請把報告當成一張「該看什麼」的清單，然後親自走一趟：
+```
+
+### deck:readme:14
+
+- source: `README.md` · L70
+- under: ## 它只是篩子，房子要親自去看
+- lang: zh-TW
+- write-back: yes
+
+```text
+作者會做這個，是因為在倫敦找房子真的很折磨人，而一個會自己去翻登記簿的助理，幫他少走了很多冤枉路。但它取代不了你自己的兩條腿。
+```
+
+### deck:readme:15
+
+- source: `README.md` · L74
+- under: ## 哪種方案，用哪種模式
+- lang: zh-TW
+- write-back: yes
+
+```text
+用你自己已經有的訂閱就好；做這件事，個人訂閱比按量計費的 API 金鑰划算不少，而且什麼都不用設定。比起純聊天，建議用 agent 模式（Claude Code、Codex、Grok Build、Cursor……）：這些檢查是一個步驟很多的長任務，聊天模式得你一步一步牽著它走。$20～$30 的方案先從 `lite` 開始，比較省 token。
+```
+
+### deck:readme:16
+
+- source: `README.md` · L85
+- under: ## 哪種方案，用哪種模式
+- lang: zh-TW
+- write-back: yes
+
+```text
+設定一次就好：寫在你的 `profile.yaml`（`budget_mode: lite`），或直接講「這間用 deep」，助理會確認後改。這幾個模式查的是同一批東西，差別只在深度：`lite` 一間房控制在十次抓取以內，硬性條件、判決和那兩個問題照樣會給；`standard` 是平常的完整版；`deep` 再加上進了決選名單才需要的項目。有兩件事是在真實房子上量出來的，不是意見：深度比模型大小重要（強模型跑 `lite` 的分數，輸給弱模型跑 `standard`），而且會亂編數字的都是便宜的組合——這也是為什麼這裡每一個數字都必須帶著來源，不然就要標成不知道。細節和注意事項：[INSTALL.md](docs/INSTALL.md)、[預算模式](skills/vet-flat/references/budget-modes.md)、[實驗紀錄](docs/EXPERIMENTS.md)。
+```
+
+### deck:readme:17
+
+- source: `README.md` · L94
 - under: ## 三種模式
 - lang: zh-TW
 - write-back: yes
@@ -532,9 +238,9 @@ All prose paragraphs. Tables, headings and code blocks are not in the deck.
 > 狀態：**草稿**。本機蒐集、區域掃描、報告產生和實驗框架都已經做好了。處理個人資料或要做發布之前，先讀[安全與隱私邊界](SECURITY.md)。使用方式：`docs/INSTALL.md`、`docs/SCRIPTS.md`、`docs/CONVENTIONS.md`。
 ```
 
-### deck:readme-zh-tw:13
+### deck:readme:18
 
-- source: `README.zh-TW.md` · L67
+- source: `README.md` · L96
 - under: ## 三種模式
 - lang: zh-TW
 - write-back: yes
@@ -543,9 +249,9 @@ All prose paragraphs. Tables, headings and code blocks are not in the deck.
 **發布方式：** 下載這個技能／工具，用你自己的 agent 跑。Pea Princess 不代管模型工作程序，也不碰訂閱帳號的憑證。本機的人物實驗室只是測試用的夥伴。詳見[桌機／手機的界線、供應商訂閱政策、發布關卡](docs/local-product-and-provider-policy.md)。
 ```
 
-### deck:readme-zh-tw:14
+### deck:readme:19
 
-- source: `README.zh-TW.md` · L82
+- source: `README.md` · L111
 - under: # then, on any host with a shell: is it installed right? (one request per open register)
 - lang: zh-TW
 - write-back: yes
@@ -554,9 +260,9 @@ All prose paragraphs. Tables, headings and code blocks are not in the deck.
 這個技能安裝和呼叫的名字都是 **`pea-princess`**；上傳用的檔案是 `dist/pea-princess-skill.zip`。專案原始碼還是放在 `skills/vet-flat/`，這樣既有的腳本路徑和實驗紀錄才不會失效。這就是一個技能，一個安裝名稱。
 ```
 
-### deck:readme-zh-tw:15
+### deck:readme:20
 
-- source: `README.zh-TW.md` · L84
+- source: `README.md` · L113
 - under: # then, on any host with a shell: is it installed right? (one request per open register)
 - lang: zh-TW
 - write-back: yes
@@ -565,9 +271,9 @@ All prose paragraphs. Tables, headings and code blocks are not in the deck.
 Codex：把沙箱網路打開（`sandbox_workspace_write.network_access = true`），或改用 manual 模式。
 ```
 
-### deck:readme-zh-tw:16
+### deck:readme:21
 
-- source: `README.zh-TW.md` · L87
+- source: `README.md` · L116
 - under: ### 腳本（只用 Python 3.9 標準函式庫；網路走 curl）
 - lang: zh-TW
 - write-back: yes
@@ -576,9 +282,9 @@ Codex：把沙箱網路打開（`sandbox_workspace_write.network_access = true`�
 全部在 `skills/vet-flat/scripts/`；每一支都印出一個 JSON 物件，裡面有 `source_url`、`retrieved_at`、`http_status`、`ok` 和一個證據等級。用法細節在 `docs/SCRIPTS.md`。
 ```
 
-### deck:readme-zh-tw:17
+### deck:readme:22
 
-- source: `README.zh-TW.md` · L102
+- source: `README.md` · L131
 - under: ### 腳本（只用 Python 3.9 標準函式庫；網路走 curl）
 - lang: zh-TW
 - write-back: yes
@@ -587,20 +293,20 @@ Codex：把沙箱網路打開（`sandbox_workspace_write.network_access = true`�
 沒有 shell 的人要看報告排版：用瀏覽器打開 `viewer/viewer.html`，把 JSON 貼進去。需求頁面對另一個檔案也是同樣的做法：`scripts/panel.py --profile profile.yaml --out requirements.html` 會寫出一頁唯讀的現況，讓人隨時想看就打開。沒有任何助理會自己寫 HTML；模型寫 YAML 和 JSON，由腳本負責排版。
 ```
 
-### deck:readme-zh-tw:18
+### deck:readme:23
 
-- source: `README.zh-TW.md` · L105
+- source: `README.md` · L134
 - under: ### 問它能做什麼
 - lang: zh-TW
 - write-back: yes
 
 ```text
-問它 **「這能幹嘛？」**（或 "What can this do?"）。答案來自 `skills/vet-flat/references/onboarding.md`：一段簡短說明、三個起點（有房源 → 尻洗它；有區域或目的地 → 掃一遍；完全沒概念 → 十個基本事實加六個帶建議預設值的問題）。你自己的規則寫在 `profile.yaml`（預算、面積、房型、不能接受的條件、優先順序，還有 `budget_mode` lite/standard/deep，給 £20 方案和只能純聊天的情況用）。Agent 一定要問的硬問題在 `references/questions.md`。
+問它 **「這能幹嘛？」**（或 "What can this do?"）。答案來自 `skills/vet-flat/references/onboarding.md`：一段簡短說明、三個起點（有房源 → 尻洗它；有區域或目的地 → 掃一遍；完全沒概念 → 十個基本事實加六個帶建議預設值的問題）。你自己的規則寫在 `profile.yaml`（預算、面積、房型、不能接受的條件、優先順序，還有 `budget_mode`——哪個方案該設哪個值，看「哪種方案，用哪種模式」那張表）。Agent 一定要問的硬問題在 `references/questions.md`。
 ```
 
-### deck:readme-zh-tw:19
+### deck:readme:24
 
-- source: `README.zh-TW.md` · L108
+- source: `README.md` · L137
 - under: ### 基準測試（事實在每個模型上都要對；判決可以不一樣）
 - lang: zh-TW
 - write-back: yes
@@ -609,9 +315,9 @@ Codex：把沙箱網路打開（`sandbox_workspace_write.network_access = true`�
 `evals/evals.json` 收了 7 個行政區的 8 間真實房子，加上 2 個對話情境（「這能幹嘛」、「我完全沒概念」），標準答案由專案自己的抓取腳本在 2026-09-03 產生。`bench/grade.py` 評分的項目有事實召回率、捏造、引用、對未知的誠實度、硬性條件的一致性；`bench/run.py --dry-run` 會印出 Claude Code、Codex、Gemini CLI 或 OpenAI 相容 API 的完整指令。詳見 `bench/README.md`。
 ```
 
-### deck:readme-zh-tw:20
+### deck:readme:25
 
-- source: `README.zh-TW.md` · L110
+- source: `README.md` · L139
 - under: ### 基準測試（事實在每個模型上都要對；判決可以不一樣）
 - lang: zh-TW
 - write-back: yes
@@ -620,9 +326,9 @@ Codex：把沙箱網路打開（`sandbox_workspace_write.network_access = true`�
 **要跑哪一種設定：** `docs/EXPERIMENTS.md` 記錄了最早的看房比較實驗。[後來的上下文消融實驗](docs/ablation-2026-09-09/results.md)包含生成成本和來源檢視：在測到的規模下，額外的摘要、結構化記憶和多次檢索呼叫並沒有省下 token。起點就維持「一個 agent 帶完整上下文」；四角色流水線還在實驗階段。這些研究量的是不同的任務，不是一份通用的模型排名。
 ```
 
-### deck:readme-zh-tw:21
+### deck:readme:26
 
-- source: `README.zh-TW.md` · L112
+- source: `README.md` · L141
 - under: ### 基準測試（事實在每個模型上都要對；判決可以不一樣）
 - lang: zh-TW
 - write-back: yes
@@ -631,9 +337,9 @@ Codex：把沙箱網路打開（`sandbox_workspace_write.network_access = true`�
 **長時間的專案和會變的需求：** [session harness](docs/session-harness.md) 會保存使用者的原話、帶版本的需求和條件式例外、來源快照、目標、待辦和執行狀態。受管理的 runner 自己把當前的封包塞進去，並拒絕過期的結果。`AGENTS.md`／`CLAUDE.md` 保持簡短，只連到詳細規則；光放指標不能保證對方會去讀。[生命週期驗證](docs/session-harness-validation.md)測的是不呼叫模型也能復原，不是品質等價或省 token。
 ```
 
-### deck:readme-zh-tw:22
+### deck:readme:27
 
-- source: `README.zh-TW.md` · L114
+- source: `README.md` · L143
 - under: ### 基準測試（事實在每個模型上都要對；判決可以不一樣）
 - lang: zh-TW
 - write-back: yes
@@ -642,9 +348,9 @@ Codex：把沙箱網路打開（`sandbox_workspace_write.network_access = true`�
 **想試一整段人物對話：** 跑 `python3 tools/persona_playground.py`，再打開它印出來的本機網址。[互動實驗室](docs/persona-playground.md)用你本機的 Codex 登入來產生動態的人物回覆和助理答案，支援單步／連續／暫停、排隊的真人提問、情境修訂、私有歷史和共用的用量上限。16 張人物卡都有，以清楚標示的聊天改編版呈現；這是本機 alpha，沒有公開部署，也沒有隱藏的模型裁判。
 ```
 
-### deck:readme-zh-tw:23
+### deck:readme:28
 
-- source: `README.zh-TW.md` · L116
+- source: `README.md` · L145
 - under: ### 基準測試（事實在每個模型上都要對；判決可以不一樣）
 - lang: zh-TW
 - write-back: yes
@@ -653,9 +359,9 @@ Codex：把沙箱網路打開（`sandbox_workspace_write.network_access = true`�
 **社群回饋，第一階段：** 打開[本機選項表單](community/index.html)，照著[指南](docs/community-feedback-stage1.md)做。公開的 JSON 只放受控的選項；選填的文字留在作者自己的裝置上。本機的驗證、匯入和搜尋用的是虛構的示範目錄。目前還沒有線上投稿服務，也沒有真實的評論資料集。
 ```
 
-### deck:readme-zh-tw:24
+### deck:readme:29
 
-- source: `README.zh-TW.md` · L118
+- source: `README.md` · L147
 - under: ### 基準測試（事實在每個模型上都要對；判決可以不一樣）
 - lang: zh-TW
 - write-back: yes
@@ -664,9 +370,9 @@ Codex：把沙箱網路打開（`sandbox_workspace_write.network_access = true`�
 **看的是整段對話，不是單一回答：** `docs/JOURNEYS.md` 為九段寫好腳本的多輪旅程評分，`docs/PERSONAS.md` 再往前一步——十六個由模型扮演的虛構人物，搭配一個決定性的控制器保管他們的文件，讓任何東西都編不出來；裁判必須引用自己的證據；每個人還配一個只動一項設定的對照探針。`python3 bench/personas.py --matrix pilot --dry-run` 不呼叫模型就能印出整份計畫。
 ```
 
-### deck:readme-zh-tw:25
+### deck:readme:30
 
-- source: `README.zh-TW.md` · L128
+- source: `README.md` · L157
 - under: ## 這裡不會有的來源
 - lang: zh-TW
 - write-back: yes
@@ -675,9 +381,9 @@ Codex：把沙箱網路打開（`sandbox_workspace_write.network_access = true`�
 Rightmove、Zoopla、OnTheMarket、OpenRent、HomeViews、Trustpilot、Airbnb、Booking.com 在這裡只會出現名字。它們的條款不希望程式自動存取，所以這個專案不提供任何做法；技能會向你要頁面（PDF、截圖或純文字），不會自己去開房源連結。這包沒有這些網頁的爬蟲，也不能鼓勵你讓 agent 去爬蟲。
 ```
 
-### deck:readme-zh-tw:26
+### deck:readme:31
 
-- source: `README.zh-TW.md` · L132
+- source: `README.md` · L161
 - under: ## 改成你的樣子
 - lang: zh-TW
 - write-back: yes
@@ -686,9 +392,9 @@ Rightmove、Zoopla、OnTheMarket、OpenRent、HomeViews、Trustpilot、Airbnb、
 技能就是一個資料夾，裡面是 Markdown 和幾支腳本，這一包本來就是設計來讓你隨手改的。不用讀程式碼：跟你的 agent 用講的。
 ```
 
-### deck:readme-zh-tw:27
+### deck:readme:32
 
-- source: `README.zh-TW.md` · L141
+- source: `README.md` · L170
 - under: ## 改成你的樣子
 - lang: zh-TW
 - write-back: yes
@@ -697,9 +403,9 @@ Rightmove、Zoopla、OnTheMarket、OpenRent、HomeViews、Trustpilot、Airbnb、
 任何主機都能先試這一句：
 ```
 
-### deck:readme-zh-tw:28
+### deck:readme:33
 
-- source: `README.zh-TW.md` · L143
+- source: `README.md` · L172
 - under: ## 改成你的樣子
 - lang: zh-TW
 - write-back: yes
@@ -708,9 +414,9 @@ Rightmove、Zoopla、OnTheMarket、OpenRent、HomeViews、Trustpilot、Airbnb、
 > 把這個技能改成每份報告開頭先講每月總花費，改完跑測試，告訴我你改了什麼。
 ```
 
-### deck:readme-zh-tw:29
+### deck:readme:34
 
-- source: `README.zh-TW.md` · L146
+- source: `README.md` · L175
 - under: ## 授權與姓名標示（提案中）
 - lang: zh-TW
 - write-back: yes
@@ -719,9 +425,9 @@ Rightmove、Zoopla、OnTheMarket、OpenRent、HomeViews、Trustpilot、Airbnb、
 文件和技能文字：CC BY 4.0。程式碼：MIT。每一份報告都會帶著 "Generated with pea-princess <version> — <source URL>"。請留著它。
 ```
 
-### deck:readme-zh-tw:30
+### deck:readme:35
 
-- source: `README.zh-TW.md` · L148
+- source: `README.md` · L177
 - under: ## 授權與姓名標示（提案中）
 - lang: zh-TW
 - write-back: yes
@@ -730,15 +436,417 @@ Rightmove、Zoopla、OnTheMarket、OpenRent、HomeViews、Trustpilot、Airbnb、
 插圖出自 Edmund Dulac 1911 年為 *Stories from Hans Andersen*（Hodder & Stoughton，倫敦）畫的彩頁，屬於公有領域。`docs/assets/mark.svg` 裡的標誌（七層床墊下的一顆豌豆）是原創的，跟文件一起以 CC BY 4.0 釋出；`docs/assets/social-preview.png` 是同一個標誌做成的 1280×640 預覽卡。
 ```
 
-### deck:readme-zh-tw:31
+### deck:readme:36
 
-- source: `README.zh-TW.md` · L152
+- source: `README.md` · L181
 - under: ## 作者的聯絡方式
 - lang: zh-TW
 - write-back: yes
 
 ```text
 陳先灝 Hsien Hao (Jacky) Chen — [LinkedIn](https://www.linkedin.com/in/jacky-chen-a49177137/)。有問題、想法，或你自己找房的故事，歡迎在這裡開 issue 或到 LinkedIn 私訊。
+```
+
+---
+
+## README.en.md — the front page, English
+
+All prose paragraphs. Tables, headings and code blocks are not in the deck.
+
+### deck:readme-en:1
+
+- source: `README.en.md` · L20
+- under: (top of file)
+- lang: en
+- write-back: yes
+
+```text
+An agent skill for checking and searching rental listings in London. It vets a flat the way a careful surveyor would: identity, floor area, age, heating, construction nearby, crime, management reviews, agent compliance, price, light, total monthly cost and commute, from official and open UK data, ending in a verdict. Works with any agent that reads the [Agent Skills](https://agentskills.io) format (e.g. GPT, Claude, Grok, Gemini, pi-agent, DeepSeek, etc.). Plain chat mode works too, but agent mode is recommended: it is steadier on complex tasks. Just talk to the AI in plain words.
+```
+
+### deck:readme-en:2
+
+- source: `README.en.md` · L23
+- under: ## Why "Pea Princess"
+- lang: en
+- write-back: yes
+
+```text
+In the fairy tale only the real princess feels the pea through twenty mattresses. Here **you** are the princess. This tool lifts the mattresses one by one: it reads the registers, counts the crimes, checks the planning applications and the company filings, and tells you where the pea might be. Only you can feel it: go and see the flat, walk the street, talk to the agent and the landlord. The report is a filter, and when you are in a hurry it is only a filter. Its first duty is to say what it does not know and ask you for it.
+```
+
+### deck:readme-en:3
+
+- source: `README.en.md` · L25
+- under: ## Why "Pea Princess"
+- lang: zh-TW
+- write-back: yes
+
+```text
+The author's own account, in Traditional Chinese, as posted to the community: [到了倫敦才發現自己有病，是公主病](docs/posts/2026-09-launch.zh-TW.md).
+```
+
+### deck:readme-en:4
+
+- source: `README.en.md` · L29
+- under: ## Start here — no terminal needed
+- lang: en
+- write-back: yes
+
+```text
+Three ways in, from easiest to most manual. Pick the one that matches what you already use.
+```
+
+### deck:readme-en:5
+
+- source: `README.en.md` · L31
+- under: ## Start here — no terminal needed
+- lang: en
+- write-back: yes
+
+```text
+1. **You use an agent app** (Claude Code, Codex, Cursor, Gemini CLI, Grok Build, …). Paste this sentence to it and wait:
+```
+
+### deck:readme-en:6
+
+- source: `README.en.md` · L33
+- under: ## Start here — no terminal needed
+- lang: en
+- write-back: yes
+
+```text
+   > Install the skill from https://github.com/jacky18008/pea-princess and then tell me what it can do.
+```
+
+### deck:readme-en:7
+
+- source: `README.en.md` · L35
+- under: ## Start here — no terminal needed
+- lang: en
+- write-back: yes
+
+```text
+   The agent fetches this repository, installs the skill under the name `pea-princess`, and answers. From then on, just talk: "Roast this flat:" and paste the listing.
+```
+
+### deck:readme-en:8
+
+- source: `README.en.md` · L37
+- under: ## Start here — no terminal needed
+- lang: en
+- write-back: yes
+
+```text
+2. **You use a chat app with a Skills feature** (claude.ai, Claude Cowork, ChatGPT Business). Download `pea-princess-skill.zip` from [Releases](https://github.com/jacky18008/pea-princess/releases), open Settings → Skills → Upload, choose the zip. Then ask "What can this do?".
+```
+
+### deck:readme-en:9
+
+- source: `README.en.md` · L39
+- under: ## Start here — no terminal needed
+- lang: en
+- write-back: yes
+
+```text
+3. **You use a chat app without Skills** (ChatGPT Plus Projects, Grok Projects, Gemini Gems, Perplexity Spaces). Download the prompt pack from [Releases](https://github.com/jacky18008/pea-princess/releases), paste `INSTRUCTIONS.md` into the project's instructions and attach the `references/` files. The skill then tells you, once, what to paste.
+```
+
+### deck:readme-en:10
+
+- source: `README.en.md` · L41
+- under: ## Start here — no terminal needed
+- lang: en
+- write-back: yes
+
+```text
+No code, no settings files: everything after that is sentences, typed or dictated. The five-minute walkthrough is [USING.md](docs/USING.md); every install route with its caveats is [INSTALL.md](docs/INSTALL.md).
+```
+
+### deck:readme-en:11
+
+- source: `README.en.md` · L45
+- under: ### Tell it about you
+- lang: en
+- write-back: yes
+
+```text
+You do not fill in a form. Say what you need and what you cannot stand — the budget with bills, the commute, "never a basement again" — and the places you have lived, the best and the worst; even a shopping habit you remember tells it how you decide. It keeps that in your `profile.yaml`, shows every change before it makes it, and you can change your mind halfway. If typing is a chore, dictate: the built-in dictation on your phone or computer, or an app such as Typeless or Wispr Flow, and mixed Chinese and English is fine.
+```
+
+### deck:readme-en:12
+
+- source: `README.en.md` · L60
+- under: ## What it checks, and where the answers come from
+- lang: en
+- write-back: yes
+
+```text
+Every finding carries its evidence grade. What it cannot reach, it asks you for, once, in one message. It never opens listing sites: you hand it the page, and [the walkthrough](docs/USING.md) shows the three ways to do that.
+```
+
+### deck:readme-en:13
+
+- source: `README.en.md` · L64
+- under: ## It is a filter. Go and see the flat
+- lang: en
+- write-back: yes
+
+```text
+Everything here is read from registers and from what you paste. It cannot smell the damp, hear the road at 2 a.m., or see the agent's face when you ask who the landlord is. So treat the report as the list of what to look at, then go:
+```
+
+### deck:readme-en:14
+
+- source: `README.en.md` · L70
+- under: ## It is a filter. Go and see the flat
+- lang: en
+- write-back: yes
+
+```text
+The author built this because looking for a flat in London is a grim process, and an assistant that reads the registers saved them many wasted viewings. It is not a replacement for your own feet.
+```
+
+### deck:readme-en:15
+
+- source: `README.en.md` · L74
+- under: ## Which plan, which mode
+- lang: en
+- write-back: yes
+
+```text
+Use the subscription you already have; for this work a personal plan is far better value than pay-as-you-go keys, and it needs no setup. Prefer an agent mode (Claude Code, Codex, Grok Build, Cursor…) over plain chat: the checks are a long task with many small steps, and chat mode has to be walked through them by hand.
+```
+
+### deck:readme-en:16
+
+- source: `README.en.md` · L85
+- under: ## Which plan, which mode
+- lang: en
+- write-back: yes
+
+```text
+Set it once in your `profile.yaml` (`budget_mode: lite`) or just say it ("use deep for this one"); the assistant confirms the change. The modes are depths of the same checks: `lite` keeps under ten fetches a flat and still gives the hard filters, the verdict and the two questions; `standard` is the usual set; `deep` adds the shortlist extras. Two things measured on real flats, not opinions: depth matters more than model size (a strong model in `lite` scored below a weak one in `standard`), and cheap set-ups are the ones that invent numbers, which is why every number here must carry its source or be marked unknown. Details and caveats: [INSTALL.md](docs/INSTALL.md), [budget modes](skills/vet-flat/references/budget-modes.md), [experiments](docs/EXPERIMENTS.md).
+```
+
+### deck:readme-en:17
+
+- source: `README.en.md` · L94
+- under: ## Three modes
+- lang: en
+- write-back: yes
+
+```text
+> Status: **draft**. Local collection, area sweep, report rendering and experiment harnesses are implemented. Read [security and privacy boundaries](SECURITY.md) before handling personal data or building a release. Usage: `docs/INSTALL.md`, `docs/SCRIPTS.md`, `docs/CONVENTIONS.md`.
+```
+
+### deck:readme-en:18
+
+- source: `README.en.md` · L96
+- under: ## Three modes
+- lang: en
+- write-back: yes
+
+```text
+**Distribution:** download the skill/tool and run it with your own agent. Pea Princess does not host model workers or handle subscription credentials. The local persona lab is a testing companion. See [desktop/mobile boundaries, provider subscription policies, and release gates](docs/local-product-and-provider-policy.md).
+```
+
+### deck:readme-en:19
+
+- source: `README.en.md` · L111
+- under: # then, on any host with a shell: is it installed right? (one request per open register)
+- lang: en
+- write-back: yes
+
+```text
+The skill is installed and invoked as **`pea-princess`**; the upload artifact is `dist/pea-princess-skill.zip`. The repository still stores its source in `skills/vet-flat/` so existing script paths and experiment records remain valid. This is one skill, with one installed name.
+```
+
+### deck:readme-en:20
+
+- source: `README.en.md` · L113
+- under: # then, on any host with a shell: is it installed right? (one request per open register)
+- lang: en
+- write-back: yes
+
+```text
+Codex: enable sandbox network (`sandbox_workspace_write.network_access = true`) or use manual mode.
+```
+
+### deck:readme-en:21
+
+- source: `README.en.md` · L116
+- under: ### Scripts (Python 3.9 standard library only; network via curl)
+- lang: en
+- write-back: yes
+
+```text
+All in `skills/vet-flat/scripts/`; each prints one JSON object with `source_url`, `retrieved_at`, `http_status`, `ok` and an evidence class. Usage details: `docs/SCRIPTS.md`.
+```
+
+### deck:readme-en:22
+
+- source: `README.en.md` · L131
+- under: ### Scripts (Python 3.9 standard library only; network via curl)
+- lang: en
+- write-back: yes
+
+```text
+Report layout for people without a shell: open `viewer/viewer.html` in a browser and paste the JSON. The requirements page is the same idea for the other file: `scripts/panel.py --profile profile.yaml --out requirements.html` writes a read-only page of where things stand, for the person to open whenever they like. No assistant writes HTML; the model writes YAML and JSON, the scripts render them.
+```
+
+### deck:readme-en:23
+
+- source: `README.en.md` · L134
+- under: ### Ask it what it can do
+- lang: en
+- write-back: yes
+
+```text
+Ask **"What can this do?"** (or 這能幹嘛？). The answer comes from `skills/vet-flat/references/onboarding.md`: a short pitch, three starting points (a listing → vet it; an area or destination → sweep; no idea → a ten-fact primer and six questions with suggested defaults). Your rules live in `profile.yaml` (budget, size, flat type, deal-breakers, priorities, and `budget_mode` — which value fits which plan is the table under "Which plan, which mode"). The hard follow-up questions the agent must ask are in `references/questions.md`.
+```
+
+### deck:readme-en:24
+
+- source: `README.en.md` · L137
+- under: ### Benchmark (facts must be right on every model; verdicts may differ)
+- lang: en
+- write-back: yes
+
+```text
+`evals/evals.json` has 8 real flats across 7 boroughs plus 2 conversation cases ("what can this do", "I have no idea"), with truth produced by the repo's own fetchers on 2026-09-03. `bench/grade.py` scores fact recall, fabrications, citations, unknown-honesty and hard-filter consistency; `bench/run.py --dry-run` prints the exact command for Claude Code, Codex, Gemini CLI or an OpenAI-compatible API. See `bench/README.md`.
+```
+
+### deck:readme-en:25
+
+- source: `README.en.md` · L139
+- under: ### Benchmark (facts must be right on every model; verdicts may differ)
+- lang: en
+- write-back: yes
+
+```text
+**Which configuration to run:** `docs/EXPERIMENTS.md` records the original flat-vetting comparisons. The [later context ablation](docs/ablation-2026-09-09/results.md) includes generation costs and source reviews: extra summarization, structured memory and multiple retrieval calls did not save tokens at the tested sizes. Keep one agent with full context as the starting point; the four-role pipeline remains experimental. These studies measure different tasks, not a universal model ranking.
+```
+
+### deck:readme-en:26
+
+- source: `README.en.md` · L141
+- under: ### Benchmark (facts must be right on every model; verdicts may differ)
+- lang: en
+- write-back: yes
+
+```text
+**Long-running projects and changing requirements:** the [session harness](docs/session-harness.md) saves exact user requests, revisioned requirements and conditional exceptions, source snapshots, goals, TODOs and execution state. The managed runner inserts the current packet itself and rejects stale results. Short `AGENTS.md` / `CLAUDE.md` files link to detailed rules; pointers alone cannot ensure reading. [Lifecycle validation](docs/session-harness-validation.md) tests recovery without new model calls, not quality equivalence or token savings.
+```
+
+### deck:readme-en:27
+
+- source: `README.en.md` · L143
+- under: ### Benchmark (facts must be right on every model; verdicts may differ)
+- lang: en
+- write-back: yes
+
+```text
+**Try a whole persona conversation:** run `python3 tools/persona_playground.py` and open the printed local URL. The [interactive lab](docs/persona-playground.md) uses your local Codex login for dynamic persona replies and assistant answers, with step/run/pause, queued human questions, scenario amendments, private history and shared usage ceilings. All 16 cards are available in a clearly labelled chat adaptation; this is a local alpha, with no public deployment or hidden model judge.
+```
+
+### deck:readme-en:28
+
+- source: `README.en.md` · L145
+- under: ### Benchmark (facts must be right on every model; verdicts may differ)
+- lang: en
+- write-back: yes
+
+```text
+**Community feedback, stage 1:** open the [local options form](community/index.html) and follow the [guide](docs/community-feedback-stage1.md). Public JSON contains controlled choices; optional text stays on the author's device. Local validation, import and search use a fictional demo catalog. There is no online submission service or real review dataset yet.
+```
+
+### deck:readme-en:29
+
+- source: `README.en.md` · L147
+- under: ### Benchmark (facts must be right on every model; verdicts may differ)
+- lang: en
+- write-back: yes
+
+```text
+**Whole conversations, not one answer:** `docs/JOURNEYS.md` scores nine scripted multi-turn journeys, and `docs/PERSONAS.md` goes one step further — sixteen fictional people played by a model, with a deterministic controller holding their documents so nothing can be invented, a judge that has to quote its evidence, and a paired probe per person that moves exactly one setting. `python3 bench/personas.py --matrix pilot --dry-run` prints the whole plan without calling a model.
+```
+
+### deck:readme-en:30
+
+- source: `README.en.md` · L157
+- under: ## Sources you will not find here
+- lang: en
+- write-back: yes
+
+```text
+Rightmove, Zoopla, OnTheMarket, OpenRent, HomeViews, Trustpilot, Airbnb, Booking.com appear here by name only. Their terms do not want programs reading them automatically, so this project provides no method for that; the skill asks you for the page (a PDF, screenshots or the plain text) and never opens listing links itself. There is no scraper for these sites in this package, and it cannot encourage you to have your agent scrape them either.
+```
+
+### deck:readme-en:31
+
+- source: `README.en.md` · L161
+- under: ## Make it yours
+- lang: en
+- write-back: yes
+
+```text
+A skill is a folder of Markdown and a few scripts, and this one is written to be bent. You do not need to read the code: say what you want to your agent.
+```
+
+### deck:readme-en:32
+
+- source: `README.en.md` · L170
+- under: ## Make it yours
+- lang: en
+- write-back: yes
+
+```text
+One sentence to try first, on any host:
+```
+
+### deck:readme-en:33
+
+- source: `README.en.md` · L172
+- under: ## Make it yours
+- lang: en
+- write-back: yes
+
+```text
+> Change this skill so that every report starts with the all-in monthly cost, run the tests, and tell me what you changed.
+```
+
+### deck:readme-en:34
+
+- source: `README.en.md` · L175
+- under: ## Licence and attribution (proposed)
+- lang: en
+- write-back: yes
+
+```text
+Documentation and skill text: CC BY 4.0. Code: MIT. Every report carries "Generated with pea-princess <version> — <source URL>". Please keep it.
+```
+
+### deck:readme-en:35
+
+- source: `README.en.md` · L177
+- under: ## Licence and attribution (proposed)
+- lang: en
+- write-back: yes
+
+```text
+The illustration is Edmund Dulac's 1911 plate for *Stories from Hans Andersen* (Hodder & Stoughton, London), public domain. The mark in `docs/assets/mark.svg` (a pea under seven mattresses) is original and released with the documentation under CC BY 4.0; `docs/assets/social-preview.png` is the same mark as a 1280×640 preview card.
+```
+
+### deck:readme-en:36
+
+- source: `README.en.md` · L181
+- under: ## Contact the author
+- lang: en
+- write-back: yes
+
+```text
+Hsien Hao (Jacky) Chen 陳先灝 — [LinkedIn](https://www.linkedin.com/in/jacky-chen-a49177137/). Questions, ideas and stories from your own search are welcome: open an issue here or write on LinkedIn.
 ```
 
 ---
