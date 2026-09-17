@@ -77,7 +77,7 @@ Use the subscription you already have; for this work a personal plan is far bett
 |---|---|---|---|
 | ChatGPT Plus, about £20 | Codex (app, CLI or IDE) | `lite` | the most published headroom and usage numbers you can plan with; turn Codex's sub-agents off (`[agents] enabled = false`) or each answer costs five to twenty times more |
 | Claude Pro, about £20 | Claude Code, or claude.ai with the skill uploaded | `lite` | works well; no published usage figures, and it shares one pool with chat |
-| Claude Max or ChatGPT Pro, £100 and up | the same | `standard`, `deep` for the last two flats | the author's own setup: Codex for the legwork, Claude's largest model for the judgement calls — the hard cases and the final advice |
+| Claude Max or ChatGPT Pro, £100 and up | the same | `standard`, `deep` for the last two flats | the author's own setup: Codex for the legwork, Claude's largest model, Fable 5.1, for the judgement calls — the hard cases and the final advice |
 | SuperGrok or X Premium+ | Grok Build CLI | `lite` | it runs the skill, but in our first measurements an answer took about ten minutes and millions of tokens; not a daily default yet |
 | A chat app without Skills | the prompt pack | manual | the skill lists, once, what to paste |
 | An API key | Codex, OpenCode or Gemini CLI with a cheap model | `standard` | a quick check costs pence and an area sweep under £1, at the price of a key and a config file |

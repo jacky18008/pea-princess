@@ -77,7 +77,7 @@
 |---|---|---|---|
 | ChatGPT Plus 約 £20 | Codex（app、CLI 或 IDE） | `lite` | token 給得比較大方，用量數字也公布得最清楚，你可以照著規劃；記得把 Codex 的子 agent 關掉（`[agents] enabled = false`），不然每一次回答會貴上五到二十倍 |
 | Claude Pro 約 £20 | Claude Code，或把技能上傳到 claude.ai | `lite` | 很好用；但沒有公布用量數字，而且跟聊天共用同一個額度池 |
-| Claude Max 或 ChatGPT Pro，£100 起跳 | 同上 | `standard`，最後在比的那兩間房用 `deep` | 作者自己的配置：跑腿的交給 Codex，需要判斷的交給 Claude 最大的模型——疑難雜症和最終建議（貴有貴的道理） |
+| Claude Max 或 ChatGPT Pro，£100 起跳 | 同上 | `standard`，最後在比的那兩間房用 `deep` | 作者自己的配置：跑腿的交給 Codex，需要判斷的交給 Claude 最強的 Fable 5.1——疑難雜症和最終建議（貴有貴的道理） |
 | SuperGrok 或 X Premium+ | Grok Build CLI | `lite` | 它跑得動這個技能，但我們第一次實測，一個回答花了大約十分鐘、好幾百萬個 token；還不適合當每天的預設 |
 | 沒有 Skills 的聊天軟體 | 提示詞包 | manual | 技能會一次列出要貼什麼 |
 | API 金鑰 | Codex、OpenCode 或 Gemini CLI 搭配便宜的模型 | `standard` | 快速查一間只要幾便士，掃一個區域不到 £1，代價是要自己弄一把金鑰和一個設定檔 |
