@@ -33,14 +33,14 @@ On a phone
 |---|---|---|
 | README — the front page | 20 | `README.md` |
 | docs/USING.md — the plain-words walkthrough | 41 | `docs/USING.md` |
-| docs/INSTALL.md — install page | 13 | `docs/INSTALL.md` |
+| docs/INSTALL.md — install page | 14 | `docs/INSTALL.md` |
 | docs/EXPERIMENTS.md — which configuration to run | 7 | `docs/EXPERIMENTS.md` |
 | onboarding.md — what the skill says to a new user | 30 | `skills/vet-flat/references/onboarding.md` |
 | sharing.md — social posts and the card description | 6 | `skills/vet-flat/references/sharing.md` |
 | inputs.md — the one message that asks the user for what is missing | 1 | `skills/vet-flat/references/inputs.md` |
 | profiles/ — the sentences a profile carries | 14 | `skills/vet-flat/profiles/*.yaml` |
 | seed.py — the seed card sentences (read-only here) | 25 | `skills/vet-flat/scripts/seed.py` |
-| **Total** | **157** | |
+| **Total** | **158** | |
 
 ---
 
@@ -874,6 +874,21 @@ Measured 2026-09-11 (`docs/EXPERIMENTS.md`): with that sentence in the skill, Cl
 Ask: "Vet this flat: <address or postcode>, flat <n>." The first line of the answer states the mode (shell / fetch / manual). The report ends with "Generated with pea-princess <version> — https://github.com/jacky18008/pea-princess".
 ```
 
+### deck:install:14
+
+- source: `docs/INSTALL.md` · L96-L100
+- under: ## Is it installed right? One command
+- lang: en
+- write-back: yes
+
+```text
+Run it from the skill folder after installing, and again whenever a check comes back unknown. It prints one
+line per check with the time it took and, at the end, which axes will come back unknown until a failed
+register works again. It does not change the rental project; the read-only register requests use the same
+local fetch cache as normal skill calls. A failed check may succeed immediately on a later attempt, so keep
+both results and diagnose the individual source rather than treating one failure as a blanket network block.
+```
+
 ---
 
 ## docs/EXPERIMENTS.md — which configuration to run
@@ -1074,8 +1089,8 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:8
 
-- source: `skills/vet-flat/references/onboarding.md` · L209
-- under: ## 3. Primer for someone with no idea (ten facts, one screen; cite `references/sources.yaml` ids where numbers appear)
+- source: `skills/vet-flat/references/onboarding.md` · L77
+- under: ## 3. Primer for someone with no idea (ten facts, one screen; name the register a number comes from)
 - lang: en
 - write-back: yes
 
@@ -1085,8 +1100,8 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:9
 
-- source: `skills/vet-flat/references/onboarding.md` · L210
-- under: ## 3. Primer for someone with no idea (ten facts, one screen; cite `references/sources.yaml` ids where numbers appear)
+- source: `skills/vet-flat/references/onboarding.md` · L78
+- under: ## 3. Primer for someone with no idea (ten facts, one screen; name the register a number comes from)
 - lang: en
 - write-back: yes
 
@@ -1096,19 +1111,19 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:10
 
-- source: `skills/vet-flat/references/onboarding.md` · L211
-- under: ## 3. Primer for someone with no idea (ten facts, one screen; cite `references/sources.yaml` ids where numbers appear)
+- source: `skills/vet-flat/references/onboarding.md` · L79
+- under: ## 3. Primer for someone with no idea (ten facts, one screen; name the register a number comes from)
 - lang: en
 - write-back: yes
 
 ```text
-3. **The law since 2026-05-01**: in-scope private assured tenancies are periodic. No rent before signing; normally **one month's rent in advance** between signing and commencement for monthly rent. Deposit cap **five weeks' rent** (six at £50,000 annual rent), holding deposit **one week**. Identify halls, licences and lodgers separately; axis 07 gives scope, timing and exceptions.
+3. **The law since 2026-05-01** (caps, advance rent, deposit protection): the checklist at the top of `references/axes/16-referencing-and-proof-of-funds.md` carries the figures; quote them from there, never from memory.
 ```
 
 ### deck:onboarding:11
 
-- source: `skills/vet-flat/references/onboarding.md` · L212
-- under: ## 3. Primer for someone with no idea (ten facts, one screen; cite `references/sources.yaml` ids where numbers appear)
+- source: `skills/vet-flat/references/onboarding.md` · L80
+- under: ## 3. Primer for someone with no idea (ten facts, one screen; name the register a number comes from)
 - lang: en
 - write-back: yes
 
@@ -1118,8 +1133,8 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:12
 
-- source: `skills/vet-flat/references/onboarding.md` · L213
-- under: ## 3. Primer for someone with no idea (ten facts, one screen; cite `references/sources.yaml` ids where numbers appear)
+- source: `skills/vet-flat/references/onboarding.md` · L81
+- under: ## 3. Primer for someone with no idea (ten facts, one screen; name the register a number comes from)
 - lang: en
 - write-back: yes
 
@@ -1129,8 +1144,8 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:13
 
-- source: `skills/vet-flat/references/onboarding.md` · L214
-- under: ## 3. Primer for someone with no idea (ten facts, one screen; cite `references/sources.yaml` ids where numbers appear)
+- source: `skills/vet-flat/references/onboarding.md` · L82
+- under: ## 3. Primer for someone with no idea (ten facts, one screen; name the register a number comes from)
 - lang: en
 - write-back: yes
 
@@ -1140,8 +1155,8 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:14
 
-- source: `skills/vet-flat/references/onboarding.md` · L215
-- under: ## 3. Primer for someone with no idea (ten facts, one screen; cite `references/sources.yaml` ids where numbers appear)
+- source: `skills/vet-flat/references/onboarding.md` · L83
+- under: ## 3. Primer for someone with no idea (ten facts, one screen; name the register a number comes from)
 - lang: en
 - write-back: yes
 
@@ -1151,8 +1166,8 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:15
 
-- source: `skills/vet-flat/references/onboarding.md` · L216
-- under: ## 3. Primer for someone with no idea (ten facts, one screen; cite `references/sources.yaml` ids where numbers appear)
+- source: `skills/vet-flat/references/onboarding.md` · L84
+- under: ## 3. Primer for someone with no idea (ten facts, one screen; name the register a number comes from)
 - lang: en
 - write-back: yes
 
@@ -1162,8 +1177,8 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:16
 
-- source: `skills/vet-flat/references/onboarding.md` · L217
-- under: ## 3. Primer for someone with no idea (ten facts, one screen; cite `references/sources.yaml` ids where numbers appear)
+- source: `skills/vet-flat/references/onboarding.md` · L85
+- under: ## 3. Primer for someone with no idea (ten facts, one screen; name the register a number comes from)
 - lang: en
 - write-back: yes
 
@@ -1173,8 +1188,8 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:17
 
-- source: `skills/vet-flat/references/onboarding.md` · L218
-- under: ## 3. Primer for someone with no idea (ten facts, one screen; cite `references/sources.yaml` ids where numbers appear)
+- source: `skills/vet-flat/references/onboarding.md` · L86
+- under: ## 3. Primer for someone with no idea (ten facts, one screen; name the register a number comes from)
 - lang: en
 - write-back: yes
 
@@ -1184,7 +1199,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:18
 
-- source: `skills/vet-flat/references/onboarding.md` · L224
+- source: `skills/vet-flat/references/onboarding.md` · L92
 - under: ## 4. Short answers to common questions
 - lang: en
 - write-back: yes
@@ -1195,7 +1210,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:19
 
-- source: `skills/vet-flat/references/onboarding.md` · L225
+- source: `skills/vet-flat/references/onboarding.md` · L93
 - under: ## 4. Short answers to common questions
 - lang: en
 - write-back: yes
@@ -1206,7 +1221,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:20
 
-- source: `skills/vet-flat/references/onboarding.md` · L226
+- source: `skills/vet-flat/references/onboarding.md` · L94
 - under: ## 4. Short answers to common questions
 - lang: en
 - write-back: yes
@@ -1217,7 +1232,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:21
 
-- source: `skills/vet-flat/references/onboarding.md` · L227
+- source: `skills/vet-flat/references/onboarding.md` · L95
 - under: ## 4. Short answers to common questions
 - lang: en
 - write-back: yes
@@ -1228,7 +1243,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:22
 
-- source: `skills/vet-flat/references/onboarding.md` · L228
+- source: `skills/vet-flat/references/onboarding.md` · L96
 - under: ## 4. Short answers to common questions
 - lang: en
 - write-back: yes
@@ -1239,7 +1254,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:23
 
-- source: `skills/vet-flat/references/onboarding.md` · L229
+- source: `skills/vet-flat/references/onboarding.md` · L97
 - under: ## 4. Short answers to common questions
 - lang: en
 - write-back: yes
@@ -1250,7 +1265,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:24
 
-- source: `skills/vet-flat/references/onboarding.md` · L230
+- source: `skills/vet-flat/references/onboarding.md` · L98
 - under: ## 4. Short answers to common questions
 - lang: en
 - write-back: yes
@@ -1261,7 +1276,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:25
 
-- source: `skills/vet-flat/references/onboarding.md` · L231
+- source: `skills/vet-flat/references/onboarding.md` · L99
 - under: ## 4. Short answers to common questions
 - lang: en
 - write-back: yes
@@ -1272,7 +1287,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:26
 
-- source: `skills/vet-flat/references/onboarding.md` · L232
+- source: `skills/vet-flat/references/onboarding.md` · L100
 - under: ## 4. Short answers to common questions
 - lang: en
 - write-back: yes
@@ -1283,7 +1298,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:27
 
-- source: `skills/vet-flat/references/onboarding.md` · L233
+- source: `skills/vet-flat/references/onboarding.md` · L101
 - under: ## 4. Short answers to common questions
 - lang: en
 - write-back: yes
@@ -1294,7 +1309,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:28
 
-- source: `skills/vet-flat/references/onboarding.md` · L234
+- source: `skills/vet-flat/references/onboarding.md` · L102
 - under: ## 4. Short answers to common questions
 - lang: en
 - write-back: yes
@@ -1305,7 +1320,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:29
 
-- source: `skills/vet-flat/references/onboarding.md` · L235
+- source: `skills/vet-flat/references/onboarding.md` · L103
 - under: ## 4. Short answers to common questions
 - lang: en
 - write-back: yes
@@ -1316,7 +1331,7 @@ The three pitches, the four starting points, the ten-fact primer, the Q&A answer
 
 ### deck:onboarding:30
 
-- source: `skills/vet-flat/references/onboarding.md` · L236
+- source: `skills/vet-flat/references/onboarding.md` · L104
 - under: ## 4. Short answers to common questions
 - lang: en
 - write-back: yes
