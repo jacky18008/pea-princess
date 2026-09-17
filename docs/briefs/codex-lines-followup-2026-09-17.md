@@ -51,9 +51,13 @@ against the disk. The full reports sit in the private evidence folder under `aud
 7. **Diagnose v18 turn 2 before touching code.** Compare turn 1's accepted authority events with what turn 2
    replayed, and decide whether the actor must re-assert the global hold on every save or the frozen expectation
    is over-strict. Candidates: `references/boundary-turn.md`, `scripts/authority_capture.py`, `scripts/save_gate.py`.
-8. **Decide, with the author, whether the ten skill files ship.** Until then no public build from the branch or
-   from a merged main. If they do not ship, move them out of `skills/vet-flat/` (and take
-   `references/boundary-turn.md` and `references/comparison-research.md` out of SKILL.md's routing table).
+8. **Decided (author, 2026-09-17 14:50): the ten skill files do not ship.** Move `boundary.py`, `save_gate.py`,
+   `host_tool.py`, `host_client.py`, `authority_capture.py`, `requirement_capture.py` and the four references
+   (`boundary-api.md`, `boundary-turn.md`, `comparison-fidelity.md`, `comparison-research.md`) out of
+   `skills/vet-flat/` — to `tools/host/` on the P1 branch, or to `codex/grok-harness-20260917` — and take the
+   two routing rows that point at `boundary-turn.md` and `comparison-research.md` out of SKILL.md. The public
+   skill must behave identically without them (merge condition 10). Do this before the transplant; the merged
+   pack should then stay at main's member count plus nothing from this list.
 9. **Cut Grok's cost at the harness, not the skill.** Each turn is launched with `--resume-id`, so every step
    replays the whole transcript: cache-read is 95–98% of processed tokens and cost grows quadratically across
    turns (six turns projected ~48 M tokens). Seed each turn from the journal context dump plus the accepted
@@ -93,5 +97,5 @@ viewer/viewer.html docs/COPY-DECK.md .claude-plugin/plugin.json` must be empty a
 - Six green Grok turns on one run, with the per-turn gate table, model id and token counts committed.
 - Codex 46 calls done (44/46 at 14:34), re-scored offline from a full checkout with the committed evaluator fix,
   13-row mean against 0.871 — and a clean rerun if the install contamination is judged to matter.
-- The ten-file shipping decision recorded.
+- The ten files moved out of the shipped skill (decided: they do not ship).
 - Then the independent final acceptance.
