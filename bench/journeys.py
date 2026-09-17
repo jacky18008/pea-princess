@@ -348,8 +348,11 @@ def count_questions(text):
 try:  # the skill's own list of simplified-only characters (scripts/reply_check.py), so the two agree
     sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "skills", "vet-flat", "scripts"))
     from reply_check import SIMPLIFIED as SIMPLIFIED_ONLY  # noqa: E402
-except Exception:  # noqa: BLE001
-    SIMPLIFIED_ONLY = set("这们为说时会对开关么没样发过还从间问题动进经现实报门业务给让办买卖钱两种类应该虽记录电话网络设备参认识观讨论准选择继续总结简单复杂适马汉语韩国键东钟头产权账预约签录异议担护许证据际气质构")
+except Exception as error:  # noqa: BLE001
+    # No silent substitute: a regrade from a partial tree once used a hard-coded set that
+    # contained 准 and cost three journeys a spurious script finding (audit 2026-09-17).
+    raise RuntimeError("bench/journeys.py needs skills/vet-flat/scripts/reply_check.py beside it; "
+                       "run from a full checkout (%s)" % error)
 
 
 def script_mismatch(text, language):
@@ -878,12 +881,82 @@ def claude_command(prompt, workdir, model, system, session_id=None, resume=None,
     return cmd + ["--", prompt]
 
 
-def codex_command(prompt, workdir, model, sandbox="read-only"):
+def codex_command(prompt, workdir, model, sandbox="read-only", effort=None, subagents=False):
+    """One ``codex exec`` turn. Sub-agents are off unless asked for (the bench measured
+    no spawned thread in 179 collaboration events, and INSTALL.md prices them at 5-20x);
+    ``effort`` pins ``model_reasoning_effort`` so a run does not inherit whatever the
+    machine's ~/.codex/config.toml says that day."""
     cmd = ["codex", "exec", "--cd", workdir, "--sandbox", sandbox,
            "--skip-git-repo-check", "--json"]
+    if not subagents:
+        cmd += ["-c", "agents.enabled=false"]
+    if effort:
+        cmd += ["-c", "model_reasoning_effort=%s" % effort]
     if model:
         cmd += ["--model", model]
     return cmd + ["--", prompt]
+
+
+def codex_effective_effort():
+    """What ~/.codex/config.toml pins as model_reasoning_effort, or None."""
+    try:
+        with io.open(os.path.expanduser("~/.codex/config.toml"), encoding="utf-8") as fh:
+            m = re.search(r'^\s*model_reasoning_effort\s*=\s*"?([A-Za-z]+)"?', fh.read(), re.M)
+        return m.group(1) if m else None
+    except OSError:
+        return None
+
+
+INSTALL_ROOTS = ("~/.agents/skills", "~/.codex/skills", "~/.claude/skills")
+
+
+def discoverable_installs(pinned_skill_dir, name="pea-princess"):
+    """The skill copies a host might read instead of the pinned one, with whether each
+    differs. A Codex regression on 2026-09-17 read the author's ~/.agents install in 21 of
+    41 calls while that copy was being edited, so the run measured two skills at once."""
+    import hashlib
+
+    def digest(path):
+        try:
+            with io.open(path, "rb") as fh:
+                return hashlib.md5(fh.read()).hexdigest()
+        except OSError:
+            return None
+
+    pinned = digest(os.path.join(pinned_skill_dir, "SKILL.md"))
+    out = []
+    for root in INSTALL_ROOTS:
+        path = os.path.join(os.path.expanduser(root), name)
+        found = digest(os.path.join(path, "SKILL.md"))
+        if found is not None:
+            out.append({"path": path, "skill_md_md5": found, "differs_from_pinned": found != pinned})
+    return {"pinned_skill_md_md5": pinned, "installs": out}
+
+
+def record_run_conditions(results_dir, agent, args, pinned_skill_dir):
+    """run-conditions.json beside the results: the knobs a later reader needs to trust
+    the numbers (effective Codex effort, sub-agents, the discoverable installs). Never
+    fails the run."""
+    try:
+        conditions = collections.OrderedDict([
+            ("recorded_at", time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())),
+            ("agent", agent), ("model", args.model),
+            ("codex_effort", getattr(args, "codex_effort", None) or ("inherited:%s" % codex_effective_effort())),
+            ("codex_subagents", bool(getattr(args, "codex_subagents", False))),
+        ])
+        conditions.update(discoverable_installs(pinned_skill_dir))
+        differing = [i["path"] for i in conditions["installs"] if i["differs_from_pinned"]]
+        os.makedirs(results_dir, exist_ok=True)
+        with io.open(os.path.join(results_dir, "run-conditions.json"), "w", encoding="utf-8") as fh:
+            json.dump(conditions, fh, ensure_ascii=False, indent=1)
+        if differing:
+            sys.stderr.write("WARNING: a host may read these installs instead of the pinned skill, and they "
+                             "differ: %s - move them aside for the run, and do not edit them while it is live.\n"
+                             % ", ".join(differing))
+        return conditions
+    except Exception as error:  # noqa: BLE001
+        sys.stderr.write("run-conditions.json not written: %s\n" % error)
+        return None
 
 
 # ------------------------------------------------------------------- grok --
@@ -1163,6 +1236,9 @@ def play(journey, args, variant_id=None):
             print("sandbox:  %s" % sandbox)
         elif agent == "grok":
             print("tools:    %s   sandbox: read-only, web search off" % GROK_TOOLS_READ)
+    elif agent in ("claude", "codex", "grok"):
+        record_run_conditions(args.results or RESULTS, agent, args,
+                              getattr(args, "skill_dir", None) or SKILL_DIR)
 
     history, turns, errors = [], [], []
     for index, turn in enumerate(journey["turns"], 1):
@@ -1205,7 +1281,8 @@ def play(journey, args, variant_id=None):
                 print("          cd %s && %s" % (workdir, shell_preview(cmd)))
             else:
                 cmd = codex_command(transcript(history, user) if history else user,
-                                    workdir, args.model, sandbox)
+                                    workdir, args.model, sandbox,
+                                    effort=args.codex_effort, subagents=args.codex_subagents)
                 print("          cd %s && %s" % (workdir, shell_preview(cmd)))
             history.append(("user", user))
             history.append(("assistant", "(dry run: the reply would be here)"))
@@ -1234,7 +1311,8 @@ def play(journey, args, variant_id=None):
                                    resume=session_id if index > 1 else None)
             else:
                 cmd = codex_command(transcript(history, user) if history else user,
-                                    workdir, args.model, sandbox)
+                                    workdir, args.model, sandbox,
+                                    effort=args.codex_effort, subagents=args.codex_subagents)
             # One launcher for every runner: stdin closed, both streams captured, the
             # one physical attempt, and the tails kept when the
             # provider never let the turn through at all.
@@ -1483,6 +1561,10 @@ def build_parser():
                     help="re-score every raw record under FOLDER/raw with the current "
                          "journeys file and rebuild its scorecard; nothing is re-run")
     ap.add_argument("--model", help="the model name to pass to the agent")
+    ap.add_argument("--codex-effort", choices=("low", "medium", "high", "ultra"),
+                    help="pin Codex's model_reasoning_effort for the run (default: inherit ~/.codex/config.toml, recorded)")
+    ap.add_argument("--codex-subagents", action="store_true",
+                    help="allow Codex sub-agents (default off: 5-20x the cost, and the bench never needed one)")
     ap.add_argument("--dry-run", action="store_true",
                     help="print the plan and the exact command or request for every turn, "
                          "and run nothing")

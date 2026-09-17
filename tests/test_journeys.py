@@ -626,6 +626,43 @@ class TestDryRun(unittest.TestCase):
         self.assertEqual(len(runner.TONE_BLOCKLIST), len(set(runner.TONE_BLOCKLIST)))
 
 
+class TestRunConditions(unittest.TestCase):
+    """The knobs a later reader needs to trust a regression's numbers (audit 2026-09-17)."""
+
+    def test_codex_sub_agents_are_off_unless_asked_and_effort_is_pinnable(self):
+        cmd = runner.codex_command("hi", "/w", "gpt-x")
+        self.assertIn("agents.enabled=false", cmd)
+        self.assertNotIn("model_reasoning_effort=high", " ".join(cmd))
+        cmd = runner.codex_command("hi", "/w", "gpt-x", effort="high", subagents=True)
+        self.assertNotIn("agents.enabled=false", cmd)
+        self.assertIn("model_reasoning_effort=high", cmd)
+        self.assertEqual(cmd[-1], "hi")
+
+    def test_discoverable_installs_report_which_copy_differs(self):
+        import hashlib
+        home = tempfile.mkdtemp(prefix="vetflat-home-")
+        pinned = tempfile.mkdtemp(prefix="vetflat-pinned-")
+        with io.open(os.path.join(pinned, "SKILL.md"), "w", encoding="utf-8") as fh:
+            fh.write("pinned")
+        same = os.path.join(home, ".agents", "skills", "pea-princess")
+        other = os.path.join(home, ".claude", "skills", "pea-princess")
+        for folder, body in ((same, "pinned"), (other, "edited during the run")):
+            os.makedirs(folder)
+            with io.open(os.path.join(folder, "SKILL.md"), "w", encoding="utf-8") as fh:
+                fh.write(body)
+        with mock.patch.dict(os.environ, {"HOME": home}):
+            found = runner.discoverable_installs(pinned)
+        self.assertEqual(hashlib.md5(b"pinned").hexdigest(), found["pinned_skill_md_md5"])
+        by_path = {i["path"]: i["differs_from_pinned"] for i in found["installs"]}
+        self.assertEqual({same: False, other: True}, by_path)
+
+    def test_the_script_set_comes_from_the_skill_not_a_fallback(self):
+        self.assertIn("这", runner.SIMPLIFIED_ONLY)
+        self.assertNotIn("准", runner.SIMPLIFIED_ONLY)
+        with io.open(os.path.join(runner.SKILL_DIR, "scripts", "reply_check.py"), encoding="utf-8") as fh:
+            self.assertIn("SIMPLIFIED", fh.read())
+
+
 if __name__ == "__main__":
     unittest.main()
 
