@@ -778,19 +778,25 @@ def classify_floor_position(text, bare_number_counts=True):
         return None
     if "basement" in low or "lower ground" in low:
         return "basement"
-    if re.search(r"\bground\b", low):
+    # "not ground floor", "above ground", "not on the ground floor": the word is there, the claim is not
+    if re.search(r"\bground\b", low) and not re.search(
+            r"\b(?:not|no|never|isn't|is not|above|off)\s+(?:the\s+|a\s+|on\s+(?:the\s+)?)?ground\b", low):
         return "ground"
     if re.search(r"\btop\b", low) or "penthouse" in low:
         return "top"
     if re.search(r"\bmid\b", low) or "mid floor" in low or "middle" in low:
         return "mid"
+    if looks_unknown(low):
+        return None      # "exact floor unknown (2009 certificate)": the year is not a floor
     if bare_number_counts:
-        m = re.search(r"\b(\d+)\s*(?:st|nd|rd|th)?\b", low)
+        matches = re.finditer(r"\b(\d+)\s*(?:st|nd|rd|th)?\b", low)
     else:
-        m = (re.search(r"\b(\d+)\s*(?:st|nd|rd|th)?\s+(?:floor|storey|story)\b", low)
-             or re.search(r"\b(?:floor|storey|story)\s+(\d+)\b", low))
-    if m and int(m.group(1)) > 0:
-        return "mid"
+        matches = list(re.finditer(r"\b(\d+)\s*(?:st|nd|rd|th)?\s+(?:floor|storey|story)\b", low)) + \
+                  list(re.finditer(r"\b(?:floor|storey|story)\s+(\d+)\b", low))
+    for m in matches:
+        n = int(m.group(1))
+        if 0 < n < 100:          # a four-digit number is a year, not a storey
+            return "mid"
     return None
 
 

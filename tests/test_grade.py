@@ -616,6 +616,12 @@ class TestReferentGuard(GradeBase):
         self.assertEqual("correct", row["status"])
         self.assertIn("one of 2 listed areas", row["where"])
 
+    def test_a_denied_ground_floor_is_not_the_ground_floor(self):
+        self.assertIsNone(grader.classify_floor_position(
+            "Not ground floor (2009 certificate); exact floor unknown"))
+        self.assertIsNone(grader.classify_floor_position("one floor above ground"))
+        self.assertEqual("ground", grader.classify_floor_position("Ground floor, own entrance"))
+
     def test_a_grade_shade_is_the_same_letter(self):
         rep = self.report()
         rep["candidates"][0].setdefault("metrics", {})["commute_redundancy_grade"] = {
