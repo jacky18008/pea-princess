@@ -737,7 +737,7 @@ Rightmove、Zoopla、OnTheMarket、OpenRent、HomeViews、Trustpilot、Airbnb、
 - write-back: yes
 
 ```text
-陳先豪 Hsien Hao (Jacky) Chen — [LinkedIn](https://www.linkedin.com/in/jacky-chen-a49177137/)。有問題、想法，或你自己找房的故事，歡迎在這裡開 issue 或到 LinkedIn 私訊。
+Hsien Hao (Jacky) Chen — [LinkedIn](https://www.linkedin.com/in/jacky-chen-a49177137/)。有問題、想法，或你自己找房的故事，歡迎在這裡開 issue 或到 LinkedIn 私訊。
 ```
 
 ---
@@ -1084,7 +1084,7 @@ Rightmove、Zoopla、OnTheMarket、OpenRent、HomeViews、Trustpilot、Airbnb、
 - write-back: yes
 
 ```text
-陈先豪 Hsien Hao (Jacky) Chen — [LinkedIn](https://www.linkedin.com/in/jacky-chen-a49177137/)。有问题、想法，或你自己找房的故事，欢迎在这里开 issue 或到 LinkedIn 私信。
+Hsien Hao (Jacky) Chen — [LinkedIn](https://www.linkedin.com/in/jacky-chen-a49177137/)。有问题、想法，或你自己找房的故事，欢迎在这里开 issue 或到 LinkedIn 私信。
 ```
 
 ---
