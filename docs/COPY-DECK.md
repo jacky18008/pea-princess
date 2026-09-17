@@ -31,9 +31,9 @@ On a phone
 
 | Surface | Blocks | Source |
 |---|---|---|
-| README — the front page | 27 | `README.md` |
-| README.zh-TW.md — the front page, Traditional Chinese | 27 | `README.zh-TW.md` |
-| README.zh-CN.md — the front page, Simplified Chinese | 27 | `README.zh-CN.md` |
+| README — the front page | 30 | `README.md` |
+| README.zh-TW.md — the front page, Traditional Chinese | 30 | `README.zh-TW.md` |
+| README.zh-CN.md — the front page, Simplified Chinese | 30 | `README.zh-CN.md` |
 | docs/USING.md — the plain-words walkthrough (English) | 21 | `docs/USING.md` |
 | docs/USING.zh-TW.md — the walkthrough, Traditional Chinese | 18 | `docs/USING.zh-TW.md` |
 | docs/USING.zh-CN.md — the walkthrough, Simplified Chinese | 8 | `docs/USING.zh-CN.md` |
@@ -44,7 +44,7 @@ On a phone
 | inputs.md — the one message that asks the user for what is missing | 1 | `skills/vet-flat/references/inputs.md` |
 | profiles/ — the sentences a profile carries | 14 | `skills/vet-flat/profiles/*.yaml` |
 | seed.py — the seed card sentences (read-only here) | 25 | `skills/vet-flat/scripts/seed.py` |
-| **Total** | **225** | |
+| **Total** | **234** | |
 
 ---
 
@@ -329,7 +329,40 @@ Rightmove, Zoopla, OnTheMarket, OpenRent, HomeViews, Trustpilot, Airbnb, Booking
 
 ### deck:readme:26
 
-- source: `README.md` · L130
+- source: `README.md` · L131
+- under: ## Make it yours
+- lang: en
+- write-back: yes
+
+```text
+A skill is a folder of Markdown and a few scripts, and this one is written to be bent. You do not need to read the code: say what you want to your agent.
+```
+
+### deck:readme:27
+
+- source: `README.md` · L140
+- under: ## Make it yours
+- lang: en
+- write-back: yes
+
+```text
+One sentence to try first, on any host:
+```
+
+### deck:readme:28
+
+- source: `README.md` · L142
+- under: ## Make it yours
+- lang: en
+- write-back: yes
+
+```text
+> Change this skill so that every report starts with the all-in monthly cost, run the tests, and tell me what you changed.
+```
+
+### deck:readme:29
+
+- source: `README.md` · L145
 - under: ## Licence and attribution (proposed)
 - lang: en
 - write-back: yes
@@ -338,9 +371,9 @@ Rightmove, Zoopla, OnTheMarket, OpenRent, HomeViews, Trustpilot, Airbnb, Booking
 Documentation and skill text: CC BY 4.0. Code: MIT. Every report carries "Generated with pea-princess <version> — <source URL>". Please keep it.
 ```
 
-### deck:readme:27
+### deck:readme:30
 
-- source: `README.md` · L132
+- source: `README.md` · L147
 - under: ## Licence and attribution (proposed)
 - lang: en
 - write-back: yes
@@ -632,7 +665,40 @@ Rightmove、Zoopla、OnTheMarket、OpenRent、HomeViews、Trustpilot、Airbnb、
 
 ### deck:readme-zh-tw:26
 
-- source: `README.zh-TW.md` · L130
+- source: `README.zh-TW.md` · L131
+- under: ## 改成你的樣子
+- lang: zh-TW
+- write-back: yes
+
+```text
+技能就是一個資料夾，裡面是 Markdown 和幾支腳本，這一包本來就是設計來讓你隨手改的。不用讀程式碼：跟你的 agent 用講的。
+```
+
+### deck:readme-zh-tw:27
+
+- source: `README.zh-TW.md` · L140
+- under: ## 改成你的樣子
+- lang: zh-TW
+- write-back: yes
+
+```text
+任何主機都能先試這一句：
+```
+
+### deck:readme-zh-tw:28
+
+- source: `README.zh-TW.md` · L142
+- under: ## 改成你的樣子
+- lang: zh-TW
+- write-back: yes
+
+```text
+> 把這個技能改成每份報告開頭先講每月總花費，改完跑測試，告訴我你改了什麼。
+```
+
+### deck:readme-zh-tw:29
+
+- source: `README.zh-TW.md` · L145
 - under: ## 授權與姓名標示（提案中）
 - lang: zh-TW
 - write-back: yes
@@ -641,9 +707,9 @@ Rightmove、Zoopla、OnTheMarket、OpenRent、HomeViews、Trustpilot、Airbnb、
 文件和技能文字：CC BY 4.0。程式碼：MIT。每一份報告都會帶著 "Generated with pea-princess <version> — <source URL>"。請留著它。
 ```
 
-### deck:readme-zh-tw:27
+### deck:readme-zh-tw:30
 
-- source: `README.zh-TW.md` · L132
+- source: `README.zh-TW.md` · L147
 - under: ## 授權與姓名標示（提案中）
 - lang: zh-TW
 - write-back: yes
@@ -935,7 +1001,40 @@ Rightmove、Zoopla、OnTheMarket、OpenRent、HomeViews、Trustpilot、Airbnb、
 
 ### deck:readme-zh-cn:26
 
-- source: `README.zh-CN.md` · L130
+- source: `README.zh-CN.md` · L131
+- under: ## 改成你的样子
+- lang: zh-CN
+- write-back: yes
+
+```text
+技能就是一个文件夹，里面是 Markdown 和几个脚本，这一包本来就是设计来让你随手改的。不用读代码：跟你的 agent 用说的。
+```
+
+### deck:readme-zh-cn:27
+
+- source: `README.zh-CN.md` · L140
+- under: ## 改成你的样子
+- lang: zh-CN
+- write-back: yes
+
+```text
+任何主机都能先试这一句：
+```
+
+### deck:readme-zh-cn:28
+
+- source: `README.zh-CN.md` · L142
+- under: ## 改成你的样子
+- lang: zh-CN
+- write-back: yes
+
+```text
+> 把这个技能改成每份报告开头先讲每月总花费，改完跑测试，告诉我你改了什么。
+```
+
+### deck:readme-zh-cn:29
+
+- source: `README.zh-CN.md` · L145
 - under: ## 许可与署名（提案中）
 - lang: zh-CN
 - write-back: yes
@@ -944,9 +1043,9 @@ Rightmove、Zoopla、OnTheMarket、OpenRent、HomeViews、Trustpilot、Airbnb、
 文档和技能文字：CC BY 4.0。代码：MIT。每一份报告都会带着 "Generated with pea-princess <version> — <source URL>"。请留着它。
 ```
 
-### deck:readme-zh-cn:27
+### deck:readme-zh-cn:30
 
-- source: `README.zh-CN.md` · L132
+- source: `README.zh-CN.md` · L147
 - under: ## 许可与署名（提案中）
 - lang: zh-CN
 - write-back: yes

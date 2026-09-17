@@ -126,6 +126,21 @@ python3 -m unittest tests/test_epc.py
 ## Sources you will not find here
 Rightmove, Zoopla, OnTheMarket, OpenRent, HomeViews, Trustpilot, Airbnb, Booking.com appear here by name only. Their terms do not want programs reading them automatically, so this project provides no method for that; the skill asks you for the page (a PDF, screenshots or the plain text) and never opens listing links itself. There is no scraper for these sites in this package, and it cannot encourage you to have your agent scrape them either.
 
+## Make it yours
+
+A skill is a folder of Markdown and a few scripts, and this one is written to be bent. You do not need to read the code: say what you want to your agent.
+
+- **Your rules, in your words.** "Raise my all-in ceiling to £2,300", "quiet matters more than light", "only ask me the eight money questions". The assistant shows the change, waits for your yes, then writes it into your `profile.yaml`. Depth too: `lite` on a £20 plan, `deep` when a flat is serious.
+- **Your own checks.** Anything the shared skill does not look at — the walk to your gym, a school's catchment, a noise you know about — goes into `extensions/` as one page, or you dictate the list and let the agent write it. They are labelled as yours in the report and never move the verdict by themselves.
+- **Change the skill itself.** Tell the agent what annoys you or what is missing: "put the monthly cost first in every report", "add a check for upper floors without a lift", "ask the questions in Cantonese". It edits the files under `skills/vet-flat/`; `python3 -m unittest discover -s tests` tells you nothing broke, and the report schema keeps the output readable by the viewer.
+- **Your private edition.** The author keeps a token-hungry "roast everything" version; yours can be a fork, or just an `extensions/` folder. Keep `profile.yaml`, `.pea-state/` and your documents out of anything you publish (see [SECURITY.md](SECURITY.md)).
+- **Another country.** Fork it for Taiwan, the US or the EU: the register scripts are the part to swap, the conversation rules travel as they are. Keep the attribution (CC BY 4.0 text, MIT code) and say where it came from; the author is glad to compare notes.
+- **Share tips, not your address.** "Share my seed" gives a short code that carries your taste and your questions, never where you live or when you move.
+
+One sentence to try first, on any host:
+
+> Change this skill so that every report starts with the all-in monthly cost, run the tests, and tell me what you changed.
+
 ## Licence and attribution (proposed)
 Documentation and skill text: CC BY 4.0. Code: MIT. Every report carries "Generated with pea-princess <version> — <source URL>". Please keep it.
 
