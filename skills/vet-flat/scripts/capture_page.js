@@ -8,7 +8,8 @@
 // request of its own and reads nothing but the page in front of the person. The document
 // is HTML inside a .txt file, which scripts/listing_fields.py reads as a saved page.
 //
-// iPhone / iPad (Safari): a Shortcut in the share sheet.
+// iPhone / iPad (Safari only - the action below runs on Safari web pages; from another browser,
+//   copy the link and open it in Safari first): a Shortcut in the share sheet.
 //   Shortcuts app > + > name it "Hand page to Pea Princess" > (i) Show in Share Sheet, receive
 //   "Safari web pages" > add the action "Run JavaScript on Web Page" (Settings > Shortcuts >
 //   Advanced > Allow Running Scripts must be on) and paste this whole file into it > add
