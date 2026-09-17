@@ -2,7 +2,7 @@
  "schema_version": "1.1",
  "generated_by": {
   "tool": "vet-flat",
-  "version": "1.0.0-draft",
+  "version": "0.1.0",
   "source_url": "https://github.com/jacky18008/pea-princess",
   "runtime": "a coding agent with a shell and internet access, on macOS",
   "mode": "shell",

@@ -2,13 +2,13 @@
   "name": "pea-princess",
   "owner": { "name": "Hsien Hao (Jacky) Chen", "url": "https://github.com/jacky18008" },
   "description": "Pea Princess: vendor-neutral London flat-vetting skill",
-  "version": "1.0.0-draft",
+  "version": "0.1.0",
   "plugins": [
     {
       "name": "pea-princess",
       "source": "./",
       "description": "London rental flat due-diligence pipeline with plain-language verdicts",
-      "version": "1.0.0-draft",
+      "version": "0.1.0",
       "author": { "name": "Hsien Hao (Jacky) Chen" }
     }
   ]

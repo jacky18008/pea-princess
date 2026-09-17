@@ -34,7 +34,7 @@ FIXED_QUESTIONS = os.path.join(REFS, "fixed-questions.yaml")
 VIEWER = os.path.join(VIEWER_DIR, "viewer.html")
 PROFILE = os.path.join(ROOT, "skills", "vet-flat", "profile.template.yaml")
 
-FOOTER = "Generated with pea-princess 1.0.0-draft \u2014 https://github.com/jacky18008/pea-princess"
+FOOTER = "Generated with pea-princess 0.1.0 \u2014 https://github.com/jacky18008/pea-princess"
 
 SECTION_TITLES_EN = [
     "Verdict",

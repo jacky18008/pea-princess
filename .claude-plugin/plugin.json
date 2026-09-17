@@ -1,7 +1,7 @@
 {
   "name": "pea-princess",
   "description": "London rental flat due-diligence pipeline (Pea Princess): identity, area, age, heating, construction, crime, reviews, compliance, price, light, cost, commute → plain-language verdict with evidence grades.",
-  "version": "1.0.0-draft",
+  "version": "0.1.0",
   "author": { "name": "Hsien Hao (Jacky) Chen" },
   "homepage": "https://github.com/jacky18008/pea-princess",
   "repository": "https://github.com/jacky18008/pea-princess",

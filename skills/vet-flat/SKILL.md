@@ -6,7 +6,7 @@ metadata:
   runtime: Best with a shell and internet access (python3 + curl). Works in fetch-only or chat-only runtimes in reduced modes; the skill tells the user exactly what to paste.
   author: "Hsien Hao (Jacky) Chen"
   source: "https://github.com/jacky18008/pea-princess"
-  version: "1.0.0-draft"
+  version: "0.1.0"
   brand: "Pea Princess / 豌豆公主"
 ---
 # Pea Princess — London flat vetting
