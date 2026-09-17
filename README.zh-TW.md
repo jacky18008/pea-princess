@@ -124,7 +124,7 @@ python3 -m unittest tests/test_epc.py
 </details>
 
 ## 這裡不會有的來源
-Rightmove、Zoopla、OnTheMarket、OpenRent、HomeViews、Trustpilot、Airbnb、Booking.com 在這裡只會出現名字。它們的條款禁止程式自動存取，所以這個專案不提供任何做法；技能會向你要頁面（PDF、截圖或純文字），不會自己去開房源連結。你和你的助理怎麼使用那些網站，是你在它們條款下的責任；這裡不做這件事，也不會叫你去做。
+Rightmove、Zoopla、OnTheMarket、OpenRent、HomeViews、Trustpilot、Airbnb、Booking.com 在這裡只會出現名字。它們的條款不希望程式自動存取，所以這個專案不提供任何做法；技能會向你要頁面（PDF、截圖或純文字），不會自己去開房源連結。這包沒有這些網頁的爬蟲，也不能鼓勵你讓 agent 去爬蟲。
 
 ## 授權與姓名標示（提案中）
 文件和技能文字：CC BY 4.0。程式碼：MIT。每一份報告都會帶著 "Generated with pea-princess <version> — <source URL>"。請留著它。
