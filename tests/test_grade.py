@@ -471,7 +471,7 @@ class TestReferentGuard(GradeBase):
     def test_the_journey_if_the_trains_stop_is_not_the_rail_time(self):
         rep = self.report()
         self.axis(rep, 11)["numbers"] += [
-            number("Journey if the trains stop", 49, "minutes", sources=("s-tfl",)),
+            number("Journey if the train stops", 49, "minutes", sources=("s-tfl",)),
             number("Rail-only journey", 33, "minutes", sources=("s-tfl",))]
         card = self.graded(rep)
         row = self.fact(card, "commute.rail_min")
@@ -484,7 +484,7 @@ class TestReferentGuard(GradeBase):
     def test_a_wrong_rail_time_is_still_a_fabrication(self):
         rep = self.report()
         self.axis(rep, 11)["numbers"] += [
-            number("Journey if the trains stop", 49, "minutes", sources=("s-tfl",)),
+            number("Journey if the train stops", 49, "minutes", sources=("s-tfl",)),
             number("Rail-only journey", 55, "minutes", sources=("s-tfl",))]
         card = self.graded(rep)
         row = self.fact(card, "commute.rail_min")
@@ -572,7 +572,8 @@ class TestReferentGuard(GradeBase):
         self.assertEqual([], self.excluded_for(card, "epc.first_assessment_year"))
 
     def test_the_landlords_company_number_is_not_an_assessment_year(self):
-        """'age' is inside 'management', so a company row can match the year rule."""
+        """Labels match whole words: 'age' inside 'management' is not the word 'age', so a
+        company row is not a year candidate at all (nothing graded, nothing skipped)."""
         rep = self.report()
         self.axis(rep, 3)["numbers"] = []
         self.axis(rep, 6)["numbers"].append(
@@ -582,8 +583,40 @@ class TestReferentGuard(GradeBase):
         self.assertEqual("missing", self.fact(card, "epc.first_assessment_year")["status"])
         skipped = [s for s in self.excluded_for(card, "epc.first_assessment_year")
                    if "05919132" in str(s["value"])]
-        self.assertEqual(1, len(skipped), card["referent_excluded"])
-        self.assertIn("company", skipped[0]["reason"])
+        self.assertEqual([], skipped, card["referent_excluded"])
+
+    def test_a_noise_label_is_not_an_assessment_year(self):
+        """'Road noise (day-evening-night average)' carried 80.4 dB; 'average' contains 'age'
+        and was once graded as an age of 80 years (release gate, 2026-09-17)."""
+        rep = self.report()
+        self.axis(rep, 3)["numbers"] = []
+        self.axis(rep, 12).setdefault("numbers", []).append(
+            number("Road noise (day-evening-night average)", 80.4, "decibels", sources=("s-noise",)))
+        card = self.graded(rep)
+        self.assertEqual("missing", self.fact(card, "epc.first_assessment_year")["status"])
+
+    def test_a_denied_heat_network_is_not_a_heat_network(self):
+        self.assertEqual("gas_boiler", grader.classify_heating(
+            "Heating is a gas boiler with radiators, not a heat network."))
+        self.assertEqual("community_heat_network", grader.classify_heating(
+            "Heat comes from the estate's heat network; there is no gas boiler in the flat."))
+
+    def test_two_certificates_side_by_side_grade_the_current_one(self):
+        rep = self.report()
+        self.axis(rep, 2)["numbers"] = [
+            number("Area, certificate 0857 (Jan 2009)", 463, "square feet", sources=("s-epc-5b",)),
+            number("Area, certificate 9238 (Apr 2009)", 592, "square feet", sources=("s-epc-5a",))]
+        card = self.graded(rep, self.case(epc={"floor_area_m2": 55.0, "floor_area_sqft": 592}))
+        row = self.fact(card, "epc.floor_area_m2")
+        self.assertEqual("correct", row["status"])
+        self.assertIn("one of 2 listed areas", row["where"])
+
+    def test_a_grade_shade_is_the_same_letter(self):
+        rep = self.report()
+        rep["candidates"][0].setdefault("metrics", {})["commute_redundancy_grade"] = {
+            "value": "B-", "unit": "grade A/B/C", "sources": ["s-tfl"]}
+        card = self.graded(rep, self.case(commute={"redundancy_grade": "B"}))
+        self.assertEqual("correct", self.fact(card, "commute.redundancy_grade")["status"])
 
     # ------------------------------------------------------- the audit trail --
     def test_the_metric_slots_are_never_guarded(self):

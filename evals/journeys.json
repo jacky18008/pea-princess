@@ -710,7 +710,7 @@
         "why": "Five weeks of GBP 1,850 pcm: 1850 x 12 / 52 x 5 = 2134.62. Stated differently, the arithmetic was done in the model's head and got it wrong.",
         "mask_patterns": [
          "(?m)^[ \\t#*\\-\\d.]*(?:留位金|留位費|留位|保留金|訂金|holding[- ]deposit)(?:(?!押金|tenancy deposit|deposit cap|security deposit)[^\\n])*(?:\\n+(?![0-9]+\\.\\s|#|\\|)[^\\n]+)*",
-         "(?:月租|年租|租金|rent|annual)[^\\n]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "(?:月租|年租|租金|rent|annual)[^\\n|]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "£\\s?50,?000",
          "£\\s?[0-9][0-9,]*\\s*(?:pcm|per month|/ ?月|每月)",
          "£\\s?[0-9]+(?:\\.[0-9]+)?\\s*(?:/|／|per|每)\\s*(?:sq|平方|ft|呎|m²|m2)",
@@ -1494,7 +1494,7 @@
         "why": "Five weeks of GBP 2,050 pcm: 2050 x 12 / 52 x 5 = 2365.38. The advertised six weeks, 2838.46, is allowed because the listing asks for it and a good reply prices both.",
         "mask_patterns": [
          "(?m)^[ \\t#*\\-\\d.]*(?:留位金|留位費|留位|保留金|訂金|holding[- ]deposit)(?:(?!押金|tenancy deposit|deposit cap|security deposit)[^\\n])*(?:\\n+(?![0-9]+\\.\\s|#|\\|)[^\\n]+)*",
-         "(?:月租|年租|租金|rent|annual)[^\\n]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "(?:月租|年租|租金|rent|annual)[^\\n|]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "£\\s?50,?000",
          "£\\s?[0-9][0-9,]*\\s*(?:pcm|per month|/ ?月|每月)",
          "£\\s?[0-9]+(?:\\.[0-9]+)?\\s*(?:/|／|per|每)\\s*(?:sq|平方|ft|呎|m²|m2)",
@@ -1987,7 +1987,7 @@
         "why": "Five weeks of GBP 2,350 pcm: 2350 x 12 / 52 x 5 = 2711.54. The advertised six weeks, 3253.85, is allowed because the listing asks for it and a good reply prices both.",
         "mask_patterns": [
          "(?m)^[ \\t#*\\-\\d.]*(?:留位金|留位費|留位|保留金|訂金|holding[- ]deposit)(?:(?!押金|tenancy deposit|deposit cap|security deposit)[^\\n])*(?:\\n+(?![0-9]+\\.\\s|#|\\|)[^\\n]+)*",
-         "(?:月租|年租|租金|rent|annual)[^\\n]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "(?:月租|年租|租金|rent|annual)[^\\n|]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "£\\s?50,?000",
          "£\\s?[0-9][0-9,]*\\s*(?:pcm|per month|/ ?月|每月)",
          "£\\s?[0-9]+(?:\\.[0-9]+)?\\s*(?:/|／|per|每)\\s*(?:sq|平方|ft|呎|m²|m2)",
@@ -2821,7 +2821,8 @@
         "tolerance": 0.0,
         "required": false,
         "patterns": [
-         "non-?refundable(?:(?! or |, |; |／|/|\\|)[^.\\n]){0,40}?£\\s?([0-9]{1,3}(?:,[0-9]{3})+|[0-9]{3,6})"
+         "£\\s?([0-9]{1,3}(?:,[0-9]{3})+|[0-9]{3,6})\\s*(?:[a-z-]+\\s+){0,2}non-?refundable",
+         "non-?refundable(?:(?! or |, |; |／|/|\\||saves?\\b|saving|cheaper|discount|difference|gap\\b)[^.\\n]){0,40}?£\\s?([0-9]{1,3}(?:,[0-9]{3})+|[0-9]{3,6})"
         ],
         "near": [
          "Halcyon",
@@ -2831,7 +2832,7 @@
         ],
         "window": 500,
         "source": "attachment:stay-d-halcyon-row",
-        "why": "£2,700 on the non-refundable rate for the same 30 nights.",
+        "why": "£2,700 on the non-refundable rate for the same 30 nights (the number may sit before or after the phrase; a saving stated after it is not the rate).",
         "line_mask": [
          "garden\\ studio|Bramblewick|\\bStay A\\b|\\bListing A\\b|\\bOption A\\b|^\\|\\s*A\\s*\\||Netherfield|\\bStay B\\b|\\bListing B\\b|\\bOption B\\b|^\\|\\s*B\\s*\\||Quillon|\\bStay C\\b|\\bListing C\\b|\\bOption C\\b|^\\|\\s*C\\s*\\|"
         ]
@@ -3446,7 +3447,7 @@
         "why": "Five weeks of GBP 2,150 pcm: 2150 x 12 / 52 x 5 = 2480.77.",
         "mask_patterns": [
          "(?m)^[ \\t#*\\-\\d.]*(?:留位金|留位費|留位|保留金|訂金|holding[- ]deposit)(?:(?!押金|tenancy deposit|deposit cap|security deposit)[^\\n])*(?:\\n+(?![0-9]+\\.\\s|#|\\|)[^\\n]+)*",
-         "(?:月租|年租|租金|rent|annual)[^\\n]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "(?:月租|年租|租金|rent|annual)[^\\n|]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "£\\s?50,?000",
          "£\\s?[0-9][0-9,]*\\s*(?:pcm|per month|/ ?月|每月)",
          "£\\s?[0-9]+(?:\\.[0-9]+)?\\s*(?:/|／|per|每)\\s*(?:sq|平方|ft|呎|m²|m2)",
@@ -4570,7 +4571,7 @@
          "(?:年收入|年薪|annual income|income|salary|earn)[^\\n]{0,24}£\\s?[0-9][0-9,]*",
          "£?\\s?50[,，]?000(?:\\.00)?\\b",
          "(?:留位金|留位費|留位|保留金|訂金|holding[- ]deposit)[^\\n|]*?(?=\\|)",
-         "(?:月租|年租|租金|rent|annual)[^\\n]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
+         "(?:月租|年租|租金|rent|annual)[^\\n|]{0,14}?£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?",
          "£\\s?50,?000",
          "£\\s?[0-9][0-9,]*\\s*(?:pcm|per month|/ ?月|每月)",
          "(?m)^\\s*[-*•]\\s*£\\s?[0-9][0-9,]*(?:\\.[0-9]{1,2})?\\s*$",

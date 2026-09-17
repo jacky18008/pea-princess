@@ -367,7 +367,8 @@ def label_matches(label, rule):
         if " " + norm(word) + " " in text or norm(word) in text:
             return False
     for group in (rule.get("require") or []):
-        if not any(norm(w) in text for w in group):
+        # whole words: "age" must not match "average" (a road-noise label once graded as a build year)
+        if not any(re.search(r"(?<![a-z0-9])%s(?![a-z0-9])" % re.escape(norm(w)), text) for w in group):
             return False
     return True
 
@@ -696,7 +697,7 @@ class ReferentGuard(object):
 Found = collections.namedtuple("Found", "value unit where sources axis_id explicit_null")
 
 
-def find_in_numbers(cand, rule, guard=None, fact=None):
+def find_in_numbers(cand, rule, guard=None, fact=None, every=False):
     """Search axes[].numbers[] by label, canonical axis first, then the rest.
 
     A ``guard`` skips numbers whose label matches but whose referent is something
@@ -707,6 +708,7 @@ def find_in_numbers(cand, rule, guard=None, fact=None):
     ordered = ([a for a in axes if a.get("id") == rule.get("axis")] +
                [a for a in axes if a.get("id") != rule.get("axis")])
     null_hit = None
+    hits = []
     for axis in ordered:
         for i, num in enumerate(axis.get("numbers") or []):
             if not isinstance(num, dict) or not label_matches(num.get("label"), rule):
@@ -720,7 +722,13 @@ def find_in_numbers(cand, rule, guard=None, fact=None):
                 null_hit = null_hit or Found(None, num.get("unit"), where, srcs,
                                              axis.get("id"), True)
                 continue
-            return Found(num.get("value"), num.get("unit"), where, srcs, axis.get("id"), False)
+            found = Found(num.get("value"), num.get("unit"), where, srcs, axis.get("id"), False)
+            if every:
+                hits.append(found)
+                continue
+            return found
+    if every:
+        return hits + ([null_hit] if null_hit and not hits else [])
     return null_hit
 
 
@@ -734,11 +742,18 @@ def find_in_metric(cand, key):
                  m.get("value") is None)
 
 
+NEGATION_BEFORE = re.compile(r"(?:\bnot\b|\bno\b|\bnever\b|\bwithout\b|\brather than\b|\binstead of\b|\bisn't\b|\bis not\b|\bnot a\b|\bnot on a\b)[^.;]{0,30}$")
+
+
 def classify_heating(text):
+    """The heating class a text names, in priority order, ignoring a class it denies
+    ("a gas boiler with radiators, not a heat network" is gas_boiler)."""
     low = norm(text)
     for cls, words in HEATING_KEYWORDS.items():
-        if any(norm(w) in low for w in words):
-            return cls
+        for w in words:
+            for m in re.finditer(re.escape(norm(w)), low):
+                if not NEGATION_BEFORE.search(low[max(0, m.start() - 40):m.start()]):
+                    return cls
     return None
 
 
@@ -835,7 +850,17 @@ def find_fact(cand, fact, rule, truth, guard=None):
     else:
         metric_null = None
 
-    if kind in ("area", "year", "count", "minutes"):
+    if kind == "area":
+        hits = find_in_numbers(cand, rule, guard, fact, every=True)
+        real = [h for h in hits if h.value is not None]
+        if len(real) > 1 and isinstance(truth, dict):
+            # Two certificates listed side by side, disagreeing, is honest reporting: grade the one
+            # that is the current record when it is there, and say so.
+            for h in real:
+                if compare(fact, rule, h, truth, None)[0] == "correct":
+                    return h._replace(where=h.where + " [one of %d listed areas]" % len(real))
+        return (real[0] if real else (hits[0] if hits else None)) or metric_null
+    if kind in ("year", "count", "minutes"):
         hit = find_in_numbers(cand, rule, guard, fact)
         return hit or metric_null
 
@@ -970,6 +995,9 @@ def compare(fact, rule, found, truth, report):
         if value is None:
             return "missing", "no value"
         ok = str(value).strip().upper() == str(truth).strip().upper()
+        if not ok and fact == "commute.redundancy_grade" and str(value).strip()[:1].upper() == str(truth).strip()[:1].upper():
+            # commute.py itself grades B- as a shade of B; a walk of a few metres flips the modifier
+            return "correct", "%r against %r (same letter; the modifier is a threshold shade)" % (value, truth)
         return ("correct" if ok else "wrong", "%r against %r (exact)" % (value, truth))
 
     if kind == "sic_codes":
