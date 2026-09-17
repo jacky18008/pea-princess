@@ -394,6 +394,30 @@ class Uploads(BenchCase):
         self.assertTrue(os.path.isfile(os.path.join(bench.work("codex"), "attachments",
                                                     "2", "photo-1.jpg")))
 
+    def test_a_web_archive_is_kept_and_its_page_unpacked_beside_it(self):
+        import plistlib
+        page = "<html><head><title>Flat to rent</title></head><body><p>£1,850 pcm</p></body></html>"
+        archive = plistlib.dumps({"WebMainResource": {"WebResourceData": page.encode("utf-8"),
+                                                       "WebResourceMIMEType": "text/html",
+                                                       "WebResourceTextEncodingName": "UTF-8",
+                                                       "WebResourceURL": "https://example.invalid/1"}},
+                                 fmt=plistlib.FMT_BINARY)
+        self.assertEqual(tri_bench.upload_name("Deals Gateway.webarchive"), ("Deals-Gateway.webarchive", "webarchive"))
+        taken = tri_bench.accept_uploads([("page.webarchive", archive)])
+        self.assertEqual([("page.webarchive", "webarchive")], [(n, k) for n, k, _d in taken])
+        with self.assertRaises(tri_bench.BenchError):
+            tri_bench.accept_uploads([("page.webarchive", ZIP)])          # not a property list inside
+        bench = self.bench()
+        self.send(bench, "看一下", uploads=taken)
+        for host in tri_bench.HOSTS:
+            folder = os.path.join(bench.work(host), "attachments", "1")
+            self.assertTrue(os.path.isfile(os.path.join(folder, "page.webarchive")))
+            with io.open(os.path.join(folder, "page.html"), encoding="utf-8") as handle:
+                self.assertEqual(page, handle.read())
+            self.assertEqual(bench.hosts[host]["cards"][0]["files"],
+                             ["attachments/1/page.webarchive", "attachments/1/page.html"])
+        self.assertIn("attachments/1/page.html", self.runner.cmd("claude")[-1])
+
     def test_the_message_says_what_arrived_where_it_is_and_how_big(self):
         bench = self.bench()
         self.send(bench, "看一下", uploads=tri_bench.accept_uploads(

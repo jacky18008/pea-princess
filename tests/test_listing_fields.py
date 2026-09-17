@@ -442,5 +442,44 @@ class TestVisibleTextLayouts(unittest.TestCase):
         self.assertTrue(rec["postcode_note"])
 
 
+class TestWebArchive(unittest.TestCase):
+    """A Web Archive (what a phone's share sheet or Safari saves) is a property list; only
+    its main document is read. Everything else in it - images, scripts - is ignored."""
+
+    def archive(self, page, encoding="UTF-8"):
+        import plistlib
+        return plistlib.dumps({
+            "WebMainResource": {"WebResourceData": page.encode("utf-8"), "WebResourceMIMEType": "text/html",
+                                "WebResourceTextEncodingName": encoding, "WebResourceURL": "https://example.invalid/listing/12345",
+                                "WebResourceFrameName": ""},
+            "WebSubresources": [{"WebResourceData": b"\x89PNG\r\n\x1a\n" + b"\0" * 32, "WebResourceMIMEType": "image/png",
+                                 "WebResourceURL": "https://example.invalid/photo/1.png"}],
+        }, fmt=plistlib.FMT_BINARY)
+
+    def test_the_main_document_is_read_out_of_the_archive(self):
+        raw = self.archive(JSONLD_PAGE)
+        self.assertTrue(raw.startswith(b"bplist00"))
+        text = LF.decode_saved_text(raw, "listing.webarchive")
+        self.assertIn("<title>1 bedroom flat to rent, Example Road</title>", text)
+        rec = LF.extract(text, "html")
+        self.assertEqual(1850.0, rec["fields"]["rent"]["value"]); self.assertEqual("SE1 8BW", rec["fields"]["postcode"]["value"])
+
+    def test_the_command_line_reads_an_archive_and_prints_the_fields(self):
+        folder = tempfile.mkdtemp(prefix="vetflat-listing-")
+        path = os.path.join(folder, "page.webarchive")
+        with io.open(path, "wb") as fh:
+            fh.write(self.archive(JSONLD_PAGE))
+        proc = subprocess.run([sys.executable, os.path.join(SCRIPTS, "listing_fields.py"), path], capture_output=True, text=True)
+        self.assertEqual(0, proc.returncode, proc.stdout + proc.stderr)
+        self.assertEqual("saved_page", json.loads(proc.stdout)["source"]["kind"])
+
+    def test_a_property_list_without_a_main_document_is_refused_not_decoded(self):
+        import plistlib
+        raw = plistlib.dumps({"Something": {"else": b"\x00\x01"}}, fmt=plistlib.FMT_BINARY)
+        with self.assertRaises(ValueError) as caught:
+            LF.decode_saved_text(raw, "page.webarchive")
+        self.assertIn("Web Archive", str(caught.exception))
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -1410,10 +1410,21 @@ postcode unknown. Checked on one real saved portal page on 2026-09-17 (the page 
 fields read, the full postcode came from the data block although the screen showed only the district,
 and the agent's office postcode — which the previous version returned as the property's — was excluded.
 
-Refuses: any URL (prints the save instruction); PDFs and other binaries (convert with
-`pdftotext -layout` first). `vet_case.py --listing` feeds its postcode, monthly rent, floor area, floor
-and pound deposit into the chain. Tests: `tests/test_listing_fields.py` (no network module imported, no
-site named in the module).
+Accepts one container: a Web Archive (`.webarchive`, what a phone's share sheet or Safari saves — a
+property list); its main document is read and everything else in it ignored. Refuses: any URL (prints the
+save instruction); PDFs and other binaries (convert with `pdftotext -layout` first). `vet_case.py
+--listing` feeds its postcode, monthly rent, floor area, floor and pound deposit into the chain. Tests:
+`tests/test_listing_fields.py` (no network module imported, no site named in the module).
+
+## `capture_page.js` — the page in front of the person, as one text file (runs in their browser, no network)
+
+Not a Python script and not run by the model: the person installs it once as an iOS Shortcut ("Run
+JavaScript on Web Page", build steps at the top of the file) or, on a desktop, as a bookmarklet. On a
+listing page it hands back one document — title, address bar, meta tags, every JSON-LD and JSON block,
+the page's inline data assignments, the visible text, the image links — as HTML inside a `.txt`, which
+`listing_fields.py` reads as a saved page. It makes no request of its own and reads nothing but the open
+page, the way "Save Page As" does; no site names, no page selectors. Checked in headless Chrome on the
+same real saved page as above (2026-09-17): the capture parsed to the same fields as the saved `.html`.
 
 ## `vet_case.py` — the fixed vetting chain for one flat, one command, explicit data states
 

@@ -45,8 +45,10 @@ link at the top of the page opens that directory.
 Beside the message box there is a file picker. Pick one file or several, type the
 question, press Send: the files go with that message to every host that is switched on.
 
-**What it takes.** `pdf`, `png`, `jpg`/`jpeg`, `webp`, `heic`, `txt`, `md`, `html`,
-`json`, `csv` — up to **8 files and 20 MB** in one message. The name is checked and so
+**What it takes.** `pdf`, `png`, `jpg`/`jpeg`, `webp`, `heic`, `webarchive`, `txt`, `md`,
+`html`, `json`, `csv` — up to **8 files and 20 MB** in one message. A `.webarchive` (what a
+phone's share sheet or Safari saves) is kept as sent and its main document is unpacked beside
+it as `.html`, so the text-only hosts can read the page. The name is checked and so
 are the first bytes: a `.zip` renamed `listing.pdf` is refused, and so is a `photo.png`
 that is not a PNG inside. A refused file stops the whole message and the page says which
 file and why, because half a message reaching three hosts is worse than none. Anything

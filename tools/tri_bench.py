@@ -82,7 +82,7 @@ MAX_FILES = 8
 UPLOAD_SLACK = 64 * 1024           # the boundaries and headers around those bytes
 MAX_PARTS = 40                     # a sanity bound on the parser, not the file limit
 TEXT_KINDS = ("txt", "md", "html", "json", "csv")
-ACCEPTED = ("pdf", "png", "jpg", "jpeg", "webp", "heic") + TEXT_KINDS
+ACCEPTED = ("pdf", "png", "jpg", "jpeg", "webp", "heic", "webarchive") + TEXT_KINDS
 
 # What a bench turn may do, per host: read the folder it was given, nothing else. Claude
 # gets Read, Codex a read-only sandbox, Grok its read-only three with web search off, so
@@ -140,7 +140,7 @@ def upload_name(raw, taken=(), index=1):
     stem, dot, ext = base.rpartition(".")
     if not dot:
         stem, ext = base, ""
-    ext = re.sub(r"[^a-z0-9]+", "", ext.lower())[:8]
+    ext = re.sub(r"[^a-z0-9]+", "", ext.lower())[:10]
     stem = re.sub(r"[^A-Za-z0-9._-]+", "-", stem).strip("-._")[:60] or "file-%d" % index
     tail = "." + ext if ext else ""
     name, count = stem + tail, 1
@@ -167,6 +167,8 @@ def sniff(kind, raw):
     if kind == "heic":
         brands = (b"heic", b"heix", b"hevc", b"hevx", b"heim", b"heis", b"mif1", b"msf1")
         return raw[4:8] == b"ftyp" and raw[8:12] in brands
+    if kind == "webarchive":
+        return raw[:8] == b"bplist00"
     if kind in TEXT_KINDS:
         if b"\x00" in raw:
             return False
@@ -206,6 +208,20 @@ def accept_uploads(files):
         taken.add(name)
         out.append((name, kind, data))
     return out
+
+
+def webarchive_main_document(data):
+    """The HTML inside a Web Archive (what a phone's share sheet or Safari saves), or None."""
+    try:
+        import plistlib
+        doc = plistlib.loads(data)
+        main = doc.get("WebMainResource") if isinstance(doc, dict) else None
+        body = main.get("WebResourceData") if isinstance(main, dict) else None
+        if not isinstance(body, (bytes, bytearray)):
+            return None
+        return bytes(body).decode(str(main.get("WebResourceTextEncodingName") or "utf-8"), "replace")
+    except Exception:  # noqa: BLE001 - not an archive we can open; the hosts still get the file
+        return None
 
 
 def attachment_line(uploaded):
@@ -476,6 +492,18 @@ class Bench(object):
             kept.append(collections.OrderedDict([
                 ("name", name), ("rel", "attachments/%d/%s" % (turn_no, name)),
                 ("size", len(data)), ("kind", kind)]))
+            if kind == "webarchive":
+                # The archive is a container; its main document is written beside it as
+                # .html so that the text-only hosts can read the page too.
+                page = webarchive_main_document(data)
+                if page is not None:
+                    html_name = name[:-len(".webarchive")] + ".html"
+                    with io.open(self.owned(os.path.join(folder, html_name)), "w", encoding="utf-8") as fh:
+                        fh.write(page)
+                    kept.append(collections.OrderedDict([
+                        ("name", html_name), ("rel", "attachments/%d/%s" % (turn_no, html_name)),
+                        ("size", len(page.encode("utf-8"))), ("kind", "html"),
+                        ("note", "the main document unpacked from %s" % name)]))
         turn["uploaded"] = kept
         return kept
 
@@ -809,7 +837,7 @@ p.err { color:var(--bad); font-size:13px; margin:10px 0 0; white-space:pre-wrap 
     <div class="row">
       <label for="files">Files</label>
       <input type="file" id="files" multiple
-             accept=".pdf,.png,.jpg,.jpeg,.webp,.heic,.txt,.md,.html,.json,.csv">
+             accept=".pdf,.png,.jpg,.jpeg,.webp,.heic,.webarchive,.txt,.md,.html,.json,.csv">
       <span class="hint" id="chosen"></span>
       <span class="hint">up to 8 files, 20 MB a message; each host gets its own copy under
         attachments/&lt;turn&gt;/ in its working folder</span>

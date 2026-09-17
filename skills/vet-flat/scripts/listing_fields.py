@@ -35,7 +35,10 @@ Nothing here is written for one website: no site names, no page selectors.
 
 PDF and other binary inputs are refused before decoding, even if renamed to .txt.
 For a PDF, first convert it locally with ``pdftotext -layout input.pdf output.txt``,
-then pass ``--text output.txt``. Only UTF-8 HTML/plain text is accepted.
+then pass ``--text output.txt``. Only UTF-8 HTML/plain text is accepted, plus one
+container: a Web Archive (``.webarchive``, the property list a browser's "Save as Web
+Archive" or a phone's share sheet writes), from which the main document is read and
+everything else in it ignored.
 
 What it refuses: a web address. It prints an error asking the person to open the
 page in their browser and save or copy it. There is no network code in this file and
@@ -54,6 +57,7 @@ import html
 import io
 import json
 import os
+import plistlib
 import re
 import sys
 from html.parser import HTMLParser
@@ -72,11 +76,39 @@ BINARY_SIGNATURES = (b'%PDF-', b'\x89PNG\r\n\x1a\n', b'\xff\xd8\xff', b'GIF87a',
                      b'\x1f\x8b', b'RIFF', b'II*\x00', b'MM\x00*')
 
 
+WEBARCHIVE_REFUSAL = ("This looks like a Web Archive without a readable main document. Save the page again as "
+                      "HTML (\"Webpage, Complete\" or \"Page Source\"), or copy the page text.")
+
+
+def webarchive_html(raw):
+    """The main document inside a Web Archive (a property list a browser saves), or None."""
+    try:
+        doc = plistlib.loads(raw)
+    except Exception:  # noqa: BLE001 - not a property list at all
+        return None
+    main = doc.get("WebMainResource") if isinstance(doc, dict) else None
+    data = main.get("WebResourceData") if isinstance(main, dict) else None
+    if not isinstance(data, (bytes, bytearray)):
+        return None
+    for encoding in (main.get("WebResourceTextEncodingName") or "utf-8", "utf-8"):
+        try:
+            return bytes(data).decode(str(encoding))
+        except (LookupError, UnicodeError):
+            continue
+    return None
+
+
 def decode_saved_text(raw, name='-'):
     """Reject binary bytes rather than replacing them and extracting invented text."""
     if isinstance(raw, str):
         raw = raw.encode('utf-8')  # Supports an explicitly supplied StringIO stdin.
     head = raw[:1024].lstrip(b'\xef\xbb\xbf \t\r\n')
+    if (head.startswith(b'bplist00') or os.path.splitext(name)[1].lower() == '.webarchive'
+            or (head.startswith(b'<?xml') and b'<plist' in raw[:400])):
+        text = webarchive_html(raw)
+        if text is None:
+            raise ValueError(WEBARCHIVE_REFUSAL)
+        return text
     if (os.path.splitext(name)[1].lower() in BINARY_SUFFIXES or
             head.startswith(BINARY_SIGNATURES) or b'%PDF-' in raw[:1024] or
             any(byte < 32 and byte not in (9, 10, 12, 13) for byte in raw) or b'\x7f' in raw):
