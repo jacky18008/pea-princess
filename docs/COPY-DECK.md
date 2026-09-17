@@ -324,7 +324,7 @@ Ask **"What can this do?"** (or 這能幹嘛？). The answer comes from `skills/
 - write-back: yes
 
 ```text
-Rightmove, Zoopla, OnTheMarket, OpenRent, HomeViews, Trustpilot, Airbnb, Booking.com are listed by name only. Their terms forbid automated access, so this project gives no method for them; the skill asks you for the page (a PDF, screenshots or the text) and does not open listing links itself. How you and your assistant use those sites is your responsibility under their terms; nothing here does it or asks for it.
+Rightmove, Zoopla, OnTheMarket, OpenRent, HomeViews, Trustpilot, Airbnb, Booking.com appear here by name only. Their terms do not want programs reading them automatically, so this project provides no method for that; the skill asks you for the page (a PDF, screenshots or the plain text) and never opens listing links itself. There is no scraper for these sites in this package, and it cannot encourage you to have your agent scrape them either.
 ```
 
 ### deck:readme:26
@@ -627,7 +627,7 @@ Codex：把沙箱網路打開（`sandbox_workspace_write.network_access = true`�
 - write-back: yes
 
 ```text
-Rightmove、Zoopla、OnTheMarket、OpenRent、HomeViews、Trustpilot、Airbnb、Booking.com 在這裡只會出現名字。它們的條款禁止程式自動存取，所以這個專案不提供任何做法；技能會向你要頁面（PDF、截圖或純文字），不會自己去開房源連結。你和你的助理怎麼使用那些網站，是你在它們條款下的責任；這裡不做這件事，也不會叫你去做。
+Rightmove、Zoopla、OnTheMarket、OpenRent、HomeViews、Trustpilot、Airbnb、Booking.com 在這裡只會出現名字。它們的條款不希望程式自動存取，所以這個專案不提供任何做法；技能會向你要頁面（PDF、截圖或純文字），不會自己去開房源連結。這包沒有這些網頁的爬蟲，也不能鼓勵你讓 agent 去爬蟲。
 ```
 
 ### deck:readme-zh-tw:26
@@ -930,7 +930,7 @@ Codex：把沙箱网络打开（`sandbox_workspace_write.network_access = true`�
 - write-back: yes
 
 ```text
-Rightmove、Zoopla、OnTheMarket、OpenRent、HomeViews、Trustpilot、Airbnb、Booking.com 在这里只会出现名字。它们的条款禁止程序自动访问，所以这个项目不提供任何做法；技能会向你要页面（PDF、截图或纯文字），不会自己去打开房源链接。你和你的助理怎么使用那些网站，是你在它们条款下的责任；这里不做这件事，也不会叫你去做。
+Rightmove、Zoopla、OnTheMarket、OpenRent、HomeViews、Trustpilot、Airbnb、Booking.com 在这里只会出现名字。它们的条款不希望程序自动访问，所以这个项目不提供任何做法；技能会向你要页面（PDF、截图或纯文本），不会自己去打开房源链接。这个包里没有这些网页的爬虫，也不能鼓励你让 agent 去爬。
 ```
 
 ### deck:readme-zh-cn:26

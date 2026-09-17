@@ -1001,7 +1001,7 @@
       "section": null,
       "sha256": "3ad91a1e501c6b42ed928cc83e484727a3c00326ff4e3094d593129093865bf2",
       "source": "README.zh-CN.md",
-      "source_sha256": "62af56bdb46039fe5c083de594156e1bdb9b9daff833c93d42dd6dfb53a44c2b",
+      "source_sha256": "dc624788551443344e478cd18a4dcd9564627d7d058f8d76b3e8f88f07b020bd",
       "text": "这是一个在伦敦查验和搜索房源用的 agent skill，用官方与公开的英国数据，像谨慎的验房师一样尻洗一套伦敦出租公寓：身份、面积、房龄、供暖、周边工地、治安、物业评价、中介合规、价格、采光、每月总成本、通勤，最后给出判决。任何支持 [Agent Skills](https://agentskills.io) 格式的 agent 都能用（Ex: GPT, Claude, Grok, Gemini, pi-agent, DeepSeek, etc）；普通的 chat mode 也可以，只是建议使用 agent mode，复杂的任务会更稳定。跟 AI 讲大白话就行。",
       "writable": true
     },
@@ -1016,7 +1016,7 @@
       "section": null,
       "sha256": "6488b5914849f12a14f3afd088ecd66de171921f8c8ce8b97c8baabc989a60f3",
       "source": "README.zh-CN.md",
-      "source_sha256": "62af56bdb46039fe5c083de594156e1bdb9b9daff833c93d42dd6dfb53a44c2b",
+      "source_sha256": "dc624788551443344e478cd18a4dcd9564627d7d058f8d76b3e8f88f07b020bd",
       "text": "童话里，只有真正的公主能隔着二十层床垫感觉到那颗豌豆。在这里，**你**就是那位公主。这个工具帮你一层一层掀开床垫：翻登记资料、数犯罪案件、查规划申请和公司备案文件，告诉你豌豆可能藏在哪里。但只有你感觉得到：亲自去看房、走一走那条街、跟中介和房东聊一聊。这份报告是一道筛子，赶时间的时候，它也只是一道筛子。它的第一个责任，是说出自己不知道什么，然后开口问你。",
       "writable": true
     },
@@ -1031,7 +1031,7 @@
       "section": null,
       "sha256": "522b901e3f6d60dcf5dfcdf1ec00b3019ed2e0dceabd5861dd7a1c7966c8fceb",
       "source": "README.zh-CN.md",
-      "source_sha256": "62af56bdb46039fe5c083de594156e1bdb9b9daff833c93d42dd6dfb53a44c2b",
+      "source_sha256": "dc624788551443344e478cd18a4dcd9564627d7d058f8d76b3e8f88f07b020bd",
       "text": "作者自己的经历，发在社群的繁体中文原文：[到了倫敦才發現自己有病，是公主病](docs/posts/2026-09-launch.zh-TW.md)。",
       "writable": true
     },
@@ -1046,7 +1046,7 @@
       "section": null,
       "sha256": "1e9eb3a3bb2bdd42788321577d9d530ee4a627b4b426f9b50fb3523e0f5fd08d",
       "source": "README.zh-CN.md",
-      "source_sha256": "62af56bdb46039fe5c083de594156e1bdb9b9daff833c93d42dd6dfb53a44c2b",
+      "source_sha256": "dc624788551443344e478cd18a4dcd9564627d7d058f8d76b3e8f88f07b020bd",
       "text": "> 状态：**草稿**。本地采集、区域扫描、报告生成和实验框架都已经做好了。处理个人数据或要做发布之前，先读[安全与隐私边界](SECURITY.md)。使用方式：`docs/INSTALL.md`、`docs/SCRIPTS.md`、`docs/CONVENTIONS.md`。",
       "writable": true
     },
@@ -1061,7 +1061,7 @@
       "section": null,
       "sha256": "c5ae855ad75610a16be0217683aefa98bb1e188ff252d21ae61e477ef0d267d2",
       "source": "README.zh-CN.md",
-      "source_sha256": "62af56bdb46039fe5c083de594156e1bdb9b9daff833c93d42dd6dfb53a44c2b",
+      "source_sha256": "dc624788551443344e478cd18a4dcd9564627d7d058f8d76b3e8f88f07b020bd",
       "text": "**分发方式：** 下载这个技能／工具，用你自己的 agent 跑。Pea Princess 不托管模型工作进程，也不碰订阅账号的凭据。本地的人物实验室只是测试用的伙伴。详见[桌面端／移动端的界线、供应商订阅政策、发布关卡](docs/local-product-and-provider-policy.md)。",
       "writable": true
     },
@@ -1076,7 +1076,7 @@
       "section": null,
       "sha256": "de50ce32e49913091ec87e8b18c912cc337891daa665251b47753a25a959c575",
       "source": "README.zh-CN.md",
-      "source_sha256": "62af56bdb46039fe5c083de594156e1bdb9b9daff833c93d42dd6dfb53a44c2b",
+      "source_sha256": "dc624788551443344e478cd18a4dcd9564627d7d058f8d76b3e8f88f07b020bd",
       "text": "这个技能安装和调用的名字都是 **`pea-princess`**；上传用的文件是 `dist/pea-princess-skill.zip`。项目源码仍然放在 `skills/vet-flat/`，这样已有的脚本路径和实验记录才不会失效。这就是一个技能，一个安装名称。",
       "writable": true
     },
@@ -1091,7 +1091,7 @@
       "section": null,
       "sha256": "bcaea754477eca205ea4d63db001dbcb2a207cbc171f89415d5a710e8aeaa7da",
       "source": "README.zh-CN.md",
-      "source_sha256": "62af56bdb46039fe5c083de594156e1bdb9b9daff833c93d42dd6dfb53a44c2b",
+      "source_sha256": "dc624788551443344e478cd18a4dcd9564627d7d058f8d76b3e8f88f07b020bd",
       "text": "Codex：把沙箱网络打开（`sandbox_workspace_write.network_access = true`），或改用 manual 模式。",
       "writable": true
     },
@@ -1106,7 +1106,7 @@
       "section": null,
       "sha256": "6b3879e7d52edbf5ef8f7c155421967ab0dba2d0d6d834590966867a6a055acb",
       "source": "README.zh-CN.md",
-      "source_sha256": "62af56bdb46039fe5c083de594156e1bdb9b9daff833c93d42dd6dfb53a44c2b",
+      "source_sha256": "dc624788551443344e478cd18a4dcd9564627d7d058f8d76b3e8f88f07b020bd",
       "text": "全部在 `skills/vet-flat/scripts/`；每一个都打印一个 JSON 对象，里面有 `source_url`、`retrieved_at`、`http_status`、`ok` 和一个证据等级。用法细节在 `docs/SCRIPTS.md`。",
       "writable": true
     },
@@ -1121,7 +1121,7 @@
       "section": null,
       "sha256": "dcd89e57b537995dfabec1ea83e5e600dc9df2d43508c8cab6e27bab2defb98c",
       "source": "README.zh-CN.md",
-      "source_sha256": "62af56bdb46039fe5c083de594156e1bdb9b9daff833c93d42dd6dfb53a44c2b",
+      "source_sha256": "dc624788551443344e478cd18a4dcd9564627d7d058f8d76b3e8f88f07b020bd",
       "text": "没有 shell 的人要看报告排版：用浏览器打开 `viewer/viewer.html`，把 JSON 粘贴进去。需求页面对另一个文件也是同样的做法：`scripts/panel.py --profile profile.yaml --out requirements.html` 会写出一页只读的现状，让人随时想看就打开。没有任何助理会自己写 HTML；模型写 YAML 和 JSON，由脚本负责排版。",
       "writable": true
     },
@@ -1136,7 +1136,7 @@
       "section": null,
       "sha256": "8e0510971a3e9ea08c70cd8564eade198573afa43f219e7618f97aafa3ed40f4",
       "source": "README.zh-CN.md",
-      "source_sha256": "62af56bdb46039fe5c083de594156e1bdb9b9daff833c93d42dd6dfb53a44c2b",
+      "source_sha256": "dc624788551443344e478cd18a4dcd9564627d7d058f8d76b3e8f88f07b020bd",
       "text": "问它 **「这能干嘛？」**（或 \"What can this do?\"）。答案来自 `skills/vet-flat/references/onboarding.md`：一段简短说明、三个起点（有房源 → 尻洗它；有区域或目的地 → 扫一遍；完全没概念 → 十个基本事实加六个带建议默认值的问题）。你自己的规则写在 `profile.yaml`（预算、面积、户型、不能接受的条件、优先级，还有 `budget_mode` lite/standard/deep，给 £20 套餐和只能纯聊天的情况用）。Agent 必须问的硬问题在 `references/questions.md`。",
       "writable": true
     },
@@ -1151,7 +1151,7 @@
       "section": null,
       "sha256": "cb8206d28f1c1249a49ac8ec8591e6d8130e364e7ceac024055cc12b0ce40278",
       "source": "README.zh-CN.md",
-      "source_sha256": "62af56bdb46039fe5c083de594156e1bdb9b9daff833c93d42dd6dfb53a44c2b",
+      "source_sha256": "dc624788551443344e478cd18a4dcd9564627d7d058f8d76b3e8f88f07b020bd",
       "text": "`evals/evals.json` 收了 7 个行政区的 8 套真实房子，加上 2 个对话场景（「这能干嘛」、「我完全没概念」），标准答案由项目自己的抓取脚本在 2026-09-03 生成。`bench/grade.py` 评分的项目有事实召回率、编造、引用、对未知的诚实度、硬性条件的一致性；`bench/run.py --dry-run` 会打印 Claude Code、Codex、Gemini CLI 或 OpenAI 兼容 API 的完整命令。详见 `bench/README.md`。",
       "writable": true
     },
@@ -1166,7 +1166,7 @@
       "section": null,
       "sha256": "f808c4c4dcb74d551eeaaee18a84271b3e333ab46c3e969c3b9224d33d682019",
       "source": "README.zh-CN.md",
-      "source_sha256": "62af56bdb46039fe5c083de594156e1bdb9b9daff833c93d42dd6dfb53a44c2b",
+      "source_sha256": "dc624788551443344e478cd18a4dcd9564627d7d058f8d76b3e8f88f07b020bd",
       "text": "三条路，从最省事到最手动。挑一条和你现在用的工具对得上的。",
       "writable": true
     },
@@ -1181,7 +1181,7 @@
       "section": null,
       "sha256": "c9b959d53663632769f355b3b4b32c1a95833c9e5d55e5d84fb47ef9d78bd291",
       "source": "README.zh-CN.md",
-      "source_sha256": "62af56bdb46039fe5c083de594156e1bdb9b9daff833c93d42dd6dfb53a44c2b",
+      "source_sha256": "dc624788551443344e478cd18a4dcd9564627d7d058f8d76b3e8f88f07b020bd",
       "text": "**要跑哪一种配置：** `docs/EXPERIMENTS.md` 记录了最早的看房比较实验。[后来的上下文消融实验](docs/ablation-2026-09-09/results.md)包含生成成本和来源审阅：在测到的规模下，额外的摘要、结构化记忆和多次检索调用并没有省下 token。起点就维持「一个 agent 带完整上下文」；四角色流水线还在实验阶段。这些研究测的是不同的任务，不是一份通用的模型排名。",
       "writable": true
     },
@@ -1196,7 +1196,7 @@
       "section": null,
       "sha256": "d00c73f974b1bee26a4899c46d63e7651f055ff86aed88da0174f2ffe1142ca4",
       "source": "README.zh-CN.md",
-      "source_sha256": "62af56bdb46039fe5c083de594156e1bdb9b9daff833c93d42dd6dfb53a44c2b",
+      "source_sha256": "dc624788551443344e478cd18a4dcd9564627d7d058f8d76b3e8f88f07b020bd",
       "text": "**长时间的项目和会变的需求：** [session harness](docs/session-harness.md) 会保存用户的原话、带版本的需求和条件式例外、来源快照、目标、待办和执行状态。受管理的 runner 自己把当前的数据包塞进去，并拒绝过期的结果。`AGENTS.md`／`CLAUDE.md` 保持简短，只链到详细规则；光放指针不能保证对方会去读。[生命周期验证](docs/session-harness-validation.md)测的是不调用模型也能恢复，不是质量等价或省 token。",
       "writable": true
     },
@@ -1211,7 +1211,7 @@
       "section": null,
       "sha256": "00a4315f33a30f968fa95b97fcef292fdabac3fdb6a3536a14ab2bb0438de467",
       "source": "README.zh-CN.md",
-      "source_sha256": "62af56bdb46039fe5c083de594156e1bdb9b9daff833c93d42dd6dfb53a44c2b",
+      "source_sha256": "dc624788551443344e478cd18a4dcd9564627d7d058f8d76b3e8f88f07b020bd",
       "text": "**想试一整段人物对话：** 运行 `python3 tools/persona_playground.py`，再打开它打印出来的本地网址。[交互实验室](docs/persona-playground.md)用你本地的 Codex 登录来生成动态的人物回复和助理答案，支持单步／连续／暂停、排队的真人提问、场景修订、私有历史和共用的用量上限。16 张人物卡都有，以清楚标注的聊天改编版呈现；这是本地 alpha，没有公开部署，也没有隐藏的模型裁判。",
       "writable": true
     },
@@ -1226,7 +1226,7 @@
       "section": null,
       "sha256": "6d3158cd7019fc93c549365a0087ec96b67e6ccc83586f403a015f0240cf65c1",
       "source": "README.zh-CN.md",
-      "source_sha256": "62af56bdb46039fe5c083de594156e1bdb9b9daff833c93d42dd6dfb53a44c2b",
+      "source_sha256": "dc624788551443344e478cd18a4dcd9564627d7d058f8d76b3e8f88f07b020bd",
       "text": "**社区反馈，第一阶段：** 打开[本地选项表单](community/index.html)，照着[指南](docs/community-feedback-stage1.md)做。公开的 JSON 只放受控的选项；选填的文字留在作者自己的设备上。本地的验证、导入和搜索用的是虚构的演示目录。目前还没有在线提交服务，也没有真实的评论数据集。",
       "writable": true
     },
@@ -1241,29 +1241,29 @@
       "section": null,
       "sha256": "f5dcb5fd852775bddff8631b0e7327f0269d1f6a986c398da4b58aaa4f57d8e7",
       "source": "README.zh-CN.md",
-      "source_sha256": "62af56bdb46039fe5c083de594156e1bdb9b9daff833c93d42dd6dfb53a44c2b",
+      "source_sha256": "dc624788551443344e478cd18a4dcd9564627d7d058f8d76b3e8f88f07b020bd",
       "text": "**看的是整段对话，不是单一回答：** `docs/JOURNEYS.md` 为九段写好脚本的多轮旅程评分，`docs/PERSONAS.md` 再往前一步——十六个由模型扮演的虚构人物，搭配一个确定性的控制器保管他们的文件，让任何东西都编不出来；裁判必须引用自己的证据；每个人还配一个只动一项设置的对照探针。`python3 bench/personas.py --matrix pilot --dry-run` 不调用模型就能打印出整份计划。",
       "writable": true
     },
     "deck:readme-zh-cn:25": {
       "anchor": "## 这里不会有的来源",
       "char_from": 7321,
-      "char_to": 7513,
+      "char_to": 7502,
       "kind": "para",
       "lang": "zh-CN",
       "line_from": 127,
       "line_to": 127,
       "section": null,
-      "sha256": "421ca23d58915a005eea3b3df30da6ab04b25d9570e378f2ca1aaef297a6f79a",
+      "sha256": "3d7fcb799a62f635fc41012cc010b25b4ef65bba3e0cc08dd6f98c4b949a3c45",
       "source": "README.zh-CN.md",
-      "source_sha256": "62af56bdb46039fe5c083de594156e1bdb9b9daff833c93d42dd6dfb53a44c2b",
-      "text": "Rightmove、Zoopla、OnTheMarket、OpenRent、HomeViews、Trustpilot、Airbnb、Booking.com 在这里只会出现名字。它们的条款禁止程序自动访问，所以这个项目不提供任何做法；技能会向你要页面（PDF、截图或纯文字），不会自己去打开房源链接。你和你的助理怎么使用那些网站，是你在它们条款下的责任；这里不做这件事，也不会叫你去做。",
+      "source_sha256": "dc624788551443344e478cd18a4dcd9564627d7d058f8d76b3e8f88f07b020bd",
+      "text": "Rightmove、Zoopla、OnTheMarket、OpenRent、HomeViews、Trustpilot、Airbnb、Booking.com 在这里只会出现名字。它们的条款不希望程序自动访问，所以这个项目不提供任何做法；技能会向你要页面（PDF、截图或纯文本），不会自己去打开房源链接。这个包里没有这些网页的爬虫，也不能鼓励你让 agent 去爬。",
       "writable": true
     },
     "deck:readme-zh-cn:26": {
       "anchor": "## 许可与署名（提案中）",
-      "char_from": 7529,
-      "char_to": 7624,
+      "char_from": 7518,
+      "char_to": 7613,
       "kind": "para",
       "lang": "zh-CN",
       "line_from": 130,
@@ -1271,14 +1271,14 @@
       "section": null,
       "sha256": "e96e42dcdca21cd9b5782c6ff6a42e06f7f65ea45dce3decefd33ebecaf063e9",
       "source": "README.zh-CN.md",
-      "source_sha256": "62af56bdb46039fe5c083de594156e1bdb9b9daff833c93d42dd6dfb53a44c2b",
+      "source_sha256": "dc624788551443344e478cd18a4dcd9564627d7d058f8d76b3e8f88f07b020bd",
       "text": "文档和技能文字：CC BY 4.0。代码：MIT。每一份报告都会带着 \"Generated with pea-princess <version> — <source URL>\"。请留着它。",
       "writable": true
     },
     "deck:readme-zh-cn:27": {
       "anchor": "## 许可与署名（提案中）",
-      "char_from": 7626,
-      "char_to": 7835,
+      "char_from": 7615,
+      "char_to": 7824,
       "kind": "para",
       "lang": "zh-CN",
       "line_from": 132,
@@ -1286,7 +1286,7 @@
       "section": null,
       "sha256": "7624bac4e0af9e27ccebf433587d34937cb50316aa1adbfc6b6e631ace1529a0",
       "source": "README.zh-CN.md",
-      "source_sha256": "62af56bdb46039fe5c083de594156e1bdb9b9daff833c93d42dd6dfb53a44c2b",
+      "source_sha256": "dc624788551443344e478cd18a4dcd9564627d7d058f8d76b3e8f88f07b020bd",
       "text": "插图出自 Edmund Dulac 1911 年为 *Stories from Hans Andersen*（Hodder & Stoughton，伦敦）画的彩页，属于公有领域。`docs/assets/mark.svg` 里的标志（七层床垫下的一颗豌豆）是原创的，跟文档一起以 CC BY 4.0 发布；`docs/assets/social-preview.png` 是同一个标志做成的 1280×640 预览卡。",
       "writable": true
     },
@@ -1301,7 +1301,7 @@
       "section": null,
       "sha256": "23988b9631d6fbd3db274542b87227c07f157018bfcb6d15da77c000cac1b9a1",
       "source": "README.zh-CN.md",
-      "source_sha256": "62af56bdb46039fe5c083de594156e1bdb9b9daff833c93d42dd6dfb53a44c2b",
+      "source_sha256": "dc624788551443344e478cd18a4dcd9564627d7d058f8d76b3e8f88f07b020bd",
       "text": "1. **你在用 agent 应用**（Claude Code、Codex、Cursor、Gemini CLI、Grok Build……）。把这句话贴给它，然后等：",
       "writable": true
     },
@@ -1316,7 +1316,7 @@
       "section": null,
       "sha256": "b01005ff4438ad04a57a5642ed1cee174da70fe5f141e2785ea4592ead071e0a",
       "source": "README.zh-CN.md",
-      "source_sha256": "62af56bdb46039fe5c083de594156e1bdb9b9daff833c93d42dd6dfb53a44c2b",
+      "source_sha256": "dc624788551443344e478cd18a4dcd9564627d7d058f8d76b3e8f88f07b020bd",
       "text": "   > 请安装 https://github.com/jacky18008/pea-princess 这个技能，装好后告诉我它能做什么",
       "writable": true
     },
@@ -1331,7 +1331,7 @@
       "section": null,
       "sha256": "292d4ca91af305e25191e81207eee10188e1232ab4fe59399fa9da983f0b97fd",
       "source": "README.zh-CN.md",
-      "source_sha256": "62af56bdb46039fe5c083de594156e1bdb9b9daff833c93d42dd6dfb53a44c2b",
+      "source_sha256": "dc624788551443344e478cd18a4dcd9564627d7d058f8d76b3e8f88f07b020bd",
       "text": "   Agent 会把这个项目拉下来，用 `pea-princess` 这个名字把技能装好，然后回答你。从此就只要讲话：「尻洗这套房：」再把房源贴上去。",
       "writable": true
     },
@@ -1346,7 +1346,7 @@
       "section": null,
       "sha256": "c0ee8c75e554b00897907b7609b25df07b94a08750a0f96253915f03cbfc040d",
       "source": "README.zh-CN.md",
-      "source_sha256": "62af56bdb46039fe5c083de594156e1bdb9b9daff833c93d42dd6dfb53a44c2b",
+      "source_sha256": "dc624788551443344e478cd18a4dcd9564627d7d058f8d76b3e8f88f07b020bd",
       "text": "2. **你在用有 Skills 功能的聊天软件**（claude.ai、Claude Cowork、ChatGPT Business）。到 [Releases](https://github.com/jacky18008/pea-princess/releases) 下载 `pea-princess-skill.zip`，打开 Settings → Skills → Upload，选这个 zip。然后问它「这能干嘛？」。",
       "writable": true
     },
@@ -1361,7 +1361,7 @@
       "section": null,
       "sha256": "594ae603f0cc9873a9c6e667a4d2463a1bc1c5d1966a34b00fc5cacfb77c4c4b",
       "source": "README.zh-CN.md",
-      "source_sha256": "62af56bdb46039fe5c083de594156e1bdb9b9daff833c93d42dd6dfb53a44c2b",
+      "source_sha256": "dc624788551443344e478cd18a4dcd9564627d7d058f8d76b3e8f88f07b020bd",
       "text": "3. **你在用没有 Skills 的聊天软件**（ChatGPT Plus Projects、Grok Projects、Gemini Gems、Perplexity Spaces）。到 [Releases](https://github.com/jacky18008/pea-princess/releases) 下载提示词包，把 `INSTRUCTIONS.md` 贴进项目的指令栏，再附上 `references/` 里的文件。之后技能会一次性告诉你要贴什么。",
       "writable": true
     },
@@ -1376,7 +1376,7 @@
       "section": null,
       "sha256": "94501f8a02879f9264b30508cb32d7b231eb9fd65acbf0000b6abf05c8bcf2a3",
       "source": "README.zh-CN.md",
-      "source_sha256": "62af56bdb46039fe5c083de594156e1bdb9b9daff833c93d42dd6dfb53a44c2b",
+      "source_sha256": "dc624788551443344e478cd18a4dcd9564627d7d058f8d76b3e8f88f07b020bd",
       "text": "不用写代码，不用改配置文件：接下来全部都是一句一句的话，打字或用语音都行。五分钟上手看 [USING.zh-CN.md](docs/USING.zh-CN.md)；每一种安装方式和它的注意事项在 [INSTALL.md](docs/INSTALL.md)。",
       "writable": true
     },
@@ -1391,7 +1391,7 @@
       "section": null,
       "sha256": "30d2968cb3dae1da0004ca0118e25a2d409c367616b44b7b8971db9a0a688ff3",
       "source": "README.zh-CN.md",
-      "source_sha256": "62af56bdb46039fe5c083de594156e1bdb9b9daff833c93d42dd6dfb53a44c2b",
+      "source_sha256": "dc624788551443344e478cd18a4dcd9564627d7d058f8d76b3e8f88f07b020bd",
       "text": "每一项结论都带着它的证据等级。查不到的东西，它会一次性用一条消息问你。它不会自己去打开房源网站：页面由你交给它，[上手指南](docs/USING.zh-CN.md)里有三种做法。",
       "writable": true
     },
@@ -1406,7 +1406,7 @@
       "section": null,
       "sha256": "cb4e617b0ea8a906892be14e860b95a9aa5291653820aa781cff127b430e2295",
       "source": "README.zh-TW.md",
-      "source_sha256": "d75366a8e1c5a2c19cc64da2b705eb7043f6e40d2f2fa6b1f3d8f05fff974e98",
+      "source_sha256": "dd73c513f7aaf90d84308c6859d5e32ce8d2885e4bf9978d103723942fa49cc8",
       "text": "這是一個在倫敦檢視跟搜尋房源用的 agent skill，用官方與公開的英國資料，像謹慎的驗屋師一樣尻洗一間倫敦出租公寓：身份、面積、屋齡、供暖、周邊工地、治安、管理評價、仲介合規、價格、採光、全部月成本、通勤，最後給出判決。任何支援 [Agent Skills](https://agentskills.io) 格式的 agent 都能用（Ex: GPT, Claude, Grok, Gemini, pi-agent, DeepSeek, etc）；一般的 chat mode, 也可以，只是建議使用 agent mode, 複雜的任務會比較穩定。跟 AI 講白話文就好。",
       "writable": true
     },
@@ -1421,7 +1421,7 @@
       "section": null,
       "sha256": "b7dcfe9328b3bef108b68e47816a6c45a704a789b80938cd8171e68f777fd873",
       "source": "README.zh-TW.md",
-      "source_sha256": "d75366a8e1c5a2c19cc64da2b705eb7043f6e40d2f2fa6b1f3d8f05fff974e98",
+      "source_sha256": "dd73c513f7aaf90d84308c6859d5e32ce8d2885e4bf9978d103723942fa49cc8",
       "text": "童話裡，只有真正的公主能隔著二十層床墊感覺到那顆豌豆。在這裡，**你**就是那位公主。這個工具幫你一層一層把床墊掀開：翻登記資料、數犯罪案件、查規劃申請和公司申報文件，告訴你豌豆可能藏在哪裡。但只有你感覺得到：親自去看房、走一走那條街、跟仲介和房東聊一聊。這份報告是一道濾網，趕時間的時候，它也只是一道濾網。它的第一個責任，是說出自己不知道什麼，然後開口問你。",
       "writable": true
     },
@@ -1436,7 +1436,7 @@
       "section": null,
       "sha256": "c3bd0bdaa7e2356ae6b649d4f80e540b3f37f0106210d4028e83922e49fb2274",
       "source": "README.zh-TW.md",
-      "source_sha256": "d75366a8e1c5a2c19cc64da2b705eb7043f6e40d2f2fa6b1f3d8f05fff974e98",
+      "source_sha256": "dd73c513f7aaf90d84308c6859d5e32ce8d2885e4bf9978d103723942fa49cc8",
       "text": "作者自己的經歷，發在社群的繁體中文原文：[到了倫敦才發現自己有病，是公主病](docs/posts/2026-09-launch.zh-TW.md)。",
       "writable": true
     },
@@ -1451,7 +1451,7 @@
       "section": null,
       "sha256": "d91f0affd298474791079ee7e9293f3db7c7e83c5fa534def630b01974ec449d",
       "source": "README.zh-TW.md",
-      "source_sha256": "d75366a8e1c5a2c19cc64da2b705eb7043f6e40d2f2fa6b1f3d8f05fff974e98",
+      "source_sha256": "dd73c513f7aaf90d84308c6859d5e32ce8d2885e4bf9978d103723942fa49cc8",
       "text": "> 狀態：**草稿**。本機蒐集、區域掃描、報告產生和實驗框架都已經做好了。處理個人資料或要做發布之前，先讀[安全與隱私邊界](SECURITY.md)。使用方式：`docs/INSTALL.md`、`docs/SCRIPTS.md`、`docs/CONVENTIONS.md`。",
       "writable": true
     },
@@ -1466,7 +1466,7 @@
       "section": null,
       "sha256": "7659bec709300a62d32fe4565a9ead95fb01b7929167c867fe781f1a3e64da9d",
       "source": "README.zh-TW.md",
-      "source_sha256": "d75366a8e1c5a2c19cc64da2b705eb7043f6e40d2f2fa6b1f3d8f05fff974e98",
+      "source_sha256": "dd73c513f7aaf90d84308c6859d5e32ce8d2885e4bf9978d103723942fa49cc8",
       "text": "**發布方式：** 下載這個技能／工具，用你自己的 agent 跑。Pea Princess 不代管模型工作程序，也不碰訂閱帳號的憑證。本機的人物實驗室只是測試用的夥伴。詳見[桌機／手機的界線、供應商訂閱政策、發布關卡](docs/local-product-and-provider-policy.md)。",
       "writable": true
     },
@@ -1481,7 +1481,7 @@
       "section": null,
       "sha256": "4a508b5c43ca76a9378204518ce7da88d86e2848dc8782b441c12daef9c65ac9",
       "source": "README.zh-TW.md",
-      "source_sha256": "d75366a8e1c5a2c19cc64da2b705eb7043f6e40d2f2fa6b1f3d8f05fff974e98",
+      "source_sha256": "dd73c513f7aaf90d84308c6859d5e32ce8d2885e4bf9978d103723942fa49cc8",
       "text": "這個技能安裝和呼叫的名字都是 **`pea-princess`**；上傳用的檔案是 `dist/pea-princess-skill.zip`。專案原始碼還是放在 `skills/vet-flat/`，這樣既有的腳本路徑和實驗紀錄才不會失效。這就是一個技能，一個安裝名稱。",
       "writable": true
     },
@@ -1496,7 +1496,7 @@
       "section": null,
       "sha256": "9399dab537c9d21d0dc614c4115f87ba539b5c658856a8a9f415e0a35ff51c74",
       "source": "README.zh-TW.md",
-      "source_sha256": "d75366a8e1c5a2c19cc64da2b705eb7043f6e40d2f2fa6b1f3d8f05fff974e98",
+      "source_sha256": "dd73c513f7aaf90d84308c6859d5e32ce8d2885e4bf9978d103723942fa49cc8",
       "text": "Codex：把沙箱網路打開（`sandbox_workspace_write.network_access = true`），或改用 manual 模式。",
       "writable": true
     },
@@ -1511,7 +1511,7 @@
       "section": null,
       "sha256": "6b1b634db5b7bffed7b8b70ccb7a64982e06fe546039ffe7fb364ddf180273c6",
       "source": "README.zh-TW.md",
-      "source_sha256": "d75366a8e1c5a2c19cc64da2b705eb7043f6e40d2f2fa6b1f3d8f05fff974e98",
+      "source_sha256": "dd73c513f7aaf90d84308c6859d5e32ce8d2885e4bf9978d103723942fa49cc8",
       "text": "全部在 `skills/vet-flat/scripts/`；每一支都印出一個 JSON 物件，裡面有 `source_url`、`retrieved_at`、`http_status`、`ok` 和一個證據等級。用法細節在 `docs/SCRIPTS.md`。",
       "writable": true
     },
@@ -1526,7 +1526,7 @@
       "section": null,
       "sha256": "c9c4cfbd8ae32a948189b3b831db63604ce463975e2da40c123bb89268f833fe",
       "source": "README.zh-TW.md",
-      "source_sha256": "d75366a8e1c5a2c19cc64da2b705eb7043f6e40d2f2fa6b1f3d8f05fff974e98",
+      "source_sha256": "dd73c513f7aaf90d84308c6859d5e32ce8d2885e4bf9978d103723942fa49cc8",
       "text": "沒有 shell 的人要看報告排版：用瀏覽器打開 `viewer/viewer.html`，把 JSON 貼進去。需求頁面對另一個檔案也是同樣的做法：`scripts/panel.py --profile profile.yaml --out requirements.html` 會寫出一頁唯讀的現況，讓人隨時想看就打開。沒有任何助理會自己寫 HTML；模型寫 YAML 和 JSON，由腳本負責排版。",
       "writable": true
     },
@@ -1541,7 +1541,7 @@
       "section": null,
       "sha256": "a4f22470d7ea40748ca6bcaf1d3843d2a6d1d8ff8135c0d1d16e5218fe606e8f",
       "source": "README.zh-TW.md",
-      "source_sha256": "d75366a8e1c5a2c19cc64da2b705eb7043f6e40d2f2fa6b1f3d8f05fff974e98",
+      "source_sha256": "dd73c513f7aaf90d84308c6859d5e32ce8d2885e4bf9978d103723942fa49cc8",
       "text": "問它 **「這能幹嘛？」**（或 \"What can this do?\"）。答案來自 `skills/vet-flat/references/onboarding.md`：一段簡短說明、三個起點（有房源 → 尻洗它；有區域或目的地 → 掃一遍；完全沒概念 → 十個基本事實加六個帶建議預設值的問題）。你自己的規則寫在 `profile.yaml`（預算、面積、房型、不能接受的條件、優先順序，還有 `budget_mode` lite/standard/deep，給 £20 方案和只能純聊天的情況用）。Agent 一定要問的硬問題在 `references/questions.md`。",
       "writable": true
     },
@@ -1556,7 +1556,7 @@
       "section": null,
       "sha256": "106a315b19104a385bd68946eee747f25f664741a446b63b6c0ccc55df373176",
       "source": "README.zh-TW.md",
-      "source_sha256": "d75366a8e1c5a2c19cc64da2b705eb7043f6e40d2f2fa6b1f3d8f05fff974e98",
+      "source_sha256": "dd73c513f7aaf90d84308c6859d5e32ce8d2885e4bf9978d103723942fa49cc8",
       "text": "`evals/evals.json` 收了 7 個行政區的 8 間真實房子，加上 2 個對話情境（「這能幹嘛」、「我完全沒概念」），標準答案由專案自己的抓取腳本在 2026-09-03 產生。`bench/grade.py` 評分的項目有事實召回率、捏造、引用、對未知的誠實度、硬性條件的一致性；`bench/run.py --dry-run` 會印出 Claude Code、Codex、Gemini CLI 或 OpenAI 相容 API 的完整指令。詳見 `bench/README.md`。",
       "writable": true
     },
@@ -1571,7 +1571,7 @@
       "section": null,
       "sha256": "7a98a601af382e7be7e72526994151fd55f86809babb9bb7983ddec5511fd8c7",
       "source": "README.zh-TW.md",
-      "source_sha256": "d75366a8e1c5a2c19cc64da2b705eb7043f6e40d2f2fa6b1f3d8f05fff974e98",
+      "source_sha256": "dd73c513f7aaf90d84308c6859d5e32ce8d2885e4bf9978d103723942fa49cc8",
       "text": "三條路，從最省事到最手動。挑一條跟你現在在用的工具對得上的。",
       "writable": true
     },
@@ -1586,7 +1586,7 @@
       "section": null,
       "sha256": "248020903aa87537c231af844c7dc5d4a774ac98a6ca56262d962bf04af46379",
       "source": "README.zh-TW.md",
-      "source_sha256": "d75366a8e1c5a2c19cc64da2b705eb7043f6e40d2f2fa6b1f3d8f05fff974e98",
+      "source_sha256": "dd73c513f7aaf90d84308c6859d5e32ce8d2885e4bf9978d103723942fa49cc8",
       "text": "**要跑哪一種設定：** `docs/EXPERIMENTS.md` 記錄了最早的看房比較實驗。[後來的上下文消融實驗](docs/ablation-2026-09-09/results.md)包含生成成本和來源檢視：在測到的規模下，額外的摘要、結構化記憶和多次檢索呼叫並沒有省下 token。起點就維持「一個 agent 帶完整上下文」；四角色流水線還在實驗階段。這些研究量的是不同的任務，不是一份通用的模型排名。",
       "writable": true
     },
@@ -1601,7 +1601,7 @@
       "section": null,
       "sha256": "a8d855a914c9264a82fc45c6c10e7843915c8235cbb561c9446749179613163f",
       "source": "README.zh-TW.md",
-      "source_sha256": "d75366a8e1c5a2c19cc64da2b705eb7043f6e40d2f2fa6b1f3d8f05fff974e98",
+      "source_sha256": "dd73c513f7aaf90d84308c6859d5e32ce8d2885e4bf9978d103723942fa49cc8",
       "text": "**長時間的專案和會變的需求：** [session harness](docs/session-harness.md) 會保存使用者的原話、帶版本的需求和條件式例外、來源快照、目標、待辦和執行狀態。受管理的 runner 自己把當前的封包塞進去，並拒絕過期的結果。`AGENTS.md`／`CLAUDE.md` 保持簡短，只連到詳細規則；光放指標不能保證對方會去讀。[生命週期驗證](docs/session-harness-validation.md)測的是不呼叫模型也能復原，不是品質等價或省 token。",
       "writable": true
     },
@@ -1616,7 +1616,7 @@
       "section": null,
       "sha256": "76834314081f483d779f8f78de6206e1700eb4197ec4a73e4dcb2cc9fb71f570",
       "source": "README.zh-TW.md",
-      "source_sha256": "d75366a8e1c5a2c19cc64da2b705eb7043f6e40d2f2fa6b1f3d8f05fff974e98",
+      "source_sha256": "dd73c513f7aaf90d84308c6859d5e32ce8d2885e4bf9978d103723942fa49cc8",
       "text": "**想試一整段人物對話：** 跑 `python3 tools/persona_playground.py`，再打開它印出來的本機網址。[互動實驗室](docs/persona-playground.md)用你本機的 Codex 登入來產生動態的人物回覆和助理答案，支援單步／連續／暫停、排隊的真人提問、情境修訂、私有歷史和共用的用量上限。16 張人物卡都有，以清楚標示的聊天改編版呈現；這是本機 alpha，沒有公開部署，也沒有隱藏的模型裁判。",
       "writable": true
     },
@@ -1631,7 +1631,7 @@
       "section": null,
       "sha256": "f8df125954e3751f9c76312fb2e351073194ee4439d2860ca9592bcc62184068",
       "source": "README.zh-TW.md",
-      "source_sha256": "d75366a8e1c5a2c19cc64da2b705eb7043f6e40d2f2fa6b1f3d8f05fff974e98",
+      "source_sha256": "dd73c513f7aaf90d84308c6859d5e32ce8d2885e4bf9978d103723942fa49cc8",
       "text": "**社群回饋，第一階段：** 打開[本機選項表單](community/index.html)，照著[指南](docs/community-feedback-stage1.md)做。公開的 JSON 只放受控的選項；選填的文字留在作者自己的裝置上。本機的驗證、匯入和搜尋用的是虛構的示範目錄。目前還沒有線上投稿服務，也沒有真實的評論資料集。",
       "writable": true
     },
@@ -1646,29 +1646,29 @@
       "section": null,
       "sha256": "d959338fc070fc23859c53980f53ec3690fbce1bfc35655190c41c5b56a5f881",
       "source": "README.zh-TW.md",
-      "source_sha256": "d75366a8e1c5a2c19cc64da2b705eb7043f6e40d2f2fa6b1f3d8f05fff974e98",
+      "source_sha256": "dd73c513f7aaf90d84308c6859d5e32ce8d2885e4bf9978d103723942fa49cc8",
       "text": "**看的是整段對話，不是單一回答：** `docs/JOURNEYS.md` 為九段寫好腳本的多輪旅程評分，`docs/PERSONAS.md` 再往前一步——十六個由模型扮演的虛構人物，搭配一個決定性的控制器保管他們的文件，讓任何東西都編不出來；裁判必須引用自己的證據；每個人還配一個只動一項設定的對照探針。`python3 bench/personas.py --matrix pilot --dry-run` 不呼叫模型就能印出整份計畫。",
       "writable": true
     },
     "deck:readme-zh-tw:25": {
       "anchor": "## 這裡不會有的來源",
       "char_from": 7323,
-      "char_to": 7514,
+      "char_to": 7502,
       "kind": "para",
       "lang": "zh-TW",
       "line_from": 127,
       "line_to": 127,
       "section": null,
-      "sha256": "cffffb601c4e85e99cdabfdd13fb23edf8a431c0d344963b57949f542575743d",
+      "sha256": "e44f54300a51c87c03ecb486a0e1266e117afd26805410cc7823e6db8d86e8d4",
       "source": "README.zh-TW.md",
-      "source_sha256": "d75366a8e1c5a2c19cc64da2b705eb7043f6e40d2f2fa6b1f3d8f05fff974e98",
-      "text": "Rightmove、Zoopla、OnTheMarket、OpenRent、HomeViews、Trustpilot、Airbnb、Booking.com 在這裡只會出現名字。它們的條款禁止程式自動存取，所以這個專案不提供任何做法；技能會向你要頁面（PDF、截圖或純文字），不會自己去開房源連結。你和你的助理怎麼使用那些網站，是你在它們條款下的責任；這裡不做這件事，也不會叫你去做。",
+      "source_sha256": "dd73c513f7aaf90d84308c6859d5e32ce8d2885e4bf9978d103723942fa49cc8",
+      "text": "Rightmove、Zoopla、OnTheMarket、OpenRent、HomeViews、Trustpilot、Airbnb、Booking.com 在這裡只會出現名字。它們的條款不希望程式自動存取，所以這個專案不提供任何做法；技能會向你要頁面（PDF、截圖或純文字），不會自己去開房源連結。這包沒有這些網頁的爬蟲，也不能鼓勵你讓 agent 去爬蟲。",
       "writable": true
     },
     "deck:readme-zh-tw:26": {
       "anchor": "## 授權與姓名標示（提案中）",
-      "char_from": 7532,
-      "char_to": 7628,
+      "char_from": 7520,
+      "char_to": 7616,
       "kind": "para",
       "lang": "zh-TW",
       "line_from": 130,
@@ -1676,14 +1676,14 @@
       "section": null,
       "sha256": "b615e9b6401f9d0ccd824145b7be8be9746fe35979fde333a79e6b24ba9d102b",
       "source": "README.zh-TW.md",
-      "source_sha256": "d75366a8e1c5a2c19cc64da2b705eb7043f6e40d2f2fa6b1f3d8f05fff974e98",
+      "source_sha256": "dd73c513f7aaf90d84308c6859d5e32ce8d2885e4bf9978d103723942fa49cc8",
       "text": "文件和技能文字：CC BY 4.0。程式碼：MIT。每一份報告都會帶著 \"Generated with pea-princess <version> — <source URL>\"。請留著它。",
       "writable": true
     },
     "deck:readme-zh-tw:27": {
       "anchor": "## 授權與姓名標示（提案中）",
-      "char_from": 7630,
-      "char_to": 7839,
+      "char_from": 7618,
+      "char_to": 7827,
       "kind": "para",
       "lang": "zh-TW",
       "line_from": 132,
@@ -1691,7 +1691,7 @@
       "section": null,
       "sha256": "f80a2f0600a501cb0e9bc7c8da14430fc473e69c27b311bd8d025740c924dfa1",
       "source": "README.zh-TW.md",
-      "source_sha256": "d75366a8e1c5a2c19cc64da2b705eb7043f6e40d2f2fa6b1f3d8f05fff974e98",
+      "source_sha256": "dd73c513f7aaf90d84308c6859d5e32ce8d2885e4bf9978d103723942fa49cc8",
       "text": "插圖出自 Edmund Dulac 1911 年為 *Stories from Hans Andersen*（Hodder & Stoughton，倫敦）畫的彩頁，屬於公有領域。`docs/assets/mark.svg` 裡的標誌（七層床墊下的一顆豌豆）是原創的，跟文件一起以 CC BY 4.0 釋出；`docs/assets/social-preview.png` 是同一個標誌做成的 1280×640 預覽卡。",
       "writable": true
     },
@@ -1706,7 +1706,7 @@
       "section": null,
       "sha256": "4084bf28c85785dc9899a8ae8bd01bf9addacc27134ae71699036a1695743fd5",
       "source": "README.zh-TW.md",
-      "source_sha256": "d75366a8e1c5a2c19cc64da2b705eb7043f6e40d2f2fa6b1f3d8f05fff974e98",
+      "source_sha256": "dd73c513f7aaf90d84308c6859d5e32ce8d2885e4bf9978d103723942fa49cc8",
       "text": "1. **你在用 agent 應用程式**（Claude Code、Codex、Cursor、Gemini CLI、Grok Build……）。把這句話貼給它，然後等：",
       "writable": true
     },
@@ -1721,7 +1721,7 @@
       "section": null,
       "sha256": "b4696454b4a7425a7f905cbeb185802cc5407ecc42d811abbcbc0f7338e6ebb8",
       "source": "README.zh-TW.md",
-      "source_sha256": "d75366a8e1c5a2c19cc64da2b705eb7043f6e40d2f2fa6b1f3d8f05fff974e98",
+      "source_sha256": "dd73c513f7aaf90d84308c6859d5e32ce8d2885e4bf9978d103723942fa49cc8",
       "text": "   > 請安裝 https://github.com/jacky18008/pea-princess 這個技能，裝好後告訴我它能做什麼",
       "writable": true
     },
@@ -1736,7 +1736,7 @@
       "section": null,
       "sha256": "e48e83849b39461fc4c3a41add09c8e0484900cdedf96802d4aa6392b1bc7315",
       "source": "README.zh-TW.md",
-      "source_sha256": "d75366a8e1c5a2c19cc64da2b705eb7043f6e40d2f2fa6b1f3d8f05fff974e98",
+      "source_sha256": "dd73c513f7aaf90d84308c6859d5e32ce8d2885e4bf9978d103723942fa49cc8",
       "text": "   Agent 會把這個專案抓下來，用 `pea-princess` 這個名字把技能裝好，然後回答你。從此就只要講話：「尻洗這間房：」再把房源貼上去。",
       "writable": true
     },
@@ -1751,7 +1751,7 @@
       "section": null,
       "sha256": "c52c8631e6a4402daa13a41c4f579fad0925f4c961054d6fd1927a47c9b7df5c",
       "source": "README.zh-TW.md",
-      "source_sha256": "d75366a8e1c5a2c19cc64da2b705eb7043f6e40d2f2fa6b1f3d8f05fff974e98",
+      "source_sha256": "dd73c513f7aaf90d84308c6859d5e32ce8d2885e4bf9978d103723942fa49cc8",
       "text": "2. **你在用有 Skills 功能的聊天軟體**（claude.ai、Claude Cowork、ChatGPT Business）。到 [Releases](https://github.com/jacky18008/pea-princess/releases) 下載 `pea-princess-skill.zip`，打開 Settings → Skills → Upload，選這個 zip。然後問它「這能幹嘛？」。",
       "writable": true
     },
@@ -1766,7 +1766,7 @@
       "section": null,
       "sha256": "86d2820af4bf0cd3b828ac2ee26f3ee425e6978e97df2c8dd5ccdeb0264dff92",
       "source": "README.zh-TW.md",
-      "source_sha256": "d75366a8e1c5a2c19cc64da2b705eb7043f6e40d2f2fa6b1f3d8f05fff974e98",
+      "source_sha256": "dd73c513f7aaf90d84308c6859d5e32ce8d2885e4bf9978d103723942fa49cc8",
       "text": "3. **你在用沒有 Skills 的聊天軟體**（ChatGPT Plus Projects、Grok Projects、Gemini Gems、Perplexity Spaces）。到 [Releases](https://github.com/jacky18008/pea-princess/releases) 下載提示詞包，把 `INSTRUCTIONS.md` 貼進專案的指示欄，再附上 `references/` 裡的檔案。之後技能會一次告訴你要貼什麼。",
       "writable": true
     },
@@ -1781,7 +1781,7 @@
       "section": null,
       "sha256": "c55ec48929b543e153a530d23ffc059e4402631bd493d3449c20ded645fd51fb",
       "source": "README.zh-TW.md",
-      "source_sha256": "d75366a8e1c5a2c19cc64da2b705eb7043f6e40d2f2fa6b1f3d8f05fff974e98",
+      "source_sha256": "dd73c513f7aaf90d84308c6859d5e32ce8d2885e4bf9978d103723942fa49cc8",
       "text": "不用寫程式，不用改設定檔：接下來全部都是一句一句的話，打字或用語音都行。五分鐘上手看 [USING.zh-TW.md](docs/USING.zh-TW.md)；每一種安裝方式和它的注意事項在 [INSTALL.md](docs/INSTALL.md)。",
       "writable": true
     },
@@ -1796,7 +1796,7 @@
       "section": null,
       "sha256": "010f32b6f60e4f18a99664003aadd90a6ddc60dfdce066a7647374c322f37006",
       "source": "README.zh-TW.md",
-      "source_sha256": "d75366a8e1c5a2c19cc64da2b705eb7043f6e40d2f2fa6b1f3d8f05fff974e98",
+      "source_sha256": "dd73c513f7aaf90d84308c6859d5e32ce8d2885e4bf9978d103723942fa49cc8",
       "text": "每一項結論都帶著它的證據等級。查不到的東西，它會一次、用一則訊息問你。它不會自己去開房源網站：頁面由你交給它，[上手指南](docs/USING.zh-TW.md)裡有三種做法。",
       "writable": true
     },
@@ -1811,7 +1811,7 @@
       "section": null,
       "sha256": "40cea219032acdc47299b63b57725925587e71b70d1f1bc72bb77f0a100ab6e2",
       "source": "README.md",
-      "source_sha256": "cf1571ed59e9ad2df7daea244223108f28c43f8fe48276991f52a85e54889f79",
+      "source_sha256": "83d79f17edd9fb775de99b080b2a87767448ef8ba8a8c4dfc5b37d7729509bd2",
       "text": "An agent skill for checking and searching rental listings in London. It vets a flat the way a careful surveyor would: identity, floor area, age, heating, construction nearby, crime, management reviews, agent compliance, price, light, total monthly cost and commute, from official and open UK data, ending in a verdict. Works with any agent that reads the [Agent Skills](https://agentskills.io) format (e.g. GPT, Claude, Grok, Gemini, pi-agent, DeepSeek, etc.). Plain chat mode works too, but agent mode is recommended: it is steadier on complex tasks. Just talk to the AI in plain words.",
       "writable": true
     },
@@ -1826,7 +1826,7 @@
       "section": null,
       "sha256": "94351e0ac0d20911ada0690e2038440a55a1a9fb436ea10797c848cef62e1dd3",
       "source": "README.md",
-      "source_sha256": "cf1571ed59e9ad2df7daea244223108f28c43f8fe48276991f52a85e54889f79",
+      "source_sha256": "83d79f17edd9fb775de99b080b2a87767448ef8ba8a8c4dfc5b37d7729509bd2",
       "text": "In the fairy tale only the real princess feels the pea through twenty mattresses. Here **you** are the princess. This tool lifts the mattresses one by one: it reads the registers, counts the crimes, checks the planning applications and the company filings, and tells you where the pea might be. Only you can feel it: go and see the flat, walk the street, talk to the agent and the landlord. The report is a filter, and when you are in a hurry it is only a filter. Its first duty is to say what it does not know and ask you for it.",
       "writable": true
     },
@@ -1841,7 +1841,7 @@
       "section": null,
       "sha256": "bf9ae1c74ee867e141238281d1335c7291b9e744efb79a5c39f36f1c917473af",
       "source": "README.md",
-      "source_sha256": "cf1571ed59e9ad2df7daea244223108f28c43f8fe48276991f52a85e54889f79",
+      "source_sha256": "83d79f17edd9fb775de99b080b2a87767448ef8ba8a8c4dfc5b37d7729509bd2",
       "text": "The author's own account, in Traditional Chinese, as posted to the community: [到了倫敦才發現自己有病，是公主病](docs/posts/2026-09-launch.zh-TW.md).",
       "writable": true
     },
@@ -1856,7 +1856,7 @@
       "section": null,
       "sha256": "b16026a155ad1668601422042ea38dbfbc77d1769a443b0e24dfcb617f8e6bf8",
       "source": "README.md",
-      "source_sha256": "cf1571ed59e9ad2df7daea244223108f28c43f8fe48276991f52a85e54889f79",
+      "source_sha256": "83d79f17edd9fb775de99b080b2a87767448ef8ba8a8c4dfc5b37d7729509bd2",
       "text": "> Status: **draft**. Local collection, area sweep, report rendering and experiment harnesses are implemented. Read [security and privacy boundaries](SECURITY.md) before handling personal data or building a release. Usage: `docs/INSTALL.md`, `docs/SCRIPTS.md`, `docs/CONVENTIONS.md`.",
       "writable": true
     },
@@ -1871,7 +1871,7 @@
       "section": null,
       "sha256": "4b7dfba2d66174842dceea9193c8af06d4c8372e082f79c96b070f39c16eac1c",
       "source": "README.md",
-      "source_sha256": "cf1571ed59e9ad2df7daea244223108f28c43f8fe48276991f52a85e54889f79",
+      "source_sha256": "83d79f17edd9fb775de99b080b2a87767448ef8ba8a8c4dfc5b37d7729509bd2",
       "text": "**Distribution:** download the skill/tool and run it with your own agent. Pea Princess does not host model workers or handle subscription credentials. The local persona lab is a testing companion. See [desktop/mobile boundaries, provider subscription policies, and release gates](docs/local-product-and-provider-policy.md).",
       "writable": true
     },
@@ -1886,7 +1886,7 @@
       "section": null,
       "sha256": "7bd52a2e3347ca4439fd870a11a87e80c53272a01e3eba2b46226842e7fe5fd6",
       "source": "README.md",
-      "source_sha256": "cf1571ed59e9ad2df7daea244223108f28c43f8fe48276991f52a85e54889f79",
+      "source_sha256": "83d79f17edd9fb775de99b080b2a87767448ef8ba8a8c4dfc5b37d7729509bd2",
       "text": "The skill is installed and invoked as **`pea-princess`**; the upload artifact is `dist/pea-princess-skill.zip`. The repository still stores its source in `skills/vet-flat/` so existing script paths and experiment records remain valid. This is one skill, with one installed name.",
       "writable": true
     },
@@ -1901,7 +1901,7 @@
       "section": null,
       "sha256": "4dce632f20d73728bb2e7d5daa95f05fc1341c561af7d5cb2cfd75eb8c53e4d8",
       "source": "README.md",
-      "source_sha256": "cf1571ed59e9ad2df7daea244223108f28c43f8fe48276991f52a85e54889f79",
+      "source_sha256": "83d79f17edd9fb775de99b080b2a87767448ef8ba8a8c4dfc5b37d7729509bd2",
       "text": "Codex: enable sandbox network (`sandbox_workspace_write.network_access = true`) or use manual mode.",
       "writable": true
     },
@@ -1916,7 +1916,7 @@
       "section": null,
       "sha256": "8547cf041177db9cd4a3d76f694fdf5fca9e4c2158690b7590cdc907e2eb44e3",
       "source": "README.md",
-      "source_sha256": "cf1571ed59e9ad2df7daea244223108f28c43f8fe48276991f52a85e54889f79",
+      "source_sha256": "83d79f17edd9fb775de99b080b2a87767448ef8ba8a8c4dfc5b37d7729509bd2",
       "text": "All in `skills/vet-flat/scripts/`; each prints one JSON object with `source_url`, `retrieved_at`, `http_status`, `ok` and an evidence class. Usage details: `docs/SCRIPTS.md`.",
       "writable": true
     },
@@ -1931,7 +1931,7 @@
       "section": null,
       "sha256": "0f2d78219c0ce5c6f01f08ddc67b643c98e3b8fc035497ba4649275780087345",
       "source": "README.md",
-      "source_sha256": "cf1571ed59e9ad2df7daea244223108f28c43f8fe48276991f52a85e54889f79",
+      "source_sha256": "83d79f17edd9fb775de99b080b2a87767448ef8ba8a8c4dfc5b37d7729509bd2",
       "text": "Report layout for people without a shell: open `viewer/viewer.html` in a browser and paste the JSON. The requirements page is the same idea for the other file: `scripts/panel.py --profile profile.yaml --out requirements.html` writes a read-only page of where things stand, for the person to open whenever they like. No assistant writes HTML; the model writes YAML and JSON, the scripts render them.",
       "writable": true
     },
@@ -1946,7 +1946,7 @@
       "section": null,
       "sha256": "58af9606b8cc0a4f66a0fbca05f8de1b8401898f42ca9338e92cc6bd5ce2cfdd",
       "source": "README.md",
-      "source_sha256": "cf1571ed59e9ad2df7daea244223108f28c43f8fe48276991f52a85e54889f79",
+      "source_sha256": "83d79f17edd9fb775de99b080b2a87767448ef8ba8a8c4dfc5b37d7729509bd2",
       "text": "Ask **\"What can this do?\"** (or 這能幹嘛？). The answer comes from `skills/vet-flat/references/onboarding.md`: a short pitch, three starting points (a listing → vet it; an area or destination → sweep; no idea → a ten-fact primer and six questions with suggested defaults). Your rules live in `profile.yaml` (budget, size, flat type, deal-breakers, priorities, `budget_mode` lite/standard/deep for £20 plans and chat-only use). The hard follow-up questions the agent must ask are in `references/questions.md`.",
       "writable": true
     },
@@ -1961,7 +1961,7 @@
       "section": null,
       "sha256": "3ed7d238520d3d8d185cfe9b6200edf61d6b3af4b320fc26ab921bb957cdeb3d",
       "source": "README.md",
-      "source_sha256": "cf1571ed59e9ad2df7daea244223108f28c43f8fe48276991f52a85e54889f79",
+      "source_sha256": "83d79f17edd9fb775de99b080b2a87767448ef8ba8a8c4dfc5b37d7729509bd2",
       "text": "`evals/evals.json` has 8 real flats across 7 boroughs plus 2 conversation cases (\"what can this do\", \"I have no idea\"), with truth produced by the repo's own fetchers on 2026-09-03. `bench/grade.py` scores fact recall, fabrications, citations, unknown-honesty and hard-filter consistency; `bench/run.py --dry-run` prints the exact command for Claude Code, Codex, Gemini CLI or an OpenAI-compatible API. See `bench/README.md`.",
       "writable": true
     },
@@ -1976,7 +1976,7 @@
       "section": null,
       "sha256": "8ab61235c6bc959310fa3ea735087dc873e5d56d9caf071e132ce2a55cff1fa1",
       "source": "README.md",
-      "source_sha256": "cf1571ed59e9ad2df7daea244223108f28c43f8fe48276991f52a85e54889f79",
+      "source_sha256": "83d79f17edd9fb775de99b080b2a87767448ef8ba8a8c4dfc5b37d7729509bd2",
       "text": "Three ways in, from easiest to most manual. Pick the one that matches what you already use.",
       "writable": true
     },
@@ -1991,7 +1991,7 @@
       "section": null,
       "sha256": "e3035f2c30969910e03dfd0b1bf844534af88ebe2597b107a0e03a57b013bfc6",
       "source": "README.md",
-      "source_sha256": "cf1571ed59e9ad2df7daea244223108f28c43f8fe48276991f52a85e54889f79",
+      "source_sha256": "83d79f17edd9fb775de99b080b2a87767448ef8ba8a8c4dfc5b37d7729509bd2",
       "text": "**Which configuration to run:** `docs/EXPERIMENTS.md` records the original flat-vetting comparisons. The [later context ablation](docs/ablation-2026-09-09/results.md) includes generation costs and source reviews: extra summarization, structured memory and multiple retrieval calls did not save tokens at the tested sizes. Keep one agent with full context as the starting point; the four-role pipeline remains experimental. These studies measure different tasks, not a universal model ranking.",
       "writable": true
     },
@@ -2006,7 +2006,7 @@
       "section": null,
       "sha256": "7b2838a8f778a7a89ae877f87de8d00123f9bbb0a45650848db7ed10e3724424",
       "source": "README.md",
-      "source_sha256": "cf1571ed59e9ad2df7daea244223108f28c43f8fe48276991f52a85e54889f79",
+      "source_sha256": "83d79f17edd9fb775de99b080b2a87767448ef8ba8a8c4dfc5b37d7729509bd2",
       "text": "**Long-running projects and changing requirements:** the [session harness](docs/session-harness.md) saves exact user requests, revisioned requirements and conditional exceptions, source snapshots, goals, TODOs and execution state. The managed runner inserts the current packet itself and rejects stale results. Short `AGENTS.md` / `CLAUDE.md` files link to detailed rules; pointers alone cannot ensure reading. [Lifecycle validation](docs/session-harness-validation.md) tests recovery without new model calls, not quality equivalence or token savings.",
       "writable": true
     },
@@ -2021,7 +2021,7 @@
       "section": null,
       "sha256": "c9df3ec095184041c610922a217480e80bc3d763956e09042cdf3f0e85f06558",
       "source": "README.md",
-      "source_sha256": "cf1571ed59e9ad2df7daea244223108f28c43f8fe48276991f52a85e54889f79",
+      "source_sha256": "83d79f17edd9fb775de99b080b2a87767448ef8ba8a8c4dfc5b37d7729509bd2",
       "text": "**Try a whole persona conversation:** run `python3 tools/persona_playground.py` and open the printed local URL. The [interactive lab](docs/persona-playground.md) uses your local Codex login for dynamic persona replies and assistant answers, with step/run/pause, queued human questions, scenario amendments, private history and shared usage ceilings. All 16 cards are available in a clearly labelled chat adaptation; this is a local alpha, with no public deployment or hidden model judge.",
       "writable": true
     },
@@ -2036,7 +2036,7 @@
       "section": null,
       "sha256": "793cb1d61d8cd39b4095785e62995af7a0b5db483c7d001d5f7eb1f867ffa695",
       "source": "README.md",
-      "source_sha256": "cf1571ed59e9ad2df7daea244223108f28c43f8fe48276991f52a85e54889f79",
+      "source_sha256": "83d79f17edd9fb775de99b080b2a87767448ef8ba8a8c4dfc5b37d7729509bd2",
       "text": "**Community feedback, stage 1:** open the [local options form](community/index.html) and follow the [guide](docs/community-feedback-stage1.md). Public JSON contains controlled choices; optional text stays on the author's device. Local validation, import and search use a fictional demo catalog. There is no online submission service or real review dataset yet.",
       "writable": true
     },
@@ -2051,29 +2051,29 @@
       "section": null,
       "sha256": "6151d53153066b430e5a0148851a9c65dd68cc1ddf43d376b2b4d2305cfbcd0b",
       "source": "README.md",
-      "source_sha256": "cf1571ed59e9ad2df7daea244223108f28c43f8fe48276991f52a85e54889f79",
+      "source_sha256": "83d79f17edd9fb775de99b080b2a87767448ef8ba8a8c4dfc5b37d7729509bd2",
       "text": "**Whole conversations, not one answer:** `docs/JOURNEYS.md` scores nine scripted multi-turn journeys, and `docs/PERSONAS.md` goes one step further — sixteen fictional people played by a model, with a deterministic controller holding their documents so nothing can be invented, a judge that has to quote its evidence, and a paired probe per person that moves exactly one setting. `python3 bench/personas.py --matrix pilot --dry-run` prints the whole plan without calling a model.",
       "writable": true
     },
     "deck:readme:25": {
       "anchor": "## Sources you will not find here",
       "char_from": 12786,
-      "char_to": 13201,
+      "char_to": 13231,
       "kind": "para",
       "lang": "en",
       "line_from": 127,
       "line_to": 127,
       "section": null,
-      "sha256": "eae760353a1c27cf551bd177442bbffbd4fd27f3aa2f419ef9ee2f1592e5fd14",
+      "sha256": "9c6399a008056ac71cd1da3c78f6df332588930b60aaa4a034e203b3c8167c45",
       "source": "README.md",
-      "source_sha256": "cf1571ed59e9ad2df7daea244223108f28c43f8fe48276991f52a85e54889f79",
-      "text": "Rightmove, Zoopla, OnTheMarket, OpenRent, HomeViews, Trustpilot, Airbnb, Booking.com are listed by name only. Their terms forbid automated access, so this project gives no method for them; the skill asks you for the page (a PDF, screenshots or the text) and does not open listing links itself. How you and your assistant use those sites is your responsibility under their terms; nothing here does it or asks for it.",
+      "source_sha256": "83d79f17edd9fb775de99b080b2a87767448ef8ba8a8c4dfc5b37d7729509bd2",
+      "text": "Rightmove, Zoopla, OnTheMarket, OpenRent, HomeViews, Trustpilot, Airbnb, Booking.com appear here by name only. Their terms do not want programs reading them automatically, so this project provides no method for that; the skill asks you for the page (a PDF, screenshots or the plain text) and never opens listing links itself. There is no scraper for these sites in this package, and it cannot encourage you to have your agent scrape them either.",
       "writable": true
     },
     "deck:readme:26": {
       "anchor": "## Licence and attribution (proposed)",
-      "char_from": 13241,
-      "char_to": 13385,
+      "char_from": 13271,
+      "char_to": 13415,
       "kind": "para",
       "lang": "en",
       "line_from": 130,
@@ -2081,14 +2081,14 @@
       "section": null,
       "sha256": "ed96c4bf9d91182543a3b72c1ea2e75de0180533f716a5a929cf1f1a9f1e0050",
       "source": "README.md",
-      "source_sha256": "cf1571ed59e9ad2df7daea244223108f28c43f8fe48276991f52a85e54889f79",
+      "source_sha256": "83d79f17edd9fb775de99b080b2a87767448ef8ba8a8c4dfc5b37d7729509bd2",
       "text": "Documentation and skill text: CC BY 4.0. Code: MIT. Every report carries \"Generated with pea-princess <version> — <source URL>\". Please keep it.",
       "writable": true
     },
     "deck:readme:27": {
       "anchor": "## Licence and attribution (proposed)",
-      "char_from": 13387,
-      "char_to": 13719,
+      "char_from": 13417,
+      "char_to": 13749,
       "kind": "para",
       "lang": "en",
       "line_from": 132,
@@ -2096,7 +2096,7 @@
       "section": null,
       "sha256": "68a28b5d236dc7acc77cd8e76b4b27abc716f47848d7aa7b6f379abdcde4b4bf",
       "source": "README.md",
-      "source_sha256": "cf1571ed59e9ad2df7daea244223108f28c43f8fe48276991f52a85e54889f79",
+      "source_sha256": "83d79f17edd9fb775de99b080b2a87767448ef8ba8a8c4dfc5b37d7729509bd2",
       "text": "The illustration is Edmund Dulac's 1911 plate for *Stories from Hans Andersen* (Hodder & Stoughton, London), public domain. The mark in `docs/assets/mark.svg` (a pea under seven mattresses) is original and released with the documentation under CC BY 4.0; `docs/assets/social-preview.png` is the same mark as a 1280×640 preview card.",
       "writable": true
     },
@@ -2111,7 +2111,7 @@
       "section": null,
       "sha256": "e6e7b37f2a8df91def37d2ff5d3f4586afcddf0c6d92a54cb12d28eeed670c63",
       "source": "README.md",
-      "source_sha256": "cf1571ed59e9ad2df7daea244223108f28c43f8fe48276991f52a85e54889f79",
+      "source_sha256": "83d79f17edd9fb775de99b080b2a87767448ef8ba8a8c4dfc5b37d7729509bd2",
       "text": "1. **You use an agent app** (Claude Code, Codex, Cursor, Gemini CLI, Grok Build, …). Paste this sentence to it and wait:",
       "writable": true
     },
@@ -2126,7 +2126,7 @@
       "section": null,
       "sha256": "ff03fd752b099456069cd56cfcb7072417b061064ab5ceccc4e26ebaea9c258c",
       "source": "README.md",
-      "source_sha256": "cf1571ed59e9ad2df7daea244223108f28c43f8fe48276991f52a85e54889f79",
+      "source_sha256": "83d79f17edd9fb775de99b080b2a87767448ef8ba8a8c4dfc5b37d7729509bd2",
       "text": "   > Install the skill from https://github.com/jacky18008/pea-princess and then tell me what it can do.",
       "writable": true
     },
@@ -2141,7 +2141,7 @@
       "section": null,
       "sha256": "45a347328547ec54a70d4999eea8c5a310055bfdf36b4411b510bca7cebd0f24",
       "source": "README.md",
-      "source_sha256": "cf1571ed59e9ad2df7daea244223108f28c43f8fe48276991f52a85e54889f79",
+      "source_sha256": "83d79f17edd9fb775de99b080b2a87767448ef8ba8a8c4dfc5b37d7729509bd2",
       "text": "   The agent fetches this repository, installs the skill under the name `pea-princess`, and answers. From then on, just talk: \"Roast this flat:\" and paste the listing.",
       "writable": true
     },
@@ -2156,7 +2156,7 @@
       "section": null,
       "sha256": "3edce2d1b69728f6a00882fb813f9494c043394192023210a59d54c5bb572766",
       "source": "README.md",
-      "source_sha256": "cf1571ed59e9ad2df7daea244223108f28c43f8fe48276991f52a85e54889f79",
+      "source_sha256": "83d79f17edd9fb775de99b080b2a87767448ef8ba8a8c4dfc5b37d7729509bd2",
       "text": "2. **You use a chat app with a Skills feature** (claude.ai, Claude Cowork, ChatGPT Business). Download `pea-princess-skill.zip` from [Releases](https://github.com/jacky18008/pea-princess/releases), open Settings → Skills → Upload, choose the zip. Then ask \"What can this do?\".",
       "writable": true
     },
@@ -2171,7 +2171,7 @@
       "section": null,
       "sha256": "e9d0f0125d5855bb6d43861af6a563070266b51182f78093a5539e49f5dbf84e",
       "source": "README.md",
-      "source_sha256": "cf1571ed59e9ad2df7daea244223108f28c43f8fe48276991f52a85e54889f79",
+      "source_sha256": "83d79f17edd9fb775de99b080b2a87767448ef8ba8a8c4dfc5b37d7729509bd2",
       "text": "3. **You use a chat app without Skills** (ChatGPT Plus Projects, Grok Projects, Gemini Gems, Perplexity Spaces). Download the prompt pack from [Releases](https://github.com/jacky18008/pea-princess/releases), paste `INSTRUCTIONS.md` into the project's instructions and attach the `references/` files. The skill then tells you, once, what to paste.",
       "writable": true
     },
@@ -2186,7 +2186,7 @@
       "section": null,
       "sha256": "3d43c172216045fcb79ffc825c8e55172d1012a241f544c75c59e6b932b51311",
       "source": "README.md",
-      "source_sha256": "cf1571ed59e9ad2df7daea244223108f28c43f8fe48276991f52a85e54889f79",
+      "source_sha256": "83d79f17edd9fb775de99b080b2a87767448ef8ba8a8c4dfc5b37d7729509bd2",
       "text": "No code, no settings files: everything after that is sentences, typed or dictated. The five-minute walkthrough is [USING.md](docs/USING.md); every install route with its caveats is [INSTALL.md](docs/INSTALL.md).",
       "writable": true
     },
@@ -2201,7 +2201,7 @@
       "section": null,
       "sha256": "6c059056b9ca64c3e6267a301413e0ec00b9ff413a2185c66b7b16ff7fdb31ae",
       "source": "README.md",
-      "source_sha256": "cf1571ed59e9ad2df7daea244223108f28c43f8fe48276991f52a85e54889f79",
+      "source_sha256": "83d79f17edd9fb775de99b080b2a87767448ef8ba8a8c4dfc5b37d7729509bd2",
       "text": "Every finding carries its evidence grade. What it cannot reach, it asks you for, once, in one message. It never opens listing sites: you hand it the page, and [the walkthrough](docs/USING.md) shows the three ways to do that.",
       "writable": true
     },
