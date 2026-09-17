@@ -56,7 +56,7 @@ All prose paragraphs. Tables, headings and code blocks are not in the deck.
 - write-back: yes
 
 ```text
-**EN** — A vendor-neutral agent skill that vets a London rental flat the way a careful surveyor would: identity, floor area, age, heating, construction nearby, crime, management reviews, agent compliance, price, light, total monthly cost and commute, from official and open UK data, ending in a plain-language verdict. Works with any agent that reads the [Agent Skills](https://agentskills.io) format (Claude Code, Codex, Gemini CLI, Grok CLI, Cursor, Copilot, OpenCode, Cline, Goose, OpenHands, Kimi Code, Qwen Code, pi, OpenClaw, Hermes Agent…) and, in reduced modes, with chat products that cannot run scripts.
+**EN** — An agent skill for checking and searching rental listings in London. It vets a flat the way a careful surveyor would: identity, floor area, age, heating, construction nearby, crime, management reviews, agent compliance, price, light, total monthly cost and commute, from official and open UK data, ending in a verdict. Works with any agent that reads the [Agent Skills](https://agentskills.io) format (e.g. GPT, Claude, Grok, Gemini, pi-agent, DeepSeek, etc.). Plain chat mode works too, but agent mode is recommended: it is steadier on complex tasks. Just talk to the AI in plain words.
 ```
 
 ### deck:readme:2
@@ -67,7 +67,7 @@ All prose paragraphs. Tables, headings and code blocks are not in the deck.
 - write-back: yes
 
 ```text
-**繁中** — 這是一個不綁定任何廠商的 agent skill，用官方與公開的英國資料，像謹慎的驗屋師一樣尻洗（台語，roast）一間倫敦出租公寓：身份、面積、屋齡、供暖、周邊工地、治安、管理評價、仲介合規、價格、採光、全部月成本、通勤，最後給出白話判決。任何支援 Agent Skills 格式的 agent 都能用；只能對話不能跑程式的產品也能用「精簡模式」。
+**繁中** — 這是一個在倫敦檢視跟搜尋房源用的 agent skill，用官方與公開的英國資料，像謹慎的驗屋師一樣尻洗一間倫敦出租公寓：身份、面積、屋齡、供暖、周邊工地、治安、管理評價、仲介合規、價格、採光、全部月成本、通勤，最後給出判決。任何支援 Agent Skills 格式的 agent 都能用（Ex: GPT, Claude, Grok, Gemini, pi-agent, DeepSeek, etc）；一般的 chat mode, 也可以，只是建議使用 agent mode, 複雜的任務會比較穩定。跟 AI 講白話文就好。
 ```
 
 ### deck:readme:3
@@ -381,7 +381,7 @@ If speaking is easier, use your device's built-in dictation or an app you alread
 - write-back: yes
 
 ```text
-Describe what you want, a home you liked or disliked, or a change of mind in your own words. You do not need to prepare a polished prompt or a form. Before sending, glance at names, postcodes, amounts, dates and words such as “not” or “only if” so a transcription error does not change your conditions. This is speech-to-text input; it does not require the assistant to support a voice call.
+Describe in your own words what you want, the rentals or stays that were especially good or especially bad, even a shopping experience you still remember — it all helps the assistant understand you. You can change your mind midway. Before sending, just glance at the text to check it was transcribed correctly.
 ```
 
 ### deck:using:11
@@ -392,7 +392,7 @@ Describe what you want, a home you liked or disliked, or a change of mind in you
 - write-back: yes
 
 ```text
-Start with differences you can react to: a shorter commute versus more space, a quiet bedroom versus a busy road, lower rent versus uncertain bills. The assistant explains the likely consequences, then helps you inspect the evidence or prepare a viewing check. You can ask about London areas, rental budgets, paperwork or common problems whenever they become relevant. Current market and legal claims need current sources.
+Start with differences you can react to: a shorter commute versus more space, a quiet bedroom versus a busy road, lower rent versus uncertain bills. The assistant explains the likely consequences, then helps you inspect the evidence or prepare a viewing check. You can ask about London areas, rental budgets, paperwork or common problems whenever they become relevant. For claims about the current market or the law, you can ask the assistant to attach the sources it checked.
 ```
 
 ### deck:using:12
@@ -469,7 +469,7 @@ Use the report to decide what to investigate, then see the flat and speak with t
 - write-back: yes
 
 ```text
-**Your own little secretary.** Anything personal or local that the shared skill does not check — the walk to your gym, a school's catchment, a noise source you know about, a data set you trust — goes into `extensions/` in your copy as a one-page add-on (there is a template). Add-ons are labelled in the report, never change the verdict by themselves, read no listing or review sites, and never describe an area by who lives there.
+**Your own little secretary.** Anything personal or local that the shared skill does not check — the walk to your gym, a school's catchment, a noise source you know about, a data set you trust — goes into `extensions/` in your copy as a one-page add-on (or just tell the assistant the whole list and let it put it in). These extras are labelled in the report, never change the verdict by themselves, read no listing or review sites, and never describe an area by who lives there.
 ```
 
 ### deck:using:19
@@ -546,7 +546,7 @@ Use the report to decide what to investigate, then see the flat and speak with t
 - write-back: yes
 
 ```text
-助理會先用例子或你提供的房源做出有用的比較，再從你的反應了解偏好。通常一次問零到兩題，必要確認最多三題；「還不知道」也可以，不必先把所有條件想清楚。
+Agent 會先用例子或你提供的房源做出有用的比較，再從你的反應了解偏好。通常一次問零到兩題，必要確認最多三題；「還不知道」也可以，不必先把所有條件想清楚。
 ```
 
 ### deck:using:26
@@ -579,7 +579,7 @@ Use the report to decide what to investigate, then see the flat and speak with t
 - write-back: yes
 
 ```text
-可以直接說需求、過去住過的好房子或雷點，也能中途改主意，不用先整理成表單或漂亮的提示詞。送出前看一下校名、郵遞區號、金額、日期，以及「不要」「只有……才可以」有沒有辨識正確。這是把聲音轉成文字，不要求助理本身支援語音通話。
+可以直接說你的需求、過去特別好或特別糟的租房/住宿經驗，甚至是過去印象深刻的購物經驗也可以，會讓 AI 更理解你。中途改主意也行。送出前看一下文字有沒有辨識正確就好。
 ```
 
 ### deck:using:29
@@ -590,7 +590,7 @@ Use the report to decide what to investigate, then see the flat and speak with t
 - write-back: yes
 
 ```text
-可以先比較「通勤近一點，還是空間大一點」、「臥室安靜，還是生活機能方便」、「租金低一點，還是帳單比較確定」。邊看邊問倫敦的區域、預算、租屋流程或常見問題，也可以請助理教你如何在看房時查證。涉及目前行情或法律的說法，應附上查過的來源。
+可以先比較「通勤近一點，還是空間大一點」、「臥室安靜，還是生活機能方便」、「租金低一點，還是帳單比較確定」。邊看邊問倫敦的區域、預算、租屋流程或常見問題，也可以請助理教你如何在看房時查證。涉及目前行情或法律的說法，可以要求 Agent 應附上查過的來源。
 ```
 
 ### deck:using:30
@@ -645,7 +645,7 @@ Use the report to decide what to investigate, then see the flat and speak with t
 - write-back: yes
 
 ```text
-**自己的小秘書。** 共用技能沒查、但你在意的東西，例如到健身房的步行時間、學區、你知道的噪音來源、你信任的資料集，寫成一頁放進你自己那份的 `extensions/` 資料夾（有範本）。這些加購項目在報告裡會標示出來、不會自己改變判決、不讀房源和評價網站、也不用「住的是誰」來描述一個地區。
+**自己的小秘書。** 共用技能沒查、但你在意的東西，例如到健身房的步行時間、學區、你知道的噪音來源、你信任的資料集，寫成一頁放進你自己那份的 `extensions/` 資料夾（或是直接跟 Agent 講一整串讓它放進去）。這些額外項目在報告裡會標示出來、不會自己改變判決、不讀房源和評價網站、也不用「住的是誰」來描述一個地區。
 ```
 
 ### deck:using:35
@@ -678,7 +678,7 @@ Use the report to decide what to investigate, then see the flat and speak with t
 - write-back: yes
 
 ```text
-**不想打字，可以用语音输入。** 使用设备内置的听写或你习惯的语音转文字工具，将内容输入助理的聊天框；[Typeless](https://www.typeless.com/pricing) 和 [Wispr Flow](https://wisprflow.ai/pricing) 是可选例子。两者目前都有免费方案，但有用量限制，依平台和方案而异（2026-09-11 查核，最新额度看官方页面），不必另行安装或付费。直接说需求、住屋经历或临时改动即可；发送前核对名称、邮编、金额、日期及否定词、附带条件。无需先填表，也不要求助理支持语音通话。
+**不想打字，可以用语音输入。** 使用设备内置的听写或你习惯的语音转文字工具，将内容输入助理的聊天框；[Typeless](https://www.typeless.com/pricing) 和 [Wispr Flow](https://wisprflow.ai/pricing) 是可选例子。两者目前都有免费方案，但有用量限制，依平台和方案而异（2026-09-11 查核，最新额度看官方页面），不必另行安装或付费。直接说你的需求、过去特别好或特别糟的租房/住宿经历，甚至印象深刻的购物经历也可以，能让助理更了解你；中途改主意也行。发送前看一下文字有没有识别正确就好。
 ```
 
 ### deck:using:38
@@ -711,7 +711,7 @@ Use the report to decide what to investigate, then see the flat and speak with t
 - write-back: yes
 
 ```text
-**自己的小秘书。** 共用技能没查、但你在意的东西，例如到健身房的步行时间、学区、你知道的噪音来源、你信任的数据集，写成一页放进你自己那份的 `extensions/` 文件夹（有模板）。这些加购项目在报告里会标示出来、不会自己改变判决、不读房源和评价网站、也不用「住的是谁」来描述一个地区。
+**自己的小秘书。** 共用技能没查、但你在意的东西，例如到健身房的步行时间、学区、你知道的噪音来源、你信任的数据集，写成一页放进你自己那份的 `extensions/` 文件夹（或者直接跟助理讲一整串让它放进去）。这些额外项目在报告里会标示出来、不会自己改变判决、不读房源和评价网站、也不用「住的是谁」来描述一个地区。
 ```
 
 ### deck:using:41
