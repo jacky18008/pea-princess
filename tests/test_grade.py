@@ -600,6 +600,11 @@ class TestReferentGuard(GradeBase):
             "Heating is a gas boiler with radiators, not a heat network."))
         self.assertEqual("community_heat_network", grader.classify_heating(
             "Heat comes from the estate's heat network; there is no gas boiler in the flat."))
+        self.assertEqual("gas_boiler", grader.classify_heating(
+            "Gas boiler and radiators with a programmer. Most other homes at the postcode are on a "
+            "communal heat network, this one is not."))
+        self.assertEqual("community_heat_network", grader.classify_heating(
+            "Heating: communal heat network billed by a third party."))
 
     def test_two_certificates_side_by_side_grade_the_current_one(self):
         rep = self.report()

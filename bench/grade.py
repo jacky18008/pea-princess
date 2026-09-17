@@ -742,18 +742,26 @@ def find_in_metric(cand, key):
                  m.get("value") is None)
 
 
-NEGATION_BEFORE = re.compile(r"(?:\bnot\b|\bno\b|\bnever\b|\bwithout\b|\brather than\b|\binstead of\b|\bisn't\b|\bis not\b|\bnot a\b|\bnot on a\b)[^.;]{0,30}$")
+NEGATION_BEFORE = re.compile(r"(?:\bnot\b|\bno\b|\bnever\b|\bwithout\b|\brather than\b|\binstead of\b|\bisn't\b|\bis not\b)[^.;,]{0,30}$")
+# "…are on a communal heat network, this one is not": the denial comes after the words it denies
+NEGATION_AFTER = re.compile(r"\b(?:this (?:one|flat|home|property|unit) (?:is|does|was) not|not (?:this|here)|none here|but not (?:this|here))\b")
 
 
 def classify_heating(text):
-    """The heating class a text names, in priority order, ignoring a class it denies
-    ("a gas boiler with radiators, not a heat network" is gas_boiler)."""
-    low = norm(text)
+    """The heating class a text names, in priority order, ignoring a class it denies:
+    "a gas boiler with radiators, not a heat network" and "most homes here are on a heat
+    network, this one is not" are both gas_boiler."""
+    raw = str(text or "")
+    sentences = [s for s in re.split(r"(?<=[.;!?])\s+|\n+", raw) if s.strip()]
     for cls, words in HEATING_KEYWORDS.items():
-        for w in words:
-            for m in re.finditer(re.escape(norm(w)), low):
-                if not NEGATION_BEFORE.search(low[max(0, m.start() - 40):m.start()]):
-                    return cls
+        for sentence in sentences:
+            low = norm(sentence)
+            if NEGATION_AFTER.search(low):
+                continue
+            for w in words:
+                for m in re.finditer(re.escape(norm(w)), low):
+                    if not NEGATION_BEFORE.search(low[max(0, m.start() - 40):m.start()]):
+                        return cls
     return None
 
 
